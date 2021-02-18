@@ -1,0 +1,5 @@
+# Universe definition, because this file is not in the project root, we must go up one step
+projectRoot ..
+
+release .*
+version .* ${version:portal-gateway}-${VERSION_SUFFIX}

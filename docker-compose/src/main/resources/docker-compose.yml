@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  portal-gateway:
+    image: ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:latest
+    networks:
+      - portal-proxy
+    ports:
+      - "30000:20000"
+    env_file:
+      - portal-gateway.common.env
+      - portal-gateway.specific.env # deployments must create this file by copying a environment specific file
+      - secrets.env
+
+networks:
+  portal-proxy:
+    external:
+      name: portal-proxy

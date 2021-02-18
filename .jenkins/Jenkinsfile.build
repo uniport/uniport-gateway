@@ -1,0 +1,193 @@
+pipeline {
+    agent {
+        node {
+            label 'southport'
+        }
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+        timeout(time: 15, unit: 'MINUTES')
+        ansiColor('xterm')
+    }
+
+    parameters {
+        string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
+        booleanParam(defaultValue: true, description: 'Push docker images', name: 'PUSH_DOCKER_IMAGES')
+        booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
+    }
+
+    environment {
+        LINE_SEPARATOR = '================================================================================'
+        CI_REGISTRY_CREDS = credentials('portal-registry-creds')
+        BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com'
+        DEV_DEPLOYMENT_HOST = 'inventage@docker-test.inventage.com'
+        DEV_DEPLOYMENT_DIR = '/home/inventage/portal/portal-gateway'
+        DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
+    }
+
+    tools {
+        maven 'maven-release-latest'
+        jdk 'Open-JDK-11'
+    }
+
+    stages {
+        stage('Initialize') {
+            steps {
+                sh 'echo Initialize'
+
+                step([$class: 'WsCleanup'])
+                checkout scm
+
+                // Change the snapshot version in all pom.xml files to a release candidate version
+                updateVersion()
+
+                // Set environment variables from pom.xml
+                setPackageEnvironmentVariables()
+
+                // Update build information in Jenkins
+                script {
+                    currentBuild.displayName = "Build: #${env.BUILD_NUMBER}"
+                    currentBuild.description = "Version: ${env.PACKAGE_VERSION}"
+                }
+                // Display important environment variables
+                sh '''
+                    set +x
+                    echo "Environment variables:"
+
+                    echo $LINE_SEPARATOR
+                    echo "PACKAGE_VERSION = $PACKAGE_VERSION"
+                    echo "PACKAGE_GROUP_ID = $PACKAGE_GROUP_ID"
+                    echo "PACKAGE_ARTIFACT_ID = $PACKAGE_ARTIFACT_ID"
+
+
+                    echo "DOCKER_PULL_REGISTRY = $DOCKER_PULL_REGISTRY"
+                    echo "DOCKER_PUSH_REGISTRY = $DOCKER_PUSH_REGISTRY"
+                    echo "PROMOTION_TAG = $PROMOTION_TAG"
+                    echo "PROMOTION_REPO_NAME = $PROMOTION_REPO_NAME"
+
+                    echo $LINE_SEPARATOR
+                '''
+            }
+        }
+        stage('Build') {
+            // Use the local docker host for building the container image
+            environment {
+                DOCKER_HOST = 'unix:///var/run/docker.sock'
+            }
+
+            steps {
+                sh 'echo Build'
+
+                sh 'mvn help:system'
+
+                mvn("-s .jenkins/settings.xml", "-Djava.io.tmpdir=${WORKSPACE}", "clean", "deploy", "-P!local")
+            }
+        }
+
+        stage('Deployment') {
+            when {
+                branch params.BRANCH_FILTER
+                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
+            }
+            steps {
+                sh '''
+                    set +x
+
+                    echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
+                    ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
+                    scp target/classes/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp target/classes/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp target/classes/portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
+                    echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
+                '''
+                withDockerRegistry(credentialsId: "portal-registry-creds", url: "https://${DOCKER_PULL_REGISTRY}") {
+                    sh '''
+                        echo 'Download new container'
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml pull'"
+
+                        echo 'Clean old container…'
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml down'"
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml rm -f'"
+
+                        echo 'Deploy new container…'
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml up -d'"
+                    '''
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            deleteDir()
+            sendNotifications()
+        }
+    }
+}
+
+/**
+ * Returns the "version suffix"  variable. The format is `yyyyMMddhhmm-${JENKINS_BUILD_NUMBER}-${GIT_COMMIT_HASH}`
+ *
+ * @return
+ */
+def getVersionSuffix() {
+    def separator = '-'
+    def now = sh(script: 'date -u +%Y%m%d%H%M', returnStdout: true).trim()
+    def gitCommitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+    return now + separator + "${env.BUILD_NUMBER}" + separator + gitCommitHash
+}
+
+/**
+ * Sets the appropriate version in `pom.xml`.
+ */
+void updateVersion() {
+    sh 'echo UpdateVersion'
+    env.VERSION_SUFFIX = getVersionSuffix()
+
+    versiontiger('.')
+}
+
+def versiontiger(reactorFolder) {
+    dir(reactorFolder) {
+        sh 'mvn com.inventage.tools.versiontiger:versiontiger-maven-plugin:execute -B -DstatementsFile=.jenkins/jenkins.versiontiger'
+    }
+}
+
+/**
+ * Sets important values defined in reactor pom.xml as environment variables.
+ */
+void setPackageEnvironmentVariables() {
+    // @see https://jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#readmavenpom-read-a-maven-project-file
+    // @see http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html
+    def pom = readMavenPom file: 'pom.xml'
+
+    env.PACKAGE_VERSION = pom.version
+    env.PACKAGE_GROUP_ID = pom.groupId
+    env.PACKAGE_ARTIFACT_ID = pom.artifactId
+    env.DOCKER_PULL_REGISTRY = pom.properties['docker.pull.registry']
+    env.DOCKER_PUSH_REGISTRY = pom.properties['docker.push.registry']
+    env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}:${env.PACKAGE_VERSION}"
+    env.PROMOTION_REPO_NAME = pom.properties['docker.promotion.repository.name']
+}
+
+def mvn(Map options = [:], CharSequence... goals) {
+    // options.put('settings', 'settings.xml')
+
+    util.mvn(options, goals)
+}
+
+def iqEvaluation(application, scanPattern) {
+    nexusPolicyEvaluation failBuildOnNetworkError: false, iqApplication: application, iqScanPatterns: [[scanPattern: scanPattern]], iqStage: 'build', jobCredentialsId: "${env.IQ_SERVER_CREDENTIALS_ID}"
+}
+
+/**
+ * Sends notifications about the build status.
+ *
+ * @return
+ */
+def sendNotifications() {
+    step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "${env.BUILD_STATUS_EMAIL_RECIPIENTS}", sendToIndividuals: false])
+}

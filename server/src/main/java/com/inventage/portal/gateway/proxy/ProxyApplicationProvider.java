@@ -1,0 +1,22 @@
+package com.inventage.portal.gateway.proxy;
+
+import com.inventage.portal.gateway.core.application.Application;
+import com.inventage.portal.gateway.core.application.ApplicationProvider;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+
+/**
+ *
+ */
+public class ProxyApplicationProvider implements ApplicationProvider {
+
+    @Override
+    public String provides() {
+        return ProxyApplication.class.getSimpleName();
+    }
+
+    @Override
+    public Application create(JsonObject applicationConfig, JsonObject config, Vertx vertx) {
+        return new ProxyApplication(applicationConfig.getString(Application.NAME), applicationConfig.getString(Application.ENTRYPOINT), config, vertx);
+    }
+}

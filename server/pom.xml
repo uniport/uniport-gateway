@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>portal-gateway</artifactId>
+        <groupId>com.inventage.portal.gateway</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>server</artifactId>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!-- http://logback.qos.ch/manual/configuration.html -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-http-proxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-oauth2</artifactId>
+        </dependency>
+        <!-- test -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#additional-build-artifacts -->
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>2.7.1</version>
+                <configuration>
+                    <!-- <from></from> https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#setting-the-base-image -->
+                    <to>
+                        <image>${docker.push.registry}/com.inventage.portal.gateway.portal-gateway</image>
+                        <tags>
+                            <tag>${project.version}</tag>
+                        </tags>
+                    </to>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>./portal-gateway/</from>
+                                <into>/etc/portal-gateway/</into>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                    <container>
+                        <mainClass>com.inventage.portal.gateway.PortalGatewayLauncher</mainClass>
+                        <args>
+                            <arg>run</arg>
+                            <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
+                            <arg>-cluster</arg>
+                        </args>
+<!--                        <ports>-->
+<!--                            <port>20000</port>-->
+<!--                        </ports>-->
+                    </container>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>dockerBuild</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>local</id>
+            <!-- needs to be deactivated in Jenkinsfile -->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <!-- for local builds this should be the same as pull registry, so that we can use locally docker-compose.yml -->
+            <properties>
+                <docker.push.registry>${docker.pull.registry}</docker.push.registry>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

@@ -1,0 +1,54 @@
+{
+  "entrypoints": [
+    {
+      "name": "http8000",
+      "port": 8000
+    }
+  ],
+  "applications": [
+    {
+      "name": "proxy",
+      "entrypoint": "http8000",
+      "requestSelector": {
+        "urlPrefix": "/"
+      },
+      "provider": "ProxyApplication"
+    }
+  ],
+
+  "proxies": [
+    {
+      "name": "status",
+      "pathPrefix": "/status",
+      "service": "httpbin8888"
+    },
+    {
+      "name": "headers",
+      "pathPrefix": "/organisation",
+      "_oauth": {
+        "clientId": "Organisation",
+        "clientSecret": "Organisation!",
+        "discoveryUrl": "http://localhost:8080/auth/realms/portal"
+      },
+      "middleware": {
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
+        "uris": [ { "provider":  "ReplaceUriByRegex", "regex": "^/organisation/", "replacement": "/"} ]
+      },
+      "service": "httpbin8889"
+    }
+  ],
+  "services": [
+    {
+      "name": "httpbin8888",
+      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
+      "serverHost": "localhost",
+      "serverPort": 8888
+    },
+    {
+      "name": "httpbin8889",
+      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
+      "serverHost": "localhost",
+      "serverPort": 8889
+    }
+  ]
+}

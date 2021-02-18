@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  httpbin8888: # https://httpbin.org/
+    # docker run -p 8888:80 kennethreitz/httpbin
+    image: kennethreitz/httpbin
+    ports:
+      - "8888:80"
+  httpbin8889: # https://httpbin.org/
+    # docker run -p 8888:80 kennethreitz/httpbin
+    image: kennethreitz/httpbin
+    ports:
+      - "8889:80"
