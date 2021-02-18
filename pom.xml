@@ -15,6 +15,7 @@
     </modules>
 
     <properties>
+        <maven.deploy.skip>true</maven.deploy.skip> <!-- because we deploy via nexus-staging-maven-plugin -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <vertx.version>4.0.2</vertx.version>
@@ -128,6 +129,16 @@
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
+                <!-- for staging deployments to nexus2 -->
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.8</version>
                 </plugin>
             </plugins>
         </pluginManagement>
