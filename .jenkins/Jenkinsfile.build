@@ -73,9 +73,7 @@ pipeline {
 
                 sh 'mvn help:system'
 
-                script {
-                    util.mvn('clean', 'deploy', '-P!local', settings: './.jenkins/settings.xml', quiet: false)
-                }
+                mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE], 'clean', 'deploy')
             }
         }
 
