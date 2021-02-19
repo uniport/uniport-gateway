@@ -6,7 +6,7 @@ services:
     networks:
       - portal-proxy
     ports:
-      - "30000:20000"
+      - "20001:20000"
     env_file:
       - portal-gateway.common.env
       - portal-gateway.specific.env # deployments must create this file by copying a environment specific file
