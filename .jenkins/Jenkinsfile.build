@@ -82,11 +82,11 @@ pipeline {
                 sh '''
                     set +x
 
-                    echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
+                    echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
                     ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
-                    scp target/classes/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp target/classes/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp target/classes/portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
+                    scp docker-compose/target/classes/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target/classes/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target/classes/portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
                     echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
                 '''
                 withDockerRegistry(credentialsId: "portal-registry-creds", url: "https://${DOCKER_PULL_REGISTRY}") {
