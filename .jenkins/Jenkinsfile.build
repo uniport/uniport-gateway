@@ -54,13 +54,10 @@ pipeline {
                     echo "PACKAGE_VERSION = $PACKAGE_VERSION"
                     echo "PACKAGE_GROUP_ID = $PACKAGE_GROUP_ID"
                     echo "PACKAGE_ARTIFACT_ID = $PACKAGE_ARTIFACT_ID"
-
-
                     echo "DOCKER_PULL_REGISTRY = $DOCKER_PULL_REGISTRY"
                     echo "DOCKER_PUSH_REGISTRY = $DOCKER_PUSH_REGISTRY"
                     echo "PROMOTION_TAG = $PROMOTION_TAG"
                     echo "PROMOTION_REPO_NAME = $PROMOTION_REPO_NAME"
-
                     echo $LINE_SEPARATOR
                 '''
             }
@@ -76,7 +73,7 @@ pipeline {
 
                 sh 'mvn help:system'
 
-                mvn("-s .jenkins/settings.xml", "-Djava.io.tmpdir=${WORKSPACE}", "clean", "deploy", "-P!local")
+                mvn("-s .jenkins/settings2.xml", "-Djava.io.tmpdir=${WORKSPACE}", "clean", "deploy", "-P!local")
             }
         }
 
@@ -169,8 +166,6 @@ void setPackageEnvironmentVariables() {
 }
 
 def mvn(Map options = [:], CharSequence... goals) {
-    // options.put('settings', 'settings.xml')
-
     util.mvn(options, goals)
 }
 
