@@ -48,7 +48,7 @@
                         <phase>initialize</phase>
                         <configuration>
                             <target>
-                                <touch file="src/main/resources/organisation.specific.env"/>
+                                <touch file="src/main/resources/portal-gateway.specific.env"/>
                                 <touch file="src/main/resources/secrets.env"/>
                             </target>
                         </configuration>
