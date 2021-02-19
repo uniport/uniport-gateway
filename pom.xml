@@ -144,10 +144,12 @@
         </pluginManagement>
     </build>
 
+    <!-- for accessing com.inventage.vertx.vertx-http-proxy -->
     <repositories>
         <repository>
-            <id>inventage-default</id>
-            <url>https://nexus.inventage.com/content/groups/default</url>
+            <id>inventage-projectware</id>
+            <name>Inventage Projectware</name>
+            <url>https://nexus.inventage.com/content/groups/projectware/</url>
         </repository>
     </repositories>
 

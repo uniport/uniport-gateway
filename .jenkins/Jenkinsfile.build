@@ -11,14 +11,9 @@ pipeline {
         ansiColor('xterm')
     }
 
-    parameters {
-        string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
-        booleanParam(defaultValue: true, description: 'Push docker images', name: 'PUSH_DOCKER_IMAGES')
-        booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
-    }
-
     environment {
         LINE_SEPARATOR = '================================================================================'
+        NEXUS2_CREDS = credentials('inventage-ierp')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com'
         DEV_DEPLOYMENT_HOST = 'inventage@docker-test.inventage.com'
