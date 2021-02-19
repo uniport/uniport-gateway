@@ -73,9 +73,7 @@ pipeline {
 
                 sh 'mvn help:system'
 
-                script {
-                    util.mvn('clean', 'deploy', '-P!local', settings: './.jenkins/settings2.xml', quiet: false)
-                }
+                mvn("-s .jenkins/settings.xml", "-Djava.io.tmpdir=${WORKSPACE}", "clean", "deploy", "-P!local")
             }
         }
 
