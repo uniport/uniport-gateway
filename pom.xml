@@ -134,12 +134,17 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.0.0-M1</version>
                 </plugin>
-                <!-- for staging deployments to nexus2 -->
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>2.7.1</version>
                 </plugin>
+<!--                &lt;!&ndash; for staging deployments to nexus2 &ndash;&gt;-->
+<!--                <plugin>-->
+<!--                    <groupId>org.sonatype.plugins</groupId>-->
+<!--                    <artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--                    <version>1.6.8</version>-->
+<!--                </plugin>-->
             </plugins>
         </pluginManagement>
     </build>
