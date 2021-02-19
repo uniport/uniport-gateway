@@ -144,4 +144,11 @@
         </pluginManagement>
     </build>
 
+    <repositories>
+        <repository>
+            <id>inventage-default</id>
+            <url>https://nexus.inventage.com/content/groups/default</url>
+        </repository>
+    </repositories>
+
 </project>
