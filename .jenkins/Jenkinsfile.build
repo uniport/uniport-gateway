@@ -73,15 +73,13 @@ pipeline {
 
                 sh 'mvn help:system'
 
-                mvn("-s .jenkins/settings.xml", "-Djava.io.tmpdir=${WORKSPACE}", "clean", "deploy", "-P!local")
+                script {
+                    util.mvn('clean', 'deploy', '-P!local', settings: './.jenkins/settings.xml', quiet: false)
+                }
             }
         }
 
         stage('Deployment') {
-            when {
-                branch params.BRANCH_FILTER
-                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
-            }
             steps {
                 sh '''
                     set +x
