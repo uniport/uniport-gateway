@@ -26,6 +26,14 @@
       "service": "portal-iam"
     },
     {
+      "name": "navigation-service",
+      "pathPrefix": "/navigation/service",
+      "middleware": {
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
+      },
+      "service": "navigation-service"
+    },
+    {
       "name": "navigation-frontend",
       "pathPrefix": "/navigation",
       "middleware": {
@@ -35,12 +43,12 @@
       "service": "navigation-frontend"
     },
     {
-      "name": "navigation-service",
-      "pathPrefix": "/navigation/service",
+      "name": "dashboard-service",
+      "pathPrefix": "/dashboard/service",
       "middleware": {
         "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
       },
-      "service": "navigation-service"
+      "service": "dashboard-service"
     },
     {
       "name": "dashboard-frontend",
@@ -50,14 +58,6 @@
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/dashboard/", "replacement": "/"} ]
       },
       "service": "dashboard-frontend"
-    },
-    {
-      "name": "dashboard-service",
-      "pathPrefix": "/dashboard/service",
-      "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
-      },
-      "service": "dashboard-service"
     },
     {
       "name": "organisation",
