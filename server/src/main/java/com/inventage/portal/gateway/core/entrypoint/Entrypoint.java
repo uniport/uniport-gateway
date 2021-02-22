@@ -3,6 +3,9 @@ package com.inventage.portal.gateway.core.entrypoint;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.log.RequestResponseLogger;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -18,7 +21,6 @@ import java.util.Optional;
 public class Entrypoint {
 
     // keys in the portal-gateway.json
-
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String NAME = "name";
     public static final String PORT = "port";
@@ -27,14 +29,16 @@ public class Entrypoint {
 
     private final Vertx vertx;
     private final String name;
+    private final String publicHostname;
     private final int port;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(String name, int port, Vertx vertx) {
+    public Entrypoint(String name, String publicHostname, int port, Vertx vertx) {
         this.vertx = vertx;
         this.name = name;
+        this.publicHostname = publicHostname;
         this.port = port;
         this.enabled = true;
     }
@@ -55,17 +59,6 @@ public class Entrypoint {
         }
         return router;
     }
-
-//    private Router configureGlobalRoutes(Router router, JsonObject config) {
-//        routingContextHandlerProviderLoader.findFirst().ifPresent(routingContextHandlerProvider -> {
-//            final List<Handler<RoutingContext>> handlers = routingContextHandlerProvider.handlers(vertx, config);
-//            if (handlers != null) {
-//                handlers.stream().forEach(handler -> router.route().handler(handler));
-//            }
-//        });
-//        return router;
-//    }
-
 
     public void mount(Application application) {
         final Optional<Router> optionApplicationRouter = application.router();
@@ -116,4 +109,12 @@ public class Entrypoint {
 //                    .setPassword(config.getString(CONFIG_PREFIX + CONFIG_HTTPS_KEY_STORE_PASSWORD));
         }
     }
+
+    public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
+        final JsonArray configs = globalConfig.getJsonArray(Entrypoint.ENTRYPOINTS);
+        return configs.stream().map(object -> new JsonObject(Json.encode(object)))
+                .filter(entrypoint -> entrypoint.getString(Entrypoint.NAME).equals(name))
+                .findFirst().orElseThrow(() -> { throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name)); });
+    }
+
 }

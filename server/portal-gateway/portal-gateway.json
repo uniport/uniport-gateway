@@ -1,14 +1,14 @@
 {
   "entrypoints": [
     {
-      "name": "http20000",
-      "port": 20000
+      "name": "http20001",
+      "port": 20001
     }
   ],
   "applications": [
     {
       "name": "proxy",
-      "entrypoint": "http20000",
+      "entrypoint": "http20001",
       "requestSelector": {
         "urlPrefix": "/"
       },
@@ -20,40 +20,57 @@
     {
       "name": "auth",
       "pathPrefix": "/auth",
+      "middleware": {
+        "headers": [ { "provider": "ForwardedHostHeader" } ]
+      },
       "service": "portal-iam"
     },
     {
       "name": "navigation-frontend",
       "pathPrefix": "/navigation",
+      "middleware": {
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
+        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/navigation/", "replacement": "/"} ]
+      },
       "service": "navigation-frontend"
     },
     {
       "name": "navigation-service",
-      "pathPrefix": "/navigation",
+      "pathPrefix": "/navigation/service",
+      "middleware": {
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
+      },
       "service": "navigation-service"
     },
     {
       "name": "dashboard-frontend",
       "pathPrefix": "/dashboard",
+      "middleware": {
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
+        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/dashboard/", "replacement": "/"} ]
+      },
       "service": "dashboard-frontend"
     },
     {
       "name": "dashboard-service",
-      "pathPrefix": "/dashboard",
+      "pathPrefix": "/dashboard/service",
+      "middleware": {
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
+      },
       "service": "dashboard-service"
     },
     {
       "name": "organisation",
       "pathPrefix": "/organisation",
       "service": "organisation-service",
-      "!_oauth": {
+      "oauth2": {
         "clientId": "Organisation",
         "clientSecret": "Organisation!",
-        "discoveryUrl": "http://localhost:8080/auth/realms/portal"
+        "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
       },
       "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader" } ],
-        "uris": [ { "provider":  "ReplaceUriByRegex", "regex": "^/organisation/", "replacement": "/" } ]
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
+        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/organisation/", "replacement": "/" } ]
       }
     }
   ],

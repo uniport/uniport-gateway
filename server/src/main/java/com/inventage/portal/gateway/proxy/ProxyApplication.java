@@ -1,6 +1,9 @@
 package com.inventage.portal.gateway.proxy;
 
+import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
+import com.inventage.portal.gateway.core.config.ConfigAdapter;
+import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -10,9 +13,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +45,8 @@ public class ProxyApplication implements Application {
      */
     private final String entrypoint;
 
-    private final JsonObject config;
+    /** the global configuration */
+    private final JsonObject globalConfig;
 
     /**
      * the selection criteria for delegating incoming requests to this application
@@ -56,10 +58,12 @@ public class ProxyApplication implements Application {
      */
     private final Router router;
 
-    public ProxyApplication(String name, String entrypoint, JsonObject config, Vertx vertx) {
+    private Set<String> proxyNames = new HashSet<>();
+
+    public ProxyApplication(String name, String entrypoint, JsonObject globalConfig, Vertx vertx) {
         this.name = name;
         this.entrypoint = entrypoint;
-        this.config = config;
+        this.globalConfig = globalConfig;
         this.router = Router.router(vertx);
     }
 
@@ -95,13 +99,21 @@ public class ProxyApplication implements Application {
 
     private List<ProxyVerticle> proxies(Router router, Vertx vertx) {
         List<ProxyVerticle> result = new ArrayList<>();
-        final JsonArray configs = config.getJsonArray(PROXIES);
+        final JsonArray configs = globalConfig.getJsonArray(PROXIES);
         configs.stream()
                 .map(object -> new JsonObject(Json.encode(object)))
+                .filter(jsonConfig -> checkUniqueness(jsonConfig))
                 .forEach(proxy -> {
                     final Router proxyRouter = Router.router(vertx);
                     final Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(proxy);
-                    final ProxyVerticle proxyVerticle = new ProxyVerticle(proxy.getString(PROXY_NAME), middlewareConfig(proxy), serviceConfig(proxy.getString(SERVICE)), proxyRouter, oAuth2Configuration);
+                    final ProxyVerticle proxyVerticle = new ProxyVerticle(
+                            proxy.getString(PROXY_NAME),
+                            globalConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME, PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT),
+                            Entrypoint.entrypointConfigByName(entrypoint, globalConfig).getInteger(Entrypoint.PORT),
+                            middlewareConfig(proxy),
+                            serviceConfig(proxy.getString(SERVICE)),
+                            proxyRouter,
+                            oAuth2Configuration);
                     router.mountSubRouter(proxy.getString(PATH_PREFIX), proxyRouter);
                     result.add(proxyVerticle);
                 });
@@ -125,8 +137,8 @@ public class ProxyApplication implements Application {
                     new OAuth2Configuration(
                             oauth2.getString(OAUTH2_CLIENTID),
                             oauth2.getString(OAUTH2_CLIENTSECRET),
-                            oauth2.getString(OAUTH2_DISCOVERYURL),
-                            router.get(OAUTH2_CALLBACK_PREFIX + oauth2.getString(OAUTH2_CLIENTID).toLowerCase()))
+                            ConfigAdapter.replaceEnvVariables(globalConfig, oauth2.getString(OAUTH2_DISCOVERYURL)),
+                            router.get(OAUTH2_CALLBACK_PREFIX + proxy.getString(PROXY_NAME).toLowerCase()))
             );
         }
         else {
@@ -135,9 +147,17 @@ public class ProxyApplication implements Application {
     }
 
     private JsonObject serviceConfig(String name) {
-        final JsonArray configs = config.getJsonArray(SERVICES);
+        final JsonArray configs = globalConfig.getJsonArray(SERVICES);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
                 .filter(service -> service.getString(SERVICE_NAME).equals(name))
                 .findFirst().orElseThrow(() -> { throw new IllegalStateException(String.format("Service '%s' not found!", name)); });
+    }
+
+    private boolean checkUniqueness(JsonObject json) {
+        if (proxyNames.contains(json.getString(PROXY_NAME))) {
+            throw new IllegalStateException(String.format("Name of proxy already used, but it must be unique '%s'", json.getString(PROXY_NAME)));
+        }
+        proxyNames.add(json.getString(PROXY_NAME));
+        return true;
     }
 }

@@ -3,12 +3,12 @@ package com.inventage.portal.gateway.proxy.request.uri;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ReplaceUriByRegexTest {
+public class ReplacePathByRegexTest {
 
     @Test
     public void test_starting_with() {
         // given
-        final ReplaceUriByRegex r = new ReplaceUriByRegex("^/organisation/*", "/");
+        final ReplacePathByRegex r = new ReplacePathByRegex("^/organisation/", "/");
         // when
         final String uri = r.apply("/organisation/v1/graphql");
         // then
@@ -18,7 +18,7 @@ public class ReplaceUriByRegexTest {
     @Test
     public void test_exact() {
         // given
-        final ReplaceUriByRegex r = new ReplaceUriByRegex("^/status*.*", "/status/200");
+        final ReplacePathByRegex r = new ReplacePathByRegex("^/status*.*", "/status/200");
         // when
         final String uri = r.apply("/status/404");
         // then
@@ -28,7 +28,7 @@ public class ReplaceUriByRegexTest {
     @Test
     public void test_exact2() {
         // given
-        final ReplaceUriByRegex r = new ReplaceUriByRegex("^/organisation/", "/");
+        final ReplacePathByRegex r = new ReplacePathByRegex("^/organisation/", "/");
         // when
         final String uri = r.apply("/organisation/headers");
         // then

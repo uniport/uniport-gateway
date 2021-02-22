@@ -16,7 +16,7 @@ public class ProxyApplicationProvider implements ApplicationProvider {
     }
 
     @Override
-    public Application create(JsonObject applicationConfig, JsonObject config, Vertx vertx) {
-        return new ProxyApplication(applicationConfig.getString(Application.NAME), applicationConfig.getString(Application.ENTRYPOINT), config, vertx);
+    public Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx) {
+        return new ProxyApplication(applicationConfig.getString(Application.NAME), applicationConfig.getString(Application.ENTRYPOINT), globalConfig, vertx);
     }
 }

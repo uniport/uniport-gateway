@@ -26,11 +26,11 @@ public interface ApplicationProvider {
     /**
      *
      * @param applicationConfig extract of the config for this application
-     * @param config complete config
+     * @param globalConfig complete config
      * @param vertx running instance by which an application can get their router
      * @return new application instance
      */
-    Application create(JsonObject applicationConfig, JsonObject config, Vertx vertx);
+    Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx);
 
     class Loader {
         public static ApplicationProvider getProvider(String providerId) {

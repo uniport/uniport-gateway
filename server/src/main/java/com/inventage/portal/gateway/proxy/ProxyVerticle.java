@@ -17,6 +17,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
@@ -26,6 +27,7 @@ import io.vertx.ext.web.handler.OAuth2AuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -42,6 +44,8 @@ public class ProxyVerticle extends AbstractVerticle {
     private static Logger LOGGER = LoggerFactory.getLogger(ProxyVerticle.class);
 
     private String name;
+    private String publicHostname;
+    private int entrypointPort;
     private Optional<JsonObject> middlewareConfig;
     private JsonObject serviceConfig;
     private Router router;
@@ -52,16 +56,14 @@ public class ProxyVerticle extends AbstractVerticle {
 
     private Service service;
 
-    public ProxyVerticle(String proxyName, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
-        this(proxyName, middlewareConfig, serviceConfig, proxyRouter, Optional.empty());
+    public ProxyVerticle(String proxyName, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
+        this(proxyName, publicHostname, entrypointPort, middlewareConfig, serviceConfig, proxyRouter, Optional.empty());
     }
 
-    public ProxyVerticle(String proxyName, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter, OAuth2Configuration oAuth2Configuration) {
-        this(proxyName, middlewareConfig, serviceConfig, proxyRouter, Optional.of(oAuth2Configuration));
-    }
-
-    public ProxyVerticle(String proxyName, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter, Optional<OAuth2Configuration> oAuth2Configuration) {
+    public ProxyVerticle(String proxyName, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter, Optional<OAuth2Configuration> oAuth2Configuration) {
         this.name = proxyName;
+        this.publicHostname = publicHostname;
+        this.entrypointPort = entrypointPort;
         this.middlewareConfig = middlewareConfig;
         this.serviceConfig = serviceConfig;
         this.router = proxyRouter;
@@ -83,7 +85,7 @@ public class ProxyVerticle extends AbstractVerticle {
                 configureMiddleware();
                 service = fromServiceConfig(globalConfig);
 
-                configureOptionalOAuth2().compose(authenticationHandler -> {
+                configureOptionalOAuth2(globalConfig).compose(authenticationHandler -> {
                     router.route().handler(this::forward);
                     LOGGER.debug("init: service '{}'", service);
                     return Future.succeededFuture();
@@ -100,36 +102,46 @@ public class ProxyVerticle extends AbstractVerticle {
     private void configureMiddleware() {
         if (middlewareConfig.isPresent()) {
             // headers
-            final JsonArray headers = middlewareConfig.get().getJsonArray(MIDDLEWARE_HEADERS);
-            headers.stream().map(object -> new JsonObject(Json.encode(object)))
+            headerMiddlewareConfig().ifPresent(headers -> headers.stream().map(object -> new JsonObject(Json.encode(object)))
                     .forEach(header -> {
                         final RequestHeaderMiddlewareProvider provider = RequestHeaderMiddlewareProvider.Loader.getProvider(header.getString(MIDDLEWARE_PROVIDER));
                         headerMiddleware = headerMiddleware.andThen(provider.create(header));
-                    });
+                    })
+            );
             // uris
-            final JsonArray uris = middlewareConfig.get().getJsonArray(MIDDLEWARE_URIS);
-            uris.stream().map(object -> new JsonObject(Json.encode(object)))
+            uriMiddlewareConfig().ifPresent(uris -> uris.stream().map(object -> new JsonObject(Json.encode(object)))
                     .forEach(uri -> {
                         final UriMiddlewareProvider provider = UriMiddlewareProvider.Loader.getProvider(uri.getString(MIDDLEWARE_PROVIDER));
                         uriMiddleware = uriMiddleware.andThen(provider.create(uri));
-                    });
-
+                    })
+            );
         }
+    }
+
+    private Optional<JsonArray> uriMiddlewareConfig() {
+        final JsonArray uris = middlewareConfig.get().getJsonArray(MIDDLEWARE_URIS);
+        return uris != null ? Optional.of(uris) : Optional.empty();
+    }
+
+    private Optional<JsonArray> headerMiddlewareConfig() {
+        final JsonArray headers = middlewareConfig.get().getJsonArray(MIDDLEWARE_HEADERS);
+        return headers != null ? Optional.of(headers) : Optional.empty();
     }
 
     private Service fromServiceConfig(JsonObject globalConfig) {
         return ServiceProvider.Loader.getProvider(serviceConfig.getString(SERVICE_PROVIDER)).create(serviceConfig, globalConfig, vertx);
     }
 
-    private Future<?> configureOptionalOAuth2() {
+    private Future<?> configureOptionalOAuth2(JsonObject globalConfig) {
         final Promise<Object> promise = Promise.promise();
         if (oAuth2Configuration.isPresent()) {
             KeycloakAuth.discover(vertx, oAuth2Options())
                     .onSuccess(oAuth2 -> {
                         router.route().handler(this::prepareUser);
                         oAuth2Configuration.get().callback().handler(this::storeUserForService);
+                        patchAuthorizationPath(((OAuth2AuthProviderImpl) oAuth2).getConfig(), globalConfig);
                         // callbackURL (muss aus Sicht des Browsers definiert werden!)
-                        final AuthenticationHandler authenticationHandler = OAuth2AuthHandler.create(vertx, oAuth2, "http://localhost:8000" + oAuth2Configuration.get().callback().getPath())
+                        final AuthenticationHandler authenticationHandler = OAuth2AuthHandler.create(vertx, oAuth2, String.format("http://%s:%s%s", publicHostname, entrypointPort, oAuth2Configuration.get().callback().getPath()))
                                 .setupCallback(oAuth2Configuration.get().callback());
                         router.route().handler(authenticationHandler);
                         promise.complete(authenticationHandler);
@@ -146,6 +158,24 @@ public class ProxyVerticle extends AbstractVerticle {
         return promise.future();
     }
 
+    /**
+     * Change the authorization path so that the requests go again through the portal gateway
+     * @param configToPatch to be changed
+     * @return the given config
+     */
+    private OAuth2Options patchAuthorizationPath(OAuth2Options configToPatch, JsonObject globalConfig) {
+        try {
+            final URI uri = new URI(configToPatch.getAuthorizationPath());
+            final String newAuthorizationPath = String.format("%s://%s:%s%s", "http", publicHostname, entrypointPort, uri.getPath());
+            configToPatch.setAuthorizationPath(newAuthorizationPath);
+        }
+        catch (Exception e) {
+
+        }
+        return configToPatch;
+    }
+
+    // for doing the OIDC discovery request
     private OAuth2Options oAuth2Options() {
         return new OAuth2Options()
                 .setClientID(oAuth2Configuration.orElseThrow().clientId())
@@ -179,7 +209,7 @@ public class ProxyVerticle extends AbstractVerticle {
      */
     protected void forward(RoutingContext rc) {
         LOGGER.info("forward: request with uri '{}' to service '{}'", rc.request().uri(), service);
-        service.proxy().handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL)
+        service.handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL)
                 .setHeaderMiddleware(headerMiddleware)
                 .setUriMiddleware(uriMiddleware)
         );

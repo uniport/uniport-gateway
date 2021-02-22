@@ -15,29 +15,51 @@
       "provider": "ProxyApplication"
     }
   ],
-
   "proxies": [
     {
-      "name": "status",
-      "pathPrefix": "/status",
-      "service": "httpbin8888"
+      "name": "auth",
+      "pathPrefix": "/auth",
+      "middleware": {
+        "headers": [ { "provider": "ForwardedHostHeader" }, { "provider":  "TestHeader"} ]
+      },
+      "service": "portal-iam"
     },
     {
-      "name": "headers",
-      "pathPrefix": "/organisation",
-      "_oauth": {
+      "name": "one",
+      "pathPrefix": "/one",
+      "oauth2": {
         "clientId": "Organisation",
         "clientSecret": "Organisation!",
         "discoveryUrl": "http://localhost:8080/auth/realms/portal"
       },
       "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
-        "uris": [ { "provider":  "ReplaceUriByRegex", "regex": "^/organisation/", "replacement": "/"} ]
+        "headers": [ { "provider": "ForwardedHostHeader" }, { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
+        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/one/", "replacement": "/"} ]
+      },
+      "service": "httpbin8888"
+    },
+    {
+      "name": "two",
+      "pathPrefix": "/two",
+      "oauth2": {
+        "clientId": "Organisation",
+        "clientSecret": "Organisation!",
+        "discoveryUrl": "http://localhost:8080/auth/realms/portal"
+      },
+      "middleware": {
+        "headers": [ { "provider": "ForwardedHostHeader" }, { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
+        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/two/", "replacement": "/"} ]
       },
       "service": "httpbin8889"
     }
   ],
   "services": [
+    {
+      "name": "portal-iam",
+      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
+      "serverHost": "localhost",
+      "serverPort": 8080
+    },
     {
       "name": "httpbin8888",
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",

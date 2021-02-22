@@ -19,6 +19,7 @@
 package com.inventage.portal.gateway.proxy.request;
 
 import com.inventage.portal.gateway.proxy.request.header.RequestHeaderMiddleware;
+import com.inventage.portal.gateway.proxy.response.ProxiedHttpServerResponse;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -160,7 +161,7 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public HttpServerResponse response() {
-        return delegate.response();
+        return new ProxiedHttpServerResponse(routingContext, delegate.response());
     }
 
     @Override

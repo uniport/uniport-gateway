@@ -1,2 +1,3 @@
 com.inventage.portal.gateway.proxy.request.header.TestHeaderProvider
 com.inventage.portal.gateway.proxy.request.header.AuthorizationBearerHeaderProvider
+com.inventage.portal.gateway.proxy.request.header.ForwardedHostHeaderProvider

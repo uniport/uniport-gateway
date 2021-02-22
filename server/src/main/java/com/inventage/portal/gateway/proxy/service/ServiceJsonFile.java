@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.service;
 
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.httpproxy.HttpProxy;
 
 /**
@@ -25,7 +26,8 @@ public class ServiceJsonFile implements Service {
         return String.format("%s at %s:%d", name, serverHost, serverPort);
     }
 
-    public HttpProxy proxy() {
-        return httpProxy;
+    @Override
+    public void handle(HttpServerRequest outboundRequest) {
+        httpProxy.handle(outboundRequest);
     }
 }

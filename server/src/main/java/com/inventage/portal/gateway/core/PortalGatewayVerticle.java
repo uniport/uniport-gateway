@@ -16,10 +16,7 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +26,13 @@ import java.util.stream.Collectors;
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
+    // env variable
+    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME = "PORTAL_GATEWAY_PUBLIC_HOSTNAME";
+    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
+
+    private String publicHostname;
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
@@ -39,6 +42,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         retriever.getConfig(asyncResult -> {
             try {
                 final JsonObject config = asyncResult.result();
+                publicHostname = config.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
                 // get the entrypoints from the configuration
                 List<Entrypoint> entrypoints = entrypoints(config);
@@ -124,7 +128,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             if (configs != null) {
                 configs.stream()
                         .map(object -> new JsonObject(Json.encode(object)))
-                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME), entrypoint.getInteger(Entrypoint.PORT), vertx))
+                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME), publicHostname, entrypoint.getInteger(Entrypoint.PORT), vertx))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
