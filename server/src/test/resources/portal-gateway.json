@@ -39,13 +39,19 @@
       "service": "httpbin8888"
     },
     {
-      "name": "two",
-      "pathPrefix": "/two",
+      "name": "two-login-redirect",
+      "pathPrefix": "/two/login",
       "oauth2": {
         "clientId": "Organisation",
         "clientSecret": "Organisation!",
         "discoveryUrl": "http://localhost:8080/auth/realms/portal"
       },
+      "sessionScope": "two",
+      "service": "login"
+    },
+    {
+      "name": "two",
+      "pathPrefix": "/two",
       "middleware": {
         "headers": [ { "provider": "ForwardedHostHeader" }, { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/two/", "replacement": "/"} ]
@@ -71,6 +77,11 @@
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
       "serverHost": "localhost",
       "serverPort": 8889
+    },
+    {
+      "name": "login",
+      "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
+      "destination": "/two/headers"
     }
   ]
 }

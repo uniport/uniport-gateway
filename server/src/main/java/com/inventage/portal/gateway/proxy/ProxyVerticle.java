@@ -43,7 +43,7 @@ public class ProxyVerticle extends AbstractVerticle {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ProxyVerticle.class);
 
-    private String name;
+    private JsonObject proxyConfig;
     private String publicHostname;
     private int entrypointPort;
     private Optional<JsonObject> middlewareConfig;
@@ -56,12 +56,12 @@ public class ProxyVerticle extends AbstractVerticle {
 
     private Service service;
 
-    public ProxyVerticle(String proxyName, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
-        this(proxyName, publicHostname, entrypointPort, middlewareConfig, serviceConfig, proxyRouter, Optional.empty());
+    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
+        this(proxyConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig, proxyRouter, Optional.empty());
     }
 
-    public ProxyVerticle(String proxyName, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter, Optional<OAuth2Configuration> oAuth2Configuration) {
-        this.name = proxyName;
+    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter, Optional<OAuth2Configuration> oAuth2Configuration) {
+        this.proxyConfig = proxyConfig;
         this.publicHostname = publicHostname;
         this.entrypointPort = entrypointPort;
         this.middlewareConfig = middlewareConfig;
@@ -72,12 +72,12 @@ public class ProxyVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        LOGGER.debug("start: proxy '{}'", name);
+        LOGGER.debug("start: proxy '{}'", proxyConfig.getString(ProxyApplication.PROXY_NAME));
         init(startPromise);
     }
 
     private void init(Promise<Void> startPromise) {
-        LOGGER.debug("init: proxy '{}'", name);
+        LOGGER.debug("init: proxy '{}'", proxyConfig.getString(ProxyApplication.PROXY_NAME));
         final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
         retriever.getConfig(asyncResult -> {
             if (asyncResult.succeeded()) {
@@ -140,14 +140,13 @@ public class ProxyVerticle extends AbstractVerticle {
                         router.route().handler(this::prepareUser);
                         oAuth2Configuration.get().callback().handler(this::storeUserForService);
                         patchAuthorizationPath(((OAuth2AuthProviderImpl) oAuth2).getConfig(), globalConfig);
-                        // callbackURL (muss aus Sicht des Browsers definiert werden!)
                         final AuthenticationHandler authenticationHandler = OAuth2AuthHandler.create(vertx, oAuth2, String.format("http://%s:%s%s", publicHostname, entrypointPort, oAuth2Configuration.get().callback().getPath()))
                                 .setupCallback(oAuth2Configuration.get().callback());
                         router.route().handler(authenticationHandler);
                         promise.complete(authenticationHandler);
                     })
                     .onFailure(failure -> {
-                        final String message = String.format("configureOptionalOAuth2: for proxy '%s' failed with message '%s'", name, failure.getMessage());
+                        final String message = String.format("configureOptionalOAuth2: for proxy '%s' failed with message '%s'", proxyConfig.getString(ProxyApplication.PROXY_NAME), failure.getMessage());
                         LOGGER.error(message);
                         promise.fail(message);
                     });
@@ -186,7 +185,7 @@ public class ProxyVerticle extends AbstractVerticle {
     // set the user specific for this service
     protected void prepareUser(RoutingContext rc) {
         final User user = rc.user();
-        final User service_user = rc.session().get(name);
+        final User service_user = rc.session().get(sessionScopeOrName());
         rc.setUser(service_user);
         rc.next();
         rc.setUser(user);
@@ -196,10 +195,14 @@ public class ProxyVerticle extends AbstractVerticle {
     protected void storeUserForService(RoutingContext rc) {
         rc.addEndHandler(event -> {
             if (rc.user() != null) {
-                rc.session().put(name, rc.user());
+                rc.session().put(sessionScopeOrName(), rc.user());
             }
         });
         rc.next();
+    }
+
+    private String sessionScopeOrName() {
+        return proxyConfig.getString("sessionScope") != null ? proxyConfig.getString("sessionScope") : proxyConfig.getString(ProxyApplication.PROXY_NAME);
     }
 
     /**

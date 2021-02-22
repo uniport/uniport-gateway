@@ -1,1 +1,3 @@
 com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider
+com.inventage.portal.gateway.proxy.service.EchoServiceProvider
+com.inventage.portal.gateway.proxy.service.RedirectServiceProvider

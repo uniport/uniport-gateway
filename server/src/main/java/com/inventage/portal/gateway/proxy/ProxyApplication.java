@@ -107,7 +107,7 @@ public class ProxyApplication implements Application {
                     final Router proxyRouter = Router.router(vertx);
                     final Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(proxy);
                     final ProxyVerticle proxyVerticle = new ProxyVerticle(
-                            proxy.getString(PROXY_NAME),
+                            proxy,
                             globalConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME, PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT),
                             Entrypoint.entrypointConfigByName(entrypoint, globalConfig).getInteger(Entrypoint.PORT),
                             middlewareConfig(proxy),
