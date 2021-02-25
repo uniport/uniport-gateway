@@ -82,8 +82,19 @@
         "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
       },
       "middleware": {
+        "redirects": [],
         "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/organisation/", "replacement": "/" } ]
+      }
+    },
+    {
+      "name": "document",
+      "pathPrefix": "/document",
+      "service": "document-service",
+      "middleware": {
+        "redirects": [],
+        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
+        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/document/", "replacement": "/" } ]
       }
     }
   ],
@@ -123,6 +134,12 @@
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
       "serverHost": "${organisation-service.host}",
       "serverPort": 20030
+    },
+    {
+      "name": "document-service",
+      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
+      "serverHost": "${document-service.host}",
+      "serverPort": 20050
     },
     {
       "name": "login",
