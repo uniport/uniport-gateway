@@ -141,7 +141,7 @@ public class ProxyVerticle extends AbstractVerticle {
                         oAuth2Configuration.get().callback().handler(this::storeUserForService);
                         patchAuthorizationPath(((OAuth2AuthProviderImpl) oAuth2).getConfig(), globalConfig);
                         final AuthenticationHandler authenticationHandler = OAuth2AuthHandler.create(vertx, oAuth2, String.format("http://%s:%s%s", publicHostname, entrypointPort, oAuth2Configuration.get().callback().getPath()))
-                                .setupCallback(oAuth2Configuration.get().callback());
+                                .withScope("openid").setupCallback(oAuth2Configuration.get().callback());
                         router.route().handler(authenticationHandler);
                         promise.complete(authenticationHandler);
                     })
@@ -195,6 +195,7 @@ public class ProxyVerticle extends AbstractVerticle {
     protected void storeUserForService(RoutingContext rc) {
         rc.addEndHandler(event -> {
             if (rc.user() != null) {
+                final JsonObject principal = rc.user().principal();
                 rc.session().put(sessionScopeOrName(), rc.user());
             }
         });

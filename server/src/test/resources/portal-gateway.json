@@ -27,11 +27,6 @@
     {
       "name": "one",
       "pathPrefix": "/one",
-      "oauth2": {
-        "clientId": "Organisation",
-        "clientSecret": "Organisation!",
-        "discoveryUrl": "http://localhost:8080/auth/realms/portal"
-      },
       "middleware": {
         "headers": [ { "provider": "ForwardedHostHeader" }, { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/one/", "replacement": "/"} ]
@@ -41,11 +36,6 @@
     {
       "name": "two-login-redirect",
       "pathPrefix": "/two/login",
-      "oauth2": {
-        "clientId": "Organisation",
-        "clientSecret": "Organisation!",
-        "discoveryUrl": "http://localhost:8080/auth/realms/portal"
-      },
       "sessionScope": "two",
       "service": "login"
     },

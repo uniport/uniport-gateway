@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.service;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 
