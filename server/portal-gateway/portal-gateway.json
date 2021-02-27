@@ -104,6 +104,12 @@
         "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/document/", "replacement": "/" } ]
       }
+    },
+
+    {
+      "name": "root",
+      "pathPrefix": "/",
+      "service": "dashboard-default"
     }
   ],
   "services": [

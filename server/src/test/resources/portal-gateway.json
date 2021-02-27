@@ -33,6 +33,7 @@
       },
       "service": "httpbin8888"
     },
+
     {
       "name": "two",
       "pathPrefix": "/two/",
@@ -47,7 +48,14 @@
       "pathPrefix": "/two",
       "sessionScope": "two",
       "service": "/two/headers"
+    },
+
+    {
+      "name": "root",
+      "pathPrefix": "/",
+      "service": "/two/headers"
     }
+
   ],
   "services": [
     {
