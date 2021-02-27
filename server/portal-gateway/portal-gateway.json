@@ -25,6 +25,7 @@
       },
       "service": "portal-iam"
     },
+
     {
       "name": "navigation-service",
       "pathPrefix": "/navigation/service",
@@ -82,7 +83,7 @@
 
     {
       "name": "organisation",
-      "pathPrefix": "/organisation",
+      "pathPrefix": "/organisation/",
       "service": "organisation-service",
       "oauth2": {
         "clientId": "Organisation",
@@ -96,14 +97,27 @@
       }
     },
     {
+      "name": "organisation-default",
+      "pathPrefix": "/organisation",
+      "sessionScope": "organisation",
+      "service": "organisation-default"
+    },
+
+    {
       "name": "document",
-      "pathPrefix": "/document",
+      "pathPrefix": "/document/",
       "service": "document-service",
       "middleware": {
         "redirects": [],
         "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/document/", "replacement": "/" } ]
       }
+    },
+    {
+      "name": "document-default",
+      "pathPrefix": "/document",
+      "sessionScope": "document",
+      "service": "document-default"
     },
 
     {
@@ -119,6 +133,7 @@
       "serverHost": "${portal-iam.host}",
       "serverPort": 8080
     },
+
     {
       "name": "navigation-frontend",
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
@@ -130,6 +145,12 @@
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
       "serverHost": "${navigation-service.host}",
       "serverPort": 20012
+    },
+
+    {
+      "name": "dashboard-default",
+      "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
+      "destination": "/dashboard/"
     },
     {
       "name": "dashboard-frontend",
@@ -143,6 +164,7 @@
       "serverHost": "${dashboard-service.host}",
       "serverPort": 20022
     },
+
     {
       "name": "organisation-service",
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
@@ -150,16 +172,21 @@
       "serverPort": 20030
     },
     {
+      "name": "organisation-default",
+      "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
+      "destination": "/organisation/"
+    },
+
+    {
       "name": "document-service",
       "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
       "serverHost": "${document-service.host}",
       "serverPort": 20050
     },
     {
-      "name": "dashboard-default",
+      "name": "document-default",
       "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
-      "destination": "/dashboard/"
+      "destination": "/document/"
     }
-
   ]
 }
