@@ -34,19 +34,19 @@
       "service": "httpbin8888"
     },
     {
-      "name": "two-login-redirect",
-      "pathPrefix": "/two/login",
-      "sessionScope": "two",
-      "service": "login"
-    },
-    {
       "name": "two",
-      "pathPrefix": "/two",
+      "pathPrefix": "/two/",
       "middleware": {
         "headers": [ { "provider": "ForwardedHostHeader" }, { "provider": "AuthorizationBearerHeader" }, { "provider":  "TestHeader"} ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/two/", "replacement": "/"} ]
       },
       "service": "httpbin8889"
+    },
+    {
+      "name": "two-default",
+      "pathPrefix": "/two",
+      "sessionScope": "two",
+      "service": "/two/headers"
     }
   ],
   "services": [
@@ -69,7 +69,7 @@
       "serverPort": 8889
     },
     {
-      "name": "login",
+      "name": "/two/headers",
       "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
       "destination": "/two/headers"
     }

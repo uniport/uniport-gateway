@@ -42,6 +42,7 @@
       },
       "service": "navigation-frontend"
     },
+
     {
       "name": "dashboard-login-redirect",
       "pathPrefix": "/dashboard/login",
@@ -51,7 +52,7 @@
         "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
       },
       "sessionScope": "dashboard",
-      "service": "login"
+      "service": "dashboard-default"
     },
     {
       "name": "dashboard-service",
@@ -64,7 +65,7 @@
     },
     {
       "name": "dashboard-frontend",
-      "pathPrefix": "/dashboard",
+      "pathPrefix": "/dashboard/",
       "middleware": {
         "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/dashboard/", "replacement": "/"} ]
@@ -72,6 +73,13 @@
       "sessionScope": "dashboard",
       "service": "dashboard-frontend"
     },
+    {
+      "name": "dashboard-frontend",
+      "pathPrefix": "/dashboard",
+      "sessionScope": "dashboard",
+      "service": "dashboard-default"
+    },
+
     {
       "name": "organisation",
       "pathPrefix": "/organisation",
@@ -142,7 +150,7 @@
       "serverPort": 20050
     },
     {
-      "name": "login",
+      "name": "dashboard-default",
       "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
       "destination": "/dashboard/"
     }
