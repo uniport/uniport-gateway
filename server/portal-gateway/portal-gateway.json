@@ -74,7 +74,7 @@
       "service": "dashboard-frontend"
     },
     {
-      "name": "dashboard-frontend",
+      "name": "dashboard-default",
       "pathPrefix": "/dashboard",
       "sessionScope": "dashboard",
       "service": "dashboard-default"
