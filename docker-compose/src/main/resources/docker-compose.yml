@@ -6,7 +6,7 @@ services:
     networks:
       - portal-proxy
     ports:
-      - "20001:20001" # docker-host.port:entrypoint.port
+      - "20000:20000" # docker-host.port:entrypoint.port
     env_file:
       - portal-gateway.common.env
       - portal-gateway.specific.env # deployments must create this file by copying a environment specific file

@@ -1,14 +1,14 @@
 {
   "entrypoints": [
     {
-      "name": "http20001",
-      "port": 20001
+      "name": "http20000",
+      "port": 20000
     }
   ],
   "applications": [
     {
       "name": "proxy",
-      "entrypoint": "http20001",
+      "entrypoint": "http20000",
       "requestSelector": {
         "urlPrefix": "/"
       },
