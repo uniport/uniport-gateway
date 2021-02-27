@@ -22,7 +22,7 @@ public class PortalGatewayConfigRetriever {
 
     public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
     public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway/portal-gateway.json";
-    public static final String LOCAL_CONFIG_FILE_PATH = "./portal-gateway/portal-gateway.json";
+    public static final String LOCAL_CONFIG_FILE_PATH = "./portal-gateway.json";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);
     private static ConfigRetrieverOptions options;
@@ -67,11 +67,11 @@ public class PortalGatewayConfigRetriever {
             return Optional.of(configStoreOptions(envValue));
         }
         if (existsAsFile(DEFAULT_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading from file '{}'", DEFAULT_CONFIG_FILE_PATH);
+            LOGGER.info("getPortalGatewayJson: reading from default file '{}'", DEFAULT_CONFIG_FILE_PATH);
             return Optional.of(configStoreOptions(DEFAULT_CONFIG_FILE_PATH));
         }
         if (existsAsFile(LOCAL_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading from file '{}'", LOCAL_CONFIG_FILE_PATH);
+            LOGGER.info("getPortalGatewayJson: reading file '{}' from working directory '{}'", LOCAL_CONFIG_FILE_PATH, new File(".").getAbsolutePath());
             return Optional.of(configStoreOptions(LOCAL_CONFIG_FILE_PATH));
         }
         LOGGER.warn("getPortalGatewayJson: no portal-gateway.json file configured");

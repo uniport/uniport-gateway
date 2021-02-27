@@ -5,7 +5,7 @@
     </envs>
     <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.PortalGatewayLauncher" />
     <module name="server" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server/portal-gateway" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.inventage.portal.gateway.setup.*" />
