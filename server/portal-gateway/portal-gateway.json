@@ -36,14 +36,13 @@
     },
     {
       "name": "navigation-frontend",
-      "pathPrefix": "/navigation",
+      "pathPrefix": "/navigation/",
       "middleware": {
         "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
         "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/navigation/", "replacement": "/"} ]
       },
       "service": "navigation-frontend"
     },
-
     {
       "name": "dashboard-login-redirect",
       "pathPrefix": "/dashboard/login",
