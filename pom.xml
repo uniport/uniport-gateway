@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.inventage.portal.gateway</groupId>
@@ -15,7 +14,7 @@
     </modules>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip> <!-- because we deploy via nexus-staging-maven-plugin -->
+        <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <vertx.version>4.0.2</vertx.version>
@@ -50,7 +49,7 @@
             <dependency>
                 <groupId>com.inventage.vertx</groupId>
                 <artifactId>vertx-http-proxy</artifactId>
-                <version>1.0.0-202102222056-6-7802784</version>
+                <version>1.0.0-202103030719-7-7802784</version>
             </dependency>
             <!-- for substituting variables in config via StringSubstitutor.replace -->
             <dependency>
@@ -70,12 +69,12 @@
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.jetbrains</groupId>-->
-<!--                <artifactId>annotations</artifactId>-->
-<!--                <version>RELEASE</version>-->
-<!--                <scope>compile</scope>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.jetbrains</groupId>-->
+            <!--                <artifactId>annotations</artifactId>-->
+            <!--                <version>RELEASE</version>-->
+            <!--                <scope>compile</scope>-->
+            <!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
@@ -104,15 +103,13 @@
                             </goals>
                             <configuration>
                                 <transformers>
-                                    <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
                                             <Main-Class>${launcher.class}</Main-Class>
                                             <Main-Verticle>${main.verticle}</Main-Verticle>
                                         </manifestEntries>
                                     </transformer>
-                                    <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 </transformers>
                                 <artifactSet>
                                 </artifactSet>
@@ -139,12 +136,12 @@
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>2.7.1</version>
                 </plugin>
-<!--                &lt;!&ndash; for staging deployments to nexus2 &ndash;&gt;-->
-<!--                <plugin>-->
-<!--                    <groupId>org.sonatype.plugins</groupId>-->
-<!--                    <artifactId>nexus-staging-maven-plugin</artifactId>-->
-<!--                    <version>1.6.8</version>-->
-<!--                </plugin>-->
+                <!--                &lt;!&ndash; for staging deployments to nexus2 &ndash;&gt;-->
+                <!--                <plugin>-->
+                <!--                    <groupId>org.sonatype.plugins</groupId>-->
+                <!--                    <artifactId>nexus-staging-maven-plugin</artifactId>-->
+                <!--                    <version>1.6.8</version>-->
+                <!--                </plugin>-->
             </plugins>
         </pluginManagement>
     </build>
