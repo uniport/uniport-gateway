@@ -12,6 +12,8 @@
 !/.idea/prettier.xml
 *.iml
 
+# Ignore all VS Code stuff
+/.vscode/*
 # Maven
 target/
 pom.xml.tag
