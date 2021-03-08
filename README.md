@@ -11,12 +11,25 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 3. Datei 'portal-gateway.json' im '/etc/portal-gateway/' Verzeichnis
 4. Datei 'portal-gateway.json' im aktuellen Verzeichnis (Run Configuration "PortalGateway" := ./server/portal-gateway)
 
-
 ## Build
 
 ```shell
 ./mvnw clean install
 ```
+
+**Note**: You need to have your [~/.m2/settings.xml](http://maven.apache.org/settings.html#Servers) set up proberly with at least:
+
+```xml
+<servers>
+    <server>
+        <id>inventage-projectware</id>
+        <username>username</username>
+        <password>password</password>
+    </server>
+</servers>
+```
+
+(You can also use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens) if you don't want to save your password in a file)
 
 ## Launch
 
