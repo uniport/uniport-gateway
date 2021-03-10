@@ -17,7 +17,7 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 ./mvnw clean install
 ```
 
-**Note**: You need to have your [~/.m2/settings.xml](http://maven.apache.org/settings.html#Servers) set up proberly with at least:
+**Beachte**: Deine Konfiguration unter [~/.m2/settings.xml](http://maven.apache.org/settings.html#Servers) muss mindestens mit dem folgenden Inhalt existieren:
 
 ```xml
 <servers>
@@ -29,7 +29,7 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 </servers>
 ```
 
-(You can also use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens) if you don't want to save your password in a file)
+(Du kannst auch [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens) verwenden, falls du keine Passwörter in Dateien speichern möchtest)
 
 ## Launch
 
@@ -42,3 +42,7 @@ PORTAL_GATEWAY_JSON=./src/test/resources/portal-gateway.json
 ```
 
 Für den Start der verwendeten Backend Systeme, kann die Run Configuration `httpbin: docker-compose` verwendet werden.
+
+**Beachte**: Um die `httpbin: docker-compose` Run Configuration direkt von IntelliJ zu starten, muss du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren.
+
+(Alternativ, kannst du die Docker-Compose auch direkt von der Command Line benutzen).
