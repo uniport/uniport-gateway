@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.config;
+package com.inventage.portal.gateway.core.config.startup;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -12,11 +12,11 @@ import java.io.File;
 import java.util.Optional;
 
 /**
- * The Json file for the portal gateway configuration is taken from one of these places:
- * 1. File pointed to by the system env variable 'PORTAL_GATEWAY_JSON'
- * 2. File pointed to by the system property 'PORTAL_GATEWAY_JSON'
- * 3. File 'portal-gateway.json' in '/etc/portal-gateway/'
- * 4. File 'portal-gateway.json' in the current working directory
+ * The Json file for the portal gateway configuration is taken from one of these
+ * places: 1. File pointed to by the system env variable 'PORTAL_GATEWAY_JSON'
+ * 2. File pointed to by the system property 'PORTAL_GATEWAY_JSON' 3. File
+ * 'portal-gateway.json' in '/etc/portal-gateway/' 4. File 'portal-gateway.json'
+ * in the current working directory
  */
 public class PortalGatewayConfigRetriever {
 
@@ -38,7 +38,8 @@ public class PortalGatewayConfigRetriever {
     }
 
     /**
-     * Stores added later to the options, will override properties from prior stores.
+     * Stores added later to the options, will override properties from prior
+     * stores.
      *
      * @return ConfigRetrieverOptions
      */
@@ -47,10 +48,8 @@ public class PortalGatewayConfigRetriever {
             options = new ConfigRetrieverOptions();
 
             getPortalGatewayJson().ifPresent(json -> options.addStore(json));
-            options.addStore(new ConfigStoreOptions()
-                    .setType("sys").setConfig(new JsonObject().put("raw-data", true)));
-            options.addStore(new ConfigStoreOptions()
-                    .setType("env").setConfig(new JsonObject().put("raw-data", true)));
+            options.addStore(new ConfigStoreOptions().setType("sys").setConfig(new JsonObject().put("raw-data", true)));
+            options.addStore(new ConfigStoreOptions().setType("env").setConfig(new JsonObject().put("raw-data", true)));
         }
         return options;
     }
@@ -71,7 +70,8 @@ public class PortalGatewayConfigRetriever {
             return Optional.of(configStoreOptions(DEFAULT_CONFIG_FILE_PATH));
         }
         if (existsAsFile(LOCAL_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading file '{}' from working directory '{}'", LOCAL_CONFIG_FILE_PATH, new File(".").getAbsolutePath());
+            LOGGER.info("getPortalGatewayJson: reading file '{}' from working directory '{}'", LOCAL_CONFIG_FILE_PATH,
+                    new File(".").getAbsolutePath());
             return Optional.of(configStoreOptions(LOCAL_CONFIG_FILE_PATH));
         }
         LOGGER.warn("getPortalGatewayJson: no portal-gateway.json file configured");
@@ -80,13 +80,9 @@ public class PortalGatewayConfigRetriever {
 
     private static ConfigStoreOptions configStoreOptions(String fileName) {
         final File file = new File(fileName);
-        return new ConfigStoreOptions()
-                .setType("file")
+        return new ConfigStoreOptions().setType("file")
                 .setFormat(file.getName().endsWith("json") ? "json" : "properties")
-                .setConfig(new JsonObject()
-                        .put("path", file.getAbsolutePath())
-                        .put("raw-data", true)
-                );
+                .setConfig(new JsonObject().put("path", file.getAbsolutePath()).put("raw-data", true));
     }
 
     private static boolean existsAsFile(String fileName) {

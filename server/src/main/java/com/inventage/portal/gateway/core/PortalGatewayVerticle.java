@@ -2,7 +2,7 @@ package com.inventage.portal.gateway.core;
 
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationProvider;
-import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.config.startup.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
@@ -20,9 +20,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * The main verticle of the portal gateway.
- * It reads the configuration for the entrypoints and creates an HTTP listener for each of them. Additionally it reads the
- * configuration for the applications and mounts them using the entrypoints.
+ * The main verticle of the portal gateway. It reads the configuration for the
+ * entrypoints and creates an HTTP listener for each of them. Additionally it
+ * reads the configuration for the applications and mounts them using the
+ * entrypoints.
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
@@ -42,7 +43,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         retriever.getConfig(asyncResult -> {
             try {
                 final JsonObject config = asyncResult.result();
-                publicHostname = config.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+                publicHostname = config.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                        PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
                 // get the entrypoints from the configuration
                 List<Entrypoint> entrypoints = entrypoints(config);
@@ -52,60 +54,54 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
                 deployAndMountApplications(applications, entrypoints);
                 createListenersForEntrypoints(entrypoints, config, startPromise);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 shutdownOnStartupFailure(e);
             }
         });
     }
 
     private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
-        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'", applications.size(), entrypoints.size());
+        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'", applications.size(),
+                entrypoints.size());
         applications.stream().forEach(application -> {
             application.deployOn(vertx).onComplete(deployed -> {
                 if (deployed.succeeded()) {
                     entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
-                }
-                else {
+                } else {
                     shutdownOnStartupFailure(deployed.cause());
                 }
             });
         });
     }
 
-    private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config, Promise<Void> startPromise) {
-        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'",entrypoints.size());
-        listenOnEntrypoints(entrypoints)
-            .onComplete(all -> {
-                if (all.succeeded()) {
-                    startPromise.complete();
-                    LOGGER.info("start: succeeded.");
-                }
-                else {
-                    startPromise.fail(all.cause());
-                    LOGGER.error("start: failed.");
-                }
-            });
+    private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config,
+            Promise<Void> startPromise) {
+        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'", entrypoints.size());
+        listenOnEntrypoints(entrypoints).onComplete(all -> {
+            if (all.succeeded()) {
+                startPromise.complete();
+                LOGGER.info("start: succeeded.");
+            } else {
+                startPromise.fail(all.cause());
+                LOGGER.error("start: failed.");
+            }
+        });
     }
 
     private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-        return CompositeFuture.join(entrypoints.stream()
-                .map(this::listOnEntrypoint)
-                .collect(Collectors.toList()));
+        return CompositeFuture.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
     }
 
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
         if (entrypoint.port() > 0) {
-            final HttpServerOptions options = new HttpServerOptions()
-                    .setMaxHeaderSize(1024 * 20)
-                    .setSsl(entrypoint.isTls())
-                    .setKeyStoreOptions(entrypoint.jksOptions());
+            final HttpServerOptions options = new HttpServerOptions().setMaxHeaderSize(1024 * 20)
+                    .setSsl(entrypoint.isTls()).setKeyStoreOptions(entrypoint.jksOptions());
             LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(), entrypoint.port());
             return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
-        }
-        else {
+        } else {
             entrypoint.disable();
-            LOGGER.warn("listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0", entrypoint.name(), entrypoint.port());
+            LOGGER.warn("listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
+                    entrypoint.name(), entrypoint.port());
             return Future.succeededFuture();
         }
     }
@@ -113,8 +109,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     private void shutdownOnStartupFailure(Throwable throwable) {
         if (throwable instanceof IllegalArgumentException) {
             LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage());
-        }
-        else {
+        } else {
             LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage(), throwable);
         }
         vertx.close();
@@ -126,14 +121,13 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final List<Entrypoint> entrypoints = new ArrayList<>();
             final JsonArray configs = config.getJsonArray(Entrypoint.ENTRYPOINTS);
             if (configs != null) {
-                configs.stream()
-                        .map(object -> new JsonObject(Json.encode(object)))
-                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME), publicHostname, entrypoint.getInteger(Entrypoint.PORT), vertx))
+                configs.stream().map(object -> new JsonObject(Json.encode(object)))
+                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME), publicHostname,
+                                entrypoint.getInteger(Entrypoint.PORT), vertx))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalStateException(String.format("Couldn't read %s configuration", Entrypoint.ENTRYPOINTS));
         }
     }
@@ -144,17 +138,16 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final List<Application> applications = new ArrayList<>();
             final JsonArray configs = config.getJsonArray(Application.APPLICATIONS);
             if (configs != null) {
-                configs.stream()
-                        .map(object -> new JsonObject(Json.encode(object)))
-                        .map(application -> ApplicationProvider.Loader.getProvider(application.getString(Application.PROVIDER)).create(application, config, vertx))
+                configs.stream().map(object -> new JsonObject(Json.encode(object)))
+                        .map(application -> ApplicationProvider.Loader
+                                .getProvider(application.getString(Application.PROVIDER))
+                                .create(application, config, vertx))
                         .forEach(applications::add);
             }
             return applications;
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalStateException(String.format("Couldn't read %s configuration", Application.APPLICATIONS));
         }
     }
