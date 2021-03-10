@@ -2,30 +2,25 @@ package com.inventage.portal.gateway.core.config.label;
 
 import java.util.*;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class Parser {
 
-    public final static String defaultRootName = "portal";
+    public final static String DEFAULT_ROOT_NAME = "portal";
 
     public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
-        JsonObject conf = new JsonObject();
-
-        Node node = decodeToNode(labels, rootName, filters);
-
-        // TODO apply node to conf
-
-        return conf;
+        return decodeToJson(labels, rootName, filters);
     }
 
-    private static Node decodeToNode(Map<String, Object> labels, String rootName, List<String> filters) {
+    private static JsonObject decodeToJson(Map<String, Object> labels, String rootName, List<String> filters) {
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
             return null;
         }
 
-        Node node = new Node();
+        JsonObject node = new JsonObject();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String key = sortedKeys.get(i);
 
@@ -55,30 +50,34 @@ public class Parser {
                 }
             }
 
-            decodeToNode(node, parts, (String) labels.get(key));
+            decodeToJson(node, parts, (String) labels.get(key));
         }
 
         return node;
     }
 
-    private static void decodeToNode(Node root, List<String> path, String value) {
-        if (root.getName() == null) {
-            root.setName(path.get(0));
+    private static void decodeToJson(JsonObject root, List<String> path, String value) {
+        if (!root.containsKey("name")) {
+            root.put("name", path.get(0));
         }
 
         // It is a leaf or has children
         if (path.size() > 1) {
-            Node node = root.hasChild(path.get(1));
-            if (node != null) {
-                decodeToNode(node, path.subList(1, path.size()), value);
+            if (root.containsKey(path.get(1))) {
+                JsonObject node = root.getJsonObject(path.get(1));
+                decodeToJson(node, path.subList(1, path.size()), value);
             } else {
-                Node child = new Node();
-                child.setName(path.get(1));
-                decodeToNode(child, path.subList(1, path.size()), value);
-                root.addChild(child);
+                JsonObject child = new JsonObject();
+                child.put("name", path.get(1));
+                decodeToJson(child, path.subList(1, path.size()), value);
+
+                if (!root.containsKey("children")) {
+                    root.put("children", new JsonArray());
+                }
+                root.getJsonArray("children").add(child);
             }
         } else {
-            root.setValue(value);
+            root.put("value", value);
         }
     }
 

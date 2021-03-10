@@ -96,7 +96,7 @@ public class DockerContainerProvider implements Provider {
 
         String health = metadata.getString("portal.docker.health");
 
-        JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.defaultRootName,
+        JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
 
         // check entrypoints exist
