@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy;
 
-import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.config.startup.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 import com.inventage.portal.gateway.proxy.request.ProxiedHttpServerRequest;
 import com.inventage.portal.gateway.proxy.request.header.RequestHeaderMiddleware;
@@ -53,14 +53,17 @@ public class ProxyVerticle extends AbstractVerticle {
     private RequestHeaderMiddleware headerMiddleware = RequestHeaderMiddleware.IDENTITY;
     private Function<String, String> uriMiddleware = Function.identity();
 
-
     private Service service;
 
-    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
-        this(proxyConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig, proxyRouter, Optional.empty());
+    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort,
+            Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
+        this(proxyConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig, proxyRouter,
+                Optional.empty());
     }
 
-    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort, Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter, Optional<OAuth2Configuration> oAuth2Configuration) {
+    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort,
+            Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter,
+            Optional<OAuth2Configuration> oAuth2Configuration) {
         this.proxyConfig = proxyConfig;
         this.publicHostname = publicHostname;
         this.entrypointPort = entrypointPort;
@@ -72,12 +75,12 @@ public class ProxyVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        LOGGER.debug("start: proxy '{}'", proxyConfig.getString(ProxyApplication.PROXY_NAME));
+        LOGGER.debug("start: proxy '{}'", proxyConfig.getString(ProxyApplication.ROUTER_NAME));
         init(startPromise);
     }
 
     private void init(Promise<Void> startPromise) {
-        LOGGER.debug("init: proxy '{}'", proxyConfig.getString(ProxyApplication.PROXY_NAME));
+        LOGGER.debug("init: proxy '{}'", proxyConfig.getString(ProxyApplication.ROUTER_NAME));
         final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
         retriever.getConfig(asyncResult -> {
             if (asyncResult.succeeded()) {
@@ -89,11 +92,8 @@ public class ProxyVerticle extends AbstractVerticle {
                     router.route().handler(this::forward);
                     LOGGER.debug("init: service '{}'", service);
                     return Future.succeededFuture();
-                })
-                        .onSuccess(s -> startPromise.complete())
-                        .onFailure(startPromise::fail);
-            }
-            else {
+                }).onSuccess(s -> startPromise.complete()).onFailure(startPromise::fail);
+            } else {
                 startPromise.fail(asyncResult.cause());
             }
         });
@@ -102,19 +102,19 @@ public class ProxyVerticle extends AbstractVerticle {
     private void configureMiddleware() {
         if (middlewareConfig.isPresent()) {
             // headers
-            headerMiddlewareConfig().ifPresent(headers -> headers.stream().map(object -> new JsonObject(Json.encode(object)))
-                    .forEach(header -> {
-                        final RequestHeaderMiddlewareProvider provider = RequestHeaderMiddlewareProvider.Loader.getProvider(header.getString(MIDDLEWARE_PROVIDER));
+            headerMiddlewareConfig().ifPresent(
+                    headers -> headers.stream().map(object -> new JsonObject(Json.encode(object))).forEach(header -> {
+                        final RequestHeaderMiddlewareProvider provider = RequestHeaderMiddlewareProvider.Loader
+                                .getProvider(header.getString(MIDDLEWARE_PROVIDER));
                         headerMiddleware = headerMiddleware.andThen(provider.create(header));
-                    })
-            );
+                    }));
             // uris
-            uriMiddlewareConfig().ifPresent(uris -> uris.stream().map(object -> new JsonObject(Json.encode(object)))
-                    .forEach(uri -> {
-                        final UriMiddlewareProvider provider = UriMiddlewareProvider.Loader.getProvider(uri.getString(MIDDLEWARE_PROVIDER));
+            uriMiddlewareConfig()
+                    .ifPresent(uris -> uris.stream().map(object -> new JsonObject(Json.encode(object))).forEach(uri -> {
+                        final UriMiddlewareProvider provider = UriMiddlewareProvider.Loader
+                                .getProvider(uri.getString(MIDDLEWARE_PROVIDER));
                         uriMiddleware = uriMiddleware.andThen(provider.create(uri));
-                    })
-            );
+                    }));
         }
     }
 
@@ -129,46 +129,50 @@ public class ProxyVerticle extends AbstractVerticle {
     }
 
     private Service fromServiceConfig(JsonObject globalConfig) {
-        return ServiceProvider.Loader.getProvider(serviceConfig.getString(SERVICE_PROVIDER)).create(serviceConfig, globalConfig, vertx);
+        return ServiceProvider.Loader.getProvider(serviceConfig.getString(SERVICE_PROVIDER)).create(serviceConfig,
+                globalConfig, vertx);
     }
 
     private Future<?> configureOptionalOAuth2(JsonObject globalConfig) {
         final Promise<Object> promise = Promise.promise();
         if (oAuth2Configuration.isPresent()) {
-            KeycloakAuth.discover(vertx, oAuth2Options())
-                    .onSuccess(oAuth2 -> {
-                        router.route().handler(this::prepareUser);
-                        oAuth2Configuration.get().callback().handler(this::storeUserForService);
-                        patchAuthorizationPath(((OAuth2AuthProviderImpl) oAuth2).getConfig(), globalConfig);
-                        final AuthenticationHandler authenticationHandler = OAuth2AuthHandler.create(vertx, oAuth2, String.format("http://%s:%s%s", publicHostname, entrypointPort, oAuth2Configuration.get().callback().getPath()))
-                                .withScope("openid").setupCallback(oAuth2Configuration.get().callback());
-                        router.route().handler(authenticationHandler);
-                        promise.complete(authenticationHandler);
-                    })
-                    .onFailure(failure -> {
-                        final String message = String.format("configureOptionalOAuth2: for proxy '%s' failed with message '%s'", proxyConfig.getString(ProxyApplication.PROXY_NAME), failure.getMessage());
-                        LOGGER.error(message);
-                        promise.fail(message);
-                    });
-        }
-        else {
+            KeycloakAuth.discover(vertx, oAuth2Options()).onSuccess(oAuth2 -> {
+                router.route().handler(this::prepareUser);
+                oAuth2Configuration.get().callback().handler(this::storeUserForService);
+                patchAuthorizationPath(((OAuth2AuthProviderImpl) oAuth2).getConfig(), globalConfig);
+                final AuthenticationHandler authenticationHandler = OAuth2AuthHandler
+                        .create(vertx, oAuth2,
+                                String.format("http://%s:%s%s", publicHostname, entrypointPort,
+                                        oAuth2Configuration.get().callback().getPath()))
+                        .withScope("openid").setupCallback(oAuth2Configuration.get().callback());
+                router.route().handler(authenticationHandler);
+                promise.complete(authenticationHandler);
+            }).onFailure(failure -> {
+                final String message = String.format("configureOptionalOAuth2: for proxy '%s' failed with message '%s'",
+                        proxyConfig.getString(ProxyApplication.ROUTER_NAME), failure.getMessage());
+                LOGGER.error(message);
+                promise.fail(message);
+            });
+        } else {
             promise.complete();
         }
         return promise.future();
     }
 
     /**
-     * Change the authorization path so that the requests go again through the portal gateway
+     * Change the authorization path so that the requests go again through the
+     * portal gateway
+     * 
      * @param configToPatch to be changed
      * @return the given config
      */
     private OAuth2Options patchAuthorizationPath(OAuth2Options configToPatch, JsonObject globalConfig) {
         try {
             final URI uri = new URI(configToPatch.getAuthorizationPath());
-            final String newAuthorizationPath = String.format("%s://%s:%s%s", "http", publicHostname, entrypointPort, uri.getPath());
+            final String newAuthorizationPath = String.format("%s://%s:%s%s", "http", publicHostname, entrypointPort,
+                    uri.getPath());
             configToPatch.setAuthorizationPath(newAuthorizationPath);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 
         }
         return configToPatch;
@@ -176,8 +180,7 @@ public class ProxyVerticle extends AbstractVerticle {
 
     // for doing the OIDC discovery request
     private OAuth2Options oAuth2Options() {
-        return new OAuth2Options()
-                .setClientID(oAuth2Configuration.orElseThrow().clientId())
+        return new OAuth2Options().setClientID(oAuth2Configuration.orElseThrow().clientId())
                 .setClientSecret(oAuth2Configuration.orElseThrow().clientSecret())
                 .setSite(oAuth2Configuration.orElseThrow().discoveryUrl());
     }
@@ -203,7 +206,8 @@ public class ProxyVerticle extends AbstractVerticle {
     }
 
     private String sessionScopeOrName() {
-        return proxyConfig.getString("sessionScope") != null ? proxyConfig.getString("sessionScope") : proxyConfig.getString(ProxyApplication.PROXY_NAME);
+        return proxyConfig.getString("sessionScope") != null ? proxyConfig.getString("sessionScope")
+                : proxyConfig.getString(ProxyApplication.ROUTER_NAME);
     }
 
     /**
@@ -213,10 +217,8 @@ public class ProxyVerticle extends AbstractVerticle {
      */
     protected void forward(RoutingContext rc) {
         LOGGER.info("forward: request with uri '{}' to service '{}'", rc.request().uri(), service);
-        service.handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL)
-                .setHeaderMiddleware(headerMiddleware)
-                .setUriMiddleware(uriMiddleware)
-        );
-     }
+        service.handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL).setHeaderMiddleware(headerMiddleware)
+                .setUriMiddleware(uriMiddleware));
+    }
 
 }
