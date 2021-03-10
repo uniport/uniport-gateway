@@ -113,17 +113,17 @@ public class DockerContainerServiceImporter implements ServiceImporter {
             } catch (Exception e) {
                 future.fail(e);
             }
-        }, ar -> {
-            if (ar.failed()) {
+        }, listContainersAr -> {
+            if (listContainersAr.failed()) {
                 if (completion != null) {
-                    completion.fail(ar.cause());
+                    completion.fail(listContainersAr.cause());
                 } else {
-                    LOGGER.error("Fail to import containers from docker", ar.cause());
+                    LOGGER.error("Fail to import containers from docker", listContainersAr.cause());
                 }
                 return;
             }
             started = true;
-            List<Container> running = ar.result();
+            List<Container> running = listContainersAr.result();
             List<DockerContainerService> toRemove = new ArrayList<>();
 
             // Detect lost containers
@@ -136,7 +136,6 @@ public class DockerContainerServiceImporter implements ServiceImporter {
             if (running != null) {
                 // Detect new containers
                 running.stream().filter(container -> !isKnown(container)).forEach(container -> {
-                    LOGGER.info(container.getId().toString());
                     DockerContainerService service = new DockerContainerService(container);
                     services.add(service);
                     publish(service);

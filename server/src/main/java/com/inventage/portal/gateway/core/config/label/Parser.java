@@ -2,17 +2,23 @@ package com.inventage.portal.gateway.core.config.label;
 
 import java.util.*;
 
+import io.vertx.core.json.JsonObject;
+
 public class Parser {
 
     public final static String defaultRootName = "portal";
 
-    public static void decode(Map<String, String> labels, Object element, String rootName, List<String> filters) {
+    public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
+        JsonObject conf = new JsonObject();
+
         Node node = decodeToNode(labels, rootName, filters);
 
-        // TODO add node to element
+        // TODO apply node to conf
+
+        return conf;
     }
 
-    private static Node decodeToNode(Map<String, String> labels, String rootName, List<String> filters) {
+    private static Node decodeToNode(Map<String, Object> labels, String rootName, List<String> filters) {
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
@@ -49,7 +55,7 @@ public class Parser {
                 }
             }
 
-            decodeToNode(node, parts, labels.get(key));
+            decodeToNode(node, parts, (String) labels.get(key));
         }
 
         return node;
@@ -76,9 +82,12 @@ public class Parser {
         }
     }
 
-    private static List<String> sortKeys(Map<String, String> labels, List<String> filters) {
+    private static List<String> sortKeys(Map<String, Object> labels, List<String> filters) {
         List<String> sortedKeys = new ArrayList<>();
         for (String key : labels.keySet()) {
+            if (!(labels.get(key) instanceof String)) {
+                continue;
+            }
             if (filters.isEmpty()) {
                 sortedKeys.add(key);
                 continue;
