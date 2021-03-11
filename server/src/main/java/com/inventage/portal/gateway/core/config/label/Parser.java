@@ -22,7 +22,7 @@ public class Parser {
     private static final String SERVICES = "services";
 
     private static final List<String> CONTAINS_CUSTOM_NAMES = Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
-    private static final List<String> ARRAY_TYPE = Arrays.asList("entrypoints");
+    private static final List<String> VALUE_IS_ARRAY_TYPE = Arrays.asList("entrypoints");
 
     public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
         return decodeToJson(labels, rootName, filters);
@@ -35,7 +35,7 @@ public class Parser {
             return null;
         }
 
-        JsonObject node = new JsonObject();
+        JsonObject node = buildDefaultConfiguration();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String key = sortedKeys.get(i);
 
@@ -84,9 +84,6 @@ public class Parser {
                 if (child != null) {
                     decodeToJson(child, path.subList(2, path.size()), value);
                 } else {
-                    if (children == null) {
-                        children = new JsonArray();
-                    }
                     JsonObject newChild = new JsonObject();
                     newChild.put(getName(key), path.get(1));
                     decodeToJson(newChild, path.subList(2, path.size()), value);
@@ -104,7 +101,7 @@ public class Parser {
                 }
             }
         } else {
-            if (ARRAY_TYPE.contains(key)) {
+            if (VALUE_IS_ARRAY_TYPE.contains(key)) {
                 JsonArray values = root.getJsonArray(key);
                 if (values == null) {
                     values = new JsonArray();
@@ -171,5 +168,19 @@ public class Parser {
         }
         Collections.sort(sortedKeys);
         return sortedKeys;
+    }
+
+    private static JsonObject buildDefaultConfiguration() {
+        JsonObject config = new JsonObject();
+
+        JsonObject http = new JsonObject();
+
+        http.put(DynamicConfiguration.ROUTERS, new JsonArray());
+        http.put(DynamicConfiguration.MIDDLEWARES, new JsonArray());
+        http.put(DynamicConfiguration.SERVICES, new JsonArray());
+
+        config.put(DynamicConfiguration.HTTP, http);
+
+        return config;
     }
 }

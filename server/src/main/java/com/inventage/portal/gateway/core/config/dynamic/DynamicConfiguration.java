@@ -23,10 +23,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_TYPE = "type";
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
-    public static final String SERVICE_SERVERS = "server";
-    public static final String SERVICE_SERVER_SCHEMA = "schema";
+    public static final String SERVICE_SERVERS = "servers";
     public static final String SERVICE_SERVER_URL = "url";
-    public static final String SERVICE_SERVER_PORT = "port";
 
     private static Schema schema;
 
@@ -43,9 +41,7 @@ public class DynamicConfiguration {
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
                 .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
-                        .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_SCHEMA, Schemas.stringSchema())
-                                .requiredProperty(SERVICE_SERVER_URL, Schemas.stringSchema())
-                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())));
+                        .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_URL, Schemas.stringSchema())));
 
         ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
                 .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
