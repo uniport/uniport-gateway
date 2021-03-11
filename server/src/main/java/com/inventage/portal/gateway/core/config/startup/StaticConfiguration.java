@@ -11,7 +11,7 @@ import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 
 public class StaticConfiguration {
-
+    // keywords used for internal purpose only
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";

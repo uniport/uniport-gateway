@@ -2,12 +2,27 @@ package com.inventage.portal.gateway.core.config.label;
 
 import java.util.*;
 
+import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class Parser {
 
-    public final static String DEFAULT_ROOT_NAME = "portal";
+    public static final String DEFAULT_ROOT_NAME = "portal";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Parser.class);
+
+    // keywords used in the labels
+    private static final String ROUTERS = "routers";
+    private static final String MIDDLEWARES = "middlewares";
+    private static final String SERVICES = "services";
+
+    private static final List<String> CONTAINS_CUSTOM_NAMES = Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
+    private static final List<String> ARRAY_TYPE = Arrays.asList("entrypoints");
 
     public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
         return decodeToJson(labels, rootName, filters);
@@ -41,6 +56,10 @@ public class Parser {
                             "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
                 }
 
+                if (v.equals(rootName)) {
+                    continue;
+                }
+
                 if (v.endsWith("]") && v.substring(0, 1) != "[") {
                     int indexLeft = v.indexOf("[");
                     parts.add(v.substring(0, indexLeft));
@@ -57,27 +76,78 @@ public class Parser {
     }
 
     private static void decodeToJson(JsonObject root, List<String> path, String value) {
-        if (!root.containsKey("name")) {
-            root.put("name", path.get(0));
-        }
-
-        // It is a leaf or has children
+        String key = path.get(0);
         if (path.size() > 1) {
-            if (root.containsKey(path.get(1))) {
-                JsonObject node = root.getJsonObject(path.get(1));
-                decodeToJson(node, path.subList(1, path.size()), value);
-            } else {
-                JsonObject child = new JsonObject();
-                child.put("name", path.get(1));
-                decodeToJson(child, path.subList(1, path.size()), value);
-
-                if (!root.containsKey("children")) {
-                    root.put("children", new JsonArray());
+            if (CONTAINS_CUSTOM_NAMES.contains(key)) {
+                JsonArray children = root.getJsonArray(key);
+                JsonObject child = getObjByKeyWithValue(children, getName(key), path.get(1));
+                if (child != null) {
+                    decodeToJson(child, path.subList(2, path.size()), value);
+                } else {
+                    if (children == null) {
+                        children = new JsonArray();
+                    }
+                    JsonObject newChild = new JsonObject();
+                    newChild.put(getName(key), path.get(1));
+                    decodeToJson(newChild, path.subList(2, path.size()), value);
+                    children.add(newChild);
+                    root.put(key, children);
                 }
-                root.getJsonArray("children").add(child);
+            } else {
+                if (root.containsKey(key)) {
+                    JsonObject child = root.getJsonObject(key);
+                    decodeToJson(child, path.subList(1, path.size()), value);
+                } else {
+                    JsonObject newChild = new JsonObject();
+                    decodeToJson(newChild, path.subList(1, path.size()), value);
+                    root.put(key, newChild);
+                }
             }
         } else {
-            root.put("value", value);
+            if (ARRAY_TYPE.contains(key)) {
+                JsonArray values = root.getJsonArray(key);
+                if (values == null) {
+                    values = new JsonArray();
+                }
+                String[] split = value.split("\\,");
+                for (String s : split) {
+                    values.add(s.trim());
+                }
+                root.put(key, values);
+            } else {
+                if (root.containsKey(key)) {
+                    LOGGER.warn("Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'", key,
+                            root.getString(key), value);
+                }
+                root.put(key, value);
+            }
+        }
+    }
+
+    private static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
+        if (jsonArr == null) {
+            return null;
+        }
+        int size = jsonArr.size();
+        for (int i = 0; i < size; i++) {
+            JsonObject obj = jsonArr.getJsonObject(i);
+            if (obj.containsKey(key) && obj.getString(key).equals(value)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    private static String getName(String key) {
+        switch (key) {
+        case ROUTERS:
+            return DynamicConfiguration.ROUTER_NAME;
+        case MIDDLEWARES:
+            return DynamicConfiguration.MIDDLEWARE_NAME;
+        case SERVICES:
+            return DynamicConfiguration.SERVICE_NAME;
+        default:
+            throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
         }
     }
 
