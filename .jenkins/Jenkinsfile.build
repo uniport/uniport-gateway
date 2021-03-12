@@ -15,7 +15,7 @@ pipeline {
         LINE_SEPARATOR = '================================================================================'
         NEXUS2_CREDS = credentials('inventage-ierp')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
-        BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com'
+        BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com'
         DEV_DEPLOYMENT_HOST = 'inventage@docker-test.inventage.com'
         DEV_DEPLOYMENT_DIR = '/home/inventage/portal/portal-gateway'
         DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
