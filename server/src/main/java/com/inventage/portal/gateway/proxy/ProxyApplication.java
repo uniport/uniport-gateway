@@ -4,8 +4,9 @@ import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-import com.inventage.portal.gateway.core.provider.docker.DockerContainerProvider;
+import com.inventage.portal.gateway.core.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class ProxyApplication implements Application {
     private final String entrypoint;
 
     /** the global configuration */
-    private final JsonObject globalConfig;
+    private final JsonObject staticConfig;
 
     /**
      * the selection criteria for delegating incoming requests to this application
@@ -67,10 +68,10 @@ public class ProxyApplication implements Application {
      */
     private final Router router;
 
-    public ProxyApplication(String name, String entrypoint, JsonObject globalConfig, Vertx vertx) {
+    public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
         this.name = name;
         this.entrypoint = entrypoint;
-        this.globalConfig = globalConfig;
+        this.staticConfig = staticConfig;
         this.router = Router.router(vertx);
     }
 
@@ -80,18 +81,23 @@ public class ProxyApplication implements Application {
 
     @Override
     public Future<?> deployOn(Vertx vertx) {
-        String announceAddress = "service-announce";
+        StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
+            if (ar.failed()) {
+                LOGGER.error("Invalid static configuration");
+                ar.cause();
+            }
+            String announceAddress = "service-announce";
 
-        // TODO configure this according to the static configuration
-        // TODO merge configs of all providers
-        DockerContainerProvider dockerprovider = new DockerContainerProvider(vertx);
-        dockerprovider.provide(announceAddress);
+            ProviderAggregator aggregator = new ProviderAggregator(announceAddress, staticConfig);
+            vertx.deployVerticle(aggregator);
 
-        EventBus eb = vertx.eventBus();
-        MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
-        announceConsumer.handler(service -> {
-            JsonObject config = service.body();
-            updateRoutes(vertx, config);
+            EventBus eb = vertx.eventBus();
+            MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
+            announceConsumer.handler(service -> {
+                JsonObject config = service.body();
+                // TODO merge configs of all providers
+                updateRoutes(vertx, config);
+            });
         });
 
         // TODO: not really happy with this but how should it be solved?
@@ -125,7 +131,7 @@ public class ProxyApplication implements Application {
         // TODO why do we need different providers?
         // maybe also change the name to something else like RequestHandlers, Connectors
         String provider = "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider";
-        String publicHostname = globalConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+        String publicHostname = this.staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
                 PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
         List<ProxyVerticle> proxyVerticles = new ArrayList<>();
@@ -148,8 +154,9 @@ public class ProxyApplication implements Application {
             String url = servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_URL);
             String[] hostPort = url.split(":");
 
-            JsonObject routerConfig = new JsonObject().put("name", router.getString(DynamicConfiguration.ROUTER_NAME))
-                    .put(PATH_PREFIX, pathPrefix).put(SERVICE, serviceName);
+            JsonObject routerConfig = new JsonObject()
+                    .put(ROUTER_NAME, router.getString(DynamicConfiguration.ROUTER_NAME)).put(PATH_PREFIX, pathPrefix)
+                    .put(SERVICE, serviceName);
 
             JsonObject serviceConfig = new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
                     .put("serverHost", hostPort[0]).put("serverPort", Integer.parseInt(hostPort[1]));
@@ -160,7 +167,7 @@ public class ProxyApplication implements Application {
             final Router proxyRouter = Router.router(vertx);
 
             ProxyVerticle proxyVerticle = new ProxyVerticle(routerConfig, publicHostname,
-                    Entrypoint.entrypointConfigByName(entrypoint, globalConfig).getInteger(Entrypoint.PORT),
+                    Entrypoint.entrypointConfigByName(entrypoint, this.staticConfig).getInteger(Entrypoint.PORT),
                     middlewareConfiguration, serviceConfig, proxyRouter, oAuth2Configuration);
             proxyVerticles.add(proxyVerticle);
 
@@ -200,7 +207,7 @@ public class ProxyApplication implements Application {
         if (oauth2 != null) {
             return Optional.of(
                     new OAuth2Configuration(oauth2.getString(OAUTH2_CLIENTID), oauth2.getString(OAUTH2_CLIENTSECRET),
-                            ConfigAdapter.replaceEnvVariables(globalConfig, oauth2.getString(OAUTH2_DISCOVERYURL)),
+                            ConfigAdapter.replaceEnvVariables(this.staticConfig, oauth2.getString(OAUTH2_DISCOVERYURL)),
                             router.get(OAUTH2_CALLBACK_PREFIX + proxy.getString(ROUTER_NAME).toLowerCase())));
         } else {
             return Optional.empty();

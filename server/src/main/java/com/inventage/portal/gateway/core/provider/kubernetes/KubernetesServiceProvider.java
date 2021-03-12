@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.core.provider.kubernetes;
 
-import com.inventage.portal.gateway.core.provider.Provider;
+import com.inventage.portal.gateway.core.provider.AbstractProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -13,19 +13,21 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.kubernetes.KubernetesServiceImporter;
 
-public class KubernetesServiceProvider implements Provider {
+public class KubernetesServiceProvider extends AbstractProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceProvider.class);
 
-    private Vertx vertx;
+    private EventBus eb;
+    private String configurationAddress;
+
     private ServiceDiscovery kubernetesDiscovery;
 
-    public KubernetesServiceProvider(Vertx vertx) {
-        this.vertx = vertx;
+    public KubernetesServiceProvider(String configurationAddress) {
+        this.configurationAddress = configurationAddress;
     }
 
     @Override
-    public void provide(String configurationAddress) {
+    public void provide(Promise<Void> startPromise) {
         String announceAddress = "service-announce";
 
         this.kubernetesDiscovery = ServiceDiscovery.create(vertx,
@@ -59,6 +61,6 @@ public class KubernetesServiceProvider implements Provider {
         announceConsumer.handler(message -> {
             JsonObject json = message.body();
         });
+        startPromise.complete();
     }
-
 }

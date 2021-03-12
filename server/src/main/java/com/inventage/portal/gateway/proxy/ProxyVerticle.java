@@ -81,16 +81,17 @@ public class ProxyVerticle extends AbstractVerticle {
 
     private void init(Promise<Void> startPromise) {
         LOGGER.debug("init: proxy '{}'", proxyConfig.getString(ProxyApplication.ROUTER_NAME));
+        // TODO should not use the globalConfig but its own fields
         final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
         retriever.getConfig(asyncResult -> {
             if (asyncResult.succeeded()) {
                 final JsonObject globalConfig = asyncResult.result();
                 configureMiddleware();
-                service = fromServiceConfig(globalConfig);
+                this.service = fromServiceConfig(globalConfig);
 
                 configureOptionalOAuth2(globalConfig).compose(authenticationHandler -> {
                     router.route().handler(this::forward);
-                    LOGGER.debug("init: service '{}'", service);
+                    LOGGER.debug("init: service '{}'", this.service);
                     return Future.succeededFuture();
                 }).onSuccess(s -> startPromise.complete()).onFailure(startPromise::fail);
             } else {
@@ -216,9 +217,9 @@ public class ProxyVerticle extends AbstractVerticle {
      * @param rc with the request to be forwarded
      */
     protected void forward(RoutingContext rc) {
-        LOGGER.info("forward: request with uri '{}' to service '{}'", rc.request().uri(), service);
-        service.handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL).setHeaderMiddleware(headerMiddleware)
-                .setUriMiddleware(uriMiddleware));
+        LOGGER.info("forward: request with uri '{}' to service '{}'", rc.request().uri(), this.service);
+        this.service.handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL)
+                .setHeaderMiddleware(headerMiddleware).setUriMiddleware(uriMiddleware));
     }
 
 }

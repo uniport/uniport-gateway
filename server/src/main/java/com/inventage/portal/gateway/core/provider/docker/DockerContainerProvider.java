@@ -6,13 +6,13 @@ import java.util.Map;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.label.Parser;
-import com.inventage.portal.gateway.core.provider.Provider;
+import com.inventage.portal.gateway.core.provider.AbstractProvider;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
@@ -20,13 +20,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
-public class DockerContainerProvider implements Provider {
+public class DockerContainerProvider extends AbstractProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
     private static final String announceAddress = "docker-container-announce";
     private static final String defaultTempateRule = "Host('${name}')";
 
-    private Vertx vertx;
     private EventBus eb;
+    private String configurationAddress;
 
     private ServiceDiscovery dockerContainerDiscovery;
 
@@ -37,9 +37,9 @@ public class DockerContainerProvider implements Provider {
 
     private Map<String, JsonObject> configurations = new HashMap<String, JsonObject>();
 
-    public DockerContainerProvider(Vertx vertx) {
-        this.vertx = vertx;
+    public DockerContainerProvider(String configurationAddress) {
         this.eb = vertx.eventBus();
+        this.configurationAddress = configurationAddress;
 
         this.watch = true;
         this.endpoint = "unix:///var/run/docker.sock";
@@ -48,7 +48,7 @@ public class DockerContainerProvider implements Provider {
     }
 
     @Override
-    public void provide(String configurationAddress) {
+    public void provide(Promise<Void> startPromise) {
         this.getOrCreateDockerContainerDiscovery();
 
         MessageConsumer<JsonObject> consumer = this.eb.consumer(announceAddress);
@@ -60,7 +60,7 @@ public class DockerContainerProvider implements Provider {
             DynamicConfiguration.validate(vertx, config).onComplete(validateAr -> {
                 if (validateAr.succeeded()) {
                     LOGGER.info("configuration published");
-                    eb.publish(configurationAddress, config);
+                    eb.publish(this.configurationAddress, config);
                 } else {
                     LOGGER.error("invalid configuration");
                 }
@@ -70,6 +70,7 @@ public class DockerContainerProvider implements Provider {
                 }
             });
         });
+        startPromise.complete();
     }
 
     private ServiceDiscovery getOrCreateDockerContainerDiscovery() {

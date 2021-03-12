@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.core.provider.file;
 import java.io.File;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.core.provider.Provider;
+import com.inventage.portal.gateway.core.provider.AbstractProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,17 +11,17 @@ import org.slf4j.LoggerFactory;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.Vertx;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class FileConfigProvider implements Provider {
+public class FileConfigProvider extends AbstractProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);
 
-    private Vertx vertx;
     private EventBus eb;
+    private String configurationAddress;
 
     private String filename;
     private String directory;
@@ -29,9 +29,9 @@ public class FileConfigProvider implements Provider {
     private Boolean watch;
     private int scanPeriodMs = 5000;
 
-    public FileConfigProvider(Vertx vertx, String filename, String directory, Boolean watch) {
-        this.vertx = vertx;
+    public FileConfigProvider(String configurationAddress, String filename, String directory, Boolean watch) {
         this.eb = vertx.eventBus();
+        this.configurationAddress = configurationAddress;
 
         this.filename = filename;
         this.directory = directory;
@@ -39,18 +39,14 @@ public class FileConfigProvider implements Provider {
         this.watch = watch;
     }
 
-    public FileConfigProvider(Vertx vertx, String filename, String directory) {
-        this(vertx, filename, directory, false);
-    }
-
     @Override
-    public void provide(String configurationAddress) {
+    public void provide(Promise<Void> startPromise) {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig(ar -> {
             if (ar.succeeded()) {
                 LOGGER.info("configuration retrieved");
                 final JsonObject config = ar.result();
-                this.validateAndPublish(config, configurationAddress);
+                this.validateAndPublish(config, this.configurationAddress);
             } else {
                 LOGGER.error("cannot retrieve configuration");
             }
@@ -58,9 +54,10 @@ public class FileConfigProvider implements Provider {
         if (this.watch) {
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
-                this.validateAndPublish(config, configurationAddress);
+                this.validateAndPublish(config, this.configurationAddress);
             });
         }
+        startPromise.complete();
     }
 
     private ConfigRetrieverOptions getOptions() {
