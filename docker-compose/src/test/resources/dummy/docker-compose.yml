@@ -9,6 +9,6 @@ services:
     image: kennethreitz/httpbin
     labels:
       - "portal.http.routers.httpbin.entrypoints=foobar, barfoo"
-      - "portal.http.routers.whoami.rule=Path('/httpbin')"
+      - "portal.http.routers.httpbin.rule=Path('/httpbin')"
       # no service specified or defined and yet one gets automatically created
       # and assigned to router httpbin.

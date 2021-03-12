@@ -1,0 +1,22 @@
+{
+  "http": {
+    "routers": [
+      {
+        "name": "router1",
+        "entrypoints": ["a", "b", "c"],
+        "service": "service1",
+        "rule": "Path('/foo')"
+      }
+    ],
+    "services": [
+      {
+        "name": "service1",
+        "servers": [
+          {
+            "url": "abc"
+          }
+        ]
+      }
+    ]
+  }
+}
