@@ -25,7 +25,9 @@ public class FileConfigProvider implements Provider {
 
     private String filename;
     private String directory;
+
     private Boolean watch;
+    private int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String filename, String directory, Boolean watch) {
         this.vertx = vertx;
@@ -33,37 +35,42 @@ public class FileConfigProvider implements Provider {
 
         this.filename = filename;
         this.directory = directory;
-        // TODO implement watch
-        // https://vertx.io/docs/vertx-config/java/#_listening_for_configuration_changes
+
         this.watch = watch;
+    }
+
+    public FileConfigProvider(Vertx vertx, String filename, String directory) {
+        this(vertx, filename, directory, false);
     }
 
     @Override
     public void provide(String configurationAddress) {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
-        retriever.getConfig(retrieveAr -> {
-            if (retrieveAr.succeeded()) {
-                LOGGER.info("file config provider: configuration retrieved");
-                final JsonObject config = retrieveAr.result();
-
-                DynamicConfiguration.validate(vertx, config).onComplete(validateAr -> {
-                    if (validateAr.succeeded()) {
-                        LOGGER.info("file config provider: configuration published");
-                        eb.publish(configurationAddress, config);
-                    } else {
-                        LOGGER.error("file config provider: invalid configuration");
-                    }
-                });
+        retriever.getConfig(ar -> {
+            if (ar.succeeded()) {
+                LOGGER.info("configuration retrieved");
+                final JsonObject config = ar.result();
+                this.validateAndPublish(config, configurationAddress);
             } else {
-                LOGGER.error("file config provider: cannot retrieve configuration");
+                LOGGER.error("cannot retrieve configuration");
             }
         });
+        if (this.watch) {
+            retriever.listen(ar -> {
+                JsonObject config = ar.getNewConfiguration();
+                this.validateAndPublish(config, configurationAddress);
+            });
+        }
     }
 
     private ConfigRetrieverOptions getOptions() {
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
+        if (this.watch) {
+            LOGGER.info("settting scan period to '{}'", this.scanPeriodMs);
+            options.setScanPeriod(this.scanPeriodMs);
+        }
         if (this.filename != null && this.filename.length() != 0) {
-            LOGGER.info("file config provider: reading file '{}'", this.filename);
+            LOGGER.info("reading file '{}'", this.filename);
 
             final File file = new File(this.filename);
             ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("json")
@@ -73,7 +80,7 @@ public class FileConfigProvider implements Provider {
         }
 
         if (this.directory != null && this.directory.length() != 0) {
-            LOGGER.info("file config provider: reading directory '{}'", this.directory);
+            LOGGER.info("reading directory '{}'", this.directory);
 
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("directory")
                     .setConfig(new JsonObject().put("path", this.directory).put("filesets",
@@ -82,7 +89,18 @@ public class FileConfigProvider implements Provider {
             return options.addStore(dirStore);
         }
 
-        LOGGER.error("file config provider: neither filename or directory defined");
+        LOGGER.error("neither filename or directory defined");
         return options;
+    }
+
+    private void validateAndPublish(JsonObject config, String configurationAddress) {
+        DynamicConfiguration.validate(vertx, config).onComplete(validateAr -> {
+            if (validateAr.succeeded()) {
+                LOGGER.info("configuration published");
+                eb.publish(configurationAddress, config);
+            } else {
+                LOGGER.error("invalid configuration");
+            }
+        });
     }
 }

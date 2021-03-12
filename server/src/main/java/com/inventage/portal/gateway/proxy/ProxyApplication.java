@@ -8,6 +8,9 @@ import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.core.provider.docker.DockerContainerProvider;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
  * read from the "routers" configuration key.
  */
 public class ProxyApplication implements Application {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
     public static final String ROUTERS = "routers";
     public static final String ROUTER_NAME = "name";
@@ -148,7 +153,6 @@ public class ProxyApplication implements Application {
 
             JsonObject serviceConfig = new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
                     .put("serverHost", hostPort[0]).put("serverPort", Integer.parseInt(hostPort[1]));
-            System.out.println(serviceConfig);
 
             Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(routerConfig);
             Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);
@@ -174,12 +178,10 @@ public class ProxyApplication implements Application {
                             Router r = ((Router) newRouterConfig.getValue("router"));
                             this.router.mountSubRouter(path, r);
                         }
-                        System.out.println("Router updated");
-                        System.out.println(this.router.getRoutes().toString());
                         // TODO undeploy the old proxyVerticles
+                        LOGGER.info("Router updated");
                     } else {
-                        System.out.println("Router update failed");
-                        System.out.println(ar.cause());
+                        LOGGER.error("Router update failed '{}'", ar.cause());
                     }
                 });
     }
