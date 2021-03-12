@@ -23,7 +23,7 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 public class DockerContainerProvider implements Provider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
     private static final String announceAddress = "docker-container-announce";
-    private static final String defaultTempateRule = "Host(`${name}`)";
+    private static final String defaultTempateRule = "Host('${name}')";
 
     private Vertx vertx;
     private EventBus eb;

@@ -78,6 +78,7 @@ public class ProxyApplication implements Application {
         String announceAddress = "service-announce";
 
         // TODO configure this according to the static configuration
+        // TODO merge configs of all providers
         DockerContainerProvider dockerprovider = new DockerContainerProvider(vertx);
         dockerprovider.provide(announceAddress);
 
