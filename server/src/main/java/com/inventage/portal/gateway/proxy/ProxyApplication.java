@@ -3,22 +3,22 @@ package com.inventage.portal.gateway.proxy;
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
+import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-import com.inventage.portal.gateway.core.provider.docker.DockerContainerServiceImporter;
+import com.inventage.portal.gateway.core.provider.docker.DockerContainerProvider;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Application for the proxy feature of the portal gateway. The routers will be
@@ -62,10 +62,6 @@ public class ProxyApplication implements Application {
      */
     private final Router router;
 
-    private Set<String> proxyNames = new HashSet<>();
-
-    private Map<String, String> deployedServices = new HashMap<>();
-
     public ProxyApplication(String name, String entrypoint, JsonObject globalConfig, Vertx vertx) {
         this.name = name;
         this.entrypoint = entrypoint;
@@ -80,77 +76,16 @@ public class ProxyApplication implements Application {
     @Override
     public Future<?> deployOn(Vertx vertx) {
         String announceAddress = "service-announce";
-        String endpoint = "unix:///var/run/docker.sock";
-        ServiceDiscovery dockerDiscovery = ServiceDiscovery.create(vertx,
-                new ServiceDiscoveryOptions().setAnnounceAddress(announceAddress).setName("docker-discovery"));
-        dockerDiscovery.registerServiceImporter(new DockerContainerServiceImporter(),
-                new JsonObject().put("docker-tls-verify", false).put("docker-host", endpoint));
+
+        // TODO configure this according to the static configuration
+        DockerContainerProvider dockerprovider = new DockerContainerProvider(vertx);
+        dockerprovider.provide(announceAddress);
 
         EventBus eb = vertx.eventBus();
         MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
         announceConsumer.handler(service -> {
-            // TODO send object instead
-            // https://vertx.io/docs/vertx-core/java/#_message_codecs
-            JsonObject record = service.body();
-
-            String ID = record.getString("docker.id");
-            String name = record.getString("docker.name");
-
-            String pathPrefix = "/"; // TODO read from labels
-
-            String status = record.getString("status");
-            switch (status) {
-            case "UP":
-                JsonObject location = record.getJsonObject("location");
-                String host = location.getString("host");
-                int port = location.getInteger("port");
-
-                // TODO not happy with this
-                String provider = "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider";
-
-                // TODO everthing that comes from routerConfig should be removed
-                String publicHostname = globalConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                        PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
-                JsonObject routerConfig = new JsonObject().put("name", name).put("pathPrefix", pathPrefix)
-                        .put("service", ID);
-                JsonObject serviceConfig = new JsonObject().put("name", ID).put("provider", provider)
-                        .put("serverHost", host).put("serverPort", port);
-                Router proxyRouter = Router.router(vertx);
-                Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(routerConfig);
-                Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);
-
-                ProxyVerticle proxyVerticle = new ProxyVerticle(routerConfig, publicHostname,
-                        Entrypoint.entrypointConfigByName(entrypoint, globalConfig).getInteger(Entrypoint.PORT),
-                        middlewareConfiguration, serviceConfig, proxyRouter, oAuth2Configuration);
-
-                router.mountSubRouter(pathPrefix, proxyRouter);
-
-                vertx.deployVerticle(proxyVerticle, asyncResult -> {
-                    if (asyncResult.succeeded()) {
-                        String deploymentID = asyncResult.result();
-                        System.out.println("Deployed " + deploymentID);
-                        deployedServices.put(ID, deploymentID);
-                    } else {
-                        System.out.println("Deployment failed");
-                    }
-                });
-                break;
-            case "DOWN":
-                String deploymentID = deployedServices.get(ID);
-                unMountSubRouter(pathPrefix, router);
-                vertx.undeploy(deploymentID, asyncResult -> {
-                    if (asyncResult.succeeded()) {
-                        System.out.println("Undeployed " + deploymentID);
-                    } else {
-                        System.out.println("Undeploment failed " + deploymentID);
-                    }
-                });
-                deployedServices.remove(ID);
-                break;
-            default:
-                System.out.println("Unknown Status received " + status);
-                break;
-            }
+            JsonObject config = service.body();
+            updateRoutes(vertx, config);
         });
 
         // TODO: not really happy with this but how should it be solved?
@@ -173,9 +108,79 @@ public class ProxyApplication implements Application {
         return entrypoint;
     }
 
-    public void unMountSubRouter(String mountPoint, Router router) {
-        router.getRoutes().stream().filter(route -> route.getPath() != null && route.getPath().equals(mountPoint))
-                .forEach(route -> route.remove());
+    private void updateRoutes(Vertx vertx, JsonObject config) {
+        Router newRouter = Router.router(vertx);
+
+        System.out.println(config);
+        JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
+
+        JsonArray newRouterConfigs = new JsonArray();
+
+        // TODO why do we need different providers?
+        // maybe also change the name to something else like RequestHandlers, Connectors
+        String provider = "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider";
+        String publicHostname = globalConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+
+        List<ProxyVerticle> proxyVerticles = new ArrayList<>();
+
+        JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+        JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+
+        for (int i = 0; i < routers.size(); i++) {
+            JsonObject router = routers.getJsonObject(i);
+            String serviceName = router.getString(DynamicConfiguration.ROUTER_SERVICE);
+            JsonObject service = DynamicConfiguration.getObjByKeyWithValue(services, DynamicConfiguration.SERVICE_NAME,
+                    serviceName);
+
+            // TODO parse rule (https://github.com/Sallatik/predicate-parser)
+            String rule = router.getString(DynamicConfiguration.ROUTER_RULE);
+            String pathPrefix = rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
+
+            // TODO support multipe servers and solve this ugly host-port splitting
+            JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            String url = servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_URL);
+            String[] hostPort = url.split(":");
+
+            JsonObject routerConfig = new JsonObject().put("name", router.getString(DynamicConfiguration.ROUTER_NAME))
+                    .put(PATH_PREFIX, pathPrefix).put(SERVICE, serviceName);
+
+            JsonObject serviceConfig = new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
+                    .put("serverHost", hostPort[0]).put("serverPort", Integer.parseInt(hostPort[1]));
+            System.out.println(serviceConfig);
+
+            Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(routerConfig);
+            Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);
+
+            final Router proxyRouter = Router.router(vertx);
+
+            ProxyVerticle proxyVerticle = new ProxyVerticle(routerConfig, publicHostname,
+                    Entrypoint.entrypointConfigByName(entrypoint, globalConfig).getInteger(Entrypoint.PORT),
+                    middlewareConfiguration, serviceConfig, proxyRouter, oAuth2Configuration);
+            proxyVerticles.add(proxyVerticle);
+
+            newRouter.mountSubRouter(pathPrefix, proxyRouter);
+            newRouterConfigs.add(new JsonObject().put("path", pathPrefix).put("router", proxyRouter));
+        }
+
+        CompositeFuture.join(proxyVerticles.stream().map(proxyVerticle -> vertx.deployVerticle(proxyVerticle))
+                .collect(Collectors.toList())).onComplete(ar -> {
+                    if (ar.succeeded()) {
+                        this.router.clear();
+                        for (int i = 0; i < newRouterConfigs.size(); i++) {
+                            JsonObject newRouterConfig = newRouterConfigs.getJsonObject(i);
+                            String path = newRouterConfig.getString("path");
+                            Router r = ((Router) newRouterConfig.getValue("router"));
+                            this.router.mountSubRouter(path, r);
+                        }
+                        System.out.println("Router updated");
+                        System.out.println(this.router.getRoutes().toString());
+                        // TODO undeploy the old proxyVerticles
+                    } else {
+                        System.out.println("Router update failed");
+                        System.out.println(ar.cause());
+                    }
+                });
     }
 
     private Optional<JsonObject> middlewareConfig(JsonObject proxy) {
@@ -197,22 +202,5 @@ public class ProxyApplication implements Application {
         } else {
             return Optional.empty();
         }
-    }
-
-    private JsonObject serviceConfig(String name) {
-        final JsonArray configs = globalConfig.getJsonArray(SERVICES);
-        return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(service -> service.getString(SERVICE_NAME).equals(name)).findFirst().orElseThrow(() -> {
-                    throw new IllegalStateException(String.format("Service '%s' not found!", name));
-                });
-    }
-
-    private boolean checkUniqueness(JsonObject json) {
-        if (proxyNames.contains(json.getString(ROUTER_NAME))) {
-            throw new IllegalStateException(String.format("Name of proxy already used, but it must be unique '%s'",
-                    json.getString(ROUTER_NAME)));
-        }
-        proxyNames.add(json.getString(ROUTER_NAME));
-        return true;
     }
 }
