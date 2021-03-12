@@ -2,13 +2,13 @@ package com.inventage.portal.gateway.core.provider.docker;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.label.Parser;
 import com.inventage.portal.gateway.core.provider.Provider;
 
+import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 public class DockerContainerProvider implements Provider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
     private static final String announceAddress = "docker-container-announce";
-    private static final String defaultTempateRule = "Host(`{}`)";
+    private static final String defaultTempateRule = "Host(`${name}`)";
 
     private Vertx vertx;
     private EventBus eb;
@@ -59,10 +59,10 @@ public class DockerContainerProvider implements Provider {
 
             DynamicConfiguration.validate(vertx, config).onComplete(validateAr -> {
                 if (validateAr.succeeded()) {
-                    LOGGER.info("docker container provider: configuration published");
+                    LOGGER.info("configuration published");
                     eb.publish(configurationAddress, config);
                 } else {
-                    LOGGER.error("docker container provider: invalid configuration");
+                    LOGGER.error("invalid configuration");
                 }
 
                 if (!this.watch) {
@@ -83,15 +83,20 @@ public class DockerContainerProvider implements Provider {
     }
 
     private JsonObject buildConfiguration(JsonObject dockerContainer) {
-        JsonObject config = new JsonObject();
-
         // TODO I am not really convinced with using the Record type to un/publish
-        String status = dockerContainer.getString("status");
         JsonObject metadata = dockerContainer.getJsonObject("metadata");
 
         String serviceName = metadata.getString("portal.docker.serviceName");
         String containerId = metadata.getString("portal.docker.id");
         String containerName = serviceName + "-" + containerId;
+
+        String status = dockerContainer.getString("status");
+        if (status.equals("DOWN")) {
+            this.configurations.remove(containerName);
+            return DynamicConfiguration.merge(this.configurations);
+        } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
+            throw new IllegalArgumentException("unkown status type: " + status);
+        }
 
         JsonObject labels = metadata.getJsonObject("portal.docker.labels");
 
@@ -105,26 +110,28 @@ public class DockerContainerProvider implements Provider {
         if (httpConf.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
                 && httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
                 && httpConf.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
-            this.configurations.put(serviceName, confFromLabels);
-            // TODO return merged config
+            this.configurations.put(containerName, confFromLabels);
+            return confFromLabels;
         }
 
         this.buildServiceConfiguration(httpConf, serviceName, ip, port);
 
-        this.buildRouterConfiguration(httpConf, serviceName);
+        Map<String, String> model = new HashMap<String, String>();
+        model.put("name", serviceName);
 
-        System.out.println(confFromLabels);
+        this.buildRouterConfiguration(httpConf, serviceName, model);
+
+        this.configurations.put(containerName, confFromLabels);
 
         DynamicConfiguration.validate(vertx, confFromLabels).onComplete(ar -> {
             if (ar.succeeded()) {
-                LOGGER.debug("docker container provider: configuration from labels '{}'", confFromLabels);
+                LOGGER.debug("configuration from labels '{}'", confFromLabels);
             } else {
-                LOGGER.error("docker container provider: invalid configuration form container labels '{}': '{}'",
-                        serviceName, ar.cause());
+                LOGGER.error("invalid configuration form container labels '{}': '{}'", serviceName, ar.cause());
             }
         });
 
-        return config;
+        return DynamicConfiguration.merge(this.configurations);
     }
 
     private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String ip, String port) {
@@ -135,9 +142,8 @@ public class DockerContainerProvider implements Provider {
             services.add(fallbackService);
         }
 
-        List<JsonObject> servicesAsList = services.getList();
-        for (int i = 0; i < servicesAsList.size(); i++) {
-            JsonObject service = servicesAsList.get(i);
+        for (int i = 0; i < services.size(); i++) {
+            JsonObject service = services.getJsonObject(i);
             this.addServer(service, ip, port);
         }
     }
@@ -163,7 +169,7 @@ public class DockerContainerProvider implements Provider {
         servers.getJsonObject(0).put(DynamicConfiguration.SERVICE_SERVER_URL, url);
     }
 
-    private void buildRouterConfiguration(JsonObject httpConf, String serviceName) {
+    private void buildRouterConfiguration(JsonObject httpConf, String serviceName, Map<String, String> model) {
         JsonArray routers = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (routers.size() == 0) {
@@ -174,7 +180,27 @@ public class DockerContainerProvider implements Provider {
             }
         }
 
-        // TODO finish building router config
+        for (int i = 0; i < routers.size(); i++) {
+            JsonObject router = routers.getJsonObject(i);
+            if (!router.containsKey("rule")) {
+                StringSubstitutor sub = new StringSubstitutor(model);
+                String resolvedRule = sub.replace(this.defaultRule);
+                if (resolvedRule.length() == 0) {
+                    throw new IllegalArgumentException("Undefined rule");
+                }
+                router.put(DynamicConfiguration.ROUTER_RULE, resolvedRule);
+            }
 
+            if (!router.containsKey(DynamicConfiguration.ROUTER_SERVICE)) {
+                if (services.size() > 1) {
+                    throw new IllegalArgumentException(
+                            "Could not define the service name for the router: too many services");
+                }
+                for (int j = 0; j < services.size(); j++) {
+                    router.put(DynamicConfiguration.ROUTER_SERVICE,
+                            services.getJsonObject(j).getString(DynamicConfiguration.SERVICE_NAME));
+                }
+            }
+        }
     }
 }

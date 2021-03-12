@@ -35,7 +35,7 @@ public class Parser {
             return null;
         }
 
-        JsonObject node = buildDefaultConfiguration();
+        JsonObject node = DynamicConfiguration.buildDefaultConfiguration();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String key = sortedKeys.get(i);
 
@@ -80,7 +80,7 @@ public class Parser {
         if (path.size() > 1) {
             if (CONTAINS_CUSTOM_NAMES.contains(key)) {
                 JsonArray children = root.getJsonArray(key);
-                JsonObject child = getObjByKeyWithValue(children, getName(key), path.get(1));
+                JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key), path.get(1));
                 if (child != null) {
                     decodeToJson(child, path.subList(2, path.size()), value);
                 } else {
@@ -121,20 +121,6 @@ public class Parser {
         }
     }
 
-    private static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
-        if (jsonArr == null) {
-            return null;
-        }
-        int size = jsonArr.size();
-        for (int i = 0; i < size; i++) {
-            JsonObject obj = jsonArr.getJsonObject(i);
-            if (obj.containsKey(key) && obj.getString(key).equals(value)) {
-                return obj;
-            }
-        }
-        return null;
-    }
-
     private static String getName(String key) {
         switch (key) {
         case ROUTERS:
@@ -168,19 +154,5 @@ public class Parser {
         }
         Collections.sort(sortedKeys);
         return sortedKeys;
-    }
-
-    private static JsonObject buildDefaultConfiguration() {
-        JsonObject config = new JsonObject();
-
-        JsonObject http = new JsonObject();
-
-        http.put(DynamicConfiguration.ROUTERS, new JsonArray());
-        http.put(DynamicConfiguration.MIDDLEWARES, new JsonArray());
-        http.put(DynamicConfiguration.SERVICES, new JsonArray());
-
-        config.put(DynamicConfiguration.HTTP, http);
-
-        return config;
     }
 }
