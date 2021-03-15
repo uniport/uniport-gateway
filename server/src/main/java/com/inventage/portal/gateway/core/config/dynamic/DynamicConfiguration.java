@@ -37,7 +37,9 @@ public class DynamicConfiguration {
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
-    public static final String SERVICE_SERVER_URL = "url";
+    public static final String SERVICE_SERVER_HOST = "host";
+    public static final String SERVICE_SERVER_PORT = "port";
+
 
     private static Schema schema;
 
@@ -54,9 +56,11 @@ public class DynamicConfiguration {
                         .requiredProperty(MIDDLEWARE_TYPE, Schemas.objectSchema());
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
-                .requiredProperty(SERVICE_NAME, Schemas.stringSchema()).requiredProperty(
-                        SERVICE_SERVERS, Schemas.arraySchema().items(Schemas.objectSchema()
-                                .requiredProperty(SERVICE_SERVER_URL, Schemas.stringSchema())));
+                .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
+                .requiredProperty(SERVICE_SERVERS,
+                        Schemas.arraySchema().items(Schemas.objectSchema()
+                                .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
+                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.stringSchema())));
 
         ObjectSchemaBuilder httpSchema =
                 Schemas.objectSchema().property(ROUTERS, Schemas.arraySchema().items(routerSchema))
@@ -244,19 +248,26 @@ public class DynamicConfiguration {
                 existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         for (int i = 0; i < existingServers.size(); i++) {
             JsonObject server = existingServers.getJsonObject(i);
-            uniqueServers.put(server.getString(DynamicConfiguration.SERVICE_SERVER_URL), server);
+            String url = createURL(server.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
+                    server.getString(DynamicConfiguration.SERVICE_SERVER_PORT));
+            uniqueServers.put(url, server);
         }
 
         JsonArray serversToAdd = serviceToAdd.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         for (int i = 0; i < serversToAdd.size(); i++) {
             JsonObject serverToAdd = serversToAdd.getJsonObject(i);
-            String url = serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_URL);
+            String url = createURL(serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
+                    serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_PORT));
             if (!uniqueServers.containsKey(url)) {
                 existingServers.add(serverToAdd);
             }
         }
 
         return true;
+    }
+
+    private static String createURL(String host, String port) {
+        return String.format("%s:%s", host, port);
     }
 
     private static Boolean addMiddleware(JsonObject httpConf, String middlewareName,

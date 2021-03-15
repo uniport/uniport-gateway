@@ -156,19 +156,20 @@ public class ProxyApplication implements Application {
             String pathPrefix =
                     rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
 
-            // TODO support multipe servers and solve this ugly host-port splitting
+            // TODO support multipe servers
             JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-            String url =
-                    servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_URL);
-            String[] hostPort = url.split(":");
+            String host =
+                    servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_HOST);
+            String port =
+                    servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_PORT);
 
             JsonObject routerConfig = new JsonObject()
                     .put(ROUTER_NAME, router.getString(DynamicConfiguration.ROUTER_NAME))
                     .put(PATH_PREFIX, pathPrefix).put(SERVICE, serviceName);
 
-            JsonObject serviceConfig = new JsonObject().put(SERVICE_NAME, serviceName)
-                    .put(PROVIDER, provider).put("serverHost", hostPort[0])
-                    .put("serverPort", Integer.parseInt(hostPort[1]));
+            JsonObject serviceConfig =
+                    new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
+                            .put("serverHost", host).put("serverPort", Integer.parseInt(port));
 
             Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(routerConfig);
             Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);

@@ -112,7 +112,7 @@ public class DockerContainerProvider extends AbstractProvider {
 
         JsonObject labels = metadata.getJsonObject("portal.docker.labels");
 
-        String ip = metadata.getString("portal.docker.ip");
+        String host = metadata.getString("portal.docker.ip");
         String port = metadata.getString("portal.docker.port");
 
         JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
@@ -126,7 +126,7 @@ public class DockerContainerProvider extends AbstractProvider {
             return DynamicConfiguration.merge(this.configurations);
         }
 
-        this.buildServiceConfiguration(httpConf, serviceName, ip, port);
+        this.buildServiceConfiguration(httpConf, serviceName, host, port);
 
         Map<String, String> model = new HashMap<String, String>();
         model.put("name", serviceName);
@@ -147,7 +147,7 @@ public class DockerContainerProvider extends AbstractProvider {
         return DynamicConfiguration.merge(this.configurations);
     }
 
-    private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String ip,
+    private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String host,
             String port) {
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
@@ -159,14 +159,14 @@ public class DockerContainerProvider extends AbstractProvider {
 
         for (int i = 0; i < services.size(); i++) {
             JsonObject service = services.getJsonObject(i);
-            this.addServer(service, ip, port);
+            this.addServer(service, host, port);
         }
     }
 
     // there is at most one docker container per service
     // since docker does not provide a out of the book load balancer
     // newer containers overwrite the old one
-    private void addServer(JsonObject service, String ip, String port) {
+    private void addServer(JsonObject service, String host, String port) {
         if (service == null) {
             throw new IllegalArgumentException("service is not defined");
         }
@@ -180,8 +180,9 @@ public class DockerContainerProvider extends AbstractProvider {
             servers.add(new JsonObject());
         }
 
-        String url = ip + ":" + port;
-        servers.getJsonObject(0).put(DynamicConfiguration.SERVICE_SERVER_URL, url);
+        JsonObject server = servers.getJsonObject(0);
+        server.put(DynamicConfiguration.SERVICE_SERVER_HOST, host);
+        server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
     }
 
     private void buildRouterConfiguration(JsonObject httpConf, String serviceName,
