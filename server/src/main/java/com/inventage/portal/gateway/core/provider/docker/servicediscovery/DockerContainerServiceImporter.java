@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.provider.docker;
+package com.inventage.portal.gateway.core.provider.docker.servicediscovery;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;

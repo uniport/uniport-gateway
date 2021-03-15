@@ -7,6 +7,7 @@ import java.util.Map;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.label.Parser;
 import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.docker.servicediscovery.DockerContainerServiceImporter;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
