@@ -1,192 +1,31 @@
 {
   "entrypoints": [
     {
-      "name": "http20000",
-      "port": 20000
+      "name": "http8000",
+      "port": 8000
     }
   ],
   "applications": [
     {
       "name": "proxy",
-      "entrypoint": "http20000",
+      "entrypoint": "http8000",
       "requestSelector": {
         "urlPrefix": "/"
       },
       "provider": "ProxyApplication"
     }
   ],
-
-  "proxies": [
+  "providers": [
     {
-      "name": "auth",
-      "pathPrefix": "/auth",
-      "middleware": {
-        "headers": [ { "provider": "ForwardedHostHeader" } ]
-      },
-      "service": "portal-iam"
-    },
-
-    {
-      "name": "navigation-service",
-      "pathPrefix": "/navigation/service",
-      "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
-      },
-      "service": "navigation-service"
+      "name": "file",
+      "filename": "file-config.json",
+      "directory": "",
+      "watch": false
     },
     {
-      "name": "navigation-frontend",
-      "pathPrefix": "/navigation",
-      "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
-        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/navigation/", "replacement": "/"} ]
-      },
-      "service": "navigation-frontend"
-    },
-
-    {
-      "name": "dashboard-login-redirect",
-      "pathPrefix": "/dashboard/login",
-      "oauth2": {
-        "clientId": "Dashboard",
-        "clientSecret": "Dashboard!",
-        "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
-      },
-      "sessionScope": "dashboard",
-      "service": "dashboard-default"
-    },
-    {
-      "name": "dashboard-service",
-      "pathPrefix": "/dashboard/service",
-      "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ]
-      },
-      "sessionScope": "dashboard",
-      "service": "dashboard-service"
-    },
-    {
-      "name": "dashboard-frontend",
-      "pathPrefix": "/dashboard/",
-      "middleware": {
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
-        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/dashboard/", "replacement": "/"} ]
-      },
-      "sessionScope": "dashboard",
-      "service": "dashboard-frontend"
-    },
-    {
-      "name": "dashboard-default",
-      "pathPrefix": "/dashboard",
-      "sessionScope": "dashboard",
-      "service": "dashboard-default"
-    },
-
-    {
-      "name": "organisation",
-      "pathPrefix": "/organisation/",
-      "service": "organisation-service",
-      "oauth2": {
-        "clientId": "Organisation",
-        "clientSecret": "Organisation!",
-        "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
-      },
-      "middleware": {
-        "redirects": [],
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
-        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/organisation/", "replacement": "/" } ]
-      }
-    },
-    {
-      "name": "organisation-default",
-      "pathPrefix": "/organisation",
-      "sessionScope": "organisation",
-      "service": "organisation-default"
-    },
-
-    {
-      "name": "document",
-      "pathPrefix": "/document/",
-      "service": "document-service",
-      "middleware": {
-        "redirects": [],
-        "headers": [ { "provider": "AuthorizationBearerHeader" }, { "provider": "ForwardedHostHeader" } ],
-        "uris": [ { "provider":  "ReplacePathByRegex", "regex": "^/document/", "replacement": "/" } ]
-      }
-    },
-    {
-      "name": "document-default",
-      "pathPrefix": "/document",
-      "sessionScope": "document",
-      "service": "document-default"
-    },
-
-    {
-      "name": "root",
-      "pathPrefix": "/",
-      "service": "dashboard-default"
-    }
-  ],
-  "services": [
-    {
-      "name": "portal-iam",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${portal-iam.host}",
-      "serverPort": 8080
-    },
-
-    {
-      "name": "navigation-frontend",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${navigation-frontend.host}",
-      "serverPort": 20015
-    },
-    {
-      "name": "navigation-service",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${navigation-service.host}",
-      "serverPort": 20012
-    },
-
-    {
-      "name": "dashboard-default",
-      "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
-      "destination": "/dashboard/"
-    },
-    {
-      "name": "dashboard-frontend",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${dashboard-frontend.host}",
-      "serverPort": 20025
-    },
-    {
-      "name": "dashboard-service",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${dashboard-service.host}",
-      "serverPort": 20022
-    },
-
-    {
-      "name": "organisation-service",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${organisation-service.host}",
-      "serverPort": 20030
-    },
-    {
-      "name": "organisation-default",
-      "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
-      "destination": "/organisation/"
-    },
-
-    {
-      "name": "document-service",
-      "provider": "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider",
-      "serverHost": "${document-service.host}",
-      "serverPort": 20050
-    },
-    {
-      "name": "document-default",
-      "provider": "com.inventage.portal.gateway.proxy.service.RedirectServiceProvider",
-      "destination": "/document/"
+      "name": "docker",
+      "endpoint": "unix:///var/run/docker.sock",
+      "watch": true
     }
   ]
 }
