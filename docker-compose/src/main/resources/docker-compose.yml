@@ -2,7 +2,7 @@ version: '3'
 
 services:
   portal-gateway:
-    image: ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:latest
+    image: ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:${project.version}
     networks:
       - portal-proxy
     ports:
