@@ -13,14 +13,14 @@ Die oben aufgeführte Reihenfolge definiert wie die Werte ausgewertet werden (ei
 Die Konfigurationsdatei wird von einem der folgenden Orten gelesen:
 
 - `/etc/portal-gateway/`
-- `~/.config/`  
+- `~/.config/`
 - `.` (aktuelles Verzeichnis)
 - definiert durch das CLI Argument `--configFile`
 
 ## Debugging
 
 - io.vertx.ext.web.handler.impl.AuthenticationHandlerImpl
-    - handle
+  - handle
 - io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl
-    - parseCredentials
-    - setupCallback: im Callback wird der OAuth2 Code bei Keycloak gegen ein Token ausgetauschen und dann im RoutingContext als User gesetzt (OAuth2AuthHandlerImpl.java:335).
+  - parseCredentials
+  - setupCallback: im Callback wird der OAuth2 Code bei Keycloak gegen ein Token ausgetauschen und dann im RoutingContext als User gesetzt (OAuth2AuthHandlerImpl.java:335).
