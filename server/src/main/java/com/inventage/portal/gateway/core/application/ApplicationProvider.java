@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
- * Service interface for providing applications. Implementations must add an
- * entry with the fully qualified class name into
+ * Service interface for providing applications. Implementations must add an entry with the fully
+ * qualified class name into
  * META-INF/services/com.inventage.portal.gateway.core.application.ApplicationProvider
  * 
  * TODO I think we should rename this to ApplicationFactory or similar
@@ -30,8 +30,7 @@ public interface ApplicationProvider {
      *
      * @param applicationConfig extract of the config for this application
      * @param globalConfig      complete config
-     * @param vertx             running instance by which an application can get
-     *                          their router
+     * @param vertx             running instance by which an application can get their router
      * @return new application instance
      */
     Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx);
@@ -39,13 +38,14 @@ public interface ApplicationProvider {
     class Loader {
         public static ApplicationProvider getProvider(String providerId) {
             LOGGER.debug("getProvider: for '{}'", providerId);
-            final Optional<ApplicationProvider> provider = ServiceLoader.load(ApplicationProvider.class).stream()
-                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerId))
-                    .findFirst();
+            final Optional<ApplicationProvider> provider = ServiceLoader
+                    .load(ApplicationProvider.class).stream().map(ServiceLoader.Provider::get)
+                    .filter(instance -> instance.provides().equals(providerId)).findFirst();
             if (provider.isPresent()) {
                 return provider.get();
             } else {
-                throw new IllegalStateException(String.format("Application provider '%s' doesn't exist!", providerId));
+                throw new IllegalStateException(
+                        String.format("Application provider '%s' doesn't exist!", providerId));
             }
         }
     }

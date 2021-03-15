@@ -23,7 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class DockerContainerServiceImporter implements ServiceImporter {
-    private final static Logger LOGGER = LoggerFactory.getLogger(DockerContainerServiceImporter.class);
+    private final static Logger LOGGER =
+            LoggerFactory.getLogger(DockerContainerServiceImporter.class);
 
     private long timer;
     private DockerClient client;
@@ -44,10 +45,12 @@ public class DockerContainerServiceImporter implements ServiceImporter {
      * @param completion    future to assign with completion status
      */
     @Override
-    public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
+    public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
+            Promise<Void> completion) {
         this.publisher = publisher;
         this.vertx = vertx;
-        DefaultDockerClientConfig.Builder builder = DefaultDockerClientConfig.createDefaultConfigBuilder();
+        DefaultDockerClientConfig.Builder builder =
+                DefaultDockerClientConfig.createDefaultConfigBuilder();
         String dockerCertPath = configuration.getString("docker-cert-path");
         String dockerCfgPath = configuration.getString("docker-cfg-path");
         String email = configuration.getString("docker-registry-email");
@@ -55,7 +58,8 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         String username = configuration.getString("docker-registry-username");
         String host = configuration.getString("docker-host");
         boolean tlsVerify = configuration.getBoolean("docker-tls-verify", true);
-        String registry = configuration.getString("docker-registry-url", "https://index.docker.io/v1/");
+        String registry =
+                configuration.getString("docker-registry-url", "https://index.docker.io/v1/");
         String version = configuration.getString("version");
 
         if (dockerCertPath != null) {
@@ -108,8 +112,8 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     synchronized void scan(Promise<Void> completion) {
         vertx.<List<Container>>executeBlocking(future -> {
             try {
-                future.complete(
-                        client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
+                future.complete(client.listContainersCmd()
+                        .withStatusFilter(Collections.singletonList("running")).exec());
             } catch (Exception e) {
                 future.fail(e);
             }
@@ -127,10 +131,11 @@ public class DockerContainerServiceImporter implements ServiceImporter {
             List<DockerContainerService> toRemove = new ArrayList<>();
 
             // Detect lost containers
-            services.stream().filter(service -> isNotRunning(service.id(), running)).forEach(service -> {
-                unpublish(service);
-                toRemove.add(service);
-            });
+            services.stream().filter(service -> isNotRunning(service.id(), running))
+                    .forEach(service -> {
+                        unpublish(service);
+                        toRemove.add(service);
+                    });
             services.removeAll(toRemove);
 
             if (running != null) {
@@ -153,8 +158,8 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         publisher.publish(record, ar -> {
             if (ar.succeeded()) {
                 record.setRegistration(ar.result().getRegistration());
-                LOGGER.info(
-                        "Container " + service.id() + " on location " + record.getLocation() + " has been published");
+                LOGGER.info("Container " + service.id() + " on location " + record.getLocation()
+                        + " has been published");
             } else {
                 LOGGER.error("Container " + service.id() + " on location " + record.getLocation()
                         + " could not have been published", ar.cause());
@@ -165,8 +170,8 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     private void unpublish(DockerContainerService service) {
         Record record = service.record();
         publisher.unpublish(record.getRegistration(), ar -> {
-            LOGGER.info("Service from container " + service.id() + " on location " + record.getLocation()
-                    + " has been unpublished");
+            LOGGER.info("Service from container " + service.id() + " on location "
+                    + record.getLocation() + " has been unpublished");
         });
     }
 

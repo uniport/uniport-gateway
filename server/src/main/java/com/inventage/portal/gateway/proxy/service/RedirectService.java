@@ -5,8 +5,8 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Service for returning redirects responses to the browser.
- * Such a service can easily be used for redirecting to a default URL.
+ * Service for returning redirects responses to the browser. Such a service can easily be used for
+ * redirecting to a default URL.
  */
 public class RedirectService implements Service {
 
@@ -19,6 +19,7 @@ public class RedirectService implements Service {
     @Override
     public void handle(HttpServerRequest request) {
         request.headers();
-        request.response().setStatusCode(HttpResponseStatus.FOUND.code()).putHeader("Location", serviceConfig.getString("destination")).end();
+        request.response().setStatusCode(HttpResponseStatus.FOUND.code())
+                .putHeader("Location", serviceConfig.getString("destination")).end();
     }
 }

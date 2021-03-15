@@ -12,7 +12,8 @@ public class AuthorizationBearerHeaderProvider implements RequestHeaderMiddlewar
     }
 
     @Override
-    public RequestHeaderMiddleware<RoutingContext, MultiMap> create(JsonObject headerMiddlewareConfig) {
+    public RequestHeaderMiddleware<RoutingContext, MultiMap> create(
+            JsonObject headerMiddlewareConfig) {
         return new AuthorizationBearerHeader();
     }
 }

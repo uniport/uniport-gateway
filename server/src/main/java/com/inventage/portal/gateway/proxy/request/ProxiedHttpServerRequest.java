@@ -1,17 +1,15 @@
 /*
  * Copyright 2014 Red Hat, Inc.
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  and Apache License v2.0 which accompanies this distribution.
+ * All rights reserved. This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 and Apache License v2.0 which accompanies this
+ * distribution.
  *
- *  The Eclipse Public License is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
  *
- *  The Apache License v2.0 is available at
- *  http://www.opensource.org/licenses/apache2.0.php
+ * The Apache License v2.0 is available at http://www.opensource.org/licenses/apache2.0.php
  *
- *  You may elect to redistribute this code under either of these licenses.
+ * You may elect to redistribute this code under either of these licenses.
  */
 
 // This code was copied from the io.vertx.ext.web.impl.HttpServerRequestWrapper
@@ -42,8 +40,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Subclass of HttpServerRequest which can be manipulated by various middleware functions.
- * See setXYZMiddleware() methods for manipulation possibilities.
+ * Subclass of HttpServerRequest which can be manipulated by various middleware functions. See
+ * setXYZMiddleware() methods for manipulation possibilities.
  */
 public class ProxiedHttpServerRequest implements HttpServerRequest {
 
@@ -272,8 +270,8 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
     public void toWebSocket(Handler<AsyncResult<ServerWebSocket>> handler) {
         delegate.toWebSocket(toWebSocket -> {
             if (toWebSocket.succeeded()) {
-                handler.handle(Future.succeededFuture(
-                        new ServerWebSocketWrapper(toWebSocket.result(), host(), scheme(), isSSL(), remoteAddress())));
+                handler.handle(Future.succeededFuture(new ServerWebSocketWrapper(
+                        toWebSocket.result(), host(), scheme(), isSSL(), remoteAddress())));
             } else {
                 handler.handle(toWebSocket);
             }
@@ -282,8 +280,8 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public Future<ServerWebSocket> toWebSocket() {
-        return delegate.toWebSocket()
-                .map(ws -> new ServerWebSocketWrapper(ws, host(), scheme(), isSSL(), remoteAddress()));
+        return delegate.toWebSocket().map(
+                ws -> new ServerWebSocketWrapper(ws, host(), scheme(), isSSL(), remoteAddress()));
     }
 
     @Override

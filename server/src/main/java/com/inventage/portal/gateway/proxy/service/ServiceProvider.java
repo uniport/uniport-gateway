@@ -21,15 +21,14 @@ public interface ServiceProvider {
     class Loader {
         public static ServiceProvider getProvider(String providerId) {
             LOGGER.debug("getProvider: for '{}'", providerId);
-            final Optional<ServiceProvider> provider = ServiceLoader.load(ServiceProvider.class).stream()
-                    .map(ServiceLoader.Provider::get)
-                    .filter(instance -> instance.provides().equals(providerId))
-                    .findFirst();
+            final Optional<ServiceProvider> provider = ServiceLoader.load(ServiceProvider.class)
+                    .stream().map(ServiceLoader.Provider::get)
+                    .filter(instance -> instance.provides().equals(providerId)).findFirst();
             if (provider.isPresent()) {
                 return provider.get();
-            }
-            else {
-                throw new IllegalStateException(String.format("Service provider '%s' doesn't exist!", providerId));
+            } else {
+                throw new IllegalStateException(
+                        String.format("Service provider '%s' doesn't exist!", providerId));
             }
         }
     }

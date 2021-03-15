@@ -12,7 +12,8 @@ public class ForwardedHostHeaderProvider implements RequestHeaderMiddlewareProvi
     }
 
     @Override
-    public RequestHeaderMiddleware<RoutingContext, MultiMap> create(JsonObject headerMiddlewareConfig) {
+    public RequestHeaderMiddleware<RoutingContext, MultiMap> create(
+            JsonObject headerMiddlewareConfig) {
         return new ForwardedHostHeader();
     }
 }

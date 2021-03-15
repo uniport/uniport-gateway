@@ -25,7 +25,8 @@ public interface Application {
 
     /**
      * @return router which will be mounted by the global router for receiving requests
-     * @see ApplicationProvider#create(io.vertx.core.json.JsonObject, io.vertx.core.json.JsonObject, io.vertx.core.Vertx)
+     * @see ApplicationProvider#create(io.vertx.core.json.JsonObject, io.vertx.core.json.JsonObject,
+     *      io.vertx.core.Vertx)
      */
     Optional<Router> router();
 

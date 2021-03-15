@@ -12,7 +12,8 @@ public class TestHeaderProvider implements RequestHeaderMiddlewareProvider {
     }
 
     @Override
-    public RequestHeaderMiddleware<RoutingContext, MultiMap> create(JsonObject headerMiddlewareConfig) {
+    public RequestHeaderMiddleware<RoutingContext, MultiMap> create(
+            JsonObject headerMiddlewareConfig) {
         return new TestHeader();
     }
 }

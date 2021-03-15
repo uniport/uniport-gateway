@@ -16,7 +16,8 @@ import java.util.Map;
 
 public class DockerContainerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerService.class.getName());
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(DockerContainerService.class.getName());
 
     private static final String labelDockerComposeProject = "com.docker.compose.project";
     private static final String labelDockerComposeService = "com.docker.compose.service";
@@ -65,8 +66,10 @@ public class DockerContainerService {
         String serviceName = defaultServiceName;
 
         Map<String, String> labels = container.getLabels();
-        if (labels.containsKey(labelDockerComposeProject) && labels.containsKey(labelDockerComposeService)) {
-            this.serviceName = labels.get(labelDockerComposeProject) + "_" + labels.get(labelDockerComposeService);
+        if (labels.containsKey(labelDockerComposeProject)
+                && labels.containsKey(labelDockerComposeService)) {
+            this.serviceName = labels.get(labelDockerComposeProject) + "_"
+                    + labels.get(labelDockerComposeService);
         }
         return serviceName;
     }
@@ -97,19 +100,19 @@ public class DockerContainerService {
         }
 
         switch (type) {
-        case HttpEndpoint.TYPE:
-            HttpLocation httpLocation = new HttpLocation();
-            httpLocation.setHost(this.ip);
-            httpLocation.setPort(this.port);
-            httpLocation.setSsl(this.port == 443);
-            record.setLocation(httpLocation.toJson()).setType(type);
-            break;
-        default:
-            JsonObject location = new JsonObject();
-            location.put("ip", this.ip);
-            location.put("port", this.port);
-            record.setLocation(location).setType(type);
-            break;
+            case HttpEndpoint.TYPE:
+                HttpLocation httpLocation = new HttpLocation();
+                httpLocation.setHost(this.ip);
+                httpLocation.setPort(this.port);
+                httpLocation.setSsl(this.port == 443);
+                record.setLocation(httpLocation.toJson()).setType(type);
+                break;
+            default:
+                JsonObject location = new JsonObject();
+                location.put("ip", this.ip);
+                location.put("port", this.port);
+                record.setLocation(location).setType(type);
+                break;
         }
 
         return record;
@@ -122,8 +125,8 @@ public class DockerContainerService {
         }
 
         if (ports.length > 1) {
-            LOGGER.warn("More than one ports has been found for " + record.getName() + " - taking the "
-                    + "first one to build the record location");
+            LOGGER.warn("More than one ports has been found for " + record.getName()
+                    + " - taking the " + "first one to build the record location");
         }
 
         ContainerPort port = ports[0];
@@ -166,7 +169,8 @@ public class DockerContainerService {
                 if (network != null) {
                     return network.getIpAddress();
                 }
-                LOGGER.warn("Could not find network named " + networkMode + " for container " + container.getId()
+                LOGGER.warn("Could not find network named " + networkMode + " for container "
+                        + container.getId()
                         + "! Maybe you're missing the project's prefix in the label? Defaulting to first available network.");
             }
         }
@@ -186,14 +190,14 @@ public class DockerContainerService {
         ContainerPort[] ports = container.getPorts();
         if (ports != null && ports.length != 0) {
             if (ports.length > 1) {
-                LOGGER.warn("More than one ports has been found for " + container.getId() + " - taking the "
-                        + "first one to build the record location");
+                LOGGER.warn("More than one ports has been found for " + container.getId()
+                        + " - taking the " + "first one to build the record location");
             }
             ContainerPort port = ports[0];
             return port.getPrivatePort();
         } else {
-            throw new IllegalStateException(
-                    "Cannot extract the HTTP URL from the container " + container.getNames() + " - no port");
+            throw new IllegalStateException("Cannot extract the HTTP URL from the container "
+                    + container.getNames() + " - no port");
         }
     }
 }

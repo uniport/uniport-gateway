@@ -25,8 +25,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Application for the proxy feature of the portal gateway. The routers will be
- * read from the "routers" configuration key.
+ * Application for the proxy feature of the portal gateway. The routers will be read from the
+ * "routers" configuration key.
  */
 public class ProxyApplication implements Application {
 
@@ -88,7 +88,8 @@ public class ProxyApplication implements Application {
             }
             String announceAddress = "service-announce";
 
-            ProviderAggregator aggregator = new ProviderAggregator(vertx, announceAddress, staticConfig);
+            ProviderAggregator aggregator =
+                    new ProviderAggregator(vertx, announceAddress, staticConfig);
             vertx.deployVerticle(aggregator);
 
             EventBus eb = vertx.eventBus();
@@ -125,14 +126,16 @@ public class ProxyApplication implements Application {
         Router newRouter = Router.router(vertx);
 
         JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
+        System.out.println(httpConfig);
 
         JsonArray newRouterConfigs = new JsonArray();
 
         // TODO why do we need different providers?
         // maybe also change the name to something else like RequestHandlers, Connectors
         String provider = "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider";
-        String publicHostname = this.staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        String publicHostname =
+                this.staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                        PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
         List<ProxyVerticle> proxyVerticles = new ArrayList<>();
 
@@ -142,27 +145,30 @@ public class ProxyApplication implements Application {
         for (int i = 0; i < routers.size(); i++) {
             JsonObject router = routers.getJsonObject(i);
             String serviceName = router.getString(DynamicConfiguration.ROUTER_SERVICE);
-            JsonObject service = DynamicConfiguration.getObjByKeyWithValue(services, DynamicConfiguration.SERVICE_NAME,
-                    serviceName);
+            JsonObject service = DynamicConfiguration.getObjByKeyWithValue(services,
+                    DynamicConfiguration.SERVICE_NAME, serviceName);
 
             // TODO parse rule (https://github.com/Sallatik/predicate-parser)
             // what rules do we want to support (at the moment everything is a Path)
             // traefik has: Host HostHeader HostRegexp Path PathPrefix Method Headers
             // HeadersRegexp Query
             String rule = router.getString(DynamicConfiguration.ROUTER_RULE);
-            String pathPrefix = rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
+            String pathPrefix =
+                    rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
 
             // TODO support multipe servers and solve this ugly host-port splitting
             JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-            String url = servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_URL);
+            String url =
+                    servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_URL);
             String[] hostPort = url.split(":");
 
             JsonObject routerConfig = new JsonObject()
-                    .put(ROUTER_NAME, router.getString(DynamicConfiguration.ROUTER_NAME)).put(PATH_PREFIX, pathPrefix)
-                    .put(SERVICE, serviceName);
+                    .put(ROUTER_NAME, router.getString(DynamicConfiguration.ROUTER_NAME))
+                    .put(PATH_PREFIX, pathPrefix).put(SERVICE, serviceName);
 
-            JsonObject serviceConfig = new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
-                    .put("serverHost", hostPort[0]).put("serverPort", Integer.parseInt(hostPort[1]));
+            JsonObject serviceConfig = new JsonObject().put(SERVICE_NAME, serviceName)
+                    .put(PROVIDER, provider).put("serverHost", hostPort[0])
+                    .put("serverPort", Integer.parseInt(hostPort[1]));
 
             Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(routerConfig);
             Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);
@@ -170,16 +176,20 @@ public class ProxyApplication implements Application {
             final Router proxyRouter = Router.router(vertx);
 
             ProxyVerticle proxyVerticle = new ProxyVerticle(routerConfig, publicHostname,
-                    Entrypoint.entrypointConfigByName(entrypoint, this.staticConfig).getInteger(Entrypoint.PORT),
+                    Entrypoint.entrypointConfigByName(entrypoint, this.staticConfig)
+                            .getInteger(Entrypoint.PORT),
                     middlewareConfiguration, serviceConfig, proxyRouter, oAuth2Configuration);
             proxyVerticles.add(proxyVerticle);
 
             newRouter.mountSubRouter(pathPrefix, proxyRouter);
-            newRouterConfigs.add(new JsonObject().put("path", pathPrefix).put("router", proxyRouter));
+            newRouterConfigs
+                    .add(new JsonObject().put("path", pathPrefix).put("router", proxyRouter));
         }
 
-        CompositeFuture.join(proxyVerticles.stream().map(proxyVerticle -> vertx.deployVerticle(proxyVerticle))
-                .collect(Collectors.toList())).onComplete(ar -> {
+        CompositeFuture.join(
+                proxyVerticles.stream().map(proxyVerticle -> vertx.deployVerticle(proxyVerticle))
+                        .collect(Collectors.toList()))
+                .onComplete(ar -> {
                     if (ar.succeeded()) {
                         this.router.clear();
                         for (int i = 0; i < newRouterConfigs.size(); i++) {
@@ -208,10 +218,12 @@ public class ProxyApplication implements Application {
     private Optional<OAuth2Configuration> oAuth2Configuration(JsonObject proxy) {
         final JsonObject oauth2 = proxy.getJsonObject(OAUTH2);
         if (oauth2 != null) {
-            return Optional.of(
-                    new OAuth2Configuration(oauth2.getString(OAUTH2_CLIENTID), oauth2.getString(OAUTH2_CLIENTSECRET),
-                            ConfigAdapter.replaceEnvVariables(this.staticConfig, oauth2.getString(OAUTH2_DISCOVERYURL)),
-                            router.get(OAUTH2_CALLBACK_PREFIX + proxy.getString(ROUTER_NAME).toLowerCase())));
+            return Optional.of(new OAuth2Configuration(oauth2.getString(OAUTH2_CLIENTID),
+                    oauth2.getString(OAUTH2_CLIENTSECRET),
+                    ConfigAdapter.replaceEnvVariables(this.staticConfig,
+                            oauth2.getString(OAUTH2_DISCOVERYURL)),
+                    router.get(
+                            OAUTH2_CALLBACK_PREFIX + proxy.getString(ROUTER_NAME).toLowerCase())));
         } else {
             return Optional.empty();
         }

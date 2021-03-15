@@ -18,9 +18,9 @@ public class ServiceJsonFileProvider implements ServiceProvider {
 
     @Override
     public Service create(JsonObject serviceConfig, JsonObject globalConfig, Vertx vertx) {
-        return new ServiceJsonFile(
-                serviceConfig.getString(NAME),
-                ConfigAdapter.replaceEnvVariables(globalConfig, serviceConfig.getString(SERVER_HOST)),
+        return new ServiceJsonFile(serviceConfig.getString(NAME),
+                ConfigAdapter.replaceEnvVariables(globalConfig,
+                        serviceConfig.getString(SERVER_HOST)),
                 serviceConfig.getInteger(SERVER_PORT),
                 HttpProxy.reverseProxy2(vertx.createHttpClient()));
     }

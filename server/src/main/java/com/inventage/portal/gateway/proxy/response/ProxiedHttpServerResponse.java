@@ -105,7 +105,8 @@ public class ProxiedHttpServerResponse implements HttpServerResponse {
     }
 
     @Override
-    public HttpServerResponse putHeader(CharSequence charSequence, Iterable<CharSequence> iterable) {
+    public HttpServerResponse putHeader(CharSequence charSequence,
+            Iterable<CharSequence> iterable) {
         return delegate.putHeader(charSequence, iterable);
     }
 
@@ -130,7 +131,8 @@ public class ProxiedHttpServerResponse implements HttpServerResponse {
     }
 
     @Override
-    public HttpServerResponse putTrailer(CharSequence charSequence, Iterable<CharSequence> iterable) {
+    public HttpServerResponse putTrailer(CharSequence charSequence,
+            Iterable<CharSequence> iterable) {
         return delegate.putHeader(charSequence, iterable);
     }
 
@@ -215,7 +217,8 @@ public class ProxiedHttpServerResponse implements HttpServerResponse {
     }
 
     @Override
-    public HttpServerResponse sendFile(String s, long l, long l1, Handler<AsyncResult<Void>> handler) {
+    public HttpServerResponse sendFile(String s, long l, long l1,
+            Handler<AsyncResult<Void>> handler) {
         return delegate.sendFile(s, l, l1, handler);
     }
 
@@ -260,7 +263,8 @@ public class ProxiedHttpServerResponse implements HttpServerResponse {
     }
 
     @Override
-    public Future<HttpServerResponse> push(HttpMethod httpMethod, String s, String s1, MultiMap multiMap) {
+    public Future<HttpServerResponse> push(HttpMethod httpMethod, String s, String s1,
+            MultiMap multiMap) {
         return delegate.push(httpMethod, s, s1, multiMap);
     }
 

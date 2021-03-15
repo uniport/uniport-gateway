@@ -9,7 +9,8 @@ public class OAuth2Configuration {
     private final String discoveryUrl;
     private Route callback;
 
-    public OAuth2Configuration(String clientId, String clientSecret, String discoveryUrl, Route callback) {
+    public OAuth2Configuration(String clientId, String clientSecret, String discoveryUrl,
+            Route callback) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.discoveryUrl = discoveryUrl;

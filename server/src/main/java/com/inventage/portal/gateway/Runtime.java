@@ -11,7 +11,8 @@ public class Runtime {
     private static final Logger LOGGER = LoggerFactory.getLogger(Runtime.class);
 
     /**
-     * Development mode can be activated by setting the system property 'development' (-Ddevelopment).
+     * Development mode can be activated by setting the system property 'development'
+     * (-Ddevelopment).
      *
      * @return true if development mode is activated
      */
@@ -35,16 +36,14 @@ public class Runtime {
             final int envValue = toInt(System.getenv(VERTICLE_INSTANCES_KEY));
             LOGGER.info("numberOfVerticleInstances: from environment is '{}'", envValue);
             return String.valueOf(envValue);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //
         }
         try {
             final int propvalue = toInt(System.getProperty(VERTICLE_INSTANCES_KEY));
             LOGGER.warn("numberOfVerticleInstances: from system property is '{}'", propvalue);
             return String.valueOf(propvalue);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //
         }
         final int defaultNumber = 1;

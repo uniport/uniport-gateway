@@ -20,10 +20,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * The main verticle of the portal gateway. It reads the configuration for the
- * entrypoints and creates an HTTP listener for each of them. Additionally it
- * reads the configuration for the applications and mounts them using the
- * entrypoints.
+ * The main verticle of the portal gateway. It reads the configuration for the entrypoints and
+ * creates an HTTP listener for each of them. Additionally it reads the configuration for the
+ * applications and mounts them using the entrypoints.
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
@@ -61,9 +60,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         });
     }
 
-    private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
-        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'", applications.size(),
-                entrypoints.size());
+    private void deployAndMountApplications(List<Application> applications,
+            List<Entrypoint> entrypoints) {
+        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'",
+                applications.size(), entrypoints.size());
         applications.stream().forEach(application -> {
             application.deployOn(vertx).onComplete(deployed -> {
                 if (deployed.succeeded()) {
@@ -78,7 +78,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config,
             Promise<Void> startPromise) {
-        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'", entrypoints.size());
+        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'",
+                entrypoints.size());
         listenOnEntrypoints(entrypoints).onComplete(all -> {
             if (all.succeeded()) {
                 startPromise.complete();
@@ -91,18 +92,22 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     }
 
     private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-        return CompositeFuture.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
+        return CompositeFuture.join(
+                entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
     }
 
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
         if (entrypoint.port() > 0) {
             final HttpServerOptions options = new HttpServerOptions().setMaxHeaderSize(1024 * 20)
                     .setSsl(entrypoint.isTls()).setKeyStoreOptions(entrypoint.jksOptions());
-            LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(), entrypoint.port());
-            return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
+            LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(),
+                    entrypoint.port());
+            return vertx.createHttpServer(options).requestHandler(entrypoint.router())
+                    .listen(entrypoint.port());
         } else {
             entrypoint.disable();
-            LOGGER.warn("listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
+            LOGGER.warn(
+                    "listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
                     entrypoint.name(), entrypoint.port());
             return Future.succeededFuture();
         }
@@ -110,9 +115,11 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private void shutdownOnStartupFailure(Throwable throwable) {
         if (throwable instanceof IllegalArgumentException) {
-            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage());
+            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'",
+                    throwable.getMessage());
         } else {
-            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage(), throwable);
+            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'",
+                    throwable.getMessage(), throwable);
         }
         vertx.close();
     }
@@ -124,13 +131,14 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final JsonArray configs = config.getJsonArray(Entrypoint.ENTRYPOINTS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME), publicHostname,
-                                entrypoint.getInteger(Entrypoint.PORT), vertx))
+                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME),
+                                publicHostname, entrypoint.getInteger(Entrypoint.PORT), vertx))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Couldn't read %s configuration", Entrypoint.ENTRYPOINTS));
+            throw new IllegalStateException(
+                    String.format("Couldn't read %s configuration", Entrypoint.ENTRYPOINTS));
         }
     }
 
@@ -150,7 +158,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         } catch (IllegalStateException e) {
             throw e;
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Couldn't read %s configuration", Application.APPLICATIONS));
+            throw new IllegalStateException(
+                    String.format("Couldn't read %s configuration", Application.APPLICATIONS));
         }
     }
 

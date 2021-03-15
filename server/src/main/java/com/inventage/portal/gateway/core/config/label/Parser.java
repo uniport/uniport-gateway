@@ -21,14 +21,17 @@ public class Parser {
     private static final String MIDDLEWARES = "middlewares";
     private static final String SERVICES = "services";
 
-    private static final List<String> CONTAINS_CUSTOM_NAMES = Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
+    private static final List<String> CONTAINS_CUSTOM_NAMES =
+            Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
     private static final List<String> VALUE_IS_ARRAY_TYPE = Arrays.asList("entrypoints");
 
-    public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
+    public static JsonObject decode(Map<String, Object> labels, String rootName,
+            List<String> filters) {
         return decodeToJson(labels, rootName, filters);
     }
 
-    private static JsonObject decodeToJson(Map<String, Object> labels, String rootName, List<String> filters) {
+    private static JsonObject decodeToJson(Map<String, Object> labels, String rootName,
+            List<String> filters) {
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
@@ -53,7 +56,8 @@ public class Parser {
 
                 if (v.substring(0, 1).equals("[")) {
                     throw new IllegalArgumentException(
-                            "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
+                            "invalid leading character '[' in field name (bracket is a slice delimiter): "
+                                    + v);
                 }
 
                 if (v.equals(rootName)) {
@@ -80,7 +84,8 @@ public class Parser {
         if (path.size() > 1) {
             if (CONTAINS_CUSTOM_NAMES.contains(key)) {
                 JsonArray children = root.getJsonArray(key);
-                JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key), path.get(1));
+                JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key),
+                        path.get(1));
                 if (child != null) {
                     decodeToJson(child, path.subList(2, path.size()), value);
                 } else {
@@ -113,8 +118,9 @@ public class Parser {
                 root.put(key, values);
             } else {
                 if (root.containsKey(key)) {
-                    LOGGER.warn("Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'", key,
-                            root.getString(key), value);
+                    LOGGER.warn(
+                            "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
+                            key, root.getString(key), value);
                 }
                 root.put(key, value);
             }
@@ -123,14 +129,14 @@ public class Parser {
 
     private static String getName(String key) {
         switch (key) {
-        case ROUTERS:
-            return DynamicConfiguration.ROUTER_NAME;
-        case MIDDLEWARES:
-            return DynamicConfiguration.MIDDLEWARE_NAME;
-        case SERVICES:
-            return DynamicConfiguration.SERVICE_NAME;
-        default:
-            throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
+            case ROUTERS:
+                return DynamicConfiguration.ROUTER_NAME;
+            case MIDDLEWARES:
+                return DynamicConfiguration.MIDDLEWARE_NAME;
+            case SERVICES:
+                return DynamicConfiguration.SERVICE_NAME;
+            default:
+                throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
         }
     }
 

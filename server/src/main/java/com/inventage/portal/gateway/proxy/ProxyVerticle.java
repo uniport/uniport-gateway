@@ -57,8 +57,8 @@ public class ProxyVerticle extends AbstractVerticle {
 
     public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort,
             Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
-        this(proxyConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig, proxyRouter,
-                Optional.empty());
+        this(proxyConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig,
+                proxyRouter, Optional.empty());
     }
 
     public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort,
@@ -103,15 +103,16 @@ public class ProxyVerticle extends AbstractVerticle {
     private void configureMiddleware() {
         if (middlewareConfig.isPresent()) {
             // headers
-            headerMiddlewareConfig().ifPresent(
-                    headers -> headers.stream().map(object -> new JsonObject(Json.encode(object))).forEach(header -> {
-                        final RequestHeaderMiddlewareProvider provider = RequestHeaderMiddlewareProvider.Loader
-                                .getProvider(header.getString(MIDDLEWARE_PROVIDER));
+            headerMiddlewareConfig().ifPresent(headers -> headers.stream()
+                    .map(object -> new JsonObject(Json.encode(object))).forEach(header -> {
+                        final RequestHeaderMiddlewareProvider provider =
+                                RequestHeaderMiddlewareProvider.Loader
+                                        .getProvider(header.getString(MIDDLEWARE_PROVIDER));
                         headerMiddleware = headerMiddleware.andThen(provider.create(header));
                     }));
             // uris
-            uriMiddlewareConfig()
-                    .ifPresent(uris -> uris.stream().map(object -> new JsonObject(Json.encode(object))).forEach(uri -> {
+            uriMiddlewareConfig().ifPresent(uris -> uris.stream()
+                    .map(object -> new JsonObject(Json.encode(object))).forEach(uri -> {
                         final UriMiddlewareProvider provider = UriMiddlewareProvider.Loader
                                 .getProvider(uri.getString(MIDDLEWARE_PROVIDER));
                         uriMiddleware = uriMiddleware.andThen(provider.create(uri));
@@ -130,8 +131,8 @@ public class ProxyVerticle extends AbstractVerticle {
     }
 
     private Service fromServiceConfig(JsonObject globalConfig) {
-        return ServiceProvider.Loader.getProvider(serviceConfig.getString(SERVICE_PROVIDER)).create(serviceConfig,
-                globalConfig, vertx);
+        return ServiceProvider.Loader.getProvider(serviceConfig.getString(SERVICE_PROVIDER))
+                .create(serviceConfig, globalConfig, vertx);
     }
 
     private Future<?> configureOptionalOAuth2(JsonObject globalConfig) {
@@ -149,7 +150,8 @@ public class ProxyVerticle extends AbstractVerticle {
                 router.route().handler(authenticationHandler);
                 promise.complete(authenticationHandler);
             }).onFailure(failure -> {
-                final String message = String.format("configureOptionalOAuth2: for proxy '%s' failed with message '%s'",
+                final String message = String.format(
+                        "configureOptionalOAuth2: for proxy '%s' failed with message '%s'",
                         proxyConfig.getString(ProxyApplication.ROUTER_NAME), failure.getMessage());
                 LOGGER.error(message);
                 promise.fail(message);
@@ -161,17 +163,17 @@ public class ProxyVerticle extends AbstractVerticle {
     }
 
     /**
-     * Change the authorization path so that the requests go again through the
-     * portal gateway
+     * Change the authorization path so that the requests go again through the portal gateway
      * 
      * @param configToPatch to be changed
      * @return the given config
      */
-    private OAuth2Options patchAuthorizationPath(OAuth2Options configToPatch, JsonObject globalConfig) {
+    private OAuth2Options patchAuthorizationPath(OAuth2Options configToPatch,
+            JsonObject globalConfig) {
         try {
             final URI uri = new URI(configToPatch.getAuthorizationPath());
-            final String newAuthorizationPath = String.format("%s://%s:%s%s", "http", publicHostname, entrypointPort,
-                    uri.getPath());
+            final String newAuthorizationPath = String.format("%s://%s:%s%s", "http",
+                    publicHostname, entrypointPort, uri.getPath());
             configToPatch.setAuthorizationPath(newAuthorizationPath);
         } catch (Exception e) {
 
@@ -217,7 +219,8 @@ public class ProxyVerticle extends AbstractVerticle {
      * @param rc with the request to be forwarded
      */
     protected void forward(RoutingContext rc) {
-        LOGGER.info("forward: request with uri '{}' to service '{}'", rc.request().uri(), this.service);
+        LOGGER.info("forward: request with uri '{}' to service '{}'", rc.request().uri(),
+                this.service);
         this.service.handle(new ProxiedHttpServerRequest(rc, AllowForwardHeaders.ALL)
                 .setHeaderMiddleware(headerMiddleware).setUriMiddleware(uriMiddleware));
     }

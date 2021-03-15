@@ -84,10 +84,12 @@ public class DockerContainerProvider extends AbstractProvider {
 
     private ServiceDiscovery getOrCreateDockerContainerDiscovery() {
         if (this.dockerContainerDiscovery == null) {
-            this.dockerContainerDiscovery = ServiceDiscovery.create(vertx,
-                    new ServiceDiscoveryOptions().setAnnounceAddress(announceAddress).setName("docker-discovery"));
-            this.dockerContainerDiscovery.registerServiceImporter(new DockerContainerServiceImporter(),
-                    new JsonObject().put("docker-tls-verify", this.TLS).put("docker-host", this.endpoint));
+            this.dockerContainerDiscovery =
+                    ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
+                            .setAnnounceAddress(announceAddress).setName("docker-discovery"));
+            this.dockerContainerDiscovery
+                    .registerServiceImporter(new DockerContainerServiceImporter(), new JsonObject()
+                            .put("docker-tls-verify", this.TLS).put("docker-host", this.endpoint));
         }
         return this.dockerContainerDiscovery;
     }
@@ -137,18 +139,21 @@ public class DockerContainerProvider extends AbstractProvider {
             if (ar.succeeded()) {
                 LOGGER.debug("configuration from labels '{}'", confFromLabels);
             } else {
-                LOGGER.error("invalid configuration form container labels '{}': '{}'", serviceName, ar.cause());
+                LOGGER.error("invalid configuration form container labels '{}': '{}'", serviceName,
+                        ar.cause());
             }
         });
 
         return DynamicConfiguration.merge(this.configurations);
     }
 
-    private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String ip, String port) {
+    private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String ip,
+            String port) {
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
-            JsonObject fallbackService = new JsonObject().put(DynamicConfiguration.SERVICE_NAME, serviceName)
-                    .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray());
+            JsonObject fallbackService =
+                    new JsonObject().put(DynamicConfiguration.SERVICE_NAME, serviceName)
+                            .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray());
             services.add(fallbackService);
         }
 
@@ -179,12 +184,14 @@ public class DockerContainerProvider extends AbstractProvider {
         servers.getJsonObject(0).put(DynamicConfiguration.SERVICE_SERVER_URL, url);
     }
 
-    private void buildRouterConfiguration(JsonObject httpConf, String serviceName, Map<String, String> model) {
+    private void buildRouterConfiguration(JsonObject httpConf, String serviceName,
+            Map<String, String> model) {
         JsonArray routers = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (routers.size() == 0) {
             if (services.size() > 1) {
-                throw new IllegalArgumentException("Could not create a router for the container: too many services");
+                throw new IllegalArgumentException(
+                        "Could not create a router for the container: too many services");
             } else {
                 routers.add(new JsonObject());
             }

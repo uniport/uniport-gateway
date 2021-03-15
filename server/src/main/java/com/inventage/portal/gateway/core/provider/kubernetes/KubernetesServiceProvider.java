@@ -38,8 +38,8 @@ public class KubernetesServiceProvider extends AbstractProvider {
     public void provide(Promise<Void> startPromise) {
         String announceAddress = "service-announce";
 
-        this.kubernetesDiscovery = ServiceDiscovery.create(vertx,
-                new ServiceDiscoveryOptions().setAnnounceAddress(announceAddress).setName("kubernetes-discovery"));
+        this.kubernetesDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
+                .setAnnounceAddress(announceAddress).setName("kubernetes-discovery"));
 
         // LOCAL KUBERNETES CLUSTER RUNNING WITH MINIKUBE
         // HOST:PORT
@@ -57,12 +57,13 @@ public class KubernetesServiceProvider extends AbstractProvider {
         String host = "192.168.99.102";
         int port = 8443;
         Boolean useTLS = true;
-        String token = "eyJhbGciOiJSUzI1NiIsImtpZCI6InF4azdOWVhfT0FtME9uUE1zR1ZudUIySVBDWjh5MXgtU1ZQa01FOWxrSHMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tcXp0emIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImNlOWNmOTExLWIyODktNDdlYS1iMjYzLWY1NmY4ZGRjMzc0ZSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.X39cJ6IHhq1OW_uM30vYVEUAjLTKTaVcGavRIu2P-JDlv8rqiG8XyyIqFXzjJaw2K3BT7yVuE-TtAF7cj3VDFFmau1U2EBK9ftp6PIWa5c-ioKHQ1TzQXaNCPeX6QC0z1270lr6uN1dzze5wcc2DQukNR07zTJEk_e7BFLDMuRMWHmbnBLBis1RvxYr4MOTPtG2uYvfQQ8Vo4irdU_bncH55PimG1toVsGPYsk7GyVjVg7Cct-WJQWmZABHM0Fy1TZHGpN4kTbjsmq3P5kHQdEBSC8fbeIyP_-wxoxVYOcd60jBHN-4VBBMy2JSnPs89Q-r-sQFtddWPMiNre6HI7Q";
+        String token =
+                "eyJhbGciOiJSUzI1NiIsImtpZCI6InF4azdOWVhfT0FtME9uUE1zR1ZudUIySVBDWjh5MXgtU1ZQa01FOWxrSHMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tcXp0emIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImNlOWNmOTExLWIyODktNDdlYS1iMjYzLWY1NmY4ZGRjMzc0ZSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.X39cJ6IHhq1OW_uM30vYVEUAjLTKTaVcGavRIu2P-JDlv8rqiG8XyyIqFXzjJaw2K3BT7yVuE-TtAF7cj3VDFFmau1U2EBK9ftp6PIWa5c-ioKHQ1TzQXaNCPeX6QC0z1270lr6uN1dzze5wcc2DQukNR07zTJEk_e7BFLDMuRMWHmbnBLBis1RvxYr4MOTPtG2uYvfQQ8Vo4irdU_bncH55PimG1toVsGPYsk7GyVjVg7Cct-WJQWmZABHM0Fy1TZHGpN4kTbjsmq3P5kHQdEBSC8fbeIyP_-wxoxVYOcd60jBHN-4VBBMy2JSnPs89Q-r-sQFtddWPMiNre6HI7Q";
         String namespace = "default";
 
         this.kubernetesDiscovery.registerServiceImporter(new KubernetesServiceImporter(),
-                new JsonObject().put("host", host).put("port", port).put("ssl", useTLS).put("token", token)
-                        .put("namespace", namespace));
+                new JsonObject().put("host", host).put("port", port).put("ssl", useTLS)
+                        .put("token", token).put("namespace", namespace));
 
         EventBus eb = vertx.eventBus();
         MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);

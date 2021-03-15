@@ -42,26 +42,29 @@ public class DynamicConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
-        ObjectSchemaBuilder routerSchema = Schemas.objectSchema().requiredProperty(ROUTER_NAME, Schemas.stringSchema())
+        ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
+                .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema());
+                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
+                .property(ROUTER_RULE, Schemas.stringSchema());
 
-        ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
-                .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_TYPE, Schemas.objectSchema());
+        ObjectSchemaBuilder middlewareSchema =
+                Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
+                        .requiredProperty(MIDDLEWARE_TYPE, Schemas.objectSchema());
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
-                .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
-                .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
-                        .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_URL, Schemas.stringSchema())));
+                .requiredProperty(SERVICE_NAME, Schemas.stringSchema()).requiredProperty(
+                        SERVICE_SERVERS, Schemas.arraySchema().items(Schemas.objectSchema()
+                                .requiredProperty(SERVICE_SERVER_URL, Schemas.stringSchema())));
 
-        ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
-                .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
-                .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
-                .property(SERVICES, Schemas.arraySchema().items(serviceSchema));
+        ObjectSchemaBuilder httpSchema =
+                Schemas.objectSchema().property(ROUTERS, Schemas.arraySchema().items(routerSchema))
+                        .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
+                        .property(SERVICES, Schemas.arraySchema().items(serviceSchema));
 
-        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().property(HTTP, httpSchema);
+        ObjectSchemaBuilder dynamicConfigBuilder =
+                Schemas.objectSchema().property(HTTP, httpSchema);
 
         SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
         SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
@@ -185,7 +188,8 @@ public class DynamicConfiguration {
             JsonObject r = rs.getJsonObject(i);
             JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
             if (rEntrypoints == null || rEntrypoints.size() == 0) {
-                LOGGER.info("No entryPoint defined for this router, using the default one(s) instead: {}",
+                LOGGER.info(
+                        "No entryPoint defined for this router, using the default one(s) instead: {}",
                         entrypoints.toString());
                 r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
             }
@@ -211,9 +215,11 @@ public class DynamicConfiguration {
         return null;
     }
 
-    private static Boolean addRouter(JsonObject httpConf, String routerName, JsonObject routerToAdd) {
+    private static Boolean addRouter(JsonObject httpConf, String routerName,
+            JsonObject routerToAdd) {
         JsonArray existingRouters = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-        JsonObject existingRouter = getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
+        JsonObject existingRouter =
+                getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
         if (existingRouter == null) {
             existingRouters.add(routerToAdd);
             return true;
@@ -222,10 +228,11 @@ public class DynamicConfiguration {
         return existingRouter.equals(routerToAdd);
     }
 
-    private static Boolean addService(JsonObject httpConf, String serviceName, JsonObject serviceToAdd) {
+    private static Boolean addService(JsonObject httpConf, String serviceName,
+            JsonObject serviceToAdd) {
         JsonArray existingServices = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-        JsonObject existingService = getObjByKeyWithValue(existingServices, DynamicConfiguration.SERVICE_NAME,
-                serviceName);
+        JsonObject existingService = getObjByKeyWithValue(existingServices,
+                DynamicConfiguration.SERVICE_NAME, serviceName);
         if (existingService == null) {
             existingServices.add(serviceToAdd);
             return true;
@@ -233,7 +240,8 @@ public class DynamicConfiguration {
 
         Map<String, JsonObject> uniqueServers = new HashMap<>();
 
-        JsonArray existingServers = existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+        JsonArray existingServers =
+                existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         for (int i = 0; i < existingServers.size(); i++) {
             JsonObject server = existingServers.getJsonObject(i);
             uniqueServers.put(server.getString(DynamicConfiguration.SERVICE_SERVER_URL), server);
@@ -251,10 +259,11 @@ public class DynamicConfiguration {
         return true;
     }
 
-    private static Boolean addMiddleware(JsonObject httpConf, String middlewareName, JsonObject middlewareToAdd) {
+    private static Boolean addMiddleware(JsonObject httpConf, String middlewareName,
+            JsonObject middlewareToAdd) {
         JsonArray existingMiddlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-        JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares, DynamicConfiguration.MIDDLEWARE_NAME,
-                middlewareName);
+        JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares,
+                DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
         if (existingMiddleware == null) {
             existingMiddlewares.add(middlewareToAdd);
             return true;

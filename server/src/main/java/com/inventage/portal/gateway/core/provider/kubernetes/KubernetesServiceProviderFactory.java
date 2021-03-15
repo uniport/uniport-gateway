@@ -15,7 +15,8 @@ public class KubernetesServiceProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public AbstractProvider create(Vertx vertx, String configurationAddress, JsonObject providerConfig) {
+    public AbstractProvider create(Vertx vertx, String configurationAddress,
+            JsonObject providerConfig) {
         return new KubernetesServiceProvider(vertx, configurationAddress);
     }
 

@@ -32,8 +32,8 @@ public class FileConfigProvider extends AbstractProvider {
     private Boolean watch;
     private int scanPeriodMs = 5000;
 
-    public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
-            Boolean watch) {
+    public FileConfigProvider(Vertx vertx, String configurationAddress, String filename,
+            String directory, Boolean watch) {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -79,8 +79,9 @@ public class FileConfigProvider extends AbstractProvider {
             LOGGER.info("reading file '{}'", this.filename);
 
             final File file = new File(this.filename);
-            ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
-                    .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
+            ConfigStoreOptions fileStore =
+                    new ConfigStoreOptions().setType("file").setFormat("json")
+                            .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
             return options.addStore(fileStore);
         }

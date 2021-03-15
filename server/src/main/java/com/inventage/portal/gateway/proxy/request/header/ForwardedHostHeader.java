@@ -14,7 +14,8 @@ public class ForwardedHostHeader implements RequestHeaderMiddleware<RoutingConte
     @Override
     public MultiMap apply(RoutingContext routingContext, MultiMap headers) {
         if (!headers.contains(X_FORWARDED_HOST)) {
-            return headers.add(X_FORWARDED_HOST, String.format("%s", routingContext.request().host()));
+            return headers.add(X_FORWARDED_HOST,
+                    String.format("%s", routingContext.request().host()));
         }
         return headers;
     }

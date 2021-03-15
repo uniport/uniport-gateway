@@ -17,6 +17,7 @@ public class ReplacePathByRegexProvider implements UriMiddlewareProvider {
 
     @Override
     public UriMiddleware create(JsonObject uriMiddlewareConfig) {
-        return new ReplacePathByRegex(uriMiddlewareConfig.getString(REGEX), uriMiddlewareConfig.getString(REPLACEMENT));
+        return new ReplacePathByRegex(uriMiddlewareConfig.getString(REGEX),
+                uriMiddlewareConfig.getString(REPLACEMENT));
     }
 }

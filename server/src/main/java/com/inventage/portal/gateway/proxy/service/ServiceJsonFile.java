@@ -14,7 +14,8 @@ public class ServiceJsonFile implements Service {
     final HttpProxy httpProxy;
 
 
-    public ServiceJsonFile(String serviceName, String serverHost, int serverPort, HttpProxy httpProxy) {
+    public ServiceJsonFile(String serviceName, String serverHost, int serverPort,
+            HttpProxy httpProxy) {
         this.name = serviceName;
         this.serverHost = serverHost;
         this.serverPort = serverPort;

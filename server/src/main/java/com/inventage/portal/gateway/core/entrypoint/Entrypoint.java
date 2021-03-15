@@ -62,18 +62,19 @@ public class Entrypoint {
 
     public void mount(Application application) {
         final Optional<Router> optionApplicationRouter = application.router();
-        optionApplicationRouter.ifPresent(
-                applicationRouter -> {
-                    if (name.equals(application.entrypoint())) {
-                        if (enabled()) {
-                            router().mountSubRouter(application.rootPath(), applicationRouter);
-                            LOGGER.info("mount: application '{}' for '{}' at endpoint '{}'", application, application.rootPath(), name);
-                        }
-                        else {
-                            LOGGER.warn("mount: disabled endpoint '{}' can not mount application '{}' for '{}'", name, application, application.rootPath());
-                        }
-                    }
-                });
+        optionApplicationRouter.ifPresent(applicationRouter -> {
+            if (name.equals(application.entrypoint())) {
+                if (enabled()) {
+                    router().mountSubRouter(application.rootPath(), applicationRouter);
+                    LOGGER.info("mount: application '{}' for '{}' at endpoint '{}'", application,
+                            application.rootPath(), name);
+                } else {
+                    LOGGER.warn(
+                            "mount: disabled endpoint '{}' can not mount application '{}' for '{}'",
+                            name, application, application.rootPath());
+                }
+            }
+        });
     }
 
     public boolean isTls() {
@@ -99,14 +100,17 @@ public class Entrypoint {
 
         public JksOptions jksOptions() {
             return null;
-//            final String keyStorePath = config.getString(CONFIG_PREFIX + CONFIG_HTTPS_KEY_STORE_PATH);
-//            if (keyStorePath == null || keyStorePath.isEmpty()) {
-//                throw new IllegalStateException("When using https the path to the key store must be configured by variable: '" +
-//                        CONFIG_PREFIX + "https-key-store-path'. To disable the https port configuration use '-1' as port.");
-//            }
-//            return new JksOptions()
-//                    .setPath(keyStorePath)
-//                    .setPassword(config.getString(CONFIG_PREFIX + CONFIG_HTTPS_KEY_STORE_PASSWORD));
+            // final String keyStorePath = config.getString(CONFIG_PREFIX +
+            // CONFIG_HTTPS_KEY_STORE_PATH);
+            // if (keyStorePath == null || keyStorePath.isEmpty()) {
+            // throw new IllegalStateException("When using https the path to the key store must be
+            // configured by variable: '" +
+            // CONFIG_PREFIX + "https-key-store-path'. To disable the https port configuration use
+            // '-1' as port.");
+            // }
+            // return new JksOptions()
+            // .setPath(keyStorePath)
+            // .setPassword(config.getString(CONFIG_PREFIX + CONFIG_HTTPS_KEY_STORE_PASSWORD));
         }
     }
 
@@ -114,7 +118,10 @@ public class Entrypoint {
         final JsonArray configs = globalConfig.getJsonArray(Entrypoint.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
                 .filter(entrypoint -> entrypoint.getString(Entrypoint.NAME).equals(name))
-                .findFirst().orElseThrow(() -> { throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name)); });
+                .findFirst().orElseThrow(() -> {
+                    throw new IllegalStateException(
+                            String.format("Entrypoint '%s' not found!", name));
+                });
     }
 
 }

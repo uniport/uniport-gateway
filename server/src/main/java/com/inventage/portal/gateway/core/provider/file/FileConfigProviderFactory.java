@@ -18,7 +18,8 @@ public class FileConfigProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public AbstractProvider create(Vertx vertx, String configurationAddress, JsonObject providerConfig) {
+    public AbstractProvider create(Vertx vertx, String configurationAddress,
+            JsonObject providerConfig) {
         String filename = providerConfig.getString(PROVIDER_FILENAME, "");
         String directory = providerConfig.getString(PROVIDER_DIRECTORY, "");
         Boolean watch = providerConfig.getBoolean(PROVIDER_WATCH, false);

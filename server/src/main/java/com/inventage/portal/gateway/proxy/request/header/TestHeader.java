@@ -4,8 +4,8 @@ import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * Request header middleware that adds "PortalGateway" to the HTTP header with a value identifying the running
- * vert.x instance.
+ * Request header middleware that adds "PortalGateway" to the HTTP header with a value identifying
+ * the running vert.x instance.
  */
 public class TestHeader implements RequestHeaderMiddleware<RoutingContext, MultiMap> {
 
