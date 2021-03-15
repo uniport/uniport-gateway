@@ -121,7 +121,7 @@ public class DockerContainerProvider extends AbstractProvider {
                 && httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
                 && httpConf.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
             this.configurations.put(containerName, confFromLabels);
-            return confFromLabels;
+            return DynamicConfiguration.merge(this.configurations);
         }
 
         this.buildServiceConfiguration(httpConf, serviceName, ip, port);

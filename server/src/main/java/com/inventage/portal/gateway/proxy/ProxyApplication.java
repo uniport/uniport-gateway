@@ -96,6 +96,7 @@ public class ProxyApplication implements Application {
             announceConsumer.handler(service -> {
                 JsonObject config = service.body();
                 // TODO merge configs of all providers
+                DynamicConfiguration.applyEntrypoints(config, Arrays.asList(entrypoint));
                 updateRoutes(vertx, config);
             });
         });
