@@ -11,13 +11,11 @@ import java.util.ServiceLoader;
 /**
  * Service interface for providing applications. Implementations must add an entry with the fully
  * qualified class name into
- * META-INF/services/com.inventage.portal.gateway.core.application.ApplicationProvider
- * 
- * TODO I think we should rename this to ApplicationFactory or similar
+ * META-INF/services/com.inventage.portal.gateway.core.application.ApplicationFactory
  */
-public interface ApplicationProvider {
+public interface ApplicationFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(ApplicationProvider.class);
+    Logger LOGGER = LoggerFactory.getLogger(ApplicationFactory.class);
 
     /**
      * Used in the portal-gateway.json applications.provider field.
@@ -36,10 +34,10 @@ public interface ApplicationProvider {
     Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx);
 
     class Loader {
-        public static ApplicationProvider getProvider(String providerId) {
+        public static ApplicationFactory getProvider(String providerId) {
             LOGGER.debug("getProvider: for '{}'", providerId);
-            final Optional<ApplicationProvider> provider = ServiceLoader
-                    .load(ApplicationProvider.class).stream().map(ServiceLoader.Provider::get)
+            final Optional<ApplicationFactory> provider = ServiceLoader
+                    .load(ApplicationFactory.class).stream().map(ServiceLoader.Provider::get)
                     .filter(instance -> instance.provides().equals(providerId)).findFirst();
             if (provider.isPresent()) {
                 return provider.get();

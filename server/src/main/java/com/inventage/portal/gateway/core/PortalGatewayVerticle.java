@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.core;
 
 import com.inventage.portal.gateway.core.application.Application;
-import com.inventage.portal.gateway.core.application.ApplicationProvider;
+import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.startup.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import io.vertx.config.ConfigRetriever;
@@ -149,7 +149,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final JsonArray configs = config.getJsonArray(Application.APPLICATIONS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                        .map(application -> ApplicationProvider.Loader
+                        .map(application -> ApplicationFactory.Loader
                                 .getProvider(application.getString(Application.PROVIDER))
                                 .create(application, config, vertx))
                         .forEach(applications::add);
