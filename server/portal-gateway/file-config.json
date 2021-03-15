@@ -13,7 +13,7 @@
         "name": "service1",
         "servers": [
           {
-            "url": "abc"
+            "url": "abc:80"
           }
         ]
       }

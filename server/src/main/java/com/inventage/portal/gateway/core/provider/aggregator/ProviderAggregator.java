@@ -32,7 +32,6 @@ public class ProviderAggregator extends AbstractProvider {
 
         for (int i = 0; i < providers.size(); i++) {
             JsonObject providerConfig = providers.getJsonObject(i);
-            System.out.println(providerConfig);
 
             AbstractProvider provider = ProviderFactory.Loader
                     .getFactory(providerConfig.getString(StaticConfiguration.PROVIDER_NAME))

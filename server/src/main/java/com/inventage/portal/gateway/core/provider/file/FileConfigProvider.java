@@ -44,6 +44,10 @@ public class FileConfigProvider extends AbstractProvider {
         this.watch = watch;
     }
 
+    public void start(Promise<Void> startPromise) {
+        provide(startPromise);
+    }
+
     @Override
     public void provide(Promise<Void> startPromise) {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
@@ -75,7 +79,7 @@ public class FileConfigProvider extends AbstractProvider {
             LOGGER.info("reading file '{}'", this.filename);
 
             final File file = new File(this.filename);
-            ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("json")
+            ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
                     .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
             return options.addStore(fileStore);

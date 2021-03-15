@@ -52,6 +52,10 @@ public class DockerContainerProvider extends AbstractProvider {
         this.TLS = false;
     }
 
+    public void start(Promise<Void> startPromise) {
+        provide(startPromise);
+    }
+
     @Override
     public void provide(Promise<Void> startPromise) {
         this.getOrCreateDockerContainerDiscovery();

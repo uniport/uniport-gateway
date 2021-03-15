@@ -123,7 +123,6 @@ public class ProxyApplication implements Application {
     private void updateRoutes(Vertx vertx, JsonObject config) {
         Router newRouter = Router.router(vertx);
 
-        System.out.println(config);
         JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
 
         JsonArray newRouterConfigs = new JsonArray();
@@ -146,7 +145,9 @@ public class ProxyApplication implements Application {
                     serviceName);
 
             // TODO parse rule (https://github.com/Sallatik/predicate-parser)
-            // what rules do we want to support
+            // what rules do we want to support (at the moment everything is a Path)
+            // traefik has: Host HostHeader HostRegexp Path PathPrefix Method Headers
+            // HeadersRegexp Query
             String rule = router.getString(DynamicConfiguration.ROUTER_RULE);
             String pathPrefix = rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
 

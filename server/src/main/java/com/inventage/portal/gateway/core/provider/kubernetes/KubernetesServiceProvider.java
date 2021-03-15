@@ -30,6 +30,10 @@ public class KubernetesServiceProvider extends AbstractProvider {
         this.configurationAddress = configurationAddress;
     }
 
+    public void start(Promise<Void> startPromise) {
+        provide(startPromise);
+    }
+
     @Override
     public void provide(Promise<Void> startPromise) {
         String announceAddress = "service-announce";
