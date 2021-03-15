@@ -94,11 +94,13 @@ public class ProxyApplication implements Application {
 
             EventBus eb = vertx.eventBus();
             MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
-            announceConsumer.handler(service -> {
-                JsonObject config = service.body();
-                // TODO merge configs of all providers
-                DynamicConfiguration.applyEntrypoints(config, Arrays.asList(entrypoint));
-                updateRoutes(vertx, config);
+            announceConsumer.handler(message -> {
+                JsonObject messageBody = message.body();
+                String providerName = messageBody.getString(AbstractProvider.PROVIDER_NAME);
+                JsonObject providerConfig =
+                        messageBody.getJsonObject(AbstractProvider.PROVIDER_CONFIGURATION);
+
+                updateRoutes(vertx, providerConfig);
             });
         });
 

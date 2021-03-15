@@ -119,42 +119,44 @@ public class DynamicConfiguration {
             JsonObject conf = configurations.get(key);
             JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
-            JsonArray rs = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-            for (int i = 0; i < rs.size(); i++) {
-                JsonObject r = rs.getJsonObject(i);
-                String rName = r.getString(DynamicConfiguration.ROUTER_NAME);
-                if (!routers.containsKey(rName)) {
-                    routers.put(rName, new ArrayList<String>());
+            if (httpConf != null) {
+                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
+                for (int i = 0; i < rts.size(); i++) {
+                    JsonObject rt = rts.getJsonObject(i);
+                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
+                    if (!routers.containsKey(rtName)) {
+                        routers.put(rtName, new ArrayList<String>());
+                    }
+                    routers.get(rtName).add(key);
+                    if (!addRouter(mergedHttpConfig, rtName, rt)) {
+                        routersToDelete.add(rtName);
+                    }
                 }
-                routers.get(rName).add(key);
-                if (!addRouter(mergedHttpConfig, rName, r)) {
-                    routersToDelete.add(rName);
-                }
-            }
 
-            JsonArray ms = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            for (int i = 0; i < ms.size(); i++) {
-                JsonObject m = ms.getJsonObject(i);
-                String mName = m.getString(DynamicConfiguration.MIDDLEWARE_NAME);
-                if (!middlewares.containsKey(mName)) {
-                    middlewares.put(mName, new ArrayList<String>());
+                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                for (int i = 0; i < mws.size(); i++) {
+                    JsonObject mw = mws.getJsonObject(i);
+                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+                    if (!middlewares.containsKey(mwName)) {
+                        middlewares.put(mwName, new ArrayList<String>());
+                    }
+                    middlewares.get(mwName).add(key);
+                    if (!addMiddleware(mergedHttpConfig, mwName, mw)) {
+                        middlewaresToDelete.add(mwName);
+                    }
                 }
-                middlewares.get(mName).add(key);
-                if (!addMiddleware(mergedHttpConfig, mName, m)) {
-                    middlewaresToDelete.add(mName);
-                }
-            }
 
-            JsonArray ss = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-            for (int i = 0; i < ss.size(); i++) {
-                JsonObject s = ss.getJsonObject(i);
-                String sName = s.getString(DynamicConfiguration.SERVICE_NAME);
-                if (!services.containsKey(sName)) {
-                    services.put(sName, new ArrayList<String>());
-                }
-                services.get(sName).add(key);
-                if (!addService(mergedHttpConfig, sName, s)) {
-                    servicesToDelete.add(sName);
+                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
+                for (int i = 0; i < svs.size(); i++) {
+                    JsonObject sv = svs.getJsonObject(i);
+                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
+                    if (!services.containsKey(svName)) {
+                        services.put(svName, new ArrayList<String>());
+                    }
+                    services.get(svName).add(key);
+                    if (!addService(mergedHttpConfig, svName, sv)) {
+                        servicesToDelete.add(svName);
+                    }
                 }
             }
         }

@@ -62,22 +62,12 @@ public class DockerContainerProvider extends AbstractProvider {
 
         MessageConsumer<JsonObject> consumer = this.eb.consumer(announceAddress);
         consumer.handler(message -> {
-            JsonObject dockerContainer = message.body();
+            JsonObject config = this.buildConfiguration(message.body());
+            validateAndPublish(config);
 
-            JsonObject config = this.buildConfiguration(dockerContainer);
-
-            DynamicConfiguration.validate(vertx, config).onComplete(validateAr -> {
-                if (validateAr.succeeded()) {
-                    LOGGER.info("configuration published");
-                    eb.publish(this.configurationAddress, config);
-                } else {
-                    LOGGER.error("invalid configuration");
-                }
-
-                if (!this.watch) {
-                    consumer.unregister();
-                }
-            });
+            if (!this.watch) {
+                consumer.unregister();
+            }
         });
         startPromise.complete();
     }
@@ -118,26 +108,25 @@ public class DockerContainerProvider extends AbstractProvider {
         JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
 
-        JsonObject httpConf = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
-        if (httpConf.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
-                && httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
-                && httpConf.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
+        JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
+        if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
+                && httpConfFromLabels.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
+                && httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
             this.configurations.put(containerName, confFromLabels);
             return DynamicConfiguration.merge(this.configurations);
         }
 
-        this.buildServiceConfiguration(httpConf, serviceName, host, port);
+        this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
 
         Map<String, String> model = new HashMap<String, String>();
         model.put("name", serviceName);
 
-        this.buildRouterConfiguration(httpConf, serviceName, model);
-
-        this.configurations.put(containerName, confFromLabels);
+        this.buildRouterConfiguration(httpConfFromLabels, serviceName, model);
 
         DynamicConfiguration.validate(vertx, confFromLabels).onComplete(ar -> {
             if (ar.succeeded()) {
                 LOGGER.debug("configuration from labels '{}'", confFromLabels);
+                this.configurations.put(containerName, confFromLabels);
             } else {
                 LOGGER.error("invalid configuration form container labels '{}': '{}'", serviceName,
                         ar.cause());
@@ -220,5 +209,20 @@ public class DockerContainerProvider extends AbstractProvider {
                 }
             }
         }
+    }
+
+    private void validateAndPublish(JsonObject config) {
+        DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
+            if (ar.succeeded()) {
+                LOGGER.info("configuration published");
+                this.eb.publish(this.configurationAddress,
+                        new JsonObject()
+                                .put(AbstractProvider.PROVIDER_NAME,
+                                        DockerContainerProviderFactory.PROVIDER_NAME)
+                                .put(AbstractProvider.PROVIDER_CONFIGURATION, config));
+            } else {
+                LOGGER.error("invalid configuration");
+            }
+        });
     }
 }

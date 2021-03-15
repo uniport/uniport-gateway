@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.core.provider.kubernetes;
 
+import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.provider.AbstractProvider;
 
 import org.slf4j.Logger;
@@ -68,8 +69,28 @@ public class KubernetesServiceProvider extends AbstractProvider {
         EventBus eb = vertx.eventBus();
         MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
         announceConsumer.handler(message -> {
-            JsonObject json = message.body();
+            JsonObject config = this.buildConfiguration(message.body());
+            validateAndPublish(config);
         });
         startPromise.complete();
+    }
+
+    private JsonObject buildConfiguration(JsonObject kubernetesService) {
+        return null;
+    }
+
+    private void validateAndPublish(JsonObject config) {
+        DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
+            if (ar.succeeded()) {
+                LOGGER.info("configuration published");
+                this.eb.publish(this.configurationAddress,
+                        new JsonObject()
+                                .put(AbstractProvider.PROVIDER_NAME,
+                                        KubernetesServiceProviderFactory.PROVIDER_NAME)
+                                .put(AbstractProvider.PROVIDER_CONFIGURATION, config));
+            } else {
+                LOGGER.error("invalid configuration");
+            }
+        });
     }
 }

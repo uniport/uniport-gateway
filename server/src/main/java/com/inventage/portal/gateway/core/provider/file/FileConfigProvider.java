@@ -55,7 +55,7 @@ public class FileConfigProvider extends AbstractProvider {
             if (ar.succeeded()) {
                 LOGGER.info("configuration retrieved");
                 final JsonObject config = ar.result();
-                this.validateAndPublish(config, this.configurationAddress);
+                this.validateAndPublish(config);
             } else {
                 LOGGER.error("cannot retrieve configuration");
             }
@@ -63,7 +63,7 @@ public class FileConfigProvider extends AbstractProvider {
         if (this.watch) {
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
-                this.validateAndPublish(config, this.configurationAddress);
+                this.validateAndPublish(config);
             });
         }
         startPromise.complete();
@@ -100,11 +100,15 @@ public class FileConfigProvider extends AbstractProvider {
         return options;
     }
 
-    private void validateAndPublish(JsonObject config, String configurationAddress) {
-        DynamicConfiguration.validate(vertx, config).onComplete(validateAr -> {
-            if (validateAr.succeeded()) {
+    private void validateAndPublish(JsonObject config) {
+        DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
+            if (ar.succeeded()) {
                 LOGGER.info("configuration published");
-                eb.publish(configurationAddress, config);
+                this.eb.publish(this.configurationAddress,
+                        new JsonObject()
+                                .put(AbstractProvider.PROVIDER_NAME,
+                                        FileConfigProviderFactory.PROVIDER_NAME)
+                                .put(AbstractProvider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("invalid configuration");
             }
