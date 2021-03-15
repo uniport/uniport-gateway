@@ -88,7 +88,7 @@ public class ProxyApplication implements Application {
             }
             String announceAddress = "service-announce";
 
-            ProviderAggregator aggregator = new ProviderAggregator(announceAddress, staticConfig);
+            ProviderAggregator aggregator = new ProviderAggregator(vertx, announceAddress, staticConfig);
             vertx.deployVerticle(aggregator);
 
             EventBus eb = vertx.eventBus();
@@ -146,6 +146,7 @@ public class ProxyApplication implements Application {
                     serviceName);
 
             // TODO parse rule (https://github.com/Sallatik/predicate-parser)
+            // what rules do we want to support
             String rule = router.getString(DynamicConfiguration.ROUTER_RULE);
             String pathPrefix = rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
 

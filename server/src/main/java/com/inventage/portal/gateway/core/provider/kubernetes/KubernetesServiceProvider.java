@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -17,12 +18,15 @@ public class KubernetesServiceProvider extends AbstractProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceProvider.class);
 
+    private Vertx vertx;
+
     private EventBus eb;
     private String configurationAddress;
 
     private ServiceDiscovery kubernetesDiscovery;
 
-    public KubernetesServiceProvider(String configurationAddress) {
+    public KubernetesServiceProvider(Vertx vertx, String configurationAddress) {
+        this.vertx = vertx;
         this.configurationAddress = configurationAddress;
     }
 

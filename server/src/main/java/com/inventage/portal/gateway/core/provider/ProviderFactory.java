@@ -6,15 +6,16 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public interface ProviderFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(Provider.class);
+    Logger LOGGER = LoggerFactory.getLogger(ProviderFactory.class);
 
     String provides();
 
-    AbstractProvider create(String configurationAddress, JsonObject providerConfig);
+    AbstractProvider create(Vertx vertx, String configurationAddress, JsonObject providerConfig);
 
     class Loader {
         public static ProviderFactory getFactory(String providerName) {
@@ -25,8 +26,7 @@ public interface ProviderFactory {
             if (provider.isPresent()) {
                 return provider.get();
             } else {
-                throw new IllegalStateException(
-                        String.format("Application provider '%s' doesn't exist!", providerName));
+                throw new IllegalStateException(String.format("Provider factory '%s' doesn't exist!", providerName));
             }
         }
     }

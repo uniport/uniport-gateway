@@ -43,7 +43,6 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         retriever.getConfig(asyncResult -> {
             try {
                 final JsonObject config = asyncResult.result();
-                System.out.println(config);
                 // TODO validate config with StaticConfiguration.validate(config)
                 publicHostname = config.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
                         PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);

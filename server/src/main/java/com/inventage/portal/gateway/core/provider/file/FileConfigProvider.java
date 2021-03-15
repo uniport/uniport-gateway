@@ -12,6 +12,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -19,6 +20,8 @@ import io.vertx.core.json.JsonObject;
 public class FileConfigProvider extends AbstractProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);
+
+    private Vertx vertx;
 
     private EventBus eb;
     private String configurationAddress;
@@ -29,7 +32,9 @@ public class FileConfigProvider extends AbstractProvider {
     private Boolean watch;
     private int scanPeriodMs = 5000;
 
-    public FileConfigProvider(String configurationAddress, String filename, String directory, Boolean watch) {
+    public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
+            Boolean watch) {
+        this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
 

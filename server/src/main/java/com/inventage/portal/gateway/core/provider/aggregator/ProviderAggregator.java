@@ -5,15 +5,19 @@ import com.inventage.portal.gateway.core.provider.AbstractProvider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
 
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class ProviderAggregator extends AbstractProvider {
 
+    private Vertx vertx;
+
     private String configurationAddress;
     private JsonObject staticConfig;
 
-    public ProviderAggregator(String configurationAddress, JsonObject staticConfig) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonObject staticConfig) {
+        this.vertx = vertx;
         this.configurationAddress = configurationAddress;
         this.staticConfig = staticConfig;
     }
@@ -32,7 +36,7 @@ public class ProviderAggregator extends AbstractProvider {
 
             AbstractProvider provider = ProviderFactory.Loader
                     .getFactory(providerConfig.getString(StaticConfiguration.PROVIDER_NAME))
-                    .create(this.configurationAddress, providerConfig);
+                    .create(this.vertx, this.configurationAddress, providerConfig);
 
             launchProvider(provider);
         }

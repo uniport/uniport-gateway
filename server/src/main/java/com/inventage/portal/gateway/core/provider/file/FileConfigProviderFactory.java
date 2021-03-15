@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.core.provider.file;
 import com.inventage.portal.gateway.core.provider.AbstractProvider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class FileConfigProviderFactory implements ProviderFactory {
@@ -17,11 +18,11 @@ public class FileConfigProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public AbstractProvider create(String configurationAddress, JsonObject providerConfig) {
+    public AbstractProvider create(Vertx vertx, String configurationAddress, JsonObject providerConfig) {
         String filename = providerConfig.getString(PROVIDER_FILENAME, "");
         String directory = providerConfig.getString(PROVIDER_DIRECTORY, "");
         Boolean watch = providerConfig.getBoolean(PROVIDER_WATCH, false);
-        return new FileConfigProvider(configurationAddress, filename, directory, watch);
+        return new FileConfigProvider(vertx, configurationAddress, filename, directory, watch);
     }
 
 }

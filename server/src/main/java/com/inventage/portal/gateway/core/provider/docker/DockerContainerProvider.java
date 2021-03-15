@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
@@ -25,6 +26,8 @@ public class DockerContainerProvider extends AbstractProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
     private static final String announceAddress = "docker-container-announce";
     private static final String defaultTempateRule = "Host('${name}')";
+
+    private Vertx vertx;
 
     private EventBus eb;
     private String configurationAddress;
@@ -38,8 +41,9 @@ public class DockerContainerProvider extends AbstractProvider {
 
     private Map<String, JsonObject> configurations = new HashMap<String, JsonObject>();
 
-    public DockerContainerProvider(String configurationAddress) {
-        this.eb = vertx.eventBus();
+    public DockerContainerProvider(Vertx vertx, String configurationAddress) {
+        this.vertx = vertx;
+        this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;
 
         this.watch = true;

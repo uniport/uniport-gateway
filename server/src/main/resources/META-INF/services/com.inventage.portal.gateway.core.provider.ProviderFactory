@@ -1,0 +1,3 @@
+com.inventage.portal.gateway.core.provider.file.FileConfigProviderFactory
+com.inventage.portal.gateway.core.provider.docker.DockerContainerProviderFactory
+com.inventage.portal.gateway.core.provider.kubernetes.KubernetesServiceProviderFactory
