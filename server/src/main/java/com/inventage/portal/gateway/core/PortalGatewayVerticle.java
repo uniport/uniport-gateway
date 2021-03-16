@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.core;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.startup.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
@@ -41,19 +42,25 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
         retriever.getConfig(asyncResult -> {
             try {
-                final JsonObject config = asyncResult.result();
-                // TODO validate config with StaticConfiguration.validate(config)
-                publicHostname = config.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                        PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+                final JsonObject staticConfig = asyncResult.result();
+                StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
+                    if (ar.failed()) {
+                        LOGGER.error("Failed to validate static configuration");
+                        shutdownOnStartupFailure(ar.cause());
+                    }
 
-                // get the entrypoints from the configuration
-                List<Entrypoint> entrypoints = entrypoints(config);
+                    publicHostname = staticConfig.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                            PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
-                // get the applications from the configuration
-                final List<Application> applications = applications(config);
+                    // get the entrypoints from the configuration
+                    List<Entrypoint> entrypoints = entrypoints(staticConfig);
 
-                deployAndMountApplications(applications, entrypoints);
-                createListenersForEntrypoints(entrypoints, config, startPromise);
+                    // get the applications from the configuration
+                    final List<Application> applications = applications(staticConfig);
+
+                    deployAndMountApplications(applications, entrypoints);
+                    createListenersForEntrypoints(entrypoints, staticConfig, startPromise);
+                });
             } catch (Exception e) {
                 shutdownOnStartupFailure(e);
             }
