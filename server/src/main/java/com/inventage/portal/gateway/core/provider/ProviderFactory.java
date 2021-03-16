@@ -15,7 +15,7 @@ public interface ProviderFactory {
 
     String provides();
 
-    AbstractProvider create(Vertx vertx, String configurationAddress, JsonObject providerConfig);
+    Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig);
 
     class Loader {
         public static ProviderFactory getFactory(String providerName) {

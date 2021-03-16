@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.core.provider.kubernetes;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.kubernetes.KubernetesServiceImporter;
 
-public class KubernetesServiceProvider extends AbstractProvider {
+public class KubernetesServiceProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceProvider.class);
 
@@ -85,9 +85,9 @@ public class KubernetesServiceProvider extends AbstractProvider {
                 LOGGER.info("configuration published");
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
-                                .put(AbstractProvider.PROVIDER_NAME,
+                                .put(Provider.PROVIDER_NAME,
                                         KubernetesServiceProviderFactory.PROVIDER_NAME)
-                                .put(AbstractProvider.PROVIDER_CONFIGURATION, config));
+                                .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("invalid configuration");
             }

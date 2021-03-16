@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.core.provider.file;
 import java.io.File;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class FileConfigProvider extends AbstractProvider {
+public class FileConfigProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);
 
@@ -106,9 +106,9 @@ public class FileConfigProvider extends AbstractProvider {
                 LOGGER.info("configuration published");
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
-                                .put(AbstractProvider.PROVIDER_NAME,
+                                .put(Provider.PROVIDER_NAME,
                                         FileConfigProviderFactory.PROVIDER_NAME)
-                                .put(AbstractProvider.PROVIDER_CONFIGURATION, config));
+                                .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("invalid configuration");
             }

@@ -9,7 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class ProviderAggregator extends AbstractProvider {
+public class ProviderAggregator extends Provider {
 
     private Vertx vertx;
 
@@ -33,7 +33,7 @@ public class ProviderAggregator extends AbstractProvider {
         for (int i = 0; i < providers.size(); i++) {
             JsonObject providerConfig = providers.getJsonObject(i);
 
-            AbstractProvider provider = ProviderFactory.Loader
+            Provider provider = ProviderFactory.Loader
                     .getFactory(providerConfig.getString(StaticConfiguration.PROVIDER_NAME))
                     .create(this.vertx, this.configurationAddress, providerConfig);
 
@@ -43,7 +43,7 @@ public class ProviderAggregator extends AbstractProvider {
         startPromise.complete();
     }
 
-    private void launchProvider(AbstractProvider provider) {
+    private void launchProvider(Provider provider) {
         vertx.deployVerticle(provider);
     }
 

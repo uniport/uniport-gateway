@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.label.Parser;
-import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.docker.servicediscovery.DockerContainerServiceImporter;
 
 import org.apache.commons.text.StringSubstitutor;
@@ -22,7 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
-public class DockerContainerProvider extends AbstractProvider {
+public class DockerContainerProvider extends Provider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
     private static final String announceAddress = "docker-container-announce";
     private static final String defaultTempateRule = "Host('${name}')";
@@ -217,9 +217,9 @@ public class DockerContainerProvider extends AbstractProvider {
                 LOGGER.info("configuration published");
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
-                                .put(AbstractProvider.PROVIDER_NAME,
+                                .put(Provider.PROVIDER_NAME,
                                         DockerContainerProviderFactory.PROVIDER_NAME)
-                                .put(AbstractProvider.PROVIDER_CONFIGURATION, config));
+                                .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("invalid configuration");
             }

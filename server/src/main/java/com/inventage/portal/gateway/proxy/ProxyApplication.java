@@ -6,7 +6,7 @@ import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 

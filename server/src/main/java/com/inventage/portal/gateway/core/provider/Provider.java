@@ -1,9 +1,11 @@
 package com.inventage.portal.gateway.core.provider;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 
-public interface Provider {
+public abstract class Provider extends AbstractVerticle {
+    public static final String PROVIDER_CONFIGURATION = "configuration";
+    public static final String PROVIDER_NAME = "name";
 
-    public void provide(Promise<Void> startPromise);
-
+    public abstract void provide(Promise<Void> startPromise);
 }

@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.core.provider.docker;
 
-import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
 
 import io.vertx.core.Vertx;
@@ -15,8 +15,7 @@ public class DockerContainerProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public AbstractProvider create(Vertx vertx, String configurationAddress,
-            JsonObject providerConfig) {
+    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig) {
         return new DockerContainerProvider(vertx, configurationAddress);
     }
 
