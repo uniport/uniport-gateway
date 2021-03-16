@@ -1,9 +1,14 @@
 package com.inventage.portal.gateway.core.provider.aggregator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
 
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -30,6 +35,7 @@ public class ProviderAggregator extends Provider {
     public void provide(Promise<Void> startPromise) {
         JsonArray providers = this.staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
 
+        List<Future> futures = new ArrayList<>();
         for (int i = 0; i < providers.size(); i++) {
             JsonObject providerConfig = providers.getJsonObject(i);
 
@@ -37,14 +43,20 @@ public class ProviderAggregator extends Provider {
                     .getFactory(providerConfig.getString(StaticConfiguration.PROVIDER_NAME))
                     .create(this.vertx, this.configurationAddress, providerConfig);
 
-            launchProvider(provider);
+            futures.add(launchProvider(provider));
         }
 
-        startPromise.complete();
+        CompositeFuture.join(futures).onComplete(ar -> {
+            if (ar.succeeded()) {
+                startPromise.complete();
+            } else {
+                startPromise.fail(ar.cause());
+            }
+        });
     }
 
-    private void launchProvider(Provider provider) {
-        vertx.deployVerticle(provider);
+    private Future<String> launchProvider(Provider provider) {
+        return this.vertx.deployVerticle(provider);
     }
 
 }

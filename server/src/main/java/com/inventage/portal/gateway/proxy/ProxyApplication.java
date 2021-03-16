@@ -69,50 +69,17 @@ public class ProxyApplication implements Application {
      */
     private final Router router;
 
-    private Map<String, JsonObject> configurations;
+    private final int providersThrottleDuration = 2;
 
     public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
         this.name = name;
         this.entrypoint = entrypoint;
         this.staticConfig = staticConfig;
         this.router = Router.router(vertx);
-        this.configurations = new HashMap<>();
     }
 
     public String toString() {
         return String.format("%s:%s", getClass().getSimpleName(), name);
-    }
-
-    @Override
-    public Future<?> deployOn(Vertx vertx) {
-        StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
-            if (ar.failed()) {
-                LOGGER.error("Invalid static configuration");
-                ar.cause();
-            }
-            String announceAddress = "service-announce";
-
-            ProviderAggregator aggregator =
-                    new ProviderAggregator(vertx, announceAddress, staticConfig);
-            vertx.deployVerticle(aggregator);
-
-            EventBus eb = vertx.eventBus();
-            MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
-            announceConsumer.handler(message -> {
-                JsonObject messageBody = message.body();
-                String providerName = messageBody.getString(Provider.PROVIDER_NAME);
-                JsonObject providerConfig =
-                        messageBody.getJsonObject(Provider.PROVIDER_CONFIGURATION);
-
-                // TODO merge configurations over all providers
-
-                updateRoutes(vertx, providerConfig);
-            });
-        });
-
-        // TODO: not really happy with this but how should it be solved?
-        // maybe ping
-        return Future.succeededFuture();
     }
 
     @Override
@@ -128,6 +95,31 @@ public class ProxyApplication implements Application {
     @Override
     public String entrypoint() {
         return entrypoint;
+    }
+
+    @Override
+    public Future<?> deployOn(Vertx vertx) {
+        StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
+            if (ar.failed()) {
+                LOGGER.error("Invalid static configuration");
+                ar.cause();
+            }
+            String announceAddress = "service-announce";
+
+            ProviderAggregator aggregator =
+                    new ProviderAggregator(vertx, announceAddress, staticConfig);
+
+            ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator,
+                    this.providersThrottleDuration, Arrays.asList(this.entrypoint));
+
+            // TODO add listener to update routes
+
+            Future<String> watcherFuture = watcher.start();
+        });
+
+        // TODO: not really happy with this but how should it be solved?
+        // maybe ping
+        return Future.succeededFuture();
     }
 
     private void updateRoutes(Vertx vertx, JsonObject config) {

@@ -182,28 +182,6 @@ public class DynamicConfiguration {
         return mergedConfig;
     }
 
-    public static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
-        JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
-
-        if (httpConfig == null) {
-            return config;
-        }
-
-        JsonArray rs = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-        for (int i = 0; i < rs.size(); i++) {
-            JsonObject r = rs.getJsonObject(i);
-            JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
-            if (rEntrypoints == null || rEntrypoints.size() == 0) {
-                LOGGER.info(
-                        "No entryPoint defined for this router, using the default one(s) instead: {}",
-                        entrypoints.toString());
-                r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
-            }
-        }
-
-        return config;
-    }
-
     public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
         if (jsonArr == null) {
             return null;
