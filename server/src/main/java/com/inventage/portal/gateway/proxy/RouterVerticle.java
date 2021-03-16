@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway.proxy;
 
 import com.inventage.portal.gateway.core.config.startup.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.middleware.headers.HeaderHandler;
+import com.inventage.portal.gateway.core.middleware.proxy.ProxyHandler;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 import com.inventage.portal.gateway.proxy.request.ProxiedHttpServerRequest;
 import com.inventage.portal.gateway.proxy.request.header.RequestHeaderMiddleware;
@@ -20,6 +22,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.AllowForwardHeaders;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
@@ -89,6 +92,13 @@ public class RouterVerticle extends AbstractVerticle {
                 final JsonObject globalConfig = asyncResult.result();
                 configureMiddleware();
                 this.service = fromServiceConfig(globalConfig);
+
+                // TODO move everthing here into middlewares
+                // Route route = router.route();
+                // route.handler(HeaderHandler.create());
+                // route.handler(ProxyHandler.create(vertx, serviceConfig.getString("serverHost"),
+                // serviceConfig.getInteger("serverPort")));
+                // startPromise.complete();
 
                 configureOptionalOAuth2(globalConfig).compose(authenticationHandler -> {
                     router.route().handler(this::forward);
