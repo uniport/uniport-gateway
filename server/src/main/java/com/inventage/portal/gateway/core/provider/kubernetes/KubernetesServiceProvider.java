@@ -89,7 +89,7 @@ public class KubernetesServiceProvider extends Provider {
                                         KubernetesServiceProviderFactory.PROVIDER_NAME)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.error("invalid configuration");
+                LOGGER.error("cannot publish new configuration: invalid configuration");
             }
         });
     }

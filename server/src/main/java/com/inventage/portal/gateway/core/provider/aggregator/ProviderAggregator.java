@@ -7,6 +7,9 @@ import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -15,6 +18,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class ProviderAggregator extends Provider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProviderAggregator.class);
 
     private Vertx vertx;
 
@@ -48,6 +53,7 @@ public class ProviderAggregator extends Provider {
 
         CompositeFuture.join(futures).onComplete(ar -> {
             if (ar.succeeded()) {
+                LOGGER.info("Launched all providers successfully");
                 startPromise.complete();
             } else {
                 startPromise.fail(ar.cause());

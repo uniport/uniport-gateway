@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,13 +36,14 @@ public class ConfigurationWatcher {
 
     private List<String> defaultEntrypoints;
 
-    public ConfigurationWatcher(Vertx vertx, Provider provider, int providersThrottleDuration,
-            List<String> defaultEntrypoints) {
+    public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
+            int providersThrottleDuration, List<String> defaultEntrypoints) {
         this.vertx = vertx;
         this.provider = provider;
-        this.configurationAddress = "configuration-announce-address";
+        this.configurationAddress = configurationAddress;
         this.providersThrottleDuration = providersThrottleDuration;
         this.defaultEntrypoints = defaultEntrypoints;
+        this.currentConfigurations = new HashMap<>();
     }
 
     public Future<String> start() {
@@ -65,6 +67,7 @@ public class ConfigurationWatcher {
 
             String providerName = messageBody.getString(Provider.PROVIDER_NAME);
             JsonObject providerConfig = messageBody.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+            LOGGER.debug("Received new configuration from '{}'", providerName);
 
             loadMessage(providerName, providerConfig);
         });
@@ -81,6 +84,7 @@ public class ConfigurationWatcher {
         JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
+        LOGGER.debug("Informing listeners about new configuration");
         for (Listener listener : this.configurationListeners) {
             listener.listen(mergedConfig);
         }
@@ -107,8 +111,8 @@ public class ConfigurationWatcher {
                     String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
 
                     // TODO maybe use map like traefik
-                    rt.put(DynamicConfiguration.ROUTER_NAME,
-                            makeQualifiedName(providerName, rtName));
+                    // rt.put(DynamicConfiguration.ROUTER_NAME,
+                    // makeQualifiedName(providerName, rtName));
                     mergedRts.add(rt);
                 }
 
@@ -120,8 +124,8 @@ public class ConfigurationWatcher {
                     String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
 
                     // TODO maybe use map like traefik
-                    mw.put(DynamicConfiguration.MIDDLEWARE_NAME,
-                            makeQualifiedName(providerName, mwName));
+                    // mw.put(DynamicConfiguration.MIDDLEWARE_NAME,
+                    // makeQualifiedName(providerName, mwName));
                     mergedMws.add(mw);
                 }
 
@@ -132,8 +136,8 @@ public class ConfigurationWatcher {
                     String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
 
                     // TODO maybe use map like traefik
-                    sv.put(DynamicConfiguration.SERVICE_NAME,
-                            makeQualifiedName(providerName, svName));
+                    // sv.put(DynamicConfiguration.SERVICE_NAME,
+                    // makeQualifiedName(providerName, svName));
                     mergedSvs.add(sv);
                 }
             }
@@ -143,7 +147,7 @@ public class ConfigurationWatcher {
     }
 
     private static String makeQualifiedName(String providerName, String routerName) {
-        return String.format("%s@%s", providerName, routerName);
+        return String.format("%s@%s", routerName, providerName);
     }
 
     private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {

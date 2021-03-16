@@ -43,7 +43,7 @@ public class Entrypoint {
         this.enabled = true;
     }
 
-    public Object name() {
+    public String name() {
         return name;
     }
 

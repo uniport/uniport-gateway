@@ -4,10 +4,9 @@ import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.aggregator.ProviderAggregator;
+import com.inventage.portal.gateway.core.router.RouterFactory;
 import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 
 import org.slf4j.Logger;
@@ -16,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -67,7 +64,7 @@ public class ProxyApplication implements Application {
     /**
      * the router on which the routes for this application will be added
      */
-    private final Router router;
+    private Router router;
 
     private final int providersThrottleDuration = 2;
 
@@ -99,27 +96,37 @@ public class ProxyApplication implements Application {
 
     @Override
     public Future<?> deployOn(Vertx vertx) {
-        StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
-            if (ar.failed()) {
-                LOGGER.error("Invalid static configuration");
-                ar.cause();
+        // TODO move this definition elsewhere
+        String configurationAddress = "configuration-announce-address";
+
+        ProviderAggregator aggregator =
+                new ProviderAggregator(vertx, configurationAddress, staticConfig);
+
+        ConfigurationWatcher watcher =
+                new ConfigurationWatcher(vertx, aggregator, configurationAddress,
+                        this.providersThrottleDuration, Arrays.asList(this.entrypoint));
+
+        RouterFactory routerFactory = new RouterFactory(vertx);
+
+        watcher.addListener(switchRouter(vertx, routerFactory));
+
+        return watcher.start();
+    }
+
+    private Listener switchRouter(Vertx vertx, RouterFactory routerFactory) {
+        return new Listener() {
+            @Override
+            public void listen(JsonObject config) {
+                updateRoutes(vertx, config);
+                // Router router = routerFactory.createRouter(config);
+                // setRouter(router);
+                // TODO update entrypoint router
             }
-            String announceAddress = "service-announce";
+        };
+    }
 
-            ProviderAggregator aggregator =
-                    new ProviderAggregator(vertx, announceAddress, staticConfig);
-
-            ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator,
-                    this.providersThrottleDuration, Arrays.asList(this.entrypoint));
-
-            // TODO add listener to update routes
-
-            Future<String> watcherFuture = watcher.start();
-        });
-
-        // TODO: not really happy with this but how should it be solved?
-        // maybe ping
-        return Future.succeededFuture();
+    private void setRouter(Router router) {
+        this.router = router;
     }
 
     private void updateRoutes(Vertx vertx, JsonObject config) {

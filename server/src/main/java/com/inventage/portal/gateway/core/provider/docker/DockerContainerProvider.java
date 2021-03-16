@@ -221,7 +221,7 @@ public class DockerContainerProvider extends Provider {
                                         DockerContainerProviderFactory.PROVIDER_NAME)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.error("invalid configuration");
+                LOGGER.error("cannot publish new configuration: invalid configuration");
             }
         });
     }
