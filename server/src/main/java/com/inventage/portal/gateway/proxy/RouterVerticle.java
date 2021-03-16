@@ -34,16 +34,16 @@ import java.util.function.Function;
 /**
  *
  */
-public class ProxyVerticle extends AbstractVerticle {
+public class RouterVerticle extends AbstractVerticle {
 
     public static final String SERVICE_PROVIDER = "provider";
     public static final String MIDDLEWARE_HEADERS = "headers";
     public static final String MIDDLEWARE_URIS = "uris";
     public static final String MIDDLEWARE_PROVIDER = "provider";
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ProxyVerticle.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(RouterVerticle.class);
 
-    private JsonObject proxyConfig;
+    private JsonObject routerConfig;
     private String publicHostname;
     private int entrypointPort;
     private Optional<JsonObject> middlewareConfig;
@@ -55,32 +55,33 @@ public class ProxyVerticle extends AbstractVerticle {
 
     private Service service;
 
-    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort,
-            Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter) {
-        this(proxyConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig,
-                proxyRouter, Optional.empty());
+    public RouterVerticle(JsonObject routerConfig, String publicHostname, int entrypointPort,
+            Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router router) {
+        this(routerConfig, publicHostname, entrypointPort, middlewareConfig, serviceConfig, router,
+                Optional.empty());
     }
 
-    public ProxyVerticle(JsonObject proxyConfig, String publicHostname, int entrypointPort,
-            Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router proxyRouter,
+    public RouterVerticle(JsonObject routerConfig, String publicHostname, int entrypointPort,
+            Optional<JsonObject> middlewareConfig, JsonObject serviceConfig, Router router,
             Optional<OAuth2Configuration> oAuth2Configuration) {
-        this.proxyConfig = proxyConfig;
+        this.routerConfig = routerConfig;
         this.publicHostname = publicHostname;
         this.entrypointPort = entrypointPort;
         this.middlewareConfig = middlewareConfig;
         this.serviceConfig = serviceConfig;
-        this.router = proxyRouter;
+        this.router = router;
         this.oAuth2Configuration = oAuth2Configuration;
     }
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        LOGGER.debug("start: proxy '{}'", proxyConfig.getString(ProxyApplication.ROUTER_NAME));
+        LOGGER.debug("start: router'{}'",
+                this.routerConfig.getString(ProxyApplication.ROUTER_NAME));
         init(startPromise);
     }
 
     private void init(Promise<Void> startPromise) {
-        LOGGER.debug("init: proxy '{}'", proxyConfig.getString(ProxyApplication.ROUTER_NAME));
+        LOGGER.debug("init: router'{}'", this.routerConfig.getString(ProxyApplication.ROUTER_NAME));
         // TODO should not use the globalConfig but its own fields
         final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
         retriever.getConfig(asyncResult -> {
@@ -151,8 +152,9 @@ public class ProxyVerticle extends AbstractVerticle {
                 promise.complete(authenticationHandler);
             }).onFailure(failure -> {
                 final String message = String.format(
-                        "configureOptionalOAuth2: for proxy '%s' failed with message '%s'",
-                        proxyConfig.getString(ProxyApplication.ROUTER_NAME), failure.getMessage());
+                        "configureOptionalOAuth2: for router'%s' failed with message '%s'",
+                        this.routerConfig.getString(ProxyApplication.ROUTER_NAME),
+                        failure.getMessage());
                 LOGGER.error(message);
                 promise.fail(message);
             });
@@ -209,8 +211,9 @@ public class ProxyVerticle extends AbstractVerticle {
     }
 
     private String sessionScopeOrName() {
-        return proxyConfig.getString("sessionScope") != null ? proxyConfig.getString("sessionScope")
-                : proxyConfig.getString(ProxyApplication.ROUTER_NAME);
+        return this.routerConfig.getString("sessionScope") != null
+                ? this.routerConfig.getString("sessionScope")
+                : this.routerConfig.getString(ProxyApplication.ROUTER_NAME);
     }
 
     /**
