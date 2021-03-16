@@ -69,11 +69,14 @@ public class ProxyApplication implements Application {
      */
     private final Router router;
 
+    private Map<String, JsonObject> configurations;
+
     public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
         this.name = name;
         this.entrypoint = entrypoint;
         this.staticConfig = staticConfig;
         this.router = Router.router(vertx);
+        this.configurations = new HashMap<>();
     }
 
     public String toString() {
@@ -97,9 +100,11 @@ public class ProxyApplication implements Application {
             MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
             announceConsumer.handler(message -> {
                 JsonObject messageBody = message.body();
-                String providerName = messageBody.getString(AbstractProvider.PROVIDER_NAME);
+                String providerName = messageBody.getString(Provider.PROVIDER_NAME);
                 JsonObject providerConfig =
-                        messageBody.getJsonObject(AbstractProvider.PROVIDER_CONFIGURATION);
+                        messageBody.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+
+                // TODO merge configurations over all providers
 
                 updateRoutes(vertx, providerConfig);
             });
@@ -133,14 +138,14 @@ public class ProxyApplication implements Application {
 
         JsonArray newRouterConfigs = new JsonArray();
 
-        // TODO why do we need different providers?
+        // TODO why do we need different providers? -> those are services now
         // maybe also change the name to something else like RequestHandlers, Connectors
         String provider = "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider";
         String publicHostname =
                 this.staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
                         PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
-        List<ProxyVerticle> proxyVerticles = new ArrayList<>();
+        List<RouterVerticle> proxyVerticles = new ArrayList<>();
 
         JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
@@ -153,8 +158,7 @@ public class ProxyApplication implements Application {
 
             // TODO parse rule (https://github.com/Sallatik/predicate-parser)
             // what rules do we want to support (at the moment everything is a Path)
-            // traefik has: Host HostHeader HostRegexp Path PathPrefix Method Headers
-            // HeadersRegexp Query
+            // -> Host PathPrefix (only one rule at a time)
             String rule = router.getString(DynamicConfiguration.ROUTER_RULE);
             String pathPrefix =
                     rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
@@ -179,7 +183,7 @@ public class ProxyApplication implements Application {
 
             final Router proxyRouter = Router.router(vertx);
 
-            ProxyVerticle proxyVerticle = new ProxyVerticle(routerConfig, publicHostname,
+            RouterVerticle proxyVerticle = new RouterVerticle(routerConfig, publicHostname,
                     Entrypoint.entrypointConfigByName(entrypoint, this.staticConfig)
                             .getInteger(Entrypoint.PORT),
                     middlewareConfiguration, serviceConfig, proxyRouter, oAuth2Configuration);

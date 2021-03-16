@@ -68,6 +68,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             application.deployOn(vertx).onComplete(deployed -> {
                 if (deployed.succeeded()) {
                     // TODO do we want to support configurable entrypoints per router?
+                    // router listens only on entrypoints of its application
                     entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
                 } else {
                     shutdownOnStartupFailure(deployed.cause());

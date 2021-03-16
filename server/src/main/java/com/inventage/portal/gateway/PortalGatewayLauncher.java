@@ -28,16 +28,12 @@ public class PortalGatewayLauncher extends Launcher {
         LOGGER = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
         LOGGER.info("main: Portal Gateway starting....");
 
-        System.setProperty("vertx.metrics.options.enabled", "true"); // enable metrics
-        System.setProperty("vertx.metrics.options.registryName", "PortalGatewayMetrics"); // name of
-                                                                                          // the
-                                                                                          // metrics
-                                                                                          // registry
-        System.setProperty("vertx.options.maxWorkerExecuteTime", "240000000000"); // increase
-                                                                                  // timeout for
-                                                                                  // worker
-                                                                                  // execution to 2
-                                                                                  // min
+        // enable metrics
+        System.setProperty("vertx.metrics.options.enabled", "true");
+        // name of the metrics registry
+        System.setProperty("vertx.metrics.options.registryName", "PortalGatewayMetrics");
+        // increase timeout for worker execution to 2 min
+        System.setProperty("vertx.options.maxWorkerExecuteTime", "240000000000");
 
         if (Runtime.isDevelopment()) {
             // increase the max event loop time to 10 min (default is 2000000000 ns = 2s) to omit

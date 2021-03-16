@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.core.provider.aggregator;
 
 import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
-import com.inventage.portal.gateway.core.provider.AbstractProvider;
+import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
 
 import io.vertx.core.Promise;

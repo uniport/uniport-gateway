@@ -175,9 +175,6 @@ public class DockerContainerService {
             }
         }
 
-        // TODO maybe check for host and container network mode
-        // traefik/pkg/docker/config.go:325
-
         for (ContainerNetwork network : container.getNetworkSettings().getNetworks().values()) {
             return network.getIpAddress();
         }
