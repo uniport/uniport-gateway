@@ -2,12 +2,10 @@ package com.inventage.portal.gateway.proxy;
 
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
-import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.core.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.core.router.RouterFactory;
-import com.inventage.portal.gateway.proxy.oauth2.OAuth2Configuration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +31,6 @@ public class ProxyApplication implements Application {
     public static final String ROUTERS = "routers";
     public static final String ROUTER_NAME = "name";
     public static final String PATH_PREFIX = "pathPrefix";
-    public static final String OAUTH2 = "oauth2";
-    public static final String OAUTH2_CLIENTID = "clientId";
-    public static final String OAUTH2_CLIENTSECRET = "clientSecret";
-    public static final String OAUTH2_DISCOVERYURL = "discoveryUrl";
-    public static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     public static final String SERVICES = "services";
     public static final String SERVICE = "service";
     public static final String SERVICE_NAME = "name";
@@ -177,15 +170,15 @@ public class ProxyApplication implements Application {
                     new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
                             .put("serverHost", host).put("serverPort", Integer.parseInt(port));
 
-            Optional<OAuth2Configuration> oAuth2Configuration = oAuth2Configuration(routerConfig);
             Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);
 
             final Router proxyRouter = Router.router(vertx);
 
-            RouterVerticle proxyVerticle = new RouterVerticle(routerConfig, publicHostname,
-                    Entrypoint.entrypointConfigByName(entrypoint, this.staticConfig)
-                            .getInteger(Entrypoint.PORT),
-                    middlewareConfiguration, serviceConfig, proxyRouter, oAuth2Configuration);
+            RouterVerticle proxyVerticle =
+                    new RouterVerticle(routerConfig, publicHostname,
+                            Entrypoint.entrypointConfigByName(entrypoint, this.staticConfig)
+                                    .getInteger(Entrypoint.PORT),
+                            middlewareConfiguration, serviceConfig, proxyRouter);
             proxyVerticles.add(proxyVerticle);
 
             newRouter.mountSubRouter(pathPrefix, proxyRouter);
@@ -217,20 +210,6 @@ public class ProxyApplication implements Application {
         final JsonObject middleware = proxy.getJsonObject(MIDDLEWARE);
         if (middleware != null) {
             return Optional.of(middleware);
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<OAuth2Configuration> oAuth2Configuration(JsonObject proxy) {
-        final JsonObject oauth2 = proxy.getJsonObject(OAUTH2);
-        if (oauth2 != null) {
-            return Optional.of(new OAuth2Configuration(oauth2.getString(OAUTH2_CLIENTID),
-                    oauth2.getString(OAUTH2_CLIENTSECRET),
-                    ConfigAdapter.replaceEnvVariables(this.staticConfig,
-                            oauth2.getString(OAUTH2_DISCOVERYURL)),
-                    router.get(
-                            OAUTH2_CALLBACK_PREFIX + proxy.getString(ROUTER_NAME).toLowerCase())));
         } else {
             return Optional.empty();
         }
