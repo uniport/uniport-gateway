@@ -15,9 +15,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -118,20 +121,63 @@ public class ProxyApplication implements Application {
         };
     }
 
+    private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {
+        return new RoutingRule() {
+            @Override
+            public Route apply(Router router) {
+                Router subRouter = Router.router(vertx);
+                return router.mountSubRouter(pathPrefix, subRouter);
+            }
+        };
+    }
+
+    private RoutingRule host(Vertx vertx, String host) {
+        return new RoutingRule() {
+            @Override
+            public Route apply(Router router) {
+                Router subRouter = Router.router(vertx);
+                return subRouter.route().virtualHost(host);
+            }
+
+        };
+    }
+
+    // only rules like PathPrefix('/abc') and Host('example.com') are supported
+    private RoutingRule parseRule(Vertx vertx, String rule) {
+        Pattern rulePattern =
+                Pattern.compile("^(?<ruleName>(Path|Host))\\('(?<ruleValue>[a-zA-Z]+)'\\)$");
+        Matcher m = rulePattern.matcher(rule);
+
+        RoutingRule routingRule;
+        String ruleValue = m.group("ruleValue");
+        switch (m.group("ruleName")) {
+            case "PathPrefix": {
+                routingRule = pathPrefix(vertx, ruleValue);
+                break;
+            }
+            case "Host": {
+                routingRule = host(vertx, ruleValue);
+                break;
+            }
+            default: {
+                LOGGER.error("Failed to parse rule: Unknown rule '{}'", rule);
+                routingRule = null;
+                break;
+            }
+        }
+        return routingRule;
+    }
+
     private void setRouter(Router router) {
         this.router = router;
     }
 
     private void updateRoutes(Vertx vertx, JsonObject config) {
-        Router newRouter = Router.router(vertx);
-
         JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
         System.out.println(httpConfig);
 
         JsonArray newRouterConfigs = new JsonArray();
 
-        // TODO why do we need different providers? -> those are services now
-        // maybe also change the name to something else like RequestHandlers, Connectors
         String provider = "com.inventage.portal.gateway.proxy.service.ServiceJsonFileProvider";
         String publicHostname =
                 this.staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
@@ -148,9 +194,7 @@ public class ProxyApplication implements Application {
             JsonObject service = DynamicConfiguration.getObjByKeyWithValue(services,
                     DynamicConfiguration.SERVICE_NAME, serviceName);
 
-            // TODO parse rule (https://github.com/Sallatik/predicate-parser)
-            // what rules do we want to support (at the moment everything is a Path)
-            // -> Host PathPrefix (only one rule at a time)
+            // TODO substitute with parsed rule
             String rule = router.getString(DynamicConfiguration.ROUTER_RULE);
             String pathPrefix =
                     rule.substring(rule.indexOf("(") + 1, rule.indexOf(")")).replace("'", "");
@@ -162,15 +206,15 @@ public class ProxyApplication implements Application {
             String port =
                     servers.getJsonObject(0).getString(DynamicConfiguration.SERVICE_SERVER_PORT);
 
-            JsonObject routerConfig = new JsonObject()
-                    .put(ROUTER_NAME, router.getString(DynamicConfiguration.ROUTER_NAME))
-                    .put(PATH_PREFIX, pathPrefix).put(SERVICE, serviceName);
+            JsonObject routerConfig = new JsonObject().put(ROUTER_NAME,
+                    router.getString(DynamicConfiguration.ROUTER_NAME));
 
             JsonObject serviceConfig =
                     new JsonObject().put(SERVICE_NAME, serviceName).put(PROVIDER, provider)
                             .put("serverHost", host).put("serverPort", Integer.parseInt(port));
 
-            Optional<JsonObject> middlewareConfiguration = middlewareConfig(routerConfig);
+            // TODO read middlewares
+            Optional<JsonObject> middlewareConfiguration = null;
 
             final Router proxyRouter = Router.router(vertx);
 
@@ -181,7 +225,6 @@ public class ProxyApplication implements Application {
                             middlewareConfiguration, serviceConfig, proxyRouter);
             proxyVerticles.add(proxyVerticle);
 
-            newRouter.mountSubRouter(pathPrefix, proxyRouter);
             newRouterConfigs
                     .add(new JsonObject().put("path", pathPrefix).put("router", proxyRouter));
         }

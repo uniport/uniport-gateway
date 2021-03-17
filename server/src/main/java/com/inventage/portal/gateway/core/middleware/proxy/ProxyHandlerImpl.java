@@ -21,8 +21,6 @@ public class ProxyHandlerImpl implements ProxyHandler {
             ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
         }
 
-        System.out.println(ctx.request().getClass());
-
         httpProxy.handle(ctx.request());
     }
 }

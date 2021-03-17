@@ -85,7 +85,6 @@ public class DockerContainerProvider extends Provider {
     }
 
     private JsonObject buildConfiguration(JsonObject dockerContainer) {
-        // TODO I am not really convinced with using the Record type to un/publish
         JsonObject metadata = dockerContainer.getJsonObject("metadata");
 
         String serviceName = metadata.getString("portal.docker.serviceName");
