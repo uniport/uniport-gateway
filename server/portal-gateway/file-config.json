@@ -2,18 +2,209 @@
   "http": {
     "routers": [
       {
-        "name": "router1",
-        "entrypoints": ["a", "b", "c"],
-        "service": "service1",
-        "rule": "Path('/foo')"
+        "name": "root",
+        "rule": "PathPrefix('/')",
+        "service": "dashboard-default"
+      },
+
+      {
+        "name": "auth",
+        "rule": "PathPrefix('/auth')",
+        "service": "portal-iam"
+      },
+
+      {
+        "name": "navigation-frontend",
+        "rule": "PathPrefix('/navigation/')",
+        "middlewares": ["authBearer", "navigation-replacePathRegex"],
+        "service": "navigation-frontend"
+      },
+      {
+        "name": "navigation-service",
+        "rule": "PathPrefix('/navigation/service')",
+        "middlewares": ["authBearer"],
+        "service": "navigation-service"
+      },
+
+      {
+        "name": "dashboard-default",
+        "rule": "PathPrefix('/dashboard')",
+        "middlewares": ["dashboard-redirectPath"],
+        "service": "dashboard-default"
+      },
+      {
+        "name": "dashboard-login-redirect",
+        "rule": "PathPrefix('/dashboard/login')",
+        "middlewares": ["dashboard-oauth2"],
+        "service": "dashboard-default"
+      },
+      {
+        "name": "dashboard-frontend",
+        "rule": "PathPrefix('/dashboard/')",
+        "middlewares": ["authBearer", "dashboard-replacePathRegex"],
+        "service": "dashboard-frontend"
+      },
+      {
+        "name": "dashboard-service",
+        "rule": "PathPrefix('/dashboard/service')",
+        "middlewares": ["authBearer"],
+        "service": "dashboard-service"
+      },
+
+      {
+        "name": "organisation-default",
+        "rule": "PathPrefix('/organisation')",
+        "middlewares": ["organisation-redirectPath"],
+        "service": "organisation-default"
+      },
+      {
+        "name": "organisation",
+        "rule": "Path('/organisation/')",
+        "middlewares": ["authBearer", "organisation-oauth2"],
+        "service": "organisation-service"
+      },
+
+      {
+        "name": "document-default",
+        "rule": "PathPrefix('/document')",
+        "middlewares": ["document-redirectPath"],
+        "service": "document-default"
+      },
+      {
+        "name": "document",
+        "rule": "Path('/document/')",
+        "middlewares": ["authBearer"],
+        "service": "document-service"
       }
     ],
+
+    "middlewares": [
+      {
+        "name": "authBearer",
+        "type": "AuthorizationBearerHeader"
+      },
+
+      {
+        "name": "navigation-replacePathRegex",
+        "type": "replacePathRegex",
+        "regex": "^/navigation/",
+        "replacement": "/"
+      },
+      {
+        "name": "dashboard-replacePathRegex",
+        "type": "replacePathRegex",
+        "regex": "^/dashboard/",
+        "replacement": "/"
+      },
+      {
+        "name": "organisation-replacePathRegex",
+        "type": "replacePathRegex",
+        "regex": "^/organisation/",
+        "replacement": "/"
+      },
+      {
+        "name": "document-replacePathRegex",
+        "type": "replacePathRegex",
+        "regex": "^/document/",
+        "replacement": "/"
+      },
+
+      {
+        "name": "dashboard-redirectPath",
+        "type": "redirectPath",
+        "destination": "/dashboard/"
+      },
+      {
+        "name": "organiation-redirectPath",
+        "type": "redirectPath",
+        "destination": "/organiation/"
+      },
+      {
+        "name": "document-redirectPath",
+        "type": "redirectPath",
+        "destination": "/document/"
+      },
+
+      {
+        "name": "dashboard-oauth2",
+        "type": "oauth2",
+        "clientId": "Dashboard",
+        "clientSecret": "Dashboard!",
+        "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
+      },
+      {
+        "name": "organisation-oauth2",
+        "type": "oauth2",
+        "clientId": "Organisation",
+        "clientSecret": "Organisation!",
+        "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal"
+      }
+    ],
+
     "services": [
       {
-        "name": "service1",
+        "name": "portal-iam",
         "servers": [
           {
-            "url": "abc:80"
+            "host": "${portal-iam.host}",
+            "port": 8080
+          }
+        ]
+      },
+
+      {
+        "name": "navigation-frontend",
+        "servers": [
+          {
+            "host": "${navigation-frontend.host}",
+            "port": 20015
+          }
+        ]
+      },
+      {
+        "name": "navigation-service",
+        "servers": [
+          {
+            "host": "${navigation-service.host}",
+            "port": 20012
+          }
+        ]
+      },
+
+      {
+        "name": "dashboard-frontend",
+        "servers": [
+          {
+            "host": "${dashboard-frontend.host}",
+            "port": 20025
+          }
+        ]
+      },
+      {
+        "name": "dashboard-service",
+        "servers": [
+          {
+            "host": "${dashboard-service.host}",
+            "port": 20022
+          }
+        ]
+      },
+
+      {
+        "name": "organisation-service",
+        "servers": [
+          {
+            "host": "${organisation-service.host}",
+            "port": 20030
+          }
+        ]
+      },
+      {
+        "name": "document-service",
+        "servers": [
+          {
+            "host": "${document-service.host}",
+            "port": 20050
           }
         ]
       }
