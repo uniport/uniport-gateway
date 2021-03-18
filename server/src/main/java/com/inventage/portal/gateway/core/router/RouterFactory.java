@@ -16,8 +16,6 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 
 public class RouterFactory {
-    // router
-
     Vertx vertx;
 
     public RouterFactory(Vertx vertx) {
