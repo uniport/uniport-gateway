@@ -22,14 +22,6 @@ public class ProxyApplication implements Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
-    public static final String ROUTERS = "routers";
-    public static final String ROUTER_NAME = "name";
-    public static final String PATH_PREFIX = "pathPrefix";
-    public static final String SERVICES = "services";
-    public static final String SERVICE = "service";
-    public static final String SERVICE_NAME = "name";
-    public static final String MIDDLEWARE = "middleware";
-
     /**
      * the name of this instance
      */
@@ -107,7 +99,7 @@ public class ProxyApplication implements Application {
                 Future<Router> routerCreation = routerFactory.createRouter(config);
                 routerCreation.onComplete(ar -> {
                     if (ar.succeeded()) {
-                        setRouter(ar.result());
+                        setSubRouter(ar.result());
                     } else {
                         LOGGER.error("Failed to create new router with '{}' from config '{}'",
                                 ar.cause(), config);
@@ -117,10 +109,9 @@ public class ProxyApplication implements Application {
         };
     }
 
-    private void setRouter(Router router) {
-        System.out.println(this.router.getRoutes());
+    private void setSubRouter(Router subRouter) {
+        // TODO might this create a connection gap?
         this.router.clear();
-        this.router.mountSubRouter("/", router);
-        System.out.println(this.router.getRoutes());
+        this.router.mountSubRouter("/", subRouter);
     }
 }
