@@ -1,11 +1,9 @@
 package com.inventage.portal.gateway.core.middleware.headers;
 
+import com.inventage.portal.gateway.core.middleware.Middleware;
 import io.vertx.ext.web.RoutingContext;
 
-public class HeaderHandlerImpl implements HeaderHandler {
-
-    public HeaderHandlerImpl() {
-    }
+public class HeaderMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {

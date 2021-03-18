@@ -17,12 +17,6 @@
   ],
   "providers": [
     {
-      "name": "file",
-      "filename": "file-config.json",
-      "directory": "",
-      "watch": false
-    },
-    {
       "name": "docker",
       "endpoint": "unix:///var/run/docker.sock",
       "watch": true

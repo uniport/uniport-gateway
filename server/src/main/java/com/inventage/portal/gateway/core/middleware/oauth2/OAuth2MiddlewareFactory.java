@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import com.inventage.portal.gateway.core.middleware.Middleware;
+import com.inventage.portal.gateway.core.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -14,10 +14,11 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 
-public interface OAuth2Handler extends Handler<RoutingContext> {
+public class OAuth2MiddlewareFactory implements MiddlewareFactory {
+
+    Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
     public static final String OAUTH2 = "oauth2";
     public static final String OAUTH2_CLIENTID = "clientId";
@@ -26,9 +27,20 @@ public interface OAuth2Handler extends Handler<RoutingContext> {
     public static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     public static final String OAUTH2_SCOPE = "openid";
 
-    static OAuth2Handler create(Vertx vertx, JsonObject middlewareConfig, Router router,
-            String routerName, String sessionScope, String publicHostname, String entrypointPort) {
+    @Override
+    public String provides() {
+        return "oauth2";
+    }
 
+    @Override
+    public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
+
+        // TODO configure
+        Router router = null;
+        String routerName = null;
+        String sessionScope = null;
+        String publicHostname = null;
+        String entrypointPort = null;
 
         // if (sessionScope == null || "".equals(sessionScope)) {
         // sessionScope = routerName;
@@ -68,8 +80,10 @@ public interface OAuth2Handler extends Handler<RoutingContext> {
 
         });
 
-        // TODO solve this asynch problem
+        // TODO/ASK solve this asynch problem
         // return new OAuth2HandlerImpl(authHandler, sessionScope);
-        return new OAuth2HandlerImpl(null, sessionScope);
+        return new OAuth2AuthMiddleware(null, sessionScope);
     }
+
 }
+

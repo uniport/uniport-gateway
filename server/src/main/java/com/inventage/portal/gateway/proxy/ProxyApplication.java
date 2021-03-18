@@ -110,7 +110,7 @@ public class ProxyApplication implements Application {
     }
 
     private void setSubRouter(Router subRouter) {
-        // TODO might this create a connection gap?
+        // TODO/ASK might this create a connection gap?
         this.router.clear();
         this.router.mountSubRouter("/", subRouter);
     }

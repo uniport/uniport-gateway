@@ -1,16 +1,17 @@
 package com.inventage.portal.gateway.core.middleware.proxy;
 
+import com.inventage.portal.gateway.core.middleware.Middleware;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 
-public class ProxyHandlerImpl implements ProxyHandler {
+public class ProxyMiddleware implements Middleware {
 
     public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
 
     private HttpProxy httpProxy;
 
-    public ProxyHandlerImpl(Vertx vertx, String serverHost, int serverPort) {
+    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
         this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
         this.httpProxy.target(serverPort, serverHost);
     }
@@ -23,4 +24,5 @@ public class ProxyHandlerImpl implements ProxyHandler {
 
         httpProxy.handle(ctx.request());
     }
+
 }

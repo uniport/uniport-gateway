@@ -3,8 +3,8 @@ package com.inventage.portal.gateway.core.router;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.core.middleware.headers.HeaderHandler;
-import com.inventage.portal.gateway.core.middleware.proxy.ProxyHandler;
+import com.inventage.portal.gateway.core.middleware.Middleware;
+import com.inventage.portal.gateway.core.middleware.MiddlewareFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -53,18 +53,21 @@ public class RouterFactory {
                             middlwares, DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
 
                     // TODO configure middleware
+                    Middleware middlware = MiddlewareFactory.Loader.getFactory(middlewareName)
+                            .create(this.vertx, middlewareConfig);
                 }
             }
 
             // TODO experimental
-            route.handler(HeaderHandler.create());
+            route.handler(MiddlewareFactory.Loader.getFactory("headers").create(vertx, null));
 
             String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
             JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
                     DynamicConfiguration.SERVICE_NAME, serviceName);
             JsonArray servers = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
             // TODO support multipe servers
-            route.handler(ProxyHandler.create(this.vertx, servers.getJsonObject(0)));
+            route.handler(MiddlewareFactory.Loader.getFactory("proxy").create(vertx,
+                    servers.getJsonObject(0)));
 
         }
 
