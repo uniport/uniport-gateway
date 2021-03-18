@@ -16,7 +16,6 @@
 // https://github.com/
 package com.inventage.portal.gateway.proxy.request;
 
-import com.inventage.portal.gateway.proxy.request.header.RequestHeaderMiddleware;
 import com.inventage.portal.gateway.proxy.response.ProxiedHttpServerResponse;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -45,23 +44,14 @@ import java.util.function.Function;
  */
 public class ProxiedHttpServerRequest implements HttpServerRequest {
 
-    private final RoutingContext routingContext;
     private final HttpServerRequest delegate;
     private final ForwardedParser forwardedParser;
 
-    private RequestHeaderMiddleware headerMiddleware = RequestHeaderMiddleware.IDENTITY;
     private Function<String, String> uriMiddleware = Function.identity();
 
     public ProxiedHttpServerRequest(RoutingContext rc, AllowForwardHeaders allowForward) {
-        this.routingContext = rc;
         this.delegate = rc.request();
         this.forwardedParser = new ForwardedParser(delegate, allowForward);
-    }
-
-    public ProxiedHttpServerRequest setHeaderMiddleware(RequestHeaderMiddleware middleware) {
-        Objects.requireNonNull(middleware, "Given header middleware must not be null!");
-        this.headerMiddleware = middleware;
-        return this;
     }
 
     public ProxiedHttpServerRequest setUriMiddleware(Function<String, String> middleware) {
@@ -159,12 +149,12 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public HttpServerResponse response() {
-        return new ProxiedHttpServerResponse(routingContext, delegate.response());
+        return new ProxiedHttpServerResponse(delegate.response());
     }
 
     @Override
     public MultiMap headers() {
-        return (MultiMap) headerMiddleware.apply(routingContext, delegate.headers());
+        return delegate.headers();
     }
 
     @Override
