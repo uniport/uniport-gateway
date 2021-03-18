@@ -53,8 +53,10 @@ public class RouterFactory {
                             middlwares, DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
 
                     // TODO configure middleware
-                    Middleware middlware = MiddlewareFactory.Loader.getFactory(middlewareName)
+                    Middleware middleware = MiddlewareFactory.Loader.getFactory(middlewareName)
                             .create(this.vertx, middlewareConfig);
+
+                    route.handler(middleware);
                 }
             }
 
