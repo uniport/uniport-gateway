@@ -60,7 +60,7 @@ public class DynamicConfiguration {
                 .requiredProperty(SERVICE_SERVERS,
                         Schemas.arraySchema().items(Schemas.objectSchema()
                                 .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
-                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.stringSchema())));
+                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())));
 
         ObjectSchemaBuilder httpSchema =
                 Schemas.objectSchema().property(ROUTERS, Schemas.arraySchema().items(routerSchema))

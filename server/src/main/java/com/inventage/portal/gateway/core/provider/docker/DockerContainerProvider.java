@@ -102,7 +102,7 @@ public class DockerContainerProvider extends Provider {
         JsonObject labels = metadata.getJsonObject("portal.docker.labels");
 
         String host = metadata.getString("portal.docker.ip");
-        String port = metadata.getString("portal.docker.port");
+        int port = metadata.getInteger("portal.docker.port");
 
         JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
@@ -136,7 +136,7 @@ public class DockerContainerProvider extends Provider {
     }
 
     private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String host,
-            String port) {
+            int port) {
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
             JsonObject fallbackService =
@@ -154,7 +154,7 @@ public class DockerContainerProvider extends Provider {
     // there is at most one docker container per service
     // since docker does not provide a out of the book load balancer
     // newer containers overwrite the old one
-    private void addServer(JsonObject service, String host, String port) {
+    private void addServer(JsonObject service, String host, int port) {
         if (service == null) {
             throw new IllegalArgumentException("service is not defined");
         }
