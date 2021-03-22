@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.core.middleware.oauth2;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URI;
+import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.middleware.Middleware;
 import com.inventage.portal.gateway.core.middleware.MiddlewareFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -20,10 +20,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
-    public static final String OAUTH2 = "oauth2";
-    public static final String OAUTH2_CLIENTID = "clientId";
-    public static final String OAUTH2_CLIENTSECRET = "clientSecret";
-    public static final String OAUTH2_DISCOVERYURL = "discoveryUrl";
     public static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     public static final String OAUTH2_SCOPE = "openid";
 
@@ -57,10 +53,13 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             ctx.next();
         });
 
-        OAuth2Options oauth2Options =
-                new OAuth2Options().setClientID(middlewareConfig.getString(OAUTH2_CLIENTID))
-                        .setClientSecret(middlewareConfig.getString(OAUTH2_CLIENTSECRET))
-                        .setSite(middlewareConfig.getString(OAUTH2_DISCOVERYURL));
+        OAuth2Options oauth2Options = new OAuth2Options()
+                .setClientID(
+                        middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
+                .setClientSecret(middlewareConfig
+                        .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
+                .setSite(middlewareConfig
+                        .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL));
 
         Future<OAuth2Auth> future = KeycloakAuth.discover(vertx, oauth2Options);
 

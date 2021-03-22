@@ -11,8 +11,6 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        // TODO Auto-generated method stub
-
         if (ctx.user() != null && ctx.user().principal() != null)
 
         {

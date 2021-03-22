@@ -6,10 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -26,14 +24,34 @@ public class DynamicConfiguration {
 
     // keywords used for internal purpose only
     public static final String HTTP = "http";
+
     public static final String ROUTERS = "routers";
     public static final String ROUTER_NAME = "name";
     public static final String ROUTER_ENTRYPOINTS = "entrypoints";
+    public static final String ROUTER_MIDDLEWARES = "middlewares";
     public static final String ROUTER_SERVICE = "service";
     public static final String ROUTER_RULE = "rule";
+
     public static final String MIDDLEWARES = "middlewares";
     public static final String MIDDLEWARE_NAME = "name";
-    public static final String MIDDLEWARE_TYPE = "type";
+    public static final String MIDDLEWARE_OPTIONS = "options";
+
+    public static final String MIDDLEWARE_REPLACE_PATH_REGEX = "replacePathRegex";
+    public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REGEX = "regex";
+    public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
+
+    public static final String MIDDLEWARE_REDIRECT_PATH = "redirectPath";
+    public static final String MIDDLEWARE_REDIRECT_PATH_DESTINATION = "destination";
+
+    public static final String MIDDLEWARE_HEADERS = "headers";
+
+    public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
+
+    public static final String MIDDLEWARE_OAUTH2 = "oauth2";
+    public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
+    public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
+    public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
+
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
@@ -44,16 +62,37 @@ public class DynamicConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
+        // TODO consider setting "additionalProperties": false
+
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
                 .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .property(MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
+                .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
                 .property(ROUTER_RULE, Schemas.stringSchema());
 
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                        .requiredProperty(MIDDLEWARE_TYPE, Schemas.objectSchema());
+                        .property(MIDDLEWARE_REPLACE_PATH_REGEX,
+                                Schemas.objectSchema()
+                                        .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX,
+                                                Schemas.stringSchema())
+                                        .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
+                                                Schemas.stringSchema()))
+                        .property(MIDDLEWARE_REDIRECT_PATH,
+                                Schemas.objectSchema().requiredProperty(
+                                        MIDDLEWARE_REDIRECT_PATH_DESTINATION,
+                                        Schemas.stringSchema()))
+                        .property(MIDDLEWARE_HEADERS, Schemas.objectSchema()) // TODO headers
+                        .property(MIDDLEWARE_AUTHORIZATION_BEARER, Schemas.objectSchema())
+                        .property(MIDDLEWARE_OAUTH2,
+                                Schemas.objectSchema()
+                                        .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTID,
+                                                Schemas.stringSchema())
+                                        .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTSECRET,
+                                                Schemas.stringSchema())
+                                        .requiredProperty(MIDDLEWARE_OAUTH2_DISCOVERYURL,
+                                                Schemas.stringSchema()));
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
