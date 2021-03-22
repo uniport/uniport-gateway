@@ -5,10 +5,11 @@ services:
     image: traefik/whoami
     labels:
       - "portal.http.routers.whoami.rule=PathPrefix('/whoami')"
+      - "portal.http.middlewares.test-replacePath.replacePathRegex.regex=whoami"
+      - "portal.http.middlewares.test-replacePath.replacePathRegex.replacement=blub"
   httpbin:
     image: kennethreitz/httpbin
     labels:
-      - "portal.http.routers.httpbin.entrypoints=foobar, barfoo"
       - "portal.http.routers.httpbin.rule=PathPrefix('/httpbin')"
       # no service specified or defined and yet one gets automatically created
       # and assigned to router httpbin.

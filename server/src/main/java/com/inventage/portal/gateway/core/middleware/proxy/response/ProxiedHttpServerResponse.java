@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.response;
+package com.inventage.portal.gateway.core.middleware.proxy.response;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

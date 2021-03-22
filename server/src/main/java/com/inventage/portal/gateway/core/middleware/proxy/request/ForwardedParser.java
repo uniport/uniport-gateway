@@ -14,7 +14,7 @@
 
 // This code was copied from the io.vertx.ext.web.impl.ForwardedParser
 // https://github.com/
-package com.inventage.portal.gateway.proxy.request;
+package com.inventage.portal.gateway.core.middleware.proxy.request;
 
 import io.netty.util.AsciiString;
 import io.vertx.core.http.HttpServerRequest;

@@ -14,15 +14,30 @@
 
 // This code was copied from the io.vertx.ext.web.impl.HttpServerRequestWrapper
 // https://github.com/
-package com.inventage.portal.gateway.proxy.request;
+package com.inventage.portal.gateway.core.middleware.proxy.request;
 
-import com.inventage.portal.gateway.proxy.response.ProxiedHttpServerResponse;
+import java.util.Map;
+import java.util.Objects;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.security.cert.X509Certificate;
+import com.inventage.portal.gateway.core.middleware.proxy.request.uri.UriMiddleware;
+import com.inventage.portal.gateway.core.middleware.proxy.response.ProxiedHttpServerResponse;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.*;
+import io.vertx.core.http.Cookie;
+import io.vertx.core.http.HttpConnection;
+import io.vertx.core.http.HttpFrame;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerFileUpload;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.HttpVersion;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.http.StreamPriority;
 import io.vertx.core.net.NetSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.streams.Pipe;
@@ -30,13 +45,6 @@ import io.vertx.core.streams.WriteStream;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.ServerWebSocketWrapper;
-
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * Subclass of HttpServerRequest which can be manipulated by various middleware functions. See
@@ -47,14 +55,14 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
     private final HttpServerRequest delegate;
     private final ForwardedParser forwardedParser;
 
-    private Function<String, String> uriMiddleware = Function.identity();
+    private UriMiddleware uriMiddleware;
 
     public ProxiedHttpServerRequest(RoutingContext rc, AllowForwardHeaders allowForward) {
         this.delegate = rc.request();
         this.forwardedParser = new ForwardedParser(delegate, allowForward);
     }
 
-    public ProxiedHttpServerRequest setUriMiddleware(Function<String, String> middleware) {
+    public ProxiedHttpServerRequest setUriMiddleware(UriMiddleware middleware) {
         Objects.requireNonNull(middleware, "Given uri middleware must not be null!");
         this.uriMiddleware = middleware;
         return this;
@@ -124,7 +132,10 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public String uri() {
-        return uriMiddleware.apply(delegate.uri());
+        if (this.uriMiddleware != null) {
+            return uriMiddleware.apply(delegate.uri());
+        }
+        return delegate.uri();
     }
 
     @Override
