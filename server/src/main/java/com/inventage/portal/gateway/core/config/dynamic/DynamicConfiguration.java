@@ -44,6 +44,10 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REDIRECT_PATH_DESTINATION = "destination";
 
     public static final String MIDDLEWARE_HEADERS = "headers";
+    public static final String MIDDLEWARE_HEADERS_HEADER = "header";
+    public static final String MIDDLEWARE_HEADERS_VALUE = "value";
+    public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
+    public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
 
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
 
@@ -71,28 +75,40 @@ public class DynamicConfiguration {
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
                 .property(ROUTER_RULE, Schemas.stringSchema());
 
+        ObjectSchemaBuilder replacePathMiddlewareSchema = Schemas.objectSchema()
+                .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
+                .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
+                        Schemas.stringSchema());
+
+        ObjectSchemaBuilder redirectPathMiddlewareSchema = Schemas.objectSchema()
+                .requiredProperty(MIDDLEWARE_REDIRECT_PATH_DESTINATION, Schemas.stringSchema());
+
+        ObjectSchemaBuilder headersMiddlewareSchema = Schemas.objectSchema().property(
+                MIDDLEWARE_HEADERS_REQUEST,
+                Schemas.arraySchema().items(Schemas.objectSchema()
+                        .requiredProperty(MIDDLEWARE_HEADERS_HEADER, Schemas.stringSchema())
+                        .requiredProperty(MIDDLEWARE_HEADERS_VALUE, Schemas.stringSchema())))
+                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.arraySchema()
+                        .items(Schemas.objectSchema()
+                                .requiredProperty(MIDDLEWARE_HEADERS_HEADER, Schemas.stringSchema())
+                                .requiredProperty(MIDDLEWARE_HEADERS_VALUE,
+                                        Schemas.stringSchema())));
+
+        ObjectSchemaBuilder authorizationBearerMiddlewareSchema = Schemas.objectSchema();
+
+        ObjectSchemaBuilder oauth2MiddlewareSchema = Schemas.objectSchema()
+                .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
+                .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
+                .requiredProperty(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema());
+
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                        .property(MIDDLEWARE_REPLACE_PATH_REGEX,
-                                Schemas.objectSchema()
-                                        .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX,
-                                                Schemas.stringSchema())
-                                        .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
-                                                Schemas.stringSchema()))
-                        .property(MIDDLEWARE_REDIRECT_PATH,
-                                Schemas.objectSchema().requiredProperty(
-                                        MIDDLEWARE_REDIRECT_PATH_DESTINATION,
-                                        Schemas.stringSchema()))
-                        .property(MIDDLEWARE_HEADERS, Schemas.objectSchema()) // TODO headers
-                        .property(MIDDLEWARE_AUTHORIZATION_BEARER, Schemas.objectSchema())
-                        .property(MIDDLEWARE_OAUTH2,
-                                Schemas.objectSchema()
-                                        .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTID,
-                                                Schemas.stringSchema())
-                                        .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTSECRET,
-                                                Schemas.stringSchema())
-                                        .requiredProperty(MIDDLEWARE_OAUTH2_DISCOVERYURL,
-                                                Schemas.stringSchema()));
+                        .property(MIDDLEWARE_REPLACE_PATH_REGEX, replacePathMiddlewareSchema)
+                        .property(MIDDLEWARE_REDIRECT_PATH, redirectPathMiddlewareSchema)
+                        .property(MIDDLEWARE_HEADERS, headersMiddlewareSchema)
+                        .property(MIDDLEWARE_AUTHORIZATION_BEARER,
+                                authorizationBearerMiddlewareSchema)
+                        .property(MIDDLEWARE_OAUTH2, oauth2MiddlewareSchema);
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())

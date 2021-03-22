@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.core.middleware.proxy;
 
-import java.util.function.Function;
 import com.inventage.portal.gateway.core.middleware.Middleware;
 import com.inventage.portal.gateway.core.middleware.proxy.request.ProxiedHttpServerRequest;
 import com.inventage.portal.gateway.core.middleware.proxy.request.uri.UriMiddleware;
