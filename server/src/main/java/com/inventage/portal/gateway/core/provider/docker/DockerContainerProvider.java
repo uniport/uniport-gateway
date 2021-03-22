@@ -3,16 +3,13 @@ package com.inventage.portal.gateway.core.provider.docker;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.label.Parser;
 import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.docker.servicediscovery.DockerContainerServiceImporter;
-
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -128,7 +125,7 @@ public class DockerContainerProvider extends Provider {
                 this.configurations.put(containerName, confFromLabels);
             } else {
                 LOGGER.error("invalid configuration form container labels '{}': '{}'", serviceName,
-                        ar.cause());
+                        confFromLabels);
             }
         });
 
@@ -176,6 +173,7 @@ public class DockerContainerProvider extends Provider {
     private void buildRouterConfiguration(JsonObject httpConf, String serviceName,
             Map<String, String> model) {
         JsonArray routers = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
+        JsonArray middlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (routers.size() == 0) {
             if (services.size() > 1) {
@@ -195,6 +193,15 @@ public class DockerContainerProvider extends Provider {
                     throw new IllegalArgumentException("Undefined rule");
                 }
                 router.put(DynamicConfiguration.ROUTER_RULE, resolvedRule);
+            }
+
+            JsonArray middlewareNames = new JsonArray();
+            for (int j = 0; j < middlewares.size(); j++) {
+                middlewareNames.add(middlewares.getJsonObject(j)
+                        .getString(DynamicConfiguration.MIDDLEWARE_NAME));
+            }
+            if (middlewareNames.size() > 0) {
+                router.put(DynamicConfiguration.ROUTER_MIDDLEWARES, middlewareNames);
             }
 
             if (!router.containsKey(DynamicConfiguration.ROUTER_SERVICE)) {

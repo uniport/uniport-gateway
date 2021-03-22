@@ -1,10 +1,17 @@
 package com.inventage.portal.gateway.core.router;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.middleware.Middleware;
 import com.inventage.portal.gateway.core.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.core.middleware.proxy.ProxyMiddlewareFactory;
+import com.inventage.portal.gateway.core.middleware.proxy.request.uri.UriMiddleware;
+import com.inventage.portal.gateway.core.middleware.proxy.request.uri.UriMiddlewareFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -16,7 +23,9 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 
 public class RouterFactory {
-    Vertx vertx;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
+
+    private Vertx vertx;
 
     public RouterFactory(Vertx vertx) {
         this.vertx = vertx;
@@ -26,7 +35,6 @@ public class RouterFactory {
         Router router = Router.router(this.vertx);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
-        System.out.println(httpConfig);
 
         JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray middlwares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
@@ -45,18 +53,51 @@ public class RouterFactory {
             }
             Route route = routingRule.apply(router);
 
+            List<UriMiddleware> uriMiddlewares = new ArrayList<>();
             JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
             if (middlewareNames != null) {
                 for (int j = 0; j < middlewareNames.size(); j++) {
                     String middlewareName = middlewareNames.getString(j);
-                    JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(
-                            middlwares, DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+                    // TODO fix hardcoded MIDDLEWARE_REPLACE_PATH_REGEX
+                    JsonObject middlewareConfig =
+                            DynamicConfiguration
+                                    .getObjByKeyWithValue(middlwares,
+                                            DynamicConfiguration.MIDDLEWARE_NAME, middlewareName)
+                                    .getJsonObject(
+                                            DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX);
 
-                    // TODO configure middleware
-                    Middleware middleware = MiddlewareFactory.Loader.getFactory(middlewareName)
-                            .create(this.vertx, middlewareConfig);
+                    // TODO fix hardcoded MIDDLEWARE_REPLACE_PATH_REGEX
+                    middlewareName = DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX;
 
-                    route.handler(middleware);
+                    MiddlewareFactory middlewareFactory =
+                            MiddlewareFactory.Loader.getFactory(middlewareName);
+                    if (middlewareFactory != null) {
+                        // TODO wait for futures to complete and set handlers on completion
+                        Middleware middleware =
+                                middlewareFactory.create(this.vertx, middlewareConfig);
+                        route.handler(middleware);
+                        continue;
+                    }
+
+                    UriMiddlewareFactory uriMiddlewareFactory =
+                            UriMiddlewareFactory.Loader.getFactory(middlewareName);
+                    if (uriMiddlewareFactory != null) {
+                        UriMiddleware uriMiddleware = uriMiddlewareFactory.create(middlewareConfig);
+                        uriMiddlewares.add(uriMiddleware);
+                        continue;
+                    }
+
+                    LOGGER.error("Ignoring unknown middleware '{}'", middlewareName);
+                }
+            }
+
+            UriMiddleware uriMiddleware = null;
+            if (uriMiddlewares.size() > 0) {
+                uriMiddleware = uriMiddlewares.get(0);
+                if (uriMiddlewares.size() > 1) {
+                    LOGGER.warn(
+                            "Multiple URI middlewares defined. At most one can be used. Chosing the first '{}'",
+                            uriMiddleware.toString());
                 }
             }
 
@@ -66,11 +107,14 @@ public class RouterFactory {
             String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
             JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
                     DynamicConfiguration.SERVICE_NAME, serviceName);
-            JsonArray servers = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            JsonArray serverConfigs =
+                    serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
             // TODO support multipe servers
-            route.handler(MiddlewareFactory.Loader.getFactory("proxy").create(vertx,
-                    servers.getJsonObject(0)));
+            JsonObject serverConfig = serverConfigs.getJsonObject(0);
 
+            Middleware proxyMiddleware =
+                    (new ProxyMiddlewareFactory()).create(vertx, serverConfig, uriMiddleware);
+            route.handler(proxyMiddleware);
         }
 
         handler.handle(Future.succeededFuture(router));
