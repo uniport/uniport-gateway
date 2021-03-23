@@ -24,7 +24,8 @@ public class Parser {
 
     private static final List<String> CONTAINS_CUSTOM_NAMES =
             Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
-    private static final List<String> VALUE_IS_ARRAY_TYPE = Arrays.asList("entrypoints");
+    private static final List<String> VALUE_IS_ARRAY_TYPE =
+            Arrays.asList("entrypoints", "middlewares");
 
     public static JsonObject decode(Map<String, Object> labels, String rootName,
             List<String> filters) {

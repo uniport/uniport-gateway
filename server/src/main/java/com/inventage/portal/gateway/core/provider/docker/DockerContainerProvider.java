@@ -195,10 +195,18 @@ public class DockerContainerProvider extends Provider {
                 router.put(DynamicConfiguration.ROUTER_RULE, resolvedRule);
             }
 
-            JsonArray middlewareNames = new JsonArray();
+
+            JsonArray middlewareNames =
+                    router.getJsonArray(DynamicConfiguration.ROUTER_MIDDLEWARES);
+            if (middlewareNames == null) {
+                middlewareNames = new JsonArray();
+            }
             for (int j = 0; j < middlewares.size(); j++) {
-                middlewareNames.add(middlewares.getJsonObject(j)
-                        .getString(DynamicConfiguration.MIDDLEWARE_NAME));
+                String middlewareName = middlewares.getJsonObject(j)
+                        .getString(DynamicConfiguration.MIDDLEWARE_NAME);
+                if (!middlewareNames.contains(middlewareName)) {
+                    middlewareNames.add(middlewareName);
+                }
             }
             if (middlewareNames.size() > 0) {
                 router.put(DynamicConfiguration.ROUTER_MIDDLEWARES, middlewareNames);
