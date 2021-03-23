@@ -1,12 +1,13 @@
 package com.inventage.portal.gateway.core.config.label;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -95,6 +96,16 @@ public class Parser {
                     children.add(newChild);
                     root.put(key, children);
                 }
+            } else if (DynamicConfiguration.MIDDLEWARE_TYPES.contains(key)) {
+                JsonObject child;
+                if (root.containsKey(DynamicConfiguration.MIDDLEWARE_OPTIONS)) {
+                    child = root.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+                } else {
+                    child = new JsonObject();
+                }
+                decodeToJson(child, path.subList(1, path.size()), value);
+                root.put(DynamicConfiguration.MIDDLEWARE_TYPE, key);
+                root.put(DynamicConfiguration.MIDDLEWARE_OPTIONS, child);
             } else {
                 if (root.containsKey(key)) {
                     JsonObject child = root.getJsonObject(key);

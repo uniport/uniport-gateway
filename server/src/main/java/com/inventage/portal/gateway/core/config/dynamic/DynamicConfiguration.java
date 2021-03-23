@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.config.dynamic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,7 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARES = "middlewares";
     public static final String MIDDLEWARE_NAME = "name";
+    public static final String MIDDLEWARE_TYPE = "type";
     public static final String MIDDLEWARE_OPTIONS = "options";
 
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX = "replacePathRegex";
@@ -56,6 +58,10 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
     public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
 
+    public static final List<String> MIDDLEWARE_TYPES =
+            Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX, MIDDLEWARE_REDIRECT_PATH,
+                    MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2);
+
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
@@ -75,40 +81,11 @@ public class DynamicConfiguration {
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
                 .property(ROUTER_RULE, Schemas.stringSchema());
 
-        ObjectSchemaBuilder replacePathMiddlewareSchema = Schemas.objectSchema()
-                .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
-                        Schemas.stringSchema());
-
-        ObjectSchemaBuilder redirectPathMiddlewareSchema = Schemas.objectSchema()
-                .requiredProperty(MIDDLEWARE_REDIRECT_PATH_DESTINATION, Schemas.stringSchema());
-
-        ObjectSchemaBuilder headersMiddlewareSchema = Schemas.objectSchema().property(
-                MIDDLEWARE_HEADERS_REQUEST,
-                Schemas.arraySchema().items(Schemas.objectSchema()
-                        .requiredProperty(MIDDLEWARE_HEADERS_HEADER, Schemas.stringSchema())
-                        .requiredProperty(MIDDLEWARE_HEADERS_VALUE, Schemas.stringSchema())))
-                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.arraySchema()
-                        .items(Schemas.objectSchema()
-                                .requiredProperty(MIDDLEWARE_HEADERS_HEADER, Schemas.stringSchema())
-                                .requiredProperty(MIDDLEWARE_HEADERS_VALUE,
-                                        Schemas.stringSchema())));
-
-        ObjectSchemaBuilder authorizationBearerMiddlewareSchema = Schemas.objectSchema();
-
-        ObjectSchemaBuilder oauth2MiddlewareSchema = Schemas.objectSchema()
-                .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema());
-
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                        .property(MIDDLEWARE_REPLACE_PATH_REGEX, replacePathMiddlewareSchema)
-                        .property(MIDDLEWARE_REDIRECT_PATH, redirectPathMiddlewareSchema)
-                        .property(MIDDLEWARE_HEADERS, headersMiddlewareSchema)
-                        .property(MIDDLEWARE_AUTHORIZATION_BEARER,
-                                authorizationBearerMiddlewareSchema)
-                        .property(MIDDLEWARE_OAUTH2, oauth2MiddlewareSchema);
+                        .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
+                        .property(MIDDLEWARE_OPTIONS, Schemas.objectSchema())
+                        .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())

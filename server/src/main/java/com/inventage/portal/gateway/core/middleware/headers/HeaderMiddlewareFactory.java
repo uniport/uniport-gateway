@@ -21,9 +21,20 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
-        // TODO read headers from config and put into maps
+        System.out.println(middlewareConfig);
+
         Map<String, String> requestHeaders = new HashMap<>();
         Map<String, String> responseHeaders = new HashMap<>();
+
+        middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST)
+                .forEach(entry -> {
+                    requestHeaders.put(entry.getKey(), (String) entry.getValue());
+                });
+        middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_RESPONSE)
+                .forEach(entry -> {
+                    responseHeaders.put(entry.getKey(), (String) entry.getValue());
+                });
+
         return new HeaderMiddleware(requestHeaders, responseHeaders);
     }
 

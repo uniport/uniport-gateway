@@ -58,36 +58,34 @@ public class RouterFactory {
             if (middlewareNames != null) {
                 for (int j = 0; j < middlewareNames.size(); j++) {
                     String middlewareName = middlewareNames.getString(j);
-                    // TODO fix hardcoded MIDDLEWARE_REPLACE_PATH_REGEX
-                    JsonObject middlewareConfig =
-                            DynamicConfiguration
-                                    .getObjByKeyWithValue(middlwares,
-                                            DynamicConfiguration.MIDDLEWARE_NAME, middlewareName)
-                                    .getJsonObject(
-                                            DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX);
+                    JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(
+                            middlwares, DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
 
-                    // TODO fix hardcoded MIDDLEWARE_REPLACE_PATH_REGEX
-                    middlewareName = DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX;
+                    String middlewareType =
+                            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
+                    JsonObject middlewareOptions =
+                            middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
                     MiddlewareFactory middlewareFactory =
-                            MiddlewareFactory.Loader.getFactory(middlewareName);
+                            MiddlewareFactory.Loader.getFactory(middlewareType);
                     if (middlewareFactory != null) {
                         // TODO wait for futures to complete and set handlers on completion
                         Middleware middleware =
-                                middlewareFactory.create(this.vertx, middlewareConfig);
+                                middlewareFactory.create(this.vertx, middlewareOptions);
                         route.handler(middleware);
                         continue;
                     }
 
                     UriMiddlewareFactory uriMiddlewareFactory =
-                            UriMiddlewareFactory.Loader.getFactory(middlewareName);
+                            UriMiddlewareFactory.Loader.getFactory(middlewareType);
                     if (uriMiddlewareFactory != null) {
-                        UriMiddleware uriMiddleware = uriMiddlewareFactory.create(middlewareConfig);
+                        UriMiddleware uriMiddleware =
+                                uriMiddlewareFactory.create(middlewareOptions);
                         uriMiddlewares.add(uriMiddleware);
                         continue;
                     }
 
-                    LOGGER.error("Ignoring unknown middleware '{}'", middlewareName);
+                    LOGGER.error("Ignoring unknown middleware '{}'", middlewareType);
                 }
             }
 
@@ -100,9 +98,6 @@ public class RouterFactory {
                             uriMiddleware.toString());
                 }
             }
-
-            // TODO experimental
-            route.handler(MiddlewareFactory.Loader.getFactory("headers").create(vertx, null));
 
             String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
             JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
