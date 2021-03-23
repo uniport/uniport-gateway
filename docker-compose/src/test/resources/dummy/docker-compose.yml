@@ -5,8 +5,14 @@ services:
     image: traefik/whoami
     labels:
       - "portal.http.routers.whoami.rule=PathPrefix('/whoami')"
-      - "portal.http.middlewares.test-replacePath.replacePathRegex.regex=whoami"
-      - "portal.http.middlewares.test-replacePath.replacePathRegex.replacement=blub"
+      - "portal.http.routers.whoami.middlewares=testRedirectregex, testHeader, testReplacePath"
+      - "portal.http.middlewares.testReplacePath.replacePathRegex.regex=whoami"
+      - "portal.http.middlewares.testReplacePath.replacePathRegex.replacement=blub"
+      - "portal.http.middlewares.testHeader.headers.customRequestHeaders.X-Script-Name=test"
+      - "portal.http.middlewares.testHeader.headers.customRequestHeaders.X-Custom-Request-Header=requestHeader"
+      - "portal.http.middlewares.testHeader.headers.customResponseHeaders.X-Custom-Response-Header=responseHeader"
+      - "portal.http.middlewares.testRedirectregex.redirectRegex.regex=^(/whoami)$$"
+      - "portal.http.middlewares.testRedirectregex.redirectRegex.replacement=$$1/"
   httpbin:
     image: kennethreitz/httpbin
     labels:
