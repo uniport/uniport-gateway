@@ -15,14 +15,27 @@ public class StaticConfiguration {
         public static final String ENTRYPOINTS = "entrypoints";
         public static final String ENTRYPOINT_NAME = "name";
         public static final String ENTRYPOINT_PORT = "port";
+
         public static final String APPLICATIONS = "applications";
         public static final String APPLICATION_NAME = "name";
         public static final String APPLICATION_ENTRYPOINT = "entrypoint";
         public static final String APPLICATION_REQUEST_SELECTOR = "requestSelector";
         public static final String APPLICATION_REQUEST_SELECTOR_URL_PREFIX = "urlPrefix";
         public static final String APPLICATION_PROVIDER = "provider";
+
         public static final String PROVIDERS = "providers";
         public static final String PROVIDER_NAME = "name";
+
+        public static final String PROVIDER_FILE = "file";
+        public static final String PROVIDER_FILE_FILENAME = "filename";
+        public static final String PROVIDER_FILE_DIRECTORY = "directory";
+        public static final String PROVIDER_FILE_WATCH = "watch";
+
+        public static final String PROVIDER_DOCKER = "docker";
+
+        public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
+
+
 
         private static Schema schema;
 

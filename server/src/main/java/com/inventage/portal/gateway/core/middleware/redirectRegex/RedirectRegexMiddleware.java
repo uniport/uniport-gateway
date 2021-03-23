@@ -8,7 +8,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class RedirectRegexMiddleware implements Middleware {
 
-    Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddleware.class);
 
     private final Pattern pattern;
     private final String replacement;

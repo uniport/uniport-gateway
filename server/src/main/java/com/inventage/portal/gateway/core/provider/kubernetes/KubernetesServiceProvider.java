@@ -1,11 +1,10 @@
 package com.inventage.portal.gateway.core.provider.kubernetes;
 
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -86,7 +85,7 @@ public class KubernetesServiceProvider extends Provider {
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
                                 .put(Provider.PROVIDER_NAME,
-                                        KubernetesServiceProviderFactory.PROVIDER_NAME)
+                                        StaticConfiguration.PROVIDER_KUBERNETES)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("cannot publish new configuration: invalid configuration");

@@ -1,9 +1,10 @@
 package com.inventage.portal.gateway;
 
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Launcher;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PortalGatewayLauncher extends Launcher {
 
-    private static org.slf4j.Logger LOGGER;
+    private static Logger LOGGER;
 
     private PortalGatewayLauncher() {
     }

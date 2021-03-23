@@ -10,7 +10,8 @@ import io.vertx.core.json.JsonObject;
 
 public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddlewareFactory.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(AuthorizationBearerMiddlewareFactory.class);
 
     @Override
     public String provides() {

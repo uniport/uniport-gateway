@@ -10,7 +10,7 @@ import io.vertx.core.json.JsonObject;
 
 public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddlewareFactory.class);
 
     @Override
     public String provides() {

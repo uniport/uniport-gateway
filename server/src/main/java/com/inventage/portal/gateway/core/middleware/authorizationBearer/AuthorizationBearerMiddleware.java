@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.core.middleware.authorizationBearer;
 
-import io.vertx.ext.web.RoutingContext;
 import com.inventage.portal.gateway.core.middleware.Middleware;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.ext.web.RoutingContext;
 
 public class AuthorizationBearerMiddleware implements Middleware {
 
@@ -11,9 +11,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        if (ctx.user() != null && ctx.user().principal() != null)
-
-        {
+        if (ctx.user() != null && ctx.user().principal() != null) {
             ctx.request().headers().add(HttpHeaders.AUTHORIZATION, new StringBuilder(BEARER)
                     .append(ctx.user().principal().getString(ACCESS_TOKEN)));
 

@@ -1,18 +1,17 @@
 package com.inventage.portal.gateway.core.middleware.proxy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.middleware.Middleware;
 import com.inventage.portal.gateway.core.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.core.middleware.proxy.request.uri.UriMiddleware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
 
     @Override
     public String provides() {

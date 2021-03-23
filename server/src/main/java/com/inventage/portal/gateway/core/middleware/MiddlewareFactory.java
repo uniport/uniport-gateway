@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject;
 
 public interface MiddlewareFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
+    final Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
     String provides();
 

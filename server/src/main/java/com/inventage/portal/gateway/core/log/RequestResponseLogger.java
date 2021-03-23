@@ -1,16 +1,16 @@
 package com.inventage.portal.gateway.core.log;
 
-import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.ext.web.RoutingContext;
 
 /**
  * Log every request and/or response.
  */
 public class RequestResponseLogger implements Handler<RoutingContext> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
 
     public static Handler<RoutingContext> create() {
         return new RequestResponseLogger();

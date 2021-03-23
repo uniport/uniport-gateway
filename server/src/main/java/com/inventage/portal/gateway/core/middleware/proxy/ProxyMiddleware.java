@@ -11,7 +11,7 @@ import io.vertx.httpproxy.HttpProxy;
 
 public class ProxyMiddleware implements Middleware {
 
-    public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
 
     private HttpProxy httpProxy;
 

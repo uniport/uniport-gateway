@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.config.label.Parser;
+import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.docker.servicediscovery.DockerContainerServiceImporter;
 import org.apache.commons.text.StringSubstitutor;
@@ -20,7 +21,9 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
 public class DockerContainerProvider extends Provider {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
+
     private static final String announceAddress = "docker-container-announce";
     private static final String defaultTempateRule = "Host('${name}')";
 
@@ -258,8 +261,7 @@ public class DockerContainerProvider extends Provider {
                 LOGGER.info("configuration published");
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
-                                .put(Provider.PROVIDER_NAME,
-                                        DockerContainerProviderFactory.PROVIDER_NAME)
+                                .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("unable to publish invalid configuration: '{}'", config);

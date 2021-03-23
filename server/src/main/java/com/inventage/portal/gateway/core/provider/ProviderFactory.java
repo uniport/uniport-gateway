@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject;
 
 public interface ProviderFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(ProviderFactory.class);
+    final Logger LOGGER = LoggerFactory.getLogger(ProviderFactory.class);
 
     String provides();
 
@@ -18,8 +18,8 @@ public interface ProviderFactory {
     class Loader {
         public static ProviderFactory getFactory(String providerName) {
             LOGGER.debug("get provider factory: for '{}'", providerName);
-            final Optional<ProviderFactory> provider = ServiceLoader
-                    .load(ProviderFactory.class).stream().map(ServiceLoader.Provider::get)
+            final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class)
+                    .stream().map(ServiceLoader.Provider::get)
                     .filter(instance -> instance.provides().equals(providerName)).findFirst();
             if (provider.isPresent()) {
                 return provider.get();

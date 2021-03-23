@@ -1,13 +1,11 @@
 package com.inventage.portal.gateway.core.provider.file;
 
 import java.io.File;
-
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -107,7 +105,7 @@ public class FileConfigProvider extends Provider {
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
                                 .put(Provider.PROVIDER_NAME,
-                                        FileConfigProviderFactory.PROVIDER_NAME)
+                                        StaticConfiguration.PROVIDER_FILE)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
                 LOGGER.error("cannot publish new configuration: invalid configuration");

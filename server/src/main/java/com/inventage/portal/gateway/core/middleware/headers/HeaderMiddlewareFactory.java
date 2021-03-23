@@ -12,7 +12,7 @@ import io.vertx.core.json.JsonObject;
 
 public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(HeaderMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMiddlewareFactory.class);
 
     @Override
     public String provides() {

@@ -18,10 +18,10 @@ import io.vertx.ext.web.handler.OAuth2AuthHandler;
 
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
-    Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
-    public static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
-    public static final String OAUTH2_SCOPE = "openid";
+    private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
+    private static final String OAUTH2_SCOPE = "openid";
 
     @Override
     public String provides() {
