@@ -48,7 +48,7 @@ public class RouterFactory {
             String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
             RoutingRule routingRule = parseRule(this.vertx, rule);
             if (routingRule == null) {
-                handler.handle(Future.failedFuture("Failed to parse rule"));
+                handler.handle(Future.failedFuture("Failed to parse rule of router " + routerName));
                 return;
             }
             Route route = routingRule.apply(router);

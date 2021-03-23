@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import com.inventage.portal.gateway.core.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
@@ -84,7 +83,7 @@ public class ConfigurationWatcher {
         JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
-        LOGGER.debug("Informing listeners about new configuration");
+        LOGGER.debug("Informing listeners about new configuration: '{}'", mergedConfig);
         for (Listener listener : this.configurationListeners) {
             listener.listen(mergedConfig);
         }

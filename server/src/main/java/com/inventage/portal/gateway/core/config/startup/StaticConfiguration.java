@@ -35,8 +35,6 @@ public class StaticConfiguration {
 
         public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
 
-
-
         private static Schema schema;
 
         private static Schema buildSchema(Vertx vertx) {

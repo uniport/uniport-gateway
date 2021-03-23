@@ -1,18 +1,16 @@
 package com.inventage.portal.gateway.proxy;
 
+import java.util.Arrays;
+import java.util.Optional;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.core.router.RouterFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-
-import java.util.*;
 
 /**
  * Application for the proxy feature of the portal gateway. The routers will be read from the
@@ -75,7 +73,6 @@ public class ProxyApplication implements Application {
 
     @Override
     public Future<?> deployOn(Vertx vertx) {
-        // TODO move this definition elsewhere
         String configurationAddress = "configuration-announce-address";
 
         ProviderAggregator aggregator =
