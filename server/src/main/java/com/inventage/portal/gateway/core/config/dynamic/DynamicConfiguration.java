@@ -53,6 +53,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
 
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
+    public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";

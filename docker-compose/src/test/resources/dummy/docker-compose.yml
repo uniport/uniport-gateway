@@ -13,6 +13,7 @@ services:
       - "portal.http.middlewares.testHeader.headers.customResponseHeaders.X-Custom-Response-Header=responseHeader"
       - "portal.http.middlewares.testRedirectregex.redirectRegex.regex=^(/whoami)$$"
       - "portal.http.middlewares.testRedirectregex.redirectRegex.replacement=$$1/"
+      - "portal.http.middlewares.testAuthBearer.authorizationBearer.sessionScope=testScope"
   httpbin:
     image: kennethreitz/httpbin
     labels:

@@ -20,7 +20,8 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
-        return new AuthorizationBearerMiddleware();
+        return new AuthorizationBearerMiddleware(middlewareConfig
+                .getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE));
     }
 
 }
