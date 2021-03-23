@@ -42,8 +42,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REGEX = "regex";
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
 
-    public static final String MIDDLEWARE_REDIRECT_PATH = "redirectPath";
-    public static final String MIDDLEWARE_REDIRECT_PATH_DESTINATION = "destination";
+    public static final String MIDDLEWARE_REDIRECT_REGEX = "redirectRegex";
+    public static final String MIDDLEWARE_REDIRECT_REGEX_REGEX = "regex";
+    public static final String MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT = "replacement";
 
     public static final String MIDDLEWARE_HEADERS = "headers";
     public static final String MIDDLEWARE_HEADERS_HEADER = "header";
@@ -59,7 +60,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
 
     public static final List<String> MIDDLEWARE_TYPES =
-            Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX, MIDDLEWARE_REDIRECT_PATH,
+            Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX, MIDDLEWARE_REDIRECT_REGEX,
                     MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2);
 
     public static final String SERVICES = "services";

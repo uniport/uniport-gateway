@@ -21,8 +21,6 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
-        System.out.println(middlewareConfig);
-
         Map<String, String> requestHeaders = new HashMap<>();
         Map<String, String> responseHeaders = new HashMap<>();
 
