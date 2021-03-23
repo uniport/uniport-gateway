@@ -2,14 +2,11 @@ package com.inventage.portal.gateway.core.provider.aggregator;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
 import com.inventage.portal.gateway.core.provider.Provider;
 import com.inventage.portal.gateway.core.provider.ProviderFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -44,9 +41,16 @@ public class ProviderAggregator extends Provider {
         for (int i = 0; i < providers.size(); i++) {
             JsonObject providerConfig = providers.getJsonObject(i);
 
-            Provider provider = ProviderFactory.Loader
-                    .getFactory(providerConfig.getString(StaticConfiguration.PROVIDER_NAME))
-                    .create(this.vertx, this.configurationAddress, providerConfig);
+            String providerName = providerConfig.getString(StaticConfiguration.PROVIDER_NAME);
+            ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
+
+            if (providerFactory == null) {
+                LOGGER.error("Ignoring unknown provider'{}'", providerName);
+                continue;
+            }
+
+            Provider provider =
+                    providerFactory.create(this.vertx, this.configurationAddress, providerConfig);
 
             futures.add(launchProvider(provider));
         }

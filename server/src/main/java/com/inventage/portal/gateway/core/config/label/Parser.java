@@ -29,7 +29,14 @@ public class Parser {
 
     public static JsonObject decode(Map<String, Object> labels, String rootName,
             List<String> filters) {
-        return decodeToJson(labels, rootName, filters);
+        try {
+            JsonObject decodedConf = decodeToJson(labels, rootName, filters);
+            return decodedConf;
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Failed to decode labels to json: '{}', (labels: '{}')", e.getMessage(),
+                    labels.toString());
+        }
+        return null;
     }
 
     private static JsonObject decodeToJson(Map<String, Object> labels, String rootName,

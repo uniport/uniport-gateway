@@ -93,7 +93,8 @@ public class DockerContainerProvider extends Provider {
             this.configurations.remove(containerName);
             return DynamicConfiguration.merge(this.configurations);
         } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
-            throw new IllegalArgumentException("unkown status type: " + status);
+            LOGGER.error("unkown status type: " + status);
+            return null;
         }
 
         JsonObject labels = metadata.getJsonObject("portal.docker.labels");
@@ -103,6 +104,10 @@ public class DockerContainerProvider extends Provider {
 
         JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
+        if (confFromLabels == null) {
+            LOGGER.error("Failed to decode labels to json");
+            return null;
+        }
 
         JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
         if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
@@ -112,12 +117,22 @@ public class DockerContainerProvider extends Provider {
             return DynamicConfiguration.merge(this.configurations);
         }
 
-        this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
+        JsonArray serviceConfig =
+                this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
+        if (serviceConfig == null) {
+            LOGGER.error("Failed to build service configuration");
+            return null;
+        }
 
         Map<String, String> model = new HashMap<String, String>();
         model.put("name", serviceName);
 
-        this.buildRouterConfiguration(httpConfFromLabels, serviceName, model);
+        JsonArray routerConfig =
+                this.buildRouterConfiguration(httpConfFromLabels, serviceName, model);
+        if (routerConfig == null) {
+            LOGGER.error("Failed to build router configuration");
+            return null;
+        }
 
         DynamicConfiguration.validate(vertx, confFromLabels).onComplete(ar -> {
             if (ar.succeeded()) {
@@ -132,8 +147,8 @@ public class DockerContainerProvider extends Provider {
         return DynamicConfiguration.merge(this.configurations);
     }
 
-    private void buildServiceConfiguration(JsonObject httpConf, String serviceName, String host,
-            int port) {
+    private JsonArray buildServiceConfiguration(JsonObject httpConf, String serviceName,
+            String host, int port) {
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
             JsonObject fallbackService =
@@ -144,16 +159,23 @@ public class DockerContainerProvider extends Provider {
 
         for (int i = 0; i < services.size(); i++) {
             JsonObject service = services.getJsonObject(i);
-            this.addServer(service, host, port);
+            JsonObject server = this.addServer(service, host, port);
+            if (server == null) {
+                LOGGER.error("Failed to add server to service '{}', host '{}', port '{}'", service,
+                        host, port);
+                return null;
+            }
         }
+        return services;
     }
 
     // there is at most one docker container per service
     // since docker does not provide a out of the book load balancer
     // newer containers overwrite the old one
-    private void addServer(JsonObject service, String host, int port) {
+    private JsonObject addServer(JsonObject service, String host, int port) {
         if (service == null) {
-            throw new IllegalArgumentException("service is not defined");
+            LOGGER.error("Service is not defined");
+            return null;
         }
 
         JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
@@ -168,17 +190,19 @@ public class DockerContainerProvider extends Provider {
         JsonObject server = servers.getJsonObject(0);
         server.put(DynamicConfiguration.SERVICE_SERVER_HOST, host);
         server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
+        return server;
     }
 
-    private void buildRouterConfiguration(JsonObject httpConf, String serviceName,
+    private JsonArray buildRouterConfiguration(JsonObject httpConf, String serviceName,
             Map<String, String> model) {
         JsonArray routers = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray middlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (routers.size() == 0) {
             if (services.size() > 1) {
-                throw new IllegalArgumentException(
-                        "Could not create a router for the container: too many services");
+                LOGGER.error("Could not create a router for the container: too many services '{}'",
+                        services.toString());
+                return null;
             } else {
                 routers.add(new JsonObject());
             }
@@ -190,7 +214,8 @@ public class DockerContainerProvider extends Provider {
                 StringSubstitutor sub = new StringSubstitutor(model);
                 String resolvedRule = sub.replace(this.defaultRule);
                 if (resolvedRule.length() == 0) {
-                    throw new IllegalArgumentException("Undefined rule");
+                    LOGGER.error("Undefined rule: '{}'", resolvedRule);
+                    return null;
                 }
                 router.put(DynamicConfiguration.ROUTER_RULE, resolvedRule);
             }
@@ -214,8 +239,9 @@ public class DockerContainerProvider extends Provider {
 
             if (!router.containsKey(DynamicConfiguration.ROUTER_SERVICE)) {
                 if (services.size() > 1) {
-                    throw new IllegalArgumentException(
-                            "Could not define the service name for the router: too many services");
+                    LOGGER.error(
+                            "Could not define the service name for the router: too many services '{}'",
+                            services.toString());
                 }
                 for (int j = 0; j < services.size(); j++) {
                     router.put(DynamicConfiguration.ROUTER_SERVICE,
@@ -223,6 +249,7 @@ public class DockerContainerProvider extends Provider {
                 }
             }
         }
+        return routers;
     }
 
     private void validateAndPublish(JsonObject config) {
@@ -235,7 +262,7 @@ public class DockerContainerProvider extends Provider {
                                         DockerContainerProviderFactory.PROVIDER_NAME)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.error("cannot publish new configuration: invalid configuration");
+                LOGGER.error("unable to publish invalid configuration: '{}'", config);
             }
         });
     }

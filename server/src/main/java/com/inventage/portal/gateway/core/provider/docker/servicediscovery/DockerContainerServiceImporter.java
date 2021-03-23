@@ -1,26 +1,25 @@
 package com.inventage.portal.gateway.core.provider.docker.servicediscovery;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.core.DockerClientConfig;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.spi.ServicePublisher;
-import io.vertx.servicediscovery.spi.ServiceImporter;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DockerClientConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 
 public class DockerContainerServiceImporter implements ServiceImporter {
     private final static Logger LOGGER =
@@ -155,6 +154,10 @@ public class DockerContainerServiceImporter implements ServiceImporter {
 
     private void publish(DockerContainerService service) {
         Record record = service.record();
+        if (record == null) {
+            LOGGER.error("Failed to retrieve record for service '{}'", service.toString());
+            return;
+        }
         publisher.publish(record, ar -> {
             if (ar.succeeded()) {
                 record.setRegistration(ar.result().getRegistration());
@@ -169,6 +172,10 @@ public class DockerContainerServiceImporter implements ServiceImporter {
 
     private void unpublish(DockerContainerService service) {
         Record record = service.record();
+        if (record == null) {
+            LOGGER.error("Failed to retrieve record for service '{}'", service.toString());
+            return;
+        }
         publisher.unpublish(record.getRegistration(), ar -> {
             LOGGER.info("Service from container " + service.id() + " on location "
                     + record.getLocation() + " has been unpublished");

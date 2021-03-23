@@ -1,18 +1,21 @@
 package com.inventage.portal.gateway.core.provider.docker.servicediscovery;
 
+import java.util.Arrays;
+import java.util.Map;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.dockerjava.api.model.ContainerNetworkSettings;
 import com.github.dockerjava.api.model.ContainerPort;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.*;
-
-import java.util.Map;
+import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.servicediscovery.types.HttpLocation;
+import io.vertx.servicediscovery.types.JDBCDataSource;
+import io.vertx.servicediscovery.types.MongoDataSource;
+import io.vertx.servicediscovery.types.RedisDataSource;
 
 public class DockerContainerService {
 
@@ -91,6 +94,10 @@ public class DockerContainerService {
 
         record.getMetadata().put("portal.docker.ip", this.ip);
         record.getMetadata().put("portal.docker.port", this.port);
+        if (this.port < 0) {
+            LOGGER.error("Ignoring container iwth invalid port specified: '{}'", this.port);
+            return null;
+        }
 
         record.getMetadata().put("portal.docker.health", this.health);
 
@@ -193,8 +200,9 @@ public class DockerContainerService {
             ContainerPort port = ports[0];
             return port.getPrivatePort();
         } else {
-            throw new IllegalStateException("Cannot extract the HTTP URL from the container "
-                    + container.getNames() + " - no port");
+            LOGGER.error("Container has no port exposed '{}'",
+                    Arrays.toString(container.getNames()));
+            return -1;
         }
     }
 }
