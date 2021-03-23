@@ -13,6 +13,10 @@ services:
       - "portal.http.middlewares.testHeader.headers.customResponseHeaders.X-Custom-Response-Header=responseHeader"
       - "portal.http.middlewares.testRedirectregex.redirectRegex.regex=^(/whoami)$$"
       - "portal.http.middlewares.testRedirectregex.redirectRegex.replacement=$$1/"
+      - "portal.http.middlewares.testOauth2.oauth2.clientId=testClient"
+      - "portal.http.middlewares.testOauth2.oauth2.clientSecret=testSecret"
+      - "portal.http.middlewares.testOauth2.oauth2.discoveryUrl=http://localhost:29000/auth/realms/portal"
+      - "portal.http.middlewares.testOauth2.oauth2.sessionScope=testScope"
       - "portal.http.middlewares.testAuthBearer.authorizationBearer.sessionScope=testScope"
   httpbin:
     image: kennethreitz/httpbin

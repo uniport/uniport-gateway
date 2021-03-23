@@ -25,27 +25,25 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return "oauth2";
+        return DynamicConfiguration.MIDDLEWARE_OAUTH2;
     }
 
     @Override
     public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
 
         // TODO configure
-        Router router = null;
-        String routerName = null;
-        String sessionScope = null;
+        String sessionScope =
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
         String publicHostname = null;
         String entrypointPort = null;
+        Router router = null;
 
-        // if (sessionScope == null || "".equals(sessionScope)) {
-        // sessionScope = routerName;
-        // }
-
-        Route callback = router.get(OAUTH2_CALLBACK_PREFIX + routerName.toLowerCase());
+        Route callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
 
         callback.handler(ctx -> {
             ctx.addEndHandler(event -> {
+                // TODO set access and id tokens
+                System.out.println(event);
                 if (ctx.user() != null) {
                     ctx.session().put(sessionScope, ctx.user());
                 }
@@ -72,7 +70,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             } catch (Exception e) {
 
             }
-
 
             OAuth2AuthHandler authHandler = OAuth2AuthHandler.create(vertx, authProvider)
                     .setupCallback(callback).withScope(OAUTH2_SCOPE);

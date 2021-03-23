@@ -15,12 +15,12 @@ public class OAuth2AuthMiddleware implements Middleware {
         this.sessionScope = sessionScope;
     }
 
+
     @Override
     public void handle(RoutingContext ctx) {
-        // TODO/ASK
+        // TODO
+        // ctx.session().put(Client, {id: jwt, access: jwt, refresh: jwt})
         final User service_user = ctx.session().get(this.sessionScope);
-        // ATTENTION: Set the user. Usually used by auth handlers to inject a User. You will not
-        // normally call this method.
         ctx.setUser(service_user);
 
         authHandler.handle(ctx);

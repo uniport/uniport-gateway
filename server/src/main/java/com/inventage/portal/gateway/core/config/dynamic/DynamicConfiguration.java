@@ -59,6 +59,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
     public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
     public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
+    public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
 
     public static final List<String> MIDDLEWARE_TYPES =
             Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX, MIDDLEWARE_REDIRECT_REGEX,
