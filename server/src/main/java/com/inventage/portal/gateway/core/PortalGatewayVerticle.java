@@ -1,10 +1,15 @@
 package com.inventage.portal.gateway.core;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
-import com.inventage.portal.gateway.core.config.startup.PortalGatewayConfigRetriever;
-import com.inventage.portal.gateway.core.config.startup.StaticConfiguration;
+import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
@@ -14,11 +19,6 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The main verticle of the portal gateway. It reads the configuration for the entrypoints and

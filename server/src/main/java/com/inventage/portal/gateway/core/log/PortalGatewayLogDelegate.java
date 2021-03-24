@@ -9,10 +9,10 @@ import io.vertx.core.spi.logging.LogDelegate;
  */
 public class PortalGatewayLogDelegate implements LogDelegate {
 
-    private final Logger logger;
+    private final Logger LOGGER;
 
     public PortalGatewayLogDelegate(String name) {
-        logger = LoggerFactory.getLogger(name);
+        LOGGER = LoggerFactory.getLogger(name);
     }
 
     @Override

@@ -1,5 +1,0 @@
-com.inventage.portal.gateway.core.middleware.headers.HeaderMiddlewareFactory
-com.inventage.portal.gateway.core.middleware.authorizationBearer.AuthorizationBearerMiddlewareFactory
-com.inventage.portal.gateway.core.middleware.oauth2.OAuth2MiddlewareFactory
-com.inventage.portal.gateway.core.middleware.proxy.ProxyMiddlewareFactory
-com.inventage.portal.gateway.core.middleware.redirectRegex.RedirectRegexMiddlewareFactory
