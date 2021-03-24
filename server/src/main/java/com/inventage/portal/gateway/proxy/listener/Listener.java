@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy;
+package com.inventage.portal.gateway.proxy.listener;
 
 import io.vertx.core.json.JsonObject;
 

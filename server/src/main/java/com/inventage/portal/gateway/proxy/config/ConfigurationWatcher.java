@@ -1,11 +1,13 @@
-package com.inventage.portal.gateway.proxy;
+package com.inventage.portal.gateway.proxy.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.inventage.portal.gateway.proxy.ProxyApplication;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +91,7 @@ public class ConfigurationWatcher {
         }
     }
 
+    // TODO introduce provider namespaces
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
         JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
         JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);

@@ -3,6 +3,8 @@ package com.inventage.portal.gateway.proxy;
 import java.util.Arrays;
 import java.util.Optional;
 import com.inventage.portal.gateway.core.application.Application;
+import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
+import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import org.slf4j.Logger;
@@ -84,31 +86,9 @@ public class ProxyApplication implements Application {
 
         RouterFactory routerFactory = new RouterFactory(vertx);
 
-        watcher.addListener(switchRouter(vertx, routerFactory));
+        watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
 
         return watcher.start();
     }
 
-    private Listener switchRouter(Vertx vertx, RouterFactory routerFactory) {
-        return new Listener() {
-            @Override
-            public void listen(JsonObject config) {
-                Future<Router> routerCreation = routerFactory.createRouter(config);
-                routerCreation.onComplete(ar -> {
-                    if (ar.succeeded()) {
-                        setSubRouter(ar.result());
-                    } else {
-                        LOGGER.error("Failed to create new router with '{}' from config '{}'",
-                                ar.cause(), config);
-                    }
-                });
-            }
-        };
-    }
-
-    private void setSubRouter(Router subRouter) {
-        // TODO might this create a connection gap?
-        this.router.clear();
-        this.router.mountSubRouter("/", subRouter);
-    }
 }
