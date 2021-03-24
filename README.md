@@ -2,7 +2,7 @@
 
 Der Portal Gateway Server agiert als Reverse Proxy für alle Request des Portals.
 
-![PortalGateway](.docs/PortalGateway.png)
+![Concept Overview](.docs/ConceptOverview.png)
 
 Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet. Diese wird in der angegebenen Reihenfolge gesucht:
 
@@ -46,3 +46,13 @@ Für den Start der verwendeten Backend Systeme, kann die Run Configuration `http
 **Beachte**: Um die `httpbin: docker-compose` Run Configuration direkt von IntelliJ zu starten, muss du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren.
 
 (Alternativ, kannst du die Docker-Compose auch direkt von der Command Line benutzen).
+
+## Visulisierungen
+
+## Beispielflow
+
+![Example Flow](.docs/ExampleFlow.png)
+
+### Konzept des Sessionbags
+
+![Session Bag](.docs/SessionBag.png)
