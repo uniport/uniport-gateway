@@ -54,11 +54,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             // TODO maybe we can do this with postAuthentication
             callback.handler(ctx -> {
-                System.out.println("Handling callback");
+                LOGGER.debug("Handling callback");
                 ctx.addEndHandler(event -> {
                     // TODO set access and id tokens
                     if (ctx.user() != null) {
-                        System.out.println("User " + ctx.user().attributes());
                         ctx.session().put(sessionScope, ctx.user());
                     }
                 });
@@ -68,8 +67,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             OAuth2Options keycloakOAuth2Options =
                     ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-            // TODO whats the prupose of this? to ensure this request is router through the gateway
-            // again
+            // TODO whats the prupose of this? to ensure this request is routed through the gateway
+            // as well
             String publicHostname = "localhost";
             String entrypointPort = "8000";
             try {
@@ -78,7 +77,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                         publicHostname, entrypointPort, uri.getPath());
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
             } catch (Exception e) {
-                LOGGER.error("WHAT ABOUT THIS");
+                LOGGER.error("Failed to patch authorization path");
             }
 
             String callbackURL = String.format("http://%s:%s%s", publicHostname, entrypointPort,
@@ -86,9 +85,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             OAuth2AuthHandler authHandler =
                     OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
-                            .setupCallback(callback).withScope("openid");
+                            .setupCallback(callback).withScope(OAUTH2_SCOPE);
 
-            oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
+            oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler));
             LOGGER.debug("Created OAuth2 middleware");
         }).onFailure(handler -> {
             LOGGER.error(
