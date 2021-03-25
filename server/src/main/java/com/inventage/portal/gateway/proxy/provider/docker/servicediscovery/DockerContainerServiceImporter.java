@@ -121,7 +121,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
                 if (completion != null) {
                     completion.fail(listContainersAr.cause());
                 } else {
-                    LOGGER.error("Fail to import containers from docker", listContainersAr.cause());
+                    LOGGER.error("scan: fail to import containers from docker", listContainersAr.cause());
                 }
                 return;
             }
@@ -155,17 +155,15 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     private void publish(DockerContainerService service) {
         Record record = service.record();
         if (record == null) {
-            LOGGER.error("Failed to retrieve record for service '{}'", service.toString());
+            LOGGER.error("publish: failed to retrieve record for service '{}'", service.serviceName());
             return;
         }
         publisher.publish(record, ar -> {
             if (ar.succeeded()) {
                 record.setRegistration(ar.result().getRegistration());
-                LOGGER.info("Container " + service.id() + " on location " + record.getLocation()
-                        + " has been published");
+                LOGGER.info("publish: container '{}' on location '{}' was successful", service.serviceName(), record.getLocation());
             } else {
-                LOGGER.error("Container " + service.id() + " on location " + record.getLocation()
-                        + " could not have been published", ar.cause());
+                LOGGER.error("publish: container '{}' on location '{}' failed", service.serviceName(), record.getLocation(), ar.cause());
             }
         });
     }
@@ -173,12 +171,11 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     private void unpublish(DockerContainerService service) {
         Record record = service.record();
         if (record == null) {
-            LOGGER.error("Failed to retrieve record for service '{}'", service.toString());
+            LOGGER.error("unpublish: failed to retrieve record for service '{}'", service.toString());
             return;
         }
         publisher.unpublish(record.getRegistration(), ar -> {
-            LOGGER.info("Service from container " + service.id() + " on location "
-                    + record.getLocation() + " has been unpublished");
+            LOGGER.info("unpublish: service from container '{}' on location '{}' has been unpublished", service.serviceName(), record.getLocation());
         });
     }
 
@@ -214,9 +211,9 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         try {
             started = false;
             client.close();
-            LOGGER.info("Successfully closed the service importer " + this);
+            LOGGER.info("close: successfully closed the service importer " + this);
         } catch (IOException e) {
-            LOGGER.error("A failure has been caught while stopping " + this, e);
+            LOGGER.error("close: a failure has been caught while stopping " + this, e);
         }
         if (completionHandler != null) {
             completionHandler.handle(null);

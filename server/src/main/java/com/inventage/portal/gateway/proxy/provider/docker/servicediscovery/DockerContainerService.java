@@ -38,6 +38,7 @@ public class DockerContainerService {
     private Record record;
 
     public DockerContainerService(Container container) {
+        LOGGER.debug("constructor: for container '{}'", container.getNames());
         this.id = container.getId();
 
         String name;
@@ -59,6 +60,14 @@ public class DockerContainerService {
 
     public String id() {
         return this.id;
+    }
+
+    public String name() {
+        return this.name;
+    }
+
+    public String serviceName() {
+        return this.serviceName;
     }
 
     public Record record() {
@@ -95,7 +104,7 @@ public class DockerContainerService {
         record.getMetadata().put("portal.docker.ip", this.ip);
         record.getMetadata().put("portal.docker.port", this.port);
         if (this.port < 0) {
-            LOGGER.error("Ignoring container iwth invalid port specified: '{}'", this.port);
+            LOGGER.error("createRecord: ignoring container '{}' with invalid port specified: '{}'", container.getNames(), this.port);
             return null;
         }
 
@@ -132,8 +141,7 @@ public class DockerContainerService {
         }
 
         if (ports.length > 1) {
-            LOGGER.warn("More than one ports has been found for " + record.getName()
-                    + " - taking the " + "first one to build the record location");
+            LOGGER.warn("discoverType: more than one ports has been found for '{}' - taking the first one ('{}') to build the record location", record.getName(), ports[0].getPrivatePort());
         }
 
         ContainerPort port = ports[0];
@@ -176,7 +184,7 @@ public class DockerContainerService {
                 if (network != null) {
                     return network.getIpAddress();
                 }
-                LOGGER.warn("Could not find network named " + networkMode + " for container "
+                LOGGER.warn("getIPAddress: could not find network named " + networkMode + " for container "
                         + container.getId()
                         + "! Maybe you're missing the project's prefix in the label? Defaulting to first available network.");
             }
@@ -186,21 +194,20 @@ public class DockerContainerService {
             return network.getIpAddress();
         }
 
-        LOGGER.warn("Unable to find the IP address");
+        LOGGER.warn("getIPAddress: unable to find the IP address");
         return "";
     }
 
     private static int getPort(Container container) {
         ContainerPort[] ports = container.getPorts();
         if (ports != null && ports.length != 0) {
-            if (ports.length > 1) {
-                LOGGER.warn("More than one ports has been found for " + container.getId()
-                        + " - taking the " + "first one to build the record location");
-            }
             ContainerPort port = ports[0];
+            if (ports.length > 1) {
+                LOGGER.warn("getPort: more than one ports has been found for '{}' - taking the first one ('{}') to build the record location", container.getNames(), port.getPrivatePort());
+            }
             return port.getPrivatePort();
         } else {
-            LOGGER.error("Container has no port exposed '{}'",
+            LOGGER.error("getPort: container has no port exposed '{}'",
                     Arrays.toString(container.getNames()));
             return -1;
         }
