@@ -22,6 +22,12 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
+    public final static String SESSION_SCOPE_USER_FORMAT = "%s_user";
+    public final static String SESSION_SCOPE_ACCESS_TOKEN_FORMAT = "%s_access_token";
+    public final static String ID_TOKEN = "id_token";
+
+    private final static String ACCESS_TOKEN = "access_token";
+
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final String OAUTH2_SCOPE = "openid";
 
@@ -52,13 +58,27 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         keycloakDiscoveryFuture.onSuccess(authProvider -> {
             LOGGER.debug("Successfully completed Keycloak discovery");
 
-            // TODO maybe we can do this with postAuthentication
             callback.handler(ctx -> {
                 LOGGER.debug("Handling callback");
                 ctx.addEndHandler(event -> {
-                    // TODO set access and id tokens
                     if (ctx.user() != null) {
-                        ctx.session().put(sessionScope, ctx.user());
+                        LOGGER.debug("Setting session scope user");
+                        ctx.session().put(String.format(SESSION_SCOPE_USER_FORMAT, sessionScope),
+                                ctx.user());
+
+                        if (ctx.user().principal() != null) {
+                            JsonObject principal = ctx.user().principal();
+
+                            LOGGER.debug("Setting id token");
+                            String idToken = principal.getString(ID_TOKEN);
+                            ctx.session().put(ID_TOKEN, idToken);
+
+                            LOGGER.debug("Setting access token for scope '{}'", sessionScope);
+                            String accessToken = principal.getString(ACCESS_TOKEN);
+                            ctx.session().put(
+                                    String.format(SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
+                                    accessToken);
+                        }
                     }
                 });
                 ctx.next();
@@ -67,8 +87,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             OAuth2Options keycloakOAuth2Options =
                     ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-            // TODO whats the prupose of this? to ensure this request is routed through the gateway
-            // as well
+            // TODO whats the purpose of this?
+            // to ensure this request is routed through the gateway as well
             String publicHostname = "localhost";
             String entrypointPort = "8000";
             try {
@@ -87,7 +107,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                     OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
                             .setupCallback(callback).withScope(OAUTH2_SCOPE);
 
-            oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler));
+            oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
             LOGGER.debug("Created OAuth2 middleware");
         }).onFailure(handler -> {
             LOGGER.error(

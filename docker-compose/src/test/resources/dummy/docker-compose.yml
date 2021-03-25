@@ -1,26 +1,37 @@
 version: "3"
 
 services:
-  whoami:
+  dashboard:
     image: traefik/whoami
     labels:
-      - "portal.http.routers.whoami.rule=PathPrefix('/whoami')"
-      - "portal.http.routers.whoami.middlewares=testRedirectregex, testHeader, testReplacePath"
-      - "portal.http.middlewares.testReplacePath.replacePathRegex.regex=whoami"
-      - "portal.http.middlewares.testReplacePath.replacePathRegex.replacement=blub"
-      - "portal.http.middlewares.testHeader.headers.customRequestHeaders.X-Script-Name=test"
-      - "portal.http.middlewares.testHeader.headers.customRequestHeaders.X-Custom-Request-Header=requestHeader"
-      - "portal.http.middlewares.testHeader.headers.customResponseHeaders.X-Custom-Response-Header=responseHeader"
-      - "portal.http.middlewares.testRedirectregex.redirectRegex.regex=^(/whoami)$$"
-      - "portal.http.middlewares.testRedirectregex.redirectRegex.replacement=$$1/"
-      - "portal.http.middlewares.testOauth2.oauth2.clientId=testClient"
-      - "portal.http.middlewares.testOauth2.oauth2.clientSecret=testSecret"
-      - "portal.http.middlewares.testOauth2.oauth2.discoveryUrl=http://localhost:29000/auth/realms/portal"
-      - "portal.http.middlewares.testOauth2.oauth2.sessionScope=testScope"
-      - "portal.http.middlewares.testAuthBearer.authorizationBearer.sessionScope=testScope"
-  httpbin:
-    image: kennethreitz/httpbin
+      - "portal.http.routers.dashboard.rule=PathPrefix('/dashboard')"
+      - "portal.http.routers.dashboard.middlewares=dashboardRedirectregex, dashboardAuthBearer, dashboardReplacePath"
+      - "portal.http.middlewares.dashboardRedirectregex.redirectRegex.regex=^(/dashboard)$$"
+      - "portal.http.middlewares.dashboardRedirectregex.redirectRegex.replacement=$$1/"
+      - "portal.http.middlewares.dashboardAuthBearer.authorizationBearer.sessionScope=documentScope"
+      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.regex=dashboard"
+      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.replacement=blabla"
+  navigation:
+    image: traefik/whoami
     labels:
-      - "portal.http.routers.httpbin.rule=PathPrefix('/httpbin')"
-      # no service specified or defined and yet one gets automatically created
-      # and assigned to router httpbin.
+      - "portal.http.routers.navigation.rule=PathPrefix('/navigation')"
+      - "portal.http.routers.navigation.middlewares=navigationRedirectregex,  navigationAuthBearer, navigationReplacePath"
+      - "portal.http.middlewares.navigationRedirectregex.redirectRegex.regex=^(/navigation)$$"
+      - "portal.http.middlewares.navigationRedirectregex.redirectRegex.replacement=$$1/"
+      - "portal.http.middlewares.navigationAuthBearer.authorizationBearer.sessionScope=id"
+      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.regex=navigation"
+      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.replacement=walrus"
+  organisation:
+    image: traefik/whoami
+    labels:
+      - "portal.http.routers.organisation.rule=PathPrefix('/organisation')"
+      - "portal.http.routers.organisation.middlewares=organisationRedirectregex, organisationOauth2, organisationAuthBearer, organisationReplacePath"
+      - "portal.http.middlewares.organisationRedirectregex.redirectRegex.regex=^(/organisation)$$"
+      - "portal.http.middlewares.organisationRedirectregex.redirectRegex.replacement=$$1/"
+      - "portal.http.middlewares.organisationOauth2.oauth2.clientId=Organisation"
+      - "portal.http.middlewares.organisationOauth2.oauth2.clientSecret=Organisation!"
+      - "portal.http.middlewares.organisationOauth2.oauth2.discoveryUrl=http://localhost:29000/auth/realms/portal"
+      - "portal.http.middlewares.organisationOauth2.oauth2.sessionScope=organisationScope"
+      - "portal.http.middlewares.organisationAuthBearer.authorizationBearer.sessionScope=organisationScope"
+      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.regex=organisation"
+      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.replacement=blub"
