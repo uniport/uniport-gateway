@@ -13,6 +13,7 @@ import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -21,6 +22,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 
 public class RouterFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
@@ -31,7 +33,14 @@ public class RouterFactory {
         this.vertx = vertx;
     }
 
-    public void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
+    public Future<Router> createRouter(JsonObject dynamicConfig) {
+        Promise<Router> promise = Promise.promise();
+        createRouter(dynamicConfig, promise);
+        return promise.future();
+    }
+
+    private void createRouter(JsonObject dynamicConfig,
+            final Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
@@ -54,6 +63,7 @@ public class RouterFactory {
             Route route = routingRule.apply(router);
 
             List<UriMiddleware> uriMiddlewares = new ArrayList<>();
+            List<Future> middlewareFutures = new ArrayList();
             JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
             if (middlewareNames != null) {
                 for (int j = 0; j < middlewareNames.size(); j++) {
@@ -69,10 +79,9 @@ public class RouterFactory {
                     MiddlewareFactory middlewareFactory =
                             MiddlewareFactory.Loader.getFactory(middlewareType);
                     if (middlewareFactory != null) {
-                        // TODO wait for futures to complete and set handlers on completion
-                        Middleware middleware =
-                                middlewareFactory.create(this.vertx, middlewareOptions);
-                        route.handler(middleware);
+                        Future<Middleware> middlewareFuture =
+                                middlewareFactory.create(this.vertx, router, middlewareOptions);
+                        middlewareFutures.add(middlewareFuture);
                         continue;
                     }
 
@@ -107,18 +116,28 @@ public class RouterFactory {
             // TODO support multipe servers
             JsonObject serverConfig = serverConfigs.getJsonObject(0);
 
-            Middleware proxyMiddleware =
-                    (new ProxyMiddlewareFactory()).create(vertx, serverConfig, uriMiddleware);
-            route.handler(proxyMiddleware);
+            Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx,
+                    router, serverConfig, uriMiddleware);
+            middlewareFutures.add(proxyMiddlewareFuture);
+
+            CompositeFuture.all(middlewareFutures).onComplete(ar -> {
+                middlewareFutures.forEach(mf -> {
+                    if (mf.succeeded()) {
+                        LOGGER.debug("Created middleware successfully");
+                        route.handler((Handler<RoutingContext>) mf.result());
+                    } else {
+                        router.delete(route.getPath());
+                        LOGGER.error("Ignoring path '{}': Failed to create middleware '{}'",
+                                route.getPath(), mf.cause());
+                        handler.handle(Future
+                                .failedFuture("Failed to create middleware '" + mf.cause() + "'"));
+                    }
+                });
+            });
         }
 
+        // TODO ensure all routes are built
         handler.handle(Future.succeededFuture(router));
-    }
-
-    public Future<Router> createRouter(JsonObject dynamicConfig) {
-        Promise<Router> promise = Promise.promise();
-        createRouter(dynamicConfig, promise);
-        return promise.future();
     }
 
     private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {

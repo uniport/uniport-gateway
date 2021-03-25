@@ -6,8 +6,10 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
 
 public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
@@ -19,13 +21,14 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Middleware create(Vertx vertx, JsonObject serviceConfig) {
-        return this.create(vertx, serviceConfig, null);
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig) {
+        return this.create(vertx, router, serviceConfig, null);
     }
 
-    public Middleware create(Vertx vertx, JsonObject serviceConfig, UriMiddleware uriMiddleware) {
-        return new ProxyMiddleware(vertx,
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig,
+            UriMiddleware uriMiddleware) {
+        return Future.succeededFuture(new ProxyMiddleware(vertx,
                 serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
-                serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT), uriMiddleware);
+                serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT), uriMiddleware));
     }
 }

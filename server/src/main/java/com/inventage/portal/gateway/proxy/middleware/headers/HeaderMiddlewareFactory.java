@@ -7,8 +7,10 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
 
 public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
@@ -20,7 +22,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         Map<String, String> requestHeaders = new HashMap<>();
         Map<String, String> responseHeaders = new HashMap<>();
 
@@ -33,7 +35,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
                     responseHeaders.put(entry.getKey(), (String) entry.getValue());
                 });
 
-        return new HeaderMiddleware(requestHeaders, responseHeaders);
+        return Future.succeededFuture(new HeaderMiddleware(requestHeaders, responseHeaders));
     }
 
 }

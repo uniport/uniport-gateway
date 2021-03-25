@@ -77,6 +77,7 @@ public class DynamicConfiguration {
     private static Schema buildSchema(Vertx vertx) {
         // TODO consider setting "additionalProperties": false
 
+        // TODO schema required service clash
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
                 .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))

@@ -29,9 +29,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Middleware create(Vertx vertx, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
 
-        // TODO configure
         String sessionScope =
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
         String publicHostname = null;
@@ -59,6 +58,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .setSite(middlewareConfig
                         .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL));
 
+        Promise<Middleware> oauth2Promise = Promise.promise();
         Future<OAuth2Auth> future = KeycloakAuth.discover(vertx, oauth2Options);
 
         future.onSuccess(authProvider -> {
@@ -76,9 +76,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
         });
 
-        // TODO/ASK solve this asynch problem
-        // return new OAuth2HandlerImpl(authHandler, sessionScope);
-        return new OAuth2AuthMiddleware(null, sessionScope);
+        return oauth2Promise.future();
     }
 
 }
