@@ -173,7 +173,11 @@ public class RouterFactory {
         String ruleValue = m.group("ruleValue");
         switch (m.group("ruleName")) {
             case "PathPrefix": {
-                routingRule = pathPrefix(vertx, ruleValue);
+                // append * to do path prefix routing
+                String pathPrefix = ruleValue;
+                pathPrefix += "*";
+
+                routingRule = pathPrefix(vertx, pathPrefix);
                 break;
             }
             case "Host": {
