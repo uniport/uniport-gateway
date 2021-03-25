@@ -81,7 +81,7 @@ public class DynamicConfiguration {
                 .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
+                .property(ROUTER_SERVICE, Schemas.stringSchema())
                 .property(ROUTER_RULE, Schemas.stringSchema());
 
         ObjectSchemaBuilder middlewareSchema =

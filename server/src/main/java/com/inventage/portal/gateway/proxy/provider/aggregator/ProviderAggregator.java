@@ -57,7 +57,7 @@ public class ProviderAggregator extends Provider {
 
         CompositeFuture.join(futures).onComplete(ar -> {
             if (ar.succeeded()) {
-                LOGGER.info("Launched all providers successfully");
+                LOGGER.info("provide: launched {}/{} providers successfully", futures.size(), providers.size());
                 startPromise.complete();
             } else {
                 startPromise.fail(ar.cause());
