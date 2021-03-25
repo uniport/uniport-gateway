@@ -7,10 +7,12 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
@@ -33,22 +35,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
         String sessionScope =
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-        String publicHostname = null;
-        String entrypointPort = null;
-        Router router = null;
 
         Route callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
-
-        callback.handler(ctx -> {
-            ctx.addEndHandler(event -> {
-                // TODO set access and id tokens
-                System.out.println(event);
-                if (ctx.user() != null) {
-                    ctx.session().put(sessionScope, ctx.user());
-                }
-            });
-            ctx.next();
-        });
 
         OAuth2Options oauth2Options = new OAuth2Options()
                 .setClientID(
@@ -58,22 +46,55 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .setSite(middlewareConfig
                         .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL));
 
-        Promise<Middleware> oauth2Promise = Promise.promise();
-        Future<OAuth2Auth> future = KeycloakAuth.discover(vertx, oauth2Options);
+        Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oauth2Options);
 
-        future.onSuccess(authProvider -> {
+        Promise<Middleware> oauth2Promise = Promise.promise();
+        keycloakDiscoveryFuture.onSuccess(authProvider -> {
+            LOGGER.debug("Successfully completed Keycloak discovery");
+
+            // TODO maybe we can do this with postAuthentication
+            callback.handler(ctx -> {
+                System.out.println("Handling callback");
+                ctx.addEndHandler(event -> {
+                    // TODO set access and id tokens
+                    if (ctx.user() != null) {
+                        System.out.println("User " + ctx.user().attributes());
+                        ctx.session().put(sessionScope, ctx.user());
+                    }
+                });
+                ctx.next();
+            });
+
+            OAuth2Options keycloakOAuth2Options =
+                    ((OAuth2AuthProviderImpl) authProvider).getConfig();
+
+            // TODO whats the prupose of this? to ensure this request is router through the gateway
+            // again
+            String publicHostname = "localhost";
+            String entrypointPort = "8000";
             try {
-                final URI uri = new URI(oauth2Options.getAuthorizationPath());
+                final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
                 final String newAuthorizationPath = String.format("%s://%s:%s%s", "http",
                         publicHostname, entrypointPort, uri.getPath());
-                oauth2Options.setAuthorizationPath(newAuthorizationPath);
+                keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
             } catch (Exception e) {
-
+                LOGGER.error("WHAT ABOUT THIS");
             }
 
-            OAuth2AuthHandler authHandler = OAuth2AuthHandler.create(vertx, authProvider)
-                    .setupCallback(callback).withScope(OAUTH2_SCOPE);
+            String callbackURL = String.format("http://%s:%s%s", publicHostname, entrypointPort,
+                    callback.getPath());
 
+            OAuth2AuthHandler authHandler =
+                    OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
+                            .setupCallback(callback).withScope("openid");
+
+            oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
+            LOGGER.debug("Created OAuth2 middleware");
+        }).onFailure(handler -> {
+            LOGGER.error(
+                    "Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
+                    handler.getCause());
+            oauth2Promise.fail("Failed to create OAuth2 Middleware '" + handler.getCause() + "'");
         });
 
         return oauth2Promise.future();
