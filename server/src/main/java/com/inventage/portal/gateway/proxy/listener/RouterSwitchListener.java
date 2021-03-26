@@ -26,7 +26,7 @@ public class RouterSwitchListener implements Listener {
             if (ar.succeeded()) {
                 setSubRouter(ar.result());
             } else {
-                LOGGER.error("Failed to create new router with '{}' from config '{}'", ar.cause(),
+                LOGGER.warn("Failed to create new router with '{}' from config '{}'", ar.cause(),
                         config);
             }
         });

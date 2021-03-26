@@ -55,7 +55,10 @@ public class FileConfigProvider extends Provider {
                 final JsonObject config = ar.result();
                 this.validateAndPublish(config);
             } else {
-                LOGGER.error("cannot retrieve configuration");
+                String errorMsg = "cannot retrieve configuration";
+                LOGGER.warn(errorMsg);
+                startPromise.fail(errorMsg);
+                return;
             }
         });
         if (this.watch) {
@@ -94,7 +97,7 @@ public class FileConfigProvider extends Provider {
             return options.addStore(dirStore);
         }
 
-        LOGGER.error("neither filename or directory defined");
+        LOGGER.warn("neither filename or directory defined");
         return options;
     }
 
@@ -107,7 +110,8 @@ public class FileConfigProvider extends Provider {
                                 .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.error("validateAndPublish: invalid configuration '{}'", ar.cause().getMessage(), ar.cause());
+                LOGGER.warn("validateAndPublish: invalid configuration '{}'",
+                        ar.cause().getMessage(), ar.cause());
             }
         });
     }

@@ -33,7 +33,7 @@ public class Parser {
             JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
         } catch (IllegalArgumentException e) {
-            LOGGER.error("Failed to decode labels to json: '{}', (labels: '{}')", e.getMessage(),
+            LOGGER.warn("Failed to decode labels to json: '{}', (labels: '{}')", e.getMessage(),
                     labels.toString());
         }
         return null;

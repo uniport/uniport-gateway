@@ -104,7 +104,8 @@ public class DockerContainerService {
         record.getMetadata().put("portal.docker.ip", this.ip);
         record.getMetadata().put("portal.docker.port", this.port);
         if (this.port < 0) {
-            LOGGER.error("createRecord: ignoring container '{}' with invalid port specified: '{}'", container.getNames(), this.port);
+            LOGGER.warn("createRecord: ignoring container '{}' with invalid port specified: '{}'",
+                    container.getNames(), this.port);
             return null;
         }
 
@@ -141,7 +142,9 @@ public class DockerContainerService {
         }
 
         if (ports.length > 1) {
-            LOGGER.warn("discoverType: more than one ports has been found for '{}' - taking the first one ('{}') to build the record location", record.getName(), ports[0].getPrivatePort());
+            LOGGER.warn(
+                    "discoverType: more than one ports has been found for '{}' - taking the first one ('{}') to build the record location",
+                    record.getName(), ports[0].getPrivatePort());
         }
 
         ContainerPort port = ports[0];
@@ -184,8 +187,8 @@ public class DockerContainerService {
                 if (network != null) {
                     return network.getIpAddress();
                 }
-                LOGGER.warn("getIPAddress: could not find network named " + networkMode + " for container "
-                        + container.getId()
+                LOGGER.warn("getIPAddress: could not find network named " + networkMode
+                        + " for container " + container.getId()
                         + "! Maybe you're missing the project's prefix in the label? Defaulting to first available network.");
             }
         }
@@ -203,11 +206,13 @@ public class DockerContainerService {
         if (ports != null && ports.length != 0) {
             ContainerPort port = ports[0];
             if (ports.length > 1) {
-                LOGGER.warn("getPort: more than one ports has been found for '{}' - taking the first one ('{}') to build the record location", container.getNames(), port.getPrivatePort());
+                LOGGER.warn(
+                        "getPort: more than one ports has been found for '{}' - taking the first one ('{}') to build the record location",
+                        container.getNames(), port.getPrivatePort());
             }
             return port.getPrivatePort();
         } else {
-            LOGGER.error("getPort: container has no port exposed '{}'",
+            LOGGER.warn("getPort: container has no port exposed '{}'",
                     Arrays.toString(container.getNames()));
             return -1;
         }

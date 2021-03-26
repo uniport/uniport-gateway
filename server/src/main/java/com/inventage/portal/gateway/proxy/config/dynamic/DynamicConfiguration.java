@@ -199,19 +199,19 @@ public class DynamicConfiguration {
         }
 
         for (String routerName : routersToDelete) {
-            LOGGER.error("Router defined multiple times with different configurations in '{}'",
+            LOGGER.warn("Router defined multiple times with different configurations in '{}'",
                     routers.get(routerName));
             mergedHttpConfig.remove(routerName);
         }
 
         for (String middlewareName : middlewaresToDelete) {
-            LOGGER.error("Middleware defined multiple times with different configurations in '{}'",
+            LOGGER.warn("Middleware defined multiple times with different configurations in '{}'",
                     routers.get(middlewareName));
             mergedConfig.remove(middlewareName);
         }
 
         for (String serviceName : servicesToDelete) {
-            LOGGER.error("Service defined multiple times with different configurations in '{}'",
+            LOGGER.warn("Service defined multiple times with different configurations in '{}'",
                     routers.get(serviceName));
             mergedHttpConfig.remove(serviceName);
         }

@@ -95,7 +95,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                         publicHostname, entrypointPort, uri.getPath());
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
             } catch (Exception e) {
-                LOGGER.error("Failed to patch authorization path");
+                LOGGER.warn("Failed to patch authorization path");
             }
 
             String callbackURL = String.format("http://%s:%s%s", publicHostname, entrypointPort,

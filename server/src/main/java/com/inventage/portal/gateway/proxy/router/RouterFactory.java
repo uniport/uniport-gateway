@@ -104,7 +104,7 @@ public class RouterFactory {
                         continue;
                     }
 
-                    LOGGER.error("Ignoring unknown middleware '{}'", middlewareType);
+                    LOGGER.warn("Ignoring unknown middleware '{}'", middlewareType);
                 }
             }
 
@@ -137,7 +137,7 @@ public class RouterFactory {
                         route.handler((Handler<RoutingContext>) mf.result());
                     } else {
                         router.delete(route.getPath());
-                        LOGGER.error("Ignoring path '{}': Failed to create middleware '{}'",
+                        LOGGER.warn("Ignoring path '{}': Failed to create middleware '{}'",
                                 route.getPath(), mf.cause());
                         handler.handle(Future
                                 .failedFuture("Failed to create middleware '" + mf.cause() + "'"));

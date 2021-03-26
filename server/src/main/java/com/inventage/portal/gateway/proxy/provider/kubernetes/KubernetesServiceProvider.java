@@ -88,7 +88,7 @@ public class KubernetesServiceProvider extends Provider {
                                         StaticConfiguration.PROVIDER_KUBERNETES)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.error("cannot publish new configuration: invalid configuration");
+                LOGGER.warn("cannot publish new configuration: invalid configuration");
             }
         });
     }

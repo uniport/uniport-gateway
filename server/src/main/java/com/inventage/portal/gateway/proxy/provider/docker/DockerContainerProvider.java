@@ -96,7 +96,7 @@ public class DockerContainerProvider extends Provider {
             this.configurations.remove(containerName);
             return DynamicConfiguration.merge(this.configurations);
         } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
-            LOGGER.error("buildConfiguration: unkown status type: " + status);
+            LOGGER.warn("buildConfiguration: unkown status type: " + status);
             return null;
         }
 
@@ -108,7 +108,8 @@ public class DockerContainerProvider extends Provider {
         JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
         if (confFromLabels == null) {
-            LOGGER.error("buildConfiguration: failed to decode labels to json for service '{}'", serviceName);
+            LOGGER.warn("buildConfiguration: failed to decode labels to json for service '{}'",
+                    serviceName);
             return null;
         }
 
@@ -123,7 +124,8 @@ public class DockerContainerProvider extends Provider {
         JsonArray serviceConfig =
                 this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
         if (serviceConfig == null) {
-            LOGGER.error("buildConfiguration: failed to build configuration for service '{}'", serviceName);
+            LOGGER.warn("buildConfiguration: failed to build configuration for service '{}'",
+                    serviceName);
             return null;
         }
 
@@ -133,7 +135,8 @@ public class DockerContainerProvider extends Provider {
         JsonArray routerConfig =
                 this.buildRouterConfiguration(httpConfFromLabels, serviceName, model);
         if (routerConfig == null) {
-            LOGGER.error("buildConfiguration: failed to build router configuration for service '{}'", serviceName);
+            LOGGER.warn("buildConfiguration: failed to build router configuration for service '{}'",
+                    serviceName);
             return null;
         }
 
@@ -142,8 +145,9 @@ public class DockerContainerProvider extends Provider {
                 LOGGER.debug("buildConfiguration: configuration from labels '{}'", confFromLabels);
                 this.configurations.put(containerName, confFromLabels);
             } else {
-                LOGGER.error("buildConfiguration: invalid configuration form container labels '{}': '{}'", serviceName,
-                        confFromLabels);
+                LOGGER.warn(
+                        "buildConfiguration: invalid configuration form container labels '{}': '{}'",
+                        serviceName, confFromLabels);
             }
         });
 
@@ -164,8 +168,9 @@ public class DockerContainerProvider extends Provider {
             JsonObject service = services.getJsonObject(i);
             JsonObject server = this.addServer(service, host, port);
             if (server == null) {
-                LOGGER.error("buildServiceConfiguration: failed to add server to service '{}', host '{}', port '{}'", service,
-                        host, port);
+                LOGGER.warn(
+                        "buildServiceConfiguration: failed to add server to service '{}', host '{}', port '{}'",
+                        service, host, port);
                 return null;
             }
         }
@@ -177,7 +182,7 @@ public class DockerContainerProvider extends Provider {
     // newer containers overwrite the old one
     private JsonObject addServer(JsonObject service, String host, int port) {
         if (service == null) {
-            LOGGER.error("addServer: service is not defined");
+            LOGGER.warn("addServer: service is not defined");
             return null;
         }
 
@@ -203,7 +208,8 @@ public class DockerContainerProvider extends Provider {
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (routers.size() == 0) {
             if (services.size() > 1) {
-                LOGGER.error("buildRouterConfiguration: could not create a router for the container: too many services '{}'",
+                LOGGER.warn(
+                        "buildRouterConfiguration: could not create a router for the container: too many services '{}'",
                         services.toString());
                 return null;
             } else {
@@ -217,7 +223,7 @@ public class DockerContainerProvider extends Provider {
                 StringSubstitutor sub = new StringSubstitutor(model);
                 String resolvedRule = sub.replace(this.defaultRule);
                 if (resolvedRule.length() == 0) {
-                    LOGGER.error("buildRouterConfiguration: undefined rule: '{}'", resolvedRule);
+                    LOGGER.warn("buildRouterConfiguration: undefined rule: '{}'", resolvedRule);
                     return null;
                 }
                 router.put(DynamicConfiguration.ROUTER_RULE, resolvedRule);
@@ -242,7 +248,7 @@ public class DockerContainerProvider extends Provider {
 
             if (!router.containsKey(DynamicConfiguration.ROUTER_SERVICE)) {
                 if (services.size() > 1) {
-                    LOGGER.error(
+                    LOGGER.warn(
                             "buildRouterConfiguration: could not define the service name for the router: too many services '{}'",
                             services.toString());
                 }
@@ -264,7 +270,8 @@ public class DockerContainerProvider extends Provider {
                                 .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.error("validateAndPublish: unable to publish invalid configuration: '{}'", config);
+                LOGGER.warn("validateAndPublish: unable to publish invalid configuration: '{}'",
+                        config);
             }
         });
     }
