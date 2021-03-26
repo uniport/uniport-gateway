@@ -8,7 +8,8 @@ public class ReplacePathRegexMiddlewareTest {
     @Test
     public void test_starting_with() {
         // given
-        final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("^/organisation/", "/");
+        final ReplacePathRegexMiddleware r =
+                new ReplacePathRegexMiddleware("^/organisation/(.*)", "/$1");
         // when
         final String uri = r.apply("/organisation/v1/graphql");
         // then
@@ -29,7 +30,8 @@ public class ReplacePathRegexMiddlewareTest {
     @Test
     public void test_exact2() {
         // given
-        final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("^/organisation/", "/");
+        final ReplacePathRegexMiddleware r =
+                new ReplacePathRegexMiddleware("^/organisation/(.*)", "/$1");
         // when
         final String uri = r.apply("/organisation/headers");
         // then
