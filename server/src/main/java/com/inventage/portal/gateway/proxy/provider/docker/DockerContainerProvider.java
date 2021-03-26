@@ -115,6 +115,9 @@ public class DockerContainerProvider extends Provider {
         String host = location.getString("ip");
         int port = location.getInteger("port");
 
+        LOGGER.debug("buildConfiguration: build configuration for docker container: '{}'",
+                containerName);
+
         JsonObject confFromLabels = Parser.decode(metadata.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
         if (confFromLabels == null) {

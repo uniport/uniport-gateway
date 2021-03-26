@@ -71,6 +71,7 @@ public class RouterFactory {
         JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
 
         sortByRuleLength(routers);
+        LOGGER.debug("createRouter: creating router from config '{}'", dynamicConfig);
 
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
@@ -199,6 +200,7 @@ public class RouterFactory {
         return new RoutingRule() {
             @Override
             public Route apply(Router router) {
+                LOGGER.debug("apply: create route with exact path '{}'", path);
                 return router.route(path);
             }
         };
@@ -209,6 +211,7 @@ public class RouterFactory {
         return new RoutingRule() {
             @Override
             public Route apply(Router router) {
+                LOGGER.debug("apply: create route with path prefix '{}'", pathPrefix);
                 return router.route(pathPrefix);
             }
         };
@@ -219,6 +222,7 @@ public class RouterFactory {
         return new RoutingRule() {
             @Override
             public Route apply(Router router) {
+                LOGGER.debug("apply: create route with host '{}'", host);
                 return router.route().virtualHost(host);
             }
 

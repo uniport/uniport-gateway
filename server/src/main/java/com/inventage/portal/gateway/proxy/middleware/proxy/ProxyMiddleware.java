@@ -49,6 +49,7 @@ public class ProxyMiddleware implements Middleware {
             request = ctx.request();
         }
 
+        LOGGER.debug("handle: Sending request to URI '{}'", request.uri());
         httpProxy.handle(request);
     }
 

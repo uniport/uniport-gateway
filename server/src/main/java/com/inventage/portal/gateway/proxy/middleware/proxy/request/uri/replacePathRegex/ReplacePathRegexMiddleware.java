@@ -24,6 +24,14 @@ public class ReplacePathRegexMiddleware implements UriMiddleware {
     @Override
     public String apply(String uri) {
         LOGGER.trace("apply");
-        return this.pattern.matcher(uri).replaceAll(this.replacement);
+
+        if (!this.pattern.matcher(uri).matches()) {
+            LOGGER.debug("apply: Skipping path replacement of non matching URI '{}'", uri);
+            return uri;
+        }
+        String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
+
+        LOGGER.debug("apply: replace path '{}' with '{}", uri, newURI);
+        return newURI;
     }
 }

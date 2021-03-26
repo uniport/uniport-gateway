@@ -50,7 +50,7 @@ public class Parser {
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
-            LOGGER.warn("decodeToJson: No matching labels found");
+            LOGGER.warn("decodeToJson: No matching labels found '{}'", labels);
             return null;
         }
 
