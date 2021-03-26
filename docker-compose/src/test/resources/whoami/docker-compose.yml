@@ -15,14 +15,16 @@ services:
       - "portal.http.middlewares.dashboardRedirectRegex.redirectRegex.regex=^(/dashboard)$$"
       - "portal.http.middlewares.dashboardRedirectRegex.redirectRegex.replacement=$$1/"
       - "portal.http.middlewares.dashboardAuthBearer.authorizationBearer.sessionScope=dashboardScope"
-      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.regex=/dashboard/"
-      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.replacement=/"
+      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.regex=/dashboard/(.*)"
+      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.replacement=/$$1"
       - "portal.http.routers.dashboard-login.rule=Path('/dashboard/login')"
-      # - "portal.http.routers.dashboard-login.middlewares=dashboardOauth2"
-      # - "portal.http.middlewares.dashboardOauth2.oauth2.clientId=Dashboard"
-      # - "portal.http.middlewares.dashboardOauth2.oauth2.clientSecret=Dashboard!"
-      # - "portal.http.middlewares.dashboardOauth2.oauth2.discoveryUrl=http://localhost:29000/auth/realms/portal"
-      # - "portal.http.middlewares.dashboardOauth2.oauth2.sessionScope=dashboardScope"
+      - "portal.http.routers.dashboard-login.middlewares=dashboardOauth2, dashboardLoginRedirectRegex"
+      - "portal.http.middlewares.dashboardOauth2.oauth2.clientId=Dashboard"
+      - "portal.http.middlewares.dashboardOauth2.oauth2.clientSecret=Dashboard!"
+      - "portal.http.middlewares.dashboardOauth2.oauth2.discoveryUrl=http://localhost:${portPrefix}001/auth/realms/portal"
+      - "portal.http.middlewares.dashboardOauth2.oauth2.sessionScope=dashboardScope"
+      - "portal.http.middlewares.dashboardLoginRedirectRegex.redirectRegex.regex=^(/dashboard/login)$$"
+      - "portal.http.middlewares.dashboardLoginRedirectRegex.redirectRegex.replacement=/dashboard/"
   dashboard-service:
     image: traefik/whoami
     ports:
@@ -41,8 +43,8 @@ services:
       - "portal.http.middlewares.navigationRedirectRegex.redirectRegex.regex=^(/navigation)$$"
       - "portal.http.middlewares.navigationRedirectRegex.redirectRegex.replacement=$$1/"
       - "portal.http.middlewares.navigationAuthBearer.authorizationBearer.sessionScope=id"
-      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.regex=/navigation/"
-      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.replacement=/"
+      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.regex=/navigation/(.*)"
+      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.replacement=/$$1"
   navigation-service:
     image: traefik/whoami
     ports:
@@ -57,23 +59,23 @@ services:
       - "8084:80"
     labels:
       - "portal.http.routers.organisation-frontend.rule=PathPrefix('/organisation')"
-      - "portal.http.routers.organisation-frontend.middlewares=organisationRedirectRegex, organisationAuthBearer, organisationReplacePath"
+      - "portal.http.routers.organisation-frontend.middlewares=organisationRedirectRegex, organisationOauth2, organisationAuthBearer, organisationReplacePath"
       - "portal.http.middlewares.organisationRedirectRegex.redirectRegex.regex=^(/organisation)$$"
       - "portal.http.middlewares.organisationRedirectRegex.redirectRegex.replacement=$$1/"
-      # - "portal.http.middlewares.organisationOauth2.oauth2.clientId=Organisation"
-      # - "portal.http.middlewares.organisationOauth2.oauth2.clientSecret=Organisation!"
-      # - "portal.http.middlewares.organisationOauth2.oauth2.discoveryUrl=http://localhost:29000/auth/realms/portal"
-      # - "portal.http.middlewares.organisationOauth2.oauth2.sessionScope=organisationScope"
+      - "portal.http.middlewares.organisationOauth2.oauth2.clientId=Organisation"
+      - "portal.http.middlewares.organisationOauth2.oauth2.clientSecret=Organisation!"
+      - "portal.http.middlewares.organisationOauth2.oauth2.discoveryUrl=http://localhost:${portPrefix}001/auth/realms/portal"
+      - "portal.http.middlewares.organisationOauth2.oauth2.sessionScope=organisationScope"
       - "portal.http.middlewares.organisationAuthBearer.authorizationBearer.sessionScope=organisationScope"
-      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.regex=/organisation/"
-      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.replacement=/"
+      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.regex=/organisation/(.*)"
+      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.replacement=/$$1"
   organisation-service:
     image: traefik/whoami
     ports:
       - "8085:80"
     labels:
       - "portal.http.routers.organisation-service.rule=PathPrefix('/organisation/service')"
-      - "portal.http.routers.organisation-service.middlewares=organisationAuthBearer, organisationReplacePath"
+      - "portal.http.routers.organisation-service.middlewares=organisationOauth2, organisationAuthBearer, organisationReplacePath"
 
   document-frontend:
     image: traefik/whoami
@@ -81,20 +83,20 @@ services:
       - "8086:80"
     labels:
       - "portal.http.routers.document-frontend.rule=PathPrefix('/document')"
-      - "portal.http.routers.document-frontend.middlewares=documentRedirectRegex, documentAuthBearer, documentReplacePath"
+      - "portal.http.routers.document-frontend.middlewares=documentRedirectRegex, documentOauth2, documentAuthBearer, documentReplacePath"
       - "portal.http.middlewares.documentRedirectRegex.redirectRegex.regex=^(/document)$$"
       - "portal.http.middlewares.documentRedirectRegex.redirectRegex.replacement=$$1/"
-      # - "portal.http.middlewares.documentOauth2.oauth2.clientId=Document"
-      # - "portal.http.middlewares.documentOauth2.oauth2.clientSecret=Document!"
-      # - "portal.http.middlewares.documentOauth2.oauth2.discoveryUrl=http://localhost:29000/auth/realms/portal"
-      # - "portal.http.middlewares.documentOauth2.oauth2.sessionScope=documentScope"
+      - "portal.http.middlewares.documentOauth2.oauth2.clientId=Document"
+      - "portal.http.middlewares.documentOauth2.oauth2.clientSecret=Document!"
+      - "portal.http.middlewares.documentOauth2.oauth2.discoveryUrl=http://localhost:${portPrefix}001/auth/realms/portal"
+      - "portal.http.middlewares.documentOauth2.oauth2.sessionScope=documentScope"
       - "portal.http.middlewares.documentAuthBearer.authorizationBearer.sessionScope=documentScope"
-      - "portal.http.middlewares.documentReplacePath.replacePathRegex.regex=/document/"
-      - "portal.http.middlewares.documentReplacePath.replacePathRegex.replacement=/"
+      - "portal.http.middlewares.documentReplacePath.replacePathRegex.regex=/document/(.*)"
+      - "portal.http.middlewares.documentReplacePath.replacePathRegex.replacement=/$$1"
   document-service:
     image: traefik/whoami
     ports:
       - "8087:80"
     labels:
       - "portal.http.routers.document-service.rule=PathPrefix('/document/service')"
-      - "portal.http.routers.document-service.middlewares=documentAuthBearer, documentReplacePath"
+      - "portal.http.routers.document-service.middlewares=documentOauth2, documentAuthBearer, documentReplacePath"
