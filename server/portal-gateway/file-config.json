@@ -2,280 +2,202 @@
   "http": {
     "routers": [
       {
-        "name": "root-redirect",
-        "rule": "PathPrefix('/')",
-        "middlewares": ["root-redirectRegex"]
-      },
-
-      {
-        "name": "auth",
-        "rule": "PathPrefix('/auth')",
-        "service": "portal-iam"
-      },
-
-      {
-        "name": "navigation-frontend",
-        "rule": "PathPrefix('/navigation/')",
-        "middlewares": ["navigation-authBearer", "navigation-replacePathRegex"],
-        "service": "navigation-frontend"
-      },
-      {
-        "name": "navigation-service",
-        "rule": "PathPrefix('/navigation/service')",
-        "middlewares": ["navigation-authBearer", "navigation-replacePathRegex"],
-        "service": "navigation-service"
-      },
-
-      {
-        "name": "dashboard-redirect",
-        "rule": "PathPrefix('/dashboard')",
-        "middlewares": ["dashboard-redirectRegex"]
-      },
-      {
-        "name": "dashboard-login-redirect",
-        "rule": "PathPrefix('/dashboard/login')",
-        "middlewares": ["dashboard-oauth2"]
-      },
-      {
-        "name": "dashboard-frontend",
-        "rule": "PathPrefix('/dashboard/')",
-        "middlewares": ["dashboard-authBearer", "dashboard-replacePathRegex"],
-        "service": "dashboard-frontend"
-      },
-      {
-        "name": "dashboard-service",
-        "rule": "PathPrefix('/dashboard/service')",
-        "middlewares": ["dashboard-authBearer", "dashboard-replacePathRegex"],
-        "service": "dashboard-service"
-      },
-
-      {
-        "name": "organisation-redirect",
-        "rule": "PathPrefix('/organisation')",
-        "middlewares": ["organisation-redirectRegex"]
-      },
-      {
-        "name": "organisation",
-        "rule": "PathPrefix('/organisation/')",
-        "middlewares": [
-          "organisation-oauth2",
-          "organisation-authBearer",
-          "organisation-replacePathRegex"
-        ],
-        "service": "organisation-service"
-      },
-
-      {
-        "name": "document-redirect",
-        "rule": "PathPrefix('/document')",
-        "middlewares": ["document-redirectRegex"]
-      },
-      {
-        "name": "document",
-        "rule": "PathPrefix('/document/')",
-        "middlewares": [
-          "document-oauth2",
-          "document-authBearer",
-          "document-replacePathRegex"
-        ],
-        "service": "document-service"
-      }
-    ],
-
-    "middlewares": [
-      {
-        "name": "navigation-replacePathRegex",
-        "type": "replacePathRegex",
-        "options": {
-          "regex": "^/navigation/",
-          "replacement": "/"
-        }
-      },
-      {
-        "name": "dashboard-replacePathRegex",
-        "type": "replacePathRegex",
-        "options": {
-          "regex": "^/dashboard/",
-          "replacement": "/"
-        }
-      },
-      {
-        "name": "organisation-replacePathRegex",
-        "type": "replacePathRegex",
-        "options": {
-          "regex": "^/organisation/",
-          "replacement": "/"
-        }
-      },
-      {
-        "name": "document-replacePathRegex",
-        "type": "replacePathRegex",
-        "options": {
-          "regex": "^/document/",
-          "replacement": "/"
-        }
-      },
-
-      {
-        "name": "root-redirectRegex",
-        "type": "redirectRegex",
-        "options": {
-          "regex": "^/$",
-          "replacement": "/dashboard/"
-        }
-      },
-      {
-        "name": "dashboard-redirectRegex",
-        "type": "redirectRegex",
-        "options": {
-          "regex": "^(/dashboard)$",
-          "replacement": "$1/"
-        }
-      },
-      {
-        "name": "organiation-redirectRegex",
-        "type": "redirectRegex",
-        "options": {
-          "regex": "^/organiation/",
-          "replacement": "$1/"
-        }
-      },
-      {
-        "name": "document-redirectRegex",
-        "type": "redirectRegex",
-        "options": {
-          "regex": "^/document/",
-          "replacement": "$1/"
-        }
-      },
-
-      {
-        "name": "navigation-authBearer",
-        "type": "authorizationBearer",
-        "options": {
-          "sessionScope": "id"
-        }
-      },
-      {
-        "name": "dashboard-authBearer",
-        "type": "authorizationBearer",
-        "options": {
-          "sessionScope": "dashboard"
-        }
-      },
-      {
-        "name": "organisation-authBearer",
-        "type": "authorizationBearer",
-        "options": {
-          "sessionScope": "organisation"
-        }
-      },
-      {
-        "name": "document-authBearer",
-        "type": "authorizationBearer",
-        "options": {
-          "sessionScope": "document"
-        }
-      },
-
-      {
-        "name": "dashboard-oauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Dashboard",
-          "clientSecret": "Dashboard!",
-          "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal",
-          "sessionScope": "dashboard"
-        }
-      },
-      {
-        "name": "organisation-oauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Organisation",
-          "clientSecret": "Organisation!",
-          "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal",
-          "sessionScope": "organisation"
-        }
-      },
-      {
-        "name": "document-oauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Document",
-          "clientSecret": "Document!",
-          "discoveryUrl": "http://${portal-iam.host}:8080/auth/realms/portal",
-          "sessionScope": "document"
-        }
-      }
-    ],
-
-    "services": [
-      {
-        "name": "portal-iam",
-        "servers": [
-          {
-            "host": "${portal-iam.host}",
-            "port": 8080
-          }
-        ]
-      },
-
-      {
-        "name": "navigation-frontend",
-        "servers": [
-          {
-            "host": "${navigation-frontend.host}",
-            "port": 20015
-          }
-        ]
-      },
-      {
-        "name": "navigation-service",
-        "servers": [
-          {
-            "host": "${navigation-service.host}",
-            "port": 20012
-          }
-        ]
-      },
-
-      {
-        "name": "dashboard-frontend",
-        "servers": [
-          {
-            "host": "${dashboard-frontend.host}",
-            "port": 20025
-          }
-        ]
-      },
-      {
-        "name": "dashboard-service",
-        "servers": [
-          {
-            "host": "${dashboard-service.host}",
-            "port": 20022
-          }
-        ]
-      },
-
-      {
         "name": "organisation-service",
-        "servers": [
-          {
-            "host": "${organisation-service.host}",
-            "port": 20030
-          }
-        ]
+        "middlewares": ["organisationAuthBearer", "organisationReplacePath"],
+        "rule": "PathPrefix('/organisation/service')",
+        "service": "/whoami_organisation-service_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "navigation-service",
+        "middlewares": ["navigationAuthBearer", "navigationReplacePath"],
+        "rule": "PathPrefix('/navigation/service')",
+        "service": "/whoami_navigation-service_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "dashboard-service",
+        "middlewares": ["dashboardAuthBearer", "dashboardReplacePath"],
+        "rule": "PathPrefix('/dashboard/service')",
+        "service": "/whoami_dashboard-service_1",
+        "entrypoints": ["http8000"]
       },
       {
         "name": "document-service",
-        "servers": [
-          {
-            "host": "${document-service.host}",
-            "port": 20050
-          }
-        ]
+        "middlewares": ["documentAuthBearer", "documentReplacePath"],
+        "rule": "PathPrefix('/document/service')",
+        "service": "/whoami_document-service_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "organisation-frontend",
+        "middlewares": [
+          "organisationRedirectRegex",
+          "organisationAuthBearer",
+          "organisationReplacePath"
+        ],
+        "rule": "PathPrefix('/organisation')",
+        "service": "/whoami_organisation-frontend_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "navigation-frontend",
+        "middlewares": [
+          "navigationRedirectRegex",
+          "navigationAuthBearer",
+          "navigationReplacePath"
+        ],
+        "rule": "PathPrefix('/navigation')",
+        "service": "/whoami_navigation-frontend_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "dashboard-frontend",
+        "middlewares": [
+          "dashboardRedirectRegex",
+          "dashboardAuthBearer",
+          "dashboardReplacePath",
+          "rootRedirectregex"
+        ],
+        "rule": "PathPrefix('/dashboard')",
+        "service": "/whoami_dashboard-frontend_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "dashboard-login",
+        "rule": "Path('/dashboard/login')",
+        "middlewares": [
+          "dashboardAuthBearer",
+          "dashboardRedirectRegex",
+          "dashboardReplacePath",
+          "rootRedirectregex"
+        ],
+        "service": "/whoami_dashboard-frontend_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "document-frontend",
+        "middlewares": [
+          "documentRedirectRegex",
+          "documentAuthBearer",
+          "documentReplacePath"
+        ],
+        "rule": "PathPrefix('/document')",
+        "service": "/whoami_document-frontend_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "root",
+        "middlewares": [
+          "rootRedirectregex",
+          "dashboardAuthBearer",
+          "dashboardRedirectRegex",
+          "dashboardReplacePath"
+        ],
+        "rule": "Path('/')",
+        "service": "/whoami_dashboard-frontend_1",
+        "entrypoints": ["http8000"]
+      }
+    ],
+    "middlewares": [
+      {
+        "name": "navigationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "id" }
+      },
+      {
+        "name": "navigationRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+      },
+      {
+        "name": "navigationReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/navigation/", "replacement": "/" }
+      },
+      {
+        "name": "organisationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "organisationScope" }
+      },
+      {
+        "name": "organisationRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/organisation)$", "replacement": "$1/" }
+      },
+      {
+        "name": "organisationReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/organisation/", "replacement": "/" }
+      },
+      {
+        "name": "dashboardAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "dashboardScope" }
+      },
+      {
+        "name": "dashboardRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/dashboard)$", "replacement": "$1/" }
+      },
+      {
+        "name": "dashboardReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/dashboard/", "replacement": "/" }
+      },
+      {
+        "name": "rootRedirectregex",
+        "type": "redirectRegex",
+        "options": { "regex": "^/$", "replacement": "/dashboard/" }
+      },
+      {
+        "name": "documentAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "documentScope" }
+      },
+      {
+        "name": "documentRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/document)$", "replacement": "$1/" }
+      },
+      {
+        "name": "documentReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/document/", "replacement": "/" }
+      }
+    ],
+    "services": [
+      {
+        "name": "/whoami_navigation-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8083 }]
+      },
+      {
+        "name": "/whoami_document-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8087 }]
+      },
+      {
+        "name": "/whoami_navigation-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8082 }]
+      },
+      {
+        "name": "/whoami_organisation-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8085 }]
+      },
+      {
+        "name": "/whoami_dashboard-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8081 }]
+      },
+      {
+        "name": "/whoami_organisation-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8084 }]
+      },
+      {
+        "name": "/whoami_dashboard-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8080 }]
+      },
+      {
+        "name": "/whoami_document-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 8086 }]
       }
     ]
   }
