@@ -36,13 +36,14 @@ public class AuthorizationBearerMiddleware implements Middleware {
         StringBuilder token;
         if (idToken != null && this.sessionScope
                 .equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
-            LOGGER.debug("Providing id token");
+            LOGGER.debug("handle: Providing id token");
             token = new StringBuilder(BEARER).append(idToken);
         } else if (accessToken != null) {
-            LOGGER.debug("Providing access token for session scope : '{}'", this.sessionScope);
+            LOGGER.debug("handle: Providing access token for session scope : '{}'",
+                    this.sessionScope);
             token = new StringBuilder(BEARER).append(accessToken);
         } else {
-            LOGGER.debug("Providing no token");
+            LOGGER.debug("handle: Providing no token");
             ctx.next();
             return;
         }

@@ -28,8 +28,8 @@ public class OAuth2AuthMiddleware implements Middleware {
                 String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_USER_FORMAT, sessionScope));
         ctx.setUser(sessionScopeUser);
 
-        LOGGER.debug("Handling auth request");
+        LOGGER.debug("handle: Handling auth request");
         authHandler.handle(ctx);
-        LOGGER.debug("Handled auth request");
+        LOGGER.debug("handle: Handled auth request");
     }
 }

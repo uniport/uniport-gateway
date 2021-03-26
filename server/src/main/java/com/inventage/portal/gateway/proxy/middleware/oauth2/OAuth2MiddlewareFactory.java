@@ -60,24 +60,25 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
         Promise<Middleware> oauth2Promise = Promise.promise();
         keycloakDiscoveryFuture.onSuccess(authProvider -> {
-            LOGGER.debug("Successfully completed Keycloak discovery");
+            LOGGER.debug("create: Successfully completed Keycloak discovery");
 
             callback.handler(ctx -> {
-                LOGGER.debug("Handling callback");
+                LOGGER.debug("create: Handling callback");
                 ctx.addEndHandler(event -> {
                     if (ctx.user() != null) {
-                        LOGGER.debug("Setting session scope user");
+                        LOGGER.debug("create: Setting session scope user");
                         ctx.session().put(String.format(SESSION_SCOPE_USER_FORMAT, sessionScope),
                                 ctx.user());
 
                         if (ctx.user().principal() != null) {
                             JsonObject principal = ctx.user().principal();
 
-                            LOGGER.debug("Setting id token");
+                            LOGGER.debug("create: Setting id token");
                             String idToken = principal.getString(ID_TOKEN);
                             ctx.session().put(ID_TOKEN, idToken);
 
-                            LOGGER.debug("Setting access token for scope '{}'", sessionScope);
+                            LOGGER.debug("create: Setting access token for scope '{}'",
+                                    sessionScope);
                             String accessToken = principal.getString(ACCESS_TOKEN);
                             ctx.session().put(
                                     String.format(SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
@@ -99,7 +100,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                         publicHostname, entrypointPort, uri.getPath());
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
             } catch (Exception e) {
-                LOGGER.warn("Failed to patch authorization path");
+                LOGGER.warn("create: Failed to patch authorization path");
             }
 
             String callbackURL = String.format("http://%s:%s%s", publicHostname, entrypointPort,
@@ -110,10 +111,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                             .setupCallback(callback).withScope(OAUTH2_SCOPE);
 
             oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
-            LOGGER.debug("Created OAuth2 middleware");
+            LOGGER.debug("create: Created OAuth2 middleware");
         }).onFailure(handler -> {
             LOGGER.error(
-                    "Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
+                    "create: Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
                     handler.getCause());
             oauth2Promise.fail("Failed to create OAuth2 Middleware '" + handler.getCause() + "'");
         });

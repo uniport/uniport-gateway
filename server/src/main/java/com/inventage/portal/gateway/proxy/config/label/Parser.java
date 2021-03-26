@@ -37,8 +37,8 @@ public class Parser {
             JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("Failed to decode labels to json: '{}', (labels: '{}')", e.getMessage(),
-                    labels.toString());
+            LOGGER.warn("decode: Failed to decode labels to json '{}', (labels: '{}')",
+                    e.getMessage(), labels.toString());
         }
         return null;
     }
@@ -48,7 +48,7 @@ public class Parser {
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
-            LOGGER.warn("No matching labels found");
+            LOGGER.warn("decodeToJson: No matching labels found");
             return null;
         }
 
@@ -143,7 +143,7 @@ public class Parser {
             } else {
                 if (root.containsKey(key)) {
                     LOGGER.warn(
-                            "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
+                            "decodeToJson: Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
                             key, root.getString(key), value);
                 }
                 root.put(key, value);

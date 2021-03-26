@@ -45,7 +45,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 final JsonObject staticConfig = asyncResult.result();
                 StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
                     if (ar.failed()) {
-                        LOGGER.error("Failed to validate static configuration");
+                        LOGGER.error("start: Failed to validate static configuration");
                         shutdownOnStartupFailure(ar.cause());
                     }
 
@@ -89,10 +89,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         listenOnEntrypoints(entrypoints).onComplete(all -> {
             if (all.succeeded()) {
                 startPromise.complete();
-                LOGGER.info("start: succeeded.");
+                LOGGER.info("createListenersForEntrypoints: start succeeded.");
             } else {
                 startPromise.fail(all.cause());
-                LOGGER.error("start: failed.");
+                LOGGER.error("createListenersForEntrypoints: start failed.");
             }
         });
     }

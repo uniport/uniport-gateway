@@ -71,7 +71,7 @@ public class ConfigurationWatcher {
 
             String providerName = messageBody.getString(Provider.PROVIDER_NAME);
             JsonObject providerConfig = messageBody.getJsonObject(Provider.PROVIDER_CONFIGURATION);
-            LOGGER.debug("Received new configuration from '{}'", providerName);
+            LOGGER.debug("listenProviders: Received new configuration from '{}'", providerName);
 
             loadMessage(providerName, providerConfig);
         });
@@ -79,7 +79,7 @@ public class ConfigurationWatcher {
 
     private void loadMessage(String providerName, JsonObject providerConfig) {
         if (isEmptyConfiguration(providerConfig)) {
-            LOGGER.info("Skipping empty configuration for provider %s", providerName);
+            LOGGER.info("loadMessage: Skipping empty configuration for provider %s", providerName);
             return;
         }
 
@@ -88,7 +88,7 @@ public class ConfigurationWatcher {
         JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
-        LOGGER.debug("Informing listeners about new configuration: '{}'", mergedConfig);
+        LOGGER.debug("loadMessage: Informing listeners about new configuration '{}'", mergedConfig);
         for (Listener listener : this.configurationListeners) {
             listener.listen(mergedConfig);
         }
@@ -168,7 +168,7 @@ public class ConfigurationWatcher {
             JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
             if (rEntrypoints == null || rEntrypoints.size() == 0) {
                 LOGGER.info(
-                        "No entryPoint defined for this router, using the default one(s) instead: {}",
+                        "applyEntrypoints: No entryPoint defined for this router, using the default one(s) instead '{}'",
                         entrypoints.toString());
                 r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
             }

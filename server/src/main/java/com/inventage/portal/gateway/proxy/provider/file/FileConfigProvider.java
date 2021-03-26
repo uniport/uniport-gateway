@@ -54,11 +54,11 @@ public class FileConfigProvider extends Provider {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig(ar -> {
             if (ar.succeeded()) {
-                LOGGER.info("configuration retrieved");
+                LOGGER.info("provide: configuration retrieved");
                 final JsonObject config = ar.result();
                 this.validateAndPublish(config);
             } else {
-                String errorMsg = "cannot retrieve configuration";
+                String errorMsg = "provide: cannot retrieve configuration";
                 LOGGER.warn(errorMsg);
                 startPromise.fail(errorMsg);
                 return;
@@ -76,11 +76,11 @@ public class FileConfigProvider extends Provider {
     private ConfigRetrieverOptions getOptions() {
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
-            LOGGER.info("settting scan period to '{}'", this.scanPeriodMs);
+            LOGGER.info("getOptions: setting scan period to '{}'", this.scanPeriodMs);
             options.setScanPeriod(this.scanPeriodMs);
         }
         if (this.filename != null && this.filename.length() != 0) {
-            LOGGER.info("reading file '{}'", this.filename);
+            LOGGER.info("getOptions: reading file '{}'", this.filename);
 
             final File file = new File(this.filename);
             ConfigStoreOptions fileStore =
@@ -91,7 +91,7 @@ public class FileConfigProvider extends Provider {
         }
 
         if (this.directory != null && this.directory.length() != 0) {
-            LOGGER.info("reading directory '{}'", this.directory);
+            LOGGER.info("getOptions: reading directory '{}'", this.directory);
 
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("directory")
                     .setConfig(new JsonObject().put("path", this.directory).put("filesets",
@@ -100,7 +100,7 @@ public class FileConfigProvider extends Provider {
             return options.addStore(dirStore);
         }
 
-        LOGGER.warn("neither filename or directory defined");
+        LOGGER.warn("getOptions: neither filename or directory defined");
         return options;
     }
 

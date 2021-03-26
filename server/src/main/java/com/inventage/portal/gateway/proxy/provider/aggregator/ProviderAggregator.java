@@ -46,7 +46,7 @@ public class ProviderAggregator extends Provider {
             ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
 
             if (providerFactory == null) {
-                LOGGER.warn("Ignoring unknown provider '{}'", providerName);
+                LOGGER.warn("provide: Ignoring unknown provider '{}'", providerName);
                 continue;
             }
 

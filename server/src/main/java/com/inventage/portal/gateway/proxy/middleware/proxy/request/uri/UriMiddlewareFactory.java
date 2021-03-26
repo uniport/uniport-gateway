@@ -21,14 +21,14 @@ public interface UriMiddlewareFactory {
 
     class Loader {
         public static UriMiddlewareFactory getFactory(String middlewareName) {
-            LOGGER.debug("get URI middleware factory: for '{}'", middlewareName);
+            LOGGER.debug("getFactory: URI middleware '{}'", middlewareName);
             final Optional<UriMiddlewareFactory> factory = ServiceLoader
                     .load(UriMiddlewareFactory.class).stream().map(ServiceLoader.Provider::get)
                     .filter(instance -> instance.provides().equals(middlewareName)).findFirst();
             if (factory.isPresent()) {
                 return factory.get();
             }
-            LOGGER.debug("URI middleware factory not found for '{}'", middlewareName);
+            LOGGER.debug("getFactory: URI middleware factory not found '{}'", middlewareName);
             return null;
         }
     }

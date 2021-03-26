@@ -27,14 +27,14 @@ public class RedirectRegexMiddleware implements Middleware {
 
         // If the Regexp doesn't match, skip to the next handler.
         if (!this.pattern.matcher(oldURI).matches()) {
-            LOGGER.debug("Skipping redirect of non maching URI '{}'", oldURI);
+            LOGGER.debug("handle: Skipping redirect of non maching URI '{}'", oldURI);
             ctx.next();
             return;
         }
 
         String newURI = this.pattern.matcher(oldURI).replaceAll(this.replacement);
 
-        LOGGER.debug("Redirecting from '{}' to '{}'", oldURI, newURI);
+        LOGGER.debug("handle: Redirecting from '{}' to '{}'", oldURI, newURI);
         ctx.redirect(newURI);
     }
 }

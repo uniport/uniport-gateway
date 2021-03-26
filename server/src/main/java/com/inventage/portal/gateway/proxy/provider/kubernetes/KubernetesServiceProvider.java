@@ -85,14 +85,14 @@ public class KubernetesServiceProvider extends Provider {
     private void validateAndPublish(JsonObject config) {
         DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
             if (ar.succeeded()) {
-                LOGGER.info("configuration published");
+                LOGGER.info("validateAndPublish: configuration published");
                 this.eb.publish(this.configurationAddress,
                         new JsonObject()
                                 .put(Provider.PROVIDER_NAME,
                                         StaticConfiguration.PROVIDER_KUBERNETES)
                                 .put(Provider.PROVIDER_CONFIGURATION, config));
             } else {
-                LOGGER.warn("cannot publish new configuration: invalid configuration");
+                LOGGER.warn("validateAndPublish: cannot publish invalid configuration");
             }
         });
     }

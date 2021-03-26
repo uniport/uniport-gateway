@@ -114,7 +114,7 @@ public class RouterFactory {
                         continue;
                     }
 
-                    LOGGER.warn("Ignoring unknown middleware '{}'", middlewareType);
+                    LOGGER.warn("createRouter: Ignoring unknown middleware '{}'", middlewareType);
                 }
             }
 
@@ -123,7 +123,7 @@ public class RouterFactory {
                 uriMiddleware = uriMiddlewares.get(0);
                 if (uriMiddlewares.size() > 1) {
                     LOGGER.warn(
-                            "Multiple URI middlewares defined. At most one can be used. Chosing the first '{}'",
+                            "createRouter: Multiple URI middlewares defined. At most one can be used. Chosing the first '{}'",
                             uriMiddleware.toString());
                 }
             }
@@ -143,11 +143,12 @@ public class RouterFactory {
             CompositeFuture.all(middlewareFutures).onComplete(ar -> {
                 middlewareFutures.forEach(mf -> {
                     if (mf.succeeded()) {
-                        LOGGER.debug("Created middleware successfully");
+                        LOGGER.debug("createRouter: Created middleware successfully");
                         route.handler((Handler<RoutingContext>) mf.result());
                     } else {
                         router.delete(route.getPath());
-                        LOGGER.warn("Ignoring path '{}': Failed to create middleware '{}'",
+                        LOGGER.warn(
+                                "createRouter: Ignoring path '{}'. Failed to create middleware '{}'",
                                 route.getPath(), mf.cause());
                         handler.handle(Future
                                 .failedFuture("Failed to create middleware '" + mf.cause() + "'"));

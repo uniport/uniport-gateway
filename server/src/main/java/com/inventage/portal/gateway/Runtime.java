@@ -20,7 +20,7 @@ public class Runtime {
         final boolean envValue = toBoolean(System.getenv(DEVELOPMENT_MODE_KEY));
         final boolean propValue = toBoolean(System.getProperty(DEVELOPMENT_MODE_KEY));
         if (envValue || propValue) {
-            LOGGER.warn("Development mode is active");
+            LOGGER.warn("isDevelopment: Development mode is active");
             return true;
         }
         return false;

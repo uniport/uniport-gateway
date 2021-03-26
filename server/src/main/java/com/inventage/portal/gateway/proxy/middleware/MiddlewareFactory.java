@@ -24,14 +24,14 @@ public interface MiddlewareFactory {
 
     class Loader {
         public static MiddlewareFactory getFactory(String middlewareName) {
-            LOGGER.debug("get middleware factory: for '{}'", middlewareName);
+            LOGGER.debug("getFactory: middleware for '{}'", middlewareName);
             final Optional<MiddlewareFactory> middleware = ServiceLoader
                     .load(MiddlewareFactory.class).stream().map(ServiceLoader.Provider::get)
                     .filter(instance -> instance.provides().equals(middlewareName)).findFirst();
             if (middleware.isPresent()) {
                 return middleware.get();
             }
-            LOGGER.debug("middleware factory not found for '{}'", middlewareName);
+            LOGGER.debug("getFactory: middleware factory not found for '{}'", middlewareName);
             return null;
         }
     }
