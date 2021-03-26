@@ -48,6 +48,7 @@ public class Parser {
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
+            LOGGER.warn("No matching labels found");
             return null;
         }
 

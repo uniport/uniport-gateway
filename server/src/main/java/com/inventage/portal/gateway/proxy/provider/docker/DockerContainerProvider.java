@@ -7,7 +7,6 @@ import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.label.Parser;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.DockerContainerServiceImporter;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
+import io.vertx.servicediscovery.docker.DockerServiceImporter;
 
 /**
  * Generates a complete dynamic configuration from announcements about created/removed docker
@@ -36,7 +36,7 @@ public class DockerContainerProvider extends Provider {
     private EventBus eb;
     private String configurationAddress;
 
-    private ServiceDiscovery dockerContainerDiscovery;
+    private ServiceDiscovery dockerDiscovery;
 
     private Boolean watch;
     private String endpoint;
@@ -67,6 +67,9 @@ public class DockerContainerProvider extends Provider {
         MessageConsumer<JsonObject> consumer = this.eb.consumer(announceAddress);
         consumer.handler(message -> {
             JsonObject config = this.buildConfiguration(message.body());
+            if (config == null) {
+                return;
+            }
             validateAndPublish(config);
 
             if (!this.watch) {
@@ -77,43 +80,42 @@ public class DockerContainerProvider extends Provider {
     }
 
     private ServiceDiscovery getOrCreateDockerContainerDiscovery() {
-        if (this.dockerContainerDiscovery == null) {
-            this.dockerContainerDiscovery =
-                    ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
-                            .setAnnounceAddress(announceAddress).setName("docker-discovery"));
-            this.dockerContainerDiscovery
-                    .registerServiceImporter(new DockerContainerServiceImporter(), new JsonObject()
-                            .put("docker-tls-verify", this.TLS).put("docker-host", this.endpoint));
+        if (this.dockerDiscovery == null) {
+            this.dockerDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
+                    .setAnnounceAddress(announceAddress).setName("docker-discovery"));
+            this.dockerDiscovery.registerServiceImporter(new DockerServiceImporter(),
+                    new JsonObject().put("docker-tls-verify", this.TLS).put("docker-host",
+                            this.endpoint));
         }
-        return this.dockerContainerDiscovery;
+        return this.dockerDiscovery;
     }
 
     private JsonObject buildConfiguration(JsonObject dockerContainer) {
         JsonObject metadata = dockerContainer.getJsonObject("metadata");
 
-        String serviceName = metadata.getString("portal.docker.serviceName");
-        String containerId = metadata.getString("portal.docker.id");
-        String containerName = serviceName + "-" + containerId;
+        String containerId = metadata.getString("docker.id");
+        String containerName = metadata.getString("docker.name");
+        String serviceName = String.format("%s-%s", containerId, containerName);
 
         String status = dockerContainer.getString("status");
         if (status.equals("DOWN")) {
-            this.configurations.remove(containerName);
+            this.configurations.remove(serviceName);
             return DynamicConfiguration.merge(this.configurations);
         } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
             LOGGER.warn("buildConfiguration: unkown status type: " + status);
             return null;
         }
 
-        JsonObject labels = metadata.getJsonObject("portal.docker.labels");
+        JsonObject location = dockerContainer.getJsonObject("location");
+        String host = location.getString("ip");
+        int port = location.getInteger("port");
 
-        String host = metadata.getString("portal.docker.ip");
-        int port = metadata.getInteger("portal.docker.port");
-
-        JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
+        JsonObject confFromLabels = Parser.decode(metadata.getMap(), Parser.DEFAULT_ROOT_NAME,
                 Arrays.asList("portal.http"));
         if (confFromLabels == null) {
-            LOGGER.warn("buildConfiguration: failed to decode labels to json for service '{}'",
-                    serviceName);
+            LOGGER.warn(
+                    "buildConfiguration: failed to decode labels to json for docker container '{}'",
+                    containerName);
             return null;
         }
 
@@ -121,49 +123,49 @@ public class DockerContainerProvider extends Provider {
         if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
                 && httpConfFromLabels.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
                 && httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
-            this.configurations.put(containerName, confFromLabels);
+            this.configurations.put(serviceName, confFromLabels);
             return DynamicConfiguration.merge(this.configurations);
         }
 
         JsonArray serviceConfig =
-                this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
+                this.buildServiceConfiguration(httpConfFromLabels, containerName, host, port);
         if (serviceConfig == null) {
-            LOGGER.warn("buildConfiguration: failed to build configuration for service '{}'",
-                    serviceName);
+            LOGGER.warn(
+                    "buildConfiguration: failed to build configuration for docker container '{}'",
+                    containerName);
             return null;
         }
 
         Map<String, String> model = new HashMap<String, String>();
-        model.put("name", serviceName);
+        model.put("name", containerName);
 
-        JsonArray routerConfig =
-                this.buildRouterConfiguration(httpConfFromLabels, serviceName, model);
+        JsonArray routerConfig = this.buildRouterConfiguration(httpConfFromLabels, model);
         if (routerConfig == null) {
             LOGGER.warn("buildConfiguration: failed to build router configuration for service '{}'",
-                    serviceName);
+                    containerName);
             return null;
         }
 
         DynamicConfiguration.validate(vertx, confFromLabels).onComplete(ar -> {
             if (ar.succeeded()) {
                 LOGGER.debug("buildConfiguration: configuration from labels '{}'", confFromLabels);
-                this.configurations.put(containerName, confFromLabels);
+                this.configurations.put(serviceName, confFromLabels);
             } else {
                 LOGGER.warn(
                         "buildConfiguration: invalid configuration form container labels '{}': '{}'",
-                        serviceName, confFromLabels);
+                        containerName, confFromLabels);
             }
         });
 
         return DynamicConfiguration.merge(this.configurations);
     }
 
-    private JsonArray buildServiceConfiguration(JsonObject httpConf, String serviceName,
+    private JsonArray buildServiceConfiguration(JsonObject httpConf, String containerName,
             String host, int port) {
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
             JsonObject fallbackService =
-                    new JsonObject().put(DynamicConfiguration.SERVICE_NAME, serviceName)
+                    new JsonObject().put(DynamicConfiguration.SERVICE_NAME, containerName)
                             .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray());
             services.add(fallbackService);
         }
@@ -205,8 +207,7 @@ public class DockerContainerProvider extends Provider {
         return server;
     }
 
-    private JsonArray buildRouterConfiguration(JsonObject httpConf, String serviceName,
-            Map<String, String> model) {
+    private JsonArray buildRouterConfiguration(JsonObject httpConf, Map<String, String> model) {
         JsonArray routers = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray middlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);

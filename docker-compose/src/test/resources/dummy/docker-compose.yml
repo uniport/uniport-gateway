@@ -3,6 +3,8 @@ version: "3"
 services:
   dashboard:
     image: traefik/whoami
+    ports:
+      - "8080:80"
     labels:
       - "portal.http.routers.dashboard.rule=PathPrefix('/dashboard')"
       - "portal.http.routers.dashboard.middlewares=dashboardRedirectregex, dashboardAuthBearer, dashboardReplacePath"
@@ -13,6 +15,8 @@ services:
       - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.replacement=blabla"
   navigation:
     image: traefik/whoami
+    ports:
+      - "8081:80"
     labels:
       - "portal.http.routers.navigation.rule=PathPrefix('/navigation')"
       - "portal.http.routers.navigation.middlewares=navigationRedirectregex,  navigationAuthBearer, navigationReplacePath"
@@ -23,6 +27,8 @@ services:
       - "portal.http.middlewares.navigationReplacePath.replacePathRegex.replacement=walrus"
   organisation:
     image: traefik/whoami
+    ports:
+      - "8082:80"
     labels:
       - "portal.http.routers.organisation.rule=PathPrefix('/organisation')"
       - "portal.http.routers.organisation.middlewares=organisationRedirectregex, organisationOauth2, organisationAuthBearer, organisationReplacePath"
