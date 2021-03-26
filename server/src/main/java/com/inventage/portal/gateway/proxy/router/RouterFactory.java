@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway.proxy.router;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,13 +28,15 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * Essentially it translates the dynamic configuration to what vertx understands. It creates a new
- * vertx router with routes for each router, middleware and service defined in the dynmica
+ * vertx router with routes for each router, middleware and service defined in the dynamic
  * configuration. Special cases are the proxy middleware, URI middleware and the OAuth2 middleware.
  * The proxy middelware is always the final middleware (if no redirect applies) to forward the
  * request to the corresponding server. Since Vertx does not allow to manipulate the URI of a
  * request, this manipulation is done in the proxy middleware. The OAuth2 middleware requires to
  * know the public hostname (like localhost or example.com) and the entrypoint port of this
- * application to route all authenticating requests throught this application as well.
+ * application to route all authenticating requests throught this application as well. To avoid path
+ * overlap, routes are sorted, by default, in descending order using rules length. The priority is
+ * directly equal to the length of the rule, and so the longest length has the highest priority.
  */
 public class RouterFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
@@ -65,6 +69,8 @@ public class RouterFactory {
         JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray middlwares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+
+        sortByRuleLength(routers);
 
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
@@ -164,6 +170,40 @@ public class RouterFactory {
         handler.handle(Future.succeededFuture(router));
     }
 
+    // To avoid path overlap, routes are sorted, by default, in descending order using rules length.
+    // The priority is directly equal to the length of the rule, and so the longest length has the
+    // highest priority.
+    private JsonArray sortByRuleLength(JsonArray routers) {
+        List<JsonObject> routerList = routers.getList();
+
+        Collections.sort(routerList, new Comparator<JsonObject>() {
+
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
+                String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
+
+                int ruleAlength = ruleA.length();
+                int ruleBlength = ruleB.length();
+
+                return ruleBlength - ruleAlength;
+            }
+
+        });
+
+        return routers;
+    }
+
+    private RoutingRule path(Vertx vertx, String path) {
+        LOGGER.trace("path");
+        return new RoutingRule() {
+            @Override
+            public Route apply(Router router) {
+                return router.route(path);
+            }
+        };
+    }
+
     private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {
         LOGGER.trace("pathPrefix");
         return new RoutingRule() {
@@ -185,11 +225,11 @@ public class RouterFactory {
         };
     }
 
-    // only rules like PathPrefix('/abc') and Host('example.com') are supported
+    // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
     private RoutingRule parseRule(Vertx vertx, String rule) {
         LOGGER.trace("parseRule");
         Pattern rulePattern = Pattern
-                .compile("^(?<ruleName>(PathPrefix|Host))\\('(?<ruleValue>[a-zA-Z\\/]+)'\\)$");
+                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[a-zA-Z\\/]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {
@@ -199,6 +239,10 @@ public class RouterFactory {
         RoutingRule routingRule;
         String ruleValue = m.group("ruleValue");
         switch (m.group("ruleName")) {
+            case "Path": {
+                routingRule = path(vertx, ruleValue);
+                break;
+            }
             case "PathPrefix": {
                 // append * to do path prefix routing
                 String pathPrefix = ruleValue;
