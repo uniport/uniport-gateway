@@ -3,41 +3,42 @@
     "routers": [
       {
         "name": "organisation-service",
-        "middlewares": ["organisationAuthBearer", "organisationReplacePath"],
+        "middlewares": ["organisationOauth2", "organisationAuthBearer"],
         "rule": "PathPrefix('/organisation/service')",
-        "service": "/whoami_organisation-service_1",
+        "service": "/organisation_portal1-organisation-service_1",
         "entrypoints": ["http8000"]
       },
       {
         "name": "navigation-service",
-        "middlewares": ["navigationAuthBearer", "navigationReplacePath"],
+        "middlewares": ["navigationAuthBearer"],
         "rule": "PathPrefix('/navigation/service')",
-        "service": "/whoami_navigation-service_1",
+        "service": "/navigation_portal1-navigation-service_1",
         "entrypoints": ["http8000"]
       },
       {
         "name": "dashboard-service",
-        "middlewares": ["dashboardAuthBearer", "dashboardReplacePath"],
+        "middlewares": ["dashboardAuthBearer"],
         "rule": "PathPrefix('/dashboard/service')",
-        "service": "/whoami_dashboard-service_1",
+        "service": "/dashboard_portal1-dashboard-service_1",
         "entrypoints": ["http8000"]
       },
       {
         "name": "document-service",
-        "middlewares": ["documentAuthBearer", "documentReplacePath"],
+        "middlewares": ["documentOauth2", "documentAuthBearer"],
         "rule": "PathPrefix('/document/service')",
-        "service": "/whoami_document-service_1",
+        "service": "/document_portal1-document-service_1",
         "entrypoints": ["http8000"]
       },
       {
         "name": "organisation-frontend",
         "middlewares": [
           "organisationRedirectRegex",
+          "organisationOauth2",
           "organisationAuthBearer",
           "organisationReplacePath"
         ],
         "rule": "PathPrefix('/organisation')",
-        "service": "/whoami_organisation-frontend_1",
+        "service": "/organisation_portal1-organisation-frontend_1",
         "entrypoints": ["http8000"]
       },
       {
@@ -48,7 +49,7 @@
           "navigationReplacePath"
         ],
         "rule": "PathPrefix('/navigation')",
-        "service": "/whoami_navigation-frontend_1",
+        "service": "/navigation_portal1-navigation-frontend_1",
         "entrypoints": ["http8000"]
       },
       {
@@ -57,33 +58,44 @@
           "dashboardRedirectRegex",
           "dashboardAuthBearer",
           "dashboardReplacePath",
+          "dashboardLoginRedirectRegex",
+          "dashboardOauth2",
           "rootRedirectregex"
         ],
         "rule": "PathPrefix('/dashboard')",
-        "service": "/whoami_dashboard-frontend_1",
+        "service": "/dashboard_portal1-dashboard-frontend_1",
         "entrypoints": ["http8000"]
       },
       {
         "name": "dashboard-login",
-        "rule": "Path('/dashboard/login')",
         "middlewares": [
+          "dashboardOauth2",
+          "dashboardLoginRedirectRegex",
           "dashboardAuthBearer",
           "dashboardRedirectRegex",
           "dashboardReplacePath",
           "rootRedirectregex"
         ],
-        "service": "/whoami_dashboard-frontend_1",
+        "rule": "Path('/dashboard/login')",
+        "service": "/dashboard_portal1-dashboard-frontend_1",
         "entrypoints": ["http8000"]
       },
       {
         "name": "document-frontend",
         "middlewares": [
           "documentRedirectRegex",
+          "documentOauth2",
           "documentAuthBearer",
           "documentReplacePath"
         ],
         "rule": "PathPrefix('/document')",
-        "service": "/whoami_document-frontend_1",
+        "service": "/document_portal1-document-frontend_1",
+        "entrypoints": ["http8000"]
+      },
+      {
+        "name": "auth",
+        "rule": "PathPrefix('/auth')",
+        "service": "/portal-iam_portal1-portal-iam_1",
         "entrypoints": ["http8000"]
       },
       {
@@ -91,15 +103,67 @@
         "middlewares": [
           "rootRedirectregex",
           "dashboardAuthBearer",
+          "dashboardLoginRedirectRegex",
+          "dashboardOauth2",
           "dashboardRedirectRegex",
           "dashboardReplacePath"
         ],
         "rule": "Path('/')",
-        "service": "/whoami_dashboard-frontend_1",
+        "service": "/dashboard_portal1-dashboard-frontend_1",
         "entrypoints": ["http8000"]
       }
     ],
     "middlewares": [
+      {
+        "name": "documentAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "documentScope" }
+      },
+      {
+        "name": "documentOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Document",
+          "clientSecret": "Document!",
+          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "sessionScope": "documentScope"
+        }
+      },
+      {
+        "name": "documentRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/document)$", "replacement": "$1/" }
+      },
+      {
+        "name": "documentReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/document/(.*)", "replacement": "/$1" }
+      },
+      {
+        "name": "organisationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "organisationScope" }
+      },
+      {
+        "name": "organisationOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Organisation",
+          "clientSecret": "Organisation!",
+          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "sessionScope": "organisationScope"
+        }
+      },
+      {
+        "name": "organisationRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/organisation)$", "replacement": "$1/" }
+      },
+      {
+        "name": "organisationReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/organisation/(.*)", "replacement": "/$1" }
+      },
       {
         "name": "navigationAuthBearer",
         "type": "authorizationBearer",
@@ -113,27 +177,30 @@
       {
         "name": "navigationReplacePath",
         "type": "replacePathRegex",
-        "options": { "regex": "/navigation/", "replacement": "/" }
-      },
-      {
-        "name": "organisationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "organisationScope" }
-      },
-      {
-        "name": "organisationRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/organisation)$", "replacement": "$1/" }
-      },
-      {
-        "name": "organisationReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/organisation/", "replacement": "/" }
+        "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
       },
       {
         "name": "dashboardAuthBearer",
         "type": "authorizationBearer",
         "options": { "sessionScope": "dashboardScope" }
+      },
+      {
+        "name": "dashboardLoginRedirectRegex",
+        "type": "redirectRegex",
+        "options": {
+          "regex": "^(/dashboard/login)$",
+          "replacement": "/dashboard/"
+        }
+      },
+      {
+        "name": "dashboardOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Dashboard",
+          "clientSecret": "Dashboard!",
+          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "sessionScope": "dashboardScope"
+        }
       },
       {
         "name": "dashboardRedirectRegex",
@@ -143,61 +210,50 @@
       {
         "name": "dashboardReplacePath",
         "type": "replacePathRegex",
-        "options": { "regex": "/dashboard/", "replacement": "/" }
+        "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
       },
       {
         "name": "rootRedirectregex",
         "type": "redirectRegex",
         "options": { "regex": "^/$", "replacement": "/dashboard/" }
-      },
-      {
-        "name": "documentAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "documentScope" }
-      },
-      {
-        "name": "documentRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/document)$", "replacement": "$1/" }
-      },
-      {
-        "name": "documentReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/document/", "replacement": "/" }
       }
     ],
     "services": [
       {
-        "name": "/whoami_navigation-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8083 }]
+        "name": "/organisation_portal1-organisation-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29032 }]
       },
       {
-        "name": "/whoami_document-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8087 }]
+        "name": "/document_portal1-document-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29055 }]
       },
       {
-        "name": "/whoami_navigation-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8082 }]
+        "name": "/organisation_portal1-organisation-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29035 }]
       },
       {
-        "name": "/whoami_organisation-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8085 }]
+        "name": "/navigation_portal1-navigation-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29015 }]
       },
       {
-        "name": "/whoami_dashboard-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8081 }]
+        "name": "/navigation_portal1-navigation-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29012 }]
       },
       {
-        "name": "/whoami_organisation-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8084 }]
+        "name": "/dashboard_portal1-dashboard-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29022 }]
       },
       {
-        "name": "/whoami_dashboard-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8080 }]
+        "name": "/document_portal1-document-service_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29052 }]
       },
       {
-        "name": "/whoami_document-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 8086 }]
+        "name": "/dashboard_portal1-dashboard-frontend_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29025 }]
+      },
+      {
+        "name": "/portal-iam_portal1-portal-iam_1",
+        "servers": [{ "host": "127.0.1.1", "port": 29001 }]
       }
     ]
   }
