@@ -8,9 +8,16 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * Manages the authentication bearer. If the use is authenticated it provides either an ID token or
+ * a access token as defined in the sessionScope. Access tokens are only provided if the
+ * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
+ * token is sent to the Client.
+ */
 public class AuthorizationBearerMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
     private final static String BEARER = "Bearer ";
 

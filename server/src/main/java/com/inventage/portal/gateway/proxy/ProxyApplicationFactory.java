@@ -5,9 +5,6 @@ import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
-/**
- *
- */
 public class ProxyApplicationFactory implements ApplicationFactory {
 
     @Override

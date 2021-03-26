@@ -9,6 +9,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
+/**
+ * Service interface for providing middlewares. Implementations must add an entry with the fully
+ * qualified class name into
+ * META-INF/services/com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory
+ */
 public interface MiddlewareFactory {
 
     final Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);

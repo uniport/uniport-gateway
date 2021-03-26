@@ -1,15 +1,12 @@
 package com.inventage.portal.gateway.core;
 
-import io.vertx.core.Vertx;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 
-/**
- *
- */
 // https://vertx.io/docs/vertx-junit5/java/#_integration_with_junit_5
 @ExtendWith(VertxExtension.class)
 public class PortalGatewayVerticleTest {

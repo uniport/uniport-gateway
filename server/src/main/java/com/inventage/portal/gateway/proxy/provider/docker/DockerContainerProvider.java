@@ -20,6 +20,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
+/**
+ * Generates a complete dynamic configuration from announcements about created/removed docker
+ * containers.
+ */
 public class DockerContainerProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);

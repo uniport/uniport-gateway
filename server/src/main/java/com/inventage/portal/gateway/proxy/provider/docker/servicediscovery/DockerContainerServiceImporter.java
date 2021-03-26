@@ -21,6 +21,9 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 
+/**
+ * Notifies about created and removed docker containers.
+ */
 public class DockerContainerServiceImporter implements ServiceImporter {
     private final static Logger LOGGER =
             LoggerFactory.getLogger(DockerContainerServiceImporter.class);

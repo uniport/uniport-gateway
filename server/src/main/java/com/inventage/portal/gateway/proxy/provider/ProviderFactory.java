@@ -7,6 +7,11 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Service interface for providing providers. Implementations must add an entry with the fully
+ * qualified class name into
+ * META-INF/services/com.inventage.portal.gateway.proxy.provider.ProviderFactory
+ */
 public interface ProviderFactory {
 
     final Logger LOGGER = LoggerFactory.getLogger(ProviderFactory.class);

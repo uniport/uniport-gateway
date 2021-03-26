@@ -14,6 +14,10 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.kubernetes.KubernetesServiceImporter;
 
+/**
+ * Generates a complete dynamic configuration from announcements about created/removed kubernetes
+ * services.
+ */
 public class KubernetesServiceProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceProvider.class);

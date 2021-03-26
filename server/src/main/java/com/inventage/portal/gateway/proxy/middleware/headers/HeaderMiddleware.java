@@ -4,6 +4,11 @@ import java.util.Map;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.ext.web.RoutingContext;
 
+// -- request headers --> HeaderMiddleware -- updated request headers -->
+// <-- updated response headers -- HeaderMiddleware <-- response headers --
+/**
+ * Manages request/response headers. It can add/remove headers on both requests and responses.
+ */
 public class HeaderMiddleware implements Middleware {
 
     private Map<String, String> requestHeaders;

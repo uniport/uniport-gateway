@@ -7,6 +7,9 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 
+/**
+ * Redirects the user if not authenticated.
+ */
 public class OAuth2AuthMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);

@@ -10,6 +10,9 @@ import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 
+/**
+ * It defines the structure of the static configuration.
+ */
 public class StaticConfiguration {
         // keywords used for internal purpose only
         public static final String ENTRYPOINTS = "entrypoints";

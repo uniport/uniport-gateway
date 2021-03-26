@@ -11,6 +11,10 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Labels are parsed to its JSON representation. Labels not starting with one of specified filters
+ * are ignored.
+ */
 public class Parser {
 
     public static final String DEFAULT_ROOT_NAME = "portal";

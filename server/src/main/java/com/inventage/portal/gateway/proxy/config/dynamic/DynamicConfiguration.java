@@ -20,6 +20,9 @@ import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 
+/**
+ * It defines the structure of the dynamic configuration.
+ */
 public class DynamicConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicConfiguration.class);
 

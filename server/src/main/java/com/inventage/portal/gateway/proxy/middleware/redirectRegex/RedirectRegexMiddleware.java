@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * Redirecting the client to a different location using regex matching and replacement.
+ */
 public class RedirectRegexMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddleware.class);

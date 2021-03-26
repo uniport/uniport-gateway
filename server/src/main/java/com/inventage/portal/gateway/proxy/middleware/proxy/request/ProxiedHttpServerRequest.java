@@ -12,8 +12,8 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-// This code was copied from the io.vertx.ext.web.impl.HttpServerRequestWrapper
-// https://github.com/
+// NOTE: This code was copied from the io.vertx.ext.web.impl.HttpServerRequestWrapper
+// https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/main/java/io/vertx/ext/web/impl/HttpServerRequestWrapper.java
 package com.inventage.portal.gateway.proxy.middleware.proxy.request;
 
 import java.util.Map;

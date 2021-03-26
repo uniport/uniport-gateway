@@ -15,6 +15,9 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Generates a complete dynamic configuration from a file.
+ */
 public class FileConfigProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);

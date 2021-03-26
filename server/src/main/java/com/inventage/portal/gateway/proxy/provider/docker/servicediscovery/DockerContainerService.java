@@ -17,6 +17,10 @@ import io.vertx.servicediscovery.types.JDBCDataSource;
 import io.vertx.servicediscovery.types.MongoDataSource;
 import io.vertx.servicediscovery.types.RedisDataSource;
 
+/**
+ * Parses a docker containers and defines the format of an announcement about created/removed docker
+ * containers.
+ */
 public class DockerContainerService {
 
     private static final Logger LOGGER =

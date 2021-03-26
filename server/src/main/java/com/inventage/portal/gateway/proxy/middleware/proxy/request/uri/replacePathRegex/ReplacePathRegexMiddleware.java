@@ -3,6 +3,9 @@ package com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.replaceP
 import java.util.regex.Pattern;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
 
+/**
+ * Replaces the URI using regex matching and replacement.
+ */
 public class ReplacePathRegexMiddleware implements UriMiddleware {
 
     private final Pattern pattern;

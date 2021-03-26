@@ -9,6 +9,10 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 
+/**
+ * Subclass of HttpServerResponse which reverses the manipulatoin applied by
+ * ProxiedHttpServerRequest.
+ */
 public class ProxiedHttpServerResponse implements HttpServerResponse {
 
     private final HttpServerResponse delegate;

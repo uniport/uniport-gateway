@@ -7,6 +7,9 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
+/**
+ * Builds and deploys the router structure after receiving a new/changed dynamic configuration.
+ */
 public class RouterSwitchListener implements Listener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterSwitchListener.class);

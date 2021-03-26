@@ -9,6 +9,9 @@ import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 
+/**
+ * Proxies requests and set the FORWARDED headers.
+ */
 public class ProxyMiddleware implements Middleware {
 
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";

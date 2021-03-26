@@ -12,8 +12,8 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-// This code was copied from the io.vertx.ext.web.impl.ForwardedParser
-// https://github.com/
+// NOTE: This code was copied from the io.vertx.ext.web.impl.ForwardedParser
+// https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/main/java/io/vertx/ext/web/impl/ForwardedParser.java
 package com.inventage.portal.gateway.proxy.middleware.proxy.request;
 
 import java.util.regex.Matcher;
@@ -25,10 +25,9 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.ext.web.AllowForwardHeaders;
-import io.vertx.ext.web.impl.RouterImpl;
 
 class ForwardedParser {
-    private static final Logger log = LoggerFactory.getLogger(RouterImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ForwardedParser.class);
 
     private static final String HTTP_SCHEME = "http";
     private static final String HTTPS_SCHEME = "https";

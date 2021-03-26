@@ -18,6 +18,10 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 
+/**
+ * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
+ * follow up requests are routed through this application as well.
+ */
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);

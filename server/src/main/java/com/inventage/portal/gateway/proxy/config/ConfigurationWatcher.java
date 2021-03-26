@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.inventage.portal.gateway.proxy.ProxyApplication;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
@@ -18,9 +17,13 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * It listens to incoming dynamic configurations. Upon passing several checks is passed to all
+ * registered listeners. A namespace per provider exists to avoid clashes.
+ */
 public class ConfigurationWatcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationWatcher.class);
 
     private Vertx vertx;
 

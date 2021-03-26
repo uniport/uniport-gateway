@@ -5,9 +5,6 @@ import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddle
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddlewareFactory;
 import io.vertx.core.json.JsonObject;
 
-/**
- *
- */
 public class ReplacePathRegexMiddlewareFactory implements UriMiddlewareFactory {
 
     @Override

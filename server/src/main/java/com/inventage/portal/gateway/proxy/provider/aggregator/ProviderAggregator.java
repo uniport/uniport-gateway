@@ -14,6 +14,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Creates and launches all specified providers.
+ */
 public class ProviderAggregator extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderAggregator.class);

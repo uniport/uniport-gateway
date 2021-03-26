@@ -20,7 +20,7 @@ import io.vertx.ext.web.Router;
 
 /**
  * Application for the proxy feature of the portal gateway. The routers will be read from the
- * "routers" configuration key.
+ * incoming configurations provided by different providers.
  */
 public class ProxyApplication implements Application {
 
@@ -32,10 +32,18 @@ public class ProxyApplication implements Application {
     private final String name;
 
     /**
+     * the public hostname of this application
+     */
+    private String publicHostname;
+
+    /**
      * the name of the entrypoint this application should be mounted on
      */
     private final String entrypoint;
 
+    /**
+     * the port of the entrypoint this application should be mounted on
+     */
     private String entrypointPort;
 
     /**
@@ -48,9 +56,11 @@ public class ProxyApplication implements Application {
      */
     private Router router;
 
+    /**
+     * the providers that should be launched for this applicaiton to retrieve the dynamic
+     * configuration
+     */
     private JsonArray providers;
-
-    private String publicHostname;
 
     private final int providersThrottleDuration = 2;
 
