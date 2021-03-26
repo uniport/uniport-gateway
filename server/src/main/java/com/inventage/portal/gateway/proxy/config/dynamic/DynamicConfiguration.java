@@ -78,12 +78,12 @@ public class DynamicConfiguration {
     private static Schema buildSchema(Vertx vertx) {
         // TODO consider setting "additionalProperties": false
 
-        // TODO schema required service clash
+        // TODO fileconfig does not provide services for all routers
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
                 .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .property(ROUTER_SERVICE, Schemas.stringSchema())
+                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
                 .property(ROUTER_RULE, Schemas.stringSchema());
 
         ObjectSchemaBuilder middlewareSchema =

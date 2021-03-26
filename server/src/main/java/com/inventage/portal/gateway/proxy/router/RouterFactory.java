@@ -28,9 +28,13 @@ public class RouterFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
     private Vertx vertx;
+    private String publicHostname;
+    private String entrypointPort;
 
-    public RouterFactory(Vertx vertx) {
+    public RouterFactory(Vertx vertx, String publicHostname, String entrypointPort) {
         this.vertx = vertx;
+        this.publicHostname = publicHostname;
+        this.entrypointPort = entrypointPort;
     }
 
     public Future<Router> createRouter(JsonObject dynamicConfig) {
@@ -75,6 +79,12 @@ public class RouterFactory {
                             middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
                     JsonObject middlewareOptions =
                             middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+
+                    // needed to ensure authenticating requests are routed through this application
+                    if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
+                        middlewareOptions.put("publicHostname", this.publicHostname);
+                        middlewareOptions.put("entrypointPort", this.entrypointPort);
+                    }
 
                     MiddlewareFactory middlewareFactory =
                             MiddlewareFactory.Loader.getFactory(middlewareType);

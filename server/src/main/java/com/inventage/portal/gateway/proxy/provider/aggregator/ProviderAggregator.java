@@ -21,12 +21,12 @@ public class ProviderAggregator extends Provider {
     private Vertx vertx;
 
     private String configurationAddress;
-    private JsonObject staticConfig;
+    private JsonArray providers;
 
-    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonObject staticConfig) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
-        this.staticConfig = staticConfig;
+        this.providers = providers;
     }
 
     public void start(Promise<Void> startPromise) {
@@ -35,11 +35,9 @@ public class ProviderAggregator extends Provider {
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        JsonArray providers = this.staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
-
         List<Future> futures = new ArrayList<>();
-        for (int i = 0; i < providers.size(); i++) {
-            JsonObject providerConfig = providers.getJsonObject(i);
+        for (int i = 0; i < this.providers.size(); i++) {
+            JsonObject providerConfig = this.providers.getJsonObject(i);
 
             String providerName = providerConfig.getString(StaticConfiguration.PROVIDER_NAME);
             ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
@@ -57,7 +55,8 @@ public class ProviderAggregator extends Provider {
 
         CompositeFuture.join(futures).onComplete(ar -> {
             if (ar.succeeded()) {
-                LOGGER.info("provide: launched {}/{} providers successfully", futures.size(), providers.size());
+                LOGGER.info("provide: launched {}/{} providers successfully", futures.size(),
+                        this.providers.size());
                 startPromise.complete();
             } else {
                 startPromise.fail(ar.cause());

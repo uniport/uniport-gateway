@@ -87,10 +87,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             OAuth2Options keycloakOAuth2Options =
                     ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-            // TODO whats the purpose of this?
-            // to ensure this request is routed through the gateway as well
-            String publicHostname = "localhost";
-            String entrypointPort = "8000";
+            String publicHostname = middlewareConfig.getString("publicHostname");
+            String entrypointPort = middlewareConfig.getString("entrypointPort");
             try {
                 final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
                 final String newAuthorizationPath = String.format("%s://%s:%s%s", "http",
