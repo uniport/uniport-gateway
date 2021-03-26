@@ -17,11 +17,13 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
+        LOGGER.trace("provides");
         return DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER;
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        LOGGER.trace("create");
         return Future.succeededFuture(new AuthorizationBearerMiddleware(middlewareConfig
                 .getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
     }

@@ -18,12 +18,14 @@ public class RouterSwitchListener implements Listener {
     private RouterFactory routerFactory;
 
     public RouterSwitchListener(Router router, RouterFactory routerFactory) {
+        LOGGER.trace("construcutor");
         this.router = router;
         this.routerFactory = routerFactory;
     }
 
     @Override
     public void listen(JsonObject config) {
+        LOGGER.trace("listen");
         Future<Router> routerCreation = routerFactory.createRouter(config);
         routerCreation.onComplete(ar -> {
             if (ar.succeeded()) {
@@ -37,6 +39,7 @@ public class RouterSwitchListener implements Listener {
     }
 
     private void setSubRouter(Router subRouter) {
+        LOGGER.trace("setSubRouter");
         // TODO might this create a connection gap?
         this.router.clear();
         this.router.mountSubRouter("/", subRouter);

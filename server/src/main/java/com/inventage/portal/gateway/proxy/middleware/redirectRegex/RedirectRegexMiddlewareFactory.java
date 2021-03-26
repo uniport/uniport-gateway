@@ -17,11 +17,13 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
+        LOGGER.trace("provides");
         return DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX;
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        LOGGER.trace("create");
         return Future.succeededFuture(new RedirectRegexMiddleware(
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
                 middlewareConfig

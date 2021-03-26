@@ -9,11 +9,13 @@ public class ReplacePathRegexMiddlewareFactory implements UriMiddlewareFactory {
 
     @Override
     public String provides() {
+        LOGGER.trace("provides");
         return DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX;
     }
 
     @Override
     public UriMiddleware create(JsonObject uriMiddlewareConfig) {
+        LOGGER.trace("create");
         return new ReplacePathRegexMiddleware(
                 uriMiddlewareConfig
                         .getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX),

@@ -42,6 +42,7 @@ public class ConfigurationWatcher {
 
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
             int providersThrottleDuration, List<String> defaultEntrypoints) {
+        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.provider = provider;
         this.configurationAddress = configurationAddress;
@@ -51,11 +52,13 @@ public class ConfigurationWatcher {
     }
 
     public Future<String> start() {
+        LOGGER.trace("start");
         listenProviders();
         return this.vertx.deployVerticle(this.provider);
     }
 
     public void addListener(Listener listener) {
+        LOGGER.trace("addListener");
         if (this.configurationListeners == null) {
             this.configurationListeners = new ArrayList<>();
         }
@@ -63,6 +66,7 @@ public class ConfigurationWatcher {
     }
 
     private void listenProviders() {
+        LOGGER.trace("listenProviders");
         EventBus eb = this.vertx.eventBus();
         MessageConsumer<JsonObject> configConsumer = eb.consumer(this.configurationAddress);
 
@@ -78,6 +82,7 @@ public class ConfigurationWatcher {
     }
 
     private void loadMessage(String providerName, JsonObject providerConfig) {
+        LOGGER.trace("loadMessage");
         if (isEmptyConfiguration(providerConfig)) {
             LOGGER.info("loadMessage: Skipping empty configuration for provider %s", providerName);
             return;
@@ -96,6 +101,7 @@ public class ConfigurationWatcher {
 
     // TODO introduce provider namespaces
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
+        LOGGER.trace("mergeConfigurations");
         JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
         JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
 
@@ -152,10 +158,12 @@ public class ConfigurationWatcher {
     }
 
     private static String makeQualifiedName(String providerName, String routerName) {
+        LOGGER.trace("makeQualifiedName");
         return String.format("%s@%s", routerName, providerName);
     }
 
     private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
+        LOGGER.trace("applyEntrypoints");
         JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
 
         if (httpConfig == null) {
@@ -178,6 +186,7 @@ public class ConfigurationWatcher {
     }
 
     private static boolean isEmptyConfiguration(JsonObject config) {
+        LOGGER.trace("isEmptyConfiguration");
         if (config == null) {
             return true;
         }

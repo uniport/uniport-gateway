@@ -35,6 +35,7 @@ public class FileConfigProvider extends Provider {
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename,
             String directory, Boolean watch) {
+        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -46,11 +47,13 @@ public class FileConfigProvider extends Provider {
     }
 
     public void start(Promise<Void> startPromise) {
+        LOGGER.trace("start");
         provide(startPromise);
     }
 
     @Override
     public void provide(Promise<Void> startPromise) {
+        LOGGER.trace("provide");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig(ar -> {
             if (ar.succeeded()) {
@@ -74,6 +77,7 @@ public class FileConfigProvider extends Provider {
     }
 
     private ConfigRetrieverOptions getOptions() {
+        LOGGER.trace("getOptions");
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
             LOGGER.info("getOptions: setting scan period to '{}'", this.scanPeriodMs);
@@ -105,6 +109,7 @@ public class FileConfigProvider extends Provider {
     }
 
     private void validateAndPublish(JsonObject config) {
+        LOGGER.trace("validateAndPublish");
         DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
             if (ar.succeeded()) {
                 LOGGER.info("validateAndPublish: configuration published");

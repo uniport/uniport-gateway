@@ -24,11 +24,13 @@ public class AuthorizationBearerMiddleware implements Middleware {
     private String sessionScope;
 
     public AuthorizationBearerMiddleware(String sessionScope) {
+        LOGGER.trace("construcutor");
         this.sessionScope = sessionScope;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.trace("handle");
         String idToken = ctx.session().get(OAuth2MiddlewareFactory.ID_TOKEN);
         String accessToken = ctx.session().get(String.format(
                 OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, this.sessionScope));

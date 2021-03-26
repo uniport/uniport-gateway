@@ -42,12 +42,14 @@ public class RouterFactory {
     private String entrypointPort;
 
     public RouterFactory(Vertx vertx, String publicHostname, String entrypointPort) {
+        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.publicHostname = publicHostname;
         this.entrypointPort = entrypointPort;
     }
 
     public Future<Router> createRouter(JsonObject dynamicConfig) {
+        LOGGER.trace("createRouter");
         Promise<Router> promise = Promise.promise();
         createRouter(dynamicConfig, promise);
         return promise.future();
@@ -55,6 +57,7 @@ public class RouterFactory {
 
     private void createRouter(JsonObject dynamicConfig,
             final Handler<AsyncResult<Router>> handler) {
+        LOGGER.trace("createRouter");
         Router router = Router.router(this.vertx);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
@@ -162,6 +165,7 @@ public class RouterFactory {
     }
 
     private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {
+        LOGGER.trace("pathPrefix");
         return new RoutingRule() {
             @Override
             public Route apply(Router router) {
@@ -171,6 +175,7 @@ public class RouterFactory {
     }
 
     private RoutingRule host(Vertx vertx, String host) {
+        LOGGER.trace("host");
         return new RoutingRule() {
             @Override
             public Route apply(Router router) {
@@ -182,6 +187,7 @@ public class RouterFactory {
 
     // only rules like PathPrefix('/abc') and Host('example.com') are supported
     private RoutingRule parseRule(Vertx vertx, String rule) {
+        LOGGER.trace("parseRule");
         Pattern rulePattern = Pattern
                 .compile("^(?<ruleName>(PathPrefix|Host))\\('(?<ruleValue>[a-zA-Z\\/]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);

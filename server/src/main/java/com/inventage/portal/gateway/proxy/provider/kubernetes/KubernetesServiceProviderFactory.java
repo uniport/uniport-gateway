@@ -10,11 +10,13 @@ public class KubernetesServiceProviderFactory implements ProviderFactory {
 
     @Override
     public String provides() {
+        LOGGER.trace("provides");
         return StaticConfiguration.PROVIDER_KUBERNETES;
     }
 
     @Override
     public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig) {
+        LOGGER.trace("create");
         return new KubernetesServiceProvider(vertx, configurationAddress);
     }
 

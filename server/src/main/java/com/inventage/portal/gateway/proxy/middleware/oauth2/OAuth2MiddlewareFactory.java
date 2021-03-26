@@ -24,103 +24,112 @@ import io.vertx.ext.web.handler.OAuth2AuthHandler;
  */
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
-    public final static String SESSION_SCOPE_USER_FORMAT = "%s_user";
-    public final static String SESSION_SCOPE_ACCESS_TOKEN_FORMAT = "%s_access_token";
-    public final static String ID_TOKEN = "id_token";
+        public final static String SESSION_SCOPE_USER_FORMAT = "%s_user";
+        public final static String SESSION_SCOPE_ACCESS_TOKEN_FORMAT = "%s_access_token";
+        public final static String ID_TOKEN = "id_token";
 
-    private final static String ACCESS_TOKEN = "access_token";
+        private final static String ACCESS_TOKEN = "access_token";
 
-    private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
-    private static final String OAUTH2_SCOPE = "openid";
+        private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
+        private static final String OAUTH2_SCOPE = "openid";
 
-    @Override
-    public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_OAUTH2;
-    }
+        @Override
+        public String provides() {
+                LOGGER.trace("provides");
+                return DynamicConfiguration.MIDDLEWARE_OAUTH2;
+        }
 
-    @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        @Override
+        public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+                LOGGER.trace("create");
 
-        String sessionScope =
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+                String sessionScope = middlewareConfig
+                                .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
 
-        Route callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
+                Route callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
 
-        OAuth2Options oauth2Options = new OAuth2Options()
-                .setClientID(
-                        middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
-                .setClientSecret(middlewareConfig
-                        .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
-                .setSite(middlewareConfig
-                        .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL));
+                OAuth2Options oauth2Options = new OAuth2Options()
+                                .setClientID(middlewareConfig.getString(
+                                                DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
+                                .setClientSecret(middlewareConfig.getString(
+                                                DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
+                                .setSite(middlewareConfig.getString(
+                                                DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL));
 
-        Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oauth2Options);
+                Future<OAuth2Auth> keycloakDiscoveryFuture =
+                                KeycloakAuth.discover(vertx, oauth2Options);
 
-        Promise<Middleware> oauth2Promise = Promise.promise();
-        keycloakDiscoveryFuture.onSuccess(authProvider -> {
-            LOGGER.debug("create: Successfully completed Keycloak discovery");
+                Promise<Middleware> oauth2Promise = Promise.promise();
+                keycloakDiscoveryFuture.onSuccess(authProvider -> {
+                        LOGGER.debug("create: Successfully completed Keycloak discovery");
 
-            callback.handler(ctx -> {
-                LOGGER.debug("create: Handling callback");
-                ctx.addEndHandler(event -> {
-                    if (ctx.user() != null) {
-                        LOGGER.debug("create: Setting session scope user");
-                        ctx.session().put(String.format(SESSION_SCOPE_USER_FORMAT, sessionScope),
-                                ctx.user());
+                        callback.handler(ctx -> {
+                                LOGGER.debug("create: Handling callback");
+                                ctx.addEndHandler(event -> {
+                                        if (ctx.user() != null) {
+                                                LOGGER.debug("create: Setting session scope user");
+                                                ctx.session().put(String.format(
+                                                                SESSION_SCOPE_USER_FORMAT,
+                                                                sessionScope), ctx.user());
 
-                        if (ctx.user().principal() != null) {
-                            JsonObject principal = ctx.user().principal();
+                                                if (ctx.user().principal() != null) {
+                                                        JsonObject principal =
+                                                                        ctx.user().principal();
 
-                            LOGGER.debug("create: Setting id token");
-                            String idToken = principal.getString(ID_TOKEN);
-                            ctx.session().put(ID_TOKEN, idToken);
+                                                        LOGGER.debug("create: Setting id token");
+                                                        String idToken = principal
+                                                                        .getString(ID_TOKEN);
+                                                        ctx.session().put(ID_TOKEN, idToken);
 
-                            LOGGER.debug("create: Setting access token for scope '{}'",
-                                    sessionScope);
-                            String accessToken = principal.getString(ACCESS_TOKEN);
-                            ctx.session().put(
-                                    String.format(SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
-                                    accessToken);
+                                                        LOGGER.debug("create: Setting access token for scope '{}'",
+                                                                        sessionScope);
+                                                        String accessToken = principal
+                                                                        .getString(ACCESS_TOKEN);
+                                                        ctx.session().put(String.format(
+                                                                        SESSION_SCOPE_ACCESS_TOKEN_FORMAT,
+                                                                        sessionScope), accessToken);
+                                                }
+                                        }
+                                });
+                                ctx.next();
+                        });
+
+                        OAuth2Options keycloakOAuth2Options =
+                                        ((OAuth2AuthProviderImpl) authProvider).getConfig();
+
+                        String publicHostname = middlewareConfig.getString("publicHostname");
+                        String entrypointPort = middlewareConfig.getString("entrypointPort");
+                        try {
+                                final URI uri = new URI(
+                                                keycloakOAuth2Options.getAuthorizationPath());
+                                final String newAuthorizationPath = String.format("%s://%s:%s%s",
+                                                "http", publicHostname, entrypointPort,
+                                                uri.getPath());
+                                keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
+                        } catch (Exception e) {
+                                LOGGER.warn("create: Failed to patch authorization path");
                         }
-                    }
+
+                        String callbackURL = String.format("http://%s:%s%s", publicHostname,
+                                        entrypointPort, callback.getPath());
+
+                        OAuth2AuthHandler authHandler = OAuth2AuthHandler
+                                        .create(vertx, authProvider, callbackURL)
+                                        .setupCallback(callback).withScope(OAUTH2_SCOPE);
+
+                        oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
+                        LOGGER.debug("create: Created OAuth2 middleware");
+                }).onFailure(handler -> {
+                        LOGGER.error("create: Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
+                                        handler.getCause());
+                        oauth2Promise.fail("Failed to create OAuth2 Middleware '"
+                                        + handler.getCause() + "'");
                 });
-                ctx.next();
-            });
 
-            OAuth2Options keycloakOAuth2Options =
-                    ((OAuth2AuthProviderImpl) authProvider).getConfig();
-
-            String publicHostname = middlewareConfig.getString("publicHostname");
-            String entrypointPort = middlewareConfig.getString("entrypointPort");
-            try {
-                final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
-                final String newAuthorizationPath = String.format("%s://%s:%s%s", "http",
-                        publicHostname, entrypointPort, uri.getPath());
-                keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
-            } catch (Exception e) {
-                LOGGER.warn("create: Failed to patch authorization path");
-            }
-
-            String callbackURL = String.format("http://%s:%s%s", publicHostname, entrypointPort,
-                    callback.getPath());
-
-            OAuth2AuthHandler authHandler =
-                    OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
-                            .setupCallback(callback).withScope(OAUTH2_SCOPE);
-
-            oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
-            LOGGER.debug("create: Created OAuth2 middleware");
-        }).onFailure(handler -> {
-            LOGGER.error(
-                    "create: Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
-                    handler.getCause());
-            oauth2Promise.fail("Failed to create OAuth2 Middleware '" + handler.getCause() + "'");
-        });
-
-        return oauth2Promise.future();
-    }
+                return oauth2Promise.future();
+        }
 
 }
 

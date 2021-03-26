@@ -18,11 +18,13 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
+        LOGGER.trace("provides");
         return DynamicConfiguration.MIDDLEWARE_HEADERS;
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        LOGGER.trace("create");
         Map<String, String> requestHeaders = new HashMap<>();
         Map<String, String> responseHeaders = new HashMap<>();
 

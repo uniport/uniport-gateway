@@ -27,17 +27,20 @@ public class ProviderAggregator extends Provider {
     private JsonArray providers;
 
     public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers) {
+        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
         this.providers = providers;
     }
 
     public void start(Promise<Void> startPromise) {
+        LOGGER.trace("start");
         provide(startPromise);
     }
 
     @Override
     public void provide(Promise<Void> startPromise) {
+        LOGGER.trace("provide");
         List<Future> futures = new ArrayList<>();
         for (int i = 0; i < this.providers.size(); i++) {
             JsonObject providerConfig = this.providers.getJsonObject(i);
@@ -68,6 +71,7 @@ public class ProviderAggregator extends Provider {
     }
 
     private Future<String> launchProvider(Provider provider) {
+        LOGGER.trace("launchProvider");
         return this.vertx.deployVerticle(provider);
     }
 

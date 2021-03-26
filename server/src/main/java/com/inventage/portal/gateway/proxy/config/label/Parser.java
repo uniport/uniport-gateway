@@ -33,6 +33,7 @@ public class Parser {
 
     public static JsonObject decode(Map<String, Object> labels, String rootName,
             List<String> filters) {
+        LOGGER.trace("decode");
         try {
             JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
@@ -45,6 +46,7 @@ public class Parser {
 
     private static JsonObject decodeToJson(Map<String, Object> labels, String rootName,
             List<String> filters) {
+        LOGGER.trace("decodeToJson");
         List<String> sortedKeys = sortKeys(labels, filters);
 
         if (sortedKeys.isEmpty()) {
@@ -94,6 +96,7 @@ public class Parser {
     }
 
     private static void decodeToJson(JsonObject root, List<String> path, String value) {
+        LOGGER.trace("decodeToJson");
         String key = path.get(0);
         if (path.size() > 1) {
             if (CONTAINS_CUSTOM_NAMES.contains(key)) {
@@ -152,6 +155,7 @@ public class Parser {
     }
 
     private static String getName(String key) {
+        LOGGER.trace("getName");
         switch (key) {
             case ROUTERS:
                 return DynamicConfiguration.ROUTER_NAME;
@@ -165,6 +169,7 @@ public class Parser {
     }
 
     private static List<String> sortKeys(Map<String, Object> labels, List<String> filters) {
+        LOGGER.trace("sortKeys");
         List<String> sortedKeys = new ArrayList<>();
         for (String key : labels.keySet()) {
             if (!(labels.get(key) instanceof String)) {

@@ -18,12 +18,14 @@ public class OAuth2AuthMiddleware implements Middleware {
     private String sessionScope;
 
     public OAuth2AuthMiddleware(OAuth2AuthHandler authHandler, String sessionScope) {
+        LOGGER.trace("construcutor");
         this.authHandler = authHandler;
         this.sessionScope = sessionScope;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.trace("handle");
         User sessionScopeUser = ctx.session().get(
                 String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_USER_FORMAT, sessionScope));
         ctx.setUser(sessionScopeUser);

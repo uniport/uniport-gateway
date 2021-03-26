@@ -3,6 +3,8 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.ProxiedHttpServerRequest;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.AllowForwardHeaders;
@@ -14,6 +16,8 @@ import io.vertx.httpproxy.HttpProxy;
  */
 public class ProxyMiddleware implements Middleware {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
+
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
 
     private HttpProxy httpProxy;
@@ -22,6 +26,7 @@ public class ProxyMiddleware implements Middleware {
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort,
             UriMiddleware uriMiddleware) {
+        LOGGER.trace("construcutor");
         this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
         this.httpProxy.target(serverPort, serverHost);
         this.uriMiddleware = uriMiddleware;
@@ -29,6 +34,7 @@ public class ProxyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.trace("handle");
         if (!ctx.request().headers().contains(X_FORWARDED_HOST)) {
             ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
         }

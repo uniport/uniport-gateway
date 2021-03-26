@@ -30,16 +30,19 @@ public class KubernetesServiceProvider extends Provider {
     private ServiceDiscovery kubernetesDiscovery;
 
     public KubernetesServiceProvider(Vertx vertx, String configurationAddress) {
+        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
     }
 
     public void start(Promise<Void> startPromise) {
+        LOGGER.trace("start");
         provide(startPromise);
     }
 
     @Override
     public void provide(Promise<Void> startPromise) {
+        LOGGER.trace("provide");
         String announceAddress = "service-announce";
 
         this.kubernetesDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
@@ -79,10 +82,12 @@ public class KubernetesServiceProvider extends Provider {
     }
 
     private JsonObject buildConfiguration(JsonObject kubernetesService) {
+        LOGGER.trace("buildConfiguration");
         return null;
     }
 
     private void validateAndPublish(JsonObject config) {
+        LOGGER.trace("validateAndPublish");
         DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
             if (ar.succeeded()) {
                 LOGGER.info("validateAndPublish: configuration published");
