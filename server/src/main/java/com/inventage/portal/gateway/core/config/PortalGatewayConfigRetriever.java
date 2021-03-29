@@ -18,9 +18,10 @@ import io.vertx.core.json.JsonObject;
  */
 public class PortalGatewayConfigRetriever {
 
+    public static final String DEFAULT_CONFIG_FILE_NAME = "portal-gateway.json";
     public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
-    public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway/portal-gateway.json";
-    public static final String LOCAL_CONFIG_FILE_PATH = "./portal-gateway.json";
+    public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway";
+    public static final String LOCAL_CONFIG_FILE_PATH = ".";
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);
@@ -79,14 +80,16 @@ public class PortalGatewayConfigRetriever {
         return Optional.empty();
     }
 
-    private static ConfigStoreOptions configStoreOptions(String fileName) {
+    private static ConfigStoreOptions configStoreOptions(String filePath) {
+        String fileName = String.format("%s/%s", filePath, DEFAULT_CONFIG_FILE_NAME);
         final File file = new File(fileName);
         return new ConfigStoreOptions().setType("file")
                 .setFormat(file.getName().endsWith("json") ? "json" : "properties").setConfig(
                         new JsonObject().put("path", file.getAbsolutePath()).put("raw-data", true));
     }
 
-    private static boolean existsAsFile(String fileName) {
+    private static boolean existsAsFile(String filePath) {
+        String fileName = String.format("%s/%s", filePath, DEFAULT_CONFIG_FILE_NAME);
         return fileName != null && new File(fileName).exists();
     }
 
