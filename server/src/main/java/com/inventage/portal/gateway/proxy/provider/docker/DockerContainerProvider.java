@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.provider.docker;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
@@ -51,6 +52,7 @@ public class DockerContainerProvider extends Provider {
         this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;
 
+        // TODO allow to configure this
         this.watch = true;
         this.endpoint = "unix:///var/run/docker.sock";
         this.defaultRule = defaultTempateRule;
@@ -100,6 +102,8 @@ public class DockerContainerProvider extends Provider {
 
         String containerId = metadata.getString("docker.id");
         String containerName = metadata.getString("docker.name");
+        // TODO handle containers with multipe exposed ports
+        // ignore if multipe ports are exposed and no port is set in the labels
         String serviceName = String.format("%s-%s", containerId, containerName);
 
         String status = dockerContainer.getString("status");
@@ -118,8 +122,9 @@ public class DockerContainerProvider extends Provider {
         LOGGER.debug("buildConfiguration: build configuration for docker container: '{}'",
                 containerName);
 
-        JsonObject confFromLabels = Parser.decode(metadata.getMap(), Parser.DEFAULT_ROOT_NAME,
-                Arrays.asList("portal.http"));
+        List<String> filters = Arrays.asList("portal.http");
+        JsonObject confFromLabels =
+                Parser.decode(metadata.getMap(), Parser.DEFAULT_ROOT_NAME, filters);
         if (confFromLabels == null) {
             LOGGER.warn(
                     "buildConfiguration: failed to decode labels to json for docker container '{}'",
@@ -146,6 +151,10 @@ public class DockerContainerProvider extends Provider {
 
         Map<String, String> model = new HashMap<String, String>();
         model.put("name", containerName);
+        List<String> filteredKeys = Parser.filterKeys(metadata.getMap(), filters);
+        for (String filteredKey : filteredKeys) {
+            model.put(filteredKey, (String) metadata.getMap().get(filteredKey));
+        }
 
         JsonArray routerConfig = this.buildRouterConfiguration(httpConfFromLabels, model);
         if (routerConfig == null) {
@@ -244,7 +253,6 @@ public class DockerContainerProvider extends Provider {
                 }
                 router.put(DynamicConfiguration.ROUTER_RULE, resolvedRule);
             }
-
 
             JsonArray middlewareNames =
                     router.getJsonArray(DynamicConfiguration.ROUTER_MIDDLEWARES);

@@ -31,6 +31,28 @@ public class Parser {
     private static final List<String> VALUE_IS_ARRAY_TYPE =
             Arrays.asList("entrypoints", "middlewares");
 
+    public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
+        LOGGER.trace("filterKeys");
+        List<String> filteredKeys = new ArrayList<>();
+        for (String key : labels.keySet()) {
+            if (!(labels.get(key) instanceof String)) {
+                continue;
+            }
+            if (filters.isEmpty()) {
+                filteredKeys.add(key);
+                continue;
+            }
+
+            for (String filter : filters) {
+                if (key.startsWith(filter)) {
+                    filteredKeys.add(key);
+                    continue;
+                }
+            }
+        }
+        return filteredKeys;
+    }
+
     public static JsonObject decode(Map<String, Object> labels, String rootName,
             List<String> filters) {
         LOGGER.trace("decode");
@@ -47,7 +69,8 @@ public class Parser {
     private static JsonObject decodeToJson(Map<String, Object> labels, String rootName,
             List<String> filters) {
         LOGGER.trace("decodeToJson");
-        List<String> sortedKeys = sortKeys(labels, filters);
+        List<String> sortedKeys = filterKeys(labels, filters);
+        Collections.sort(sortedKeys);
 
         if (sortedKeys.isEmpty()) {
             LOGGER.warn("decodeToJson: No matching labels found '{}'", labels);
@@ -166,28 +189,5 @@ public class Parser {
             default:
                 throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
         }
-    }
-
-    private static List<String> sortKeys(Map<String, Object> labels, List<String> filters) {
-        LOGGER.trace("sortKeys");
-        List<String> sortedKeys = new ArrayList<>();
-        for (String key : labels.keySet()) {
-            if (!(labels.get(key) instanceof String)) {
-                continue;
-            }
-            if (filters.isEmpty()) {
-                sortedKeys.add(key);
-                continue;
-            }
-
-            for (String filter : filters) {
-                if (key.startsWith(filter)) {
-                    sortedKeys.add(key);
-                    continue;
-                }
-            }
-        }
-        Collections.sort(sortedKeys);
-        return sortedKeys;
     }
 }

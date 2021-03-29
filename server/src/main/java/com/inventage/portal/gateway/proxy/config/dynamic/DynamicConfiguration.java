@@ -133,6 +133,7 @@ public class DynamicConfiguration {
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
         LOGGER.trace("validate");
+        // TODO validate that all middlewares and services are present
         if (schema == null) {
             schema = buildSchema(vertx);
         }
