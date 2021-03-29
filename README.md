@@ -6,10 +6,10 @@ Der Portal Gateway Server agiert als Reverse Proxy für alle Request des Portals
 
 Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet. Diese wird in der angegebenen Reihenfolge gesucht:
 
-1. Datei welche über die Environement Variable 'PORTAL_GATEWAY_JSON' angegeben wird
-2. Datei welche über das System Property 'PORTAL_GATEWAY_JSON' angegeben wird
-3. Datei 'portal-gateway.json' im '/etc/portal-gateway/' Verzeichnis
-4. Datei 'portal-gateway.json' im aktuellen Verzeichnis (Run Configuration "PortalGateway" := ./server/portal-gateway)
+1. Datei welche über die Environment Variable `PORTAL_GATEWAY_JSON` angegeben wird
+2. Datei welche über das System Property `PORTAL_GATEWAY_JSON` angegeben wird
+3. Datei `portal-gateway.json` im `/etc/portal-gateway/` Verzeichnis
+4. Datei `portal-gateway.json` im aktuellen Verzeichnis (Run Configuration "PortalGateway" := ./server/portal-gateway)
 
 ## Build
 
