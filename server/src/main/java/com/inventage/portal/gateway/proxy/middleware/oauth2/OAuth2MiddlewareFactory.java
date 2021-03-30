@@ -123,9 +123,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                         LOGGER.debug("create: Created OAuth2 middleware");
                 }).onFailure(handler -> {
                         LOGGER.error("create: Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
-                                        handler.getCause());
+                                        handler.getMessage());
                         oauth2Promise.fail("Failed to create OAuth2 Middleware '"
-                                        + handler.getCause() + "'");
+                                        + handler.getMessage() + "'");
                 });
 
                 return oauth2Promise.future();

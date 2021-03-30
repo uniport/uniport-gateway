@@ -2,12 +2,16 @@ package com.inventage.portal.gateway.proxy.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
+import org.apache.commons.collections4.QueueUtils;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
@@ -25,7 +29,11 @@ public class ConfigurationWatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationWatcher.class);
 
+    private static final String CONFIG_VALIDATED_ADDRESS = "configuration-watcher-config-validated";
+
     private Vertx vertx;
+
+    private EventBus eventBus;
 
     private Provider provider;
 
@@ -33,27 +41,31 @@ public class ConfigurationWatcher {
 
     private Map<String, JsonObject> currentConfigurations;
 
-    // TODO use providersThrottleDuration
-    private int providersThrottleDuration;
+    private int providersThrottleIntervalSec;
 
     private List<Listener> configurationListeners;
 
     private List<String> defaultEntrypoints;
 
+    private Set<String> providerConfigReloadTrottler;
+
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
-            int providersThrottleDuration, List<String> defaultEntrypoints) {
+            int providersThrottleIntervalSec, List<String> defaultEntrypoints) {
         LOGGER.trace("construcutor");
         this.vertx = vertx;
+        this.eventBus = vertx.eventBus();
         this.provider = provider;
         this.configurationAddress = configurationAddress;
-        this.providersThrottleDuration = providersThrottleDuration;
+        this.providersThrottleIntervalSec = providersThrottleIntervalSec;
         this.defaultEntrypoints = defaultEntrypoints;
         this.currentConfigurations = new HashMap<>();
+        this.providerConfigReloadTrottler = new HashSet<>();
     }
 
     public Future<String> start() {
         LOGGER.trace("start");
         listenProviders();
+        listenConfigurations();
         return this.vertx.deployVerticle(this.provider);
     }
 
@@ -65,38 +77,117 @@ public class ConfigurationWatcher {
         this.configurationListeners.add(listener);
     }
 
+    // listenProviders receives configuration changes from the providers.
+    // The configuration message then gets passed along a series of check
+    // to finally end up in a throttler that sends it to listenConfigurations.
     private void listenProviders() {
         LOGGER.trace("listenProviders");
-        EventBus eb = this.vertx.eventBus();
-        MessageConsumer<JsonObject> configConsumer = eb.consumer(this.configurationAddress);
+        MessageConsumer<JsonObject> configConsumer =
+                this.eventBus.consumer(this.configurationAddress);
 
         configConsumer.handler(message -> {
-            JsonObject messageBody = message.body();
+            JsonObject nextConfig = message.body();
 
-            String providerName = messageBody.getString(Provider.PROVIDER_NAME);
-            JsonObject providerConfig = messageBody.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+            String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
             LOGGER.debug("listenProviders: Received new configuration from '{}'", providerName);
 
-            loadMessage(providerName, providerConfig);
+            preloadConfiguration(nextConfig);
         });
     }
 
-    private void loadMessage(String providerName, JsonObject providerConfig) {
-        LOGGER.trace("loadMessage");
-        if (isEmptyConfiguration(providerConfig)) {
-            LOGGER.info("loadMessage: Skipping empty configuration for provider %s", providerName);
+    private void preloadConfiguration(JsonObject nextConfig) {
+        LOGGER.trace("preloadConfiguration");
+
+        if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
+                || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
+            LOGGER.warn("preloadConfiguration: Invalid configuration received");
             return;
         }
 
-        this.currentConfigurations.put(providerName, providerConfig);
+        String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
 
-        JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
-        applyEntrypoints(mergedConfig, this.defaultEntrypoints);
-
-        LOGGER.debug("loadMessage: Informing listeners about new configuration '{}'", mergedConfig);
-        for (Listener listener : this.configurationListeners) {
-            listener.listen(mergedConfig);
+        if (isEmptyConfiguration(providerConfig)) {
+            LOGGER.info("preloadConfiguration: Skipping empty configuration for provider '{}'",
+                    providerName);
+            return;
         }
+
+        // there is at most one config reload trottler per provider
+        if (!this.providerConfigReloadTrottler.contains(providerName)) {
+            this.providerConfigReloadTrottler.add(providerName);
+
+            this.throttleProviderConfigReload(this.providersThrottleIntervalSec, providerName);
+        }
+
+        this.eventBus.publish(providerName, nextConfig);
+    }
+
+
+    // throttleProviderConfigReload throttles the configuration reload speed for a single provider.
+    // It will immediately publish a new configuration and then only publish the next configuration
+    // after the throttle duration.
+    // Note that in the case it receives N new configs in the timeframe of the throttle duration
+    // after publishing, it will publish the last of the newly received configurations.
+    private void throttleProviderConfigReload(int trottleSec, String providerConfigReloadAddress) {
+        LOGGER.trace("throttleProviderConfigReload");
+
+        Queue<JsonObject> ring = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
+
+        this.vertx.setPeriodic(trottleSec * 1000, timerID -> {
+            JsonObject nextConfig = ring.poll();
+            if (nextConfig == null) {
+                return;
+            }
+            this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
+        });
+
+        MessageConsumer<JsonObject> providerConfigReloadConsumer =
+                this.eventBus.consumer(providerConfigReloadAddress);
+        providerConfigReloadConsumer.handler(message -> {
+            JsonObject nextConfig = message.body();
+
+            JsonObject previousConfig = ring.peek();
+            if (previousConfig == null) {
+                ring.offer(nextConfig.copy());
+                return;
+            }
+
+            if (previousConfig.equals(nextConfig)) {
+                LOGGER.info("throttleProviderConfigReload: Skipping same configuration");
+                return;
+            }
+
+            ring.offer(nextConfig.copy());
+        });
+    }
+
+    private void listenConfigurations() {
+        LOGGER.trace("listenConfigurations");
+        MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer =
+                this.eventBus.consumer(CONFIG_VALIDATED_ADDRESS);
+
+        validatedProviderConfigUpdateConsumer.handler(message -> {
+            JsonObject nextConfig = message.body();
+
+            String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+            JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+
+            if (providerConfig == null) {
+                return;
+            }
+
+            this.currentConfigurations.put(providerName, providerConfig);
+
+            JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
+            applyEntrypoints(mergedConfig, this.defaultEntrypoints);
+
+            LOGGER.debug("listenConfigurations: Informing listeners about new configuration '{}'",
+                    mergedConfig);
+            for (Listener listener : this.configurationListeners) {
+                listener.listen(mergedConfig);
+            }
+        });
     }
 
     // TODO introduce provider namespaces
