@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -50,8 +53,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT = "replacement";
 
     public static final String MIDDLEWARE_HEADERS = "headers";
-    public static final String MIDDLEWARE_HEADERS_HEADER = "header";
-    public static final String MIDDLEWARE_HEADERS_VALUE = "value";
     public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
 
@@ -80,20 +81,31 @@ public class DynamicConfiguration {
 
     private static Schema buildSchema(Vertx vertx) {
         LOGGER.trace("buildSchema");
-        // TODO consider setting "additionalProperties": false
 
-        // TODO fileconfig does not provide services for all routers
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
                 .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
-                .property(ROUTER_RULE, Schemas.stringSchema());
+                .property(ROUTER_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
+
+        ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
+                .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
+                .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
+                .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
+                .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
+                .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
+                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema());
 
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                         .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
-                        .property(MIDDLEWARE_OPTIONS, Schemas.objectSchema())
+                        .property(MIDDLEWARE_OPTIONS, middlewareOptionsSchema)
                         .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
@@ -101,15 +113,18 @@ public class DynamicConfiguration {
                 .requiredProperty(SERVICE_SERVERS,
                         Schemas.arraySchema().items(Schemas.objectSchema()
                                 .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
-                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())));
+                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
+                                .allowAdditionalProperties(false)))
+                .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder httpSchema =
                 Schemas.objectSchema().property(ROUTERS, Schemas.arraySchema().items(routerSchema))
                         .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
-                        .property(SERVICES, Schemas.arraySchema().items(serviceSchema));
+                        .property(SERVICES, Schemas.arraySchema().items(serviceSchema))
+                        .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder dynamicConfigBuilder =
-                Schemas.objectSchema().property(HTTP, httpSchema);
+                Schemas.objectSchema().requiredProperty(HTTP, httpSchema);
 
         SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
         SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
@@ -153,11 +168,224 @@ public class DynamicConfiguration {
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
         LOGGER.trace("validate");
-        // TODO validate that all middlewares and services are present
+
         if (schema == null) {
             schema = buildSchema(vertx);
         }
-        return schema.validateAsync(json);
+
+        Promise<Void> validPromise = Promise.promise();
+        schema.validateAsync(json).onSuccess(f -> {
+            JsonObject httpConfig = json.getJsonObject(HTTP);
+            List<Future> validFutures =
+                    Arrays.asList(validateRouters(httpConfig), validateMiddlewares(httpConfig));
+
+            CompositeFuture.all(validFutures).onSuccess(h -> {
+                validPromise.complete();
+            }).onFailure(err -> {
+                validPromise.fail(err.getMessage());
+            });
+
+        }).onFailure(err -> {
+            validPromise.fail(err.getMessage());
+        });
+
+        return validPromise.future();
+    }
+
+    public static Future<Void> validateRouters(JsonObject httpConfig) {
+        LOGGER.trace("validateRouters");
+
+        JsonArray routers = httpConfig.getJsonArray(ROUTERS);
+        if (routers == null || routers.size() == 0) {
+            LOGGER.warn("validateRouters: no routers defined");
+            return Future.succeededFuture();
+        }
+
+        // collect used middlewares and services
+        Set<String> routerMiddlewareNames = new HashSet<>();
+        Set<String> routerServiceNames = new HashSet<>();
+        for (int i = 0; i < routers.size(); i++) {
+            JsonObject router = routers.getJsonObject(i);
+
+            JsonArray routerMwNames = router.getJsonArray(ROUTER_MIDDLEWARES);
+            if (routerMwNames != null) {
+                for (int j = 0; j < routerMwNames.size(); j++) {
+                    String routerMwName = routerMwNames.getString(j);
+                    if (routerMwName != null) {
+                        routerMiddlewareNames.add(routerMwName);
+                    }
+                }
+            }
+
+            String routerSvName = router.getString(ROUTER_SERVICE);
+            if (routerSvName != null) {
+                routerServiceNames.add(routerSvName);
+            }
+        }
+
+        // check whether alls used middlewares and services are defined
+        JsonArray middlewares = httpConfig.getJsonArray(MIDDLEWARES);
+        JsonArray services = httpConfig.getJsonArray(SERVICES);
+
+        for (String mwName : routerMiddlewareNames) {
+            if (getObjByKeyWithValue(middlewares, MIDDLEWARE_NAME, mwName) == null) {
+                String errMsg = "validateRouters: unknown middleware '{}' defined";
+                LOGGER.warn(errMsg);
+                return Future.failedFuture(errMsg);
+            }
+        }
+
+        for (String svName : routerServiceNames) {
+            if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
+                String errMsg = "validateRouters: unknown service '{}' defined";
+                LOGGER.warn(errMsg, svName);
+                return Future.failedFuture(errMsg);
+            }
+        }
+
+        return Future.succeededFuture();
+    }
+
+    public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
+        LOGGER.trace("validateMiddlewares");
+
+        JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
+        if (mws == null || mws.size() == 0) {
+            LOGGER.debug("validateMiddlewares: no middlewares defined");
+            return Future.succeededFuture();
+        }
+
+        for (int i = 0; i < mws.size(); i++) {
+            JsonObject mw = mws.getJsonObject(i);
+            String mwName = mw.getString(MIDDLEWARE_NAME);
+
+            Boolean valid = true;
+            String errMsg = "";
+            switch (mwName) {
+                case MIDDLEWARE_AUTHORIZATION_BEARER: {
+                    String sessionScope =
+                            mw.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+                    if (sessionScope == null || sessionScope.length() == 0) {
+                        valid = false;
+                        errMsg = "Authorization Bearer: No session scope defined";
+                    }
+                    break;
+                }
+                case MIDDLEWARE_HEADERS: {
+                    JsonObject requestHeaders = mw.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+                    if (requestHeaders != null && requestHeaders.isEmpty()) {
+                        valid = false;
+                        errMsg = "Headers: Empty request headers defined";
+                        break;
+                    }
+
+                    for (Entry<String, Object> entry : requestHeaders) {
+                        if (!(entry.getKey() instanceof String)
+                                || !(entry.getValue() instanceof String)) {
+                            valid = false;
+                            errMsg = "Headers: request header and value can only be of type string";
+                            break;
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
+
+                    JsonObject responseHeaders = mw.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+                    if (responseHeaders != null && responseHeaders.isEmpty()) {
+                        valid = false;
+                        errMsg = "Headers: Empty response headers defined";
+                        break;
+                    }
+
+                    for (Entry<String, Object> entry : responseHeaders) {
+                        if (!(entry.getKey() instanceof String)
+                                || !(entry.getValue() instanceof String)) {
+                            valid = false;
+                            errMsg = "Headers: response header and value can only be of type string";
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                case MIDDLEWARE_OAUTH2: {
+                    String clientID = mw.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+                    if (clientID == null || clientID.length() == 0) {
+                        valid = false;
+                        errMsg = "OAuth2: No client ID defined";
+                        break;
+                    }
+
+                    String clientSecret = mw.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+                    if (clientSecret == null || clientSecret.length() == 0) {
+                        valid = false;
+                        errMsg = "OAuth2: No client secret defined";
+                        break;
+                    }
+
+                    String discoveryUrl = mw.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+                    if (discoveryUrl == null || discoveryUrl.length() == 0) {
+                        valid = false;
+                        errMsg = "OAuth2: No discovery URL defined";
+                        break;
+                    }
+
+                    String sessionScope = mw.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+                    if (sessionScope == null || sessionScope.length() == 0) {
+                        valid = false;
+                        errMsg = "OAuth2: No session scope defined";
+                        break;
+                    }
+
+                    break;
+                }
+                case MIDDLEWARE_REDIRECT_REGEX: {
+                    String regex = mw.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+                    if (regex == null || regex.length() == 0) {
+                        valid = false;
+                        errMsg = "Redirect regex: No regex defined";
+                        break;
+                    }
+
+                    String replacement = mw.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+                    if (replacement == null || replacement.length() == 0) {
+                        valid = false;
+                        errMsg = "Redirect regex: No replacement defined";
+                        break;
+                    }
+
+                    break;
+                }
+                case MIDDLEWARE_REPLACE_PATH_REGEX: {
+                    String regex = mw.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+                    if (regex == null || regex.length() == 0) {
+                        valid = false;
+                        errMsg = "Replace path regex: No regex defined";
+                        break;
+                    }
+
+                    String replacement = mw.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+                    if (replacement == null || replacement.length() == 0) {
+                        valid = false;
+                        errMsg = "Replace path regex: No replacement defined";
+                        break;
+                    }
+
+                    break;
+                }
+                default: {
+                    errMsg = "Unknown middleware";
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                return Future.failedFuture(errMsg);
+            }
+        }
+
+        return Future.succeededFuture();
     }
 
     public static JsonObject merge(Map<String, JsonObject> configurations) {

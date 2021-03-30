@@ -157,10 +157,10 @@ public class RouterFactory {
                     } else {
                         router.delete(route.getPath());
                         LOGGER.warn(
-                                "createRouter: Ignoring path '{}'. Failed to create middleware '{}'",
-                                route.getPath(), mf.cause());
-                        handler.handle(Future
-                                .failedFuture("Failed to create middleware '" + mf.cause() + "'"));
+                                "createRouter: Ignoring path '{}'. Failed to create middleware: '{}'",
+                                route.getPath(), mf.cause().getMessage());
+                        handler.handle(Future.failedFuture(
+                                "Failed to create middleware '" + mf.cause().getMessage() + "'"));
                     }
                 });
             });

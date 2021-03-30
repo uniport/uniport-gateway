@@ -75,6 +75,7 @@ public class DockerContainerProvider extends Provider {
             if (config == null) {
                 return;
             }
+            LOGGER.debug("provide: configuration from docker '{}'", config);
             validateAndPublish(config);
 
             if (!this.watch) {

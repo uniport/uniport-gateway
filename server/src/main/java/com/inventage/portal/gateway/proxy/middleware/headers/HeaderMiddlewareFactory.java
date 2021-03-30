@@ -38,7 +38,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
                 });
 
         LOGGER.debug("create: Created '{}' middleware successfully",
-                DynamicConfiguration.MIDDLEWARE_HEADERS_HEADER);
+                DynamicConfiguration.MIDDLEWARE_HEADERS);
         return Future.succeededFuture(new HeaderMiddleware(requestHeaders, responseHeaders));
     }
 

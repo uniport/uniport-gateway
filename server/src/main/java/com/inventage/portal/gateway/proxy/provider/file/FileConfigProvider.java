@@ -57,8 +57,8 @@ public class FileConfigProvider extends Provider {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig(ar -> {
             if (ar.succeeded()) {
-                LOGGER.info("provide: configuration retrieved");
                 final JsonObject config = ar.result();
+                LOGGER.debug("provide: configuration from file '{}'", config);
                 this.validateAndPublish(config);
             } else {
                 String errorMsg = "provide: cannot retrieve configuration";
@@ -70,6 +70,7 @@ public class FileConfigProvider extends Provider {
         if (this.watch) {
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
+                LOGGER.debug("provide: configuration from file '{}'", config);
                 this.validateAndPublish(config);
             });
         }
@@ -110,17 +111,15 @@ public class FileConfigProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         LOGGER.trace("validateAndPublish");
-        DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
-            if (ar.succeeded()) {
-                LOGGER.info("validateAndPublish: configuration published");
-                this.eb.publish(this.configurationAddress,
-                        new JsonObject()
-                                .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
-                                .put(Provider.PROVIDER_CONFIGURATION, config));
-            } else {
-                LOGGER.warn("validateAndPublish: invalid configuration '{}'",
-                        ar.cause().getMessage(), ar.cause());
-            }
+        DynamicConfiguration.validate(this.vertx, config).onSuccess(f -> {
+            LOGGER.info("validateAndPublish: configuration published");
+            this.eb.publish(this.configurationAddress,
+                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                            .put(Provider.PROVIDER_CONFIGURATION, config));
+
+        }).onFailure(err -> {
+            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}'",
+                    err.getMessage());
         });
     }
 }

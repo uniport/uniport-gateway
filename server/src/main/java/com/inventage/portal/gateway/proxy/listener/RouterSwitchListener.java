@@ -27,13 +27,11 @@ public class RouterSwitchListener implements Listener {
     public void listen(JsonObject config) {
         LOGGER.trace("listen");
         Future<Router> routerCreation = routerFactory.createRouter(config);
-        routerCreation.onComplete(ar -> {
-            if (ar.succeeded()) {
-                setSubRouter(ar.result());
-            } else {
-                LOGGER.warn("listen: Failed to create new router with '{}' from config '{}'",
-                        ar.cause(), config);
-            }
+        routerCreation.onSuccess(router -> {
+            setSubRouter(router);
+        }).onFailure(err -> {
+            LOGGER.warn("listen: Failed to create new router from config '{}': '{}'", config,
+                    err.getMessage());
         });
 
     }

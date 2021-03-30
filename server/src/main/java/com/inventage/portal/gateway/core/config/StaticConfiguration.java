@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.core.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -16,6 +18,8 @@ import io.vertx.json.schema.common.dsl.Schemas;
  * It defines the structure of the static configuration.
  */
 public class StaticConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
+
     // keywords used for internal purpose only
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
@@ -49,6 +53,8 @@ public class StaticConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
+        LOGGER.trace("buildSchema");
+
         ObjectSchemaBuilder entrypointSchema =
                 Schemas.objectSchema().requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
                         .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
@@ -83,21 +89,28 @@ public class StaticConfiguration {
     }
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
+        LOGGER.trace("validate");
         if (schema == null) {
             schema = buildSchema(vertx);
         }
 
         Promise<Void> validPromise = Promise.promise();
-        schema.validateAsync(json).onSuccess(ar -> {
+        schema.validateAsync(json).onSuccess(f -> {
             validateProviders(json.getJsonArray(PROVIDERS), validPromise);
-        }).onFailure(ar -> {
-            validPromise.fail(ar.getMessage());
+        }).onFailure(err -> {
+            validPromise.fail(err.getMessage());
         });
 
         return validPromise.future();
     }
 
     private static void validateProviders(JsonArray providers, Promise<Void> validPromise) {
+        LOGGER.trace("validateProviders");
+        if (providers == null || providers.size() == 0) {
+            LOGGER.warn("validateProviders: no providers defined");
+            validPromise.complete();
+        }
+
         for (int i = 0; i < providers.size(); i++) {
             JsonObject provider = providers.getJsonObject(i);
             String providerName = provider.getString(PROVIDER_NAME);
