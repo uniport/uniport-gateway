@@ -131,6 +131,26 @@ public class DynamicConfiguration {
         return config;
     }
 
+    public static boolean isEmptyConfiguration(JsonObject config) {
+        LOGGER.trace("isEmptyConfiguration");
+        if (config == null) {
+            return true;
+        }
+
+        JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
+        if (httpConfig == null) {
+            return true;
+        }
+
+        JsonArray httpRouters = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+        JsonArray httpMiddlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+        JsonArray httpServices = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+
+        Boolean httpEmpty = httpRouters == null && httpMiddlewares == null && httpServices == null;
+
+        return httpEmpty;
+    }
+
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
         LOGGER.trace("validate");
         // TODO validate that all middlewares and services are present
