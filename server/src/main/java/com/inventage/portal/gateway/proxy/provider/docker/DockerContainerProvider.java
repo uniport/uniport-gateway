@@ -30,7 +30,6 @@ public class DockerContainerProvider extends Provider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
 
     private static final String announceAddress = "docker-container-announce";
-    private static final String defaultTempateRule = "Host('${name}')";
 
     private Vertx vertx;
 
@@ -46,16 +45,17 @@ public class DockerContainerProvider extends Provider {
 
     private Map<String, JsonObject> configurations = new HashMap<String, JsonObject>();
 
-    public DockerContainerProvider(Vertx vertx, String configurationAddress) {
+    public DockerContainerProvider(Vertx vertx, String configurationAddress, String endpoint,
+            String defaultRule, Boolean watch) {
         LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;
 
-        // TODO allow to configure this
-        this.watch = true;
-        this.endpoint = "unix:///var/run/docker.sock";
-        this.defaultRule = defaultTempateRule;
+        this.watch = watch;
+        this.endpoint = endpoint;
+        this.defaultRule = defaultRule;
+
         this.TLS = false;
     }
 

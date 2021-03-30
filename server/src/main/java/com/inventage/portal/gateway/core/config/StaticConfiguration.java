@@ -35,12 +35,15 @@ public class StaticConfiguration {
         public static final String PROVIDER_FILE_WATCH = "watch";
 
         public static final String PROVIDER_DOCKER = "docker";
+        public static final String PROVIDER_DOCKER_ENDPOINT = "endpoint";
+        public static final String PROVIDER_DOCKER_DEFAULT_RULE = "defaultRule";
 
         public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
 
         private static Schema schema;
 
         private static Schema buildSchema(Vertx vertx) {
+                // TODO add per provider schema
 
                 ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
                                 .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
