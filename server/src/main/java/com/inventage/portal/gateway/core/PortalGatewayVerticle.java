@@ -131,32 +131,36 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     }
 
     private List<Entrypoint> entrypoints(JsonObject config) {
-        LOGGER.debug("entrypoints: reading from config key '{}'", Entrypoint.ENTRYPOINTS);
+        LOGGER.debug("entrypoints: reading from config key '{}'", StaticConfiguration.ENTRYPOINTS);
         try {
             final List<Entrypoint> entrypoints = new ArrayList<>();
-            final JsonArray configs = config.getJsonArray(Entrypoint.ENTRYPOINTS);
+            final JsonArray configs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                        .map(entrypoint -> new Entrypoint(entrypoint.getString(Entrypoint.NAME),
-                                publicHostname, entrypoint.getInteger(Entrypoint.PORT), vertx))
+                        .map(entrypoint -> new Entrypoint(
+                                entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
+                                publicHostname,
+                                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT), vertx))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
         } catch (Exception e) {
-            throw new IllegalStateException(
-                    String.format("Couldn't read %s configuration", Entrypoint.ENTRYPOINTS));
+            throw new IllegalStateException(String.format("Couldn't read %s configuration",
+                    StaticConfiguration.ENTRYPOINTS));
         }
     }
 
     private List<Application> applications(JsonObject config) {
-        LOGGER.debug("applications: reading from config key '{}'", Application.APPLICATIONS);
+        LOGGER.debug("applications: reading from config key '{}'",
+                StaticConfiguration.APPLICATIONS);
         try {
             final List<Application> applications = new ArrayList<>();
-            final JsonArray configs = config.getJsonArray(Application.APPLICATIONS);
+            final JsonArray configs = config.getJsonArray(StaticConfiguration.APPLICATIONS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
                         .map(application -> ApplicationFactory.Loader
-                                .getProvider(application.getString(Application.PROVIDER))
+                                .getProvider(application
+                                        .getString(StaticConfiguration.APPLICATION_PROVIDER))
                                 .create(application, config, vertx))
                         .forEach(applications::add);
             }
@@ -164,8 +168,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         } catch (IllegalStateException e) {
             throw e;
         } catch (Exception e) {
-            throw new IllegalStateException(
-                    String.format("Couldn't read %s configuration", Application.APPLICATIONS));
+            throw new IllegalStateException(String.format("Couldn't read %s configuration",
+                    StaticConfiguration.APPLICATIONS));
         }
     }
 

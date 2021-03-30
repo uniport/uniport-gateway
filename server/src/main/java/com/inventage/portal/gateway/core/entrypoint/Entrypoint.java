@@ -1,7 +1,11 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
+import java.util.Optional;
 import com.inventage.portal.gateway.core.application.Application;
+import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.log.RequestResponseLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -10,20 +14,11 @@ import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 /**
  * Entry point for the portal gateway.
  */
 public class Entrypoint {
-
-    // keys in the portal-gateway.json
-    public static final String ENTRYPOINTS = "entrypoints";
-    public static final String NAME = "name";
-    public static final String PORT = "port";
 
     private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
 
@@ -115,9 +110,9 @@ public class Entrypoint {
     }
 
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
-        final JsonArray configs = globalConfig.getJsonArray(Entrypoint.ENTRYPOINTS);
+        final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(entrypoint -> entrypoint.getString(Entrypoint.NAME).equals(name))
+                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
                 .findFirst().orElseThrow(() -> {
                     throw new IllegalStateException(
                             String.format("Entrypoint '%s' not found!", name));

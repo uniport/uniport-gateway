@@ -22,14 +22,14 @@ public class Parser {
     private static final Logger LOGGER = LoggerFactory.getLogger(Parser.class);
 
     // keywords used in the labels
+    private static final String ENTRYPOINTS = "entrypoints";
     private static final String ROUTERS = "routers";
     private static final String MIDDLEWARES = "middlewares";
     private static final String SERVICES = "services";
 
     private static final List<String> CONTAINS_CUSTOM_NAMES =
             Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
-    private static final List<String> VALUE_IS_ARRAY_TYPE =
-            Arrays.asList("entrypoints", "middlewares");
+    private static final List<String> VALUE_IS_ARRAY_TYPE = Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
 
     public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
         LOGGER.trace("filterKeys");

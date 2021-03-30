@@ -67,13 +67,13 @@ public class PortalGatewayConfigRetriever {
             return Optional.of(configStoreOptions(envValue));
         }
         if (existsAsFile(DEFAULT_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading from default file '{}'",
+            LOGGER.info("getPortalGatewayJson: reading from default file path '{}'",
                     DEFAULT_CONFIG_FILE_PATH);
             return Optional.of(configStoreOptions(DEFAULT_CONFIG_FILE_PATH));
         }
         if (existsAsFile(LOCAL_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading file '{}' from working directory '{}'",
-                    LOCAL_CONFIG_FILE_PATH, new File(".").getAbsolutePath());
+            LOGGER.info("getPortalGatewayJson: reading from working directory '{}'",
+                    new File(".").getAbsolutePath());
             return Optional.of(configStoreOptions(LOCAL_CONFIG_FILE_PATH));
         }
         LOGGER.warn("getPortalGatewayJson: no portal-gateway.json file configured");

@@ -47,7 +47,7 @@ public class ConfigurationWatcher {
 
     private List<String> defaultEntrypoints;
 
-    private Set<String> providerConfigReloadTrottler;
+    private Set<String> providerConfigReloadThrottler;
 
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
             int providersThrottleIntervalSec, List<String> defaultEntrypoints) {
@@ -59,7 +59,7 @@ public class ConfigurationWatcher {
         this.providersThrottleIntervalSec = providersThrottleIntervalSec;
         this.defaultEntrypoints = defaultEntrypoints;
         this.currentConfigurations = new HashMap<>();
-        this.providerConfigReloadTrottler = new HashSet<>();
+        this.providerConfigReloadThrottler = new HashSet<>();
     }
 
     public Future<String> start() {
@@ -113,9 +113,9 @@ public class ConfigurationWatcher {
             return;
         }
 
-        // there is at most one config reload trottler per provider
-        if (!this.providerConfigReloadTrottler.contains(providerName)) {
-            this.providerConfigReloadTrottler.add(providerName);
+        // there is at most one config reload throttler per provider
+        if (!this.providerConfigReloadThrottler.contains(providerName)) {
+            this.providerConfigReloadThrottler.add(providerName);
 
             this.throttleProviderConfigReload(this.providersThrottleIntervalSec, providerName);
         }
@@ -129,12 +129,12 @@ public class ConfigurationWatcher {
     // after the throttle duration.
     // Note that in the case it receives N new configs in the timeframe of the throttle duration
     // after publishing, it will publish the last of the newly received configurations.
-    private void throttleProviderConfigReload(int trottleSec, String providerConfigReloadAddress) {
+    private void throttleProviderConfigReload(int throttleSec, String providerConfigReloadAddress) {
         LOGGER.trace("throttleProviderConfigReload");
 
         Queue<JsonObject> ring = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
-        this.vertx.setPeriodic(trottleSec * 1000, timerID -> {
+        this.vertx.setPeriodic(throttleSec * 1000, timerID -> {
             JsonObject nextConfig = ring.poll();
             if (nextConfig == null) {
                 return;
@@ -213,7 +213,6 @@ public class ConfigurationWatcher {
         return config;
     }
 
-    // TODO introduce provider namespaces
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
         LOGGER.trace("mergeConfigurations");
         JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
@@ -244,7 +243,6 @@ public class ConfigurationWatcher {
             }
         }
 
-        System.out.println(mergedConfig);
         return mergedConfig;
     }
 

@@ -1,22 +1,14 @@
 package com.inventage.portal.gateway.core.application;
 
+import java.util.Optional;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-
-import java.util.Optional;
 
 /**
  * The portal gateway is made of different application. Every one has to implement this interface.
  */
 public interface Application {
-
-    // keys in the portal-gateway.json
-
-    String APPLICATIONS = "applications";
-    String NAME = "name";
-    String ENTRYPOINT = "entrypoint";
-    String PROVIDER = "provider";
 
     /**
      * @return URL path for which this application will be responsible

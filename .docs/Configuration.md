@@ -18,7 +18,7 @@ The Portal-Gateway is a Reverse Proxy (or Edge Router) inspired by [traefik](htt
       - [[WIP] Kubernetes](#wip-kubernetes)
       - [File](#file)
         - [Provider Configuration](#provider-configuration-1)
-    - [Configuration Reload Frequency](#configuration-reload-frequency)
+    - [[WIP] Configuration Reload Frequency](#wip-configuration-reload-frequency)
   - [Routing](#routing)
     - [TODO Doc](#todo-doc)
     - [Entrypoints](#entrypoints)
@@ -144,7 +144,7 @@ It supports providing configuration throught single configuration file or multip
 
 **Note**: The ``filename`` and ``directory`` are mutually exlusive.
 
-### Configuration Reload Frequency
+### [WIP] Configuration Reload Frequency
 
 ```
 providers.providersThrottleDuration

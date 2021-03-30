@@ -62,14 +62,18 @@ public class ProxyApplication implements Application {
      */
     private JsonArray providers;
 
-    private final int providersThrottleDuration = 2;
+    private int providersThrottleDuration;
 
     public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
         LOGGER.trace("construcutor");
         this.name = name;
         this.entrypoint = entrypoint;
         this.router = Router.router(vertx);
+
         this.providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
+        this.providersThrottleDuration =
+                staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_SEC, 2);
+
         this.publicHostname =
                 staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
                         PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
@@ -77,7 +81,6 @@ public class ProxyApplication implements Application {
                 .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
                         StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
                 .getString(StaticConfiguration.ENTRYPOINT_PORT);
-
     }
 
     public String toString() {
