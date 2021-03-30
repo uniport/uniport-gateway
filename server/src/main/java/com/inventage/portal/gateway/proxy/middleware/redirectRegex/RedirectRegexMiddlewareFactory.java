@@ -24,6 +24,8 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         LOGGER.trace("create");
+        LOGGER.debug("create: Created '{}' middleware successfully",
+                DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
         return Future.succeededFuture(new RedirectRegexMiddleware(
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
                 middlewareConfig

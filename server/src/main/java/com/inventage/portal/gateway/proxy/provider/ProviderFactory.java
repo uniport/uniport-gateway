@@ -30,7 +30,7 @@ public interface ProviderFactory {
             if (provider.isPresent()) {
                 return provider.get();
             }
-            LOGGER.debug("getFactory: provider not found '{}'", providerName);
+            LOGGER.warn("getFactory: provider not found '{}'", providerName);
             return null;
         }
     }

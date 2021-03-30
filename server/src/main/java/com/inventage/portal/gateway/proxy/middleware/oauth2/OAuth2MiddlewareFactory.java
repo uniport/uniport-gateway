@@ -120,7 +120,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                                         .setupCallback(callback).withScope(OAUTH2_SCOPE);
 
                         oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
-                        LOGGER.debug("create: Created OAuth2 middleware");
+                        LOGGER.debug("create: Created '{}' middleware successfully",
+                                        DynamicConfiguration.MIDDLEWARE_OAUTH2);
                 }).onFailure(handler -> {
                         LOGGER.error("create: Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
                                         handler.getMessage());

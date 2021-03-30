@@ -153,7 +153,6 @@ public class RouterFactory {
             CompositeFuture.all(middlewareFutures).onComplete(ar -> {
                 middlewareFutures.forEach(mf -> {
                     if (mf.succeeded()) {
-                        LOGGER.debug("createRouter: Created middleware successfully");
                         route.handler((Handler<RoutingContext>) mf.result());
                     } else {
                         router.delete(route.getPath());

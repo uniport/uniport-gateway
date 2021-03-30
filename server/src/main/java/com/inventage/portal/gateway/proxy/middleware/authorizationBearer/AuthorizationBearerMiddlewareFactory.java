@@ -24,6 +24,8 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         LOGGER.trace("create");
+        LOGGER.debug("create: Created '{}' middleware successfully",
+                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
         return Future.succeededFuture(new AuthorizationBearerMiddleware(middlewareConfig
                 .getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
     }
