@@ -164,15 +164,13 @@ public class DockerContainerProvider extends Provider {
             return null;
         }
 
-        DynamicConfiguration.validate(vertx, confFromLabels).onComplete(ar -> {
-            if (ar.succeeded()) {
-                LOGGER.debug("buildConfiguration: configuration from labels '{}'", confFromLabels);
-                this.configurations.put(serviceName, confFromLabels);
-            } else {
-                LOGGER.warn(
-                        "buildConfiguration: invalid configuration form container labels '{}': '{}'",
-                        containerName, confFromLabels);
-            }
+        DynamicConfiguration.validate(vertx, confFromLabels).onSuccess(handler -> {
+            LOGGER.debug("buildConfiguration: configuration from labels '{}'", confFromLabels);
+            this.configurations.put(serviceName, confFromLabels);
+        }).onFailure(err -> {
+            LOGGER.warn(
+                    "buildConfiguration: invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
+                    err.getMessage(), containerName, confFromLabels);
         });
 
         return DynamicConfiguration.merge(this.configurations);
@@ -288,17 +286,15 @@ public class DockerContainerProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         LOGGER.trace("validateAndPublish");
-        DynamicConfiguration.validate(this.vertx, config).onComplete(ar -> {
-            if (ar.succeeded()) {
-                LOGGER.info("validateAndPublish: configuration published");
-                this.eb.publish(this.configurationAddress,
-                        new JsonObject()
-                                .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
-                                .put(Provider.PROVIDER_CONFIGURATION, config));
-            } else {
-                LOGGER.warn("validateAndPublish: unable to publish invalid configuration: '{}'",
-                        config);
-            }
+        DynamicConfiguration.validate(this.vertx, config).onSuccess(handler -> {
+            LOGGER.info("validateAndPublish: configuration published");
+            this.eb.publish(this.configurationAddress,
+                    new JsonObject()
+                            .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
+                            .put(Provider.PROVIDER_CONFIGURATION, config));
+        }).onFailure(err -> {
+            LOGGER.warn("validateAndPublish: unable to publish invalid configuration '{}': '{}'",
+                    config, err.getMessage());
         });
     }
 }

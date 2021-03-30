@@ -105,7 +105,7 @@ public class DynamicConfiguration {
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                         .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
-                        .property(MIDDLEWARE_OPTIONS, middlewareOptionsSchema)
+                        .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema)
                         .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
@@ -257,25 +257,26 @@ public class DynamicConfiguration {
 
         for (int i = 0; i < mws.size(); i++) {
             JsonObject mw = mws.getJsonObject(i);
-            String mwName = mw.getString(MIDDLEWARE_NAME);
+            String mwType = mw.getString(MIDDLEWARE_TYPE);
+            JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS);
 
             Boolean valid = true;
             String errMsg = "";
-            switch (mwName) {
+            switch (mwType) {
                 case MIDDLEWARE_AUTHORIZATION_BEARER: {
                     String sessionScope =
-                            mw.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+                            mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
                         valid = false;
-                        errMsg = "Authorization Bearer: No session scope defined";
+                        errMsg = String.format("%s: No session scope defined", mwType);
                     }
                     break;
                 }
                 case MIDDLEWARE_HEADERS: {
-                    JsonObject requestHeaders = mw.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+                    JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
                     if (requestHeaders != null && requestHeaders.isEmpty()) {
                         valid = false;
-                        errMsg = "Headers: Empty request headers defined";
+                        errMsg = String.format("%s: Empty request headers defined", mwType);
                         break;
                     }
 
@@ -283,7 +284,9 @@ public class DynamicConfiguration {
                         if (!(entry.getKey() instanceof String)
                                 || !(entry.getValue() instanceof String)) {
                             valid = false;
-                            errMsg = "Headers: request header and value can only be of type string";
+                            errMsg = String.format(
+                                    "%s: Request header and value can only be of type string",
+                                    mwType);
                             break;
                         }
                     }
@@ -291,10 +294,11 @@ public class DynamicConfiguration {
                         break;
                     }
 
-                    JsonObject responseHeaders = mw.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+                    JsonObject responseHeaders =
+                            mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
                     if (responseHeaders != null && responseHeaders.isEmpty()) {
                         valid = false;
-                        errMsg = "Headers: Empty response headers defined";
+                        errMsg = String.format("%s: Empty response headers defined", mwType);
                         break;
                     }
 
@@ -302,7 +306,9 @@ public class DynamicConfiguration {
                         if (!(entry.getKey() instanceof String)
                                 || !(entry.getValue() instanceof String)) {
                             valid = false;
-                            errMsg = "Headers: response header and value can only be of type string";
+                            errMsg = String.format(
+                                    "%s: Response header and value can only be of type string",
+                                    mwType);
                             break;
                         }
                     }
@@ -310,65 +316,66 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_OAUTH2: {
-                    String clientID = mw.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+                    String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
                     if (clientID == null || clientID.length() == 0) {
                         valid = false;
-                        errMsg = "OAuth2: No client ID defined";
+                        errMsg = String.format("%s: No client ID defined", mwType);
                         break;
                     }
 
-                    String clientSecret = mw.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+                    String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
                     if (clientSecret == null || clientSecret.length() == 0) {
                         valid = false;
-                        errMsg = "OAuth2: No client secret defined";
+                        errMsg = String.format("%s: No client secret defined", mwType);
                         break;
                     }
 
-                    String discoveryUrl = mw.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+                    String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
                     if (discoveryUrl == null || discoveryUrl.length() == 0) {
                         valid = false;
-                        errMsg = "OAuth2: No discovery URL defined";
+                        errMsg = String.format("%s: No discovery URL defined", mwType);
                         break;
                     }
 
-                    String sessionScope = mw.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+                    String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
                         valid = false;
-                        errMsg = "OAuth2: No session scope defined";
+                        errMsg = String.format("%s: No session scope defined", mwType);
                         break;
                     }
 
                     break;
                 }
                 case MIDDLEWARE_REDIRECT_REGEX: {
-                    String regex = mw.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+                    String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
                     if (regex == null || regex.length() == 0) {
                         valid = false;
-                        errMsg = "Redirect regex: No regex defined";
+                        errMsg = String.format("%s: No regex defined", mwType);
                         break;
                     }
 
-                    String replacement = mw.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+                    String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
                     if (replacement == null || replacement.length() == 0) {
                         valid = false;
-                        errMsg = "Redirect regex: No replacement defined";
+                        errMsg = String.format("%s: No replacement defined", mwType);
                         break;
                     }
 
                     break;
                 }
                 case MIDDLEWARE_REPLACE_PATH_REGEX: {
-                    String regex = mw.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+                    String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
                     if (regex == null || regex.length() == 0) {
                         valid = false;
-                        errMsg = "Replace path regex: No regex defined";
+                        errMsg = String.format("%s: No regex defined", mwType);
                         break;
                     }
 
-                    String replacement = mw.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+                    String replacement =
+                            mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
                     if (replacement == null || replacement.length() == 0) {
                         valid = false;
-                        errMsg = "Replace path regex: No replacement defined";
+                        errMsg = String.format("%s: No replacement defined", mwType);
                         break;
                     }
 

@@ -123,7 +123,8 @@ public class StaticConfiguration {
                     String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
                     if ((filename == null || filename.length() == 0)
                             && (directory == null || directory.length() == 0)) {
-                        errMsg = "File: either filename or directory has to be defined";
+                        errMsg = String.format("%s: either filename or directory has to be defined",
+                                providerName);
                         valid = false;
                     }
                     break;
