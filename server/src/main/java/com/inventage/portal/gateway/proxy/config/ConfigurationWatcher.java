@@ -231,64 +231,99 @@ public class ConfigurationWatcher {
             if (httpConf != null) {
                 JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
                 JsonArray mergedRts = mergedHttpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-                for (int i = 0; i < rts.size(); i++) {
-                    JsonObject rt = rts.getJsonObject(i);
-
-                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
-                    rt.put(DynamicConfiguration.ROUTER_NAME,
-                            makeQualifiedName(providerName, rtName));
-
-                    // Service and middlewares may referecing to another provider namespace
-                    // The names are only patched if this is not the case.
-                    String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
-                    if (!isQualifiedName(svName)) {
-                        rt.put(DynamicConfiguration.ROUTER_SERVICE,
-                                makeQualifiedName(providerName, svName));
-                    }
-
-                    JsonArray mwNames = rt.getJsonArray(DynamicConfiguration.ROUTER_MIDDLEWARES);
-                    if (mwNames != null) {
-                        JsonArray qualifiedMwNames = new JsonArray();
-                        for (int j = 0; j < mwNames.size(); j++) {
-                            String mwName = mwNames.getString(j);
-                            if (!isQualifiedName(mwName)) {
-                                String qualifiedMwName = makeQualifiedName(providerName, mwName);
-                                qualifiedMwNames.add(qualifiedMwName);
-                            }
-                        }
-                        rt.put(DynamicConfiguration.ROUTER_MIDDLEWARES, qualifiedMwNames);
-
-                    }
-
-                    mergedRts.add(rt);
-                }
+                mergeRouters(providerName, rts, mergedRts);
 
                 JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
                 JsonArray mergedMws =
                         mergedHttpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                for (int i = 0; i < mws.size(); i++) {
-                    JsonObject mw = mws.getJsonObject(i);
-                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
-
-                    mw.put(DynamicConfiguration.MIDDLEWARE_NAME,
-                            makeQualifiedName(providerName, mwName));
-                    mergedMws.add(mw);
-                }
+                mergeMiddlewares(providerName, mws, mergedMws);
 
                 JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
                 JsonArray mergedSvs = mergedHttpConfig.getJsonArray(DynamicConfiguration.SERVICES);
-                for (int i = 0; i < svs.size(); i++) {
-                    JsonObject sv = svs.getJsonObject(i);
-                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
-
-                    sv.put(DynamicConfiguration.SERVICE_NAME,
-                            makeQualifiedName(providerName, svName));
-                    mergedSvs.add(sv);
-                }
+                mergeServices(providerName, svs, mergedSvs);
             }
         }
 
+        System.out.println(mergedConfig);
         return mergedConfig;
+    }
+
+    private static JsonArray mergeRouters(String providerName, JsonArray rts, JsonArray mergedRts) {
+        LOGGER.trace("mergeRouters");
+
+        if (rts == null) {
+            return mergedRts;
+        }
+
+        for (int i = 0; i < rts.size(); i++) {
+            JsonObject rt = rts.getJsonObject(i);
+
+            String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
+            rt.put(DynamicConfiguration.ROUTER_NAME, getQualifiedName(providerName, rtName));
+
+            // Service and middlewares may referecing to another provider namespace
+            // The names are only patched if this is not the case.
+            String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
+            rt.put(DynamicConfiguration.ROUTER_SERVICE, getQualifiedName(providerName, svName));
+
+            JsonArray mwNames = rt.getJsonArray(DynamicConfiguration.ROUTER_MIDDLEWARES);
+            if (mwNames != null) {
+                JsonArray qualifiedMwNames = new JsonArray();
+                for (int j = 0; j < mwNames.size(); j++) {
+                    String mwName = mwNames.getString(j);
+                    qualifiedMwNames.add(getQualifiedName(providerName, mwName));
+                }
+                rt.put(DynamicConfiguration.ROUTER_MIDDLEWARES, qualifiedMwNames);
+
+            }
+
+            mergedRts.add(rt);
+        }
+        return mergedRts;
+    }
+
+    private static JsonArray mergeMiddlewares(String providerName, JsonArray mws,
+            JsonArray mergedMws) {
+        LOGGER.trace("mergeMiddlewares");
+
+        if (mws == null) {
+            return mergedMws;
+        }
+
+        for (int i = 0; i < mws.size(); i++) {
+            JsonObject mw = mws.getJsonObject(i);
+            String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+
+            mw.put(DynamicConfiguration.MIDDLEWARE_NAME, getQualifiedName(providerName, mwName));
+            mergedMws.add(mw);
+        }
+        return mergedMws;
+    }
+
+    private static JsonArray mergeServices(String providerName, JsonArray svs,
+            JsonArray mergedSvs) {
+        LOGGER.trace("mergeServices");
+
+        if (svs == null) {
+            return mergedSvs;
+        }
+
+        for (int i = 0; i < svs.size(); i++) {
+            JsonObject sv = svs.getJsonObject(i);
+            String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
+
+            sv.put(DynamicConfiguration.SERVICE_NAME, getQualifiedName(providerName, svName));
+            mergedSvs.add(sv);
+        }
+        return mergedSvs;
+    }
+
+    private static String getQualifiedName(String providerName, String name) {
+        LOGGER.trace("getQualifiedName");
+        if (isQualifiedName(name)) {
+            return name;
+        }
+        return makeQualifiedName(providerName, name);
     }
 
     private static String makeQualifiedName(String providerName, String name) {
@@ -297,6 +332,7 @@ public class ConfigurationWatcher {
     }
 
     private static boolean isQualifiedName(String name) {
+        LOGGER.trace("isQualifiedName");
         return name.contains("@");
     }
 }

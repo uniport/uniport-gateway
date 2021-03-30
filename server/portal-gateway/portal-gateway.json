@@ -17,6 +17,10 @@
   ],
   "providers": [
     {
+      "name": "file",
+      "filename": "auth-config.json"
+    },
+    {
       "name": "docker",
       "endpoint": "unix:///var/run/docker.sock",
       "watch": true

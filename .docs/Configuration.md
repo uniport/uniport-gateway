@@ -9,7 +9,7 @@ The Portal-Gateway is a Reverse Proxy (or Edge Router) inspired by [traefik](htt
     - [Dynamic Configuration](#dynamic-configuration)
   - [Providers](#providers)
     - [Orchestrators](#orchestrators)
-    - [[WIP] Provider Namespaces](#wip-provider-namespaces)
+    - [Provider Namespaces](#provider-namespaces)
     - [Supported Providers](#supported-providers)
       - [Docker](#docker)
         - [Port Detection](#port-detection)
@@ -18,7 +18,7 @@ The Portal-Gateway is a Reverse Proxy (or Edge Router) inspired by [traefik](htt
       - [[WIP] Kubernetes](#wip-kubernetes)
       - [File](#file)
         - [Provider Configuration](#provider-configuration-1)
-    - [[WIP] Configuration Reload Frequency](#wip-configuration-reload-frequency)
+    - [Configuration Reload Frequency](#configuration-reload-frequency)
   - [Routing](#routing)
     - [TODO Doc](#todo-doc)
     - [Entrypoints](#entrypoints)
@@ -74,7 +74,7 @@ The Portal-Gateway supports three types of providers:
 - Annotation-based: a seperate object, with annotations, defines the characteristics of the container
 - File-based: uses files to define configuration
 
-### [WIP] Provider Namespaces
+### Provider Namespaces
 
 When certain objects are declared in the dynamic configuration, such as middleware, services, they reside in their provider's namespace. For example, if you declare a middleware using a Docker label, it resides in the Docker provider namespace.
 
@@ -121,8 +121,8 @@ The Portal-Gateway requires access to the docker socket to get its dynmica confi
 ##### Provider Configuration
 
 - `endpoint` (*Required, Default="unix:///var/run/docker.sock"*): See [Docker API Access](#docker-api-access)
-- [WIP] `defaultRule` (*Optional, Default="Host('${name}')*): Defines what routing rule to apply to a container if no rule is defined by a label. It must be a valid [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html). The container service name can be accessed with the `name` identifier, and the StringSubstitutor has access to all the labels defined on this container.
-- [WIP] `watch` (*Optiona, Default=true*): Watch Docker events.
+- `defaultRule` (*Optional, Default="Host('${name}')*): Defines what routing rule to apply to a container if no rule is defined by a label. It must be a valid [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html). The container service name can be accessed with the `name` identifier, and the StringSubstitutor has access to all the labels defined on this container.
+- `watch` (*Optiona, Default=true*): Watch Docker events.
 
 #### [WIP] Kubernetes
 
@@ -144,7 +144,7 @@ It supports providing configuration throught single configuration file or multip
 
 **Note**: The ``filename`` and ``directory`` are mutually exlusive.
 
-### [WIP] Configuration Reload Frequency
+### Configuration Reload Frequency
 
 ```
 providers.providersThrottleDuration
@@ -196,5 +196,7 @@ The value should be provided in seconds.
 #### Replace Path Regex
 
 ### Services
+
+**Note**: The character @ is not authorized in the service name.
 
 ### Providers

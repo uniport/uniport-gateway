@@ -1,0 +1,59 @@
+{
+  "http": {
+    "middlewares": [
+      {
+        "name": "dashboardAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "dashboardScope" }
+      },
+      {
+        "name": "dashboardOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Dashboard",
+          "clientSecret": "Dashboard!",
+          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "sessionScope": "dashboardScope"
+        }
+      },
+
+      {
+        "name": "navigationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "id" }
+      },
+
+      {
+        "name": "organisationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "organisationScope" }
+      },
+      {
+        "name": "organisationOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Organisation",
+          "clientSecret": "Organisation!",
+          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "sessionScope": "organisationScope"
+        }
+      },
+
+      {
+        "name": "documentAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "documentScope" }
+      },
+      {
+        "name": "documentOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Document",
+          "clientSecret": "Document!",
+          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "sessionScope": "documentScope"
+        }
+      }
+    ]
+  }
+}
