@@ -3,14 +3,7 @@
     "routers": [
       {
         "name": "root",
-        "middlewares": [
-          "rootRedirectregex",
-          "dashboardAuthBearer",
-          "dashboardLoginRedirectRegex",
-          "dashboardOauth2",
-          "dashboardRedirectRegex",
-          "dashboardReplacePath"
-        ],
+        "middlewares": ["rootRedirectregex"],
         "rule": "Path('/')",
         "service": "dashboard-frontend"
       },
@@ -25,10 +18,7 @@
         "middlewares": [
           "dashboardRedirectRegex",
           "dashboardAuthBearer",
-          "dashboardReplacePath",
-          "dashboardLoginRedirectRegex",
-          "dashboardOauth2",
-          "rootRedirectregex"
+          "dashboardReplacePath"
         ],
         "rule": "PathPrefix('/dashboard')",
         "service": "dashboard-frontend"
@@ -41,14 +31,7 @@
       },
       {
         "name": "dashboard-login",
-        "middlewares": [
-          "dashboardOauth2",
-          "dashboardLoginRedirectRegex",
-          "dashboardAuthBearer",
-          "dashboardRedirectRegex",
-          "dashboardReplacePath",
-          "rootRedirectregex"
-        ],
+        "middlewares": ["dashboardOauth2", "dashboardLoginRedirectRegex"],
         "rule": "Path('/dashboard/login')",
         "service": "dashboard-frontend"
       },
@@ -65,7 +48,7 @@
       },
       {
         "name": "navigation-service",
-        "middlewares": ["navigationAuthBearer"],
+        "middlewares": ["navigationAuthBearer", "navigationReplacePath"],
         "rule": "PathPrefix('/navigation/service')",
         "service": "navigation-service"
       },
@@ -83,7 +66,11 @@
       },
       {
         "name": "organisation-service",
-        "middlewares": ["organisationOauth2", "organisationAuthBearer"],
+        "middlewares": [
+          "organisationOauth2",
+          "organisationAuthBearer",
+          "organisationReplacePath"
+        ],
         "rule": "PathPrefix('/organisation/service')",
         "service": "organisation-proxy-public"
       },
@@ -101,77 +88,23 @@
       },
       {
         "name": "document-service",
-        "middlewares": ["documentOauth2", "documentAuthBearer"],
+        "middlewares": [
+          "documentOauth2",
+          "documentAuthBearer",
+          "documentReplacePath"
+        ],
         "rule": "PathPrefix('/document/service')",
         "service": "document-proxy-public"
       }
     ],
+
     "middlewares": [
       {
-        "name": "documentAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "documentScope" }
-      },
-      {
-        "name": "documentOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Document",
-          "clientSecret": "Document!",
-          "discoveryUrl": "http://portal1-portal-iam:8080/auth/realms/portal",
-          "sessionScope": "documentScope"
-        }
-      },
-      {
-        "name": "documentRedirectRegex",
+        "name": "rootRedirectregex",
         "type": "redirectRegex",
-        "options": { "regex": "^(/document)$", "replacement": "$1/" }
+        "options": { "regex": "^/$", "replacement": "/dashboard/" }
       },
-      {
-        "name": "documentReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/document/(.*)", "replacement": "/$1" }
-      },
-      {
-        "name": "organisationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "organisationScope" }
-      },
-      {
-        "name": "organisationOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Organisation",
-          "clientSecret": "Organisation!",
-          "discoveryUrl": "http://portal1-portal-iam:8080/auth/realms/portal",
-          "sessionScope": "organisationScope"
-        }
-      },
-      {
-        "name": "organisationRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/organisation)$", "replacement": "$1/" }
-      },
-      {
-        "name": "organisationReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/organisation/(.*)", "replacement": "/$1" }
-      },
-      {
-        "name": "navigationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "id" }
-      },
-      {
-        "name": "navigationRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
-      },
-      {
-        "name": "navigationReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
-      },
+
       {
         "name": "dashboardAuthBearer",
         "type": "authorizationBearer",
@@ -191,7 +124,7 @@
         "options": {
           "clientId": "Dashboard",
           "clientSecret": "Dashboard!",
-          "discoveryUrl": "http://portal1-portal-iam:8080/auth/realms/portal",
+          "discoveryUrl": "http://portal-iam:8080/auth/realms/portal",
           "sessionScope": "dashboardScope"
         }
       },
@@ -205,16 +138,80 @@
         "type": "replacePathRegex",
         "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
       },
+
       {
-        "name": "rootRedirectregex",
+        "name": "navigationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "id" }
+      },
+      {
+        "name": "navigationRedirectRegex",
         "type": "redirectRegex",
-        "options": { "regex": "^/$", "replacement": "/dashboard/" }
+        "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+      },
+      {
+        "name": "navigationReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
+      },
+
+      {
+        "name": "organisationAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "organisationScope" }
+      },
+      {
+        "name": "organisationOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Organisation",
+          "clientSecret": "Organisation!",
+          "discoveryUrl": "http://portal-iam:8080/auth/realms/portal",
+          "sessionScope": "organisationScope"
+        }
+      },
+      {
+        "name": "organisationRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/organisation)$", "replacement": "$1/" }
+      },
+      {
+        "name": "organisationReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/organisation/(.*)", "replacement": "/$1" }
+      },
+
+      {
+        "name": "documentAuthBearer",
+        "type": "authorizationBearer",
+        "options": { "sessionScope": "documentScope" }
+      },
+      {
+        "name": "documentOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Document",
+          "clientSecret": "Document!",
+          "discoveryUrl": "http://portal-iam:8080/auth/realms/portal",
+          "sessionScope": "documentScope"
+        }
+      },
+      {
+        "name": "documentRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/document)$", "replacement": "$1/" }
+      },
+      {
+        "name": "documentReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/document/(.*)", "replacement": "/$1" }
       }
     ],
+
     "services": [
       {
         "name": "portal-iam",
-        "servers": [{ "host": "portal1-portal-iam", "port": 8080 }]
+        "servers": [{ "host": "portal-iam", "port": 8080 }]
       },
 
       {
@@ -236,13 +233,15 @@
       },
 
       {
-        "name": "document-proxy-public",
-        "servers": [{ "host": "document-proxy-public", "port": 20050 }]
+        "name": "organisation-proxy-public",
+        "servers": [
+          { "host": "organisation-proxy-public", "port": 20030 }
+        ]
       },
 
       {
-        "name": "organisation-proxy-public",
-        "servers": [{ "host": "organisation-proxy-public", "port": 20030 }]
+        "name": "document-proxy-public",
+        "servers": [{ "host": "document-proxy-public", "port": 20050 }]
       }
     ]
   }

@@ -22,6 +22,10 @@ public class ProxyMiddleware implements Middleware {
 
     private HttpProxy httpProxy;
 
+    private String serverHost;
+
+    private int serverPort;
+
     private UriMiddleware uriMiddleware;
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort,
@@ -29,6 +33,8 @@ public class ProxyMiddleware implements Middleware {
         LOGGER.trace("construcutor");
         this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
         this.httpProxy.target(serverPort, serverHost);
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
         this.uriMiddleware = uriMiddleware;
     }
 
@@ -49,7 +55,8 @@ public class ProxyMiddleware implements Middleware {
             request = ctx.request();
         }
 
-        LOGGER.debug("handle: Sending request to URI '{}'", request.uri());
+        LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort,
+                request.uri());
         httpProxy.handle(request);
     }
 
