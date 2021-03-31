@@ -48,13 +48,13 @@
       },
       {
         "name": "navigation-service",
-        "middlewares": ["navigationAuthBearer", "navigationReplacePath"],
+        "middlewares": ["navigationAuthBearer"],
         "rule": "PathPrefix('/navigation/service')",
         "service": "navigation-service"
       },
 
       {
-        "name": "organisation-frontend",
+        "name": "organisation-service",
         "middlewares": [
           "organisationRedirectRegex",
           "organisationOauth2",
@@ -64,19 +64,9 @@
         "rule": "PathPrefix('/organisation')",
         "service": "organisation-proxy-public"
       },
-      {
-        "name": "organisation-service",
-        "middlewares": [
-          "organisationOauth2",
-          "organisationAuthBearer",
-          "organisationReplacePath"
-        ],
-        "rule": "PathPrefix('/organisation/service')",
-        "service": "organisation-proxy-public"
-      },
 
       {
-        "name": "document-frontend",
+        "name": "document-service",
         "middlewares": [
           "documentRedirectRegex",
           "documentOauth2",
@@ -84,16 +74,6 @@
           "documentReplacePath"
         ],
         "rule": "PathPrefix('/document')",
-        "service": "document-proxy-public"
-      },
-      {
-        "name": "document-service",
-        "middlewares": [
-          "documentOauth2",
-          "documentAuthBearer",
-          "documentReplacePath"
-        ],
-        "rule": "PathPrefix('/document/service')",
         "service": "document-proxy-public"
       }
     ],
