@@ -18,12 +18,7 @@
   "providers": [
     {
       "name": "file",
-      "filename": "auth-config.json"
-    },
-    {
-      "name": "docker",
-      "endpoint": "unix:///var/run/docker.sock",
-      "watch": true
+      "filename": "/etc/portal-gateway/file-config.json"
     }
   ]
 }

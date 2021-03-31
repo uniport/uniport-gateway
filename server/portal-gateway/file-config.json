@@ -2,56 +2,24 @@
   "http": {
     "routers": [
       {
-        "name": "organisation-service",
-        "middlewares": ["organisationOauth2", "organisationAuthBearer"],
-        "rule": "PathPrefix('/organisation/service')",
-        "service": "/organisation_portal1-organisation-service_1",
-        "entrypoints": ["http8000"]
-      },
-      {
-        "name": "navigation-service",
-        "middlewares": ["navigationAuthBearer"],
-        "rule": "PathPrefix('/navigation/service')",
-        "service": "/navigation_portal1-navigation-service_1",
-        "entrypoints": ["http8000"]
-      },
-      {
-        "name": "dashboard-service",
-        "middlewares": ["dashboardAuthBearer"],
-        "rule": "PathPrefix('/dashboard/service')",
-        "service": "/dashboard_portal1-dashboard-service_1",
-        "entrypoints": ["http8000"]
-      },
-      {
-        "name": "document-service",
-        "middlewares": ["documentOauth2", "documentAuthBearer"],
-        "rule": "PathPrefix('/document/service')",
-        "service": "/document_portal1-document-service_1",
-        "entrypoints": ["http8000"]
-      },
-      {
-        "name": "organisation-frontend",
+        "name": "root",
         "middlewares": [
-          "organisationRedirectRegex",
-          "organisationOauth2",
-          "organisationAuthBearer",
-          "organisationReplacePath"
+          "rootRedirectregex",
+          "dashboardAuthBearer",
+          "dashboardLoginRedirectRegex",
+          "dashboardOauth2",
+          "dashboardRedirectRegex",
+          "dashboardReplacePath"
         ],
-        "rule": "PathPrefix('/organisation')",
-        "service": "/organisation_portal1-organisation-frontend_1",
-        "entrypoints": ["http8000"]
+        "rule": "Path('/')",
+        "service": "dashboard-frontend"
       },
       {
-        "name": "navigation-frontend",
-        "middlewares": [
-          "navigationRedirectRegex",
-          "navigationAuthBearer",
-          "navigationReplacePath"
-        ],
-        "rule": "PathPrefix('/navigation')",
-        "service": "/navigation_portal1-navigation-frontend_1",
-        "entrypoints": ["http8000"]
+        "name": "auth",
+        "rule": "PathPrefix('/auth')",
+        "service": "portal-iam"
       },
+
       {
         "name": "dashboard-frontend",
         "middlewares": [
@@ -63,8 +31,13 @@
           "rootRedirectregex"
         ],
         "rule": "PathPrefix('/dashboard')",
-        "service": "/dashboard_portal1-dashboard-frontend_1",
-        "entrypoints": ["http8000"]
+        "service": "dashboard-frontend"
+      },
+      {
+        "name": "dashboard-service",
+        "middlewares": ["dashboardAuthBearer"],
+        "rule": "PathPrefix('/dashboard/service')",
+        "service": "dashboard-service"
       },
       {
         "name": "dashboard-login",
@@ -77,9 +50,44 @@
           "rootRedirectregex"
         ],
         "rule": "Path('/dashboard/login')",
-        "service": "/dashboard_portal1-dashboard-frontend_1",
-        "entrypoints": ["http8000"]
+        "service": "dashboard-frontend"
       },
+
+      {
+        "name": "navigation-frontend",
+        "middlewares": [
+          "navigationRedirectRegex",
+          "navigationAuthBearer",
+          "navigationReplacePath"
+        ],
+        "rule": "PathPrefix('/navigation')",
+        "service": "navigation-frontend"
+      },
+      {
+        "name": "navigation-service",
+        "middlewares": ["navigationAuthBearer"],
+        "rule": "PathPrefix('/navigation/service')",
+        "service": "navigation-service"
+      },
+
+      {
+        "name": "organisation-frontend",
+        "middlewares": [
+          "organisationRedirectRegex",
+          "organisationOauth2",
+          "organisationAuthBearer",
+          "organisationReplacePath"
+        ],
+        "rule": "PathPrefix('/organisation')",
+        "service": "organisation-proxy-public"
+      },
+      {
+        "name": "organisation-service",
+        "middlewares": ["organisationOauth2", "organisationAuthBearer"],
+        "rule": "PathPrefix('/organisation/service')",
+        "service": "organisation-proxy-public"
+      },
+
       {
         "name": "document-frontend",
         "middlewares": [
@@ -89,28 +97,13 @@
           "documentReplacePath"
         ],
         "rule": "PathPrefix('/document')",
-        "service": "/document_portal1-document-frontend_1",
-        "entrypoints": ["http8000"]
+        "service": "document-proxy-public"
       },
       {
-        "name": "auth",
-        "rule": "PathPrefix('/auth')",
-        "service": "/portal-iam_portal1-portal-iam_1",
-        "entrypoints": ["http8000"]
-      },
-      {
-        "name": "root",
-        "middlewares": [
-          "rootRedirectregex",
-          "dashboardAuthBearer",
-          "dashboardLoginRedirectRegex",
-          "dashboardOauth2",
-          "dashboardRedirectRegex",
-          "dashboardReplacePath"
-        ],
-        "rule": "Path('/')",
-        "service": "/dashboard_portal1-dashboard-frontend_1",
-        "entrypoints": ["http8000"]
+        "name": "document-service",
+        "middlewares": ["documentOauth2", "documentAuthBearer"],
+        "rule": "PathPrefix('/document/service')",
+        "service": "document-proxy-public"
       }
     ],
     "middlewares": [
@@ -125,7 +118,7 @@
         "options": {
           "clientId": "Document",
           "clientSecret": "Document!",
-          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "discoveryUrl": "http://portal1-portal-iam:8080/auth/realms/portal",
           "sessionScope": "documentScope"
         }
       },
@@ -150,7 +143,7 @@
         "options": {
           "clientId": "Organisation",
           "clientSecret": "Organisation!",
-          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "discoveryUrl": "http://portal1-portal-iam:8080/auth/realms/portal",
           "sessionScope": "organisationScope"
         }
       },
@@ -198,7 +191,7 @@
         "options": {
           "clientId": "Dashboard",
           "clientSecret": "Dashboard!",
-          "discoveryUrl": "http://localhost:29001/auth/realms/portal",
+          "discoveryUrl": "http://portal1-portal-iam:8080/auth/realms/portal",
           "sessionScope": "dashboardScope"
         }
       },
@@ -220,40 +213,36 @@
     ],
     "services": [
       {
-        "name": "/organisation_portal1-organisation-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29032 }]
+        "name": "portal-iam",
+        "servers": [{ "host": "portal1-portal-iam", "port": 8080 }]
+      },
+
+      {
+        "name": "dashboard-frontend",
+        "servers": [{ "host": "dashboard-frontend", "port": 20025 }]
       },
       {
-        "name": "/document_portal1-document-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29055 }]
+        "name": "dashboard-service",
+        "servers": [{ "host": "dashboard-service", "port": 20022 }]
+      },
+
+      {
+        "name": "navigation-frontend",
+        "servers": [{ "host": "navigation-frontend", "port": 20015 }]
       },
       {
-        "name": "/organisation_portal1-organisation-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29035 }]
+        "name": "navigation-service",
+        "servers": [{ "host": "navigation-service", "port": 20012 }]
       },
+
       {
-        "name": "/navigation_portal1-navigation-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29015 }]
+        "name": "document-proxy-public",
+        "servers": [{ "host": "document-proxy-public", "port": 20050 }]
       },
+
       {
-        "name": "/navigation_portal1-navigation-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29012 }]
-      },
-      {
-        "name": "/dashboard_portal1-dashboard-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29022 }]
-      },
-      {
-        "name": "/document_portal1-document-service_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29052 }]
-      },
-      {
-        "name": "/dashboard_portal1-dashboard-frontend_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29025 }]
-      },
-      {
-        "name": "/portal-iam_portal1-portal-iam_1",
-        "servers": [{ "host": "127.0.1.1", "port": 29001 }]
+        "name": "organisation-proxy-public",
+        "servers": [{ "host": "organisation-proxy-public", "port": 20030 }]
       }
     ]
   }
