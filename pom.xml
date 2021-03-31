@@ -49,7 +49,7 @@
             <dependency>
                 <groupId>com.inventage.vertx</groupId>
                 <artifactId>vertx-http-proxy</artifactId>
-                <version>1.0.0-202102190716-4-9013068</version>
+                <version>1.0.0-202103311537-10-7802784</version>
             </dependency>
             <!-- for substituting variables in config via StringSubstitutor.replace -->
             <dependency>
