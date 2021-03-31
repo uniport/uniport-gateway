@@ -109,6 +109,7 @@ public class StaticConfiguration {
         if (providers == null || providers.size() == 0) {
             LOGGER.warn("validateProviders: no providers defined");
             validPromise.complete();
+            return;
         }
 
         for (int i = 0; i < providers.size(); i++) {

@@ -43,12 +43,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         retriever.getConfig(asyncResult -> {
             try {
                 final JsonObject staticConfig = asyncResult.result();
-                StaticConfiguration.validate(vertx, staticConfig).onComplete(ar -> {
-                    if (ar.failed()) {
-                        LOGGER.error("start: Failed to validate static configuration");
-                        shutdownOnStartupFailure(ar.cause());
-                    }
-
+                StaticConfiguration.validate(vertx, staticConfig).onSuccess(handler -> {
                     publicHostname = staticConfig.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
                             PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
 
@@ -60,6 +55,9 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
                     deployAndMountApplications(applications, entrypoints);
                     createListenersForEntrypoints(entrypoints, staticConfig, startPromise);
+                }).onFailure(err -> {
+                    LOGGER.error("start: Failed to validate static configuration");
+                    shutdownOnStartupFailure(err);
                 });
             } catch (Exception e) {
                 shutdownOnStartupFailure(e);
@@ -72,12 +70,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'",
                 applications.size(), entrypoints.size());
         applications.stream().forEach(application -> {
-            application.deployOn(vertx).onComplete(deployed -> {
-                if (deployed.succeeded()) {
-                    entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
-                } else {
-                    shutdownOnStartupFailure(deployed.cause());
-                }
+            application.deployOn(vertx).onSuccess(handler -> {
+                entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
+            }).onFailure(err -> {
+                shutdownOnStartupFailure(err);
             });
         });
     }
@@ -86,14 +82,12 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             Promise<Void> startPromise) {
         LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'",
                 entrypoints.size());
-        listenOnEntrypoints(entrypoints).onComplete(all -> {
-            if (all.succeeded()) {
-                startPromise.complete();
-                LOGGER.info("createListenersForEntrypoints: start succeeded.");
-            } else {
-                startPromise.fail(all.cause());
-                LOGGER.error("createListenersForEntrypoints: start failed.");
-            }
+        listenOnEntrypoints(entrypoints).onSuccess(handler -> {
+            startPromise.complete();
+            LOGGER.info("createListenersForEntrypoints: start succeeded.");
+        }).onFailure(err -> {
+            startPromise.fail(err);
+            LOGGER.error("createListenersForEntrypoints: start failed.");
         });
     }
 
