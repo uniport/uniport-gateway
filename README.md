@@ -13,7 +13,7 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 
 ## Build
 
-```shell
+```bash
 ./mvnw clean install
 ```
 
@@ -33,6 +33,8 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 
 ## Launch
 
+### IDE
+
 Die Run Configuration `PortalGateway` startet den Portal Gateway Server aus der IDE. Dabei werden die beiden Property Dateien [portal-gateway.common.env](./docker-compose/src/main/resources/portal-gateway.common.env) und [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) zur Konfiguration verwendet.
 
 Damit also die [Testkonfiguration](./server/src/test/resources/portal-gateway.json) unter `./server/src/test/resources/portal-gateway.json` verwendet wird, muss in der portal-gateway.specific.env Datei folgender Eintrag ergänzt werden:
@@ -46,6 +48,12 @@ Für den Start der verwendeten Backend Systeme, kann die Run Configuration `http
 **Beachte**: Um die `httpbin: docker-compose` Run Configuration direkt von IntelliJ zu starten, muss du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren.
 
 (Alternativ, kannst du die Docker-Compose auch direkt von der Command Line benutzen).
+
+### Docker
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock -p 20000:20000 --network portal-gateway --name portal-gateway --rm docker-registry.inventage.com:10094/com.inventage.portal.gateway.portal-gateway
+```
 
 ## Visulisierungen
 
