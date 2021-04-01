@@ -1,0 +1,131 @@
+package com.inventage.portal.gateway.proxy.provider.file.JsonDirectoryConfigStore;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.utils.FileSet;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
+// Mostly copied from DirectoryConfigStore
+// with a custom Json merge function
+// https://github.com/vert-x3/vertx-config/blob/master/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java
+public class JsonDirectoryConfigStore implements ConfigStore {
+
+    private VertxInternal vertx;
+
+    private File path;
+    private final List<FileSet> filesets = new ArrayList<>();
+
+    public JsonDirectoryConfigStore(Vertx vertx, JsonObject configuration) {
+        this.vertx = (VertxInternal) vertx;
+        String thePath = configuration.getString("path");
+        if (thePath == null) {
+            throw new IllegalArgumentException("The `path` configuration is required.");
+        }
+        this.path = new File(thePath);
+        if (this.path.isFile()) {
+            throw new IllegalArgumentException("The `path` must not be a file");
+        }
+
+        JsonArray files = configuration.getJsonArray("filesets");
+        if (files == null) {
+            throw new IllegalArgumentException("The `filesets` element is required.");
+        }
+
+        for (Object o : files) {
+            JsonObject json = (JsonObject) o;
+            FileSet set = new FileSet(vertx, this.path, json);
+            this.filesets.add(set);
+        }
+    }
+
+    @Override
+    public Future<Buffer> get() {
+        return vertx.<List<File>>executeBlocking(promise -> {
+            try {
+                promise.complete(
+                        FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
+            } catch (Throwable e) {
+                promise.fail(e);
+            }
+        }).flatMap(files -> {
+            List<Future> futures = new ArrayList<>();
+            for (FileSet set : filesets) {
+                Promise<JsonObject> promise = vertx.promise();
+                set.buildConfiguration(files, json -> {
+                    if (json.failed()) {
+                        promise.fail(json.cause());
+                    } else {
+                        promise.complete(json.result());
+                    }
+                });
+                futures.add(promise.future());
+            }
+            return CompositeFuture.all(futures);
+        }).map(compositeFuture -> {
+            JsonObject json = new JsonObject();
+            compositeFuture.<JsonObject>list().forEach(config -> this.merge(json, config));
+            return json.toBuffer();
+        });
+    }
+
+    // Mostly copied from vertx JsonObject
+    // The difference is on how JsonArrays are merged. This implementation creates a deduplicated
+    // concatination of two arrays.
+    // https://github.com/eclipse-vertx/vert.x/blob/master/src/main/java/io/vertx/core/json/JsonObject.java
+    private JsonObject merge(JsonObject one, JsonObject other) {
+        for (Map.Entry<String, Object> e : other.getMap().entrySet()) {
+            if (e.getValue() == null) {
+                one.getMap().put(e.getKey(), null);
+            } else {
+                one.getMap().merge(e.getKey(), e.getValue(), (oldVal, newVal) -> {
+                    if (oldVal instanceof Map) {
+                        oldVal = new JsonObject((Map) oldVal);
+                    }
+                    if (newVal instanceof Map) {
+                        newVal = new JsonObject((Map) newVal);
+                    }
+                    if (oldVal instanceof JsonObject && newVal instanceof JsonObject) {
+                        return this.merge((JsonObject) oldVal, (JsonObject) newVal);
+                    }
+
+                    // custom part
+                    if (oldVal instanceof List) {
+                        oldVal = new JsonArray((List) oldVal);
+                    }
+                    if (newVal instanceof List) {
+                        newVal = new JsonArray((List) newVal);
+                    }
+                    if (oldVal instanceof JsonArray && newVal instanceof JsonArray) {
+                        for (int i = 0; i < ((JsonArray) oldVal).getList().size(); i++) {
+                            Object item = ((JsonArray) oldVal).getList().get(i);
+                            if (!((JsonArray) newVal).getList().contains(item)) {
+                                ((JsonArray) newVal).getList().add(item);
+                            }
+                        }
+                        return newVal;
+                    }
+
+                    return newVal;
+                });
+            }
+        }
+
+        return one;
+    }
+
+    @Override
+    public Future<Void> close() {
+        return vertx.getOrCreateContext().succeededFuture();
+    }
+}

@@ -231,7 +231,8 @@ public class DynamicConfiguration {
 
         for (String mwName : routerMiddlewareNames) {
             if (getObjByKeyWithValue(middlewares, MIDDLEWARE_NAME, mwName) == null) {
-                String errMsg = "validateRouters: unknown middleware '{}' defined";
+                String errMsg =
+                        String.format("validateRouters: unknown middleware '%s' defined", mwName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -239,7 +240,8 @@ public class DynamicConfiguration {
 
         for (String svName : routerServiceNames) {
             if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
-                String errMsg = "validateRouters: unknown service '{}' defined";
+                String errMsg =
+                        String.format("validateRouters: unknown service '%s' defined", svName);
                 LOGGER.warn(errMsg, svName);
                 return Future.failedFuture(errMsg);
             }

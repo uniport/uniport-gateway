@@ -67,7 +67,9 @@ public class FileConfigProvider extends Provider {
                 return;
             }
         });
+        // TODO somehow not respected
         if (this.watch) {
+            LOGGER.info("provider: Listening to configuration changes");
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
                 LOGGER.debug("provide: configuration from file '{}'", config);
@@ -98,9 +100,11 @@ public class FileConfigProvider extends Provider {
         if (this.directory != null && this.directory.length() != 0) {
             LOGGER.info("getOptions: reading directory '{}'", this.directory);
 
-            ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("directory")
+            // TODO document
+            ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
                     .setConfig(new JsonObject().put("path", this.directory).put("filesets",
-                            new JsonArray().add(new JsonObject().put("pattern", "*.json"))));
+                            new JsonArray().add(new JsonObject().put("pattern", "general/*.json"))
+                                    .add(new JsonObject().put("pattern", "auth/*.json"))));
 
             return options.addStore(dirStore);
         }
