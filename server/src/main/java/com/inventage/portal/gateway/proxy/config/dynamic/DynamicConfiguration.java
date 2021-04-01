@@ -38,6 +38,7 @@ public class DynamicConfiguration {
     public static final String ROUTER_MIDDLEWARES = "middlewares";
     public static final String ROUTER_SERVICE = "service";
     public static final String ROUTER_RULE = "rule";
+    public static final String ROUTER_PRIORITY = "priority";
 
     public static final String MIDDLEWARES = "middlewares";
     public static final String MIDDLEWARE_NAME = "name";
@@ -87,7 +88,8 @@ public class DynamicConfiguration {
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
-                .property(ROUTER_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
+                .property(ROUTER_RULE, Schemas.stringSchema())
+                .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())

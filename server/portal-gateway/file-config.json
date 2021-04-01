@@ -33,6 +33,7 @@
         "name": "dashboard-login",
         "middlewares": ["dashboardOauth2", "dashboardLoginRedirectRegex"],
         "rule": "Path('/dashboard/login')",
+        "priority": 100,
         "service": "dashboard-frontend"
       },
 

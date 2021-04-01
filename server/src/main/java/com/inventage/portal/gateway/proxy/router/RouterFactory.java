@@ -173,6 +173,8 @@ public class RouterFactory {
     // To avoid path overlap, routes are sorted, by default, in descending order using rules length.
     // The priority is directly equal to the length of the rule, and so the longest length has the
     // highest priority.
+    // Additionally, a priority for each router can be defined. This overwrites priority calculates
+    // by the length of the rule.
     private JsonArray sortByRuleLength(JsonArray routers) {
         List<JsonObject> routerList = routers.getList();
 
@@ -183,10 +185,18 @@ public class RouterFactory {
                 String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
                 String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
 
-                int ruleAlength = ruleA.length();
-                int ruleBlength = ruleB.length();
+                int priorityA = ruleA.length();
+                int priorityB = ruleB.length();
 
-                return ruleBlength - ruleAlength;
+                if (a.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
+                    priorityA = a.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+                }
+
+                if (b.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
+                    priorityB = b.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+                }
+
+                return priorityB - priorityA;
             }
 
         });
