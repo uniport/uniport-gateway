@@ -78,6 +78,9 @@ pipeline {
         }
 
         stage('Deployment') {
+            when {
+                branch 'master'
+            }
             steps {
                 sh '''
                     set +x
