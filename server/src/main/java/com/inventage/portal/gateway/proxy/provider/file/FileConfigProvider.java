@@ -55,19 +55,16 @@ public class FileConfigProvider extends Provider {
     public void provide(Promise<Void> startPromise) {
         LOGGER.trace("provide");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
-        retriever.getConfig(ar -> {
-            if (ar.succeeded()) {
-                final JsonObject config = ar.result();
-                LOGGER.debug("provide: configuration from file '{}'", config);
-                this.validateAndPublish(config);
-            } else {
-                String errorMsg = "provide: cannot retrieve configuration";
-                LOGGER.warn(errorMsg);
-                startPromise.fail(errorMsg);
-                return;
-            }
+        retriever.getConfig().onSuccess(config -> {
+            LOGGER.debug("provide: configuration from file '{}'", config);
+            this.validateAndPublish(config);
+        }).onFailure(err -> {
+            String errorMsg =
+                    String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
+            LOGGER.warn(errorMsg);
+            startPromise.fail(errorMsg);
         });
-        // TODO somehow not respected
+
         if (this.watch) {
             LOGGER.info("provider: Listening to configuration changes");
             retriever.listen(ar -> {
