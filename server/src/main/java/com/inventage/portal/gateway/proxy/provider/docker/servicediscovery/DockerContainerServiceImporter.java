@@ -27,21 +27,18 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 
 /**
  * A discovery bridge collecting services from Docker, and importing them in the Vert.x discovery
  * infrastructure.
- *
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class DockerContainerServiceImporter implements ServiceImporter {
 
@@ -167,8 +164,8 @@ public class DockerContainerServiceImporter implements ServiceImporter {
       if (running != null) {
         // Detect new containers
         running.stream().filter(container -> !isKnown(container)).forEach(container -> {
-          DockerContainerService service = new DockerContainerService(container, this.host);
-          if (!service.records().isEmpty()) {
+          DockerContainerService service = new DockerContainerService(container);
+          if (service.record() != null) {
             services.add(service);
             publish(service);
           }
@@ -182,27 +179,20 @@ public class DockerContainerServiceImporter implements ServiceImporter {
   }
 
   private void publish(DockerContainerService service) {
-    for (Record record : service.records()) {
-      publisher.publish(record, ar -> {
-        if (ar.succeeded()) {
-          record.setRegistration(ar.result().getRegistration());
-          LOGGER.info("Service from container " + service.id() + " on location "
-              + record.getLocation() + " has been published");
-        } else {
-          LOGGER.error("Service from container " + service.id() + " on location "
-              + record.getLocation() + " could not have been published", ar.cause());
-        }
-      });
-    }
+    publisher.publish(service.record(), ar -> {
+      if (ar.succeeded()) {
+        service.record().setRegistration(ar.result().getRegistration());
+        LOGGER.info("Service from container '{}' has been published", service.name());
+      } else {
+        LOGGER.info("Service from container '{}' could not have been published", service.name());
+      }
+    });
   }
 
   private void unpublish(DockerContainerService service) {
-    for (Record record : service.records()) {
-      publisher.unpublish(record.getRegistration(), ar -> {
-        LOGGER.info("Service from container " + service.id() + " on location "
-            + record.getLocation() + " has been unpublished");
-      });
-    }
+    publisher.unpublish(service.record().getRegistration(), ar -> {
+      LOGGER.info("Service from container '{}' has been unpublished", service.name());
+    });
   }
 
   private boolean isKnown(Container container) {

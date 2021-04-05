@@ -14,37 +14,37 @@
 
 package com.inventage.portal.gateway.proxy.provider.docker.servicediscovery;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ContainerNetwork;
+import com.github.dockerjava.api.model.ContainerNetworkSettings;
 import com.github.dockerjava.api.model.ContainerPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.HttpEndpoint;
-import io.vertx.servicediscovery.types.HttpLocation;
 
 /**
- * Represent a service exposed by a Docker container.
- *
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * Represent a Docker container.
  */
 public class DockerContainerService {
 
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(DockerContainerService.class.getName());
+
   private final String name;
-  private final String host;
   private String containerId;
 
   private List<String> containerNames;
 
-  private List<Record> records = new ArrayList<>();
+  private Record record;
 
-  public DockerContainerService(Container container, String host) {
-    this.host = host;
+  public DockerContainerService(Container container) {
+    LOGGER.trace("constructor");
+
     containerId = container.getId();
     containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
     if (!containerNames.isEmpty()) {
@@ -53,33 +53,23 @@ public class DockerContainerService {
       name = containerId;
     }
 
-    for (ContainerPort port : container.getPorts()) {
-      Record record = createRecord(container, port);
-      if (record != null) {
-        records.add(record);
-      }
-    }
-
+    record = createRecord(container);
   }
 
-  public List<Record> records() {
-    return records;
+  public Record record() {
+    return record;
   }
 
   public String name() {
     return name;
   }
 
-  public List<String> names() {
-    return containerNames;
-  }
-
   public String id() {
     return containerId;
   }
 
-
-  public Record createRecord(Container container, ContainerPort port) {
+  private Record createRecord(Container container) {
+    LOGGER.trace("createRecord");
     Record record = new Record().setName(name);
 
     Map<String, String> labels = container.getLabels();
@@ -95,48 +85,38 @@ public class DockerContainerService {
     record.getMetadata().put("docker.name", name);
     record.getMetadata().put("docker.id", containerId);
 
-    String type = labels != null ? labels.get("service.type") : ServiceType.UNKNOWN;
-    if (type == null) {
-      type = ServiceType.UNKNOWN;
+    record.getMetadata().put("docker.ip", getIP(container));
+    JsonArray ports = new JsonArray();
+    for (ContainerPort port : container.getPorts()) {
+      ports.add(port.getPrivatePort());
     }
+    record.getMetadata().put("docker.ports", ports);
 
-    switch (type) {
-      case "http-endpoint":
-        return manageHttpService(record, port, labels);
-      default:
-        return manageUnknownService(record, port);
-    }
+    // NOTE: record location is not set
+    return record;
   }
 
-  private Record manageUnknownService(Record record, ContainerPort port) {
-    if (port.getPublicPort() == null || port.getPublicPort() == 0) {
-      return null;
+  private static String getIP(Container container) {
+    String networkMode = container.getHostConfig().getNetworkMode();
+    if (networkMode != "") {
+      ContainerNetworkSettings settings = container.getNetworkSettings();
+      if (settings != null) {
+        ContainerNetwork network = settings.getNetworks().get(networkMode);
+        if (network != null) {
+          return network.getIpAddress();
+        }
+        LOGGER.warn("getIPAddress: could not find network named " + networkMode + " for container "
+            + container.getId()
+            + "! Maybe you're missing the project's prefix in the label? Defaulting to first available network.");
+      }
     }
-    JsonObject location = new JsonObject();
-    location.put("port", port.getPublicPort());
-    location.put("internal-port", port.getPrivatePort());
-    location.put("type", port.getType());
-    location.put("ip", host);
 
-    return record.setLocation(location).setType(ServiceType.UNKNOWN);
-  }
-
-  private static Record manageHttpService(Record record, ContainerPort port,
-      Map<String, String> labels) {
-    if (port.getPublicPort() == null || port.getPublicPort() == 0) {
-      return null;
+    for (ContainerNetwork network : container.getNetworkSettings().getNetworks().values()) {
+      return network.getIpAddress();
     }
-    record.setType(HttpEndpoint.TYPE);
-    HttpLocation location = new HttpLocation().setHost(port.getIp()).setPort(port.getPublicPort());
 
-    if (isTrue(labels, "ssl") || port.getPrivatePort() == 443) {
-      location.setSsl(true);
-    }
-    return record.setLocation(location.toJson());
-  }
-
-  private static boolean isTrue(Map<String, String> labels, String key) {
-    return labels != null && "true".equalsIgnoreCase(labels.get(key));
+    LOGGER.warn("getIPAddress: unable to find the IP address");
+    return "";
   }
 }
 
