@@ -62,7 +62,6 @@ public class FileConfigProvider extends Provider {
             String errorMsg =
                     String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
             LOGGER.warn(errorMsg);
-            startPromise.fail(errorMsg);
         });
 
         if (this.watch) {
