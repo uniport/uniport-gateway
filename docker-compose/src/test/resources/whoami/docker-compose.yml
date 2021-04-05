@@ -1,86 +1,11 @@
 version: "3"
 
 services:
-  dashboard-frontend:
+  whoami:
     image: traefik/whoami
     ports:
       - "8080:80"
-    labels:
-      - "portal.http.routers.root.rule=Path('/')"
-      - "portal.http.routers.root.middlewares=rootRedirectregex"
-      - "portal.http.middlewares.rootRedirectregex.redirectRegex.regex=^/$$"
-      - "portal.http.middlewares.rootRedirectregex.redirectRegex.replacement=/dashboard/"
-      - "portal.http.routers.dashboard-frontend.rule=PathPrefix('/dashboard')"
-      - "portal.http.routers.dashboard-frontend.middlewares=dashboardRedirectRegex, dashboardAuthBearer@file, dashboardReplacePath"
-      - "portal.http.middlewares.dashboardRedirectRegex.redirectRegex.regex=^(/dashboard)$$"
-      - "portal.http.middlewares.dashboardRedirectRegex.redirectRegex.replacement=$$1/"
-      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.regex=/dashboard/(.*)"
-      - "portal.http.middlewares.dashboardReplacePath.replacePathRegex.replacement=/$$1"
-      - "portal.http.routers.dashboard-login.rule=Path('/dashboard/login')"
-      - "portal.http.routers.dashboard-login.middlewares=dashboardOauth2@file, dashboardLoginRedirectRegex"
-      - "portal.http.middlewares.dashboardLoginRedirectRegex.redirectRegex.regex=^(/dashboard/login)$$"
-      - "portal.http.middlewares.dashboardLoginRedirectRegex.redirectRegex.replacement=/dashboard/"
-  dashboard-service:
-    image: traefik/whoami
-    ports:
       - "8081:80"
     labels:
-      - "portal.http.routers.dashboard-service.rule=PathPrefix('/dashboard/service')"
-      - "portal.http.routers.dashboard-service.middlewares=dashboardAuthBearer@file, dashboardReplacePath"
-
-  navigation-frontend:
-    image: traefik/whoami
-    ports:
-      - "8082:80"
-    labels:
-      - "portal.http.routers.navigation-frontend.rule=PathPrefix('/navigation')"
-      - "portal.http.routers.navigation-frontend.middlewares=navigationRedirectRegex,  navigationAuthBearer@file, navigationReplacePath"
-      - "portal.http.middlewares.navigationRedirectRegex.redirectRegex.regex=^(/navigation)$$"
-      - "portal.http.middlewares.navigationRedirectRegex.redirectRegex.replacement=$$1/"
-      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.regex=/navigation/(.*)"
-      - "portal.http.middlewares.navigationReplacePath.replacePathRegex.replacement=/$$1"
-  navigation-service:
-    image: traefik/whoami
-    ports:
-      - "8083:80"
-    labels:
-      - "portal.http.routers.navigation-service.rule=PathPrefix('/navigation/service')"
-      - "portal.http.routers.navigation-service.middlewares=navigationAuthBearer@file, navigationReplacePath"
-
-  organisation-frontend:
-    image: traefik/whoami
-    ports:
-      - "8084:80"
-    labels:
-      - "portal.http.routers.organisation-frontend.rule=PathPrefix('/organisation')"
-      - "portal.http.routers.organisation-frontend.middlewares=organisationRedirectRegex, organisationOauth2@file, organisationAuthBearer@file, organisationReplacePath"
-      - "portal.http.middlewares.organisationRedirectRegex.redirectRegex.regex=^(/organisation)$$"
-      - "portal.http.middlewares.organisationRedirectRegex.redirectRegex.replacement=$$1/"
-      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.regex=/organisation/(.*)"
-      - "portal.http.middlewares.organisationReplacePath.replacePathRegex.replacement=/$$1"
-  organisation-service:
-    image: traefik/whoami
-    ports:
-      - "8085:80"
-    labels:
-      - "portal.http.routers.organisation-service.rule=PathPrefix('/organisation/service')"
-      - "portal.http.routers.organisation-service.middlewares=organisationOauth2@file, organisationAuthBearer@file, organisationReplacePath"
-
-  document-frontend:
-    image: traefik/whoami
-    ports:
-      - "8086:80"
-    labels:
-      - "portal.http.routers.document-frontend.rule=PathPrefix('/document')"
-      - "portal.http.routers.document-frontend.middlewares=documentRedirectRegex, documentOauth2@file, documentAuthBearer@file, documentReplacePath"
-      - "portal.http.middlewares.documentRedirectRegex.redirectRegex.regex=^(/document)$$"
-      - "portal.http.middlewares.documentRedirectRegex.redirectRegex.replacement=$$1/"
-      - "portal.http.middlewares.documentReplacePath.replacePathRegex.regex=/document/(.*)"
-      - "portal.http.middlewares.documentReplacePath.replacePathRegex.replacement=/$$1"
-  document-service:
-    image: traefik/whoami
-    ports:
-      - "8087:80"
-    labels:
-      - "portal.http.routers.document-service.rule=PathPrefix('/document/service')"
-      - "portal.http.routers.document-service.middlewares=documentOauth2@file, documentAuthBearer@file, documentReplacePath"
+      - "portal.http.routers.root.rule=Path('/')"
+      - "portal.http.services.whoami-service.servers.port=8080"
