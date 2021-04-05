@@ -164,7 +164,7 @@ public class DockerContainerProvider extends Provider {
             return null;
         }
 
-        DynamicConfiguration.validate(vertx, confFromLabels).onSuccess(handler -> {
+        DynamicConfiguration.validate(vertx, confFromLabels, false).onSuccess(handler -> {
             LOGGER.debug("buildConfiguration: configuration from labels '{}'", confFromLabels);
             this.configurations.put(serviceName, confFromLabels);
         }).onFailure(err -> {
@@ -286,7 +286,7 @@ public class DockerContainerProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         LOGGER.trace("validateAndPublish");
-        DynamicConfiguration.validate(this.vertx, config).onSuccess(handler -> {
+        DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
             LOGGER.info("validateAndPublish: configuration published");
             this.eb.publish(this.configurationAddress,
                     new JsonObject()

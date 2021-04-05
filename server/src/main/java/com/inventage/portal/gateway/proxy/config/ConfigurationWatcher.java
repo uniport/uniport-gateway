@@ -182,11 +182,18 @@ public class ConfigurationWatcher {
             JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
             applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
-            LOGGER.debug("listenConfigurations: Informing listeners about new configuration '{}'",
-                    mergedConfig);
-            for (Listener listener : this.configurationListeners) {
-                listener.listen(mergedConfig);
-            }
+
+            DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
+                LOGGER.debug(
+                        "listenConfigurations: Informing listeners about new configuration '{}'",
+                        mergedConfig);
+                for (Listener listener : this.configurationListeners) {
+                    listener.listen(mergedConfig);
+                }
+            }).onFailure(err -> {
+                LOGGER.warn("listenConfigurations: Ingoring invalid configuration",
+                        err.getMessage());
+            });
         });
     }
 

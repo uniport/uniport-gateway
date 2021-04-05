@@ -168,7 +168,7 @@ public class DynamicConfiguration {
         return httpEmpty;
     }
 
-    public static Future<Void> validate(Vertx vertx, JsonObject json) {
+    public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
         LOGGER.trace("validate");
 
         if (schema == null) {
@@ -178,8 +178,8 @@ public class DynamicConfiguration {
         Promise<Void> validPromise = Promise.promise();
         schema.validateAsync(json).onSuccess(f -> {
             JsonObject httpConfig = json.getJsonObject(HTTP);
-            List<Future> validFutures =
-                    Arrays.asList(validateRouters(httpConfig), validateMiddlewares(httpConfig));
+            List<Future> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
+                    validateMiddlewares(httpConfig));
 
             CompositeFuture.all(validFutures).onSuccess(h -> {
                 validPromise.complete();
@@ -194,12 +194,16 @@ public class DynamicConfiguration {
         return validPromise.future();
     }
 
-    public static Future<Void> validateRouters(JsonObject httpConfig) {
+    public static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
         LOGGER.trace("validateRouters");
 
         JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
             LOGGER.warn("validateRouters: no routers defined");
+            return Future.succeededFuture();
+        }
+
+        if (!complete) {
             return Future.succeededFuture();
         }
 

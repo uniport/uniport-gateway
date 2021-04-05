@@ -88,7 +88,7 @@ public class KubernetesServiceProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         LOGGER.trace("validateAndPublish");
-        DynamicConfiguration.validate(this.vertx, config).onSuccess(handler -> {
+        DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
             LOGGER.info("validateAndPublish: configuration published");
             this.eb.publish(this.configurationAddress,
                     new JsonObject()

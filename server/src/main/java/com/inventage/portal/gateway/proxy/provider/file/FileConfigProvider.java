@@ -111,7 +111,7 @@ public class FileConfigProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         LOGGER.trace("validateAndPublish");
-        DynamicConfiguration.validate(this.vertx, config).onSuccess(f -> {
+        DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
             LOGGER.info("validateAndPublish: configuration published");
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
