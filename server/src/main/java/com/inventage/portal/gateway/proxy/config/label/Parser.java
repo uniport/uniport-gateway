@@ -26,10 +26,13 @@ public class Parser {
     private static final String ROUTERS = "routers";
     private static final String MIDDLEWARES = "middlewares";
     private static final String SERVICES = "services";
+    private static final String SERVICE_SERVERS = "servers";
 
-    private static final List<String> CONTAINS_CUSTOM_NAMES =
+    private static final List<String> VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES =
             Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
-    private static final List<String> VALUE_IS_ARRAY_TYPE = Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
+    private static final List<String> VALUES_ARE_OBJECTS = Arrays.asList(SERVICE_SERVERS);
+    private static final List<String> VALUES_ARE_SEPERATED_BY_COMMA =
+            Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
 
     public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
         LOGGER.trace("filterKeys");
@@ -73,7 +76,7 @@ public class Parser {
         Collections.sort(sortedKeys);
 
         if (sortedKeys.isEmpty()) {
-            LOGGER.warn("decodeToJson: No matching labels found '{}'", labels);
+            LOGGER.info("decodeToJson: No matching labels");
             return null;
         }
 
@@ -122,7 +125,7 @@ public class Parser {
         LOGGER.trace("decodeToJson");
         String key = path.get(0);
         if (path.size() > 1) {
-            if (CONTAINS_CUSTOM_NAMES.contains(key)) {
+            if (VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES.contains(key)) {
                 JsonArray children = root.getJsonArray(key);
                 JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key),
                         path.get(1));
@@ -135,6 +138,21 @@ public class Parser {
                     children.add(newChild);
                     root.put(key, children);
                 }
+            } else if (VALUES_ARE_OBJECTS.contains(key)) {
+                // NOTE: later definitions overwrite previous ones since there is no id
+                JsonArray children = root.getJsonArray(key);
+                if (children == null) {
+                    children = new JsonArray();
+                    root.put(key, children);
+                }
+                JsonObject child;
+                if (children.size() < 1) {
+                    child = new JsonObject();
+                    children.add(child);
+                } else {
+                    child = children.getJsonObject(0);
+                }
+                decodeToJson(child, path.subList(1, path.size()), value);
             } else if (DynamicConfiguration.MIDDLEWARE_TYPES.contains(key)) {
                 JsonObject child;
                 if (root.containsKey(DynamicConfiguration.MIDDLEWARE_OPTIONS)) {
@@ -156,7 +174,7 @@ public class Parser {
                 }
             }
         } else {
-            if (VALUE_IS_ARRAY_TYPE.contains(key)) {
+            if (VALUES_ARE_SEPERATED_BY_COMMA.contains(key)) {
                 JsonArray values = root.getJsonArray(key);
                 if (values == null) {
                     values = new JsonArray();
@@ -172,7 +190,11 @@ public class Parser {
                             "decodeToJson: Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
                             key, root.getString(key), value);
                 }
-                root.put(key, value);
+                if (isInteger(value)) {
+                    root.put(key, Integer.parseInt(value));
+                } else {
+                    root.put(key, value);
+                }
             }
         }
     }
@@ -189,5 +211,17 @@ public class Parser {
             default:
                 throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
         }
+    }
+
+    private static boolean isInteger(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            int i = Integer.parseInt(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 }
