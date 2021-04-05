@@ -71,7 +71,7 @@ public class RouterFactory {
         JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
 
         sortByRuleLength(routers);
-        LOGGER.debug("createRouter: creating router from config '{}'", dynamicConfig);
+        LOGGER.debug("createRouter: creating router from config");
 
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
