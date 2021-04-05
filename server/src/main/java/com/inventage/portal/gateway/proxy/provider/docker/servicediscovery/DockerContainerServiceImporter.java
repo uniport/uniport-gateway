@@ -23,8 +23,10 @@ import java.util.List;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -118,7 +120,12 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     } else {
       this.host = config.getDockerHost().getHost();
     }
-    client = DockerClientBuilder.getInstance(config).build();
+
+    DockerHttpClient httpClient =
+        new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
+            .sslConfig(config.getSSLConfig()).maxConnections(100).build();
+
+    client = DockerClientImpl.getInstance(config, httpClient);
 
     long period = configuration.getLong("scan-period", 3000L);
     if (period > 0) {

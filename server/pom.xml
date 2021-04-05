@@ -52,6 +52,11 @@
             <artifactId>vertx-service-discovery-bridge-docker</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
+            <version>3.2.7</version>
+        </dependency>
+        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
         </dependency>
