@@ -8,6 +8,7 @@ import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.label.Parser;
 import com.inventage.portal.gateway.proxy.provider.Provider;
+import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.DockerContainerServiceImporter;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
-import io.vertx.servicediscovery.docker.DockerServiceImporter;
 
 /**
  * Generates a complete dynamic configuration from announcements about created/removed docker
@@ -90,7 +90,7 @@ public class DockerContainerProvider extends Provider {
         if (this.dockerDiscovery == null) {
             this.dockerDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
                     .setAnnounceAddress(announceAddress).setName("docker-discovery"));
-            this.dockerDiscovery.registerServiceImporter(new DockerServiceImporter(),
+            this.dockerDiscovery.registerServiceImporter(new DockerContainerServiceImporter(),
                     new JsonObject().put("docker-tls-verify", this.TLS).put("docker-host",
                             this.endpoint));
         }
@@ -103,22 +103,18 @@ public class DockerContainerProvider extends Provider {
 
         String containerId = metadata.getString("docker.id");
         String containerName = metadata.getString("docker.name");
-        // TODO handle containers with multipe exposed ports
-        // ignore if multipe ports are exposed and no port is set in the labels
-        String serviceName = String.format("%s-%s", containerId, containerName);
 
         String status = dockerContainer.getString("status");
         if (status.equals("DOWN")) {
-            this.configurations.remove(serviceName);
+            this.configurations.remove(containerId);
             return DynamicConfiguration.merge(this.configurations);
         } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
-            LOGGER.warn("buildConfiguration: unkown status type: " + status);
+            LOGGER.warn("buildConfiguration: unkown status type: '{}'", status);
             return null;
         }
 
-        JsonObject location = dockerContainer.getJsonObject("location");
-        String host = location.getString("ip");
-        int port = location.getInteger("port");
+        String host = metadata.getString("docker.ip");
+        JsonArray ports = metadata.getJsonArray("docker.ports");
 
         LOGGER.debug("buildConfiguration: build configuration for docker container: '{}'",
                 containerName);
@@ -133,16 +129,61 @@ public class DockerContainerProvider extends Provider {
             return null;
         }
 
+        // TODO consider introducing portal.enable=true/false label
+
+        // TODO handle when a container is in multiple networks
+        // take from portal.docker.network=mynetwork
+
         JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
         if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
                 && httpConfFromLabels.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
                 && httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
-            this.configurations.put(serviceName, confFromLabels);
+            this.configurations.put(containerId, confFromLabels);
             return DynamicConfiguration.merge(this.configurations);
         }
 
+        String serviceName = containerName;
+        int port;
+        if (ports.size() < 1) {
+            LOGGER.warn("buildConfiguration: ignoring container with no exposed ports '{}'",
+                    containerName);
+            return null;
+        } else if (ports.size() > 1) {
+            // check if a port is specified in the labels
+            LOGGER.debug("buildConfiguration: container exposes more than one port");
+            String errMsgFormat =
+                    "buildConfigurtation: Ignoring container '%s' with more than one exposed port and none specified in the labels (invalid %s)";
+            JsonArray services = httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES);
+            if (services == null || services.size() == 0) {
+                LOGGER.warn(String.format(errMsgFormat, containerName, "services"));
+                return null;
+            }
+            if (services.size() > 1) {
+                LOGGER.warn("Invalid services configuration '{}'", services);
+                return null;
+            }
+            JsonObject service = services.getJsonObject(0);
+            serviceName = service.getString(DynamicConfiguration.SERVICE_NAME);
+
+            JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            if (servers == null || servers.size() == 0) {
+                LOGGER.warn(String.format(errMsgFormat, containerName, "servers"));
+                return null;
+            }
+            if (servers.size() > 1) {
+                LOGGER.warn("Invalid servers configuration '{}'", servers);
+                return null;
+            }
+
+            JsonObject server = servers.getJsonObject(0);
+            port = server.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT);
+        } else {
+            port = ports.getInteger(0);
+        }
+        LOGGER.debug("buildConfiguration: using port '{}' of '{}'", port, containerName);
+
         JsonArray serviceConfig =
-                this.buildServiceConfiguration(httpConfFromLabels, containerName, host, port);
+                this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
         if (serviceConfig == null) {
             LOGGER.warn(
                     "buildConfiguration: failed to build configuration for docker container '{}'",
@@ -151,7 +192,7 @@ public class DockerContainerProvider extends Provider {
         }
 
         Map<String, String> model = new HashMap<String, String>();
-        model.put("name", containerName);
+        model.put("name", serviceName);
         List<String> filteredKeys = Parser.filterKeys(metadata.getMap(), filters);
         for (String filteredKey : filteredKeys) {
             model.put(filteredKey, (String) metadata.getMap().get(filteredKey));
@@ -166,7 +207,7 @@ public class DockerContainerProvider extends Provider {
 
         DynamicConfiguration.validate(vertx, confFromLabels, false).onSuccess(handler -> {
             LOGGER.debug("buildConfiguration: configuration from labels '{}'", confFromLabels);
-            this.configurations.put(serviceName, confFromLabels);
+            this.configurations.put(containerId, confFromLabels);
         }).onFailure(err -> {
             LOGGER.warn(
                     "buildConfiguration: invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
