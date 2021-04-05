@@ -106,15 +106,15 @@ public class DockerContainerProvider extends Provider {
 
         String status = dockerContainer.getString("status");
         if (status.equals("DOWN")) {
-            this.configurations.remove(containerId);
-            return DynamicConfiguration.merge(this.configurations);
+            if (this.configurations.containsKey(containerId)) {
+                this.configurations.remove(containerId);
+                return DynamicConfiguration.merge(this.configurations);
+            }
+            return null;
         } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
             LOGGER.warn("buildConfiguration: unkown status type: '{}'", status);
             return null;
         }
-
-        String host = metadata.getString("docker.ip");
-        JsonArray ports = metadata.getJsonArray("docker.ports");
 
         LOGGER.debug("buildConfiguration: build configuration for docker container: '{}'",
                 containerName);
@@ -131,9 +131,6 @@ public class DockerContainerProvider extends Provider {
 
         // TODO consider introducing portal.enable=true/false label
 
-        // TODO handle when a container is in multiple networks
-        // take from portal.docker.network=mynetwork
-
         JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
         if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
                 && httpConfFromLabels.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
@@ -142,6 +139,7 @@ public class DockerContainerProvider extends Provider {
             return DynamicConfiguration.merge(this.configurations);
         }
 
+        JsonArray ports = metadata.getJsonArray("docker.ports");
         String serviceName = containerName;
         int port;
         if (ports.size() < 1) {
@@ -181,6 +179,16 @@ public class DockerContainerProvider extends Provider {
             port = ports.getInteger(0);
         }
         LOGGER.debug("buildConfiguration: using port '{}' of '{}'", port, containerName);
+
+        JsonObject hostPerNetwork = metadata.getJsonObject("docker.hostPerNetwork");
+        String host;
+
+        // TODO handle when a container is in multiple networks
+        // take from portal.docker.network=mynetwork
+        // default: container.getHostConfig().getNetworkMode()
+        host = hostPerNetwork.getString("portal-gateway");
+
+        LOGGER.debug("buildConfiguration: using host '{}' of '{}'", host, containerName);
 
         JsonArray serviceConfig =
                 this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
