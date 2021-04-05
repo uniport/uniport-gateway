@@ -52,7 +52,7 @@ Für den Start der verwendeten Backend Systeme, kann die Run Configuration `http
 ### Docker
 
 ```bash
-docker run -v /var/run/docker.sock:/var/run/docker.sock -p 20000:20000 --network portal-gateway --name portal-gateway --rm docker-registry.inventage.com:10094/com.inventage.portal.gateway.portal-gateway
+mvn clean install && docker-compose -f docker-compose/target/classes/portal-gateway/docker-compose.yml up
 ```
 
 ## Visulisierungen

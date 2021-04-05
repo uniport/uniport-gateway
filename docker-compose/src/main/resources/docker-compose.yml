@@ -3,8 +3,10 @@ version: "3"
 services:
   portal-gateway:
     image: ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:${project.version}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - portal-proxy
+      - portal-gateway
     ports:
       - "20000:20000" # docker-host.port:entrypoint.port
     env_file:
@@ -13,6 +15,5 @@ services:
       - secrets.env
 
 networks:
-  portal-proxy:
-    external:
-      name: portal-proxy
+  portal-gateway:
+    external: true
