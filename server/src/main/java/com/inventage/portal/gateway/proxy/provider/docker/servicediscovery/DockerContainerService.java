@@ -17,14 +17,15 @@ package com.inventage.portal.gateway.proxy.provider.docker.servicediscovery;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerNetwork;
-import com.github.dockerjava.api.model.ContainerNetworkSettings;
 import com.github.dockerjava.api.model.ContainerPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 
 /**
@@ -85,38 +86,22 @@ public class DockerContainerService {
     record.getMetadata().put("docker.name", name);
     record.getMetadata().put("docker.id", containerId);
 
-    record.getMetadata().put("docker.ip", getIP(container));
     JsonArray ports = new JsonArray();
     for (ContainerPort port : container.getPorts()) {
       ports.add(port.getPrivatePort());
     }
     record.getMetadata().put("docker.ports", ports);
 
+    JsonObject hostPerNetwork = new JsonObject();
+    for (Entry<String, ContainerNetwork> entry : container.getNetworkSettings().getNetworks()
+        .entrySet()) {
+      hostPerNetwork.put(entry.getKey(), entry.getValue().getIpAddress());
+    }
+
+    record.getMetadata().put("docker.hostPerNetwork", hostPerNetwork);
+
     // NOTE: record location is not set
     return record;
-  }
-
-  private static String getIP(Container container) {
-    String networkMode = container.getHostConfig().getNetworkMode();
-    if (networkMode != "") {
-      ContainerNetworkSettings settings = container.getNetworkSettings();
-      if (settings != null) {
-        ContainerNetwork network = settings.getNetworks().get(networkMode);
-        if (network != null) {
-          return network.getIpAddress();
-        }
-        LOGGER.warn("getIPAddress: could not find network named " + networkMode + " for container "
-            + container.getId()
-            + "! Maybe you're missing the project's prefix in the label? Defaulting to first available network.");
-      }
-    }
-
-    for (ContainerNetwork network : container.getNetworkSettings().getNetworks().values()) {
-      return network.getIpAddress();
-    }
-
-    LOGGER.warn("getIPAddress: unable to find the IP address");
-    return "";
   }
 }
 
