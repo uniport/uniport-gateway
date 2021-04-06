@@ -18,7 +18,7 @@
   "providers": [
     {
       "name": "file",
-      "filename": "dynamic-config/auth/config.json",
+      "filename": "/etc/portal-gateway/dynamic-config/auth/config.json",
       "watch": false
     },
     {

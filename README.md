@@ -33,6 +33,8 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 
 ## Launch
 
+**Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
+
 ### IDE
 
 Die Run Configuration `PortalGateway` startet den Portal Gateway Server aus der IDE. Dabei werden die beiden Property Dateien [portal-gateway.common.env](./docker-compose/src/main/resources/portal-gateway.common.env) und [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) zur Konfiguration verwendet.
@@ -42,6 +44,8 @@ Damit also die [Testkonfiguration](./server/src/test/resources/portal-gateway.js
 ```dotenv
 PORTAL_GATEWAY_JSON=./src/test/resources/portal-gateway.json
 ```
+
+Eventuell muss der Pfad zur *dynamischen* File Configuration angepasst werden.
 
 Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoami: docker-compose` verwendet werden.
 
@@ -54,8 +58,6 @@ Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoa
 Die Run Configuration `portal-gateway: docker-compose` baut und startet den Portal Gateway Server aus der IDE in einem Docker Container. Es werden die gleichen Property Dateien wie oben verwendet.
 
 **Wichtig**: Damit die Service Discovery von Docker Containern funktioniert, wird `/var/run/docker.sock` in der Portal-Gateway gemounted. Wichtig dabei ist, dass der `docker.sock` die Berechtigung 666 (`sudo chmod 666 /var/run/docker.sock`) hat. Dabei gibt es [einige Sicherheitsaspekte](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) zu beachten.
-
-**Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
 
 ### Produktives Environment
 
