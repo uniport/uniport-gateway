@@ -47,8 +47,6 @@ public class PortalGatewayConfigRetriever {
             options = new ConfigRetrieverOptions();
 
             getPortalGatewayJson().ifPresent(json -> options.addStore(json));
-            options.addStore(new ConfigStoreOptions().setType("sys")
-                    .setConfig(new JsonObject().put("raw-data", true)));
             options.addStore(new ConfigStoreOptions().setType("env")
                     .setConfig(new JsonObject().put("raw-data", true)));
         }
