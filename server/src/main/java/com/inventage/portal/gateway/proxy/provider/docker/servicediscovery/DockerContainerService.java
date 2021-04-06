@@ -93,6 +93,7 @@ public class DockerContainerService {
     record.getMetadata().put("docker.ports", ports);
 
     JsonObject hostPerNetwork = new JsonObject();
+    hostPerNetwork.put("defaultNetworkMode", container.getHostConfig().getNetworkMode());
     for (Entry<String, ContainerNetwork> entry : container.getNetworkSettings().getNetworks()
         .entrySet()) {
       hostPerNetwork.put(entry.getKey(), entry.getValue().getIpAddress());
