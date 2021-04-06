@@ -25,12 +25,15 @@ public class ProviderAggregator extends Provider {
 
     private String configurationAddress;
     private JsonArray providers;
+    private JsonObject env;
 
-    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers,
+            JsonObject env) {
         LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
         this.providers = providers;
+        this.env = env;
     }
 
     public void start(Promise<Void> startPromise) {
@@ -53,8 +56,8 @@ public class ProviderAggregator extends Provider {
                 continue;
             }
 
-            Provider provider =
-                    providerFactory.create(this.vertx, this.configurationAddress, providerConfig);
+            Provider provider = providerFactory.create(this.vertx, this.configurationAddress,
+                    providerConfig, this.env);
 
             futures.add(launchProvider(provider));
         }

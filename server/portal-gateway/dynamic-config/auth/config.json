@@ -12,7 +12,7 @@
         "options": {
           "clientId": "Dashboard",
           "clientSecret": "Dashboard!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam-port}/auth/realms/portal",
+          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "dashboardScope"
         }
       },
@@ -34,7 +34,7 @@
         "options": {
           "clientId": "Organisation",
           "clientSecret": "Organisation!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam-port}/auth/realms/portal",
+          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "organisationScope"
         }
       },
@@ -50,7 +50,7 @@
         "options": {
           "clientId": "Document",
           "clientSecret": "Document!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam-port}/auth/realms/portal",
+          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "documentScope"
         }
       }

@@ -15,13 +15,14 @@ public class FileConfigProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig) {
+    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig,
+            JsonObject env) {
         LOGGER.trace("create");
         String filename = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_FILENAME, "");
         String directory =
                 providerConfig.getString(StaticConfiguration.PROVIDER_FILE_DIRECTORY, "");
         Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, false);
-        return new FileConfigProvider(vertx, configurationAddress, filename, directory, watch);
+        return new FileConfigProvider(vertx, configurationAddress, filename, directory, watch, env);
     }
 
 }

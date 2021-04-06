@@ -62,6 +62,8 @@ public class ProxyApplication implements Application {
      */
     private JsonArray providers;
 
+    private JsonObject env;
+
     private int providersThrottleDuration;
 
     public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
@@ -74,9 +76,13 @@ public class ProxyApplication implements Application {
         this.providersThrottleDuration =
                 staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_SEC, 2);
 
-        this.publicHostname =
-                staticConfig.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                        PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        this.env = staticConfig.copy();
+        this.env.remove(StaticConfiguration.ENTRYPOINTS);
+        this.env.remove(StaticConfiguration.APPLICATIONS);
+        this.env.remove(StaticConfiguration.PROVIDERS);
+
+        this.publicHostname = env.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
         this.entrypointPort = DynamicConfiguration
                 .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
                         StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
@@ -112,7 +118,7 @@ public class ProxyApplication implements Application {
         String configurationAddress = "configuration-announce-address";
 
         ProviderAggregator aggregator =
-                new ProviderAggregator(vertx, configurationAddress, providers);
+                new ProviderAggregator(vertx, configurationAddress, providers, this.env);
 
         ConfigurationWatcher watcher =
                 new ConfigurationWatcher(vertx, aggregator, configurationAddress,

@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.provider.file;
 
 import java.io.File;
+import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
@@ -29,12 +30,14 @@ public class FileConfigProvider extends Provider {
 
     private String filename;
     private String directory;
-
     private Boolean watch;
+
+    private JsonObject env;
+
     private int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename,
-            String directory, Boolean watch) {
+            String directory, Boolean watch, JsonObject env) {
         LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eb = vertx.eventBus();
@@ -42,8 +45,9 @@ public class FileConfigProvider extends Provider {
 
         this.filename = filename;
         this.directory = directory;
-
         this.watch = watch;
+
+        this.env = env;
     }
 
     public void start(Promise<Void> startPromise) {
@@ -56,8 +60,7 @@ public class FileConfigProvider extends Provider {
         LOGGER.trace("provide");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig().onSuccess(config -> {
-            LOGGER.debug("provide: configuration from file '{}'", config);
-            this.validateAndPublish(config);
+            this.validateAndPublish(substituteConfigurationVariables(env, config));
         }).onFailure(err -> {
             String errorMsg =
                     String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
@@ -68,8 +71,7 @@ public class FileConfigProvider extends Provider {
             LOGGER.info("provider: Listening to configuration changes");
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
-                LOGGER.debug("provide: configuration from file '{}'", config);
-                this.validateAndPublish(config);
+                this.validateAndPublish(substituteConfigurationVariables(env, config));
             });
         }
         startPromise.complete();
@@ -109,8 +111,13 @@ public class FileConfigProvider extends Provider {
         return options;
     }
 
+    private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
+        return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
+    }
+
     private void validateAndPublish(JsonObject config) {
         LOGGER.trace("validateAndPublish");
+        LOGGER.debug("validateAndPublish: configuration from file '{}'", config);
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
             LOGGER.info("validateAndPublish: configuration published");
             this.eb.publish(this.configurationAddress,
