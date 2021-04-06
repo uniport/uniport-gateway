@@ -43,17 +43,17 @@ Damit also die [Testkonfiguration](./server/src/test/resources/portal-gateway.js
 PORTAL_GATEWAY_JSON=./src/test/resources/portal-gateway.json
 ```
 
-Für den Start der verwendeten Backend Systeme, kann die Run Configuration `httpbin: docker-compose` verwendet werden.
+Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoami: docker-compose` verwendet werden.
 
-**Beachte**: Um die `httpbin: docker-compose` Run Configuration direkt von IntelliJ zu starten, muss du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren.
+**Beachte**: Um die `whoami: docker-compose` Run Configuration direkt von IntelliJ zu starten, muss du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren. Zudem muss das Plugin `net.ashald.envfile` in IntelliJ installiert werden.
 
 (Alternativ, kannst du die Docker-Compose auch direkt von der Command Line benutzen).
 
 ### Docker
 
-```bash
-mvn clean install && docker-compose -f docker-compose/target/classes/portal-gateway/docker-compose.yml up
-```
+Die Run Configuration `portal-gateway: docker-compose` baut und startet den Portal Gateway Server aus der IDE in einem Docker Container. Es werden die gleichen Property Dateien wie oben verwendet.
+
+**Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
 
 ## Visulisierungen
 

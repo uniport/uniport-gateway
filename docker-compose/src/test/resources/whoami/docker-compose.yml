@@ -3,9 +3,15 @@ version: "3"
 services:
   whoami:
     image: traefik/whoami
-    ports:
-      - "8080:80"
-      - "8081:80"
+    expose:
+      - "80"
+    networks:
+      - portal-gateway-whoami
     labels:
+      - "portal.enable=true"
+      - "portal.docker.network=portal-gateway-whoami"
       - "portal.http.routers.root.rule=Path('/')"
-      - "portal.http.services.whoami-service.servers.port=8080"
+
+networks:
+  portal-gateway-whoami:
+    name: portal-gateway-whoami
