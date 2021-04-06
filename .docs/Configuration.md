@@ -121,6 +121,8 @@ The Portal-Gateway requires access to the docker socket to get its dynmica confi
 ##### Provider Configuration
 
 - `endpoint` (*Required, Default="unix:///var/run/docker.sock"*): See [Docker API Access](#docker-api-access)
+- `exposedByDefault` (*Optional, Default=true*): Expose containers by default through Portal-Gateway. If set to `false`, containers that do not have a `portal.enable=true` label are ignored from the resulting routing configuration.
+- `network` (*Optional, Default=""*): Defines a default docker network to use for connections to all containers.
 - `defaultRule` (*Optional, Default="Host('${name}')*): Defines what routing rule to apply to a container if no rule is defined by a label. It must be a valid [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html). The container service name can be accessed with the `name` identifier, and the StringSubstitutor has access to all the labels defined on this container.
 - `watch` (*Optiona, Default=true*): Watch Docker events.
 
