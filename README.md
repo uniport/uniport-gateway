@@ -57,6 +57,10 @@ Die Run Configuration `portal-gateway: docker-compose` baut und startet den Port
 
 **Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
 
+### Produktives Environment
+
+Für den Start der produktiven Backend Systemen, kann der [Archetype](https://git.inventage.com/projects/PORTAL/repos/archetype-inventage-portal-solution) verwendet werden. Dabei sollte als artifactId `local-portal` gewählt werden oder aber der Wert von `host-prefix` in [portal-gateway.common.env](./docker-compose/src/main/resources/portal-gateway.common.env) geändert werden.
+
 ## Visulisierungen
 
 ## Beispielflow
