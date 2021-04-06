@@ -29,7 +29,10 @@ public class DockerContainerProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerProvider.class);
 
-    private static final String announceAddress = "docker-container-announce";
+    private static final String ANNOUNCE_ADDRESS = "docker-container-announce";
+
+    private static final String EXTRA_CONFIG_ENABLE = "enable";
+    private static final String EXTRA_CONFIG_NETWORK = "network";
 
     private Vertx vertx;
 
@@ -69,7 +72,7 @@ public class DockerContainerProvider extends Provider {
         LOGGER.trace("provide");
         this.getOrCreateDockerContainerDiscovery();
 
-        MessageConsumer<JsonObject> consumer = this.eb.consumer(announceAddress);
+        MessageConsumer<JsonObject> consumer = this.eb.consumer(ANNOUNCE_ADDRESS);
         consumer.handler(message -> {
             JsonObject config = this.buildConfiguration(message.body());
             if (config == null) {
@@ -89,7 +92,7 @@ public class DockerContainerProvider extends Provider {
         LOGGER.trace("getOrCreateDockerContainerDiscovery");
         if (this.dockerDiscovery == null) {
             this.dockerDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
-                    .setAnnounceAddress(announceAddress).setName("docker-discovery"));
+                    .setAnnounceAddress(ANNOUNCE_ADDRESS).setName("docker-discovery"));
             this.dockerDiscovery.registerServiceImporter(new DockerContainerServiceImporter(),
                     new JsonObject().put("docker-tls-verify", this.TLS).put("docker-host",
                             this.endpoint));
@@ -99,10 +102,10 @@ public class DockerContainerProvider extends Provider {
 
     private JsonObject buildConfiguration(JsonObject dockerContainer) {
         LOGGER.trace("buildConfiguration");
-        JsonObject metadata = dockerContainer.getJsonObject("metadata");
+        JsonObject labels = dockerContainer.getJsonObject("metadata");
 
-        String containerId = metadata.getString("docker.id");
-        String containerName = metadata.getString("docker.name");
+        String containerId = labels.getString("docker.id");
+        String containerName = labels.getString("docker.name");
 
         String status = dockerContainer.getString("status");
         if (status.equals("DOWN")) {
@@ -116,20 +119,24 @@ public class DockerContainerProvider extends Provider {
             return null;
         }
 
+        JsonObject extraConfig = filterExtraConfig(labels);
+        if (!keepContainer(extraConfig)) {
+            LOGGER.debug("buildConfiguration: ignoring container '{}'", containerName);
+            return null;
+        }
+
         LOGGER.debug("buildConfiguration: build configuration for docker container: '{}'",
                 containerName);
 
-        List<String> filters = Arrays.asList("portal.http");
+        List<String> filters = Arrays.asList(String.format("%s.http", Parser.DEFAULT_ROOT_NAME));
         JsonObject confFromLabels =
-                Parser.decode(metadata.getMap(), Parser.DEFAULT_ROOT_NAME, filters);
+                Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME, filters);
         if (confFromLabels == null) {
             LOGGER.warn(
                     "buildConfiguration: failed to decode labels to json for docker container '{}'",
                     containerName);
             return null;
         }
-
-        // TODO consider introducing portal.enable=true/false label
 
         JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
         if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
@@ -139,55 +146,17 @@ public class DockerContainerProvider extends Provider {
             return DynamicConfiguration.merge(this.configurations);
         }
 
-        JsonArray ports = metadata.getJsonArray("docker.ports");
+        JsonArray ports = labels.getJsonArray("docker.ports");
         String serviceName = containerName;
-        int port;
-        if (ports.size() < 1) {
-            LOGGER.warn("buildConfiguration: ignoring container with no exposed ports '{}'",
+        int port = getPort(httpConfFromLabels, ports, serviceName, containerName);
+        if (port < 0) {
+            LOGGER.warn("buildConfiguration: failed to determine port for container '{}'",
                     containerName);
             return null;
-        } else if (ports.size() > 1) {
-            // check if a port is specified in the labels
-            LOGGER.debug("buildConfiguration: container exposes more than one port");
-            String errMsgFormat =
-                    "buildConfigurtation: Ignoring container '%s' with more than one exposed port and none specified in the labels (invalid %s)";
-            JsonArray services = httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES);
-            if (services == null || services.size() == 0) {
-                LOGGER.warn(String.format(errMsgFormat, containerName, "services"));
-                return null;
-            }
-            if (services.size() > 1) {
-                LOGGER.warn("Invalid services configuration '{}'", services);
-                return null;
-            }
-            JsonObject service = services.getJsonObject(0);
-            serviceName = service.getString(DynamicConfiguration.SERVICE_NAME);
-
-            JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-            if (servers == null || servers.size() == 0) {
-                LOGGER.warn(String.format(errMsgFormat, containerName, "servers"));
-                return null;
-            }
-            if (servers.size() > 1) {
-                LOGGER.warn("Invalid servers configuration '{}'", servers);
-                return null;
-            }
-
-            JsonObject server = servers.getJsonObject(0);
-            port = server.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT);
-        } else {
-            port = ports.getInteger(0);
         }
         LOGGER.debug("buildConfiguration: using port '{}' of '{}'", port, containerName);
 
-        JsonObject hostPerNetwork = metadata.getJsonObject("docker.hostPerNetwork");
-        String host;
-
-        // TODO handle when a container is in multiple networks
-        // take from portal.docker.network=mynetwork
-        // default: container.getHostConfig().getNetworkMode()
-        host = hostPerNetwork.getString("portal-gateway");
-
+        String host = getHost(labels, extraConfig);
         LOGGER.debug("buildConfiguration: using host '{}' of '{}'", host, containerName);
 
         JsonArray serviceConfig =
@@ -201,9 +170,9 @@ public class DockerContainerProvider extends Provider {
 
         Map<String, String> model = new HashMap<String, String>();
         model.put("name", serviceName);
-        List<String> filteredKeys = Parser.filterKeys(metadata.getMap(), filters);
+        List<String> filteredKeys = Parser.filterKeys(labels.getMap(), filters);
         for (String filteredKey : filteredKeys) {
-            model.put(filteredKey, (String) metadata.getMap().get(filteredKey));
+            model.put(filteredKey, (String) labels.getMap().get(filteredKey));
         }
 
         JsonArray routerConfig = this.buildRouterConfiguration(httpConfFromLabels, model);
@@ -223,6 +192,113 @@ public class DockerContainerProvider extends Provider {
         });
 
         return DynamicConfiguration.merge(this.configurations);
+    }
+
+    private JsonObject filterExtraConfig(JsonObject labels) {
+        String enableFilter = String.format("%s.%s", Parser.DEFAULT_ROOT_NAME, EXTRA_CONFIG_ENABLE);
+        String dockerFilter = String.format("%s.%s", Parser.DEFAULT_ROOT_NAME,
+                StaticConfiguration.PROVIDER_DOCKER);
+        JsonObject extraConfig = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
+                Arrays.asList(dockerFilter, enableFilter));
+
+        if (extraConfig == null) {
+            extraConfig = new JsonObject();
+        }
+        if (!extraConfig.containsKey(EXTRA_CONFIG_ENABLE)) {
+            // TODO read from static config
+            extraConfig.put(EXTRA_CONFIG_ENABLE, false);
+        }
+        return extraConfig;
+    }
+
+    private Boolean keepContainer(JsonObject extraConfig) {
+        if (!extraConfig.getBoolean(EXTRA_CONFIG_ENABLE, true)) {
+            LOGGER.debug("keepContainer: filtering disabled container");
+            return false;
+        }
+
+        return true;
+    }
+
+    // If a container is linked to several networks and no network is specified, then it will
+    // randomly pick one (depending on how docker is returning them).
+    private String getHost(JsonObject labels, JsonObject extraConfig) {
+        JsonObject hostPerNetwork = labels.getJsonObject("docker.hostPerNetwork");
+        String host = null;
+        if (hostPerNetwork.size() < 1) {
+            LOGGER.debug("getHost: use default network mode");
+            host = hostPerNetwork.getString("defaultNetworkMode");
+        } else if (hostPerNetwork.size() > 1) {
+            LOGGER.debug("getHost: container is linked to several networks");
+            JsonObject dockerExtraConfig =
+                    extraConfig.getJsonObject(StaticConfiguration.PROVIDER_DOCKER_DEFAULT_RULE);
+            if (dockerExtraConfig != null && dockerExtraConfig.containsKey(EXTRA_CONFIG_NETWORK)) {
+                String network = dockerExtraConfig.getString(EXTRA_CONFIG_NETWORK);
+                if (hostPerNetwork.containsKey(network)) {
+                    LOGGER.debug("getHost: using network as specified in the labels");
+                    host = hostPerNetwork.getString(network);
+                } else {
+                    LOGGER.info("getHost: unknown network '{}'. Using random one.", network);
+                    for (Object h : hostPerNetwork.getMap().values()) {
+                        host = (String) h;
+                        break;
+                    }
+                }
+            } else {
+                LOGGER.info("getHost: no network specified. Using random one.");
+                for (Object h : hostPerNetwork.getMap().values()) {
+                    host = (String) h;
+                    break;
+                }
+            }
+        } else {
+            for (Object h : hostPerNetwork.getMap().values()) {
+                host = (String) h;
+            }
+        }
+        return host;
+    }
+
+    // side effect: serviceName might be changed
+    private int getPort(JsonObject httpConfFromLabels, JsonArray ports, String serviceName,
+            String containerName) {
+        int port;
+        if (ports.size() < 1) {
+            LOGGER.warn("getPort: ignoring container with no exposed ports '{}'", containerName);
+            return -1;
+        } else if (ports.size() > 1) {
+            // check if a port is specified in the labels
+            LOGGER.debug("getPort: container exposes more than one port");
+            String errMsgFormat =
+                    "getPort: Ignoring container '%s' with more than one exposed port and none specified in the labels (invalid %s)";
+            JsonArray services = httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES);
+            if (services == null || services.size() == 0) {
+                LOGGER.warn(String.format(errMsgFormat, containerName, "services"));
+                return -1;
+            }
+            if (services.size() > 1) {
+                LOGGER.warn("getPort: Invalid services configuration '{}'", services);
+                return -1;
+            }
+            JsonObject service = services.getJsonObject(0);
+            serviceName = service.getString(DynamicConfiguration.SERVICE_NAME);
+
+            JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            if (servers == null || servers.size() == 0) {
+                LOGGER.warn(String.format(errMsgFormat, containerName, "servers"));
+                return -1;
+            }
+            if (servers.size() > 1) {
+                LOGGER.warn("getPort: Invalid servers configuration '{}'", servers);
+                return -1;
+            }
+
+            JsonObject server = servers.getJsonObject(0);
+            port = server.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT);
+        } else {
+            port = ports.getInteger(0);
+        }
+        return port;
     }
 
     private JsonArray buildServiceConfiguration(JsonObject httpConf, String containerName,
