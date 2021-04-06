@@ -41,23 +41,27 @@ public class DockerContainerProvider extends Provider {
 
     private ServiceDiscovery dockerDiscovery;
 
-    private Boolean watch;
     private String endpoint;
+    private Boolean exposedByDefault;
+    private String network;
     private String defaultRule;
+    private Boolean watch;
     private Boolean TLS;
 
     private Map<String, JsonObject> configurations = new HashMap<String, JsonObject>();
 
     public DockerContainerProvider(Vertx vertx, String configurationAddress, String endpoint,
-            String defaultRule, Boolean watch) {
+            Boolean exposedByDefault, String network, String defaultRule, Boolean watch) {
         LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;
 
-        this.watch = watch;
         this.endpoint = endpoint;
+        this.exposedByDefault = exposedByDefault;
+        this.network = network;
         this.defaultRule = defaultRule;
+        this.watch = watch;
 
         this.TLS = false;
     }
@@ -156,7 +160,7 @@ public class DockerContainerProvider extends Provider {
         }
         LOGGER.debug("buildConfiguration: using port '{}' of '{}'", port, containerName);
 
-        String host = getHost(labels, extraConfig);
+        String host = getHost(labels, extraConfig, containerName);
         LOGGER.debug("buildConfiguration: using host '{}' of '{}'", host, containerName);
 
         JsonArray serviceConfig =
@@ -205,8 +209,7 @@ public class DockerContainerProvider extends Provider {
             extraConfig = new JsonObject();
         }
         if (!extraConfig.containsKey(EXTRA_CONFIG_ENABLE)) {
-            // TODO read from static config
-            extraConfig.put(EXTRA_CONFIG_ENABLE, false);
+            extraConfig.put(EXTRA_CONFIG_ENABLE, this.exposedByDefault);
         }
         return extraConfig;
     }
@@ -222,30 +225,49 @@ public class DockerContainerProvider extends Provider {
 
     // If a container is linked to several networks and no network is specified, then it will
     // randomly pick one (depending on how docker is returning them).
-    private String getHost(JsonObject labels, JsonObject extraConfig) {
+    private String getHost(JsonObject labels, JsonObject extraConfig, String containerName) {
         JsonObject hostPerNetwork = labels.getJsonObject("docker.hostPerNetwork");
         String host = null;
         if (hostPerNetwork.size() < 1) {
-            LOGGER.debug("getHost: use default network mode");
-            host = hostPerNetwork.getString("defaultNetworkMode");
+            String defaultNetwork = "defaultNetworkMode";
+            LOGGER.debug("getHost: use default network mode '{}' of container '{}'", defaultNetwork,
+                    containerName);
+            host = hostPerNetwork.getString(defaultNetwork);
         } else if (hostPerNetwork.size() > 1) {
-            LOGGER.debug("getHost: container is linked to several networks");
+            LOGGER.debug("getHost: container '{}' is linked to several networks (total: {})",
+                    containerName, hostPerNetwork.size());
             JsonObject dockerExtraConfig =
-                    extraConfig.getJsonObject(StaticConfiguration.PROVIDER_DOCKER_DEFAULT_RULE);
+                    extraConfig.getJsonObject(StaticConfiguration.PROVIDER_DOCKER);
+            String network = null;
             if (dockerExtraConfig != null && dockerExtraConfig.containsKey(EXTRA_CONFIG_NETWORK)) {
-                String network = dockerExtraConfig.getString(EXTRA_CONFIG_NETWORK);
+                network = dockerExtraConfig.getString(EXTRA_CONFIG_NETWORK);
+                LOGGER.debug(
+                        "getHost: trying network '{}' as specified in the labels of container '{}'",
+                        network, containerName);
+            } else if (this.network != null && this.network.length() != 0) {
+                network = this.network;
+                LOGGER.debug(
+                        "getHost: trying network '{}' as specified in the provider configuration of container '{}'",
+                        network, containerName);
+            }
+
+            if (network != null) {
                 if (hostPerNetwork.containsKey(network)) {
-                    LOGGER.debug("getHost: using network as specified in the labels");
+                    LOGGER.debug("getHost: using network '{}' of container '{}'", network,
+                            containerName);
                     host = hostPerNetwork.getString(network);
                 } else {
-                    LOGGER.info("getHost: unknown network '{}'. Using random one.", network);
+                    LOGGER.info(
+                            "getHost: unknown network '{}'. Using random one of container '{}'.",
+                            network, containerName);
                     for (Object h : hostPerNetwork.getMap().values()) {
                         host = (String) h;
                         break;
                     }
                 }
             } else {
-                LOGGER.info("getHost: no network specified. Using random one.");
+                LOGGER.info("getHost: no network specified. Using random one of container '{}'",
+                        containerName);
                 for (Object h : hostPerNetwork.getMap().values()) {
                     host = (String) h;
                     break;

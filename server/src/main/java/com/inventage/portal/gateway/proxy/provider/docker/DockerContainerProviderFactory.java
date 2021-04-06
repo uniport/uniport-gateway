@@ -21,11 +21,14 @@ public class DockerContainerProviderFactory implements ProviderFactory {
         LOGGER.trace("create");
         String endpoint = providerConfig.getString(StaticConfiguration.PROVIDER_DOCKER_ENDPOINT,
                 "unix:///var/run/docker.sock");
+        Boolean exposedByDefault = providerConfig
+                .getBoolean(StaticConfiguration.PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, true);
+        String network = providerConfig.getString(StaticConfiguration.PROVIDER_DOCKER_NETWORK, "");
         String defaultRule = providerConfig
                 .getString(StaticConfiguration.PROVIDER_DOCKER_DEFAULT_RULE, defaultTemplateRule);
         Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, false);
-        return new DockerContainerProvider(vertx, configurationAddress, endpoint, defaultRule,
-                watch);
+        return new DockerContainerProvider(vertx, configurationAddress, endpoint, exposedByDefault,
+                network, defaultRule, watch);
     }
 
 }

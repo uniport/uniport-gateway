@@ -46,6 +46,8 @@ public class StaticConfiguration {
 
     public static final String PROVIDER_DOCKER = "docker";
     public static final String PROVIDER_DOCKER_ENDPOINT = "endpoint";
+    public static final String PROVIDER_DOCKER_EXPOSED_BY_DEFAULT = "exposedByDefault";
+    public static final String PROVIDER_DOCKER_NETWORK = "network";
     public static final String PROVIDER_DOCKER_DEFAULT_RULE = "defaultRule";
 
     public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
@@ -74,8 +76,10 @@ public class StaticConfiguration {
                         .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
                         .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
                         .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
-                        .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema())
                         .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
+                        .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
+                        .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
+                        .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema())
                         .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
