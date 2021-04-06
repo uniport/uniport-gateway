@@ -18,8 +18,14 @@
   "providers": [
     {
       "name": "file",
-      "filename": "/etc/portal-gateway/complete-config.json",
+      "filename": "/etc/portal-gateway/dev-config/auth/config.json",
       "watch": false
+    },
+    {
+      "name": "docker",
+      "exposedByDefault": false,
+      "network": "portal-gateway",
+      "watch": true
     }
   ]
 }

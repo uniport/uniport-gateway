@@ -101,6 +101,7 @@ public class RouterFactory {
                             middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
                     // needed to ensure authenticating requests are routed through this application
+                    // TODO this does not work when published != exposed port
                     if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
                         middlewareOptions.put("publicHostname", this.publicHostname);
                         middlewareOptions.put("entrypointPort", this.entrypointPort);

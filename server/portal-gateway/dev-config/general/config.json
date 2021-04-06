@@ -142,44 +142,48 @@
     "services": [
       {
         "name": "portal-iam",
-        "servers": [{ "host": "local-portal-portal-iam", "port": 8080 }]
+        "servers": [
+          { "host": "${host-prefix}${portal-iam.host}", "port": 8080 }
+        ]
       },
 
       {
         "name": "dashboard-frontend",
         "servers": [
-          { "host": "local-portal-dashboard-frontend", "port": 20025 }
+          { "host": "${host-prefix}${dashboard-frontend.host}", "port": 20025 }
         ]
       },
       {
         "name": "dashboard-service",
-        "servers": [{ "host": "local-portal-dashboard-service", "port": 20022 }]
+        "servers": [
+          { "host": "${host-prefix}${dashboard-service.host}", "port": 20022 }
+        ]
       },
 
       {
         "name": "navigation-frontend",
         "servers": [
-          { "host": "local-portal-navigation-frontend", "port": 20015 }
+          { "host": "${host-prefix}${navigation-frontend.host}", "port": 20015 }
         ]
       },
       {
         "name": "navigation-service",
         "servers": [
-          { "host": "local-portal-navigation-service", "port": 20012 }
+          { "host": "${host-prefix}${navigation-service.host}", "port": 20012 }
         ]
       },
 
       {
         "name": "organisation-proxy-public",
         "servers": [
-          { "host": "local-portal-organisation-proxy-public", "port": 20030 }
+          { "host": "${host-prefix}${organisation-proxy.host}", "port": 20030 }
         ]
       },
 
       {
         "name": "document-proxy-public",
         "servers": [
-          { "host": "local-portal-document-proxy-public", "port": 20050 }
+          { "host": "${host-prefix}${document-proxy.host}", "port": 20050 }
         ]
       }
     ]
