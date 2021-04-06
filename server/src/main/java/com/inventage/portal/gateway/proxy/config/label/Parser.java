@@ -192,11 +192,14 @@ public class Parser {
                 }
                 if (isInteger(value)) {
                     root.put(key, Integer.parseInt(value));
+                } else if (isBoolean(value)) {
+                    root.put(key, Boolean.parseBoolean(value));
                 } else {
                     root.put(key, value);
                 }
             }
         }
+
     }
 
     private static String getName(String key) {
@@ -223,5 +226,12 @@ public class Parser {
             return false;
         }
         return true;
+    }
+
+    private static boolean isBoolean(String strBool) {
+        if (strBool == null) {
+            return false;
+        }
+        return "true".equalsIgnoreCase(strBool) || "false".equalsIgnoreCase(strBool);
     }
 }
