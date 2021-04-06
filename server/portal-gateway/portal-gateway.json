@@ -22,10 +22,9 @@
       "watch": false
     },
     {
-      "name": "docker",
-      "exposedByDefault": false,
-      "network": "portal-gateway",
-      "watch": true
+      "name": "file",
+      "filename": "/etc/portal-gateway/dynamic-config/general/config.json",
+      "watch": false
     }
   ]
 }
