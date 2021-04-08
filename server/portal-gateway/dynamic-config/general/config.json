@@ -136,60 +136,6 @@
         "name": "documentReplacePath",
         "type": "replacePathRegex",
         "options": { "regex": "/document/(.*)", "replacement": "/$1" }
-      },
-
-      {
-        "name": "dashboardAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "dashboardScope" }
-      },
-      {
-        "name": "dashboardOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Dashboard",
-          "clientSecret": "Dashboard!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "dashboardScope"
-        }
-      },
-
-      {
-        "name": "navigationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "id" }
-      },
-
-      {
-        "name": "organisationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "organisationScope" }
-      },
-      {
-        "name": "organisationOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Organisation",
-          "clientSecret": "Organisation!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "organisationScope"
-        }
-      },
-
-      {
-        "name": "documentAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "documentScope" }
-      },
-      {
-        "name": "documentOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Document",
-          "clientSecret": "Document!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "documentScope"
-        }
       }
     ],
 
