@@ -30,7 +30,7 @@ import io.vertx.ext.web.RoutingContext;
  * Essentially it translates the dynamic configuration to what vertx understands. It creates a new
  * vertx router with routes for each router, middleware and service defined in the dynamic
  * configuration. Special cases are the proxy middleware, URI middleware and the OAuth2 middleware.
- * The proxy middelware is always the final middleware (if no redirect applies) to forward the
+ * The proxy middleware is always the final middleware (if no redirect applies) to forward the
  * request to the corresponding server. Since Vertx does not allow to manipulate the URI of a
  * request, this manipulation is done in the proxy middleware. The OAuth2 middleware requires to
  * know the public hostname (like localhost or example.com) and the entrypoint port of this

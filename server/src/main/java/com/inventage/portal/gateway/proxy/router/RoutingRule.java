@@ -4,10 +4,10 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 
 /**
- * To define a routing rule this iterface has to be implemented.
+ * To define a routing rule this interface has to be implemented.
  */
 public interface RoutingRule {
 
-    public Route apply(Router router);
+    Route apply(Router router);
 
 }

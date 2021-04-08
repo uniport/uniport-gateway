@@ -10,6 +10,7 @@ import java.util.Set;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
+import io.vertx.core.eventbus.Message;
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
@@ -85,14 +86,17 @@ public class ConfigurationWatcher {
         MessageConsumer<JsonObject> configConsumer =
                 this.eventBus.consumer(this.configurationAddress);
 
-        configConsumer.handler(message -> {
-            JsonObject nextConfig = message.body();
+        configConsumer.handler(message -> onConfigurationAnnounce(message));
+    }
 
-            String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-            LOGGER.debug("listenProviders: Received new configuration from '{}'", providerName);
+    // handler for address: configuration-announce-address
+    private void onConfigurationAnnounce(Message<JsonObject> message) {
+        JsonObject nextConfig = message.body();
 
-            preloadConfiguration(nextConfig);
-        });
+        String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        LOGGER.debug("onConfigurationAnnounce: received new configuration '{}' from '{}' provider", nextConfig, providerName);
+
+        preloadConfiguration(nextConfig);
     }
 
     private void preloadConfiguration(JsonObject nextConfig) {
@@ -100,7 +104,7 @@ public class ConfigurationWatcher {
 
         if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
                 || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
-            LOGGER.warn("preloadConfiguration: Invalid configuration received");
+            LOGGER.warn("preloadConfiguration: invalid configuration received");
             return;
         }
 
@@ -108,7 +112,7 @@ public class ConfigurationWatcher {
         JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
 
         if (DynamicConfiguration.isEmptyConfiguration(providerConfig)) {
-            LOGGER.info("preloadConfiguration: Skipping empty configuration for provider '{}'",
+            LOGGER.info("preloadConfiguration: skipping empty configuration for provider '{}'",
                     providerName);
             return;
         }
@@ -120,6 +124,7 @@ public class ConfigurationWatcher {
             this.throttleProviderConfigReload(this.providersThrottleIntervalSec, providerName);
         }
 
+        LOGGER.info("preloadConfiguration: publishing configuration '{}' on '{}' ", nextConfig, providerName);
         this.eventBus.publish(providerName, nextConfig);
     }
 
@@ -130,7 +135,7 @@ public class ConfigurationWatcher {
     // Note that in the case it receives N new configs in the timeframe of the throttle duration
     // after publishing, it will publish the last of the newly received configurations.
     private void throttleProviderConfigReload(int throttleSec, String providerConfigReloadAddress) {
-        LOGGER.trace("throttleProviderConfigReload");
+        LOGGER.debug("throttleProviderConfigReload: for provider '{}'", providerConfigReloadAddress);
 
         Queue<JsonObject> ring = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
@@ -139,27 +144,31 @@ public class ConfigurationWatcher {
             if (nextConfig == null) {
                 return;
             }
+            LOGGER.info("throttleProviderConfigReload: publishing configuration '{}' on '{}' ", nextConfig, CONFIG_VALIDATED_ADDRESS);
             this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
         });
 
-        MessageConsumer<JsonObject> providerConfigReloadConsumer =
-                this.eventBus.consumer(providerConfigReloadAddress);
-        providerConfigReloadConsumer.handler(message -> {
-            JsonObject nextConfig = message.body();
+        MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
+        consumer.handler(message -> onConfigReload(message, ring));
+    }
 
-            JsonObject previousConfig = ring.peek();
-            if (previousConfig == null) {
-                ring.offer(nextConfig.copy());
-                return;
-            }
+    // handler for address: <provider> (e.g. file)
+    private void onConfigReload(Message<JsonObject> message, Queue<JsonObject> ring) {
+        JsonObject nextConfig = message.body();
+        LOGGER.debug("onConfigReload: config '{}'", nextConfig);
 
-            if (previousConfig.equals(nextConfig)) {
-                LOGGER.info("throttleProviderConfigReload: Skipping same configuration");
-                return;
-            }
-
+        JsonObject previousConfig = ring.peek();
+        if (previousConfig == null) {
             ring.offer(nextConfig.copy());
-        });
+            return;
+        }
+
+        if (previousConfig.equals(nextConfig)) {
+            LOGGER.info("onConfigReload: skipping same configuration");
+            return;
+        }
+
+        ring.offer(nextConfig.copy());
     }
 
     private void listenConfigurations() {
@@ -167,33 +176,37 @@ public class ConfigurationWatcher {
         MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer =
                 this.eventBus.consumer(CONFIG_VALIDATED_ADDRESS);
 
-        validatedProviderConfigUpdateConsumer.handler(message -> {
-            JsonObject nextConfig = message.body();
+        validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
+    }
 
-            String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-            JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+    // handler for address: CONFIG_VALIDATED_ADDRESS
+    private void onValidConfiguration(Message<JsonObject> message) {
+        JsonObject nextConfig = message.body();
+        LOGGER.debug("onValidConfiguration: config '{}'", nextConfig);
 
-            if (providerConfig == null) {
-                return;
+        String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+
+        if (providerConfig == null) {
+            return;
+        }
+
+        this.currentConfigurations.put(providerName, providerConfig);
+
+        JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
+        applyEntrypoints(mergedConfig, this.defaultEntrypoints);
+
+
+        DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
+            LOGGER.debug(
+                    "onValidConfiguration: Informing listeners about new configuration '{}'",
+                    mergedConfig);
+            for (Listener listener : this.configurationListeners) {
+                listener.listen(mergedConfig);
             }
-
-            this.currentConfigurations.put(providerName, providerConfig);
-
-            JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
-            applyEntrypoints(mergedConfig, this.defaultEntrypoints);
-
-
-            DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
-                LOGGER.debug(
-                        "listenConfigurations: Informing listeners about new configuration '{}'",
-                        mergedConfig);
-                for (Listener listener : this.configurationListeners) {
-                    listener.listen(mergedConfig);
-                }
-            }).onFailure(err -> {
-                LOGGER.warn("listenConfigurations: Ingoring invalid configuration",
-                        err.getMessage());
-            });
+        }).onFailure(err -> {
+            LOGGER.warn("onValidConfiguration: Ignoring invalid configuration for '{}' because of '{}'",
+                    providerName, err.getMessage());
         });
     }
 
@@ -221,7 +234,7 @@ public class ConfigurationWatcher {
     }
 
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
-        LOGGER.trace("mergeConfigurations");
+        LOGGER.debug("mergeConfigurations");
         JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
         JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
 

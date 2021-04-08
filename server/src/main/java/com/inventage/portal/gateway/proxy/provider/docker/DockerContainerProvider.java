@@ -105,7 +105,7 @@ public class DockerContainerProvider extends Provider {
     }
 
     private JsonObject buildConfiguration(JsonObject dockerContainer) {
-        LOGGER.trace("buildConfiguration");
+        LOGGER.debug("buildConfiguration");
         JsonObject labels = dockerContainer.getJsonObject("metadata");
 
         String containerId = labels.getString("docker.id");

@@ -134,7 +134,7 @@ public class DynamicConfiguration {
     }
 
     public static JsonObject buildDefaultConfiguration() {
-        LOGGER.trace("buildDefaultConfiguration");
+        LOGGER.debug("buildDefaultConfiguration");
         JsonObject config = new JsonObject();
 
         JsonObject http = new JsonObject();
@@ -404,7 +404,7 @@ public class DynamicConfiguration {
     }
 
     public static JsonObject merge(Map<String, JsonObject> configurations) {
-        LOGGER.trace("merge");
+        LOGGER.debug("merge");
         JsonObject mergedConfig = buildDefaultConfiguration();
         JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
 

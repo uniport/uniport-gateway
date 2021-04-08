@@ -116,17 +116,19 @@ public class FileConfigProvider extends Provider {
     }
 
     private void validateAndPublish(JsonObject config) {
-        LOGGER.trace("validateAndPublish");
-        LOGGER.debug("validateAndPublish: configuration from file '{}'", config);
+        LOGGER.debug("validateAndPublish: configuration '{}' from file '{}'", config, filename);
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
-            LOGGER.info("validateAndPublish: configuration published");
+            LOGGER.debug("validateAndPublish: configuration validated for '{}'", filename);
+            //
             this.eb.publish(this.configurationAddress,
-                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                    new JsonObject()
+                            .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                            .put(StaticConfiguration.PROVIDER_FILE, filename)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
-
+            LOGGER.info("validateAndPublish: configuration published for '{}' on '{}' ", filename, this.configurationAddress);
         }).onFailure(err -> {
-            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}'",
-                    err.getMessage());
+            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' in file '{}'",
+                    err.getMessage(), filename);
         });
     }
 }
