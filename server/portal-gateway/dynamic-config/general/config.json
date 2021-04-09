@@ -7,11 +7,6 @@
         "rule": "Path('/')",
         "service": "dashboard-frontend"
       },
-      {
-        "name": "auth",
-        "rule": "PathPrefix('/auth')",
-        "service": "portal-iam"
-      },
 
       {
         "name": "dashboard-frontend",
@@ -140,11 +135,6 @@
     ],
 
     "services": [
-      {
-        "name": "portal-iam",
-        "servers": [{ "host": "${portal-iam.host}", "port": 8080 }]
-      },
-
       {
         "name": "dashboard-frontend",
         "servers": [{ "host": "${dashboard-frontend.host}", "port": 20025 }]

@@ -1,5 +1,12 @@
 {
   "http": {
+    "routers": [
+      {
+        "name": "auth",
+        "rule": "PathPrefix('/auth')",
+        "service": "portal-iam"
+      }
+    ],
     "middlewares": [
       {
         "name": "dashboardAuthBearer",
@@ -53,6 +60,12 @@
           "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "documentScope"
         }
+      }
+    ],
+    "services": [
+      {
+        "name": "portal-iam",
+        "servers": [{ "host": "${portal-iam.host}", "port": 8080 }]
       }
     ]
   }
