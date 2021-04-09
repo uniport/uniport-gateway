@@ -37,14 +37,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
         @Override
         public String provides() {
-                LOGGER.trace("provides");
                 return DynamicConfiguration.MIDDLEWARE_OAUTH2;
         }
 
         @Override
         public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-                LOGGER.trace("create");
-
                 String sessionScope = middlewareConfig
                                 .getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
 

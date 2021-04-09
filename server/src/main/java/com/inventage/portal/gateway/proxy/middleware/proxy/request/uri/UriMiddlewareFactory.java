@@ -21,8 +21,7 @@ public interface UriMiddlewareFactory {
 
     class Loader {
         public static UriMiddlewareFactory getFactory(String middlewareName) {
-            LOGGER.trace("getFactory");
-            LOGGER.debug("getFactory: URI middleware '{}'", middlewareName);
+            LOGGER.debug("getFactory: URI middleware factory '{}'", middlewareName);
             final Optional<UriMiddlewareFactory> factory = ServiceLoader
                     .load(UriMiddlewareFactory.class).stream().map(ServiceLoader.Provider::get)
                     .filter(instance -> instance.provides().equals(middlewareName)).findFirst();

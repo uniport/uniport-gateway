@@ -17,14 +17,12 @@ public class RedirectRegexMiddleware implements Middleware {
     private final String replacement;
 
     public RedirectRegexMiddleware(String regex, String replacement) {
-        LOGGER.trace("construcutor");
         this.pattern = Pattern.compile(regex);
         this.replacement = replacement;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.trace("handle");
         String oldURI = ctx.request().uri();
 
         // If the Regexp doesn't match, skip to the next handler.

@@ -33,12 +33,12 @@ public class FileConfigProvider extends Provider {
     private Boolean watch;
 
     private JsonObject env;
+    private String source;
 
     private int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename,
             String directory, Boolean watch, JsonObject env) {
-        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -51,13 +51,11 @@ public class FileConfigProvider extends Provider {
     }
 
     public void start(Promise<Void> startPromise) {
-        LOGGER.trace("start");
         provide(startPromise);
     }
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        LOGGER.trace("provide");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig().onSuccess(config -> {
             this.validateAndPublish(substituteConfigurationVariables(env, config));
@@ -77,8 +75,13 @@ public class FileConfigProvider extends Provider {
         startPromise.complete();
     }
 
+    public String toString() {
+        return StaticConfiguration.PROVIDER_FILE;
+    }
+
     private ConfigRetrieverOptions getOptions() {
-        LOGGER.trace("getOptions");
+        // TODO filename/directory relative to portal-gateway.json if path is relative, otherwise
+        // absolute
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
             LOGGER.info("getOptions: setting scan period to '{}'", this.scanPeriodMs);
@@ -92,6 +95,7 @@ public class FileConfigProvider extends Provider {
                     new ConfigStoreOptions().setType("file").setFormat("json")
                             .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
+            this.source = "file";
             return options.addStore(fileStore);
         }
 
@@ -103,9 +107,11 @@ public class FileConfigProvider extends Provider {
                             new JsonArray().add(new JsonObject().put("pattern", "general/*.json"))
                                     .add(new JsonObject().put("pattern", "auth/*.json"))));
 
+            this.source = "directory";
             return options.addStore(dirStore);
         }
 
+        this.source = "undefined";
         LOGGER.warn("getOptions: neither filename or directory defined");
         return options;
     }
@@ -115,19 +121,15 @@ public class FileConfigProvider extends Provider {
     }
 
     private void validateAndPublish(JsonObject config) {
-        LOGGER.debug("validateAndPublish: configuration '{}' from file '{}'", config, filename);
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
-            LOGGER.debug("validateAndPublish: configuration validated for '{}'", filename);
-            //
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
                             .put(StaticConfiguration.PROVIDER_FILE, filename)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
-            LOGGER.info("validateAndPublish: configuration published for '{}' on '{}' ", filename,
-                    this.configurationAddress);
+            LOGGER.info("validateAndPublish: configuration published from '{}'", this.source);
         }).onFailure(err -> {
-            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' in file '{}'",
-                    err.getMessage(), filename);
+            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' from '{}'",
+                    err.getMessage(), this.source);
         });
     }
 }

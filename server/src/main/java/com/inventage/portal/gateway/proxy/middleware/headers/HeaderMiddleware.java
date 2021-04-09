@@ -20,14 +20,12 @@ public class HeaderMiddleware implements Middleware {
 
     public HeaderMiddleware(Map<String, String> requestHeaders,
             Map<String, String> responseHeaders) {
-        LOGGER.trace("construcutor");
         this.requestHeaders = requestHeaders;
         this.responseHeaders = responseHeaders;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.trace("handle");
         for (String header : this.requestHeaders.keySet()) {
             String value = this.requestHeaders.get(header);
             switch (value) {

@@ -14,13 +14,11 @@ public class ProxyApplicationFactory implements ApplicationFactory {
 
     @Override
     public String provides() {
-        LOGGER.trace("provides");
         return ProxyApplication.class.getSimpleName();
     }
 
     @Override
     public Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx) {
-        LOGGER.trace("create");
         return new ProxyApplication(
                 applicationConfig.getString(StaticConfiguration.APPLICATION_NAME),
                 applicationConfig.getString(StaticConfiguration.APPLICATION_ENTRYPOINT),

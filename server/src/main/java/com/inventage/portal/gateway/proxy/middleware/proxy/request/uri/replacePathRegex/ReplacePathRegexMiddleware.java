@@ -16,15 +16,12 @@ public class ReplacePathRegexMiddleware implements UriMiddleware {
     private final String replacement;
 
     public ReplacePathRegexMiddleware(String regex, String replacement) {
-        LOGGER.trace("construcutor");
         this.pattern = Pattern.compile(regex);
         this.replacement = replacement;
     }
 
     @Override
     public String apply(String uri) {
-        LOGGER.trace("apply");
-
         if (!this.pattern.matcher(uri).matches()) {
             LOGGER.debug("apply: Skipping path replacement of non matching URI '{}'", uri);
             return uri;

@@ -81,8 +81,6 @@ public class DynamicConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
-        LOGGER.trace("buildSchema");
-
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
                 .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
@@ -134,7 +132,6 @@ public class DynamicConfiguration {
     }
 
     public static JsonObject buildDefaultConfiguration() {
-        LOGGER.debug("buildDefaultConfiguration");
         JsonObject config = new JsonObject();
 
         JsonObject http = new JsonObject();
@@ -149,7 +146,6 @@ public class DynamicConfiguration {
     }
 
     public static boolean isEmptyConfiguration(JsonObject config) {
-        LOGGER.trace("isEmptyConfiguration");
         if (config == null) {
             return true;
         }
@@ -169,8 +165,6 @@ public class DynamicConfiguration {
     }
 
     public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
-        LOGGER.trace("validate");
-
         if (schema == null) {
             schema = buildSchema(vertx);
         }
@@ -195,8 +189,6 @@ public class DynamicConfiguration {
     }
 
     public static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
-        LOGGER.trace("validateRouters");
-
         JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
             LOGGER.warn("validateRouters: no routers defined");
@@ -255,8 +247,6 @@ public class DynamicConfiguration {
     }
 
     public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
-        LOGGER.trace("validateMiddlewares");
-
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
             LOGGER.debug("validateMiddlewares: no middlewares defined");
@@ -404,7 +394,6 @@ public class DynamicConfiguration {
     }
 
     public static JsonObject merge(Map<String, JsonObject> configurations) {
-        LOGGER.debug("merge");
         JsonObject mergedConfig = buildDefaultConfiguration();
         JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
 
@@ -494,7 +483,6 @@ public class DynamicConfiguration {
     }
 
     public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
-        LOGGER.trace("getObjByKeyWithValue");
         if (jsonArr == null) {
             return null;
         }
@@ -513,7 +501,6 @@ public class DynamicConfiguration {
 
     private static Boolean addRouter(JsonObject httpConf, String routerName,
             JsonObject routerToAdd) {
-        LOGGER.trace("addRouter");
         JsonArray existingRouters = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonObject existingRouter =
                 getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
@@ -527,7 +514,6 @@ public class DynamicConfiguration {
 
     private static Boolean addService(JsonObject httpConf, String serviceName,
             JsonObject serviceToAdd) {
-        LOGGER.trace("addService");
         JsonArray existingServices = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         JsonObject existingService = getObjByKeyWithValue(existingServices,
                 DynamicConfiguration.SERVICE_NAME, serviceName);
@@ -561,13 +547,11 @@ public class DynamicConfiguration {
     }
 
     private static String createURL(String host, String port) {
-        LOGGER.trace("createURL");
         return String.format("%s:%s", host, port);
     }
 
     private static Boolean addMiddleware(JsonObject httpConf, String middlewareName,
             JsonObject middlewareToAdd) {
-        LOGGER.trace("addMiddleware");
         JsonArray existingMiddlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares,
                 DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);

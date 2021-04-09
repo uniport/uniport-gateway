@@ -30,7 +30,6 @@ public class ProxyMiddleware implements Middleware {
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort,
             UriMiddleware uriMiddleware) {
-        LOGGER.trace("construcutor");
         this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
         this.httpProxy.target(serverPort, serverHost);
         this.serverHost = serverHost;
@@ -40,7 +39,6 @@ public class ProxyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.trace("handle");
         if (!ctx.request().headers().contains(X_FORWARDED_HOST)) {
             ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
         }

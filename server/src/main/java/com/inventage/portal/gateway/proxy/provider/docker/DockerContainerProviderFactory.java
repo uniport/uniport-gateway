@@ -12,14 +12,12 @@ public class DockerContainerProviderFactory implements ProviderFactory {
 
         @Override
         public String provides() {
-                LOGGER.trace("provides");
                 return StaticConfiguration.PROVIDER_DOCKER;
         }
 
         @Override
         public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig,
                         JsonObject env) {
-                LOGGER.trace("create");
                 String endpoint = providerConfig.getString(
                                 StaticConfiguration.PROVIDER_DOCKER_ENDPOINT,
                                 "unix:///var/run/docker.sock");

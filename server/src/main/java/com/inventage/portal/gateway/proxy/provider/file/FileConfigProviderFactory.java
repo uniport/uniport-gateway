@@ -10,14 +10,12 @@ public class FileConfigProviderFactory implements ProviderFactory {
 
     @Override
     public String provides() {
-        LOGGER.trace("provides");
         return StaticConfiguration.PROVIDER_FILE;
     }
 
     @Override
     public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig,
             JsonObject env) {
-        LOGGER.trace("create");
         String filename = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_FILENAME, "");
         String directory =
                 providerConfig.getString(StaticConfiguration.PROVIDER_FILE_DIRECTORY, "");

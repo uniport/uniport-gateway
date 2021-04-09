@@ -17,19 +17,16 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        LOGGER.trace("provides");
         return "proxy";
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig) {
-        LOGGER.trace("create");
         return this.create(vertx, router, serviceConfig, null);
     }
 
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig,
             UriMiddleware uriMiddleware) {
-        LOGGER.trace("create");
         return Future.succeededFuture(new ProxyMiddleware(vertx,
                 serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
                 serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT), uriMiddleware));

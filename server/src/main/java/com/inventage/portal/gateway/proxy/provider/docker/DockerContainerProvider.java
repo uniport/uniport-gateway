@@ -52,7 +52,6 @@ public class DockerContainerProvider extends Provider {
 
     public DockerContainerProvider(Vertx vertx, String configurationAddress, String endpoint,
             Boolean exposedByDefault, String network, String defaultRule, Boolean watch) {
-        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -67,13 +66,11 @@ public class DockerContainerProvider extends Provider {
     }
 
     public void start(Promise<Void> startPromise) {
-        LOGGER.trace("start");
         provide(startPromise);
     }
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        LOGGER.trace("provide");
         this.getOrCreateDockerContainerDiscovery();
 
         MessageConsumer<JsonObject> consumer = this.eb.consumer(ANNOUNCE_ADDRESS);
@@ -92,8 +89,11 @@ public class DockerContainerProvider extends Provider {
         startPromise.complete();
     }
 
+    public String toString() {
+        return StaticConfiguration.PROVIDER_DOCKER;
+    }
+
     private ServiceDiscovery getOrCreateDockerContainerDiscovery() {
-        LOGGER.trace("getOrCreateDockerContainerDiscovery");
         if (this.dockerDiscovery == null) {
             this.dockerDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
                     .setAnnounceAddress(ANNOUNCE_ADDRESS).setName("docker-discovery"));
@@ -105,7 +105,6 @@ public class DockerContainerProvider extends Provider {
     }
 
     private JsonObject buildConfiguration(JsonObject dockerContainer) {
-        LOGGER.debug("buildConfiguration");
         JsonObject labels = dockerContainer.getJsonObject("metadata");
 
         String containerId = labels.getString("docker.id");
@@ -325,7 +324,6 @@ public class DockerContainerProvider extends Provider {
 
     private JsonArray buildServiceConfiguration(JsonObject httpConf, String containerName,
             String host, int port) {
-        LOGGER.trace("buildServiceConfiguration");
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
             JsonObject fallbackService =
@@ -351,7 +349,6 @@ public class DockerContainerProvider extends Provider {
     // since docker does not provide a out of the book load balancer
     // newer containers overwrite the old one
     private JsonObject addServer(JsonObject service, String host, int port) {
-        LOGGER.trace("addServer");
         if (service == null) {
             LOGGER.warn("addServer: service is not defined");
             return null;
@@ -373,7 +370,6 @@ public class DockerContainerProvider extends Provider {
     }
 
     private JsonArray buildRouterConfiguration(JsonObject httpConf, Map<String, String> model) {
-        LOGGER.trace("buildRouterConfiguration");
         JsonArray routers = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
         JsonArray middlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
@@ -432,7 +428,6 @@ public class DockerContainerProvider extends Provider {
     }
 
     private void validateAndPublish(JsonObject config) {
-        LOGGER.trace("validateAndPublish");
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
             LOGGER.info("validateAndPublish: configuration published");
             this.eb.publish(this.configurationAddress,

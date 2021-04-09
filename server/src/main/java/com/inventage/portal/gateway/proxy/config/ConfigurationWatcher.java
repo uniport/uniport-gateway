@@ -10,7 +10,6 @@ import java.util.Set;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-import io.vertx.core.eventbus.Message;
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -52,7 +52,6 @@ public class ConfigurationWatcher {
 
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
             int providersThrottleIntervalSec, List<String> defaultEntrypoints) {
-        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
         this.provider = provider;
@@ -64,14 +63,13 @@ public class ConfigurationWatcher {
     }
 
     public Future<String> start() {
-        LOGGER.trace("start");
         listenProviders();
         listenConfigurations();
         return this.vertx.deployVerticle(this.provider);
     }
 
     public void addListener(Listener listener) {
-        LOGGER.trace("addListener");
+        LOGGER.debug("addListener: listener '{}'", listener);
         if (this.configurationListeners == null) {
             this.configurationListeners = new ArrayList<>();
         }
@@ -82,7 +80,6 @@ public class ConfigurationWatcher {
     // The configuration message then gets passed along a series of check
     // to finally end up in a throttler that sends it to listenConfigurations.
     private void listenProviders() {
-        LOGGER.trace("listenProviders");
         MessageConsumer<JsonObject> configConsumer =
                 this.eventBus.consumer(this.configurationAddress);
 
@@ -94,14 +91,13 @@ public class ConfigurationWatcher {
         JsonObject nextConfig = message.body();
 
         String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        LOGGER.debug("onConfigurationAnnounce: received new configuration '{}' from '{}' provider", nextConfig, providerName);
+        LOGGER.debug("onConfigurationAnnounce: received next configuration from '{}'",
+                providerName);
 
         preloadConfiguration(nextConfig);
     }
 
     private void preloadConfiguration(JsonObject nextConfig) {
-        LOGGER.trace("preloadConfiguration");
-
         if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
                 || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
             LOGGER.warn("preloadConfiguration: invalid configuration received");
@@ -124,7 +120,8 @@ public class ConfigurationWatcher {
             this.throttleProviderConfigReload(this.providersThrottleIntervalSec, providerName);
         }
 
-        LOGGER.info("preloadConfiguration: publishing configuration '{}' on '{}' ", nextConfig, providerName);
+        LOGGER.info("preloadConfiguration: publishing next configuration from '{}' provider",
+                providerName);
         this.eventBus.publish(providerName, nextConfig);
     }
 
@@ -135,8 +132,6 @@ public class ConfigurationWatcher {
     // Note that in the case it receives N new configs in the timeframe of the throttle duration
     // after publishing, it will publish the last of the newly received configurations.
     private void throttleProviderConfigReload(int throttleSec, String providerConfigReloadAddress) {
-        LOGGER.debug("throttleProviderConfigReload: for provider '{}'", providerConfigReloadAddress);
-
         Queue<JsonObject> ring = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
         this.vertx.setPeriodic(throttleSec * 1000, timerID -> {
@@ -144,7 +139,7 @@ public class ConfigurationWatcher {
             if (nextConfig == null) {
                 return;
             }
-            LOGGER.info("throttleProviderConfigReload: publishing configuration '{}' on '{}' ", nextConfig, CONFIG_VALIDATED_ADDRESS);
+            LOGGER.info("throttleProviderConfigReload: publishing configuration");
             this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
         });
 
@@ -155,8 +150,6 @@ public class ConfigurationWatcher {
     // handler for address: <provider> (e.g. file)
     private void onConfigReload(Message<JsonObject> message, Queue<JsonObject> ring) {
         JsonObject nextConfig = message.body();
-        LOGGER.debug("onConfigReload: config '{}'", nextConfig);
-
         JsonObject previousConfig = ring.peek();
         if (previousConfig == null) {
             ring.offer(nextConfig.copy());
@@ -172,7 +165,7 @@ public class ConfigurationWatcher {
     }
 
     private void listenConfigurations() {
-        LOGGER.trace("listenConfigurations");
+        LOGGER.debug("listenConfigurations");
         MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer =
                 this.eventBus.consumer(CONFIG_VALIDATED_ADDRESS);
 
@@ -182,7 +175,6 @@ public class ConfigurationWatcher {
     // handler for address: CONFIG_VALIDATED_ADDRESS
     private void onValidConfiguration(Message<JsonObject> message) {
         JsonObject nextConfig = message.body();
-        LOGGER.debug("onValidConfiguration: config '{}'", nextConfig);
 
         String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
         JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
@@ -198,20 +190,19 @@ public class ConfigurationWatcher {
 
 
         DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
-            LOGGER.debug(
-                    "onValidConfiguration: Informing listeners about new configuration '{}'",
+            LOGGER.debug("onValidConfiguration: Informing listeners about new configuration '{}'",
                     mergedConfig);
             for (Listener listener : this.configurationListeners) {
                 listener.listen(mergedConfig);
             }
         }).onFailure(err -> {
-            LOGGER.warn("onValidConfiguration: Ignoring invalid configuration for '{}' because of '{}'",
+            LOGGER.warn(
+                    "onValidConfiguration: Ignoring invalid configuration for '{}' because of '{}'",
                     providerName, err.getMessage());
         });
     }
 
     private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
-        LOGGER.trace("applyEntrypoints");
         JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
 
         if (httpConfig == null) {
@@ -267,8 +258,6 @@ public class ConfigurationWatcher {
     }
 
     private static JsonArray mergeRouters(String providerName, JsonArray rts, JsonArray mergedRts) {
-        LOGGER.trace("mergeRouters");
-
         if (rts == null) {
             return mergedRts;
         }
@@ -302,8 +291,6 @@ public class ConfigurationWatcher {
 
     private static JsonArray mergeMiddlewares(String providerName, JsonArray mws,
             JsonArray mergedMws) {
-        LOGGER.trace("mergeMiddlewares");
-
         if (mws == null) {
             return mergedMws;
         }
@@ -320,8 +307,6 @@ public class ConfigurationWatcher {
 
     private static JsonArray mergeServices(String providerName, JsonArray svs,
             JsonArray mergedSvs) {
-        LOGGER.trace("mergeServices");
-
         if (svs == null) {
             return mergedSvs;
         }
@@ -337,7 +322,6 @@ public class ConfigurationWatcher {
     }
 
     private static String getQualifiedName(String providerName, String name) {
-        LOGGER.trace("getQualifiedName");
         if (isQualifiedName(name)) {
             return name;
         }
@@ -345,12 +329,10 @@ public class ConfigurationWatcher {
     }
 
     private static String makeQualifiedName(String providerName, String name) {
-        LOGGER.trace("makeQualifiedName");
         return String.format("%s@%s", name, providerName);
     }
 
     private static boolean isQualifiedName(String name) {
-        LOGGER.trace("isQualifiedName");
         return name.contains("@");
     }
 }

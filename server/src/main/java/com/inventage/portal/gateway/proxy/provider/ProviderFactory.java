@@ -23,15 +23,14 @@ public interface ProviderFactory {
 
     class Loader {
         public static ProviderFactory getFactory(String providerName) {
-            LOGGER.trace("getFactory");
-            LOGGER.debug("getFactory: get provider '{}'", providerName);
+            LOGGER.debug("getFactory: get provider factory '{}'", providerName);
             final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class)
                     .stream().map(ServiceLoader.Provider::get)
                     .filter(instance -> instance.provides().equals(providerName)).findFirst();
             if (provider.isPresent()) {
                 return provider.get();
             }
-            LOGGER.warn("getFactory: provider not found '{}'", providerName);
+            LOGGER.warn("getFactory: provider factory not found '{}'", providerName);
             return null;
         }
     }

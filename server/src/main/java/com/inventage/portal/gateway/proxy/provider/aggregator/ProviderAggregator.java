@@ -21,6 +21,8 @@ public class ProviderAggregator extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderAggregator.class);
 
+    private static final String NAME = "providerAggregator";
+
     private Vertx vertx;
 
     private String configurationAddress;
@@ -29,7 +31,6 @@ public class ProviderAggregator extends Provider {
 
     public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers,
             JsonObject env) {
-        LOGGER.trace("construcutor");
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
         this.providers = providers;
@@ -37,13 +38,11 @@ public class ProviderAggregator extends Provider {
     }
 
     public void start(Promise<Void> startPromise) {
-        LOGGER.trace("start");
         provide(startPromise);
     }
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        LOGGER.trace("provide");
         List<Future> futures = new ArrayList<>();
         for (int i = 0; i < this.providers.size(); i++) {
             JsonObject providerConfig = this.providers.getJsonObject(i);
@@ -71,8 +70,12 @@ public class ProviderAggregator extends Provider {
         });
     }
 
+    public String toString() {
+        return NAME;
+    }
+
     private Future<String> launchProvider(Provider provider) {
-        LOGGER.trace("launchProvider");
+        LOGGER.debug("launchProvider: provider '{}'", provider);
         return this.vertx.deployVerticle(provider);
     }
 

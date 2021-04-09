@@ -44,8 +44,6 @@ public class DockerContainerService {
   private Record record;
 
   public DockerContainerService(Container container) {
-    LOGGER.trace("constructor");
-
     containerId = container.getId();
     containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
     if (!containerNames.isEmpty()) {
@@ -70,7 +68,6 @@ public class DockerContainerService {
   }
 
   private Record createRecord(Container container) {
-    LOGGER.trace("createRecord");
     Record record = new Record().setName(name);
 
     Map<String, String> labels = container.getLabels();

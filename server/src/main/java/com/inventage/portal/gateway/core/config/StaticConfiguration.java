@@ -55,8 +55,6 @@ public class StaticConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
-        LOGGER.trace("buildSchema");
-
         ObjectSchemaBuilder entrypointSchema =
                 Schemas.objectSchema().requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
                         .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
@@ -93,7 +91,6 @@ public class StaticConfiguration {
     }
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
-        LOGGER.trace("validate");
         if (schema == null) {
             schema = buildSchema(vertx);
         }
@@ -109,7 +106,7 @@ public class StaticConfiguration {
     }
 
     private static void validateProviders(JsonArray providers, Promise<Void> validPromise) {
-        LOGGER.trace("validateProviders");
+        LOGGER.debug("validateProviders: '{}'", providers);
         if (providers == null || providers.size() == 0) {
             LOGGER.warn("validateProviders: no providers defined");
             validPromise.complete();

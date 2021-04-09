@@ -67,7 +67,6 @@ public class ProxyApplication implements Application {
     private int providersThrottleDuration;
 
     public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
-        LOGGER.trace("construcutor");
         this.name = name;
         this.entrypoint = entrypoint;
         this.router = Router.router(vertx);
@@ -90,31 +89,26 @@ public class ProxyApplication implements Application {
     }
 
     public String toString() {
-        LOGGER.trace("toString");
         return String.format("%s:%s", getClass().getSimpleName(), name);
     }
 
     @Override
     public String rootPath() {
-        LOGGER.trace("rootPath");
         return rootPath;
     }
 
     @Override
     public Optional<Router> router() {
-        LOGGER.trace("router");
         return Optional.of(router);
     }
 
     @Override
     public String entrypoint() {
-        LOGGER.trace("entrypoint");
         return entrypoint;
     }
 
     @Override
     public Future<?> deployOn(Vertx vertx) {
-        LOGGER.trace("deployOn");
         String configurationAddress = "configuration-announce-address";
 
         ProviderAggregator aggregator =
