@@ -98,7 +98,6 @@ public class FileConfigProvider extends Provider {
         if (this.directory != null && this.directory.length() != 0) {
             LOGGER.info("getOptions: reading directory '{}'", this.directory);
 
-            // TODO document
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
                     .setConfig(new JsonObject().put("path", this.directory).put("filesets",
                             new JsonArray().add(new JsonObject().put("pattern", "general/*.json"))
@@ -121,11 +120,11 @@ public class FileConfigProvider extends Provider {
             LOGGER.debug("validateAndPublish: configuration validated for '{}'", filename);
             //
             this.eb.publish(this.configurationAddress,
-                    new JsonObject()
-                            .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
                             .put(StaticConfiguration.PROVIDER_FILE, filename)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
-            LOGGER.info("validateAndPublish: configuration published for '{}' on '{}' ", filename, this.configurationAddress);
+            LOGGER.info("validateAndPublish: configuration published for '{}' on '{}' ", filename,
+                    this.configurationAddress);
         }).onFailure(err -> {
             LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' in file '{}'",
                     err.getMessage(), filename);

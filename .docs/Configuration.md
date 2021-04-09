@@ -141,7 +141,7 @@ It supports providing configuration throught single configuration file or multip
 ##### Provider Configuration
 
 - `filename`: Defines the path to the configuration file.
-- `directory`: Defines the path to the directory that contains the configuration files.
+- `directory`: Defines the path to the directory that contains the configuration files. It is important to undestand how multiple configuration files are assembled: Generally, a deep merge (recursive) matches (sub) JSON objects in the existing tree and replaces all matching entries. JsonArrays are treated like any other entry, i.e. replaced entirely. This pattern is applied to all files being in the same directory. At the moment two sub-directories are supported: `general/` and `auth/`. Sub-directories are mostly merged the same way as described above with the exception of JsonArrays. JsonArrays are concatenated without duplicates.
 - `watch`: Set the watch option to `true` to automatically watch for file changes.
 
 **Note**: The ``filename`` and ``directory`` are mutually exlusive.
