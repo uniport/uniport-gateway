@@ -61,7 +61,7 @@ Die Run Configuration `portal-gateway: docker-compose` baut und startet den Port
 
 ### Produktives Environment
 
-Für den Start der produktiven Backend Systemen, kann der [Archetype](https://git.inventage.com/projects/PORTAL/repos/archetype-inventage-portal-solution) verwendet werden. Dabei sollte als artifactId `local-portal` gewählt werden oder aber der Wert von `host-prefix` in [portal-gateway.common.env](./docker-compose/src/main/resources/portal-gateway.common.env) geändert werden.
+Für den Start der produktiven Backend Systemen, kann der [Archetype](https://git.inventage.com/projects/PORTAL/repos/archetype-inventage-portal-solution) verwendet werden. Dabei müssen die Hostnamen der Backend Systemen im [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) gesetzt werden.
 
 ## Visulisierungen
 
