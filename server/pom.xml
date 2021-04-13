@@ -142,6 +142,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.oracle.substratevm</groupId>
+                <artifactId>native-image-maven-plugin</artifactId>
+                <version>1.0.0-rc14</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>native-image</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.inventage.portal.gateway.PortalGatewayLauncher</mainClass>
+                    <buildArgs>--initialize-at-run-time=io.netty -H:+ReportExceptionStackTraces</buildArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

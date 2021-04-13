@@ -31,6 +31,17 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 
 (Du kannst auch [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens) verwenden, falls du keine Passwörter in Dateien speichern möchtest)
 
+### Native Image
+
+Um Portal-Gateway mit GraalVM zu einem native Image zu kompilieren ist ein lokales Setup nötig:
+
+* [Installation GraalVM](https://www.graalvm.org/docs/getting-started/#install-graalvm)
+* [Installation Native Image](https://www.graalvm.org/reference-manual/native-image/#install-native-image) mit `gu install native-image`
+
+Nach `mvn clean package` wird das native Image unter `server/target/com.inventage.portal.gateway.portalgatewaylauncher` verfügbar sein.
+
+**Beachte**: `export PATH=/path/to/<graalvm>/bin:$PATH` muss gesetzt sein, ansonsten failt der Build mit `Error creating native image [..] Property 'Args' contains invalid entry [..]`
+
 ## Launch
 
 **Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
@@ -58,6 +69,18 @@ Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoa
 Die Run Configuration `portal-gateway: docker-compose` baut und startet den Portal Gateway Server aus der IDE in einem Docker Container. Es werden die gleichen Property Dateien wie oben verwendet.
 
 **Wichtig**: Damit die Service Discovery von Docker Containern funktioniert, wird `/var/run/docker.sock` in der Portal-Gateway gemounted. Wichtig dabei ist, dass der `docker.sock` die Berechtigung 666 (`sudo chmod 666 /var/run/docker.sock`) hat. Dabei gibt es [einige Sicherheitsaspekte](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) zu beachten.
+
+### Native Image
+
+Die statische Konfiguration kann über eine Environment Variable oder System Property mitgegeben werden:
+
+```bash
+export PORTAL_GATEWAY_JSON=${PWD}/server/portal-gateway; server/target/com.inventage.portal.gateway.portalgatewaylauncher
+```
+
+```bash
+server/target/com.inventage.portal.gateway.portalgatewaylauncher -DPORTAL_GATEWAY_JSON=${PWD}/server/portal-gateway
+```
 
 ### Produktives Environment
 
