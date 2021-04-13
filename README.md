@@ -44,19 +44,11 @@ Nach `mvn clean package` wird das native Image unter `server/target/com.inventag
 
 ## Launch
 
-**Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
+**Beachte**: MacOS Nutzer **müssen** Docker verwenden, um den Portal-Gateway out-of-the-box zu starten und den Docker Provider verwenden zu können. Der Grund dahinter ist, dass die Microservices hinter dem Portal-Gateway nicht auf einem Port published sind und dementsprechend nicht direkt ansprechbar sind (siehe [Docker Documentation](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)).
 
 ### IDE
 
 Die Run Configuration `PortalGateway` startet den Portal Gateway Server aus der IDE. Dabei werden die beiden Property Dateien [portal-gateway.common.env](./docker-compose/src/main/resources/portal-gateway.common.env) und [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) zur Konfiguration verwendet.
-
-Damit also die [Testkonfiguration](./server/src/test/resources/portal-gateway.json) unter `./server/src/test/resources/portal-gateway.json` verwendet wird, muss in der portal-gateway.specific.env Datei folgender Eintrag ergänzt werden:
-
-```dotenv
-PORTAL_GATEWAY_JSON=./src/test/resources/portal-gateway.json
-```
-
-Eventuell muss der Pfad zur *dynamischen* File Configuration angepasst werden.
 
 Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoami: docker-compose` verwendet werden.
 
@@ -85,6 +77,30 @@ server/target/com.inventage.portal.gateway.portalgatewaylauncher -DPORTAL_GATEWA
 ### Produktives Environment
 
 Für den Start der produktiven Backend Systemen, kann der [Archetype](https://git.inventage.com/projects/PORTAL/repos/archetype-inventage-portal-solution) verwendet werden. Dabei müssen die Hostnamen der Backend Systemen im [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) gesetzt werden.
+Zum Beispiel mit einer `artifactId` von `local-portal` kann die `portal-gateway.specific.env` so aussehen:
+
+```
+portal-iam.host=local-portal-portal-iam
+portal-iam.port=8080
+
+dashboard-frontend.host=local-portal-dashboard-frontend
+dashboard-frontend.port =20025
+
+dashboard-service.host=local-portal-dashboard-service
+dashboard-service.port=20022
+
+navigation-frontend.host=local-portal-navigation-frontend
+navigation-frontend.port=20015
+
+navigation-service.host=local-portal-navigation-service
+navigation-service.port=20012
+
+organisation-proxy.host=local-portal-organisation-proxy-public
+organisation-proxy.port=20030
+
+document-proxy.host=local-portal-document-proxy-public
+document-proxy.port=20050
+```
 
 ## Visulisierungen
 
