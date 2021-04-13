@@ -18,7 +18,7 @@
   "providers": [
     {
       "name": "file",
-      "directory": "/etc/portal-gateway/dynamic-config",
+      "directory": "./dynamic-config",
       "watch": false
     }
   ]

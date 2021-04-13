@@ -1,7 +1,9 @@
 package com.inventage.portal.gateway.proxy.provider.file;
 
 import java.io.File;
+import java.nio.file.Path;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
+import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
@@ -27,9 +29,10 @@ public class FileConfigProvider extends Provider {
 
     private EventBus eb;
     private String configurationAddress;
+    private Path staticConfigDir;
 
-    private String filename;
-    private String directory;
+    private Path filename;
+    private Path directory;
     private Boolean watch;
 
     private JsonObject env;
@@ -42,9 +45,10 @@ public class FileConfigProvider extends Provider {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
+        this.staticConfigDir = PortalGatewayConfigRetriever.getStaticConfigDir();
 
-        this.filename = filename;
-        this.directory = directory;
+        this.filename = Path.of(filename);
+        this.directory = Path.of(directory);
         this.watch = watch;
 
         this.env = env;
@@ -80,17 +84,16 @@ public class FileConfigProvider extends Provider {
     }
 
     private ConfigRetrieverOptions getOptions() {
-        // TODO filename/directory relative to portal-gateway.json if path is relative, otherwise
-        // absolute
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
             LOGGER.info("getOptions: setting scan period to '{}'", this.scanPeriodMs);
             options.setScanPeriod(this.scanPeriodMs);
         }
-        if (this.filename != null && this.filename.length() != 0) {
-            LOGGER.info("getOptions: reading file '{}'", this.filename);
 
-            final File file = new File(this.filename);
+        if (this.filename != null) {
+            File file = this.getAbsoluteConfigPath(this.filename).toFile();
+            LOGGER.info("getOptions: reading file '{}'", file.getAbsolutePath());
+
             ConfigStoreOptions fileStore =
                     new ConfigStoreOptions().setType("file").setFormat("json")
                             .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
@@ -99,11 +102,12 @@ public class FileConfigProvider extends Provider {
             return options.addStore(fileStore);
         }
 
-        if (this.directory != null && this.directory.length() != 0) {
-            LOGGER.info("getOptions: reading directory '{}'", this.directory);
+        if (this.directory != null) {
+            Path path = this.getAbsoluteConfigPath(this.directory);
+            LOGGER.info("getOptions: reading directory '{}'", path);
 
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
-                    .setConfig(new JsonObject().put("path", this.directory).put("filesets",
+                    .setConfig(new JsonObject().put("path", path.toString()).put("filesets",
                             new JsonArray().add(new JsonObject().put("pattern", "general/*.json"))
                                     .add(new JsonObject().put("pattern", "auth/*.json"))));
 
@@ -116,6 +120,16 @@ public class FileConfigProvider extends Provider {
         return options;
     }
 
+    private Path getAbsoluteConfigPath(Path path) {
+        if (path.isAbsolute()) {
+            LOGGER.debug("getAbsoluteConfigPath: using absolute file path");
+            return path;
+        }
+        LOGGER.debug("getAbsoluteConfigPath: using path relative to the static config file in '{}'",
+                this.staticConfigDir.toAbsolutePath());
+        return this.staticConfigDir.resolve(path).normalize();
+    }
+
     private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
         return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
     }
@@ -124,7 +138,6 @@ public class FileConfigProvider extends Provider {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
-                            .put(StaticConfiguration.PROVIDER_FILE, filename)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
             LOGGER.info("validateAndPublish: configuration published from '{}'", this.source);
         }).onFailure(err -> {
