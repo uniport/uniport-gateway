@@ -4,16 +4,16 @@
       {
         "name": "dashboardAuthBearer",
         "type": "authorizationBearer",
-        "options": { "sessionScope": "dashboardScope" }
+        "options": { "sessionScope": "Dashboard" }
       },
       {
         "name": "dashboardOauth2",
         "type": "oauth2",
         "options": {
-          "clientId": "Dashboard",
-          "clientSecret": "Dashboard!",
+          "clientId": "Portal-Gateway",
+          "clientSecret": "Portal-Gateway!",
           "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "dashboardScope"
+          "sessionScope": "Dashboard"
         }
       },
 
@@ -26,32 +26,32 @@
       {
         "name": "organisationAuthBearer",
         "type": "authorizationBearer",
-        "options": { "sessionScope": "organisationScope" }
+        "options": { "sessionScope": "Organisation" }
       },
       {
         "name": "organisationOauth2",
         "type": "oauth2",
         "options": {
-          "clientId": "Organisation",
-          "clientSecret": "Organisation!",
+          "clientId": "Portal-Gateway",
+          "clientSecret": "Portal-Gateway!",
           "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "organisationScope"
+          "sessionScope": "Organisation"
         }
       },
 
       {
         "name": "documentAuthBearer",
         "type": "authorizationBearer",
-        "options": { "sessionScope": "documentScope" }
+        "options": { "sessionScope": "Document" }
       },
       {
         "name": "documentOauth2",
         "type": "oauth2",
         "options": {
-          "clientId": "Document",
-          "clientSecret": "Document!",
+          "clientId": "Portal-Gateway",
+          "clientSecret": "Portal-Gateway!",
           "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "documentScope"
+          "sessionScope": "Document"
         }
       }
     ]
