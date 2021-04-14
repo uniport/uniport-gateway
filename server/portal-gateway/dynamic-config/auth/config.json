@@ -53,6 +53,11 @@
           "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "Document"
         }
+      },
+
+      {
+        "name": "ShowSessionContentMiddleware",
+        "type": "_session_"
       }
     ]
   }

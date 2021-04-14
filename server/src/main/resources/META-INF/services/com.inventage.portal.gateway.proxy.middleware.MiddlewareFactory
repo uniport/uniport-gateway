@@ -3,3 +3,4 @@ com.inventage.portal.gateway.proxy.middleware.authorizationBearer.AuthorizationB
 com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.debug.ShowSessionContentMiddlewareFactory
