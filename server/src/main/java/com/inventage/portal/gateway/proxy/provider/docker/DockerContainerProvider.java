@@ -71,8 +71,6 @@ public class DockerContainerProvider extends Provider {
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        this.getOrCreateDockerContainerDiscovery();
-
         MessageConsumer<JsonObject> consumer = this.eb.consumer(ANNOUNCE_ADDRESS);
         consumer.handler(message -> {
             JsonObject config = this.buildConfiguration(message.body());
@@ -86,6 +84,9 @@ public class DockerContainerProvider extends Provider {
                 consumer.unregister();
             }
         });
+
+        this.getOrCreateDockerContainerDiscovery();
+
         startPromise.complete();
     }
 
@@ -95,7 +96,7 @@ public class DockerContainerProvider extends Provider {
 
     private ServiceDiscovery getOrCreateDockerContainerDiscovery() {
         if (this.dockerDiscovery == null) {
-            this.dockerDiscovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
+            this.dockerDiscovery = ServiceDiscovery.create(this.vertx, new ServiceDiscoveryOptions()
                     .setAnnounceAddress(ANNOUNCE_ADDRESS).setName("docker-discovery"));
             this.dockerDiscovery.registerServiceImporter(new DockerContainerServiceImporter(),
                     new JsonObject().put("docker-tls-verify", this.TLS).put("docker-host",
@@ -112,6 +113,9 @@ public class DockerContainerProvider extends Provider {
 
         String status = dockerContainer.getString("status");
         if (status.equals("DOWN")) {
+            LOGGER.debug(
+                    "buildConfiguration: received announcement of removed docker container '{}'",
+                    containerName);
             if (this.configurations.containsKey(containerId)) {
                 this.configurations.remove(containerId);
                 return DynamicConfiguration.merge(this.configurations);
@@ -121,10 +125,12 @@ public class DockerContainerProvider extends Provider {
             LOGGER.warn("buildConfiguration: unkown status type: '{}'", status);
             return null;
         }
+        LOGGER.debug("buildConfiguration: received announcement of new docker container '{}'",
+                containerName);
 
         JsonObject extraConfig = filterExtraConfig(labels);
         if (!keepContainer(extraConfig)) {
-            LOGGER.debug("buildConfiguration: ignoring container '{}'", containerName);
+            LOGGER.debug("buildConfiguration: ignoring docker container '{}'", containerName);
             return null;
         }
 
@@ -142,13 +148,6 @@ public class DockerContainerProvider extends Provider {
         }
 
         JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
-        if (httpConfFromLabels.getJsonArray(DynamicConfiguration.ROUTERS).size() == 0
-                && httpConfFromLabels.getJsonArray(DynamicConfiguration.MIDDLEWARES).size() == 0
-                && httpConfFromLabels.getJsonArray(DynamicConfiguration.SERVICES).size() == 0) {
-            this.configurations.put(containerId, confFromLabels);
-            return DynamicConfiguration.merge(this.configurations);
-        }
-
         JsonArray ports = labels.getJsonArray("docker.ports");
         String serviceName = containerName;
         int port = getPort(httpConfFromLabels, ports, serviceName, containerName);

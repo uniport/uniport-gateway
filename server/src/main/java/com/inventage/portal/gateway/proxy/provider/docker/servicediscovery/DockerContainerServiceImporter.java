@@ -146,7 +146,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         if (completion != null) {
           completion.fail(ar.cause());
         } else {
-          LOGGER.error("Fail to import services from docker", ar.cause());
+          LOGGER.warn("scan: Failed to import services from docker", ar.cause());
         }
         return;
       }
@@ -179,19 +179,18 @@ public class DockerContainerServiceImporter implements ServiceImporter {
   }
 
   private void publish(DockerContainerService service) {
-    publisher.publish(service.record(), ar -> {
-      if (ar.succeeded()) {
-        service.record().setRegistration(ar.result().getRegistration());
-        LOGGER.info("Service from container '{}' has been published", service.name());
-      } else {
-        LOGGER.info("Service from container '{}' could not have been published", service.name());
-      }
+    publisher.publish(service.record()).onSuccess(record -> {
+      service.record().setRegistration(record.getRegistration());
+      LOGGER.info("publish: Service from container '{}' has been published", service.name());
+    }).onFailure(err -> {
+      LOGGER.warn("publish: Service from container '{}' could not have been published",
+          service.name());
     });
   }
 
   private void unpublish(DockerContainerService service) {
     publisher.unpublish(service.record().getRegistration(), ar -> {
-      LOGGER.info("Service from container '{}' has been unpublished", service.name());
+      LOGGER.info("unpublish: Service from container '{}' has been unpublished", service.name());
     });
   }
 
@@ -229,7 +228,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
       client.close();
       LOGGER.info("Successfully closed the service importer " + this);
     } catch (IOException e) {
-      LOGGER.error("A failure has been caught while stopping " + this, e);
+      LOGGER.warn("A failure has been caught while stopping " + this, e);
     }
     if (completionHandler != null) {
       completionHandler.handle(null);
