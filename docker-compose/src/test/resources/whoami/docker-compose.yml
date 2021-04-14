@@ -6,12 +6,11 @@ services:
     expose:
       - "80"
     networks:
-      - portal-gateway-whoami
+      - portal-gateway
     labels:
       - "portal.enable=true"
-      - "portal.docker.network=portal-gateway-whoami"
       - "portal.http.routers.root.rule=Path('/')"
 
 networks:
-  portal-gateway-whoami:
-    name: portal-gateway-whoami
+  portal-gateway:
+    external: true
