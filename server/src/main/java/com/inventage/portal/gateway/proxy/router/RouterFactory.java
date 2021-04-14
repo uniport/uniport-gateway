@@ -243,7 +243,7 @@ public class RouterFactory {
     private RoutingRule parseRule(Vertx vertx, String rule) {
         LOGGER.trace("parseRule");
         Pattern rulePattern = Pattern
-                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[a-zA-Z\\/]+)'\\)$");
+                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {
