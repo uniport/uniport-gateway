@@ -29,7 +29,7 @@ public class DockerContainerProviderFactory implements ProviderFactory {
                                 StaticConfiguration.PROVIDER_DOCKER_DEFAULT_RULE,
                                 defaultTemplateRule);
                 Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH,
-                                false);
+                                true);
                 return new DockerContainerProvider(vertx, configurationAddress, endpoint,
                                 exposedByDefault, network, defaultRule, watch);
         }

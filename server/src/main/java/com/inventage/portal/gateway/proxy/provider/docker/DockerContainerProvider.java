@@ -81,6 +81,7 @@ public class DockerContainerProvider extends Provider {
             validateAndPublish(config);
 
             if (!this.watch) {
+                LOGGER.debug("provde: stop listening for new configurations");
                 consumer.unregister();
             }
         });
