@@ -57,7 +57,8 @@
 
       {
         "name": "ShowSessionContentMiddleware",
-        "type": "_session_"
+        "type": "_session_",
+        "options": {}
       }
     ]
   }
