@@ -43,8 +43,9 @@ public class ShowSessionContentMiddleware implements Middleware {
         final Map<String, Object> data = ctx.session().data();
         data.keySet().stream()
                 .filter(key -> key.endsWith("_access_token"))
+                .peek(key -> html.append("\n\n").append(key).append(":\n"))
                 .map(key -> data.get(key))
-                .forEach(value -> html.append("\n\n").append("access token:\n").append(value));
+                .forEach(value -> html.append(value));
 
         return html.toString();
     }
