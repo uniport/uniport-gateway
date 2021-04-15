@@ -12,24 +12,26 @@ import io.vertx.ext.web.handler.OAuth2AuthHandler;
  */
 public class OAuth2AuthMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
 
-    private OAuth2AuthHandler authHandler;
-    private String sessionScope;
+        private OAuth2AuthHandler authHandler;
+        private String sessionScope;
 
-    public OAuth2AuthMiddleware(OAuth2AuthHandler authHandler, String sessionScope) {
-        this.authHandler = authHandler;
-        this.sessionScope = sessionScope;
-    }
+        public OAuth2AuthMiddleware(OAuth2AuthHandler authHandler, String sessionScope) {
+                LOGGER.debug("constructor: for session scope '{}'", sessionScope);
+                this.authHandler = authHandler;
+                this.sessionScope = sessionScope;
+        }
 
-    @Override
-    public void handle(RoutingContext ctx) {
-        User sessionScopeUser = ctx.session().get(
-                String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_USER_FORMAT, sessionScope));
-        ctx.setUser(sessionScopeUser);
+        @Override
+        public void handle(RoutingContext ctx) {
+                LOGGER.debug("handle: '{}'", ctx.request().absoluteURI());
+                User sessionScopeUser = ctx.session().get(String.format(
+                                OAuth2MiddlewareFactory.SESSION_SCOPE_USER_FORMAT, sessionScope));
+                ctx.setUser(sessionScopeUser);
 
-        LOGGER.debug("handle: Handling auth request");
-        authHandler.handle(ctx);
-        LOGGER.debug("handle: Handled auth request");
-    }
+                LOGGER.debug("handle: Handling auth request");
+                authHandler.handle(ctx);
+                LOGGER.debug("handle: Handled auth request");
+        }
 }

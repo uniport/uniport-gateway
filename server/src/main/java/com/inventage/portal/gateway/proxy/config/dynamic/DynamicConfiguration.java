@@ -67,9 +67,12 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
 
+    // type of middleware
+    public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
+
     public static final List<String> MIDDLEWARE_TYPES =
             Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX, MIDDLEWARE_REDIRECT_REGEX,
-                    MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2);
+                    MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2, MIDDLEWARE_SHOW_SESSION_CONTENT);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -379,8 +382,11 @@ public class DynamicConfiguration {
 
                     break;
                 }
+                case MIDDLEWARE_SHOW_SESSION_CONTENT: {
+                    break;
+                }
                 default: {
-                    errMsg = "Unknown middleware";
+                    errMsg = String.format("Unknown middleware: '%s'", mwType);
                     valid = false;
                 }
             }

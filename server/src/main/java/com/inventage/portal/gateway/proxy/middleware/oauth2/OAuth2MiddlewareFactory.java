@@ -33,7 +33,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         private final static String ACCESS_TOKEN = "access_token";
 
         private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
-        private static final String OAUTH2_SCOPE = "openid";
+        private static final String OIDC_SCOPE = "openid";
 
         @Override
         public String provides() {
@@ -114,7 +114,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
                         OAuth2AuthHandler authHandler = OAuth2AuthHandler
                                         .create(vertx, authProvider, callbackURL)
-                                        .setupCallback(callback).withScope(OAUTH2_SCOPE);
+                                        // add the sessionScope as a OIDC scope for "aud" in JWT
+                                        // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
+                                        .setupCallback(callback).withScope(OIDC_SCOPE + " " + sessionScope);
 
                         oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
                         LOGGER.debug("create: Created '{}' middleware successfully",

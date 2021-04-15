@@ -53,6 +53,7 @@
         "name": "organisation-service",
         "middlewares": [
           "organisationRedirectRegex",
+          "ShowSessionContentMiddleware",
           "organisationOauth2",
           "organisationAuthBearer",
           "organisationReplacePath"
