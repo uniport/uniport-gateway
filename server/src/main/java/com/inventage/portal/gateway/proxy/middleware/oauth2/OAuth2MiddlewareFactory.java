@@ -4,6 +4,7 @@ import java.net.URI;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
@@ -93,24 +94,20 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                                 ctx.next();
                         });
 
-                        OAuth2Options keycloakOAuth2Options =
-                                        ((OAuth2AuthProviderImpl) authProvider).getConfig();
+                        OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-                        String publicHostname = middlewareConfig.getString("publicHostname");
-                        String entrypointPort = middlewareConfig.getString("entrypointPort");
+                        // the protocol, hostname or port can be different then the portal-gateway knows
+                        String publicUrl = middlewareConfig.getString(RouterFactory.PUBLIC_URL);
                         try {
                                 final URI uri = new URI(
                                                 keycloakOAuth2Options.getAuthorizationPath());
-                                final String newAuthorizationPath = String.format("%s://%s:%s%s",
-                                                "http", publicHostname, entrypointPort,
-                                                uri.getPath());
+                                final String newAuthorizationPath = String.format("%s%s", publicUrl, uri.getPath());
                                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
                         } catch (Exception e) {
                                 LOGGER.warn("create: Failed to patch authorization path");
                         }
 
-                        String callbackURL = String.format("http://%s:%s%s", publicHostname,
-                                        entrypointPort, callback.getPath());
+                        String callbackURL = String.format("%s%s", publicUrl, callback.getPath());
 
                         OAuth2AuthHandler authHandler = OAuth2AuthHandler
                                         .create(vertx, authProvider, callbackURL)

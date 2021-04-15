@@ -53,7 +53,7 @@
         "options": {
           "clientId": "Portal-Gateway",
           "clientSecret": "Portal-Gateway!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
+          "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "Organisation"
         }
       },
@@ -69,7 +69,7 @@
         "options": {
           "clientId": "Portal-Gateway",
           "clientSecret": "Portal-Gateway!",
-          "discoveryUrl": "http://${host-prefix}${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
+          "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
           "sessionScope": "Dashboard"
         }
       },
@@ -122,21 +122,21 @@
       {
         "name": "portal-iam",
         "servers": [
-          { "host": "${host-prefix}${portal-iam.host}", "port": 8080 }
+          { "host": "${portal-iam.host}", "port": 8080 }
         ]
       },
 
       {
         "name": "whoami1-service",
         "servers": [
-          { "host": "${host-prefix}${whoami1.host}", "port": 8001 }
+          { "host": "${whoami1.host}", "port": 8001 }
         ]
       },
 
       {
         "name": "whoami2-service",
         "servers": [
-          { "host": "${host-prefix}${whoami2.host}", "port": 8002 }
+          { "host": "${whoami2.host}", "port": 8002 }
         ]
       }
     ]

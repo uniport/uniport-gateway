@@ -24,16 +24,14 @@ public class Entrypoint {
 
     private final Vertx vertx;
     private final String name;
-    private final String publicHostname;
     private final int port;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(String name, String publicHostname, int port, Vertx vertx) {
+    public Entrypoint(String name, int port, Vertx vertx) {
         this.vertx = vertx;
         this.name = name;
-        this.publicHostname = publicHostname;
         this.port = port;
         this.enabled = true;
     }

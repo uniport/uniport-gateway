@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.router;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,16 +40,18 @@ import io.vertx.ext.web.RoutingContext;
  * directly equal to the length of the rule, and so the longest length has the highest priority.
  */
 public class RouterFactory {
+
+    public static final String PUBLIC_URL = "publicUrl";
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
     private Vertx vertx;
+    private String publicUrl;
     private String publicHostname;
     private String entrypointPort;
 
-    public RouterFactory(Vertx vertx, String publicHostname, String entrypointPort) {
+    public RouterFactory(Vertx vertx, String publicUrl) {
         this.vertx = vertx;
-        this.publicHostname = publicHostname;
-        this.entrypointPort = entrypointPort;
+        this.publicUrl = publicUrl;
     }
 
     public Future<Router> createRouter(JsonObject dynamicConfig) {
@@ -100,8 +103,7 @@ public class RouterFactory {
                     // needed to ensure authenticating requests are routed through this application
                     // TODO this does not work when published != exposed port
                     if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
-                        middlewareOptions.put("publicHostname", this.publicHostname);
-                        middlewareOptions.put("entrypointPort", this.entrypointPort);
+                        middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
                     }
 
                     MiddlewareFactory middlewareFactory =
