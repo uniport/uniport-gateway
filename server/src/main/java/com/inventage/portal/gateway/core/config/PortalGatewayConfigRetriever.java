@@ -53,41 +53,49 @@ public class PortalGatewayConfigRetriever {
         return options;
     }
 
+    /**
+     * Implements the strategy for finding the static configuration file.
+     *
+     * @return
+     */
     private static Optional<ConfigStoreOptions> getPortalGatewayJson() {
-        final String envValue = System.getenv(PROPERTY);
-        if (existsAsFile(envValue)) {
-            LOGGER.info("getPortalGatewayJson: reading from system env variable as '{}'", envValue);
-            return Optional.of(configStoreOptions(envValue));
+        // 1.
+        String staticConfigFileName = System.getenv(PROPERTY);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from system env variable as '{}'", staticConfigFileName);
+            return Optional.of(configStoreOptions(staticConfigFileName));
         }
-        final String sysValue = System.getProperty(PROPERTY);
-        if (existsAsFile(sysValue)) {
-            LOGGER.info("getPortalGatewayJson: reading from system property as '{}'", sysValue);
-            return Optional.of(configStoreOptions(envValue));
+        // 2.
+        staticConfigFileName = System.getProperty(PROPERTY);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from system property as '{}'", staticConfigFileName);
+            return Optional.of(configStoreOptions(staticConfigFileName));
         }
-        if (existsAsFile(DEFAULT_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading from default file path '{}'",
-                    DEFAULT_CONFIG_FILE_PATH);
-            return Optional.of(configStoreOptions(DEFAULT_CONFIG_FILE_PATH));
+        // 3.
+        staticConfigFileName = String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from default file '{}'", staticConfigFileName);
+            return Optional.of(configStoreOptions(staticConfigFileName));
         }
-        if (existsAsFile(LOCAL_CONFIG_FILE_PATH)) {
-            LOGGER.info("getPortalGatewayJson: reading from working directory '{}'",
-                    new File(".").getAbsolutePath());
-            return Optional.of(configStoreOptions(LOCAL_CONFIG_FILE_PATH));
+        // 4.
+        staticConfigFileName = String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from default file within working directory '{}'",
+                    staticConfigFileName);
+            return Optional.of(configStoreOptions(staticConfigFileName));
         }
         LOGGER.warn("getPortalGatewayJson: no portal-gateway.json file configured");
         return Optional.empty();
     }
 
-    private static ConfigStoreOptions configStoreOptions(String filePath) {
-        String fileName = String.format("%s/%s", filePath, DEFAULT_CONFIG_FILE_NAME);
+    private static ConfigStoreOptions configStoreOptions(String fileName) {
         final File file = new File(fileName);
         return new ConfigStoreOptions().setType("file")
                 .setFormat(file.getName().endsWith("json") ? "json" : "properties").setConfig(
                         new JsonObject().put("path", file.getAbsolutePath()).put("raw-data", true));
     }
 
-    private static boolean existsAsFile(String filePath) {
-        String fileName = String.format("%s/%s", filePath, DEFAULT_CONFIG_FILE_NAME);
+    private static boolean existsAsFile(String fileName) {
         return fileName != null && new File(fileName).exists();
     }
 
