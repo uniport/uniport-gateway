@@ -31,8 +31,12 @@ public class ShowSessionContentMiddleware implements Middleware {
         }
     }
 
+    // TODO: usage of vert.x templating for HTML generation
     private String getHtml(RoutingContext ctx) {
         final StringBuffer html = new StringBuffer();
+
+        html.append("vertx-web.session=").append(ctx.session().id());
+        html.append("\n\n");
 
         String idToken = ctx.session().get(OAuth2MiddlewareFactory.ID_TOKEN);
         if (idToken != null) {
