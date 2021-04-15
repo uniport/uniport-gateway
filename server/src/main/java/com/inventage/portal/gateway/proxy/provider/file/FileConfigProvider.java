@@ -45,7 +45,8 @@ public class FileConfigProvider extends Provider {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
-        this.staticConfigDir = PortalGatewayConfigRetriever.getStaticConfigDir();
+        PortalGatewayConfigRetriever.getStaticConfigPath()
+                .ifPresent(path -> this.staticConfigDir = path.getParent());
 
         if (filename != null && filename.length() != 0) {
             this.filename = Path.of(filename);
@@ -108,8 +109,14 @@ public class FileConfigProvider extends Provider {
 
         if (this.directory != null) {
             Path path = this.getAbsoluteConfigPath(this.directory);
-            LOGGER.info("getOptions: reading directory '{}'", path);
+            if (path == null) {
+                LOGGER.warn("getOptions: failed to create absolute config path of '{}'",
+                        this.directory);
+                this.source = "undefined";
+                return options;
+            }
 
+            LOGGER.info("getOptions: reading directory '{}'", path);
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
                     .setConfig(new JsonObject().put("path", path.toString()).put("filesets",
                             new JsonArray().add(new JsonObject().put("pattern", "general/*.json"))
@@ -128,6 +135,12 @@ public class FileConfigProvider extends Provider {
         if (path.isAbsolute()) {
             LOGGER.debug("getAbsoluteConfigPath: using absolute file path");
             return path;
+        }
+        if (this.staticConfigDir == null) {
+            LOGGER.warn(
+                    "getAbsoluteConfigPath: no static config dir defined. Cannot assemble absolute config path from '{}'",
+                    path);
+            return null;
         }
         LOGGER.debug("getAbsoluteConfigPath: using path relative to the static config file in '{}'",
                 this.staticConfigDir.toAbsolutePath());

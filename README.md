@@ -52,7 +52,7 @@ Die Run Configuration `PortalGateway` startet den Portal Gateway Server aus der 
 
 Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoami: docker-compose` verwendet werden.
 
-**Beachte**: Um die `whoami: docker-compose` Run Configuration direkt von IntelliJ zu starten, muss du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren. Zudem muss das Plugin `net.ashald.envfile` in IntelliJ installiert werden.
+**Beachte**: Um die `whoami: docker-compose` Run Configuration direkt von IntelliJ zu starten, musst du den Support für [Docker in IntelliJ](https://www.jetbrains.com/help/idea/docker.html) aktivieren. Zudem muss das Plugin `net.ashald.envfile` in IntelliJ installiert werden.
 
 (Alternativ, kannst du die Docker-Compose auch direkt von der Command Line benutzen).
 
