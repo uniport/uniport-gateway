@@ -47,8 +47,12 @@ public class FileConfigProvider extends Provider {
         this.configurationAddress = configurationAddress;
         this.staticConfigDir = PortalGatewayConfigRetriever.getStaticConfigDir();
 
-        this.filename = Path.of(filename);
-        this.directory = Path.of(directory);
+        if (filename != null && filename.length() != 0) {
+            this.filename = Path.of(filename);
+        }
+        if (directory != null && directory.length() != 0) {
+            this.directory = Path.of(directory);
+        }
         this.watch = watch;
 
         this.env = env;
