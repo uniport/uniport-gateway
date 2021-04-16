@@ -64,16 +64,19 @@ public class AuthorizationBearerMiddlewareTest {
                         req.headers().get(HttpHeaders.AUTHORIZATION), "should match token");
             });
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+        }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
+            serverStarted.flag();
+            // server is started, we can proceed
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
+                    .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
+                testCtx.verify(() -> {
+                    assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                });
+                responseReceived.flag();
+            }));
+        }));
 
-        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-                    testCtx.verify(() -> {
-                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                "should not contain auth header");
-                    });
-                    responseReceived.flag();
-                }));
     }
 
     @Test
@@ -114,16 +117,20 @@ public class AuthorizationBearerMiddlewareTest {
                         req.headers().get(HttpHeaders.AUTHORIZATION), "should match token");
             });
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+        }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
+            serverStarted.flag();
+            // server is started, we can proceed
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
+                    .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
+                testCtx.verify(() -> {
+                    assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                });
+                responseReceived.flag();
+            }));
 
-        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-                    testCtx.verify(() -> {
-                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                "should not contain auth header");
-                    });
-                    responseReceived.flag();
-                }));
+        }));
+
     }
 
     @Test
@@ -162,15 +169,18 @@ public class AuthorizationBearerMiddlewareTest {
                         "should not contain auth header");
             });
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+        }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
+            serverStarted.flag();
+            // server is started, we can proceed
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
+                    .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
+                testCtx.verify(() -> {
+                    assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                });
+                responseReceived.flag();
+            }));
+        }));
 
-        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-                    testCtx.verify(() -> {
-                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                "should not contain auth header");
-                    });
-                    responseReceived.flag();
-                }));
     }
 }
