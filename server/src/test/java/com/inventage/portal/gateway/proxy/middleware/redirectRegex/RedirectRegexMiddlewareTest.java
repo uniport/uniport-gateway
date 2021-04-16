@@ -2,6 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.stream.Stream;
+
+import com.inventage.portal.gateway.TestUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -41,7 +43,7 @@ public class RedirectRegexMiddlewareTest {
 
         RedirectRegexMiddleware redirect = new RedirectRegexMiddleware(regex, replacement);
 
-        int port = 8888;
+        int port = TestUtils.findFreePort();
         Router router = Router.router(vertx);
         router.route().handler(redirect).handler(ctx -> ctx.response().end("ok"));
         vertx.createHttpServer().requestHandler(req -> {
