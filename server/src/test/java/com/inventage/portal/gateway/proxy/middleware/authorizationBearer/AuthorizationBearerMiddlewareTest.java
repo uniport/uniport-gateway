@@ -26,11 +26,10 @@ import io.vertx.junit5.VertxTestContext;
 public class AuthorizationBearerMiddlewareTest {
 
     String host = "localhost";
-    int port = TestUtils.findFreePort();
-
 
     @Test
     void setIdToken(Vertx vertx, VertxTestContext testCtx) {
+        int port = TestUtils.findFreePort();
         String tokenName = OAuth2MiddlewareFactory.ID_TOKEN;
         String token = "alterEgo";
 
@@ -79,6 +78,7 @@ public class AuthorizationBearerMiddlewareTest {
 
     @Test
     void setAccessToken(Vertx vertx, VertxTestContext testCtx) {
+        int port = TestUtils.findFreePort();
         String sessionScope = "testScope";
         String token = "mayIAccessThisRessource";
 
@@ -128,6 +128,7 @@ public class AuthorizationBearerMiddlewareTest {
 
     @Test
     void setNoToken(Vertx vertx, VertxTestContext testCtx) {
+        int port = TestUtils.findFreePort();
         String token = "mayIAccessThisRessource";
         String sessionScope = "someScope";
         String someOtherSessionScope = "anotherScope";

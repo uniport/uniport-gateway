@@ -23,7 +23,6 @@ import io.vertx.junit5.VertxTestContext;
 public class HeaderMiddlewareTest {
 
     String host = "localhost";
-    int port = TestUtils.findFreePort();
 
     static Stream<Arguments> requestHeaderTestData() {
         return Stream.of(//
@@ -42,6 +41,7 @@ public class HeaderMiddlewareTest {
     @MethodSource("requestHeaderTestData")
     void requestHeaderTest(String name, Map<String, String> reqHeaders,
             Map<String, String> expectedReqHeaders, Vertx vertx, VertxTestContext testCtx) {
+        int port = TestUtils.findFreePort();
 
         String failureMsgFormat = "Failure of '%s' test case: %s";
 
@@ -101,6 +101,7 @@ public class HeaderMiddlewareTest {
     @MethodSource("responseHeaderTestData")
     void responseHeaderTest(String name, Map<String, String> respHeaders,
             Map<String, String> expectedRespHeaders, Vertx vertx, VertxTestContext testCtx) {
+        int port = TestUtils.findFreePort();
 
         String failureMsgFormat = "Failure of '%s' test case: %s";
 
