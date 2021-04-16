@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.core;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,13 +28,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
-    // env variable
-    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME = "PORTAL_GATEWAY_PUBLIC_HOSTNAME";
-    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
-
-    private String publicHostname;
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
@@ -44,9 +39,6 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             try {
                 final JsonObject staticConfig = asyncResult.result();
                 StaticConfiguration.validate(vertx, staticConfig).onSuccess(handler -> {
-                    publicHostname = staticConfig.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                            PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
-
                     // get the entrypoints from the configuration
                     List<Entrypoint> entrypoints = entrypoints(staticConfig);
 
@@ -133,13 +125,12 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
                         .map(entrypoint -> new Entrypoint(
                                 entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
-                                publicHostname,
                                 entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT), vertx))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Couldn't read %s configuration",
+            throw new IllegalStateException(String.format("Couldn't read '%s' configuration",
                     StaticConfiguration.ENTRYPOINTS));
         }
     }
@@ -162,7 +153,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         } catch (IllegalStateException e) {
             throw e;
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Couldn't read %s configuration",
+            throw new IllegalStateException(String.format("Couldn't read '%s' configuration",
                     StaticConfiguration.APPLICATIONS));
         }
     }

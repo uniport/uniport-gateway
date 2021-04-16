@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
@@ -24,6 +25,13 @@ import io.vertx.ext.web.Router;
  */
 public class ProxyApplication implements Application {
 
+    // env variable
+    public static final String PORTAL_GATEWAY_PUBLIC_PROTOCOL = "PORTAL_GATEWAY_PUBLIC_PROTOCOL";
+    public static final String PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT = "http";
+    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME = "PORTAL_GATEWAY_PUBLIC_HOSTNAME";
+    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
+    public static final String PORTAL_GATEWAY_PUBLIC_PORT     = "PORTAL_GATEWAY_PUBLIC_PORT";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
     /**
@@ -32,9 +40,9 @@ public class ProxyApplication implements Application {
     private final String name;
 
     /**
-     * the public hostname of this application
+     * the public url as it is seen from outside (e.g. by a browser)
      */
-    private String publicHostname;
+    private final String publicUrl;
 
     /**
      * the name of the entrypoint this application should be mounted on
@@ -80,12 +88,16 @@ public class ProxyApplication implements Application {
         this.env.remove(StaticConfiguration.APPLICATIONS);
         this.env.remove(StaticConfiguration.PROVIDERS);
 
-        this.publicHostname = env.getString(PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                PortalGatewayVerticle.PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        String publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL, PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+        String publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        String publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT);
+
         this.entrypointPort = DynamicConfiguration
                 .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
                         StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
                 .getString(StaticConfiguration.ENTRYPOINT_PORT);
+
+        this.publicUrl = String.format("%s://%s:%s",publicProtocol, publicHostname, publicPort != null ? publicPort : entrypointPort);
     }
 
     public String toString() {
@@ -118,7 +130,7 @@ public class ProxyApplication implements Application {
                 new ConfigurationWatcher(vertx, aggregator, configurationAddress,
                         this.providersThrottleDuration, Arrays.asList(this.entrypoint));
 
-        RouterFactory routerFactory = new RouterFactory(vertx, publicHostname, entrypointPort);
+        RouterFactory routerFactory = new RouterFactory(vertx, publicUrl);
 
         watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
 

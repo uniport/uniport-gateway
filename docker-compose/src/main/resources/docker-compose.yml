@@ -8,7 +8,8 @@ services:
     networks:
       - portal-gateway
     ports:
-      - "20000:20000" # docker-host.port:entrypoint.port
+      # docker-host.port:entrypoint.port, if not equals, docker-host.port must be same as PORTAL_GATEWAY_PUBLIC_PORT
+      - "20000:20000"
     env_file:
       - portal-gateway.common.env
       - portal-gateway.specific.env # deployments must create this file by copying a environment specific file

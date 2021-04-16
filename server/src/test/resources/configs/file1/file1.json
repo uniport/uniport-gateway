@@ -18,7 +18,7 @@
   "providers": [
     {
       "name": "file",
-      "filename": "../src/test/resources/configs/file1/dynamic-config/whoami.json",
+      "filename": "./dynamic-config/whoami.json",
       "watch": false
     }
   ]
