@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ import io.vertx.junit5.VertxTestContext;
 public class AuthorizationBearerMiddlewareTest {
 
     String host = "localhost";
-    int port = 8888;
+    int port = TestUtils.findFreePort();
 
 
     @Test

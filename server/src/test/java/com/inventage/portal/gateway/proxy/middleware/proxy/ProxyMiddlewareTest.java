@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.inventage.portal.gateway.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -19,8 +21,8 @@ public class ProxyMiddlewareTest {
     @Test
     void proxyTest(Vertx vertx, VertxTestContext testCtx) {
         String host = "localhost";
-        int proxyPort = 8888;
-        int serverPort = 8889;
+        int proxyPort = TestUtils.findFreePort();
+        int serverPort = TestUtils.findFreePort();
         String proxyResponse = "proxy";
         String serverResponse = "server";
 

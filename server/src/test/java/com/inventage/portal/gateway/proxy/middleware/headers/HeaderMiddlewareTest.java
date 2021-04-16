@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+
+import com.inventage.portal.gateway.TestUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,7 +23,7 @@ import io.vertx.junit5.VertxTestContext;
 public class HeaderMiddlewareTest {
 
     String host = "localhost";
-    int port = 8888;
+    int port = TestUtils.findFreePort();
 
     static Stream<Arguments> requestHeaderTestData() {
         return Stream.of(//
