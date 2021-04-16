@@ -30,9 +30,12 @@ public class HeaderMiddleware implements Middleware {
             String value = this.requestHeaders.get(header);
             switch (value) {
                 case "": {
+                    LOGGER.debug("handler: removing request header '{}'", header);
                     ctx.request().headers().remove(header);
+                    break;
                 }
                 default: {
+                    LOGGER.debug("handler: setting request header '{}:{}'", header, value);
                     ctx.request().headers().set(header, value);
                 }
             }
@@ -42,9 +45,12 @@ public class HeaderMiddleware implements Middleware {
             String value = this.responseHeaders.get(header);
             switch (value) {
                 case "": {
+                    LOGGER.debug("handler: removing response header '{}'", header);
                     ctx.response().headers().remove(header);
+                    break;
                 }
                 default: {
+                    LOGGER.debug("handler: setting response header '{}:{}'", header, value);
                     ctx.response().headers().set(header, value);
                 }
             }
