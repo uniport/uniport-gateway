@@ -17,7 +17,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <vertx.version>4.0.2</vertx.version>
+        <vertx.version>4.0.3</vertx.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
 
         <docker.pull.registry>docker-registry.inventage.com:10094</docker.pull.registry>
@@ -140,7 +140,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>2.8.0</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <!--                &lt;!&ndash; for staging deployments to nexus2 &ndash;&gt;-->
                 <!--                <plugin>-->
