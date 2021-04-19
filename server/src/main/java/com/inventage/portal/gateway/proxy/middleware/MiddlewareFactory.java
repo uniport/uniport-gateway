@@ -31,6 +31,7 @@ public interface MiddlewareFactory {
             if (middleware.isPresent()) {
                 return middleware.get();
             }
+            // TODO should not be logged for URI middlewares
             LOGGER.warn("getFactory: middleware factory not found for '{}'", middlewareName);
             return null;
         }

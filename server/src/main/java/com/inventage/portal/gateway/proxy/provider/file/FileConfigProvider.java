@@ -116,6 +116,7 @@ public class FileConfigProvider extends Provider {
                 return options;
             }
 
+            // TODO allow any dir names for general/auth
             LOGGER.info("getOptions: reading directory '{}'", path);
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
                     .setConfig(new JsonObject().put("path", path.toString()).put("filesets",

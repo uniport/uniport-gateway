@@ -8,5 +8,5 @@ import io.vertx.ext.web.RoutingContext;
  * destination. Every one has to implement this interface.
  */
 public interface Middleware extends Handler<RoutingContext> {
-
+    // TODO: implement option injection
 }

@@ -114,7 +114,7 @@ public class DynamicConfiguration {
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
                 .requiredProperty(SERVICE_SERVERS,
-                        Schemas.arraySchema().items(Schemas.objectSchema()
+                        Schemas.arraySchema().items(Schemas.objectSchema() // TODO replace by URL (host:port)
                                 .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                                 .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
                                 .allowAdditionalProperties(false)))
