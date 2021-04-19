@@ -80,7 +80,6 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HOST = "host";
     public static final String SERVICE_SERVER_PORT = "port";
 
-
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
@@ -126,8 +125,8 @@ public class DynamicConfiguration {
                         .property(SERVICES, Schemas.arraySchema().items(serviceSchema))
                         .allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder dynamicConfigBuilder =
-                Schemas.objectSchema().requiredProperty(HTTP, httpSchema);
+        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema()
+                .requiredProperty(HTTP, httpSchema).allowAdditionalProperties(false);
 
         SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
         SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
@@ -273,6 +272,14 @@ public class DynamicConfiguration {
         return null;
     }
 
+    /**
+     * Validates a JSON object representing a dynamic configuration instance.
+     * 
+     * @param vertx    a Vertx instance
+     * @param json     the json object to validate
+     * @param complete if set to true, all references to objects need to point to existing objects (e.g. router middlewares and router services)
+     * @return a Future that will succeed or fail eventually
+     */
     public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
         if (schema == null) {
             schema = buildSchema(vertx);
@@ -282,7 +289,7 @@ public class DynamicConfiguration {
         schema.validateAsync(json).onSuccess(f -> {
             JsonObject httpConfig = json.getJsonObject(HTTP);
             List<Future> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
-                    validateMiddlewares(httpConfig));
+                    validateMiddlewares(httpConfig), validateServices(httpConfig));
 
             CompositeFuture.all(validFutures).onSuccess(h -> {
                 validPromise.complete();
@@ -499,6 +506,26 @@ public class DynamicConfiguration {
 
             if (!valid) {
                 return Future.failedFuture(errMsg);
+            }
+        }
+
+        return Future.succeededFuture();
+    }
+
+    private static Future<Void> validateServices(JsonObject httpConfig) {
+        JsonArray svs = httpConfig.getJsonArray(SERVICES);
+        if (svs == null || svs.size() == 0) {
+            LOGGER.debug("validateServices: no services defined");
+            return Future.succeededFuture();
+        }
+
+        for (int i = 0; i < svs.size(); i++) {
+            JsonObject sv = svs.getJsonObject(i);
+            JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
+            if (servers == null || servers.size() == 0) {
+                String errorMsg = "validateServices: no servers defined";
+                LOGGER.debug(errorMsg);
+                return Future.failedFuture(errorMsg);
             }
         }
 
