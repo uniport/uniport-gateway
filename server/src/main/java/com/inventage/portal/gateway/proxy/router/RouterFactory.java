@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.router;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -101,7 +100,6 @@ public class RouterFactory {
                             middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
                     // needed to ensure authenticating requests are routed through this application
-                    // TODO this does not work when published != exposed port
                     if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
                         middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
                     }
