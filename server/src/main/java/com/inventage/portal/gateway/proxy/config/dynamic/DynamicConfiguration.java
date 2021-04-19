@@ -70,9 +70,9 @@ public class DynamicConfiguration {
     // type of middleware
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
 
-    public static final List<String> MIDDLEWARE_TYPES =
-            Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX, MIDDLEWARE_REDIRECT_REGEX,
-                    MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2, MIDDLEWARE_SHOW_SESSION_CONTENT);
+    public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
+            MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER,
+            MIDDLEWARE_OAUTH2, MIDDLEWARE_SHOW_SESSION_CONTENT);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -167,6 +167,112 @@ public class DynamicConfiguration {
         return httpEmpty;
     }
 
+    public static JsonObject merge(Map<String, JsonObject> configurations) {
+        JsonObject mergedConfig = buildDefaultConfiguration();
+        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
+
+        if (mergedHttpConfig == null) {
+            return mergedConfig;
+        }
+
+        Map<String, List<String>> routers = new HashMap<>();
+        Set<String> routersToDelete = new HashSet<>();
+
+        Map<String, List<String>> services = new HashMap<>();
+        Set<String> servicesToDelete = new HashSet<>();
+
+        Map<String, List<String>> middlewares = new HashMap<>();
+        Set<String> middlewaresToDelete = new HashSet<>();
+
+        Set<String> keys = configurations.keySet();
+
+        for (String key : keys) {
+            JsonObject conf = configurations.get(key);
+            JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
+
+            if (httpConf != null) {
+                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
+                for (int i = 0; i < rts.size(); i++) {
+                    JsonObject rt = rts.getJsonObject(i);
+                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
+                    if (!routers.containsKey(rtName)) {
+                        routers.put(rtName, new ArrayList<String>());
+                    }
+                    routers.get(rtName).add(key);
+                    if (!addRouter(mergedHttpConfig, rtName, rt)) {
+                        routersToDelete.add(rtName);
+                    }
+                }
+
+                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                for (int i = 0; i < mws.size(); i++) {
+                    JsonObject mw = mws.getJsonObject(i);
+                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+                    if (!middlewares.containsKey(mwName)) {
+                        middlewares.put(mwName, new ArrayList<String>());
+                    }
+                    middlewares.get(mwName).add(key);
+                    if (!addMiddleware(mergedHttpConfig, mwName, mw)) {
+                        middlewaresToDelete.add(mwName);
+                    }
+                }
+
+                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
+                for (int i = 0; i < svs.size(); i++) {
+                    JsonObject sv = svs.getJsonObject(i);
+                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
+                    if (!services.containsKey(svName)) {
+                        services.put(svName, new ArrayList<String>());
+                    }
+                    services.get(svName).add(key);
+                    if (!addService(mergedHttpConfig, svName, sv)) {
+                        servicesToDelete.add(svName);
+                    }
+                }
+            }
+        }
+
+        for (String routerName : routersToDelete) {
+            LOGGER.warn(
+                    "merge: Router defined multiple times with different configurations in '{}'",
+                    routers.get(routerName));
+            mergedHttpConfig.remove(routerName);
+        }
+
+        for (String middlewareName : middlewaresToDelete) {
+            LOGGER.warn(
+                    "merge: Middleware defined multiple times with different configurations in '{}'",
+                    routers.get(middlewareName));
+            mergedConfig.remove(middlewareName);
+        }
+
+        for (String serviceName : servicesToDelete) {
+            LOGGER.warn(
+                    "merge: Service defined multiple times with different configurations in '{}'",
+                    routers.get(serviceName));
+            mergedHttpConfig.remove(serviceName);
+        }
+
+        return mergedConfig;
+    }
+
+    public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
+        if (jsonArr == null) {
+            return null;
+        }
+        int size = jsonArr.size();
+        for (int i = 0; i < size; i++) {
+            JsonObject obj = jsonArr.getJsonObject(i);
+            if (obj == null) {
+                return null;
+            }
+            if (obj.containsKey(key) && obj.getString(key).equals(value)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
     public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
         if (schema == null) {
             schema = buildSchema(vertx);
@@ -191,7 +297,7 @@ public class DynamicConfiguration {
         return validPromise.future();
     }
 
-    public static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
+    private static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
         JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
             LOGGER.warn("validateRouters: no routers defined");
@@ -249,7 +355,7 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
+    private static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
             LOGGER.debug("validateMiddlewares: no middlewares defined");
@@ -397,112 +503,6 @@ public class DynamicConfiguration {
         }
 
         return Future.succeededFuture();
-    }
-
-    public static JsonObject merge(Map<String, JsonObject> configurations) {
-        JsonObject mergedConfig = buildDefaultConfiguration();
-        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
-
-        if (mergedHttpConfig == null) {
-            return mergedConfig;
-        }
-
-        Map<String, List<String>> routers = new HashMap<>();
-        Set<String> routersToDelete = new HashSet<>();
-
-        Map<String, List<String>> services = new HashMap<>();
-        Set<String> servicesToDelete = new HashSet<>();
-
-        Map<String, List<String>> middlewares = new HashMap<>();
-        Set<String> middlewaresToDelete = new HashSet<>();
-
-        Set<String> keys = configurations.keySet();
-
-        for (String key : keys) {
-            JsonObject conf = configurations.get(key);
-            JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
-
-            if (httpConf != null) {
-                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-                for (int i = 0; i < rts.size(); i++) {
-                    JsonObject rt = rts.getJsonObject(i);
-                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
-                    if (!routers.containsKey(rtName)) {
-                        routers.put(rtName, new ArrayList<String>());
-                    }
-                    routers.get(rtName).add(key);
-                    if (!addRouter(mergedHttpConfig, rtName, rt)) {
-                        routersToDelete.add(rtName);
-                    }
-                }
-
-                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                for (int i = 0; i < mws.size(); i++) {
-                    JsonObject mw = mws.getJsonObject(i);
-                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
-                    if (!middlewares.containsKey(mwName)) {
-                        middlewares.put(mwName, new ArrayList<String>());
-                    }
-                    middlewares.get(mwName).add(key);
-                    if (!addMiddleware(mergedHttpConfig, mwName, mw)) {
-                        middlewaresToDelete.add(mwName);
-                    }
-                }
-
-                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-                for (int i = 0; i < svs.size(); i++) {
-                    JsonObject sv = svs.getJsonObject(i);
-                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
-                    if (!services.containsKey(svName)) {
-                        services.put(svName, new ArrayList<String>());
-                    }
-                    services.get(svName).add(key);
-                    if (!addService(mergedHttpConfig, svName, sv)) {
-                        servicesToDelete.add(svName);
-                    }
-                }
-            }
-        }
-
-        for (String routerName : routersToDelete) {
-            LOGGER.warn(
-                    "merge: Router defined multiple times with different configurations in '{}'",
-                    routers.get(routerName));
-            mergedHttpConfig.remove(routerName);
-        }
-
-        for (String middlewareName : middlewaresToDelete) {
-            LOGGER.warn(
-                    "merge: Middleware defined multiple times with different configurations in '{}'",
-                    routers.get(middlewareName));
-            mergedConfig.remove(middlewareName);
-        }
-
-        for (String serviceName : servicesToDelete) {
-            LOGGER.warn(
-                    "merge: Service defined multiple times with different configurations in '{}'",
-                    routers.get(serviceName));
-            mergedHttpConfig.remove(serviceName);
-        }
-
-        return mergedConfig;
-    }
-
-    public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
-        if (jsonArr == null) {
-            return null;
-        }
-        int size = jsonArr.size();
-        for (int i = 0; i < size; i++) {
-            JsonObject obj = jsonArr.getJsonObject(i);
-            if (obj == null) {
-                return null;
-            }
-            if (obj.containsKey(key) && obj.getString(key).equals(value)) {
-                return obj;
-            }
-        }
-        return null;
     }
 
     private static Boolean addRouter(JsonObject httpConf, String routerName,
