@@ -28,7 +28,6 @@ public interface UriMiddlewareFactory {
             if (factory.isPresent()) {
                 return factory.get();
             }
-            LOGGER.warn("getFactory: URI middleware factory not found '{}'", middlewareName);
             return null;
         }
     }
