@@ -83,23 +83,12 @@ Zum Beispiel mit einer `artifactId` von `local-portal` kann die `portal-gateway.
 portal-iam.host=local-portal-portal-iam
 portal-iam.port=8080
 
-dashboard-frontend.host=local-portal-dashboard-frontend
-dashboard-frontend.port =20025
-
-dashboard-service.host=local-portal-dashboard-service
-dashboard-service.port=20022
-
 navigation-frontend.host=local-portal-navigation-frontend
-navigation-frontend.port=20015
-
 navigation-service.host=local-portal-navigation-service
-navigation-service.port=20012
-
-organisation-proxy.host=local-portal-organisation-proxy-public
-organisation-proxy.port=20030
-
-document-proxy.host=local-portal-document-proxy-public
-document-proxy.port=20050
+dashboard-frontend.host=local-portal-dashboard-frontend
+dashboard-service.host=local-portal-dashboard-service
+organisation-service.host=local-portal-organisation-proxy-public
+document-service.host=local-portal-document-proxy-public
 ```
 
 ## Visulisierungen

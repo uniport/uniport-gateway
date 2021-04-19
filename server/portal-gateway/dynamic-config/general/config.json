@@ -59,7 +59,7 @@
           "organisationReplacePath"
         ],
         "rule": "PathPrefix('/organisation')",
-        "service": "organisation-proxy-public"
+        "service": "organisation-service"
       },
 
       {
@@ -71,7 +71,7 @@
           "documentReplacePath"
         ],
         "rule": "PathPrefix('/document')",
-        "service": "document-proxy-public"
+        "service": "document-service"
       }
     ],
 
@@ -155,13 +155,13 @@
       },
 
       {
-        "name": "organisation-proxy-public",
-        "servers": [{ "host": "${organisation-proxy.host}", "port": 20030 }]
+        "name": "organisation-service",
+        "servers": [{ "host": "${organisation-service.host}", "port": 20030 }]
       },
 
       {
-        "name": "document-proxy-public",
-        "servers": [{ "host": "${document-proxy.host}", "port": 20050 }]
+        "name": "document-service",
+        "servers": [{ "host": "${document-service.host}", "port": 20050 }]
       }
     ]
   }
