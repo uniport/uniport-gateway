@@ -102,7 +102,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
-                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema());
+                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+                .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
@@ -388,43 +389,58 @@ public class DynamicConfiguration {
                 }
                 case MIDDLEWARE_HEADERS: {
                     JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
-                    if (requestHeaders != null && requestHeaders.isEmpty()) {
-                        valid = false;
-                        errMsg = String.format("%s: Empty request headers defined", mwType);
-                        break;
-                    }
-
-                    for (Entry<String, Object> entry : requestHeaders) {
-                        if (!(entry.getKey() instanceof String)
-                                || !(entry.getValue() instanceof String)) {
+                    if (requestHeaders != null) {
+                        if (requestHeaders.isEmpty()) {
                             valid = false;
-                            errMsg = String.format(
-                                    "%s: Request header and value can only be of type string",
-                                    mwType);
+                            errMsg = String.format("%s: Empty request headers defined", mwType);
                             break;
                         }
-                    }
-                    if (!valid) {
-                        break;
+
+                        for (Entry<String, Object> entry : requestHeaders) {
+                            if (!(entry.getKey() instanceof String)
+                                    || !(entry.getValue() instanceof String)) {
+                                valid = false;
+                                errMsg = String.format(
+                                        "%s: Request header and value can only be of type string",
+                                        mwType);
+                                break;
+                            }
+                        }
+                        if (!valid) {
+                            break;
+                        }
                     }
 
                     JsonObject responseHeaders =
                             mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
-                    if (responseHeaders != null && responseHeaders.isEmpty()) {
-                        valid = false;
-                        errMsg = String.format("%s: Empty response headers defined", mwType);
-                        break;
-                    }
-
-                    for (Entry<String, Object> entry : responseHeaders) {
-                        if (!(entry.getKey() instanceof String)
-                                || !(entry.getValue() instanceof String)) {
+                    if (responseHeaders != null) {
+                        if (responseHeaders.isEmpty()) {
                             valid = false;
-                            errMsg = String.format(
-                                    "%s: Response header and value can only be of type string",
-                                    mwType);
+                            errMsg = String.format("%s: Empty response headers defined", mwType);
                             break;
                         }
+
+                        for (Entry<String, Object> entry : responseHeaders) {
+                            if (!(entry.getKey() instanceof String)
+                                    || !(entry.getValue() instanceof String)) {
+                                valid = false;
+                                errMsg = String.format(
+                                        "%s: Response header and value can only be of type string",
+                                        mwType);
+                                break;
+                            }
+                        }
+                        if (!valid) {
+                            break;
+                        }
+                    }
+
+                    if (requestHeaders == null && responseHeaders == null) {
+                        valid = false;
+                        errMsg = String.format(
+                                "%s: at least one response or request header has to be defined",
+                                mwType);
+                        break;
                     }
 
                     break;
