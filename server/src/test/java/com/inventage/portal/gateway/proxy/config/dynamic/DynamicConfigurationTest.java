@@ -1,0 +1,581 @@
+package com.inventage.portal.gateway.proxy.config.dynamic;
+
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+
+@ExtendWith(VertxExtension.class)
+public class DynamicConfigurationTest {
+
+    static Stream<Arguments> testData() {
+        /*
+        covered cases:
+        - json object: null, empty, wrong type, required keys, optional keys, additional keys
+        - json array: null, 0, 1, 2 (valid/valid, valid/invalid)
+        */
+
+        // root
+        JsonObject nullConfig = null;
+
+        JsonObject emptyConfig = new JsonObject();
+
+        JsonObject unknownConfigKey = new JsonObject().put("blub", true);
+
+        // http
+        JsonObject nullHttp = new JsonObject().put(DynamicConfiguration.HTTP, null);
+
+        JsonObject emptyHttp = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject());
+
+        JsonObject unknownHttpKey = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put("blub", new JsonArray()));
+
+        // http routers
+        JsonObject nullHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, null));
+
+        JsonObject emptyHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray()));
+
+        JsonObject singleMinimalHttpRouter =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.ROUTERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.ROUTER_NAME, "foo")
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))));
+
+        JsonObject singleCompleteHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.ROUTER_NAME, "foo")
+                                .put(DynamicConfiguration.ROUTER_SERVICE, "bar")
+                                .put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray())
+                                .put(DynamicConfiguration.ROUTER_MIDDLEWARES, new JsonArray())
+                                .put(DynamicConfiguration.ROUTER_RULE, "bla")
+                                .put(DynamicConfiguration.ROUTER_PRIORITY, 42))));
+
+        JsonObject unkownKeyHttpRouter =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.ROUTERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.ROUTER_NAME, "foo")
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "bar")
+                                        .put("blub", "baz"))));
+
+        JsonObject doubleMinimalHttpRouters =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray()
+                                .add(new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))
+                                .add(new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "blub")
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "testing"))));
+
+        JsonObject duplicatedRouter = new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
+                .put(DynamicConfiguration.ROUTER_SERVICE, "bar");
+        JsonObject dublicatedMinimalHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS,
+                        new JsonArray().add(duplicatedRouter).add(duplicatedRouter)));
+
+        JsonObject minimalAndEmptyHttpRouters =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray()
+                                .add(new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))
+                                .add(new JsonObject())));
+
+        // http middlewares
+        JsonObject nullHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES, null));
+
+        JsonObject emptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()));
+
+        JsonObject unkownHttpMiddleware =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, "blub"))));
+
+        JsonObject replacePathRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX,
+                                        "^$")
+                                        .put(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
+                                                "foobar")))));
+
+        JsonObject replacePathRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+        JsonObject directRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX,
+                                                "^$")
+                                        .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT,
+                                                "foorbar")))));
+
+        JsonObject directRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+        JsonObject headersHttpMiddlewareWithMissingOptions = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_HEADERS)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+        JsonObject headersHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_HEADERS)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                                        new JsonObject().put(
+                                                DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST,
+                                                new JsonObject().put("foo", "bar"))))));
+
+        JsonObject authBearerHttpMiddlewareWithMissingOptions = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+        JsonObject authBearerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                        "blub")))));
+
+        JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_OAUTH2)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+        JsonObject oauth2PathHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_OAUTH2)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, "foo")
+                                        .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET,
+                                                "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL,
+                                                "localhost:1234")
+                                        .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE,
+                                                "blub")))));
+
+        JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                        "blub"))
+                                .put("blub", true))));
+
+        JsonObject doubleHttpMiddlewares =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                                .add(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo").put(
+                                                DynamicConfiguration.MIDDLEWARE_TYPE,
+                                                DynamicConfiguration.MIDDLEWARE_HEADERS)
+                                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                                                new JsonObject()
+                                                        .put(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST,
+                                                                new JsonObject().put("foo",
+                                                                        "bar"))))
+                                .add(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "bar").put(
+                                                DynamicConfiguration.MIDDLEWARE_TYPE,
+                                                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                                                new JsonObject().put(
+                                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                                        "blub")))));
+
+        JsonObject duplicatedMiddleware = new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject().put(
+                                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                "blub"));
+        JsonObject duplicatedHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(duplicatedMiddleware).add(duplicatedMiddleware)));
+
+        JsonObject completeAndEmptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                        "blub")))
+                                .add(new JsonObject())));
+
+        // http services
+        JsonObject nullHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, null));
+
+        JsonObject emptyHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()));
+
+        JsonObject singleHttpServiceWithNoServers =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.SERVICES,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_NAME, "foo")
+                                        .put(DynamicConfiguration.SERVICE_SERVERS, null))));
+
+        JsonObject singleHttpServiceWithEmptyServers =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray().add(
+                                new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                                        DynamicConfiguration.SERVICE_SERVERS, new JsonArray()))));
+
+        JsonObject singleHttpServiceWithOneServer = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()
+                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                                DynamicConfiguration.SERVICE_SERVERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
+
+        JsonObject singleHttpServiceWithOneMissingKeyServer =
+                new JsonObject().put(DynamicConfiguration.HTTP,
+                        new JsonObject().put(DynamicConfiguration.SERVICES,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_NAME, "foo")
+                                        .put(DynamicConfiguration.SERVICE_SERVERS,
+                                                new JsonArray().add(new JsonObject().put(
+                                                        DynamicConfiguration.SERVICE_SERVER_HOST,
+                                                        "localhost"))))));
+
+        JsonObject singleHttpServiceWithOneUnkownKeyServer = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()
+                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                                DynamicConfiguration.SERVICE_SERVERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234)
+                                        .put("blub", true))))));
+
+        JsonObject singleHttpServiceWithTwoServers = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_NAME, "foo")
+                                .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
+                                        .add(new JsonObject()
+                                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
+                                                        "localhost")
+                                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
+                                                        1234))
+                                        .add(new JsonObject()
+                                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
+                                                        "remotehost")
+                                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
+                                                        5678))))));
+
+        JsonObject unkownKeyHttpService = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()
+                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                                DynamicConfiguration.SERVICE_SERVERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234)))
+                                .put("blub", true))));
+
+        JsonObject doubleHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()
+                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                                DynamicConfiguration.SERVICE_SERVERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))
+                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "bar").put(
+                                DynamicConfiguration.SERVICE_SERVERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
+
+        JsonObject duplicatedService =
+                new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                        DynamicConfiguration.SERVICE_SERVERS,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234)));
+        JsonObject duplicatedHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES,
+                        new JsonArray().add(duplicatedService).add(duplicatedService)));
+
+        JsonObject completeAndEmptyHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()
+                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+                                DynamicConfiguration.SERVICE_SERVERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))
+                        .add(new JsonObject())));
+
+        JsonObject httpRouterWithMiddlewareAndService = new JsonObject().put(
+                DynamicConfiguration.HTTP,
+                new JsonObject()
+                        .put(DynamicConfiguration.ROUTERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                                        .put(DynamicConfiguration.MIDDLEWARES,
+                                                new JsonArray().add("middlewareFoo"))
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                        "blub"))))
+                        .put(DynamicConfiguration.SERVICES, new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
+                                .put(DynamicConfiguration.SERVICE_SERVERS,
+                                        new JsonArray().add(new JsonObject()
+                                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
+                                                        "localhost")
+                                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
+                                                        1234))))));
+
+        JsonObject httpRouterWithMissingMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject()
+                        .put(DynamicConfiguration.ROUTERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                                        .put(DynamicConfiguration.MIDDLEWARES,
+                                                new JsonArray().add("middlewareFoo"))
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                        .put(DynamicConfiguration.SERVICES, new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
+                                .put(DynamicConfiguration.SERVICE_SERVERS,
+                                        new JsonArray().add(new JsonObject()
+                                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
+                                                        "localhost")
+                                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
+                                                        1234))))));
+
+        JsonObject httpRouterWithMissingService = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject()
+                        .put(DynamicConfiguration.ROUTERS,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                                        .put(DynamicConfiguration.MIDDLEWARES,
+                                                new JsonArray().add("middlewareFoo"))
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
+                                        "blub")))));
+
+        // the sole purpose of the following variable are to improve readability
+        boolean expectedTrue = true;
+        boolean expectedFalse = false;
+
+        // the default used in the following should be "complete" since it is more restrictive
+        boolean complete = true;
+        boolean incomplete = false;
+
+        return Stream.of(
+                // general
+                Arguments.of("reject null config", nullConfig, complete, expectedFalse),
+                Arguments.of("reject empty config", emptyConfig, complete, expectedFalse),
+                Arguments.of("reject config with unknown key", unknownConfigKey, complete,
+                        expectedFalse),
+
+                // http
+                Arguments.of("reject null http config", nullHttp, complete, expectedFalse),
+                Arguments.of("accept empty http", emptyHttp, complete, expectedTrue),
+                Arguments.of("reject unkown http key", unknownHttpKey, complete, expectedFalse),
+
+                // routers (incomplete)
+                Arguments.of("reject null routers", nullHttpRouters, incomplete, expectedFalse),
+                Arguments.of("accept empty routers", emptyHttpRouters, incomplete, expectedTrue),
+                Arguments.of("accept single minimal router", singleMinimalHttpRouter, incomplete,
+                        expectedTrue),
+                Arguments.of("accept single router with all properties", singleCompleteHttpRouter,
+                        incomplete, expectedTrue),
+                Arguments.of("reject single router with unknown key", unkownKeyHttpRouter,
+                        incomplete, expectedFalse),
+                Arguments.of("accept two minimal routers", doubleMinimalHttpRouters, incomplete,
+                        expectedTrue),
+                // TODO disallow duplicated routers (?)
+                // Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete,
+                //         expectedFalse),
+                Arguments.of("reject minimal and empty routers", minimalAndEmptyHttpRouters,
+                        incomplete, expectedFalse),
+
+                // middlewares 
+                Arguments.of("reject null middlewares", nullHttpMiddlewares, complete,
+                        expectedFalse),
+                Arguments.of("accept empty middlewares", emptyHttpMiddlewares, complete,
+                        expectedTrue),
+                Arguments.of("reject unkown middleware", unkownHttpMiddleware, complete,
+                        expectedFalse),
+                // replace path regex middleware
+                Arguments.of("accept replace path middleware", replacePathRegexHttpMiddleware,
+                        complete, expectedTrue),
+                Arguments.of("reject replace path middleware with missing options",
+                        replacePathRegexHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+                // redirect regex middleware
+                Arguments.of("accept redirect regex middleware", directRegexHttpMiddleware,
+                        complete, expectedTrue),
+                Arguments.of("reject redirect regex middleware with missing options",
+                        directRegexHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+                // headers middleware
+                Arguments.of("accept headers middleware", headersHttpMiddleware, complete,
+                        expectedTrue),
+                Arguments.of("reject headers middleware with missing options",
+                        headersHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+                // authorization bearer middleware
+                Arguments.of("accept authorization bearer middleware", authBearerHttpMiddleware,
+                        complete, expectedTrue),
+                Arguments.of("reject authorization bearer  with missing optionsmiddleware",
+                        authBearerHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+                // oauth2 middleware
+                Arguments.of("accept oAuth2 middleware", oauth2PathHttpMiddleware, complete,
+                        expectedTrue),
+                Arguments.of("reject oAuth2 middleware with missing options",
+                        oauth2PathHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+
+                Arguments.of("reject unkown key middleware", unkownKeyHttpMiddleware, complete,
+                        expectedFalse),
+                Arguments.of("accept two valid middelwares", doubleHttpMiddlewares, complete,
+                        expectedTrue),
+                // TODO disallow duplicated middlewares (?)
+                // Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete,
+                //         expectedFalse),
+                Arguments.of("reject complete and empty middlewares",
+                        completeAndEmptyHttpMiddlewares, complete, expectedFalse),
+
+                // services
+                Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),
+                Arguments.of("accept empty services", emptyHttpServices, complete, expectedTrue),
+                Arguments.of("reject single service with no servers",
+                        singleHttpServiceWithNoServers, complete, expectedFalse),
+                Arguments.of("reject single service with empty servers",
+                        singleHttpServiceWithEmptyServers, complete, expectedFalse),
+                Arguments.of("accept single service with one valid server",
+                        singleHttpServiceWithOneServer, complete, expectedTrue),
+                Arguments.of("reject single service with one server with a missing key",
+                        singleHttpServiceWithOneMissingKeyServer, complete, expectedFalse),
+                Arguments.of("reject single service with one server with a unknown key",
+                        singleHttpServiceWithOneUnkownKeyServer, complete, expectedFalse),
+                Arguments.of("accept single service with two valid servers",
+                        singleHttpServiceWithTwoServers, complete, expectedTrue),
+                Arguments.of("reject single service with unkown key", unkownKeyHttpService,
+                        complete, expectedFalse),
+                Arguments.of("accept two valid services", doubleHttpServices, complete,
+                        expectedTrue),
+                // TODO disallow duplicated services (?)
+                // Arguments.of("reject duplicated services", duplicatedHttpServices, complete,
+                //         expectedFalse),
+                Arguments.of("reject complete and empty services", completeAndEmptyHttpServices,
+                        complete, expectedFalse),
+
+                // routers (complete)
+                Arguments.of("accept http config with router referencing middleware and service",
+                        httpRouterWithMiddlewareAndService, complete, expectedTrue),
+                Arguments.of("reject http config with router referencing missing middleware",
+                        httpRouterWithMissingMiddleware, complete, expectedFalse),
+                Arguments.of("accept http config with router referencing missing service",
+                        httpRouterWithMissingService, complete, expectedFalse));
+    }
+
+    @ParameterizedTest
+    @MethodSource("testData")
+    void validateTest(String name, JsonObject json, Boolean complete, Boolean expected, Vertx vertx,
+            VertxTestContext testCtx) {
+
+        System.out.printf("Testing '%s'\n", name);
+        DynamicConfiguration.validate(vertx, json, complete).onComplete(ar -> {
+            if (ar.succeeded() && expected || ar.failed() && !expected) {
+                testCtx.completeNow();
+            } else {
+                testCtx.failNow(String.format(
+                        "'%s' was expected to have '%s'. Error: '%s', Input: '%s'", name,
+                        expected ? "succeeded" : "failed", ar.cause(), json.encodePrettily()));
+            }
+        });
+    }
+
+    @Test
+    void buildDefaultConfigurationTest(Vertx vertx, VertxTestContext testCtx) {
+        // TODO
+    }
+
+    @Test
+    void isEmptyConfigurationTest(Vertx vertx, VertxTestContext testCtx) {
+        // TODO
+    }
+
+    @Test
+    void mergeTest(Vertx vertx, VertxTestContext testCtx) {
+        // TODO
+    }
+
+    @Test
+    void getObjByKeyWithValueTest(Vertx vertx, VertxTestContext testCtx) {
+        // TODO
+    }
+
+}
