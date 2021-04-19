@@ -67,7 +67,8 @@ public class FileConfigProvider extends Provider {
     public void provide(Promise<Void> startPromise) {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig().onSuccess(config -> {
-            this.validateAndPublish(substituteConfigurationVariables(env, config));
+            this.validateAndPublish(
+                    parseServerPorts(substituteConfigurationVariables(env, config)));
         }).onFailure(err -> {
             String errorMsg =
                     String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
@@ -78,7 +79,8 @@ public class FileConfigProvider extends Provider {
             LOGGER.info("provider: Listening to configuration changes");
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
-                this.validateAndPublish(substituteConfigurationVariables(env, config));
+                this.validateAndPublish(
+                        parseServerPorts(substituteConfigurationVariables(env, config)));
             });
         }
         startPromise.complete();
@@ -150,6 +152,33 @@ public class FileConfigProvider extends Provider {
 
     private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
         return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
+    }
+
+    // To allow variable substitution by environment variables in the file config
+    // the server ports of the incoming dynamic file configuration need to be 
+    // converted to integers.
+    private JsonObject parseServerPorts(JsonObject config) {
+        JsonObject http = config.getJsonObject(DynamicConfiguration.HTTP);
+        JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
+        for (int i = 0; i < services.size(); i++) {
+            JsonObject service = services.getJsonObject(i);
+            JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            for (int j = 0; j < servers.size(); j++) {
+                JsonObject server = servers.getJsonObject(j);
+                String portStr = server.getString(DynamicConfiguration.SERVICE_SERVER_PORT);
+                int port;
+
+                try {
+                    port = Integer.parseInt(portStr);
+                } catch (NumberFormatException e) {
+                    LOGGER.warn("parseServerPorts: failed to parse server port '{}'", portStr);
+                    return config;
+                }
+
+                server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
+            }
+        }
+        return config;
     }
 
     private void validateAndPublish(JsonObject config) {
