@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,7 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class DynamicConfigurationTest {
 
-    static Stream<Arguments> testData() {
+    static Stream<Arguments> validateTestData() {
         /*
         covered cases:
         - json object: null, empty, wrong type, required keys, optional keys, additional keys
@@ -542,31 +543,76 @@ public class DynamicConfigurationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testData")
+    @MethodSource("validateTestData")
     void validateTest(String name, JsonObject json, Boolean complete, Boolean expected, Vertx vertx,
             VertxTestContext testCtx) {
 
-        System.out.printf("Testing '%s'\n", name);
         DynamicConfiguration.validate(vertx, json, complete).onComplete(ar -> {
             if (ar.succeeded() && expected || ar.failed() && !expected) {
                 testCtx.completeNow();
             } else {
-                testCtx.failNow(String.format(
-                        "'%s' was expected to have '%s'. Error: '%s', Input: '%s'", name,
-                        expected ? "succeeded" : "failed", ar.cause(), json.encodePrettily()));
+                testCtx.failNow(
+                        String.format("'%s' was expected to have '%s'. Error: '%s', Input: '%s'",
+                                name, expected ? "succeeded" : "failed", ar.cause(),
+                                json != null ? json.encodePrettily() : null));
             }
         });
     }
 
     @Test
     void buildDefaultConfigurationTest(Vertx vertx, VertxTestContext testCtx) {
-        // TODO
+        JsonObject actualConfig = DynamicConfiguration.buildDefaultConfiguration();
+        JsonObject expectedConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
+                        .put(DynamicConfiguration.SERVICES, new JsonArray()));
+        testCtx.verify(() -> assertEquals(expectedConfig, actualConfig));
         testCtx.completeNow();
     }
 
-    @Test
-    void isEmptyConfigurationTest(Vertx vertx, VertxTestContext testCtx) {
-        // TODO
+    static Stream<Arguments> isEmptyConfigurationTestData() {
+
+        JsonObject nullConfig = null;
+
+        JsonObject emptyConfig = new JsonObject();
+
+        JsonObject nullHttp = new JsonObject().put(DynamicConfiguration.HTTP, null);
+
+        JsonObject emptyHttp = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject());
+
+        JsonObject nullRouter = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, null));
+        JsonObject nullMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, null));
+        JsonObject nullService = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES, null));
+        JsonObject someRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray()));
+        JsonObject someMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()));
+        JsonObject someServices = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()));
+
+        return Stream.of(Arguments.of("null config", nullConfig, true),
+                Arguments.of("empty config", emptyConfig, true),
+                Arguments.of("null http", nullHttp, true),
+                Arguments.of("empty http", emptyHttp, true),
+                Arguments.of("null router", nullRouter, true),
+                Arguments.of("null middleware", nullMiddleware, true),
+                Arguments.of("null service", nullService, true),
+                Arguments.of("some router", someRouters, false),
+                Arguments.of("some middleware", someMiddlewares, false),
+                Arguments.of("some service", someServices, false));
+    }
+
+    @ParameterizedTest
+    @MethodSource("isEmptyConfigurationTestData")
+    void isEmptyConfigurationTest(String name, JsonObject json, boolean expected, Vertx vertx,
+            VertxTestContext testCtx) {
+        String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'", name,
+                expected ? "succeeded" : "failed", json != null ? json.encodePrettily() : json);
+        testCtx.verify(() -> assertEquals(expected, DynamicConfiguration.isEmptyConfiguration(json),
+                errMsg));
         testCtx.completeNow();
     }
 
