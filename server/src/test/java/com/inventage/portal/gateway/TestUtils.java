@@ -18,7 +18,6 @@ public class TestUtils {
         ServerSocket socket = null;
         try {
             socket = new ServerSocket(0);
-            socket.setReuseAddress(true);
             int port = socket.getLocalPort();
             try {
                 socket.close();
@@ -35,6 +34,7 @@ public class TestUtils {
                 }
             }
         }
-        throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
+        throw new IllegalStateException(
+                "Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
     }
 }
