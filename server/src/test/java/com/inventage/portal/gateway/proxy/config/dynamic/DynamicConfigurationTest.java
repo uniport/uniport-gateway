@@ -1,6 +1,13 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -616,15 +623,184 @@ public class DynamicConfigurationTest {
         testCtx.completeNow();
     }
 
-    @Test
-    void mergeTest(Vertx vertx, VertxTestContext testCtx) {
-        // TODO
+    static Stream<Arguments> mergeTestData() {
+        JsonObject defaultConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
+                        .put(DynamicConfiguration.SERVICES, new JsonArray()));
+
+        Map<String, JsonObject> nullConfig = null;
+        Map<String, JsonObject> emptyConfig = new HashMap<String, JsonObject>(Map.ofEntries());
+
+        JsonObject emptyRoutersServicesMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
+                        .put(DynamicConfiguration.SERVICES, new JsonArray()));
+        Map<String, JsonObject> emptyRoutersMiddlewaresServicesConfigs =
+                new HashMap<String, JsonObject>(Map.ofEntries(
+                        new AbstractMap.SimpleEntry<String, JsonObject>("oneConfig",
+                                emptyRoutersServicesMiddlewares),
+                        new AbstractMap.SimpleEntry<String, JsonObject>("anotherConfig",
+                                emptyRoutersServicesMiddlewares)));
+
+        JsonObject someConfig = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.ROUTERS,
+                        new JsonArray().add(new JsonObject().put(DynamicConfiguration.ROUTER_NAME,
+                                "someRouter")))
+                .put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "someMiddleware")))
+                .put(DynamicConfiguration.SERVICES,
+                        new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_NAME, "someService")
+                                .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()))));
+
+        Map<String, JsonObject> distinctConfigs = new HashMap<String, JsonObject>(Map.ofEntries(
+                new AbstractMap.SimpleEntry<String, JsonObject>("someConfig", someConfig),
+                new AbstractMap.SimpleEntry<String, JsonObject>("anotherConfig",
+                        new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject()
+                                .put(DynamicConfiguration.ROUTERS,
+                                        new JsonArray().add(new JsonObject().put(
+                                                DynamicConfiguration.ROUTER_NAME, "anotherRouter")))
+                                .put(DynamicConfiguration.MIDDLEWARES,
+                                        new JsonArray().add(new JsonObject().put(
+                                                DynamicConfiguration.MIDDLEWARE_NAME,
+                                                "anotherMiddleware")))
+                                .put(DynamicConfiguration.SERVICES,
+                                        new JsonArray().add(new JsonObject()
+                                                .put(DynamicConfiguration.SERVICE_NAME,
+                                                        "anotherService")
+                                                .put(DynamicConfiguration.SERVICE_SERVERS,
+                                                        new JsonArray())))))));
+
+        JsonObject expectedMergedDistinctConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject()
+                        .put(DynamicConfiguration.ROUTERS, new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.ROUTER_NAME, "someRouter"))
+                                .add(new JsonObject().put(DynamicConfiguration.ROUTER_NAME,
+                                        "anotherRouter")))
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                                .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME,
+                                        "someMiddleware"))
+                                .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME,
+                                        "anotherMiddleware")))
+                        .put(DynamicConfiguration.SERVICES, new JsonArray()
+                                .add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_NAME, "someService")
+                                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()))
+                                .add(new JsonObject()
+                                        .put(DynamicConfiguration.SERVICE_NAME, "anotherService")
+                                        .put(DynamicConfiguration.SERVICE_SERVERS,
+                                                new JsonArray()))));
+
+        Map<String, JsonObject> overlappingConfigs = new HashMap<String, JsonObject>(Map.ofEntries(
+                new AbstractMap.SimpleEntry<String, JsonObject>("someConfig", someConfig),
+                new AbstractMap.SimpleEntry<String, JsonObject>("sameConfig", someConfig)));
+        JsonObject mergedOverlappingConfig = someConfig;
+
+        return Stream.of(
+                Arguments.of("null returns an empty configuration", nullConfig, defaultConfig),
+                Arguments.of("empty returns an empty configuration", emptyConfig, defaultConfig),
+                Arguments.of(
+                        "empty routers, middlewares and services returns an empty configuration",
+                        emptyRoutersMiddlewaresServicesConfigs, defaultConfig),
+                Arguments.of("distinct configs", distinctConfigs, expectedMergedDistinctConfig),
+                Arguments.of("overlapping configs", overlappingConfigs, mergedOverlappingConfig));
+    }
+
+    @ParameterizedTest
+    @MethodSource("mergeTestData")
+    void mergeTest(String name, Map<String, JsonObject> configurations, JsonObject expected,
+            Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = String.format("'%s' failed. Input: '%s'", name, configurations);
+
+        Comparator<JsonObject> sortByName = new Comparator<JsonObject>() {
+
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String nameA = a.getString(DynamicConfiguration.ROUTER_NAME);
+                String nameB = b.getString(DynamicConfiguration.ROUTER_NAME);
+
+                return nameA.compareTo(nameB);
+            }
+
+        };
+
+        JsonObject actual = DynamicConfiguration.merge(configurations);
+        testCtx.verify(() -> {
+            assertNotNull(actual, errMsg);
+
+            JsonObject expectedHttp = expected.getJsonObject(DynamicConfiguration.HTTP);
+            JsonObject actualHttp = actual.getJsonObject(DynamicConfiguration.HTTP);
+            assertNotNull(actualHttp, errMsg);
+
+            JsonArray expectedRouters = expectedHttp.getJsonArray(DynamicConfiguration.ROUTERS);
+            JsonArray actualRouters = actualHttp.getJsonArray(DynamicConfiguration.ROUTERS);
+            Collections.sort((List<JsonObject>) expectedRouters.getList(), sortByName);
+            Collections.sort((List<JsonObject>) actualRouters.getList(), sortByName);
+            assertEquals(expectedRouters, actualRouters, errMsg);
+
+            JsonArray expectedMiddlewares =
+                    expectedHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            JsonArray actualMiddlewares = actualHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            Collections.sort((List<JsonObject>) expectedMiddlewares.getList(), sortByName);
+            Collections.sort((List<JsonObject>) actualMiddlewares.getList(), sortByName);
+            assertEquals(expectedMiddlewares, actualMiddlewares, errMsg);
+
+            JsonArray expectedServices = expectedHttp.getJsonArray(DynamicConfiguration.SERVICES);
+            JsonArray actualServices = actualHttp.getJsonArray(DynamicConfiguration.SERVICES);
+            Collections.sort((List<JsonObject>) expectedServices.getList(), sortByName);
+            Collections.sort((List<JsonObject>) actualServices.getList(), sortByName);
+            assertEquals(expectedServices, actualServices, errMsg);
+        });
         testCtx.completeNow();
     }
 
-    @Test
-    void getObjByKeyWithValueTest(Vertx vertx, VertxTestContext testCtx) {
-        // TODO
+    static Stream<Arguments> getObjByKeyWithValueTestData() {
+        JsonArray nullArray = null;
+        JsonArray emptyArray = new JsonArray();
+
+        String theHolyKey = "someKey";
+        String theHolyValue = "someValue";
+
+        JsonObject theHolyObject = new JsonObject().put(theHolyKey, theHolyValue).put("foo", "bar");
+        JsonObject theUnwantedObject =
+                new JsonObject().put(theHolyKey, "anotherValue").put("foo", "baz");
+        JsonObject theUnwantedObjectJunior =
+                new JsonObject().put(theHolyKey, "wrongValue").put("foo", "baz");
+
+        JsonArray oneObjectWithMatch = new JsonArray().add(theHolyObject);
+        JsonArray oneObjectWithoutMatch = new JsonArray().add(theUnwantedObject);
+        JsonArray multipleObjectsWithMatch =
+                new JsonArray().add(theHolyObject).add(theUnwantedObject);
+        JsonArray multipleObjectsWithoutMatch =
+                new JsonArray().add(theUnwantedObject).add(theUnwantedObjectJunior);
+        JsonArray stringArray = new JsonArray().add("blub").add("this").add("that");
+
+
+        return Stream.of(Arguments.of("null array", nullArray, theHolyKey, theHolyValue, null),
+                Arguments.of("empty array", emptyArray, theHolyKey, theHolyValue, null),
+                Arguments.of("array with one element and it matches", oneObjectWithMatch,
+                        theHolyKey, theHolyValue, theHolyObject),
+                Arguments.of("array with one element and it does not match", oneObjectWithoutMatch,
+                        theHolyKey, theHolyValue, null),
+                Arguments.of("array with multiple elements and one matches",
+                        multipleObjectsWithMatch, theHolyKey, theHolyValue, theHolyObject),
+                Arguments.of("array with multiple elements and none matches",
+                        multipleObjectsWithoutMatch, theHolyKey, theHolyValue, null),
+                Arguments.of("array with multiple elements and no key match",
+                        multipleObjectsWithoutMatch, "blub", "nvm", null),
+                Arguments.of("array with string items", stringArray, "hei", "hou", null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getObjByKeyWithValueTestData")
+    void getObjByKeyWithValueTest(String name, JsonArray arr, String key, String value,
+            JsonObject expected, Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'", name,
+                arr != null ? arr.encodePrettily() : arr, key, value);
+        testCtx.verify(() -> assertEquals(expected,
+                DynamicConfiguration.getObjByKeyWithValue(arr, key, value), errMsg));
         testCtx.completeNow();
     }
 
