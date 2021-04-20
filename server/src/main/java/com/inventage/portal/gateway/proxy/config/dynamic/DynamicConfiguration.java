@@ -169,8 +169,11 @@ public class DynamicConfiguration {
 
     public static JsonObject merge(Map<String, JsonObject> configurations) {
         JsonObject mergedConfig = buildDefaultConfiguration();
-        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
+        if (configurations == null) {
+            return mergedConfig;
+        }
 
+        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
         if (mergedHttpConfig == null) {
             return mergedConfig;
         }
@@ -178,20 +181,19 @@ public class DynamicConfiguration {
         Map<String, List<String>> routers = new HashMap<>();
         Set<String> routersToDelete = new HashSet<>();
 
-        Map<String, List<String>> services = new HashMap<>();
-        Set<String> servicesToDelete = new HashSet<>();
-
         Map<String, List<String>> middlewares = new HashMap<>();
         Set<String> middlewaresToDelete = new HashSet<>();
 
-        Set<String> keys = configurations.keySet();
+        Map<String, List<String>> services = new HashMap<>();
+        Set<String> servicesToDelete = new HashSet<>();
 
-        for (String key : keys) {
+        for (String key : configurations.keySet()) {
             JsonObject conf = configurations.get(key);
             JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
             if (httpConf != null) {
-                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
+                JsonArray rts =
+                        httpConf.getJsonArray(DynamicConfiguration.ROUTERS, new JsonArray());
                 for (int i = 0; i < rts.size(); i++) {
                     JsonObject rt = rts.getJsonObject(i);
                     String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
@@ -204,7 +206,8 @@ public class DynamicConfiguration {
                     }
                 }
 
-                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                JsonArray mws =
+                        httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
                 for (int i = 0; i < mws.size(); i++) {
                     JsonObject mw = mws.getJsonObject(i);
                     String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
@@ -217,7 +220,8 @@ public class DynamicConfiguration {
                     }
                 }
 
-                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
+                JsonArray svs =
+                        httpConf.getJsonArray(DynamicConfiguration.SERVICES, new JsonArray());
                 for (int i = 0; i < svs.size(); i++) {
                     JsonObject sv = svs.getJsonObject(i);
                     String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
@@ -262,7 +266,12 @@ public class DynamicConfiguration {
         }
         int size = jsonArr.size();
         for (int i = 0; i < size; i++) {
-            JsonObject obj = jsonArr.getJsonObject(i);
+            JsonObject obj;
+            try {
+                obj = jsonArr.getJsonObject(i);
+            } catch (ClassCastException e) {
+                return null;
+            }
             if (obj == null) {
                 return null;
             }
