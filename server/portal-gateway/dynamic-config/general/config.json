@@ -24,13 +24,6 @@
         "rule": "PathPrefix('/dashboard/service')",
         "service": "dashboard-service"
       },
-      {
-        "name": "dashboard-login",
-        "middlewares": ["dashboardOauth2", "dashboardLoginRedirectRegex"],
-        "rule": "Path('/dashboard/login')",
-        "priority": 100,
-        "service": "dashboard-frontend"
-      },
 
       {
         "name": "navigation-frontend",
