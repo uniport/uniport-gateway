@@ -66,6 +66,12 @@ public class ParserTest {
                 new AbstractMap.SimpleEntry<String, Object>("test.http.services.moose.servers.port",
                         "1234")));
 
+        Map<String, Object> labelsWithNoMatch = new HashMap<String, Object>(Map.ofEntries(
+                new AbstractMap.SimpleEntry<String, Object>("blub.foo.bar.baz", "moose")));
+
+        Map<String, Object> invalidLabels = new HashMap<String, Object>(
+                Map.ofEntries(new AbstractMap.SimpleEntry<String, Object>("blub...baz", "moose")));
+
         JsonObject expectedDecoding = new JsonObject().//
                 put(DynamicConfiguration.HTTP, new JsonObject()//
                         .put(DynamicConfiguration.ROUTERS, new JsonArray()//
@@ -93,6 +99,8 @@ public class ParserTest {
                                                                 1234))))));
 
         return Stream.of(Arguments.of("labels is null", null, "", null),
+                Arguments.of("labels with no match", labelsWithNoMatch, "nomatch", null),
+                Arguments.of("invalid labels", invalidLabels, "blub", null),
                 Arguments.of("decode labels", labels, "test", expectedDecoding));
     }
 

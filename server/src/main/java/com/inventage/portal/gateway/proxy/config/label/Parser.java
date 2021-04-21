@@ -87,7 +87,7 @@ public class Parser {
             String[] split = key.split("\\.");
 
             if (!split[0].equals(rootName)) {
-                throw new IllegalArgumentException("invalid label root " + split[0]);
+                throw new IllegalArgumentException("invalid root label: " + split[0]);
             }
 
             List<String> parts = new ArrayList<>();
