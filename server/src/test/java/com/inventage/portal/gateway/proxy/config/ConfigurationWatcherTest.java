@@ -5,7 +5,6 @@ import java.util.List;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -15,7 +14,6 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class ConfigurationWatcherTest {
 
-    @Test
     void simpleTest(Vertx vertx, VertxTestContext testCtx) {
         String name = "simple test";
         String errMsg = String.format("'%s' failed.", name);
