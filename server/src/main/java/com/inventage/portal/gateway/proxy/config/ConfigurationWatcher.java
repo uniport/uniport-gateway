@@ -80,6 +80,7 @@ public class ConfigurationWatcher {
     // The configuration message then gets passed along a series of check
     // to finally end up in a throttler that sends it to listenConfigurations.
     private void listenProviders() {
+        LOGGER.debug("listenProviders");
         MessageConsumer<JsonObject> configConsumer =
                 this.eventBus.consumer(this.configurationAddress);
 
