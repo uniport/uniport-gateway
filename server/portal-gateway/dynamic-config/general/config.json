@@ -7,6 +7,15 @@
         "rule": "Path('/')",
         "service": "dashboard-frontend"
       },
+      {
+        "name": "login",
+        "middlewares": [
+          "dashboardOauth2",
+          "loginRedirectRegex"
+        ],
+        "rule": "PathPrefix('/login')",
+        "service": "dashboard-frontend"
+      },
 
       {
         "name": "dashboard-frontend",
@@ -16,16 +25,6 @@
           "dashboardReplacePath"
         ],
         "rule": "PathPrefix('/dashboard')",
-        "service": "dashboard-frontend"
-      },
-      {
-        "name": "dashboard-login",
-        "middlewares": [
-          "dashboardOauth2",
-          "dashboardAuthBearer",
-          "dashboardLoginRedirectRegex"
-        ],
-        "rule": "PathPrefix('/dashboard/login')",
         "service": "dashboard-frontend"
       },
       {
@@ -84,24 +83,13 @@
         "type": "redirectRegex",
         "options": { "regex": "^/$", "replacement": "/dashboard/" }
       },
-
       {
-        "name": "dashboardLoginRedirectRegex",
+        "name": "loginRedirectRegex",
         "type": "redirectRegex",
         "options": {
-          "regex": "^(/dashboard/login)$",
+          "regex": "^(/login)$",
           "replacement": "/dashboard/"
         }
-      },
-      {
-        "name": "dashboardRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/dashboard)$", "replacement": "$1/" }
-      },
-      {
-        "name": "dashboardReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
       },
 
       {
@@ -113,6 +101,17 @@
         "name": "navigationReplacePath",
         "type": "replacePathRegex",
         "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
+      },
+
+      {
+        "name": "dashboardRedirectRegex",
+        "type": "redirectRegex",
+        "options": { "regex": "^(/dashboard)$", "replacement": "$1/" }
+      },
+      {
+        "name": "dashboardReplacePath",
+        "type": "replacePathRegex",
+        "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
       },
 
       {
