@@ -19,6 +19,16 @@
         "service": "dashboard-frontend"
       },
       {
+        "name": "dashboard-login",
+        "middlewares": [
+          "dashboardOauth2",
+          "dashboardAuthBearer",
+          "dashboardLoginRedirectRegex"
+        ],
+        "rule": "PathPrefix('/dashboard/login')",
+        "service": "dashboard-frontend"
+      },
+      {
         "name": "dashboard-service",
         "middlewares": ["dashboardAuthBearer"],
         "rule": "PathPrefix('/dashboard/service')",
