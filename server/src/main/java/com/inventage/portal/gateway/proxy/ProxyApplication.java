@@ -1,9 +1,7 @@
 package com.inventage.portal.gateway.proxy;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
-import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
@@ -81,7 +79,7 @@ public class ProxyApplication implements Application {
 
         this.providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
         this.providersThrottleDuration =
-                staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_SEC, 2);
+                staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);
 
         this.env = staticConfig.copy();
         this.env.remove(StaticConfiguration.ENTRYPOINTS);

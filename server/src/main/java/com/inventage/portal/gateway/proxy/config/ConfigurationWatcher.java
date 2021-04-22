@@ -42,7 +42,7 @@ public class ConfigurationWatcher {
 
     private Map<String, JsonObject> currentConfigurations;
 
-    private int providersThrottleIntervalSec;
+    private int providersThrottleIntervalMs;
 
     private List<Listener> configurationListeners;
 
@@ -51,12 +51,12 @@ public class ConfigurationWatcher {
     private Set<String> providerConfigReloadThrottler;
 
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
-            int providersThrottleIntervalSec, List<String> defaultEntrypoints) {
+            int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
         this.provider = provider;
         this.configurationAddress = configurationAddress;
-        this.providersThrottleIntervalSec = providersThrottleIntervalSec;
+        this.providersThrottleIntervalMs = providersThrottleIntervalMs;
         this.defaultEntrypoints = defaultEntrypoints;
         this.currentConfigurations = new HashMap<>();
         this.providerConfigReloadThrottler = new HashSet<>();
@@ -118,7 +118,7 @@ public class ConfigurationWatcher {
         if (!this.providerConfigReloadThrottler.contains(providerName)) {
             this.providerConfigReloadThrottler.add(providerName);
 
-            this.throttleProviderConfigReload(this.providersThrottleIntervalSec, providerName);
+            this.throttleProviderConfigReload(this.providersThrottleIntervalMs, providerName);
         }
 
         LOGGER.info("preloadConfiguration: publishing next configuration from '{}' provider",
@@ -132,10 +132,10 @@ public class ConfigurationWatcher {
     // after the throttle duration.
     // Note that in the case it receives N new configs in the timeframe of the throttle duration
     // after publishing, it will publish the last of the newly received configurations.
-    private void throttleProviderConfigReload(int throttleSec, String providerConfigReloadAddress) {
+    private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
         Queue<JsonObject> ring = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
-        this.vertx.setPeriodic(throttleSec * 1000, timerID -> {
+        this.vertx.setPeriodic(throttleMs, timerID -> {
             JsonObject nextConfig = ring.poll();
             if (nextConfig == null) {
                 return;

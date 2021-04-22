@@ -36,7 +36,7 @@ public class StaticConfiguration {
     public static final String PROVIDERS = "providers";
     // TODO: the following property is currently not publicly available due to not fitting into the
     // usual provider schema
-    public static final String PROVIDERS_THROTTLE_INTERVAL_SEC = "providersThrottleIntervalSec";
+    public static final String PROVIDERS_THROTTLE_INTERVAL_MS = "providersThrottleIntervalMs";
     public static final String PROVIDER_NAME = "name";
 
     public static final String PROVIDER_FILE = "file";
