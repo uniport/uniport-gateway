@@ -7,6 +7,7 @@ import com.inventage.portal.gateway.core.log.RequestResponseLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,6 +22,8 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 public class Entrypoint {
 
     private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
+
+    private static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
 
     private final Vertx vertx;
     private final String name;
@@ -48,7 +51,12 @@ public class Entrypoint {
         if (router == null) {
             router = Router.router(vertx);
             router.route().handler(RequestResponseLogger.create());
-            router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+            // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+            router.route()
+                    .handler(SessionHandler.create(LocalSessionStore.create(vertx))
+                            .setSessionCookieName(SESSION_COOKIE_NAME).setCookieHttpOnlyFlag(true)
+                            .setCookieSecureFlag(true).setCookieSameSite(CookieSameSite.STRICT)
+                            .setMinLength(32).setNagHttps(true));
         }
         return router;
     }
@@ -110,7 +118,8 @@ public class Entrypoint {
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
         final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
+                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME)
+                        .equals(name))
                 .findFirst().orElseThrow(() -> {
                     throw new IllegalStateException(
                             String.format("Entrypoint '%s' not found!", name));

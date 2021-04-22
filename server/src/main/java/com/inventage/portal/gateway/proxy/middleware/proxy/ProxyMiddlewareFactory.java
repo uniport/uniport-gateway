@@ -15,9 +15,11 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
 
+    private static final String MIDDLEWARE_PROXY = "proxy";
+
     @Override
     public String provides() {
-        return "proxy";
+        return MIDDLEWARE_PROXY;
     }
 
     @Override
@@ -27,6 +29,7 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig,
             UriMiddleware uriMiddleware) {
+        LOGGER.debug("create: Created '{}' middleware successfully", MIDDLEWARE_PROXY);
         return Future.succeededFuture(new ProxyMiddleware(vertx,
                 serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
                 serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT), uriMiddleware));

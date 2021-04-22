@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.router;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +12,7 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
@@ -87,7 +87,13 @@ public class RouterFactory {
             Route route = routingRule.apply(router);
 
             List<UriMiddleware> uriMiddlewares = new ArrayList<>();
-            List<Future> middlewareFutures = new ArrayList();
+            List<Future> middlewareFutures = new ArrayList<Future>();
+
+            // required to be the first middleware to guarantee every request is processed
+            Future<Middleware> sessionBagMiddlewareFuture =
+                    (new SessionBagMiddlewareFactory()).create(vertx);
+            middlewareFutures.add(sessionBagMiddlewareFuture);
+
             JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
             if (middlewareNames != null) {
                 for (int j = 0; j < middlewareNames.size(); j++) {
@@ -146,6 +152,7 @@ public class RouterFactory {
             // TODO support multipe servers
             JsonObject serverConfig = serverConfigs.getJsonObject(0);
 
+            // required to be the last middleware
             Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx,
                     router, serverConfig, uriMiddleware);
             middlewareFutures.add(proxyMiddlewareFuture);
@@ -237,8 +244,8 @@ public class RouterFactory {
 
     // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
     private RoutingRule parseRule(Vertx vertx, String rule) {
-        Pattern rulePattern = Pattern
-                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
+        Pattern rulePattern = Pattern.compile(
+                "^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {
