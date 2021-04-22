@@ -32,7 +32,6 @@ public class TestUtils {
             } catch (IOException e) {
                 // Ignore IOException on close()
             }
-            System.out.printf("Proposing port: %d\n", port);
             return port;
         } catch (IOException e) {
         } finally {

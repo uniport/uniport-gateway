@@ -126,7 +126,6 @@ public class ConfigurationWatcher {
         this.eventBus.publish(providerName, nextConfig);
     }
 
-
     // throttleProviderConfigReload throttles the configuration reload speed for a single provider.
     // It will immediately publish a new configuration and then only publish the next configuration
     // after the throttle duration.
