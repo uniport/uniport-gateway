@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
-
 import com.inventage.portal.gateway.TestUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -67,7 +66,7 @@ public class HeaderMiddlewareTest {
                                         "should contain request header key '%s'", h.getKey())));
                         assertTrue(req.headers().getAll(h.getKey()).contains(h.getValue()),
                                 String.format(failureMsgFormat, name,
-                                        String.format("should contain request header  '%s:%s'",
+                                        String.format("should contain request header '%s:%s'",
                                                 h.getKey(), h.getValue())));
                     }
                 }
@@ -137,7 +136,7 @@ public class HeaderMiddlewareTest {
                                 assertTrue(resp.headers().getAll(h.getKey()).contains(h.getValue()),
                                         String.format(failureMsgFormat, name,
                                                 String.format(
-                                                        "should contain response header  '%s:%s'",
+                                                        "should contain response header '%s:%s'",
                                                         h.getKey(), h.getValue())));
                             }
                         }

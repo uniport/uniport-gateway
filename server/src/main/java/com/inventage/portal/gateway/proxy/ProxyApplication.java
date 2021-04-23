@@ -1,9 +1,7 @@
 package com.inventage.portal.gateway.proxy;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
-import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
@@ -30,7 +28,7 @@ public class ProxyApplication implements Application {
     public static final String PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT = "http";
     public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME = "PORTAL_GATEWAY_PUBLIC_HOSTNAME";
     public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
-    public static final String PORTAL_GATEWAY_PUBLIC_PORT     = "PORTAL_GATEWAY_PUBLIC_PORT";
+    public static final String PORTAL_GATEWAY_PUBLIC_PORT = "PORTAL_GATEWAY_PUBLIC_PORT";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
@@ -88,8 +86,10 @@ public class ProxyApplication implements Application {
         this.env.remove(StaticConfiguration.APPLICATIONS);
         this.env.remove(StaticConfiguration.PROVIDERS);
 
-        String publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL, PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
-        String publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        String publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL,
+                PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+        String publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
         String publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT);
 
         this.entrypointPort = DynamicConfiguration
@@ -97,7 +97,8 @@ public class ProxyApplication implements Application {
                         StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
                 .getString(StaticConfiguration.ENTRYPOINT_PORT);
 
-        this.publicUrl = String.format("%s://%s:%s",publicProtocol, publicHostname, publicPort != null ? publicPort : entrypointPort);
+        this.publicUrl = String.format("%s://%s:%s", publicProtocol, publicHostname,
+                publicPort != null ? publicPort : entrypointPort);
     }
 
     public String toString() {
