@@ -69,7 +69,7 @@ public class PortalGatewayConfigRetrieverTest {
 
     @Test
     public void configFileInDefaultDir() {
-        // not testable as tempdirs are created in 'java.io.tmpdir' that is '/tmp' 
+        // not testable as tempdirs are created in 'java.io.tmpdir' that is '/tmp'
         // not forcable since the default dir is in /etc (needs root access)
     }
 

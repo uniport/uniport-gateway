@@ -12,10 +12,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 /**
- * The Json file for the portal gateway configuration is taken from one of these places: 
- * 1. File pointed to by the system env variable 'PORTAL_GATEWAY_JSON' 
- * 2. File pointed to by the system property 'PORTAL_GATEWAY_JSON' 
- * 3. File 'portal-gateway.json' in '/etc/portal-gateway/' 
+ * The Json file for the portal gateway configuration is taken from one of these places:
+ * 1. File pointed to by the system env variable 'PORTAL_GATEWAY_JSON'
+ * 2. File pointed to by the system property 'PORTAL_GATEWAY_JSON'
+ * 3. File 'portal-gateway.json' in '/etc/portal-gateway/'
  * 4. File 'portal-gateway.json' in the current working directory
  */
 public class PortalGatewayConfigRetriever {
