@@ -17,11 +17,9 @@ public class TestUtils {
     public static int findFreePort() {
         ServerSocket socket = null;
         try {
-            int port;
-            do {
-                socket = new ServerSocket(0);
-                port = socket.getLocalPort();
-            } while (port >= 40000);
+            socket = new ServerSocket(0);
+            socket.setReuseAddress(true);
+            int port = socket.getLocalPort();
             try {
                 socket.close();
             } catch (IOException e) {
@@ -37,7 +35,6 @@ public class TestUtils {
                 }
             }
         }
-        throw new IllegalStateException(
-                "Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
+        throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
     }
 }
