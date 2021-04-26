@@ -1,9 +1,12 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Map.Entry;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
 // -- request headers --> HeaderMiddleware -- updated request headers -->
@@ -15,47 +18,55 @@ public class HeaderMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMiddleware.class);
 
-    private Map<String, String> requestHeaders;
-    private Map<String, String> responseHeaders;
+    private MultiMap requestHeaders;
+    private MultiMap responseHeaders;
 
-    public HeaderMiddleware(Map<String, String> requestHeaders,
-            Map<String, String> responseHeaders) {
+    public HeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
         this.requestHeaders = requestHeaders;
         this.responseHeaders = responseHeaders;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        for (String header : this.requestHeaders.keySet()) {
-            String value = this.requestHeaders.get(header);
-            switch (value) {
+        for (Entry<String, String> header : this.requestHeaders.entries()) {
+            switch (header.getValue()) {
                 case "": {
-                    LOGGER.debug("handler: removing request header '{}'", header);
-                    ctx.request().headers().remove(header);
+                    LOGGER.debug("handler: removing request header '{}'", header.getKey());
+                    ctx.request().headers().remove(header.getKey());
                     break;
                 }
                 default: {
-                    LOGGER.debug("handler: setting request header '{}:{}'", header, value);
-                    ctx.request().headers().set(header, value);
+                    LOGGER.debug("handler: setting request header '{}:{}'", header.getKey(),
+                            header.getValue());
+                    ctx.request().headers().add(header.getKey(), header.getValue());
                 }
             }
         }
 
-        for (String header : this.responseHeaders.keySet()) {
-            String value = this.responseHeaders.get(header);
-            switch (value) {
-                case "": {
-                    LOGGER.debug("handler: removing response header '{}'", header);
-                    ctx.response().headers().remove(header);
-                    break;
-                }
-                default: {
-                    LOGGER.debug("handler: setting response header '{}:{}'", header, value);
-                    ctx.response().headers().set(header, value);
+        Handler<MultiMap> respModifier = headers -> {
+            for (Entry<String, String> header : this.responseHeaders.entries()) {
+                switch (header.getValue()) {
+                    case "": {
+                        if (headers.contains(header.getKey())) {
+                            LOGGER.debug("handler: removing response header '{}'", header.getKey());
+                            headers.remove(header.getKey());
+                        }
+                        break;
+                    }
+                    default: {
+                        List<String> hs = headers.getAll(header.getKey());
+                        if (hs == null || !hs.contains(header.getValue())) {
+                            LOGGER.debug("handler: setting response header '{}:{}'",
+                                    header.getKey(), header.getValue());
+                            headers.add(header.getKey(), header.getValue());
+                        }
+                    }
                 }
             }
-        }
+        };
+        this.addResponseHeadersModifier(ctx, respModifier);
 
         ctx.next();
     }
+
 }

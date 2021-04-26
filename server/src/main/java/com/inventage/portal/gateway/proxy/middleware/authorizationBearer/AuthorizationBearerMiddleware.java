@@ -5,6 +5,8 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 
@@ -47,9 +49,12 @@ public class AuthorizationBearerMiddleware implements Middleware {
             ctx.next();
             return;
         }
-
         ctx.request().headers().add(HttpHeaders.AUTHORIZATION, token);
-        ctx.response().headers().remove(HttpHeaders.AUTHORIZATION);
+
+        Handler<MultiMap> respModifier = headers -> {
+            headers.remove(HttpHeaders.AUTHORIZATION);
+        };
+        this.addResponseHeadersModifier(ctx, respModifier);
 
         ctx.next();
     }

@@ -52,13 +52,15 @@ import io.vertx.ext.web.impl.ServerWebSocketWrapper;
  */
 public class ProxiedHttpServerRequest implements HttpServerRequest {
 
+    private final RoutingContext ctx;
     private final HttpServerRequest delegate;
     private final ForwardedParser forwardedParser;
 
     private UriMiddleware uriMiddleware;
 
-    public ProxiedHttpServerRequest(RoutingContext rc, AllowForwardHeaders allowForward) {
-        this.delegate = rc.request();
+    public ProxiedHttpServerRequest(RoutingContext ctx, AllowForwardHeaders allowForward) {
+        this.ctx = ctx;
+        this.delegate = ctx.request();
         this.forwardedParser = new ForwardedParser(delegate, allowForward);
     }
 
@@ -160,7 +162,7 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public HttpServerResponse response() {
-        return new ProxiedHttpServerResponse(delegate.response());
+        return new ProxiedHttpServerResponse(ctx, delegate.response());
     }
 
     @Override

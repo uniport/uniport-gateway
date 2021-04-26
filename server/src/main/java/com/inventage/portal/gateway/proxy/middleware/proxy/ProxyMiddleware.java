@@ -45,12 +45,9 @@ public class ProxyMiddleware implements Middleware {
 
         // URI manipulations are not allowed by Vertx-Web therefore proxied requests
         // are patched here
-        HttpServerRequest request;
+        HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
         if (this.uriMiddleware != null) {
-            request = (new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL))
-                    .setUriMiddleware(this.uriMiddleware);
-        } else {
-            request = ctx.request();
+            ((ProxiedHttpServerRequest) request).setUriMiddleware(this.uriMiddleware);
         }
 
         LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort,

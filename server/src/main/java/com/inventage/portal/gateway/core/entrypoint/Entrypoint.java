@@ -23,7 +23,7 @@ public class Entrypoint {
 
     private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
 
-    private static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
+    public static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
 
     private final Vertx vertx;
     private final String name;
