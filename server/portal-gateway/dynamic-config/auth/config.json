@@ -9,16 +9,25 @@
     ],
     "middlewares": [
       {
-        "name": "dashboardAuthBearer",
+        "name": "navigationAuthBearer",
         "type": "authorizationBearer",
         "options": { "sessionScope": "id" }
       },
 
-
       {
-        "name": "navigationAuthBearer",
+        "name": "dashboardAuthBearer",
         "type": "authorizationBearer",
         "options": { "sessionScope": "id" }
+      },
+      {
+        "name": "dashboardOauth2",
+        "type": "oauth2",
+        "options": {
+          "clientId": "Portal-Gateway",
+          "clientSecret": "Portal-Gateway!",
+          "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
+          "sessionScope": "Dashboard"
+        }
       },
 
       {

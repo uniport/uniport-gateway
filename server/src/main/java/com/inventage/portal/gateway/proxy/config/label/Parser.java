@@ -36,11 +36,14 @@ public class Parser {
 
     public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
         List<String> filteredKeys = new ArrayList<>();
+        if (labels == null) {
+            return filteredKeys;
+        }
         for (String key : labels.keySet()) {
             if (!(labels.get(key) instanceof String)) {
                 continue;
             }
-            if (filters.isEmpty()) {
+            if (filters == null || filters.isEmpty()) {
                 filteredKeys.add(key);
                 continue;
             }
@@ -84,7 +87,7 @@ public class Parser {
             String[] split = key.split("\\.");
 
             if (!split[0].equals(rootName)) {
-                throw new IllegalArgumentException("invalid label root " + split[0]);
+                throw new IllegalArgumentException("invalid root label: " + split[0]);
             }
 
             List<String> parts = new ArrayList<>();

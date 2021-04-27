@@ -101,8 +101,13 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
             <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#additional-build-artifacts -->
             <plugin>
+                <!-- TODO native build with graalvm -->
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>

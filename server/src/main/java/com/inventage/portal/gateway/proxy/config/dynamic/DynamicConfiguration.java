@@ -79,7 +79,6 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HOST = "host";
     public static final String SERVICE_SERVER_PORT = "port";
 
-
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
@@ -102,7 +101,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
-                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema());
+                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+                .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema =
                 Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
@@ -125,8 +125,8 @@ public class DynamicConfiguration {
                         .property(SERVICES, Schemas.arraySchema().items(serviceSchema))
                         .allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder dynamicConfigBuilder =
-                Schemas.objectSchema().requiredProperty(HTTP, httpSchema);
+        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema()
+                .requiredProperty(HTTP, httpSchema).allowAdditionalProperties(false);
 
         SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
         SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
@@ -166,6 +166,129 @@ public class DynamicConfiguration {
         return httpEmpty;
     }
 
+    public static JsonObject merge(Map<String, JsonObject> configurations) {
+        JsonObject mergedConfig = buildDefaultConfiguration();
+        if (configurations == null) {
+            return mergedConfig;
+        }
+
+        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
+        if (mergedHttpConfig == null) {
+            return mergedConfig;
+        }
+
+        Map<String, List<String>> routers = new HashMap<>();
+        Set<String> routersToDelete = new HashSet<>();
+
+        Map<String, List<String>> middlewares = new HashMap<>();
+        Set<String> middlewaresToDelete = new HashSet<>();
+
+        Map<String, List<String>> services = new HashMap<>();
+        Set<String> servicesToDelete = new HashSet<>();
+
+        for (String key : configurations.keySet()) {
+            JsonObject conf = configurations.get(key);
+            JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
+
+            if (httpConf != null) {
+                JsonArray rts =
+                        httpConf.getJsonArray(DynamicConfiguration.ROUTERS, new JsonArray());
+                for (int i = 0; i < rts.size(); i++) {
+                    JsonObject rt = rts.getJsonObject(i);
+                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
+                    if (!routers.containsKey(rtName)) {
+                        routers.put(rtName, new ArrayList<String>());
+                    }
+                    routers.get(rtName).add(key);
+                    if (!addRouter(mergedHttpConfig, rtName, rt)) {
+                        routersToDelete.add(rtName);
+                    }
+                }
+
+                JsonArray mws =
+                        httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
+                for (int i = 0; i < mws.size(); i++) {
+                    JsonObject mw = mws.getJsonObject(i);
+                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+                    if (!middlewares.containsKey(mwName)) {
+                        middlewares.put(mwName, new ArrayList<String>());
+                    }
+                    middlewares.get(mwName).add(key);
+                    if (!addMiddleware(mergedHttpConfig, mwName, mw)) {
+                        middlewaresToDelete.add(mwName);
+                    }
+                }
+
+                JsonArray svs =
+                        httpConf.getJsonArray(DynamicConfiguration.SERVICES, new JsonArray());
+                for (int i = 0; i < svs.size(); i++) {
+                    JsonObject sv = svs.getJsonObject(i);
+                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
+                    if (!services.containsKey(svName)) {
+                        services.put(svName, new ArrayList<String>());
+                    }
+                    services.get(svName).add(key);
+                    if (!addService(mergedHttpConfig, svName, sv)) {
+                        servicesToDelete.add(svName);
+                    }
+                }
+            }
+        }
+
+        for (String routerName : routersToDelete) {
+            LOGGER.warn(
+                    "merge: Router defined multiple times with different configurations in '{}'",
+                    routers.get(routerName));
+            mergedHttpConfig.remove(routerName);
+        }
+
+        for (String middlewareName : middlewaresToDelete) {
+            LOGGER.warn(
+                    "merge: Middleware defined multiple times with different configurations in '{}'",
+                    routers.get(middlewareName));
+            mergedConfig.remove(middlewareName);
+        }
+
+        for (String serviceName : servicesToDelete) {
+            LOGGER.warn(
+                    "merge: Service defined multiple times with different configurations in '{}'",
+                    routers.get(serviceName));
+            mergedHttpConfig.remove(serviceName);
+        }
+
+        return mergedConfig;
+    }
+
+    public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
+        if (jsonArr == null) {
+            return null;
+        }
+        int size = jsonArr.size();
+        for (int i = 0; i < size; i++) {
+            JsonObject obj;
+            try {
+                obj = jsonArr.getJsonObject(i);
+            } catch (ClassCastException e) {
+                return null;
+            }
+            if (obj == null) {
+                return null;
+            }
+            if (obj.containsKey(key) && obj.getString(key).equals(value)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Validates a JSON object representing a dynamic configuration instance.
+     * 
+     * @param vertx    a Vertx instance
+     * @param json     the json object to validate
+     * @param complete if set to true, all references to objects need to point to existing objects (e.g. router middlewares and router services)
+     * @return a Future that will succeed or fail eventually
+     */
     public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
         if (schema == null) {
             schema = buildSchema(vertx);
@@ -175,7 +298,7 @@ public class DynamicConfiguration {
         schema.validateAsync(json).onSuccess(f -> {
             JsonObject httpConfig = json.getJsonObject(HTTP);
             List<Future> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
-                    validateMiddlewares(httpConfig));
+                    validateMiddlewares(httpConfig), validateServices(httpConfig));
 
             CompositeFuture.all(validFutures).onSuccess(h -> {
                 validPromise.complete();
@@ -190,7 +313,7 @@ public class DynamicConfiguration {
         return validPromise.future();
     }
 
-    public static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
+    private static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
         JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
             LOGGER.warn("validateRouters: no routers defined");
@@ -248,7 +371,7 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
+    private static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
             LOGGER.debug("validateMiddlewares: no middlewares defined");
@@ -274,43 +397,58 @@ public class DynamicConfiguration {
                 }
                 case MIDDLEWARE_HEADERS: {
                     JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
-                    if (requestHeaders != null && requestHeaders.isEmpty()) {
-                        valid = false;
-                        errMsg = String.format("%s: Empty request headers defined", mwType);
-                        break;
-                    }
-
-                    for (Entry<String, Object> entry : requestHeaders) {
-                        if (!(entry.getKey() instanceof String)
-                                || !(entry.getValue() instanceof String)) {
+                    if (requestHeaders != null) {
+                        if (requestHeaders.isEmpty()) {
                             valid = false;
-                            errMsg = String.format(
-                                    "%s: Request header and value can only be of type string",
-                                    mwType);
+                            errMsg = String.format("%s: Empty request headers defined", mwType);
                             break;
                         }
-                    }
-                    if (!valid) {
-                        break;
+
+                        for (Entry<String, Object> entry : requestHeaders) {
+                            if (!(entry.getKey() instanceof String)
+                                    || !(entry.getValue() instanceof String)) {
+                                valid = false;
+                                errMsg = String.format(
+                                        "%s: Request header and value can only be of type string",
+                                        mwType);
+                                break;
+                            }
+                        }
+                        if (!valid) {
+                            break;
+                        }
                     }
 
                     JsonObject responseHeaders =
                             mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
-                    if (responseHeaders != null && responseHeaders.isEmpty()) {
-                        valid = false;
-                        errMsg = String.format("%s: Empty response headers defined", mwType);
-                        break;
-                    }
-
-                    for (Entry<String, Object> entry : responseHeaders) {
-                        if (!(entry.getKey() instanceof String)
-                                || !(entry.getValue() instanceof String)) {
+                    if (responseHeaders != null) {
+                        if (responseHeaders.isEmpty()) {
                             valid = false;
-                            errMsg = String.format(
-                                    "%s: Response header and value can only be of type string",
-                                    mwType);
+                            errMsg = String.format("%s: Empty response headers defined", mwType);
                             break;
                         }
+
+                        for (Entry<String, Object> entry : responseHeaders) {
+                            if (!(entry.getKey() instanceof String)
+                                    || !(entry.getValue() instanceof String)) {
+                                valid = false;
+                                errMsg = String.format(
+                                        "%s: Response header and value can only be of type string",
+                                        mwType);
+                                break;
+                            }
+                        }
+                        if (!valid) {
+                            break;
+                        }
+                    }
+
+                    if (requestHeaders == null && responseHeaders == null) {
+                        valid = false;
+                        errMsg = String.format(
+                                "%s: at least one response or request header has to be defined",
+                                mwType);
+                        break;
                     }
 
                     break;
@@ -398,110 +536,24 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    public static JsonObject merge(Map<String, JsonObject> configurations) {
-        JsonObject mergedConfig = buildDefaultConfiguration();
-        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
-
-        if (mergedHttpConfig == null) {
-            return mergedConfig;
+    private static Future<Void> validateServices(JsonObject httpConfig) {
+        JsonArray svs = httpConfig.getJsonArray(SERVICES);
+        if (svs == null || svs.size() == 0) {
+            LOGGER.debug("validateServices: no services defined");
+            return Future.succeededFuture();
         }
 
-        Map<String, List<String>> routers = new HashMap<>();
-        Set<String> routersToDelete = new HashSet<>();
-
-        Map<String, List<String>> services = new HashMap<>();
-        Set<String> servicesToDelete = new HashSet<>();
-
-        Map<String, List<String>> middlewares = new HashMap<>();
-        Set<String> middlewaresToDelete = new HashSet<>();
-
-        Set<String> keys = configurations.keySet();
-
-        for (String key : keys) {
-            JsonObject conf = configurations.get(key);
-            JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
-
-            if (httpConf != null) {
-                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-                for (int i = 0; i < rts.size(); i++) {
-                    JsonObject rt = rts.getJsonObject(i);
-                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
-                    if (!routers.containsKey(rtName)) {
-                        routers.put(rtName, new ArrayList<String>());
-                    }
-                    routers.get(rtName).add(key);
-                    if (!addRouter(mergedHttpConfig, rtName, rt)) {
-                        routersToDelete.add(rtName);
-                    }
-                }
-
-                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                for (int i = 0; i < mws.size(); i++) {
-                    JsonObject mw = mws.getJsonObject(i);
-                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
-                    if (!middlewares.containsKey(mwName)) {
-                        middlewares.put(mwName, new ArrayList<String>());
-                    }
-                    middlewares.get(mwName).add(key);
-                    if (!addMiddleware(mergedHttpConfig, mwName, mw)) {
-                        middlewaresToDelete.add(mwName);
-                    }
-                }
-
-                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-                for (int i = 0; i < svs.size(); i++) {
-                    JsonObject sv = svs.getJsonObject(i);
-                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
-                    if (!services.containsKey(svName)) {
-                        services.put(svName, new ArrayList<String>());
-                    }
-                    services.get(svName).add(key);
-                    if (!addService(mergedHttpConfig, svName, sv)) {
-                        servicesToDelete.add(svName);
-                    }
-                }
+        for (int i = 0; i < svs.size(); i++) {
+            JsonObject sv = svs.getJsonObject(i);
+            JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
+            if (servers == null || servers.size() == 0) {
+                String errorMsg = "validateServices: no servers defined";
+                LOGGER.debug(errorMsg);
+                return Future.failedFuture(errorMsg);
             }
         }
 
-        for (String routerName : routersToDelete) {
-            LOGGER.warn(
-                    "merge: Router defined multiple times with different configurations in '{}'",
-                    routers.get(routerName));
-            mergedHttpConfig.remove(routerName);
-        }
-
-        for (String middlewareName : middlewaresToDelete) {
-            LOGGER.warn(
-                    "merge: Middleware defined multiple times with different configurations in '{}'",
-                    routers.get(middlewareName));
-            mergedConfig.remove(middlewareName);
-        }
-
-        for (String serviceName : servicesToDelete) {
-            LOGGER.warn(
-                    "merge: Service defined multiple times with different configurations in '{}'",
-                    routers.get(serviceName));
-            mergedHttpConfig.remove(serviceName);
-        }
-
-        return mergedConfig;
-    }
-
-    public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
-        if (jsonArr == null) {
-            return null;
-        }
-        int size = jsonArr.size();
-        for (int i = 0; i < size; i++) {
-            JsonObject obj = jsonArr.getJsonObject(i);
-            if (obj == null) {
-                return null;
-            }
-            if (obj.containsKey(key) && obj.getString(key).equals(value)) {
-                return obj;
-            }
-        }
-        return null;
+        return Future.succeededFuture();
     }
 
     private static Boolean addRouter(JsonObject httpConf, String routerName,

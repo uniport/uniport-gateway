@@ -31,7 +31,6 @@ public interface MiddlewareFactory {
             if (middleware.isPresent()) {
                 return middleware.get();
             }
-            LOGGER.warn("getFactory: middleware factory not found for '{}'", middlewareName);
             return null;
         }
     }
