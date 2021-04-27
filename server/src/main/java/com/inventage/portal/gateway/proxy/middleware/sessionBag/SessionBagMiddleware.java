@@ -2,9 +2,12 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
@@ -21,7 +24,8 @@ public class SessionBagMiddleware implements Middleware {
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
-    public SessionBagMiddleware() {}
+    public SessionBagMiddleware() {
+    }
 
     @Override
     public void handle(RoutingContext ctx) {
@@ -29,8 +33,17 @@ public class SessionBagMiddleware implements Middleware {
         // on request: set cookie from session if present
         if (ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             LOGGER.debug("handle: Cookies in session found. Setting as cookie header.");
-            List<String> requestCookies = ctx.session().get(SESSION_BAG_COOKIES);
-            ctx.request().headers().add(HttpHeaders.COOKIE.toString(), requestCookies);
+
+            List<String> requestCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE);
+            ctx.request().headers().remove(HttpHeaders.COOKIE);
+
+            // https://github.com/vert-x3/vertx-web/issues/1716
+            List<String> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
+            String cookieSeparator = "; ";
+            String cookies = String.join(cookieSeparator, requestCookies) + cookieSeparator
+                    + String.join(cookieSeparator, storedCookies);
+
+            ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookies);
         }
 
         // on response: remove cookies if present and store them in session
@@ -50,6 +63,7 @@ public class SessionBagMiddleware implements Middleware {
                     continue;
                 }
                 existingCookies.add(cookieToAdd);
+                LOGGER.debug("handler: Storing cookie '{}' in session", cookieToAdd);
             }
             ctx.session().put(SESSION_BAG_COOKIES, existingCookies);
         };
