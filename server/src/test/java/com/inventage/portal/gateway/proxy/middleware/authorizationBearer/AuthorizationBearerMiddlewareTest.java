@@ -64,7 +64,7 @@ public class AuthorizationBearerMiddlewareTest {
                         "should match token");
             });
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
@@ -76,7 +76,6 @@ public class AuthorizationBearerMiddlewareTest {
                         responseReceived.flag();
                     }));
         }));
-
     }
 
     @Test
@@ -114,7 +113,7 @@ public class AuthorizationBearerMiddlewareTest {
                         "should match token");
             });
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
@@ -125,7 +124,6 @@ public class AuthorizationBearerMiddlewareTest {
                         });
                         responseReceived.flag();
                     }));
-
         }));
 
     }
@@ -164,7 +162,7 @@ public class AuthorizationBearerMiddlewareTest {
                 assertFalse(req.headers().contains(HttpHeaders.AUTHORIZATION), "should not contain auth header");
             });
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())

@@ -66,13 +66,15 @@ public class HeaderMiddlewareTest {
             // date, content-length etc.
             assertHeaders(expectedReqHeaders, req.headers(), errMsgFormat, name);
             requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
+            serverStarted.flag();
 
-        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> {
-            req.putHeader("Foo", "bar"); // set some request header to test deletion/overwriting
-            return req.send();
-        }).onComplete(testCtx.succeeding(resp -> {
-            responseReceived.flag();
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> {
+                req.putHeader("Foo", "bar"); // set some request header to test deletion/overwriting
+                return req.send();
+            }).onComplete(testCtx.succeeding(resp -> {
+                responseReceived.flag();
+            }));
         }));
     }
 
@@ -112,24 +114,29 @@ public class HeaderMiddlewareTest {
             ctx.response().headers().add("Foo", "bar"); // set some response header to test deletion/overwriting
             ctx.response().end();
         });
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort)
-                .onComplete(testCtx.succeeding(httpServer -> serviceStarted.flag()));
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort).onComplete(testCtx.succeeding(s -> {
+            serviceStarted.flag();
 
-        Router router = Router.router(vertx);
-        router.route().handler(header).handler(proxy);
-        vertx.createHttpServer().requestHandler(req -> {
-            router.handle(req);
-            requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+            ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
 
-        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
-                .onComplete(testCtx.succeeding(resp -> {
-                    // cannot use assertEquals since response headers include
-                    // date, content-length etc.
-                    assertHeaders(expectedRespHeaders, resp.headers(), errMsgFormat, name);
-                    responseReceived.flag();
-                }));
+            Router router = Router.router(vertx);
+            router.route().handler(header).handler(proxy);
+            vertx.createHttpServer().requestHandler(req -> {
+                router.handle(req);
+                requestServed.flag();
+            }).listen(port).onComplete(testCtx.succeeding(p -> {
+                serverStarted.flag();
+
+                vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
+                        .onComplete(testCtx.succeeding(resp -> {
+                            // cannot use assertEquals since response headers include
+                            // date, content-length etc.
+                            assertHeaders(expectedRespHeaders, resp.headers(), errMsgFormat, name);
+                            responseReceived.flag();
+                        }));
+            }));
+        }));
+
     }
 
     void assertHeaders(MultiMap expected, MultiMap actual, String errMsgFormat, String name) {

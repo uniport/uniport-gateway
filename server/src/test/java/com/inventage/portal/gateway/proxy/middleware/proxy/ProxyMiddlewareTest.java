@@ -41,25 +41,30 @@ public class ProxyMiddlewareTest {
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
             requestProxied.flag();
-        }).listen(proxyPort).onComplete(testCtx.succeeding(httpServer -> proxyStarted.flag()));
+        }).listen(proxyPort).onComplete(testCtx.succeeding(s -> {
+            proxyStarted.flag();
 
-        vertx.createHttpServer().requestHandler(req -> {
-            assertEquals(String.format("%s:%s", host, proxyPort), req.headers().get(X_FORWARDED_HOST));
-            req.response().end(serverResponse);
-            requestServed.flag();
-        }).listen(serverPort).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+            vertx.createHttpServer().requestHandler(req -> {
+                assertEquals(String.format("%s:%s", host, proxyPort), req.headers().get(X_FORWARDED_HOST));
+                req.response().end(serverResponse);
+                requestServed.flag();
+            }).listen(serverPort).onComplete(testCtx.succeeding(p -> {
+                serverStarted.flag();
 
-        vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(req -> req.send())
-                .onComplete(testCtx.succeeding(resp -> {
-                    testCtx.verify(() -> {
-                        assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
-                        responseReceived.flag();
-                    });
-                    resp.body().onComplete(testCtx.succeeding(body -> {
-                        testCtx.verify(() -> {
-                            assertEquals(serverResponse, body.toString());
-                        });
-                    }));
-                }));
+                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(req -> req.send())
+                        .onComplete(testCtx.succeeding(resp -> {
+                            testCtx.verify(() -> {
+                                assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
+                                responseReceived.flag();
+                            });
+                            resp.body().onComplete(testCtx.succeeding(body -> {
+                                testCtx.verify(() -> {
+                                    assertEquals(serverResponse, body.toString());
+                                });
+                            }));
+                        }));
+            }));
+        }));
+
     }
 }

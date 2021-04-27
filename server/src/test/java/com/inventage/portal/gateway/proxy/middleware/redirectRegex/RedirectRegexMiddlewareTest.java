@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
@@ -52,15 +51,16 @@ public class RedirectRegexMiddlewareTest {
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
             requestsServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
+            serverStarted.flag();
 
-        HttpClient client = vertx.createHttpClient();
+            vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", URL).compose(req -> req.send())
+                    .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
+                        assertEquals(expectedStatusCode, resp.statusCode(), failureMsg);
+                        assertEquals(expectedURL, resp.headers().get(HttpHeaders.LOCATION), failureMsg);
+                        responsesReceived.flag();
+                    })));
+        }));
 
-        client.request(HttpMethod.GET, port, "localhost", URL).compose(req -> req.send())
-                .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
-                    assertEquals(expectedStatusCode, resp.statusCode(), failureMsg);
-                    assertEquals(expectedURL, resp.headers().get(HttpHeaders.LOCATION), failureMsg);
-                    responsesReceived.flag();
-                })));
     }
 }
