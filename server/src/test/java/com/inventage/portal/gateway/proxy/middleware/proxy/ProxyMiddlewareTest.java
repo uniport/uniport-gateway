@@ -3,8 +3,10 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -26,7 +28,7 @@ public class ProxyMiddlewareTest {
         String proxyResponse = "proxy";
         String serverResponse = "server";
 
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, serverPort, null);
+        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, serverPort);
 
         Checkpoint proxyStarted = testCtx.checkpoint();
         Checkpoint serverStarted = testCtx.checkpoint();

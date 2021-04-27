@@ -2,9 +2,10 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.ProxiedHttpServerRequest;
-import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.AllowForwardHeaders;
@@ -26,15 +27,11 @@ public class ProxyMiddleware implements Middleware {
 
     private int serverPort;
 
-    private UriMiddleware uriMiddleware;
-
-    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort,
-            UriMiddleware uriMiddleware) {
+    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
         this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
         this.httpProxy.target(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
-        this.uriMiddleware = uriMiddleware;
     }
 
     @Override
@@ -43,15 +40,12 @@ public class ProxyMiddleware implements Middleware {
             ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
         }
 
-        // URI manipulations are not allowed by Vertx-Web therefore proxied requests
-        // are patched here
+        // Some manipulations are 
+        // * not allowed by Vertx-Web 
+        // * or have to be made on the response of the forwarded request
         HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
-        if (this.uriMiddleware != null) {
-            ((ProxiedHttpServerRequest) request).setUriMiddleware(this.uriMiddleware);
-        }
 
-        LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort,
-                request.uri());
+        LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
         httpProxy.handle(request);
     }
 

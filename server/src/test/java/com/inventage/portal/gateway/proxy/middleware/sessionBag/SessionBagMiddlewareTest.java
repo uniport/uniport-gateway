@@ -139,7 +139,7 @@ public class SessionBagMiddlewareTest {
         SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(sessionCookieName);
         SessionBagMiddleware sessionBag = new SessionBagMiddleware();
 
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort, null);
+        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
         Router proxyRouter = Router.router(vertx);
         proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);
 

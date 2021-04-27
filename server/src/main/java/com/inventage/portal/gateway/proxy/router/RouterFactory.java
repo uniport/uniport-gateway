@@ -6,15 +6,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -60,8 +61,7 @@ public class RouterFactory {
         return promise.future();
     }
 
-    private void createRouter(JsonObject dynamicConfig,
-            final Handler<AsyncResult<Router>> handler) {
+    private void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
@@ -86,25 +86,22 @@ public class RouterFactory {
             }
             Route route = routingRule.apply(router);
 
-            List<UriMiddleware> uriMiddlewares = new ArrayList<>();
             List<Future> middlewareFutures = new ArrayList<Future>();
 
             // required to be the first middleware to guarantee every request is processed
-            Future<Middleware> sessionBagMiddlewareFuture =
-                    (new SessionBagMiddlewareFactory()).create(vertx);
+            Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx);
             middlewareFutures.add(sessionBagMiddlewareFuture);
 
             JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
             if (middlewareNames != null) {
                 for (int j = 0; j < middlewareNames.size(); j++) {
                     String middlewareName = middlewareNames.getString(j);
-                    JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(
-                            middlwares, DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+                    JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlwares,
+                            DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
 
-                    String middlewareType =
-                            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-                    JsonObject middlewareOptions =
-                            middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+                    String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
+                    JsonObject middlewareOptions = middlewareConfig
+                            .getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
                     // needed to ensure authenticating requests are routed through this application
                     // TODO this does not work when published != exposed port
@@ -112,21 +109,11 @@ public class RouterFactory {
                         middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
                     }
 
-                    MiddlewareFactory middlewareFactory =
-                            MiddlewareFactory.Loader.getFactory(middlewareType);
+                    MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
                     if (middlewareFactory != null) {
-                        Future<Middleware> middlewareFuture =
-                                middlewareFactory.create(this.vertx, router, middlewareOptions);
+                        Future<Middleware> middlewareFuture = middlewareFactory.create(this.vertx, router,
+                                middlewareOptions);
                         middlewareFutures.add(middlewareFuture);
-                        continue;
-                    }
-
-                    UriMiddlewareFactory uriMiddlewareFactory =
-                            UriMiddlewareFactory.Loader.getFactory(middlewareType);
-                    if (uriMiddlewareFactory != null) {
-                        UriMiddleware uriMiddleware =
-                                uriMiddlewareFactory.create(middlewareOptions);
-                        uriMiddlewares.add(uriMiddleware);
                         continue;
                     }
 
@@ -134,27 +121,16 @@ public class RouterFactory {
                 }
             }
 
-            UriMiddleware uriMiddleware = null;
-            if (uriMiddlewares.size() > 0) {
-                uriMiddleware = uriMiddlewares.get(0);
-                if (uriMiddlewares.size() > 1) {
-                    LOGGER.warn(
-                            "createRouter: Multiple URI middlewares defined. At most one can be used. Chosing the first '{}'",
-                            uriMiddleware.toString());
-                }
-            }
-
             String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
             JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
                     DynamicConfiguration.SERVICE_NAME, serviceName);
-            JsonArray serverConfigs =
-                    serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
             // TODO support multipe servers
             JsonObject serverConfig = serverConfigs.getJsonObject(0);
 
             // required to be the last middleware
-            Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx,
-                    router, serverConfig, uriMiddleware);
+            Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
+                    serverConfig);
             middlewareFutures.add(proxyMiddlewareFuture);
 
             CompositeFuture.all(middlewareFutures).onComplete(ar -> {
@@ -163,11 +139,10 @@ public class RouterFactory {
                         route.handler((Handler<RoutingContext>) mf.result());
                     } else {
                         router.delete(route.getPath());
-                        LOGGER.warn(
-                                "createRouter: Ignoring path '{}'. Failed to create middleware: '{}'",
+                        LOGGER.warn("createRouter: Ignoring path '{}'. Failed to create middleware: '{}'",
                                 route.getPath(), mf.cause().getMessage());
-                        handler.handle(Future.failedFuture(
-                                "Failed to create middleware '" + mf.cause().getMessage() + "'"));
+                        handler.handle(
+                                Future.failedFuture("Failed to create middleware '" + mf.cause().getMessage() + "'"));
                     }
                 });
             });
@@ -244,8 +219,8 @@ public class RouterFactory {
 
     // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
     private RoutingRule parseRule(Vertx vertx, String rule) {
-        Pattern rulePattern = Pattern.compile(
-                "^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
+        Pattern rulePattern = Pattern
+                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {
@@ -255,26 +230,26 @@ public class RouterFactory {
         RoutingRule routingRule;
         String ruleValue = m.group("ruleValue");
         switch (m.group("ruleName")) {
-            case "Path": {
-                routingRule = path(vertx, ruleValue);
-                break;
-            }
-            case "PathPrefix": {
-                // append * to do path prefix routing
-                String pathPrefix = ruleValue;
-                pathPrefix += "*";
+        case "Path": {
+            routingRule = path(vertx, ruleValue);
+            break;
+        }
+        case "PathPrefix": {
+            // append * to do path prefix routing
+            String pathPrefix = ruleValue;
+            pathPrefix += "*";
 
-                routingRule = pathPrefix(vertx, pathPrefix);
-                break;
-            }
-            case "Host": {
-                routingRule = host(vertx, ruleValue);
-                break;
-            }
-            default: {
-                routingRule = null;
-                break;
-            }
+            routingRule = pathPrefix(vertx, pathPrefix);
+            break;
+        }
+        case "Host": {
+            routingRule = host(vertx, ruleValue);
+            break;
+        }
+        default: {
+            routingRule = null;
+            break;
+        }
         }
         return routingRule;
     }

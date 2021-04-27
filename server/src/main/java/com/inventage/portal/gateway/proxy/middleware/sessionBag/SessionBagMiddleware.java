@@ -47,7 +47,7 @@ public class SessionBagMiddleware implements Middleware {
         }
 
         // on response: remove cookies if present and store them in session
-        Handler<MultiMap> respModifier = headers -> {
+        Handler<MultiMap> respHeadersModifier = headers -> {
             List<String> cookiesToAdd = headers.getAll(HttpHeaders.SET_COOKIE);
             if (cookiesToAdd == null || cookiesToAdd.isEmpty()) {
                 return;
@@ -67,7 +67,7 @@ public class SessionBagMiddleware implements Middleware {
             }
             ctx.session().put(SESSION_BAG_COOKIES, existingCookies);
         };
-        this.addResponseHeadersModifier(ctx, respModifier);
+        this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
 
         ctx.next();
     }

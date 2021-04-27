@@ -16,13 +16,19 @@
 // https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/main/java/io/vertx/ext/web/impl/HttpServerRequestWrapper.java
 package com.inventage.portal.gateway.proxy.middleware.proxy.request;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.security.cert.X509Certificate;
-import com.inventage.portal.gateway.proxy.middleware.proxy.request.uri.UriMiddleware;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.response.ProxiedHttpServerResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -47,27 +53,20 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.ServerWebSocketWrapper;
 
 /**
- * Subclass of HttpServerRequest which can be manipulated by various middleware functions. See
- * setXYZMiddleware() methods for manipulation possibilities.
+ * Subclass of HttpServerRequest which can be manipulated by various middleware functions.
  */
 public class ProxiedHttpServerRequest implements HttpServerRequest {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(ProxiedHttpServerRequest.class);
 
     private final RoutingContext ctx;
     private final HttpServerRequest delegate;
     private final ForwardedParser forwardedParser;
 
-    private UriMiddleware uriMiddleware;
-
     public ProxiedHttpServerRequest(RoutingContext ctx, AllowForwardHeaders allowForward) {
         this.ctx = ctx;
         this.delegate = ctx.request();
         this.forwardedParser = new ForwardedParser(delegate, allowForward);
-    }
-
-    public ProxiedHttpServerRequest setUriMiddleware(UriMiddleware middleware) {
-        Objects.requireNonNull(middleware, "Given uri middleware must not be null!");
-        this.uriMiddleware = middleware;
-        return this;
     }
 
     @Override
@@ -134,10 +133,17 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public String uri() {
-        if (this.uriMiddleware != null) {
-            return uriMiddleware.apply(delegate.uri());
+        StringBuilder uri = new StringBuilder(delegate.uri());
+        List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
+        if (modifiers != null) {
+            if (modifiers.size() > 1) {
+                LOGGER.info("Multiple URI modifiers declared: %s (total %s)", modifiers, modifiers.size());
+            }
+            for (Handler<StringBuilder> modifier : modifiers) {
+                modifier.handle(uri);
+            }
         }
-        return delegate.uri();
+        return uri.toString();
     }
 
     @Override
@@ -273,8 +279,8 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
     public void toWebSocket(Handler<AsyncResult<ServerWebSocket>> handler) {
         delegate.toWebSocket(toWebSocket -> {
             if (toWebSocket.succeeded()) {
-                handler.handle(Future.succeededFuture(new ServerWebSocketWrapper(
-                        toWebSocket.result(), host(), scheme(), isSSL(), remoteAddress())));
+                handler.handle(Future.succeededFuture(
+                        new ServerWebSocketWrapper(toWebSocket.result(), host(), scheme(), isSSL(), remoteAddress())));
             } else {
                 handler.handle(toWebSocket);
             }
@@ -283,8 +289,8 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public Future<ServerWebSocket> toWebSocket() {
-        return delegate.toWebSocket().map(
-                ws -> new ServerWebSocketWrapper(ws, host(), scheme(), isSSL(), remoteAddress()));
+        return delegate.toWebSocket()
+                .map(ws -> new ServerWebSocketWrapper(ws, host(), scheme(), isSSL(), remoteAddress()));
     }
 
     @Override

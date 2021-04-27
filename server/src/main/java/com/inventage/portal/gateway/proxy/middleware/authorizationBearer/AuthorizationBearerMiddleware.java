@@ -3,8 +3,10 @@ package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
@@ -18,8 +20,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class AuthorizationBearerMiddleware implements Middleware {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
     private final static String BEARER = "Bearer ";
 
@@ -32,17 +33,15 @@ public class AuthorizationBearerMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         String idToken = ctx.session().get(OAuth2MiddlewareFactory.ID_TOKEN);
-        String accessToken = ctx.session().get(String.format(
-                OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, this.sessionScope));
+        String accessToken = ctx.session()
+                .get(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, this.sessionScope));
 
         StringBuilder token;
-        if (idToken != null && this.sessionScope
-                .equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
+        if (idToken != null && this.sessionScope.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
             LOGGER.debug("handle: Providing id token");
             token = new StringBuilder(BEARER).append(idToken);
         } else if (accessToken != null) {
-            LOGGER.debug("handle: Providing access token for session scope : '{}'",
-                    this.sessionScope);
+            LOGGER.debug("handle: Providing access token for session scope : '{}'", this.sessionScope);
             token = new StringBuilder(BEARER).append(accessToken);
         } else {
             LOGGER.debug("handle: Providing no token");
@@ -51,10 +50,10 @@ public class AuthorizationBearerMiddleware implements Middleware {
         }
         ctx.request().headers().add(HttpHeaders.AUTHORIZATION, token);
 
-        Handler<MultiMap> respModifier = headers -> {
+        Handler<MultiMap> respHeadersModifier = headers -> {
             headers.remove(HttpHeaders.AUTHORIZATION);
         };
-        this.addResponseHeadersModifier(ctx, respModifier);
+        this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
 
         ctx.next();
     }

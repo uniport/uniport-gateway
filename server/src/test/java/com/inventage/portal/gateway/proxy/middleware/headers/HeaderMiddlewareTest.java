@@ -3,15 +3,19 @@ package com.inventage.portal.gateway.proxy.middleware.headers;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -115,7 +119,7 @@ public class HeaderMiddlewareTest {
         });
         vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort)
                 .onComplete(testCtx.succeeding(httpServer -> serviceStarted.flag()));
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort, null);
+        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
 
         Router router = Router.router(vertx);
         router.route().handler(header).handler(proxy);

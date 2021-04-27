@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -11,16 +11,17 @@ import io.vertx.ext.web.RoutingContext;
  * destination. Every one has to implement this interface.
  */
 public interface Middleware extends Handler<RoutingContext> {
-    public final String RESPONSE_HEADERS_MODIFIERS =
-            "portal-gateway-middleware-response-headers-modifiers";
+    public final String MODIFIERS_PREFIX = "portal-gateway-middleware";
+    public final String REQUEST_URI_MODIFIERS = String.format("%s-request-uri-modifiers", MODIFIERS_PREFIX);
+    public final String RESPONSE_HEADERS_MODIFIERS = String.format("%s-response-headers-modifiers", MODIFIERS_PREFIX);
 
-    // addResponseHeadersModifier allows to modify the response returned by the microservices.
-    default void addResponseHeadersModifier(RoutingContext ctx, Handler<MultiMap> modifier) {
-        List<Handler<MultiMap>> modifiers = ctx.get(RESPONSE_HEADERS_MODIFIERS);
+    // addModifier allows to modify the request/response to/returned by forwarded servers.
+    default void addModifier(RoutingContext ctx, Handler modifier, String modifierType) {
+        List<Handler> modifiers = ctx.get(modifierType);
         if (modifiers == null) {
-            modifiers = new ArrayList<Handler<MultiMap>>();
+            modifiers = new ArrayList<Handler>();
         }
         modifiers.add(modifier);
-        ctx.put(RESPONSE_HEADERS_MODIFIERS, modifiers);
+        ctx.put(modifierType, modifiers);
     }
 }
