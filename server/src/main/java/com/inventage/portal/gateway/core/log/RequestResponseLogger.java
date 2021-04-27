@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.core.log;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
@@ -22,8 +23,7 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
         LOGGER.debug("handle: route uri '{}' for request '{}'", routingContext.request().uri(),
                 routingContext.request().hashCode());
         routingContext.next();
-        LOGGER.debug("handle: routed uri '{}' for request '{}' in '{}' ms",
-                routingContext.request().uri(), routingContext.request().hashCode(),
-                System.currentTimeMillis() - start);
+        LOGGER.debug("handle: routed uri '{}' for request '{}' in '{}' ms", routingContext.request().uri(),
+                routingContext.request().hashCode(), System.currentTimeMillis() - start);
     }
 }

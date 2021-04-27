@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.core.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -55,30 +56,27 @@ public class StaticConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
-        ObjectSchemaBuilder entrypointSchema =
-                Schemas.objectSchema().requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
-                        .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
-                        .allowAdditionalProperties(false);
+        ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
+                .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
+                .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema()).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
                 .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
                 .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema())
                 .requiredProperty(APPLICATION_REQUEST_SELECTOR,
-                        Schemas.objectSchema().requiredProperty(
-                                APPLICATION_REQUEST_SELECTOR_URL_PREFIX, Schemas.stringSchema()))
-                .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema())
-                .allowAdditionalProperties(false);
+                        Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
+                                Schemas.stringSchema()))
+                .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()).allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder providerSchema =
-                Schemas.objectSchema().requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
-                        .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
-                        .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
-                        .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
-                        .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
-                        .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
-                        .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
-                        .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema())
-                        .allowAdditionalProperties(false);
+        ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
+                .requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
+                .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
+                .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
+                .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
+                .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
+                .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
+                .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
+                .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
                 .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
@@ -120,25 +118,23 @@ public class StaticConfiguration {
             Boolean valid = true;
             String errMsg = "";
             switch (providerName) {
-                case PROVIDER_FILE: {
-                    String filename = provider.getString(PROVIDER_FILE_FILENAME);
-                    String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
-                    if ((filename == null || filename.length() == 0)
-                            && (directory == null || directory.length() == 0)) {
-                        errMsg = String.format("%s: either filename or directory has to be defined",
-                                providerName);
-                        valid = false;
-                    }
-                    break;
-                }
-                case PROVIDER_DOCKER: {
-                    break;
-                }
-                default: {
-                    errMsg = "Unknown provider";
+            case PROVIDER_FILE: {
+                String filename = provider.getString(PROVIDER_FILE_FILENAME);
+                String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
+                if ((filename == null || filename.length() == 0) && (directory == null || directory.length() == 0)) {
+                    errMsg = String.format("%s: either filename or directory has to be defined", providerName);
                     valid = false;
-                    break;
                 }
+                break;
+            }
+            case PROVIDER_DOCKER: {
+                break;
+            }
+            default: {
+                errMsg = "Unknown provider";
+                valid = false;
+                break;
+            }
             }
 
             if (!valid) {

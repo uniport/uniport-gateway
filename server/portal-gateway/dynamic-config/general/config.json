@@ -9,10 +9,7 @@
       },
       {
         "name": "login",
-        "middlewares": [
-          "dashboardOauth2",
-          "loginRedirectRegex"
-        ],
+        "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
         "rule": "PathPrefix('/login')",
         "service": "dashboard-frontend"
       },

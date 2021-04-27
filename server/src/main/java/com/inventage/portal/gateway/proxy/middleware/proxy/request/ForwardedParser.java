@@ -18,6 +18,7 @@ package com.inventage.portal.gateway.proxy.middleware.proxy.request;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import io.netty.util.AsciiString;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.impl.logging.Logger;
@@ -39,8 +40,7 @@ class ForwardedParser {
     private static final AsciiString X_FORWARDED_FOR = AsciiString.cached("X-Forwarded-For");
 
     private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
-    private static final Pattern FORWARDED_PROTO_PATTERN =
-            Pattern.compile("proto=\"?([^;,\"]+)\"?");
+    private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
     private static final Pattern FORWARDED_FOR_PATTERN = Pattern.compile("for=\"?([^;,\"]+)\"?");
 
     private final HttpServerRequest delegate;
@@ -101,19 +101,19 @@ class ForwardedParser {
         setHostAndPort(delegate.host(), port);
 
         switch (allowForward) {
-            case X_FORWARD:
-                calculateXForward();
-                break;
-            case FORWARD:
-                calculateForward();
-                break;
-            case ALL:
-                calculateXForward();
-                calculateForward();
-                break;
-            case NONE:
-            default:
-                break;
+        case X_FORWARD:
+            calculateXForward();
+            break;
+        case FORWARD:
+            calculateForward();
+            break;
+        case ALL:
+            calculateXForward();
+            calculateForward();
+            break;
+        case NONE:
+        default:
+            break;
         }
 
         if (((scheme.equalsIgnoreCase(HTTP_SCHEME) && port == 80)
@@ -204,7 +204,6 @@ class ForwardedParser {
 
         return new SocketAddressImpl(port, host);
     }
-
 
     private int parsePort(String portToParse, int defaultPort) {
         try {

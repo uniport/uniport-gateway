@@ -38,7 +38,6 @@
         "rule": "PathPrefix('/whoami2')",
         "service": "whoami2-service"
       }
-
     ],
 
     "middlewares": [
@@ -115,29 +114,22 @@
         "type": "_session_",
         "options": {}
       }
-
     ],
 
     "services": [
       {
         "name": "portal-iam",
-        "servers": [
-          { "host": "${portal-iam.host}", "port": 8080 }
-        ]
+        "servers": [{ "host": "${portal-iam.host}", "port": 8080 }]
       },
 
       {
         "name": "whoami1-service",
-        "servers": [
-          { "host": "${whoami1.host}", "port": 8001 }
-        ]
+        "servers": [{ "host": "${whoami1.host}", "port": 8001 }]
       },
 
       {
         "name": "whoami2-service",
-        "servers": [
-          { "host": "${whoami2.host}", "port": 8002 }
-        ]
+        "servers": [{ "host": "${whoami2.host}", "port": 8002 }]
       }
     ]
   }

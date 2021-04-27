@@ -1,8 +1,10 @@
 package com.inventage.portal.gateway.proxy.listener;
 
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -30,8 +32,7 @@ public class RouterSwitchListener implements Listener {
         routerCreation.onSuccess(router -> {
             setSubRouter(router);
         }).onFailure(err -> {
-            LOGGER.warn("listen: Failed to create new router from config '{}': '{}'", config,
-                    err.getMessage());
+            LOGGER.warn("listen: Failed to create new router from config '{}': '{}'", config, err.getMessage());
         });
 
     }

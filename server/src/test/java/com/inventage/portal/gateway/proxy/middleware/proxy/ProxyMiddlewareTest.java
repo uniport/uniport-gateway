@@ -44,14 +44,13 @@ public class ProxyMiddlewareTest {
         }).listen(proxyPort).onComplete(testCtx.succeeding(httpServer -> proxyStarted.flag()));
 
         vertx.createHttpServer().requestHandler(req -> {
-            assertEquals(String.format("%s:%s", host, proxyPort),
-                    req.headers().get(X_FORWARDED_HOST));
+            assertEquals(String.format("%s:%s", host, proxyPort), req.headers().get(X_FORWARDED_HOST));
             req.response().end(serverResponse);
             requestServed.flag();
         }).listen(serverPort).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
 
-        vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
-                .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
+        vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(req -> req.send())
+                .onComplete(testCtx.succeeding(resp -> {
                     testCtx.verify(() -> {
                         assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
                         responseReceived.flag();

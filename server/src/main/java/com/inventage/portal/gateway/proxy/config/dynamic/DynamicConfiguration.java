@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -70,8 +72,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
 
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
-            MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER,
-            MIDDLEWARE_OAUTH2, MIDDLEWARE_SHOW_SESSION_CONTENT);
+            MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2,
+            MIDDLEWARE_SHOW_SESSION_CONTENT);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -82,12 +84,10 @@ public class DynamicConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
-        ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
-                .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
+        ObjectSchemaBuilder routerSchema = Schemas.objectSchema().requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
-                .property(ROUTER_RULE, Schemas.stringSchema())
+                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema())
                 .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
@@ -101,32 +101,28 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
-                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
-                .allowAdditionalProperties(false);
+                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema()).allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder middlewareSchema =
-                Schemas.objectSchema().requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                        .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
-                        .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema)
-                        .allowAdditionalProperties(false);
+        ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
+                .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
+                .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
+                .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
-                .requiredProperty(SERVICE_SERVERS,
-                        Schemas.arraySchema().items(Schemas.objectSchema()
-                                .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
+                .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
+                        .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                                 .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
                                 .allowAdditionalProperties(false)))
                 .allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder httpSchema =
-                Schemas.objectSchema().property(ROUTERS, Schemas.arraySchema().items(routerSchema))
-                        .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
-                        .property(SERVICES, Schemas.arraySchema().items(serviceSchema))
-                        .allowAdditionalProperties(false);
+        ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
+                .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
+                .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
+                .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema()
-                .requiredProperty(HTTP, httpSchema).allowAdditionalProperties(false);
+        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
+                .allowAdditionalProperties(false);
 
         SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
         SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
@@ -191,8 +187,7 @@ public class DynamicConfiguration {
             JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
             if (httpConf != null) {
-                JsonArray rts =
-                        httpConf.getJsonArray(DynamicConfiguration.ROUTERS, new JsonArray());
+                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS, new JsonArray());
                 for (int i = 0; i < rts.size(); i++) {
                     JsonObject rt = rts.getJsonObject(i);
                     String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
@@ -205,8 +200,7 @@ public class DynamicConfiguration {
                     }
                 }
 
-                JsonArray mws =
-                        httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
+                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
                 for (int i = 0; i < mws.size(); i++) {
                     JsonObject mw = mws.getJsonObject(i);
                     String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
@@ -219,8 +213,7 @@ public class DynamicConfiguration {
                     }
                 }
 
-                JsonArray svs =
-                        httpConf.getJsonArray(DynamicConfiguration.SERVICES, new JsonArray());
+                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES, new JsonArray());
                 for (int i = 0; i < svs.size(); i++) {
                     JsonObject sv = svs.getJsonObject(i);
                     String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
@@ -236,22 +229,19 @@ public class DynamicConfiguration {
         }
 
         for (String routerName : routersToDelete) {
-            LOGGER.warn(
-                    "merge: Router defined multiple times with different configurations in '{}'",
+            LOGGER.warn("merge: Router defined multiple times with different configurations in '{}'",
                     routers.get(routerName));
             mergedHttpConfig.remove(routerName);
         }
 
         for (String middlewareName : middlewaresToDelete) {
-            LOGGER.warn(
-                    "merge: Middleware defined multiple times with different configurations in '{}'",
+            LOGGER.warn("merge: Middleware defined multiple times with different configurations in '{}'",
                     routers.get(middlewareName));
             mergedConfig.remove(middlewareName);
         }
 
         for (String serviceName : servicesToDelete) {
-            LOGGER.warn(
-                    "merge: Service defined multiple times with different configurations in '{}'",
+            LOGGER.warn("merge: Service defined multiple times with different configurations in '{}'",
                     routers.get(serviceName));
             mergedHttpConfig.remove(serviceName);
         }
@@ -352,8 +342,7 @@ public class DynamicConfiguration {
 
         for (String mwName : routerMiddlewareNames) {
             if (getObjByKeyWithValue(middlewares, MIDDLEWARE_NAME, mwName) == null) {
-                String errMsg =
-                        String.format("validateRouters: unknown middleware '%s' defined", mwName);
+                String errMsg = String.format("validateRouters: unknown middleware '%s' defined", mwName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -361,8 +350,7 @@ public class DynamicConfiguration {
 
         for (String svName : routerServiceNames) {
             if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
-                String errMsg =
-                        String.format("validateRouters: unknown service '%s' defined", svName);
+                String errMsg = String.format("validateRouters: unknown service '%s' defined", svName);
                 LOGGER.warn(errMsg, svName);
                 return Future.failedFuture(errMsg);
             }
@@ -386,146 +374,135 @@ public class DynamicConfiguration {
             Boolean valid = true;
             String errMsg = "";
             switch (mwType) {
-                case MIDDLEWARE_AUTHORIZATION_BEARER: {
-                    String sessionScope =
-                            mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
-                    if (sessionScope == null || sessionScope.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No session scope defined", mwType);
-                    }
-                    break;
-                }
-                case MIDDLEWARE_HEADERS: {
-                    JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
-                    if (requestHeaders != null) {
-                        if (requestHeaders.isEmpty()) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty request headers defined", mwType);
-                            break;
-                        }
-
-                        for (Entry<String, Object> entry : requestHeaders) {
-                            if (!(entry.getKey() instanceof String)
-                                    || !(entry.getValue() instanceof String)) {
-                                valid = false;
-                                errMsg = String.format(
-                                        "%s: Request header and value can only be of type string",
-                                        mwType);
-                                break;
-                            }
-                        }
-                        if (!valid) {
-                            break;
-                        }
-                    }
-
-                    JsonObject responseHeaders =
-                            mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
-                    if (responseHeaders != null) {
-                        if (responseHeaders.isEmpty()) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty response headers defined", mwType);
-                            break;
-                        }
-
-                        for (Entry<String, Object> entry : responseHeaders) {
-                            if (!(entry.getKey() instanceof String)
-                                    || !(entry.getValue() instanceof String)) {
-                                valid = false;
-                                errMsg = String.format(
-                                        "%s: Response header and value can only be of type string",
-                                        mwType);
-                                break;
-                            }
-                        }
-                        if (!valid) {
-                            break;
-                        }
-                    }
-
-                    if (requestHeaders == null && responseHeaders == null) {
-                        valid = false;
-                        errMsg = String.format(
-                                "%s: at least one response or request header has to be defined",
-                                mwType);
-                        break;
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_OAUTH2: {
-                    String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
-                    if (clientID == null || clientID.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No client ID defined", mwType);
-                        break;
-                    }
-
-                    String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
-                    if (clientSecret == null || clientSecret.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No client secret defined", mwType);
-                        break;
-                    }
-
-                    String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
-                    if (discoveryUrl == null || discoveryUrl.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No discovery URL defined", mwType);
-                        break;
-                    }
-
-                    String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-                    if (sessionScope == null || sessionScope.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No session scope defined", mwType);
-                        break;
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_REDIRECT_REGEX: {
-                    String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
-                    if (regex == null || regex.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No regex defined", mwType);
-                        break;
-                    }
-
-                    String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
-                    if (replacement == null || replacement.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No replacement defined", mwType);
-                        break;
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_REPLACE_PATH_REGEX: {
-                    String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
-                    if (regex == null || regex.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No regex defined", mwType);
-                        break;
-                    }
-
-                    String replacement =
-                            mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
-                    if (replacement == null || replacement.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No replacement defined", mwType);
-                        break;
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_SHOW_SESSION_CONTENT: {
-                    break;
-                }
-                default: {
-                    errMsg = String.format("Unknown middleware: '%s'", mwType);
+            case MIDDLEWARE_AUTHORIZATION_BEARER: {
+                String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+                if (sessionScope == null || sessionScope.length() == 0) {
                     valid = false;
+                    errMsg = String.format("%s: No session scope defined", mwType);
                 }
+                break;
+            }
+            case MIDDLEWARE_HEADERS: {
+                JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+                if (requestHeaders != null) {
+                    if (requestHeaders.isEmpty()) {
+                        valid = false;
+                        errMsg = String.format("%s: Empty request headers defined", mwType);
+                        break;
+                    }
+
+                    for (Entry<String, Object> entry : requestHeaders) {
+                        if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                            valid = false;
+                            errMsg = String.format("%s: Request header and value can only be of type string", mwType);
+                            break;
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
+                }
+
+                JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+                if (responseHeaders != null) {
+                    if (responseHeaders.isEmpty()) {
+                        valid = false;
+                        errMsg = String.format("%s: Empty response headers defined", mwType);
+                        break;
+                    }
+
+                    for (Entry<String, Object> entry : responseHeaders) {
+                        if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                            valid = false;
+                            errMsg = String.format("%s: Response header and value can only be of type string", mwType);
+                            break;
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
+                }
+
+                if (requestHeaders == null && responseHeaders == null) {
+                    valid = false;
+                    errMsg = String.format("%s: at least one response or request header has to be defined", mwType);
+                    break;
+                }
+
+                break;
+            }
+            case MIDDLEWARE_OAUTH2: {
+                String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+                if (clientID == null || clientID.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No client ID defined", mwType);
+                    break;
+                }
+
+                String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+                if (clientSecret == null || clientSecret.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No client secret defined", mwType);
+                    break;
+                }
+
+                String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+                if (discoveryUrl == null || discoveryUrl.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No discovery URL defined", mwType);
+                    break;
+                }
+
+                String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+                if (sessionScope == null || sessionScope.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No session scope defined", mwType);
+                    break;
+                }
+
+                break;
+            }
+            case MIDDLEWARE_REDIRECT_REGEX: {
+                String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+                if (regex == null || regex.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No regex defined", mwType);
+                    break;
+                }
+
+                String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+                if (replacement == null || replacement.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No replacement defined", mwType);
+                    break;
+                }
+
+                break;
+            }
+            case MIDDLEWARE_REPLACE_PATH_REGEX: {
+                String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+                if (regex == null || regex.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No regex defined", mwType);
+                    break;
+                }
+
+                String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+                if (replacement == null || replacement.length() == 0) {
+                    valid = false;
+                    errMsg = String.format("%s: No replacement defined", mwType);
+                    break;
+                }
+
+                break;
+            }
+            case MIDDLEWARE_SHOW_SESSION_CONTENT: {
+                break;
+            }
+            default: {
+                errMsg = String.format("Unknown middleware: '%s'", mwType);
+                valid = false;
+            }
             }
 
             if (!valid) {
@@ -556,11 +533,9 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    private static Boolean addRouter(JsonObject httpConf, String routerName,
-            JsonObject routerToAdd) {
+    private static Boolean addRouter(JsonObject httpConf, String routerName, JsonObject routerToAdd) {
         JsonArray existingRouters = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-        JsonObject existingRouter =
-                getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
+        JsonObject existingRouter = getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
         if (existingRouter == null) {
             existingRouters.add(routerToAdd);
             return true;
@@ -569,11 +544,10 @@ public class DynamicConfiguration {
         return existingRouter.equals(routerToAdd);
     }
 
-    private static Boolean addService(JsonObject httpConf, String serviceName,
-            JsonObject serviceToAdd) {
+    private static Boolean addService(JsonObject httpConf, String serviceName, JsonObject serviceToAdd) {
         JsonArray existingServices = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-        JsonObject existingService = getObjByKeyWithValue(existingServices,
-                DynamicConfiguration.SERVICE_NAME, serviceName);
+        JsonObject existingService = getObjByKeyWithValue(existingServices, DynamicConfiguration.SERVICE_NAME,
+                serviceName);
         if (existingService == null) {
             existingServices.add(serviceToAdd);
             return true;
@@ -581,8 +555,7 @@ public class DynamicConfiguration {
 
         Map<String, JsonObject> uniqueServers = new HashMap<>();
 
-        JsonArray existingServers =
-                existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+        JsonArray existingServers = existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         for (int i = 0; i < existingServers.size(); i++) {
             JsonObject server = existingServers.getJsonObject(i);
             String url = createURL(server.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
@@ -607,11 +580,10 @@ public class DynamicConfiguration {
         return String.format("%s:%s", host, port);
     }
 
-    private static Boolean addMiddleware(JsonObject httpConf, String middlewareName,
-            JsonObject middlewareToAdd) {
+    private static Boolean addMiddleware(JsonObject httpConf, String middlewareName, JsonObject middlewareToAdd) {
         JsonArray existingMiddlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-        JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares,
-                DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+        JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares, DynamicConfiguration.MIDDLEWARE_NAME,
+                middlewareName);
         if (existingMiddleware == null) {
             existingMiddlewares.add(middlewareToAdd);
             return true;

@@ -1,11 +1,12 @@
 package com.inventage.portal.gateway;
 
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Launcher;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
-
 
 /**
  * Custom Vert.x Launcher for the portal gateway.
@@ -24,8 +25,7 @@ public class PortalGatewayLauncher extends Launcher {
      */
     public static void main(String[] args) {
         // https://vertx.io/docs/vertx-core/java/#_logging
-        System.setProperty("vertx.logger-delegate-factory-class-name",
-                SLF4JLogDelegateFactory.class.getName());
+        System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
         LOGGER = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
         LOGGER.info("main: Portal Gateway starting....");
 
@@ -41,8 +41,8 @@ public class PortalGatewayLauncher extends Launcher {
             // thread blocking warnings
             System.setProperty("vertx.options.maxEventLoopExecuteTime", "600000000000");
         }
-        final String[] arguments = new String[] {"run", PortalGatewayVerticle.class.getName(),
-                "--instances", Runtime.numberOfVerticleInstances()};
+        final String[] arguments = new String[] { "run", PortalGatewayVerticle.class.getName(), "--instances",
+                Runtime.numberOfVerticleInstances() };
         new PortalGatewayLauncher().dispatch(arguments);
         LOGGER.info("main: PortalGatewayLauncher started.");
     }

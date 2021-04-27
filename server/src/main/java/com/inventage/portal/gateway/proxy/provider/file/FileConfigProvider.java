@@ -2,13 +2,16 @@ package com.inventage.portal.gateway.proxy.provider.file;
 
 import java.io.File;
 import java.nio.file.Path;
+
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -40,13 +43,12 @@ public class FileConfigProvider extends Provider {
 
     private int scanPeriodMs = 5000;
 
-    public FileConfigProvider(Vertx vertx, String configurationAddress, String filename,
-            String directory, Boolean watch, JsonObject env) {
+    public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
+            Boolean watch, JsonObject env) {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
-        PortalGatewayConfigRetriever.getStaticConfigPath()
-                .ifPresent(path -> this.staticConfigDir = path.getParent());
+        PortalGatewayConfigRetriever.getStaticConfigPath().ifPresent(path -> this.staticConfigDir = path.getParent());
 
         if (filename != null && filename.length() != 0) {
             this.filename = Path.of(filename);
@@ -67,11 +69,9 @@ public class FileConfigProvider extends Provider {
     public void provide(Promise<Void> startPromise) {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig().onSuccess(config -> {
-            this.validateAndPublish(
-                    parseServerPorts(substituteConfigurationVariables(env, config)));
+            this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
         }).onFailure(err -> {
-            String errorMsg =
-                    String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
+            String errorMsg = String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
             LOGGER.warn(errorMsg);
         });
 
@@ -79,8 +79,7 @@ public class FileConfigProvider extends Provider {
             LOGGER.info("provider: Listening to configuration changes");
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
-                this.validateAndPublish(
-                        parseServerPorts(substituteConfigurationVariables(env, config)));
+                this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
             });
         }
         startPromise.complete();
@@ -101,9 +100,8 @@ public class FileConfigProvider extends Provider {
             File file = this.getAbsoluteConfigPath(this.filename).toFile();
             LOGGER.info("getOptions: reading file '{}'", file.getAbsolutePath());
 
-            ConfigStoreOptions fileStore =
-                    new ConfigStoreOptions().setType("file").setFormat("json")
-                            .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
+            ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
+                    .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
             this.source = "file";
             return options.addStore(fileStore);
@@ -112,8 +110,7 @@ public class FileConfigProvider extends Provider {
         if (this.directory != null) {
             Path path = this.getAbsoluteConfigPath(this.directory);
             if (path == null) {
-                LOGGER.warn("getOptions: failed to create absolute config path of '{}'",
-                        this.directory);
+                LOGGER.warn("getOptions: failed to create absolute config path of '{}'", this.directory);
                 this.source = "undefined";
                 return options;
             }
@@ -188,8 +185,8 @@ public class FileConfigProvider extends Provider {
                             .put(Provider.PROVIDER_CONFIGURATION, config));
             LOGGER.info("validateAndPublish: configuration published from '{}'", this.source);
         }).onFailure(err -> {
-            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' from '{}'",
-                    err.getMessage(), this.source);
+            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
+                    this.source);
         });
     }
 }

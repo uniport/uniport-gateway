@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.FileSet;
 import io.vertx.core.CompositeFuture;
@@ -53,8 +54,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
     public Future<Buffer> get() {
         return vertx.<List<File>>executeBlocking(promise -> {
             try {
-                promise.complete(
-                        FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
+                promise.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
             } catch (Throwable e) {
                 promise.fail(e);
             }

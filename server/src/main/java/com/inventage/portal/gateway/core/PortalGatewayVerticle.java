@@ -1,16 +1,18 @@
 package com.inventage.portal.gateway.core;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
@@ -57,10 +59,9 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         });
     }
 
-    private void deployAndMountApplications(List<Application> applications,
-            List<Entrypoint> entrypoints) {
-        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'",
-                applications.size(), entrypoints.size());
+    private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
+        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'", applications.size(),
+                entrypoints.size());
         applications.stream().forEach(application -> {
             application.deployOn(vertx).onSuccess(handler -> {
                 entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
@@ -72,8 +73,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config,
             Promise<Void> startPromise) {
-        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'",
-                entrypoints.size());
+        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'", entrypoints.size());
         listenOnEntrypoints(entrypoints).onSuccess(handler -> {
             startPromise.complete();
             LOGGER.info("createListenersForEntrypoints: start succeeded.");
@@ -84,22 +84,18 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     }
 
     private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-        return CompositeFuture.join(
-                entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
+        return CompositeFuture.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
     }
 
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
         if (entrypoint.port() > 0) {
             final HttpServerOptions options = new HttpServerOptions().setMaxHeaderSize(1024 * 20)
                     .setSsl(entrypoint.isTls()).setKeyStoreOptions(entrypoint.jksOptions());
-            LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(),
-                    entrypoint.port());
-            return vertx.createHttpServer(options).requestHandler(entrypoint.router())
-                    .listen(entrypoint.port());
+            LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(), entrypoint.port());
+            return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
         } else {
             entrypoint.disable();
-            LOGGER.warn(
-                    "listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
+            LOGGER.warn("listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
                     entrypoint.name(), entrypoint.port());
             return Future.succeededFuture();
         }
@@ -107,11 +103,9 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private void shutdownOnStartupFailure(Throwable throwable) {
         if (throwable instanceof IllegalArgumentException) {
-            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'",
-                    throwable.getMessage());
+            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage());
         } else {
-            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'",
-                    throwable.getMessage(), throwable);
+            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage(), throwable);
         }
         vertx.close();
     }
@@ -123,29 +117,26 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final JsonArray configs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                        .map(entrypoint -> new Entrypoint(
-                                entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
+                        .map(entrypoint -> new Entrypoint(entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
                                 entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT), vertx))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Couldn't read '%s' configuration",
-                    StaticConfiguration.ENTRYPOINTS));
+            throw new IllegalStateException(
+                    String.format("Couldn't read '%s' configuration", StaticConfiguration.ENTRYPOINTS));
         }
     }
 
     private List<Application> applications(JsonObject config) {
-        LOGGER.debug("applications: reading from config key '{}'",
-                StaticConfiguration.APPLICATIONS);
+        LOGGER.debug("applications: reading from config key '{}'", StaticConfiguration.APPLICATIONS);
         try {
             final List<Application> applications = new ArrayList<>();
             final JsonArray configs = config.getJsonArray(StaticConfiguration.APPLICATIONS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
                         .map(application -> ApplicationFactory.Loader
-                                .getProvider(application
-                                        .getString(StaticConfiguration.APPLICATION_PROVIDER))
+                                .getProvider(application.getString(StaticConfiguration.APPLICATION_PROVIDER))
                                 .create(application, config, vertx))
                         .forEach(applications::add);
             }
@@ -153,8 +144,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         } catch (IllegalStateException e) {
             throw e;
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Couldn't read '%s' configuration",
-                    StaticConfiguration.APPLICATIONS));
+            throw new IllegalStateException(
+                    String.format("Couldn't read '%s' configuration", StaticConfiguration.APPLICATIONS));
         }
     }
 

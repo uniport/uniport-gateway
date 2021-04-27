@@ -2,8 +2,10 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -25,9 +27,9 @@ public interface MiddlewareFactory {
     class Loader {
         public static MiddlewareFactory getFactory(String middlewareName) {
             LOGGER.debug("getFactory: middleware factory for '{}'", middlewareName);
-            final Optional<MiddlewareFactory> middleware = ServiceLoader
-                    .load(MiddlewareFactory.class).stream().map(ServiceLoader.Provider::get)
-                    .filter(instance -> instance.provides().equals(middlewareName)).findFirst();
+            final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()
+                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(middlewareName))
+                    .findFirst();
             if (middleware.isPresent()) {
                 return middleware.get();
             }

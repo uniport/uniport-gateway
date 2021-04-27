@@ -2,8 +2,10 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -31,5 +33,3 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     }
 
 }
-
-

@@ -2,7 +2,9 @@ package com.inventage.portal.gateway.proxy.config;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import com.inventage.portal.gateway.proxy.provider.Provider;
+
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -19,8 +21,7 @@ public class MockProvider extends Provider {
         this(vertx, configurationAddress, messages, 0);
     }
 
-    public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages,
-            long waitMs) {
+    public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages, long waitMs) {
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
         this.messages = messages;

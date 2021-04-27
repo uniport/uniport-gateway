@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy;
 
 import java.util.Arrays;
 import java.util.Optional;
+
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
@@ -9,8 +10,10 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -78,18 +81,16 @@ public class ProxyApplication implements Application {
         this.router = Router.router(vertx);
 
         this.providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
-        this.providersThrottleDuration =
-                staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);
+        this.providersThrottleDuration = staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS,
+                2000);
 
         this.env = staticConfig.copy();
         this.env.remove(StaticConfiguration.ENTRYPOINTS);
         this.env.remove(StaticConfiguration.APPLICATIONS);
         this.env.remove(StaticConfiguration.PROVIDERS);
 
-        String publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL,
-                PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
-        String publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        String publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL, PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+        String publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
         String publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT);
 
         this.entrypointPort = DynamicConfiguration
@@ -124,12 +125,10 @@ public class ProxyApplication implements Application {
     public Future<?> deployOn(Vertx vertx) {
         String configurationAddress = "configuration-announce-address";
 
-        ProviderAggregator aggregator =
-                new ProviderAggregator(vertx, configurationAddress, providers, this.env);
+        ProviderAggregator aggregator = new ProviderAggregator(vertx, configurationAddress, providers, this.env);
 
-        ConfigurationWatcher watcher =
-                new ConfigurationWatcher(vertx, aggregator, configurationAddress,
-                        this.providersThrottleDuration, Arrays.asList(this.entrypoint));
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, configurationAddress,
+                this.providersThrottleDuration, Arrays.asList(this.entrypoint));
 
         RouterFactory routerFactory = new RouterFactory(vertx, publicUrl);
 

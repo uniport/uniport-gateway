@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.config;
 
 import org.apache.commons.text.StringSubstitutor;
+
 import io.vertx.core.json.JsonObject;
 
 public class ConfigAdapter {

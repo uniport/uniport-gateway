@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -38,8 +40,7 @@ public class AuthorizationBearerMiddlewareTest {
         Checkpoint responseReceived = testCtx.checkpoint();
 
         // needed to populate a session
-        Handler<RoutingContext> sessionHandler =
-                SessionHandler.create(LocalSessionStore.create(vertx));
+        Handler<RoutingContext> sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
 
         // mock OAuth2 authentication
         Handler<RoutingContext> injectTokenHandler = ctx -> {
@@ -50,31 +51,30 @@ public class AuthorizationBearerMiddlewareTest {
         AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(
                 DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID);
 
-        Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");;
+        Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
+        ;
 
         Router router = Router.router(vertx);
-        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer)
-                .handler(endHandler);
+        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
             testCtx.verify(() -> {
-                assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION),
-                        "should contain auth header");
-                assertEquals(String.format("Bearer %s", token),
-                        req.headers().get(HttpHeaders.AUTHORIZATION), "should match token");
+                assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION), "should contain auth header");
+                assertEquals(String.format("Bearer %s", token), req.headers().get(HttpHeaders.AUTHORIZATION),
+                        "should match token");
             });
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
             serverStarted.flag();
             // server is started, we can proceed
-            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                    .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-                testCtx.verify(() -> {
-                    assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                            "should not contain auth header");
-                });
-                responseReceived.flag();
-            }));
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
+                    .onComplete(testCtx.succeeding(resp -> {
+                        testCtx.verify(() -> {
+                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                                    "should not contain auth header");
+                        });
+                        responseReceived.flag();
+                    }));
         }));
 
     }
@@ -90,44 +90,41 @@ public class AuthorizationBearerMiddlewareTest {
         Checkpoint responseReceived = testCtx.checkpoint();
 
         // needed to populate a session
-        Handler<RoutingContext> sessionHandler =
-                SessionHandler.create(LocalSessionStore.create(vertx));
+        Handler<RoutingContext> sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
 
         // mock OAuth2 authentication
         Handler<RoutingContext> injectTokenHandler = ctx -> {
-            ctx.session()
-                    .put(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT,
-                            sessionScope), token);
+            ctx.session().put(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
+                    token);
             ctx.next();
         };
 
         AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
 
-        Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");;
+        Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
+        ;
 
         Router router = Router.router(vertx);
-        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer)
-                .handler(endHandler);
+        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
             testCtx.verify(() -> {
-                assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION),
-                        "should contain auth header");
-                assertEquals(String.format("Bearer %s", token),
-                        req.headers().get(HttpHeaders.AUTHORIZATION), "should match token");
+                assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION), "should contain auth header");
+                assertEquals(String.format("Bearer %s", token), req.headers().get(HttpHeaders.AUTHORIZATION),
+                        "should match token");
             });
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
             serverStarted.flag();
             // server is started, we can proceed
-            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                    .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-                testCtx.verify(() -> {
-                    assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                            "should not contain auth header");
-                });
-                responseReceived.flag();
-            }));
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
+                    .onComplete(testCtx.succeeding(resp -> {
+                        testCtx.verify(() -> {
+                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                                    "should not contain auth header");
+                        });
+                        responseReceived.flag();
+                    }));
 
         }));
 
@@ -146,8 +143,7 @@ public class AuthorizationBearerMiddlewareTest {
         Checkpoint responseReceived = testCtx.checkpoint();
 
         // needed to populate a session
-        Handler<RoutingContext> sessionHandler =
-                SessionHandler.create(LocalSessionStore.create(vertx));
+        Handler<RoutingContext> sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
 
         // mock OAuth2 authentication
         Handler<RoutingContext> injectTokenHandler = ctx -> {
@@ -157,29 +153,28 @@ public class AuthorizationBearerMiddlewareTest {
 
         AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
 
-        Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");;
+        Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
+        ;
 
         Router router = Router.router(vertx);
-        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer)
-                .handler(endHandler);
+        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
             testCtx.verify(() -> {
-                assertFalse(req.headers().contains(HttpHeaders.AUTHORIZATION),
-                        "should not contain auth header");
+                assertFalse(req.headers().contains(HttpHeaders.AUTHORIZATION), "should not contain auth header");
             });
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(httpServer -> {
             serverStarted.flag();
             // server is started, we can proceed
-            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                    .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-                testCtx.verify(() -> {
-                    assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                            "should not contain auth header");
-                });
-                responseReceived.flag();
-            }));
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
+                    .onComplete(testCtx.succeeding(resp -> {
+                        testCtx.verify(() -> {
+                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                                    "should not contain auth header");
+                        });
+                        responseReceived.flag();
+                    }));
         }));
 
     }

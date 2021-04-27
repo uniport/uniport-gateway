@@ -2,11 +2,14 @@ package com.inventage.portal.gateway.proxy.provider.aggregator;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -29,8 +32,7 @@ public class ProviderAggregator extends Provider {
     private JsonArray providers;
     private JsonObject env;
 
-    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers,
-            JsonObject env) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers, JsonObject env) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
         this.providers = providers;
@@ -55,15 +57,13 @@ public class ProviderAggregator extends Provider {
                 continue;
             }
 
-            Provider provider = providerFactory.create(this.vertx, this.configurationAddress,
-                    providerConfig, this.env);
+            Provider provider = providerFactory.create(this.vertx, this.configurationAddress, providerConfig, this.env);
 
             futures.add(launchProvider(provider));
         }
 
         CompositeFuture.join(futures).onSuccess(cf -> {
-            LOGGER.info("provide: launched {}/{} providers successfully", futures.size(),
-                    this.providers.size());
+            LOGGER.info("provide: launched {}/{} providers successfully", futures.size(), this.providers.size());
             startPromise.complete();
         }).onFailure(err -> {
             startPromise.fail(err.getMessage());

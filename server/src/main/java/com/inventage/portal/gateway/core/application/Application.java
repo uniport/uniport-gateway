@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.application;
 
 import java.util.Optional;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;

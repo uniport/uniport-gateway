@@ -5,9 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -28,11 +31,10 @@ public class Parser {
     private static final String SERVICES = "services";
     private static final String SERVICE_SERVERS = "servers";
 
-    private static final List<String> VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES =
-            Arrays.asList(ROUTERS, MIDDLEWARES, SERVICES);
+    private static final List<String> VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES = Arrays.asList(ROUTERS, MIDDLEWARES,
+            SERVICES);
     private static final List<String> VALUES_ARE_OBJECTS = Arrays.asList(SERVICE_SERVERS);
-    private static final List<String> VALUES_ARE_SEPERATED_BY_COMMA =
-            Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
+    private static final List<String> VALUES_ARE_SEPERATED_BY_COMMA = Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
 
     public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
         List<String> filteredKeys = new ArrayList<>();
@@ -58,20 +60,18 @@ public class Parser {
         return filteredKeys;
     }
 
-    public static JsonObject decode(Map<String, Object> labels, String rootName,
-            List<String> filters) {
+    public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
         try {
             JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("decode: Failed to decode labels to json '{}', (labels: '{}')",
-                    e.getMessage(), labels.toString());
+            LOGGER.warn("decode: Failed to decode labels to json '{}', (labels: '{}')", e.getMessage(),
+                    labels.toString());
         }
         return null;
     }
 
-    private static JsonObject decodeToJson(Map<String, Object> labels, String rootName,
-            List<String> filters) {
+    private static JsonObject decodeToJson(Map<String, Object> labels, String rootName, List<String> filters) {
         List<String> sortedKeys = filterKeys(labels, filters);
         Collections.sort(sortedKeys);
 
@@ -98,8 +98,7 @@ public class Parser {
 
                 if (v.substring(0, 1).equals("[")) {
                     throw new IllegalArgumentException(
-                            "invalid leading character '[' in field name (bracket is a slice delimiter): "
-                                    + v);
+                            "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
                 }
 
                 if (v.equals(rootName)) {
@@ -126,8 +125,7 @@ public class Parser {
         if (path.size() > 1) {
             if (VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES.contains(key)) {
                 JsonArray children = root.getJsonArray(key);
-                JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key),
-                        path.get(1));
+                JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key), path.get(1));
                 if (child != null) {
                     decodeToJson(child, path.subList(2, path.size()), value);
                 } else {
@@ -203,14 +201,14 @@ public class Parser {
 
     private static String getName(String key) {
         switch (key) {
-            case ROUTERS:
-                return DynamicConfiguration.ROUTER_NAME;
-            case MIDDLEWARES:
-                return DynamicConfiguration.MIDDLEWARE_NAME;
-            case SERVICES:
-                return DynamicConfiguration.SERVICE_NAME;
-            default:
-                throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
+        case ROUTERS:
+            return DynamicConfiguration.ROUTER_NAME;
+        case MIDDLEWARES:
+            return DynamicConfiguration.MIDDLEWARE_NAME;
+        case SERVICES:
+            return DynamicConfiguration.SERVICE_NAME;
+        default:
+            throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
         }
     }
 

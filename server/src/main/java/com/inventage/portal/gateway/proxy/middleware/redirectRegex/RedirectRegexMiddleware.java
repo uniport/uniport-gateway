@@ -1,9 +1,12 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
 import java.util.regex.Pattern;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.ext.web.RoutingContext;
 
 /**

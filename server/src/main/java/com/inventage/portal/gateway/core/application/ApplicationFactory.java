@@ -2,8 +2,10 @@ package com.inventage.portal.gateway.core.application;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
@@ -35,14 +37,13 @@ public interface ApplicationFactory {
     class Loader {
         public static ApplicationFactory getProvider(String providerId) {
             LOGGER.debug("getProvider: for '{}'", providerId);
-            final Optional<ApplicationFactory> provider = ServiceLoader
-                    .load(ApplicationFactory.class).stream().map(ServiceLoader.Provider::get)
-                    .filter(instance -> instance.provides().equals(providerId)).findFirst();
+            final Optional<ApplicationFactory> provider = ServiceLoader.load(ApplicationFactory.class).stream()
+                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerId))
+                    .findFirst();
             if (provider.isPresent()) {
                 return provider.get();
             } else {
-                throw new IllegalStateException(
-                        String.format("Application provider '%s' doesn't exist!", providerId));
+                throw new IllegalStateException(String.format("Application provider '%s' doesn't exist!", providerId));
             }
         }
     }

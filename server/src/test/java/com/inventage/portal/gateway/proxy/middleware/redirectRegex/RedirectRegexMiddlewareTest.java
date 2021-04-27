@@ -1,13 +1,16 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.stream.Stream;
 
 import com.inventage.portal.gateway.TestUtils;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -32,8 +35,8 @@ public class RedirectRegexMiddlewareTest {
 
     @ParameterizedTest
     @MethodSource("redirectTestData")
-    void redirectTest(String name, String regex, String replacement, String URL,
-            int expectedStatusCode, String expectedURL, Vertx vertx, VertxTestContext testCtx) {
+    void redirectTest(String name, String regex, String replacement, String URL, int expectedStatusCode,
+            String expectedURL, Vertx vertx, VertxTestContext testCtx) {
 
         String failureMsg = String.format("Failure of '%s' test case", name);
 

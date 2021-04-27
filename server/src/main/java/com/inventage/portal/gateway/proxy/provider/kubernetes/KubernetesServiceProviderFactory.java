@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.provider.kubernetes;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
@@ -14,8 +15,7 @@ public class KubernetesServiceProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig,
-            JsonObject env) {
+    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
         return new KubernetesServiceProvider(vertx, configurationAddress);
     }
 

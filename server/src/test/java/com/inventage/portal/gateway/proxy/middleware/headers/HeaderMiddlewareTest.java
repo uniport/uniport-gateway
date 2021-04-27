@@ -33,23 +33,21 @@ public class HeaderMiddlewareTest {
     static Stream<Arguments> requestHeaderTestData() {
         return Stream.of(//
                 Arguments.of("adds a header",
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("X-Custom-Request-Header", "test_request"))),
                         (new HeadersMultiMap()).setAll(
-                                Map.ofEntries(entry("X-Custom-Request-Header", "test_request"))),
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "bar"),
-                                entry("X-Custom-Request-Header", "test_request")))),
+                                Map.ofEntries(entry("Foo", "bar"), entry("X-Custom-Request-Header", "test_request")))),
                 Arguments.of("delete a header",
-                        (new HeadersMultiMap()).setAll(Map
-                                .ofEntries(entry("X-Custom-Request-Header", ""), entry("Foo", ""))),
+                        (new HeadersMultiMap())
+                                .setAll(Map.ofEntries(entry("X-Custom-Request-Header", ""), entry("Foo", ""))),
                         new HeadersMultiMap()),
-                Arguments.of("override a header",
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "test"))),
+                Arguments.of("override a header", (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "test"))),
                         (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "test")))));
     }
 
     @ParameterizedTest
     @MethodSource("requestHeaderTestData")
-    void requestHeaderTest(String name, MultiMap reqHeaders, MultiMap expectedReqHeaders,
-            Vertx vertx, VertxTestContext testCtx) {
+    void requestHeaderTest(String name, MultiMap reqHeaders, MultiMap expectedReqHeaders, Vertx vertx,
+            VertxTestContext testCtx) {
         int port = TestUtils.findFreePort();
 
         String errMsgFormat = "Failure of '%s' test case: %s";
@@ -81,25 +79,22 @@ public class HeaderMiddlewareTest {
     static Stream<Arguments> responseHeaderTestData() {
         return Stream.of(//
                 Arguments.of("Test Simple Response",
-                        (new HeadersMultiMap()).setAll(
-                                Map.ofEntries(entry("Testing", "foo"), entry("Testing2", "bar"))),
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "bar"),
-                                entry("Testing", "foo"), entry("Testing2", "bar")))),
-                Arguments.of("empty Custom Header",
-                        (new HeadersMultiMap()).setAll(
-                                Map.ofEntries(entry("Testing", "foo"), entry("Testing2", ""))),
-                        (new HeadersMultiMap()).setAll(
-                                Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo")))),
-                Arguments.of("Deleting Custom Header",
                         (new HeadersMultiMap())
-                                .setAll(Map.ofEntries(entry("Testing", "foo"), entry("Foo", ""))),
+                                .setAll(Map.ofEntries(entry("Testing", "foo"), entry("Testing2", "bar"))),
+                        (new HeadersMultiMap()).setAll(
+                                Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo"), entry("Testing2", "bar")))),
+                Arguments.of("empty Custom Header",
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo"), entry("Testing2", ""))),
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo")))),
+                Arguments.of("Deleting Custom Header",
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo"), entry("Foo", ""))),
                         (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo")))));
     }
 
     @ParameterizedTest
     @MethodSource("responseHeaderTestData")
-    void responseHeaderTest(String name, MultiMap respHeaders, MultiMap expectedRespHeaders,
-            Vertx vertx, VertxTestContext testCtx) {
+    void responseHeaderTest(String name, MultiMap respHeaders, MultiMap expectedRespHeaders, Vertx vertx,
+            VertxTestContext testCtx) {
         int port = TestUtils.findFreePort();
         int servicePort = TestUtils.findFreePort();
 
@@ -128,8 +123,8 @@ public class HeaderMiddlewareTest {
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(httpServer -> serverStarted.flag()));
 
-        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub")
-                .compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
+        vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
+                .onComplete(testCtx.succeeding(resp -> {
                     // cannot use assertEquals since response headers include
                     // date, content-length etc.
                     assertHeaders(expectedRespHeaders, resp.headers(), errMsgFormat, name);
@@ -145,10 +140,8 @@ public class HeaderMiddlewareTest {
             } else {
                 assertTrue(actual.contains(h.getKey()), String.format(errMsgFormat, name,
                         String.format("should contain request header key '%s'", h.getKey())));
-                assertTrue(actual.getAll(h.getKey()).contains(h.getValue()),
-                        String.format(errMsgFormat, name,
-                                String.format("should contain request header '%s:%s'", h.getKey(),
-                                        h.getValue())));
+                assertTrue(actual.getAll(h.getKey()).contains(h.getValue()), String.format(errMsgFormat, name,
+                        String.format("should contain request header '%s:%s'", h.getKey(), h.getValue())));
             }
         }
     }

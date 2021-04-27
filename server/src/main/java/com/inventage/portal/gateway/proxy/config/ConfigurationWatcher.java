@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
+
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -81,8 +84,7 @@ public class ConfigurationWatcher {
     // to finally end up in a throttler that sends it to listenConfigurations.
     private void listenProviders() {
         LOGGER.debug("listenProviders");
-        MessageConsumer<JsonObject> configConsumer =
-                this.eventBus.consumer(this.configurationAddress);
+        MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
 
         configConsumer.handler(message -> onConfigurationAnnounce(message));
     }
@@ -92,8 +94,7 @@ public class ConfigurationWatcher {
         JsonObject nextConfig = message.body();
 
         String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        LOGGER.debug("onConfigurationAnnounce: received next configuration from '{}'",
-                providerName);
+        LOGGER.debug("onConfigurationAnnounce: received next configuration from '{}'", providerName);
 
         preloadConfiguration(nextConfig);
     }
@@ -109,8 +110,7 @@ public class ConfigurationWatcher {
         JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
 
         if (DynamicConfiguration.isEmptyConfiguration(providerConfig)) {
-            LOGGER.info("preloadConfiguration: skipping empty configuration for provider '{}'",
-                    providerName);
+            LOGGER.info("preloadConfiguration: skipping empty configuration for provider '{}'", providerName);
             return;
         }
 
@@ -121,8 +121,7 @@ public class ConfigurationWatcher {
             this.throttleProviderConfigReload(this.providersThrottleIntervalMs, providerName);
         }
 
-        LOGGER.info("preloadConfiguration: publishing next configuration from '{}' provider",
-                providerName);
+        LOGGER.info("preloadConfiguration: publishing next configuration from '{}' provider", providerName);
         this.eventBus.publish(providerName, nextConfig);
     }
 
@@ -166,8 +165,8 @@ public class ConfigurationWatcher {
 
     private void listenConfigurations() {
         LOGGER.debug("listenConfigurations");
-        MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer =
-                this.eventBus.consumer(CONFIG_VALIDATED_ADDRESS);
+        MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
+                .consumer(CONFIG_VALIDATED_ADDRESS);
 
         validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
     }
@@ -188,17 +187,14 @@ public class ConfigurationWatcher {
         JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
-
         DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
-            LOGGER.debug("onValidConfiguration: Informing listeners about new configuration '{}'",
-                    mergedConfig);
+            LOGGER.debug("onValidConfiguration: Informing listeners about new configuration '{}'", mergedConfig);
             for (Listener listener : this.configurationListeners) {
                 listener.listen(mergedConfig);
             }
         }).onFailure(err -> {
-            LOGGER.warn(
-                    "onValidConfiguration: Ignoring invalid configuration for '{}' because of '{}'",
-                    providerName, err.getMessage());
+            LOGGER.warn("onValidConfiguration: Ignoring invalid configuration for '{}' because of '{}'", providerName,
+                    err.getMessage());
         });
     }
 
@@ -244,8 +240,7 @@ public class ConfigurationWatcher {
                 mergeRouters(providerName, rts, mergedRts);
 
                 JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                JsonArray mergedMws =
-                        mergedHttpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                JsonArray mergedMws = mergedHttpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
                 mergeMiddlewares(providerName, mws, mergedMws);
 
                 JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
@@ -289,8 +284,7 @@ public class ConfigurationWatcher {
         return mergedRts;
     }
 
-    private static JsonArray mergeMiddlewares(String providerName, JsonArray mws,
-            JsonArray mergedMws) {
+    private static JsonArray mergeMiddlewares(String providerName, JsonArray mws, JsonArray mergedMws) {
         if (mws == null) {
             return mergedMws;
         }
@@ -305,8 +299,7 @@ public class ConfigurationWatcher {
         return mergedMws;
     }
 
-    private static JsonArray mergeServices(String providerName, JsonArray svs,
-            JsonArray mergedSvs) {
+    private static JsonArray mergeServices(String providerName, JsonArray svs, JsonArray mergedSvs) {
         if (svs == null) {
             return mergedSvs;
         }
