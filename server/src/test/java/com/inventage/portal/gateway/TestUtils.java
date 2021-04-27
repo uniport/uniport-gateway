@@ -3,47 +3,26 @@ package com.inventage.portal.gateway;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class TestUtils {
-
     /**
-     * Returns a free port number on localhost.
+     * Returns a free port number on localhost, or throws exception if unable to find a free port.
      *
-     * Heavily inspired from org.eclipse.jdt.launching.SocketUtil (to avoid a dependency to JDT just because of this).
-     * Slightly improved with close() missing in JDT. And throws exception instead of returning -1.
-     *
-     * @return a free port number on localhost
-     * @throws IllegalStateException if unable to find a free port
+     * @return a free port number on localhost, or throws exception  if unable to find a free port
+     * @since 3.0
      */
     public static int findFreePort() {
-        ServerSocket socket = null;
-        try {
-            int port;
-            do {
-                socket = new ServerSocket(0);
-                port = socket.getLocalPort();
-            } while (port >= 40000);
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // Ignore IOException on close()
-            }
-            return port;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
         } catch (IOException e) {
-        } finally {
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
-            }
         }
-        throw new IllegalStateException(
-                "Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
+        throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
     }
 
     // buildConfiguration is a helper to create a configuration.
@@ -81,8 +60,7 @@ public class TestUtils {
 
     public static Handler<JsonObject> withRouterMiddlewares(String... middlewareNames) {
         return router -> {
-            router.put(DynamicConfiguration.ROUTER_MIDDLEWARES,
-                    new JsonArray(Arrays.asList(middlewareNames)));
+            router.put(DynamicConfiguration.ROUTER_MIDDLEWARES, new JsonArray(Arrays.asList(middlewareNames)));
         };
     }
 
@@ -116,8 +94,7 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withMiddleware(String middlewareName,
-            Handler<JsonObject>... opts) {
+    public static Handler<JsonObject> withMiddleware(String middlewareName, Handler<JsonObject>... opts) {
         return middleware -> {
             middleware.put(DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
             for (Handler<JsonObject> opt : opts) {
@@ -159,8 +136,7 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withServer(String host, int port,
-            Handler<JsonObject>... opts) {
+    public static Handler<JsonObject> withServer(String host, int port, Handler<JsonObject>... opts) {
         return server -> {
             server.put(DynamicConfiguration.SERVICE_SERVER_HOST, host);
             server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
