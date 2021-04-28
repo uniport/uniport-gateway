@@ -2,12 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
@@ -24,8 +21,7 @@ public class SessionBagMiddleware implements Middleware {
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
-    public SessionBagMiddleware() {
-    }
+    public SessionBagMiddleware() {}
 
     @Override
     public void handle(RoutingContext ctx) {
@@ -39,9 +35,10 @@ public class SessionBagMiddleware implements Middleware {
 
             // https://github.com/vert-x3/vertx-web/issues/1716
             List<String> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-            String cookieSeparator = "; ";
-            String cookies = String.join(cookieSeparator, requestCookies) + cookieSeparator
-                    + String.join(cookieSeparator, storedCookies);
+            String cookieSeparator = "; "; // RFC 6265 4.2.1
+            String cookies =
+                    String.join(cookieSeparator, String.join(cookieSeparator, requestCookies),
+                            String.join(cookieSeparator, storedCookies));
 
             ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookies);
         }
