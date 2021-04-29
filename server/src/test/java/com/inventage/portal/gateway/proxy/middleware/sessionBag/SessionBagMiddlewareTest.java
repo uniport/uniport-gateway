@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.inventage.portal.gateway.TestUtils;
@@ -61,7 +62,7 @@ public class SessionBagMiddlewareTest {
     void cookiesAreIncludedInFollowUpRequests(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies are included in follow up requests' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar");
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/");
         SessionStore sessionStore = LocalSessionStore.create(vertx);
         AtomicBoolean isFollowUpRequest = new AtomicBoolean(false);
         AtomicReference<String> sessionId = new AtomicReference<>();
@@ -153,8 +154,9 @@ public class SessionBagMiddlewareTest {
 
                 HttpClient client = vertx.createHttpClient();
                 // send first request
-                client.request(new RequestOptions().setMethod(HttpMethod.GET).setPort(port)
-                        .setHost(host).setURI("")).onComplete(testCtx.succeeding(req -> {
+                client.request(
+                        new RequestOptions().setMethod(HttpMethod.GET).setPort(port).setHost(host))
+                        .onComplete(testCtx.succeeding(req -> {
                             req.send().onComplete(testCtx.succeeding(resp -> {
                                 respHandler.handle(resp);
                                 responseServed.flag();
@@ -202,13 +204,19 @@ public class SessionBagMiddlewareTest {
             // check if cookies are stored in session
             sessionStore.get(sessionId.get()).onSuccess(session -> {
                 assertNotNull(session, "Expected session to be present.");
-                List<String> actualSessionBagCookies =
+                Map<String, Cookie> actualSessionBagCookies =
                         session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
                 assertNotNull(actualSessionBagCookies,
                         "Expected cookies stored in session bag to not null");
+                List<String> actualSessionBagCookiesStr = new ArrayList<String>();
+                for (Cookie c : actualSessionBagCookies.values()) {
+                    actualSessionBagCookiesStr.add(c.encode());
+                }
+                System.out.println(actualSessionBagCookiesStr);
                 for (Cookie cookie : expectedCookies) {
-                    assertTrue(actualSessionBagCookies.contains(cookie.encode()), String.format(
-                            "%s: Expected cookie '%s' was not present in session", errMsg, cookie));
+                    assertTrue(actualSessionBagCookiesStr.contains(cookie.encode()),
+                            String.format("%s: Expected cookie '%s' was not present in session",
+                                    errMsg, cookie.encode()));
                 }
             }).onFailure(err -> testCtx.failNow(err));
         });
