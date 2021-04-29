@@ -7,6 +7,7 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+import io.vertx.core.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonObject;
@@ -39,13 +40,13 @@ public class ShowSessionContentMiddleware implements Middleware {
         html.append("session ID:\n").append(ctx.session().id());
         html.append("\n\n");
 
-        List<String> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
+        final Map<String, Cookie> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
         if (storedCookies != null) {
             if (!storedCookies.isEmpty()) {
                 html.append("cookies stored in session bag (each block is one cookie):\n\n");
             }
-            for (String cookie : storedCookies) {
-                html.append(String.join("\n", cookie.toString().split("; ")));
+            for (Cookie cookie : storedCookies.values()) {
+                html.append(String.join("\n", cookie.encode().split("; ")));
                 html.append("\n\n");
             }
         }
