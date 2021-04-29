@@ -36,13 +36,13 @@ public class ShowSessionContentMiddleware implements Middleware {
     private String getHtml(RoutingContext ctx) {
         final StringBuffer html = new StringBuffer();
 
-        html.append("vertx-web.session=").append(ctx.session().id());
+        html.append("session ID:\n").append(ctx.session().id());
         html.append("\n\n");
 
         List<String> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
         if (storedCookies != null) {
             if (!storedCookies.isEmpty()) {
-                html.append("cookies stored in session bag (each block is one cookie):\n");
+                html.append("cookies stored in session bag (each block is one cookie):\n\n");
             }
             for (String cookie : storedCookies) {
                 html.append(String.join("\n", cookie.toString().split("; ")));
