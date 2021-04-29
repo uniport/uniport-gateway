@@ -42,11 +42,11 @@ public class ShowSessionContentMiddleware implements Middleware {
         List<String> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
         if (storedCookies != null) {
             if (!storedCookies.isEmpty()) {
-                html.append("cookies stored in session bag:\n");
+                html.append("cookies stored in session bag (each block is one cookie):\n");
             }
             for (String cookie : storedCookies) {
-                html.append(cookie);
-                html.append("\n");
+                html.append(String.join("\n", cookie.toString().split("; ")));
+                html.append("\n\n");
             }
         }
 
