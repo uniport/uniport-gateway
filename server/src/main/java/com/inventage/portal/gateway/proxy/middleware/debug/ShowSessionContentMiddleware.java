@@ -1,15 +1,18 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
-import io.vertx.core.http.Cookie;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.Cookie;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
@@ -18,13 +21,11 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class ShowSessionContentMiddleware implements Middleware {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ShowSessionContentMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddleware.class);
 
     @Override
     public void handle(RoutingContext ctx) {
-        if (ctx.request().absoluteURI()
-                .contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
+        if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
             LOGGER.info("handle: url '{}'", ctx.request().absoluteURI());
             ctx.end(getHtml(ctx));
         } else {
@@ -40,12 +41,12 @@ public class ShowSessionContentMiddleware implements Middleware {
         html.append("session ID:\n").append(ctx.session().id());
         html.append("\n\n");
 
-        final Map<String, Cookie> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
+        final Set<Cookie> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
         if (storedCookies != null) {
             if (!storedCookies.isEmpty()) {
                 html.append("cookies stored in session bag (each block is one cookie):\n\n");
             }
-            for (Cookie cookie : storedCookies.values()) {
+            for (Cookie cookie : storedCookies) {
                 html.append(String.join("\n", cookie.encode().split("; ")));
                 html.append("\n\n");
             }
@@ -61,8 +62,8 @@ public class ShowSessionContentMiddleware implements Middleware {
 
         final Map<String, Object> data = ctx.session().data();
         data.keySet().stream().filter(key -> key.endsWith("_access_token"))
-                .peek(key -> html.append("\n\n").append(key).append(":\n"))
-                .map(key -> data.get(key)).forEach(value -> html.append(decodeJWT((String) value)).append("\n").append(value));
+                .peek(key -> html.append("\n\n").append(key).append(":\n")).map(key -> data.get(key))
+                .forEach(value -> html.append(decodeJWT((String) value)).append("\n").append(value));
 
         return html.toString();
     }
@@ -74,6 +75,5 @@ public class ShowSessionContentMiddleware implements Middleware {
         String payload = new String(decoder.decode(chunks[1]));
         return new JsonObject(payload).encodePrettily();
     }
-
 
 }
