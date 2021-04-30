@@ -90,7 +90,7 @@ public class RouterFactory {
 
             // required to be the first middleware to guarantee every request is processed
             Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx);
-            middlewareFutures.add(sessionBagMiddlewareFuture);
+            // middlewareFutures.add(sessionBagMiddlewareFuture);
 
             JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
             if (middlewareNames != null) {
