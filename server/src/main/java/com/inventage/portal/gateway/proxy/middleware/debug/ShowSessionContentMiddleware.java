@@ -55,12 +55,14 @@ public class ShowSessionContentMiddleware implements Middleware {
         if (idToken != null) {
             html.append("id token:\n");
             html.append(decodeJWT(idToken));
+            html.append("\n");
+            html.append(idToken);
         }
 
         final Map<String, Object> data = ctx.session().data();
         data.keySet().stream().filter(key -> key.endsWith("_access_token"))
                 .peek(key -> html.append("\n\n").append(key).append(":\n"))
-                .map(key -> data.get(key)).forEach(value -> html.append(decodeJWT((String) value)));
+                .map(key -> data.get(key)).forEach(value -> html.append(decodeJWT((String) value)).append("\n").append(value));
 
         return html.toString();
     }
