@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
-import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.impl.CookieImpl;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -66,7 +66,7 @@ public class SessionBagMiddleware implements Middleware {
         List<String> storedCookiesStr = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().host(), ctx.request().path())) {
-                storedCookiesStr.add(storedCookie.encode());
+                storedCookiesStr.add(encodeCookie(storedCookie));
             }
         }
 
@@ -97,10 +97,10 @@ public class SessionBagMiddleware implements Middleware {
     */
     private boolean matchesDomain(Cookie cookie, String domain) {
         // if the domain attribute is ommited, the cookie will only be returned to the origin server // TODO
-        if (cookie.getDomain() == null) {
+        if (cookie.domain() == null) {
             return true;
         }
-        String regex = String.format("^(.*\\.)?%s$", escapeSpecialRegexChars(cookie.getDomain()));
+        String regex = String.format("^(.*\\.)?%s$", escapeSpecialRegexChars(cookie.domain()));
         return Pattern.compile(regex).matcher(domain).matches();
     }
 
@@ -140,16 +140,16 @@ public class SessionBagMiddleware implements Middleware {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
-        if (cookie.getPath() == null) {
+        if (cookie.path() == null) {
             return false;
         }
 
         String cookiePath;
-        if (cookie.getPath().isEmpty()) {
+        if (cookie.path().isEmpty()) {
             cookiePath = "/";
         } else {
-            cookiePath = cookie.getPath().endsWith("/") ? cookie.getPath().substring(0, cookie.getPath().length() - 1)
-                    : cookie.getPath();
+            cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
+                    : cookie.path();
         }
         String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
         return Pattern.compile(regex).matcher(requestPath).matches();
@@ -170,13 +170,13 @@ public class SessionBagMiddleware implements Middleware {
         }
 
         for (String cookieToSet : cookiesToSet) {
-            io.netty.handler.codec.http.cookie.Cookie nettyCookie = ClientCookieDecoder.STRICT.decode(cookieToSet);
-            Cookie vertxCookie = new CookieImpl(nettyCookie);
-            if (vertxCookie.getName().equals(Entrypoint.SESSION_COOKIE_NAME)) {
+            // use netty cookie until maxAge getter is impemented
+            // https://github.com/eclipse-vertx/vert.x/issues/3906
+            Cookie cookie = ClientCookieDecoder.STRICT.decode(cookieToSet);
+            if (cookie.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
                 continue;
             }
-            System.out.println(vertxCookie.encode());
-            updateSessionBag(storedCookies, vertxCookie);
+            updateSessionBag(storedCookies, cookie);
         }
         ctx.session().put(SESSION_BAG_COOKIES, storedCookies);
     }
@@ -191,23 +191,23 @@ public class SessionBagMiddleware implements Middleware {
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
         Cookie foundCookie = null;
         for (Cookie storedCookie : storedCookies) {
-            if (storedCookie.getName().equals(newCookie.getName())
+            if (storedCookie.name().equals(newCookie.name())
                     // && storedCookie.getDomain().equals(newCookie.getDomain()) // TODO
-                    && storedCookie.getPath().equals(newCookie.getPath())) {
+                    && storedCookie.path().equals(newCookie.path())) {
                 foundCookie = storedCookie;
                 break;
             }
         }
-        boolean expired = false; // TODO check if new cookie is expired
         if (foundCookie != null) {
+            boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
-                LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", newCookie.encode());
+                LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", encodeCookie(newCookie));
                 return;
             }
         }
         LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding",
-                newCookie.encode());
+                encodeCookie(newCookie));
         storedCookies.add(newCookie);
     }
 
@@ -215,5 +215,10 @@ public class SessionBagMiddleware implements Middleware {
         return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
                 .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
                 .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
+    }
+
+    private String encodeCookie(Cookie cookie) {
+        // TODO encode SameSite
+        return ServerCookieEncoder.STRICT.encode(cookie);
     }
 }
