@@ -72,10 +72,8 @@ public class SessionBagMiddleware implements Middleware {
 
         // https://github.com/vert-x3/vertx-web/issues/1716
         String cookieSeparator = "; "; // RFC 6265 4.2.1
-        // TODO
-        // String cookies = String.join(cookieSeparator, String.join(cookieSeparator, requestCookies),
-        //         String.join(cookieSeparator, storedCookiesStr));
-        String cookies = String.join(cookieSeparator, storedCookiesStr);
+        String cookies = String.join(cookieSeparator, String.join(cookieSeparator, requestCookies),
+                String.join(cookieSeparator, storedCookiesStr));
 
         return cookies;
     }
@@ -102,7 +100,7 @@ public class SessionBagMiddleware implements Middleware {
         if (cookie.getDomain() == null) {
             return true;
         }
-        String regex = String.format("^([a-zA-Z0-9\\.]*\\.)?%s$", cookie.getDomain()).replace(".", "\\.");
+        String regex = String.format("^(.*\\.)?%s$", escapeSpecialRegexChars(cookie.getDomain()));
         return Pattern.compile(regex).matcher(domain).matches();
     }
 
@@ -153,7 +151,7 @@ public class SessionBagMiddleware implements Middleware {
             cookiePath = cookie.getPath().endsWith("/") ? cookie.getPath().substring(0, cookie.getPath().length() - 1)
                     : cookie.getPath();
         }
-        String regex = String.format("^%s(\\/[a-zA-Z0-9\\/]*)?$", cookiePath);
+        String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
         return Pattern.compile(regex).matcher(requestPath).matches();
     }
 
@@ -211,5 +209,11 @@ public class SessionBagMiddleware implements Middleware {
         LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding",
                 newCookie.encode());
         storedCookies.add(newCookie);
+    }
+
+    private String escapeSpecialRegexChars(String regex) {
+        return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
+                .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
+                .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
 }
