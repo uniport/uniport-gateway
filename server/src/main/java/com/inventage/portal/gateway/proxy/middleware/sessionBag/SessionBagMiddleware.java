@@ -65,7 +65,7 @@ public class SessionBagMiddleware implements Middleware {
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
         List<String> storedCookiesStr = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
-            if (cookieMatchesRequest(storedCookie, ctx.request().host(), ctx.request().path())) {
+            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().host(), ctx.request().path())) {
                 storedCookiesStr.add(encodeCookie(storedCookie));
             }
         }
@@ -78,9 +78,13 @@ public class SessionBagMiddleware implements Middleware {
         return cookies;
     }
 
-    private boolean cookieMatchesRequest(Cookie cookie, String host, String path) {
+    private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String host, String path) {
         String domain = host.split(":")[0];
-        return matchesDomain(cookie, domain) && matchesPath(cookie, path);
+        return matchesSSL(cookie, isSSL) && matchesDomain(cookie, domain) && matchesPath(cookie, path);
+    }
+
+    private boolean matchesSSL(Cookie cookie, boolean isSSL) {
+        return cookie.isSecure() == isSSL;
     }
 
     /*
@@ -205,6 +209,10 @@ public class SessionBagMiddleware implements Middleware {
                 LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", encodeCookie(newCookie));
                 return;
             }
+        }
+        if (newCookie.maxAge() == 0L) {
+            LOGGER.debug("updateSessionBag: ignoring expired cookie");
+            return;
         }
         LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding",
                 encodeCookie(newCookie));
