@@ -5,13 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
@@ -29,14 +26,15 @@ public class SessionBagMiddleware implements Middleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
 
     // those cookie are allowed to be passed back to the user agent
-    // this is required for keycloak logic
+    // this is required for keycloak login logic to its SPA (i.e. the keycloak admin UI)
     // https://github.com/keycloak/keycloak/blob/12.0.4/adapters/oidc/js/src/main/resources/login-status-iframe.html#L84
-    private static final List<String> WHITELISTED_COOKIES = List.of("KEYCLOAK_SESSION", "KEYCLOAK_SESSION_LEGACY");
+    private static final List<String> WHITHELISTED_COOKIE_NAMES =
+            List.of("KEYCLOAK_SESSION", "KEYCLOAK_SESSION_LEGACY");
+    private static final List<String> WHITHELISTED_COOKIE_PATHS = List.of("/auth/realms/master/");
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
-    public SessionBagMiddleware() {
-    }
+    public SessionBagMiddleware() {}
 
     @Override
     public void handle(RoutingContext ctx) {
@@ -68,8 +66,10 @@ public class SessionBagMiddleware implements Middleware {
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
         List<String> storedCookiesStr = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
-            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().host(), ctx.request().path())) {
-                storedCookiesStr.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
+            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().host(),
+                    ctx.request().path())) {
+                storedCookiesStr
+                        .add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
 
@@ -85,7 +85,8 @@ public class SessionBagMiddleware implements Middleware {
 
     private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String host, String path) {
         String domain = host.split(":")[0];
-        return matchesSSL(cookie, isSSL) && matchesDomain(cookie, domain) && matchesPath(cookie, path);
+        return matchesSSL(cookie, isSSL) && matchesDomain(cookie, domain)
+                && matchesPath(cookie, path);
     }
 
     private boolean matchesSSL(Cookie cookie, boolean isSSL) {
@@ -146,7 +147,8 @@ public class SessionBagMiddleware implements Middleware {
         if (uriPath.isEmpty() || !uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
             requestPath = "/";
         } else {
-            requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
+            requestPath =
+                    uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
         if (cookie.path() == null) {
@@ -157,7 +159,8 @@ public class SessionBagMiddleware implements Middleware {
         if (cookie.path().isEmpty()) {
             cookiePath = "/";
         } else {
-            cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
+            cookiePath = cookie.path().endsWith("/")
+                    ? cookie.path().substring(0, cookie.path().length() - 1)
                     : cookie.path();
         }
         String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
@@ -181,16 +184,17 @@ public class SessionBagMiddleware implements Middleware {
         for (String cookieToSet : cookiesToSet) {
             // use netty cookie until maxAge getter is impemented
             // https://github.com/eclipse-vertx/vert.x/issues/3906
-            Cookie cookie = ClientCookieDecoder.STRICT.decode(cookieToSet);
-            if (cookie.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
+            Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
+            if (decodedCookieToSet.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
                 continue;
             }
-            if (WHITELISTED_COOKIES.contains(cookie.name())) {
-                // we delegate all logic for whitelisted cookies to the user agent (@esteiner: aggreed?)
+            if (WHITHELISTED_COOKIE_NAMES.contains(decodedCookieToSet.name())
+                    && WHITHELISTED_COOKIE_PATHS.contains(decodedCookieToSet.path())) {
+                // we delegate all logic for whitelisted cookies to the user agent 
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
             }
-            updateSessionBag(storedCookies, cookie);
+            updateSessionBag(storedCookies, decodedCookieToSet);
         }
         ctx.session().put(SESSION_BAG_COOKIES, storedCookies);
     }
@@ -204,9 +208,26 @@ public class SessionBagMiddleware implements Middleware {
     */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
         Cookie foundCookie = null;
+        if (newCookie.name() == null) {
+            LOGGER.warn("updateSessionBag: ignoring cookie without a name");
+            return;
+        }
+        if (newCookie.domain() == null) {
+            // TODO
+            // If the server omits the Domain attribute, the user
+            // agent will return the cookie only to the origin server.
+            newCookie.setDomain("");
+        }
+        if (newCookie.path() == null) {
+            // TODO
+            // If the server omits the Path attribute, the user
+            // agent will use the "directory" of the request-uri's path component as
+            // the default value.
+            newCookie.setPath("/");
+        }
         for (Cookie storedCookie : storedCookies) {
             if (storedCookie.name().equals(newCookie.name())
-                    // && storedCookie.getDomain().equals(newCookie.getDomain()) // TODO
+                    // && storedCookie.domain().equals(newCookie.domain()) // TODO
                     && storedCookie.path().equals(newCookie.path())) {
                 foundCookie = storedCookie;
                 break;
@@ -224,13 +245,15 @@ public class SessionBagMiddleware implements Middleware {
             LOGGER.debug("updateSessionBag: ignoring expired cookie");
             return;
         }
-        LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding", newCookie.name());
+        LOGGER.debug("updateSessionBag: {} cookie '{}'",
+                foundCookie != null ? "Updating" : "Adding", newCookie.name());
         storedCookies.add(newCookie);
     }
 
     private String escapeSpecialRegexChars(String regex) {
-        return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
-                .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
-                .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
+        return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$")
+                .replace(".", "\\.").replace("|", "\\.").replace("?", "\\?").replace("*", "\\*")
+                .replace("+", "\\+").replace("(", "\\(").replace(")", "\\)").replace("[", "\\[")
+                .replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
 }
