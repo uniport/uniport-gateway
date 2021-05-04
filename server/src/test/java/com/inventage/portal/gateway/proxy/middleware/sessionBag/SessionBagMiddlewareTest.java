@@ -3,16 +3,19 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
-import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -37,7 +40,7 @@ public class SessionBagMiddlewareTest {
     static final String host = "localhost";
     static final String sessionCookieName = "portal-gateway-test.session";
 
-    @Test
+    // @Test
     void cookiesAreRemovedInResponses(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test removal of response cookies' failed.";
 
@@ -58,7 +61,7 @@ public class SessionBagMiddlewareTest {
         });
     }
 
-    @Test
+    // @Test
     void cookiesAreIncludedInFollowUpRequests(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies are included in follow up requests' failed.";
 
@@ -89,7 +92,7 @@ public class SessionBagMiddlewareTest {
         });
     }
 
-    @Test
+    // @Test
     void laterReturnedCookiesAreSavedToo(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies included in follow up responses are saved too' failed.";
 
