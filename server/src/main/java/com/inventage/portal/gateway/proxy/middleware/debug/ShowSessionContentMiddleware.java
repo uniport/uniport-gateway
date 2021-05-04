@@ -12,7 +12,7 @@ import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.http.Cookie;
+import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
@@ -47,7 +47,7 @@ public class ShowSessionContentMiddleware implements Middleware {
                 html.append("cookies stored in session bag (each block is one cookie):\n\n");
             }
             for (Cookie cookie : storedCookies) {
-                html.append(String.join("\n", cookie.encode().split("; ")));
+                html.append(String.join("\n", cookie.toString().replace(", ", "\n")));
                 html.append("\n\n");
             }
         }
