@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
-import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
@@ -29,6 +28,11 @@ public class SessionBagMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
 
+    // those cookie are allowed to be passed back to the user agent
+    // this is required for keycloak logic
+    // https://github.com/keycloak/keycloak/blob/12.0.4/adapters/oidc/js/src/main/resources/login-status-iframe.html#L84
+    private static final List<String> WHITELISTED_COOKIES = List.of("KEYCLOAK_SESSION", "KEYCLOAK_SESSION_LEGACY");
+
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
     public SessionBagMiddleware() {
@@ -41,7 +45,6 @@ public class SessionBagMiddleware implements Middleware {
         String cookies = loadCookiesFromSessionBag(ctx);
         if (cookies != null && !cookies.isEmpty()) {
             ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookies);
-            System.out.println(ctx.request());
         }
 
         // on response: remove cookies if present and store them in session bag
@@ -66,9 +69,11 @@ public class SessionBagMiddleware implements Middleware {
         List<String> storedCookiesStr = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().host(), ctx.request().path())) {
-                storedCookiesStr.add(encodeCookie(storedCookie));
+                storedCookiesStr.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
+
+        // TODO maybe check for conflicting request and stored cookies
 
         // https://github.com/vert-x3/vertx-web/issues/1716
         String cookieSeparator = "; "; // RFC 6265 4.2.1
@@ -180,6 +185,11 @@ public class SessionBagMiddleware implements Middleware {
             if (cookie.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
                 continue;
             }
+            if (WHITELISTED_COOKIES.contains(cookie.name())) {
+                // we delegate all logic for whitelisted cookies to the user agent (@esteiner: aggreed?)
+                headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
+                continue;
+            }
             updateSessionBag(storedCookies, cookie);
         }
         ctx.session().put(SESSION_BAG_COOKIES, storedCookies);
@@ -206,7 +216,7 @@ public class SessionBagMiddleware implements Middleware {
             boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
-                LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", encodeCookie(newCookie));
+                LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", newCookie.name());
                 return;
             }
         }
@@ -214,8 +224,7 @@ public class SessionBagMiddleware implements Middleware {
             LOGGER.debug("updateSessionBag: ignoring expired cookie");
             return;
         }
-        LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding",
-                encodeCookie(newCookie));
+        LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding", newCookie.name());
         storedCookies.add(newCookie);
     }
 
@@ -223,10 +232,5 @@ public class SessionBagMiddleware implements Middleware {
         return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
                 .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
                 .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
-    }
-
-    private String encodeCookie(Cookie cookie) {
-        // TODO encode SameSite
-        return ServerCookieEncoder.STRICT.encode(cookie);
     }
 }
