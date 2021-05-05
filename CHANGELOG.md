@@ -13,11 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added, Changed, Deprecated, Removed, Fixed or Security
 
-[1.1.0]-Unreleased 2021-04-30
+[1.1.0]-202104301516-89-6ea3315 2021-04-30
 ------------
 
 ### Added
 
+- Session information page for development/debug purposes [PORTAL-204](https://issue.inventage.com/browse/PORTAL-204)
 - Tests
 
 [1.0.0]-202104161309-72-2861749 - 2021-04-16
