@@ -121,24 +121,88 @@
     "name": "com.sun.jna.WString",
     "methods": [{ "name": "<init>", "parameterTypes": ["java.lang.String"] }]
   },
+  { "name": "java.lang.Object", "methods": [{ "name": "toString" }] },
+  { "name": "java.lang.Class", "methods": [{ "name": "getComponentType" }] },
   {
-    "name": "java.lang.ClassLoader",
-    "methods": [{ "name": "getPlatformClassLoader", "parameterTypes": [] }]
-  },
-  {
-    "name": "java.lang.NoSuchMethodError"
-  },
-  {
-    "name": "sun.management.VMManagementImpl",
-    "fields": [
-      { "name": "compTimeMonitoringSupport" },
-      { "name": "currentThreadCpuTimeSupport" },
-      { "name": "objectMonitorUsageSupport" },
-      { "name": "otherThreadCpuTimeSupport" },
-      { "name": "remoteDiagnosticCommandsSupport" },
-      { "name": "synchronizerUsageSupport" },
-      { "name": "threadAllocatedMemorySupport" },
-      { "name": "threadContentionMonitoringSupport" }
+    "name": "java.lang.String",
+    "methods": [
+      { "name": "getBytes" },
+      { "name": "toCharArray" },
+      { "name": "<init>" }
     ]
+  },
+  {
+    "name": "java.lang.reflect.Method",
+    "methods": [{ "name": "getParameterTypes" }, { "name": "getReturnType" }]
+  },
+  { "name": "java.nio.Buffer", "methods": [{ "name": "position" }] },
+  {
+    "name": "java.nio.ByteBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  {
+    "name": "java.nio.CharBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  {
+    "name": "java.nio.ShortBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  {
+    "name": "java.nio.IntBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  {
+    "name": "java.nio.LongBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  {
+    "name": "java.nio.FloatBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  {
+    "name": "java.nio.DoubleBuffer",
+    "methods": [{ "name": "array" }, { "name": "arrayOffset" }]
+  },
+  { "name": "java.lang.Void", "fields": [{ "name": "TYPE" }] },
+  {
+    "name": "java.lang.Boolean",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Byte",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Character",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Short",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Integer",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Long",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Float",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
+  },
+  {
+    "name": "java.lang.Double",
+    "methods": [{ "name": "<init>" }],
+    "fields": [{ "name": "value" }, { "name": "TYPE" }]
   }
 ]

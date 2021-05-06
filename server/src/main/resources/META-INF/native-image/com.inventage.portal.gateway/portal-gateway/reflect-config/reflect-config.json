@@ -129,6 +129,19 @@
     "allDeclaredFields": true
   },
   {
+    "name": "com.github.dockerjava.transport.DomainSocket",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.github.dockerjava.transport.LinuxDomainSocket",
+    "allPublicFields": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.github.dockerjava.transport.LinuxDomainSocket$SockaddrUn",
+    "allDeclaredFields": true
+  },
+  {
     "name": "com.inventage.portal.gateway.core.PortalGatewayVerticle",
     "methods": [{ "name": "<init>", "parameterTypes": [] }]
   },

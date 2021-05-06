@@ -19,12 +19,12 @@ RUN native-image \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
     --trace-class-initialization=ch.qos.logback.classic.Logger \
     -H:+ReportExceptionStackTraces \
-    # -H:+ReportUnsupportedElementsAtRuntime \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar 
 
-FROM debian:buster-slim
+# TODO slim down
+FROM debian:buster-slim 
 COPY --from=buildEnv /workdir/portal-gateway portal-gateway
 COPY server/portal-gateway /etc/portal-gateway
 RUN ldd portal-gateway
