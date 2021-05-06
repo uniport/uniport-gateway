@@ -26,8 +26,8 @@ RUN native-image \
 
 FROM debian:buster-slim
 COPY --from=buildEnv /workdir/portal-gateway portal-gateway
+COPY server/portal-gateway /etc/portal-gateway
 RUN ldd portal-gateway
 
 EXPOSE 20000
-CMD ["./portal-gateway"]
-# CMD ["./portal-gateway", "run", "com.inventage.portal.gateway.core.PortalGatewayVerticle", "cluster"]
+CMD ["./portal-gateway", "run", "-cluster"]
