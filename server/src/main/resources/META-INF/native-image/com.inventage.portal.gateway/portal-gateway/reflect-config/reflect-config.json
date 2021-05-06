@@ -1,5 +1,13 @@
 [
   {
+    "name": "io.netty.channel.socket.nio.NioSocketChannel",
+    "methods": [{ "name": "<init>", "parameterTypes": [] }]
+  },
+  {
+    "name": "io.netty.channel.socket.nio.NioServerSocketChannel",
+    "methods": [{ "name": "<init>", "parameterTypes": [] }]
+  },
+  {
     "name": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
     "allPublicMethods": true,
     "methods": [{ "name": "<init>", "parameterTypes": [] }]
@@ -145,7 +153,54 @@
     "methods": [{ "name": "<init>", "parameterTypes": [] }]
   },
   {
-    "name": "io.netty.bootstrap.ServerBootstrap$1"
+    "name": "io.netty.bootstrap.ServerBootstrap$1",
+    "methods": [
+      {
+        "name": "channelActive",
+        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
+      },
+      {
+        "name": "channelInactive",
+        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
+      },
+      {
+        "name": "channelRead",
+        "parameterTypes": [
+          "io.netty.channel.ChannelHandlerContext",
+          "java.lang.Object"
+        ]
+      },
+      {
+        "name": "channelReadComplete",
+        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
+      },
+      {
+        "name": "channelRegistered",
+        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
+      },
+      {
+        "name": "channelUnregistered",
+        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
+      },
+      {
+        "name": "channelWritabilityChanged",
+        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
+      },
+      {
+        "name": "exceptionCaught",
+        "parameterTypes": [
+          "io.netty.channel.ChannelHandlerContext",
+          "java.lang.Throwable"
+        ]
+      },
+      {
+        "name": "userEventTriggered",
+        "parameterTypes": [
+          "io.netty.channel.ChannelHandlerContext",
+          "java.lang.Object"
+        ]
+      }
+    ]
   },
   {
     "name": "io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor",

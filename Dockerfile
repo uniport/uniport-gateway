@@ -8,6 +8,8 @@ RUN native-image \
     --no-server \
     --no-fallback \
     --allow-incomplete-classpath \
+    --initialize-at-build-time=org.slf4j.LoggerFactory \
+    --initialize-at-build-time=org.slf4j.simple.SimpleLogger \
     --initialize-at-run-time=io.netty.bootstrap.ServerBootstrap \
     --initialize-at-run-time=io.netty.buffer.AbstractByteBuf \
     --initialize-at-run-time=io.netty.buffer.AbstractByteBufAllocator \
@@ -19,10 +21,22 @@ RUN native-image \
     --initialize-at-run-time=io.netty.channel.AbstractChannelHandlerContext \
     --initialize-at-run-time=io.netty.channel.ChannelHandlerMask \
     --initialize-at-run-time=io.netty.channel.ChannelInitializer \
+    --initialize-at-run-time=io.netty.channel.ChannelOutboundBuffer \
     --initialize-at-run-time=io.netty.channel.CombinedChannelDuplexHandler \
     --initialize-at-run-time=io.netty.channel.DefaultChannelId \
     --initialize-at-run-time=io.netty.channel.DefaultChannelPipeline \
-    --initialize-at-run-time=io.netty.handler.codec.http.HttpObjectAggregator \
+    --initialize-at-run-time=io.netty.channel.epoll.Epoll \
+    --initialize-at-run-time=io.netty.channel.epoll.Native \
+    --initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop \
+    --initialize-at-run-time=io.netty.channel.epoll.EpollEventArray \
+    --initialize-at-run-time=io.netty.channel.DefaultFileRegion \
+    --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray \
+    --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop \
+    --initialize-at-run-time=io.netty.channel.kqueue.Native \
+    --initialize-at-run-time=io.netty.channel.unix.Errors \
+    --initialize-at-run-time=io.netty.channel.unix.IovArray \
+    --initialize-at-run-time=io.netty.channel.unix.Limits \
+    --initialize-at-run-time=io.netty.handler.codec.http.HttpObjectAggregator \ 
     --initialize-at-run-time=io.netty.handler.codec.http.HttpObjectEncoder \
     --initialize-at-run-time=io.netty.handler.codec.http.websocketx.WebSocket00FrameEncoder \
     --initialize-at-run-time=io.netty.handler.codec.http2.Http2CodecUtil \
@@ -48,9 +62,10 @@ RUN native-image \
     --initialize-at-run-time=io.netty.util.ResourceLeakDetector \
     --initialize-at-run-time=io.netty.util.ResourceLeakDetectorFactory \
     --initialize-at-run-time=io.netty.util.ThreadDeathWatcher \
-    --trace-class-initialization=org.slf4j.LoggerFactory \
+    --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
+    --trace-class-initialization=ch.qos.logback.classic.Logger \
     -H:+ReportExceptionStackTraces \
-    -H:+ReportUnsupportedElementsAtRuntime \
+    # -H:+ReportUnsupportedElementsAtRuntime \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar 
