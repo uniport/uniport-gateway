@@ -1,32 +1,64 @@
 FROM ghcr.io/graalvm/graalvm-ce:java11-21.1.0 AS buildEnv
 RUN gu install native-image
 
+ENV VERSION=1.2.0
 WORKDIR /workdir
-COPY server/target/server-1.1.0-SNAPSHOT-jar-with-dependencies.jar ./fat-jar.jar
-COPY reflectconfig.json reflectconfig.json
-RUN native-image -cp fat-jar.jar \
+COPY server/target/server-${VERSION}-SNAPSHOT-fat.jar ./portal-gateway.jar
+RUN native-image \
     --no-server \
     --no-fallback \
-    --enable-all-security-services \
     --allow-incomplete-classpath \
-    --report-unsupported-elements-at-runtime \
-    --initialize-at-run-time=io.netty \
-    -H:ReflectionConfigurationFiles=reflectconfig.json \
+    --initialize-at-run-time=io.netty.bootstrap.ServerBootstrap \
+    --initialize-at-run-time=io.netty.buffer.AbstractByteBuf \
+    --initialize-at-run-time=io.netty.buffer.AbstractByteBufAllocator \
+    --initialize-at-run-time=io.netty.buffer.AdvancedLeakAwareByteBuf \
+    --initialize-at-run-time=io.netty.buffer.ByteBufUtil$HexUtil \
+    --initialize-at-run-time=io.netty.buffer.ByteBufUtil$HexUtil \
+    --initialize-at-run-time=io.netty.buffer.Unpooled \
+    --initialize-at-run-time=io.netty.channel.AbstractChannel \
+    --initialize-at-run-time=io.netty.channel.AbstractChannelHandlerContext \
+    --initialize-at-run-time=io.netty.channel.ChannelHandlerMask \
+    --initialize-at-run-time=io.netty.channel.ChannelInitializer \
+    --initialize-at-run-time=io.netty.channel.CombinedChannelDuplexHandler \
+    --initialize-at-run-time=io.netty.channel.DefaultChannelId \
+    --initialize-at-run-time=io.netty.channel.DefaultChannelPipeline \
+    --initialize-at-run-time=io.netty.handler.codec.http.HttpObjectAggregator \
+    --initialize-at-run-time=io.netty.handler.codec.http.HttpObjectEncoder \
+    --initialize-at-run-time=io.netty.handler.codec.http.websocketx.WebSocket00FrameEncoder \
+    --initialize-at-run-time=io.netty.handler.codec.http2.Http2CodecUtil \
+    --initialize-at-run-time=io.netty.handler.codec.http2.DefaultHttp2FrameWriter \
+    --initialize-at-run-time=io.netty.handler.ssl.ConscryptAlpnSslEngine \
+    --initialize-at-run-time=io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator \
+    --initialize-at-run-time=io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine \
+    --initialize-at-run-time=io.netty.handler.ssl.JettyAlpnSslEngine$ServerEngine \
+    --initialize-at-run-time=io.netty.handler.ssl.JettyNpnSslEngine \
+    --initialize-at-run-time=io.netty.handler.ssl.OpenSslSessionContext \
+    --initialize-at-run-time=io.netty.handler.ssl.ReferenceCountedOpenSslContext \
+    --initialize-at-run-time=io.netty.handler.ssl.ReferenceCountedOpenSslEngine \
+    --initialize-at-run-time=io.netty.util.concurrent.DefaultPromise \
+    --initialize-at-run-time=io.netty.util.internal.CleanerJava9 \
+    --initialize-at-run-time=io.netty.util.internal.CleanerJava6 \
+    --initialize-at-run-time=io.netty.util.internal.logging.Log4JLogger \
+    --initialize-at-run-time=io.netty.util.internal.MacAddressUtil \
+    --initialize-at-run-time=io.netty.util.internal.PlatformDependent \
+    --initialize-at-run-time=io.netty.util.internal.PlatformDependent0 \
+    --initialize-at-run-time=io.netty.util.internal.SystemPropertyUtil \
+    --initialize-at-run-time=io.netty.util.internal.StringUtil \
+    --initialize-at-run-time=io.netty.util.ReferenceCountUtil \
+    --initialize-at-run-time=io.netty.util.ResourceLeakDetector \
+    --initialize-at-run-time=io.netty.util.ResourceLeakDetectorFactory \
+    --initialize-at-run-time=io.netty.util.ThreadDeathWatcher \
+    --trace-class-initialization=org.slf4j.LoggerFactory \
     -H:+ReportExceptionStackTraces \
-    -H:Name="portal-gateway" \
-    com.inventage.portal.gateway.PortalGatewayLauncher
-
-# Here we can take advantage of the multi-stage build and boot from an optimized docker image.
-# Depending on how much slimmed down image we choose, we may need to transfer several missing libraries.
-# Generally, you can find the required libraries using ldd.
-RUN ldd portal-gateway
+    -H:+ReportUnsupportedElementsAtRuntime \
+    -Dio.netty.noUnsafe=true \
+    -Dfile.encoding=UTF-8 \
+    -jar portal-gateway.jar 
 
 FROM debian:buster-slim
-# FROM gcr.io/distroless/base
-# COPY --from=buildEnv /usr/lib64/libz.so.1 /lib/x86_64-linux-gnu/libz.so.1
-# COPY --from=buildEnv "/usr/lib64/libstdc++.so.6" "/lib/x86_64-linux-gnu/libstdc++.so.6"
-# COPY --from=buildEnv "/usr/lib64/libgcc_s.so.1" "/lib/x86_64-linux-gnu/libgcc_s.so.1"
 COPY --from=buildEnv /workdir/portal-gateway portal-gateway
+RUN ldd portal-gateway
 
 EXPOSE 20000
-CMD ["./portal-gateway", "run", "com.inventage.portal.gateway.core.PortalGatewayVerticle", "cluster"]
+CMD ["./portal-gateway"]
+# CMD ["./portal-gateway", "run", "com.inventage.portal.gateway.core.PortalGatewayVerticle", "cluster"]

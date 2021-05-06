@@ -109,11 +109,22 @@
                                 <goal>shade</goal>
                             </goals>
                             <configuration>
+                                <!-- To avoid "java.lang.SecurityException: Invalid signature file digest for Manifest main attributes" we need to exclude manifest signature files -->
+                                <filters>
+                                    <filter>
+                                        <artifact>*:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/*.SF</exclude>
+                                            <exclude>META-INF/*.DSA</exclude>
+                                            <exclude>META-INF/*.RSA</exclude>
+                                        </excludes>
+                                    </filter>
+                                </filters>
                                 <transformers>
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
-                                            <Main-Class>${launcher.class}</Main-Class>
-                                            <Main-Verticle>${main.verticle}</Main-Verticle>
+                                            <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                            <!-- <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle> -->
                                         </manifestEntries>
                                     </transformer>
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
