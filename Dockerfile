@@ -8,6 +8,7 @@ RUN native-image \
     --no-server \
     --no-fallback \
     --allow-incomplete-classpath \
+    --enable-url-protocols=http \
     --initialize-at-build-time=org.slf4j.LoggerFactory \
     --initialize-at-run-time=io.netty.bootstrap \
     --initialize-at-run-time=io.netty.buffer \
