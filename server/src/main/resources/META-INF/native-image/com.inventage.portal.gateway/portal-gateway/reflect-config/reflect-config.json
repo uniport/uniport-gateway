@@ -1,13 +1,5 @@
 [
   {
-    "name": "io.netty.channel.socket.nio.NioSocketChannel",
-    "methods": [{ "name": "<init>", "parameterTypes": [] }]
-  },
-  {
-    "name": "io.netty.channel.socket.nio.NioServerSocketChannel",
-    "methods": [{ "name": "<init>", "parameterTypes": [] }]
-  },
-  {
     "name": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
     "allPublicMethods": true,
     "methods": [{ "name": "<init>", "parameterTypes": [] }]
@@ -120,12 +112,16 @@
     "allDeclaredConstructors": true
   },
   {
-    "name": "com.github.dockerjava.httpclient5.UnixDomainSocket",
+    "name": "com.github.dockerjava.transport.DomainSocket",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.github.dockerjava.transport.LinuxDomainSocket",
     "allPublicFields": true,
     "allDeclaredMethods": true
   },
   {
-    "name": "com.github.dockerjava.httpclient5.UnixDomainSocket$SockAddr",
+    "name": "com.github.dockerjava.transport.LinuxDomainSocket$SockaddrUn",
     "allDeclaredFields": true
   },
   {
@@ -151,56 +147,6 @@
   {
     "name": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
     "methods": [{ "name": "<init>", "parameterTypes": [] }]
-  },
-  {
-    "name": "io.netty.bootstrap.ServerBootstrap$1",
-    "methods": [
-      {
-        "name": "channelActive",
-        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
-      },
-      {
-        "name": "channelInactive",
-        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
-      },
-      {
-        "name": "channelRead",
-        "parameterTypes": [
-          "io.netty.channel.ChannelHandlerContext",
-          "java.lang.Object"
-        ]
-      },
-      {
-        "name": "channelReadComplete",
-        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
-      },
-      {
-        "name": "channelRegistered",
-        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
-      },
-      {
-        "name": "channelUnregistered",
-        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
-      },
-      {
-        "name": "channelWritabilityChanged",
-        "parameterTypes": ["io.netty.channel.ChannelHandlerContext"]
-      },
-      {
-        "name": "exceptionCaught",
-        "parameterTypes": [
-          "io.netty.channel.ChannelHandlerContext",
-          "java.lang.Throwable"
-        ]
-      },
-      {
-        "name": "userEventTriggered",
-        "parameterTypes": [
-          "io.netty.channel.ChannelHandlerContext",
-          "java.lang.Object"
-        ]
-      }
-    ]
   },
   {
     "name": "io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor",
@@ -676,6 +622,14 @@
     ]
   },
   {
+    "name": "io.netty.channel.socket.nio.NioServerSocketChannel",
+    "methods": [{ "name": "<init>", "parameterTypes": [] }]
+  },
+  {
+    "name": "io.netty.channel.socket.nio.NioSocketChannel",
+    "methods": [{ "name": "<init>", "parameterTypes": [] }]
+  },
+  {
     "name": "io.netty.handler.codec.ByteToMessageDecoder",
     "methods": [
       {
@@ -990,7 +944,8 @@
   {
     "name": "java.lang.Throwable",
     "methods": [
-      { "name": "addSuppressed", "parameterTypes": ["java.lang.Throwable"] }
+      { "name": "addSuppressed", "parameterTypes": ["java.lang.Throwable"] },
+      { "name": "getSuppressed", "parameterTypes": [] }
     ]
   },
   {

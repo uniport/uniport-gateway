@@ -9,7 +9,6 @@ RUN native-image \
     --no-fallback \
     --allow-incomplete-classpath \
     --initialize-at-build-time=org.slf4j.LoggerFactory \
-    --initialize-at-build-time=org.slf4j.simple.SimpleLogger \
     --initialize-at-run-time=io.netty.bootstrap \
     --initialize-at-run-time=io.netty.buffer \
     --initialize-at-run-time=io.netty.channel \
@@ -17,7 +16,6 @@ RUN native-image \
     --initialize-at-run-time=io.netty.resolver \
     --initialize-at-run-time=io.netty.util \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
-    --trace-class-initialization=ch.qos.logback.classic.Logger \
     -H:+ReportExceptionStackTraces \
     # -H:+ReportUnsupportedElementsAtRuntime \
     -Dio.netty.noUnsafe=true \
