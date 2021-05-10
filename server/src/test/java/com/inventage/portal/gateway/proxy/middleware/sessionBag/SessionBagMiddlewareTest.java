@@ -38,11 +38,21 @@ public class SessionBagMiddlewareTest {
     static final String host = "localhost";
     static final String sessionCookieName = "portal-gateway-test.session";
 
+    /*
+    allow keycloak_session cookies for master realm to pass
+    check for 
+        secure
+        path
+        name
+        expired/max age
+        stored cookie overwrites request cookie
+    */
+
     @Test
     void cookiesAreRemovedInResponses(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test removal of response cookies' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setDomain("test.abc").setPath("/");
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(1000);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
         AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, ctx -> {
@@ -59,11 +69,11 @@ public class SessionBagMiddlewareTest {
         });
     }
 
-    // @Test
+    @Test
     void cookiesAreIncludedInFollowUpRequests(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies are included in follow up requests' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setDomain("test.abc").setPath("/");
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(1000);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
         AtomicBoolean isFollowUpRequest = new AtomicBoolean(false);
         AtomicReference<String> sessionId = new AtomicReference<>();
@@ -90,12 +100,12 @@ public class SessionBagMiddlewareTest {
         });
     }
 
-    // @Test
+    @Test
     void laterReturnedCookiesAreSavedToo(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies included in follow up responses are saved too' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setDomain("test.abc").setPath("/");
-        Cookie followUpCookie = Cookie.cookie("moose", "test").setDomain("test.abc").setPath("/");
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(1000);
+        Cookie followUpCookie = Cookie.cookie("moose", "test").setPath("/").setMaxAge(1000);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
         AtomicBoolean isFollowUpRequest = new AtomicBoolean(false);
         AtomicReference<String> sessionId = new AtomicReference<>();

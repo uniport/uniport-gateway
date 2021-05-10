@@ -20,13 +20,17 @@ import io.vertx.ext.web.RoutingContext;
  * Manages request/response cookies. It removes all cookies from responses,
  * stores them in the session and sets them again for follow up requests.
  * It guarantees that no cookies except the session ID is sent to the client.
+ * 
+ * Divergences from RFC 6265:
+ * - If the server omits the Path attribute, the middleware will use the "/" as the default value (instead of the request-uri path).
+ * - The domain attribute is ignored i.e. all cookies are included in all requests
  */
 public class SessionBagMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
 
-    // those cookie are allowed to be passed back to the user agent
-    // this is required for keycloak login logic to its SPA (i.e. the keycloak admin UI)
+    // These cookie are allowed to be passed back to the user agent.
+    // This is required for keycloak login logic of its SPA (i.e. the keycloak admin UI)
     // https://github.com/keycloak/keycloak/blob/12.0.4/adapters/oidc/js/src/main/resources/login-status-iframe.html#L84
     private static final List<String> WHITHELISTED_COOKIE_NAMES =
             List.of("KEYCLOAK_SESSION", "KEYCLOAK_SESSION_LEGACY");
@@ -64,54 +68,36 @@ public class SessionBagMiddleware implements Middleware {
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-        List<String> storedCookiesStr = new ArrayList<String>();
+        List<String> encodedStoredCookies = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
-            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().host(),
-                    ctx.request().path())) {
-                storedCookiesStr
+            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
+                encodedStoredCookies
                         .add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
 
-        // TODO maybe check for conflicting request and stored cookies
-
         // https://github.com/vert-x3/vertx-web/issues/1716
-        String cookieSeparator = "; "; // RFC 6265 4.2.1
-        String cookies = String.join(cookieSeparator, String.join(cookieSeparator, requestCookies),
-                String.join(cookieSeparator, storedCookiesStr));
+        String cookieDelimiter = "; "; // RFC 6265 4.2.1
+        String cookies = String.join(cookieDelimiter, encodedStoredCookies);
+        // check for conflicting request and stored cookies
+        // stored cookie have presedence to avoid cookie injection
+        for (String requestCookie : requestCookies) {
+            Cookie decodedRequestCookie = ClientCookieDecoder.STRICT.decode(requestCookie);
+            if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
+                continue;
+            }
+            cookies = String.join(cookieDelimiter, cookies, requestCookie);
+        }
 
         return cookies;
     }
 
-    private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String host, String path) {
-        String domain = host.split(":")[0];
-        return matchesSSL(cookie, isSSL) && matchesDomain(cookie, domain)
-                && matchesPath(cookie, path);
+    private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
+        return matchesSSL(cookie, isSSL) && matchesPath(cookie, path);
     }
 
     private boolean matchesSSL(Cookie cookie, boolean isSSL) {
         return cookie.isSecure() == isSSL;
-    }
-
-    /*
-    A string domain-matches a given domain string if at least one of the
-    following conditions hold:
-    - The domain string and the string are identical.
-    - All of the following conditions hold:
-    -  The domain string is a suffix of the string.
-    -  The last character of the string that is not included in the
-       domain string is a %x2E (".") character.
-    -  The string is a host name (i.e., not an IP address).
-    
-    https://tools.ietf.org/html/rfc6265#section-5.1.3
-    */
-    private boolean matchesDomain(Cookie cookie, String domain) {
-        // if the domain attribute is ommited, the cookie will only be returned to the origin server // TODO
-        if (cookie.domain() == null) {
-            return true;
-        }
-        String regex = String.format("^(.*\\.)?%s$", escapeSpecialRegexChars(cookie.domain()));
-        return Pattern.compile(regex).matcher(domain).matches();
     }
 
     /*
@@ -200,39 +186,22 @@ public class SessionBagMiddleware implements Middleware {
     }
 
     /*
-    If a new cookie is received with the same cookie-name,
-    domain-value, and path-value as a cookie that it has already stored,
+    If a new cookie is received with the same cookie-name, and 
+    path-value as a cookie that it has already stored,
     the existing cookie is evicted and replaced with the new cookie.
     Cookies can be deleted by sending a new cookie with an Expires
     attribute with a value in the past.
     */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
-        Cookie foundCookie = null;
         if (newCookie.name() == null) {
-            LOGGER.warn("updateSessionBag: ignoring cookie without a name");
+            LOGGER.warn("updateSessionBag: Ignoring cookie without a name");
             return;
         }
-        if (newCookie.domain() == null) {
-            // TODO
-            // If the server omits the Domain attribute, the user
-            // agent will return the cookie only to the origin server.
-            newCookie.setDomain("");
-        }
         if (newCookie.path() == null) {
-            // TODO
-            // If the server omits the Path attribute, the user
-            // agent will use the "directory" of the request-uri's path component as
-            // the default value.
             newCookie.setPath("/");
         }
-        for (Cookie storedCookie : storedCookies) {
-            if (storedCookie.name().equals(newCookie.name())
-                    // && storedCookie.domain().equals(newCookie.domain()) // TODO
-                    && storedCookie.path().equals(newCookie.path())) {
-                foundCookie = storedCookie;
-                break;
-            }
-        }
+
+        Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
         if (foundCookie != null) {
             boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
@@ -241,8 +210,9 @@ public class SessionBagMiddleware implements Middleware {
                 return;
             }
         }
-        if (newCookie.maxAge() == 0L) {
-            LOGGER.debug("updateSessionBag: ignoring expired cookie");
+
+        if (newCookie.maxAge() <= 0L) {
+            LOGGER.debug("updateSessionBag: Ignoring expired cookie");
             return;
         }
         LOGGER.debug("updateSessionBag: {} cookie '{}'",
@@ -255,5 +225,14 @@ public class SessionBagMiddleware implements Middleware {
                 .replace(".", "\\.").replace("|", "\\.").replace("?", "\\?").replace("*", "\\*")
                 .replace("+", "\\+").replace("(", "\\(").replace(")", "\\)").replace("[", "\\[")
                 .replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
+    }
+
+    private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
+        for (Cookie c : set) {
+            if (c.name().equals(cookie.name()) && c.path().equals(cookie.path())) {
+                return c;
+            }
+        }
+        return null;
     }
 }
