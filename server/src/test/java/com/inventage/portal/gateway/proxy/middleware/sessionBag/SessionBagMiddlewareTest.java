@@ -13,6 +13,7 @@ import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -38,34 +39,26 @@ public class SessionBagMiddlewareTest {
     static final String host = "localhost";
     static final String sessionCookieName = "portal-gateway-test.session";
 
-    /*
-    allow keycloak_session cookies for master realm to pass
-    check for 
-        secure
-        path
-        name
-        expired/max age
-        stored cookie overwrites request cookie
-    */
-
     @Test
     void cookiesAreRemovedInResponses(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test removal of response cookies' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(1000);
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
+        AtomicBoolean isFirstReq = new AtomicBoolean(true);
         AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, ctx -> {
-            if (ctx.request().getCookie(cookie.getName()) == null) {
+            if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
+                isFirstReq.set(false);
             }
             ctx.response().end();
-        }, resp -> {
+        }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
                     new ArrayList<Cookie>(Arrays.asList(cookie)));
-        }, resp -> {
+        }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
-                    new ArrayList<Cookie>());
+                    new ArrayList<Cookie>(Arrays.asList(cookie)));
         });
     }
 
@@ -73,12 +66,15 @@ public class SessionBagMiddlewareTest {
     void cookiesAreIncludedInFollowUpRequests(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies are included in follow up requests' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(1000);
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFollowUpRequest = new AtomicBoolean(false);
+        AtomicBoolean isFirstReq = new AtomicBoolean(true);
         AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, ctx -> {
-            if (isFollowUpRequest.get()) {
+            if (isFirstReq.get()) {
+                ctx.response().addCookie(cookie);
+                isFirstReq.set(false);
+            } else {
                 testCtx.verify(() -> {
                     assertTrue(ctx.request().cookieMap().containsKey(cookie.getName()),
                             String.format(
@@ -86,17 +82,13 @@ public class SessionBagMiddlewareTest {
                                     errMsg, ctx.request().cookieMap()));
                 });
             }
-            if (ctx.request().getCookie(cookie.getName()) == null) {
-                ctx.response().addCookie(cookie);
-            }
-            isFollowUpRequest.set(true);
             ctx.response().end();
-        }, resp -> {
+        }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
                     new ArrayList<Cookie>(Arrays.asList(cookie)));
-        }, resp -> {
+        }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
-                    new ArrayList<Cookie>());
+                    new ArrayList<Cookie>(Arrays.asList(cookie)));
         });
     }
 
@@ -104,32 +96,142 @@ public class SessionBagMiddlewareTest {
     void laterReturnedCookiesAreSavedToo(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test cookies included in follow up responses are saved too' failed.";
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(1000);
-        Cookie followUpCookie = Cookie.cookie("moose", "test").setPath("/").setMaxAge(1000);
+        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
+        Cookie followUpCookie = Cookie.cookie("moose", "test").setPath("/").setMaxAge(3600);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFollowUpRequest = new AtomicBoolean(false);
+        AtomicBoolean isFirstReq = new AtomicBoolean(true);
         AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, ctx -> {
-            if (ctx.request().getCookie(cookie.getName()) == null) {
+            if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
-            }
-            if (isFollowUpRequest.get()
-                    && ctx.request().getCookie(followUpCookie.getName()) == null) {
+                isFirstReq.set(false);
+            } else {
                 ctx.response().addCookie(followUpCookie);
             }
-            isFollowUpRequest.set(true);
             ctx.response().end();
-        }, resp -> {
+        }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
                     new ArrayList<Cookie>(Arrays.asList(cookie)));
-        }, resp -> {
+        }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
                     new ArrayList<Cookie>(Arrays.asList(cookie, followUpCookie)));
         });
     }
 
+    @Test
+    void expiredCookieIsRemoved(Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = "'test expired cookie are removed from session bag' failed.";
+        Cookie cookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(3600);
+        Cookie expiredCookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(-42);
+        SessionStore sessionStore = LocalSessionStore.create(vertx);
+        AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        AtomicReference<String> sessionId = new AtomicReference<>();
+
+        testHarness(vertx, testCtx, sessionStore, ctx -> {
+            if (isFirstReq.get()) {
+                ctx.response().addCookie(cookie);
+                isFirstReq.set(false);
+            } else {
+                ctx.response().addCookie(expiredCookie);
+            }
+            ctx.response().end();
+        }, null, resp -> {
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
+                    new ArrayList<Cookie>(Arrays.asList(cookie)));
+        }, null, resp -> {
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
+                    new ArrayList<Cookie>());
+        });
+    }
+
+    @Test
+    void keycloakMasterRealmCookieIsPassedInResponse(Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = "'test keycloak master realm cookie is passed to user agent' failed";
+        Cookie masterRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar")
+                .setPath("/auth/realms/master/").setMaxAge(3600);
+        Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar")
+                .setPath("/auth/realms/portal/").setMaxAge(3600);
+        SessionStore sessionStore = LocalSessionStore.create(vertx);
+        AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        AtomicReference<String> sessionId = new AtomicReference<>();
+
+        testHarness(vertx, testCtx, sessionStore, ctx -> {
+            if (isFirstReq.get()) {
+                ctx.response().addCookie(masterRealmCookie);
+                // vert.x uses a cookie name as its unique identifier
+                // but it should be the tuple (name, domain, path)
+                // https://github.com/eclipse-vertx/vert.x/issues/3916
+                // TODO set once this issue is closed
+                // ctx.response().addCookie(portalRealmCookie); 
+                isFirstReq.set(false);
+            }
+            ctx.response().end();
+        }, null, resp -> {
+            testCtx.verify(() -> {
+                boolean foundMasterRealmCookie = false;
+                for (String respCookie : resp.cookies()) {
+                    io.netty.handler.codec.http.cookie.Cookie decodedRespCookie =
+                            ClientCookieDecoder.STRICT.decode(respCookie);
+                    if (decodedRespCookie.name().equals(masterRealmCookie.getName())
+                            && decodedRespCookie.path().equals(masterRealmCookie.getPath())) {
+                        foundMasterRealmCookie = true;
+                        break;
+                    }
+                }
+                assertTrue(foundMasterRealmCookie, String.format(
+                        "%s: Expected master realm cookie to be included in response but was '%s'",
+                        errMsg, resp.cookies()));
+            });
+            // masterRealmCookie should not be saved in the session bag
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
+                    new ArrayList<Cookie>(Arrays.asList()));
+        }, null, resp -> {
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
+                    new ArrayList<Cookie>(Arrays.asList()));
+        });
+    }
+
+    @Test
+    void storedCookieHasPrecedenceOverRequestCookie(Vertx vertx, VertxTestContext testCtx) {
+        String errMsg =
+                "'test stored cookies have precedence over request cookies with the same name' failed";
+        Cookie storedCookie = Cookie.cookie("blub", "foo").setPath("/").setMaxAge(3600);
+        Cookie reqCookie = Cookie.cookie("blub", "bar").setPath("/").setMaxAge(3600);
+        SessionStore sessionStore = LocalSessionStore.create(vertx);
+        AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        AtomicReference<String> sessionId = new AtomicReference<>();
+
+        testHarness(vertx, testCtx, sessionStore, ctx -> {
+            if (isFirstReq.get()) {
+                ctx.response().addCookie(storedCookie);
+                isFirstReq.set(false);
+            } else {
+                testCtx.verify(() -> {
+                    for (String cookieName : ctx.request().cookieMap().keySet()) {
+                        if (cookieName.equals("blub")) {
+                            String cookieVal = ctx.request().cookieMap().get(cookieName).getValue();
+                            assertTrue(cookieVal.equals("foo"),
+                                    String.format(
+                                            "%s: Expected cookie value to be '%s' but was '%s'",
+                                            errMsg, "foo", cookieVal));
+                        }
+                    }
+                });
+            }
+            ctx.response().end();
+        }, null, resp -> {
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
+                    new ArrayList<Cookie>(Arrays.asList(storedCookie)));
+        }, new ArrayList<Cookie>(Arrays.asList(reqCookie)), resp -> {
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, resp,
+                    new ArrayList<Cookie>(Arrays.asList(storedCookie)));
+        });
+
+    }
+
     void testHarness(Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore,
-            Handler<RoutingContext> serverReqHandler, Handler<HttpClientResponse> respHandler,
+            Handler<RoutingContext> serverReqHandler, List<Cookie> reqCookies,
+            Handler<HttpClientResponse> respHandler, List<Cookie> followUpReqCookies,
             Handler<HttpClientResponse> followUpRespHandler) {
         int port = TestUtils.findFreePort();
         int servicePort = TestUtils.findFreePort();
@@ -177,6 +279,11 @@ public class SessionBagMiddlewareTest {
                                 for (String respCookie : resp.cookies()) {
                                     headers.add(HttpHeaders.COOKIE, respCookie);
                                 }
+                                if (followUpReqCookies != null) {
+                                    for (Cookie followUpReqCookie : followUpReqCookies) {
+                                        headers.add(HttpHeaders.COOKIE, followUpReqCookie.encode());
+                                    }
+                                }
                                 client.request(new RequestOptions().setMethod(HttpMethod.GET)
                                         .setPort(port).setHost(host).setURI("").setHeaders(headers))
                                         .onComplete(testCtx.succeeding(followUpReq -> {
@@ -192,23 +299,51 @@ public class SessionBagMiddlewareTest {
         }));
     }
 
+    /**
+     * Verifies that 
+     * a) a session cookie is returned to the user agent 
+     * b) no other cookies are returned to the user agent but the session cookie 
+     * c) all expectedSessionBagCookies are present in the session bag
+     * 
+     * @param testCtx test context
+     * @param errMsg error message
+     * @param sessionStore contains stored cookies
+     * @param sessionId session ID as returned in the session cookie
+     * @param resp response returned to the user agent
+     * @param expectedSessionBagCookies cookie expected to be stored in the session bag
+     */
     void expectedCookies(VertxTestContext testCtx, String errMsg, SessionStore sessionStore,
             AtomicReference<String> sessionId, HttpClientResponse resp,
-            List<Cookie> expectedCookies) {
+            List<Cookie> expectedSessionBagCookies) {
         testCtx.verify(() -> {
-            int expectedMaxNumberOfCookies = 1;
-            assertTrue(resp.cookies().size() <= expectedMaxNumberOfCookies,
-                    String.format("%s: Wrong amount of cookies. Expected at most '%s' but got '%s'",
-                            errMsg, expectedMaxNumberOfCookies, resp.cookies().size()));
+            io.netty.handler.codec.http.cookie.Cookie sessionCookie = null;
+            List<io.netty.handler.codec.http.cookie.Cookie> decodedRespCookies = new ArrayList<>();
+            for (String respCookie : resp.cookies()) {
+                io.netty.handler.codec.http.cookie.Cookie decodedRespCookie =
+                        ClientCookieDecoder.STRICT.decode(respCookie);
+                decodedRespCookies.add(decodedRespCookie);
 
+                // only session cookie and whitelisted cookies are passed 
+                if (decodedRespCookie.name().equals(sessionCookieName)) {
+                    sessionCookie = decodedRespCookie;
+                    continue;
+                }
+
+                assertTrue(
+                        SessionBagMiddleware.WHITHELISTED_COOKIE_NAMES
+                                .contains(decodedRespCookie.name())
+                                && SessionBagMiddleware.WHITHELISTED_COOKIE_PATHS
+                                        .contains(decodedRespCookie.path()),
+                        String.format("%s: Not whitelisted cookie was passed to user agent '%s'",
+                                errMsg, respCookie));
+            }
+
+            // extract session ID to inspect session content i.e. session bag
             if (sessionId == null || sessionId.get() == null || sessionId.get().isEmpty()) {
-                assertTrue(resp.cookies().size() == 1,
+                assertNotNull(sessionCookie,
                         String.format("%s: No session cookie returned.", errMsg));
-                String sessionCookie = resp.cookies().get(0);
-                String[] cookieParts = sessionCookie.split(";|=");
-                String actualSessionCookieName = cookieParts[0];
-                sessionId.set(cookieParts[1]);
-                assertEquals(sessionCookieName, actualSessionCookieName,
+                sessionId.set(sessionCookie.value());
+                assertEquals(sessionCookieName, sessionCookie.name(),
                         String.format("%s: Wrong cookie name", errMsg));
             }
 
@@ -217,14 +352,13 @@ public class SessionBagMiddlewareTest {
                 assertNotNull(session, "Expected session to be present.");
                 Set<io.netty.handler.codec.http.cookie.Cookie> actualSessionBagCookies =
                         session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
-                assertNotNull(actualSessionBagCookies,
-                        "Expected cookies stored in session bag to not null");
+                assertNotNull(actualSessionBagCookies, "Expected session bag to be present");
                 List<String> actualSessionBagCookiesStr = new ArrayList<String>();
                 for (io.netty.handler.codec.http.cookie.Cookie nettyCookie : actualSessionBagCookies) {
                     Cookie c = new CookieImpl(nettyCookie);
                     actualSessionBagCookiesStr.add(c.encode());
                 }
-                for (Cookie cookie : expectedCookies) {
+                for (Cookie cookie : expectedSessionBagCookies) {
                     assertTrue(actualSessionBagCookiesStr.contains(cookie.encode()),
                             String.format("%s: Expected cookie '%s' was not present in session",
                                     errMsg, cookie.encode()));

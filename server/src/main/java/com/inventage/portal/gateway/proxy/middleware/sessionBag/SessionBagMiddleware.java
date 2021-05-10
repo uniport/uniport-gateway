@@ -32,9 +32,9 @@ public class SessionBagMiddleware implements Middleware {
     // These cookie are allowed to be passed back to the user agent.
     // This is required for keycloak login logic of its SPA (i.e. the keycloak admin UI)
     // https://github.com/keycloak/keycloak/blob/12.0.4/adapters/oidc/js/src/main/resources/login-status-iframe.html#L84
-    private static final List<String> WHITHELISTED_COOKIE_NAMES =
+    public static final List<String> WHITHELISTED_COOKIE_NAMES =
             List.of("KEYCLOAK_SESSION", "KEYCLOAK_SESSION_LEGACY");
-    private static final List<String> WHITHELISTED_COOKIE_PATHS = List.of("/auth/realms/master/");
+    public static final List<String> WHITHELISTED_COOKIE_PATHS = List.of("/auth/realms/master/");
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
@@ -177,6 +177,7 @@ public class SessionBagMiddleware implements Middleware {
             if (WHITHELISTED_COOKIE_NAMES.contains(decodedCookieToSet.name())
                     && WHITHELISTED_COOKIE_PATHS.contains(decodedCookieToSet.path())) {
                 // we delegate all logic for whitelisted cookies to the user agent 
+                LOGGER.debug("handle: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
             }
