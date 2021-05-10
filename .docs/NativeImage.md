@@ -57,3 +57,5 @@ docker-compose -f docker-compose/src/main/resources/docker-compose.yml up
 * [Instant Netty Startup using GraalVM Native Image Generation](https://medium.com/graalvm/instant-netty-startup-using-graalvm-native-image-generation-ed6f14ff7692)
 * [Updates on Class Initialization in GraalVM Native Image Generation](https://medium.com/graalvm/updates-on-class-initialization-in-graalvm-native-image-generation-c61faca461f7)
 * [GraalVM: Native Images in Containers](https://cdn.app.compendium.com/uploads/user/e7c690e8-6ff9-102a-ac6d-e4aebca50425/34d3828b-c12e-4c7e-8942-b6b7deb02e12/File/913f2b04a820c11be614de5b371ad626/graalvm__native_images_in_containers.pdf)
+* [Vert.x native image awesomeness!](https://www.jetdrone.xyz/2018/08/10/Vertx-native-image-10mb.html)
+* [Trust me! SSL works on native images](https://www.jetdrone.xyz/2019/04/16/Full-SSL-Trust-in-Native-Images.html)
