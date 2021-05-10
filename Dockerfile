@@ -4,6 +4,8 @@ RUN gu install native-image
 ENV VERSION=1.2.0
 WORKDIR /workdir
 COPY server/target/server-${VERSION}-SNAPSHOT-fat.jar ./portal-gateway.jar
+
+# https://www.graalvm.org/reference-manual/native-image/Options/#options-to-native-image-builder
 RUN native-image \
     --no-server \
     --no-fallback \
@@ -18,7 +20,6 @@ RUN native-image \
     --initialize-at-run-time=io.netty.util \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
     -H:+ReportExceptionStackTraces \
-    # -H:+ReportUnsupportedElementsAtRuntime \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar 
