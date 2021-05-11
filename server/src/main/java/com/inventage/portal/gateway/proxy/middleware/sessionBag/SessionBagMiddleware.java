@@ -212,7 +212,7 @@ public class SessionBagMiddleware implements Middleware {
             }
         }
 
-        if (newCookie.maxAge() <= 0L) {
+        if (newCookie.maxAge() == 0L) {
             LOGGER.debug("updateSessionBag: Ignoring expired cookie");
             return;
         }

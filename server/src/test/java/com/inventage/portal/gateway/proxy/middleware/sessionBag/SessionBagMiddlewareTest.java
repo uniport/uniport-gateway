@@ -122,7 +122,7 @@ public class SessionBagMiddlewareTest {
     void expiredCookieIsRemoved(Vertx vertx, VertxTestContext testCtx) {
         String errMsg = "'test expired cookie are removed from session bag' failed.";
         Cookie cookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(3600);
-        Cookie expiredCookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(-42);
+        Cookie expiredCookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(0);
         SessionStore sessionStore = LocalSessionStore.create(vertx);
         AtomicBoolean isFirstReq = new AtomicBoolean(true);
         AtomicReference<String> sessionId = new AtomicReference<>();
