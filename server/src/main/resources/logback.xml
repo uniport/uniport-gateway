@@ -1,16 +1,16 @@
 <configuration scan="true">
-    <property name="COMMON_PATTERN" value="%d [%thread] %-5level %X %logger{36} - %msg%n" />
+  <property name="COMMON_PATTERN" value="%d [%thread] %-5level %X %logger{36} - %msg%n" />
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>${COMMON_PATTERN}</pattern>
-        </encoder>
-    </appender>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${COMMON_PATTERN}</pattern>
+    </encoder>
+  </appender>
 
-    <!-- loggers -->
-    <logger name="com.inventage.portal.gateway" level="DEBUG"/>
+  <!-- loggers -->
+  <logger name="com.inventage.portal.gateway" level="DEBUG"/>
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT" />
-    </root>
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
 </configuration>

@@ -9,17 +9,17 @@ import io.vertx.core.json.JsonObject;
 
 public class FileConfigProviderFactory implements ProviderFactory {
 
-    @Override
-    public String provides() {
-        return StaticConfiguration.PROVIDER_FILE;
-    }
+  @Override
+  public String provides() {
+    return StaticConfiguration.PROVIDER_FILE;
+  }
 
-    @Override
-    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
-        String filename = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_FILENAME, "");
-        String directory = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_DIRECTORY, "");
-        Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, false);
-        return new FileConfigProvider(vertx, configurationAddress, filename, directory, watch, env);
-    }
+  @Override
+  public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
+    String filename = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_FILENAME, "");
+    String directory = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_DIRECTORY, "");
+    Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, false);
+    return new FileConfigProvider(vertx, configurationAddress, filename, directory, watch, env);
+  }
 
 }

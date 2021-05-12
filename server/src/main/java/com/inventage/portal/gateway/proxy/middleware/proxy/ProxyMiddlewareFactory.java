@@ -14,20 +14,20 @@ import io.vertx.ext.web.Router;
 
 public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
 
-    private static final String MIDDLEWARE_PROXY = "proxy";
+  private static final String MIDDLEWARE_PROXY = "proxy";
 
-    @Override
-    public String provides() {
-        return MIDDLEWARE_PROXY;
-    }
+  @Override
+  public String provides() {
+    return MIDDLEWARE_PROXY;
+  }
 
-    @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig) {
-        LOGGER.debug("create: Created '{}' middleware successfully", MIDDLEWARE_PROXY);
-        return Future.succeededFuture(
-                new ProxyMiddleware(vertx, serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
-                        serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT)));
-    }
+  @Override
+  public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig) {
+    LOGGER.debug("create: Created '{}' middleware successfully", MIDDLEWARE_PROXY);
+    return Future
+        .succeededFuture(new ProxyMiddleware(vertx, serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
+            serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT)));
+  }
 }
