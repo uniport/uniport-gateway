@@ -163,7 +163,7 @@ Optional, Default: 2s
 
 In some cases, some providers might undergo a sudden burst of changes, which would generate a lot of configuration change events. If all of them are taken into account, more configuration reloads would be triggered than is necessary or even useful.
 
-In order to mitigate that, this option can be set. It is the duration that Traefik waits for, after a configuration reload, before taking into account any new configuration refresh event. If multiple events occur within this time, only the most recent one is taken into account, and all others are discarded.
+In order to mitigate that, this option can be set. It is the duration that Portal-Gateway waits for, after a configuration reload, before taking into account any new configuration refresh event. If multiple events occur within this time, only the most recent one is taken into account, and all others are discarded.
 
 This option cannot be set per provider, but the throttling algorithm applies to each of them independently.
 
@@ -268,8 +268,6 @@ service
 Required, String
 ```
 
-TODO: Session Bag and Proxy
-
 ### 1.3.4. Services
 
 Services are responsible for configuring how to reach the actual services that will eventually handle the oncoming requests.
@@ -297,11 +295,13 @@ Middlewares can be combined in chains to fit every scenario.
 
 ### 1.4.1. Proxy
 
-TODO
+The Proxy is implemented as a middleware but it cannot be dynamically set. It is always the last middleware in the chain and forwards the incoming request to the service.
 
 ### 1.4.2. Session Bag
 
-TODO
+The SessionBag is also implemented as a middleware but cannot be set dynamically. It is always the first middleware in the chain and is responsible for the cookie handling. The user agent in general won't see any cookie but Vert.x session cookie. The SessionBag manages all cookies related to this session. It intercepts responses from services, removes them and stores them. In future requests of the same session, it will then set those cookie again so that the services won't see any difference.
+
+One exception to this rule is the Keycloak session cookie for the Master realm. This is the only cookie, apart from the Vert.x session cookie, that will be passed to the user agent. This is required for some Keycloak login logic.
 
 ### 1.4.3. Headers
 
@@ -359,10 +359,10 @@ Example
 
 ```yaml
 labels:
-  - "traefik.http.middlewares.test-oauth2.oauth2.clientId=testclient"
-  - "traefik.http.middlewares.test-oauth2.oauth2.clientSecret=testsecret"
-  - "traefik.http.middlewares.test-oauth2.oauth2.discoverUrl=https://keycloak.ch/auth/realms/testrealm"
-  - "traefik.http.middlewares.test-oauth2.oauth2.sessionScope=testScope"
+  - "portal.http.middlewares.test-oauth2.oauth2.clientId=testclient"
+  - "portal.http.middlewares.test-oauth2.oauth2.clientSecret=testsecret"
+  - "portal.http.middlewares.test-oauth2.oauth2.discoverUrl=https://keycloak.ch/auth/realms/testrealm"
+  - "portal.http.middlewares.test-oauth2.oauth2.sessionScope=testScope"
 ```
 
 ### 1.4.5. Authorization Bearer
@@ -378,8 +378,10 @@ Required, id|<referencing a session scope defined by a OAuth2 middleware>
 
 Example
 
-```yml
-#TODO
+```yaml
+# sessionScope should be 'id' or reference a sessionScope defined by a OAuth2 middleware
+labels:
+  - "portal.http.middlewares.test-auth-bearer.authorizationBearer.sessionScope=testScope"
 ```
 
 ### 1.4.6. Redirect Regex
@@ -406,8 +408,8 @@ Example
 # Redirect with domain replacement
 # Note: all dollar signs need to be doubled for escaping in a docker-compose.yml.
 labels:
-  - "traefik.http.middlewares.test-redirectregex.redirectregex.regex=^http://localhost/(.*)"
-  - "traefik.http.middlewares.test-redirectregex.redirectregex.replacement=http://mydomain/$${1}"
+  - "portal.http.middlewares.test-redirectregex.redirectregex.regex=^http://localhost/(.*)"
+  - "portal.http.middlewares.test-redirectregex.redirectregex.replacement=http://mydomain/$${1}"
 ```
 
 ### 1.4.7. Replace Path Regex
@@ -435,8 +437,8 @@ Example
 ```yaml
 # Replace path with regex
 labels:
-  - "traefik.http.middlewares.test-replacepathregex.replacepathregex.regex=^/foo/(.*)"
-  - "traefik.http.middlewares.test-replacepathregex.replacepathregex.replacement=/bar/$$1"
+  - "portal.http.middlewares.test-replacepathregex.replacepathregex.regex=^/foo/(.*)"
+  - "portal.http.middlewares.test-replacepathregex.replacepathregex.replacement=/bar/$$1"
 ```
 
 ### 1.4.8. Show session content
@@ -446,7 +448,7 @@ The ShowSessionContent is intended for **development** only. It will show the cu
 Example
 
 ```yaml
-# TODO
+# TODO: currently not configurable by labels
 ```
 
 ## 1.5. Providers
