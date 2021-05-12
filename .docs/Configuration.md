@@ -7,7 +7,7 @@ The Portal-Gateway is a Reverse Proxy (or Edge Router) inspired by [traefik](htt
     - [1.1.1. Static Configuration](#111-static-configuration)
       - [1.1.1.1. Configuration file](#1111-configuration-file)
     - [1.1.2. Dynamic Configuration](#112-dynamic-configuration)
-  - [1.2. Providers](#12-providers)
+  - [1.2. Configuration Discovery](#12-configuration-discovery)
     - [1.2.1. Orchestrators](#121-orchestrators)
     - [1.2.2. Provider Namespaces](#122-provider-namespaces)
     - [1.2.3. Supported Providers](#123-supported-providers)
@@ -15,10 +15,10 @@ The Portal-Gateway is a Reverse Proxy (or Edge Router) inspired by [traefik](htt
         - [1.2.3.1.1. IP/Port Detection](#12311-ipport-detection)
         - [1.2.3.1.2. Docker API Access](#12312-docker-api-access)
         - [1.2.3.1.3. Provider Configuration](#12313-provider-configuration)
-      - [1.2.3.2. [TODO] Kubernetes](#1232-todo-kubernetes)
+      - [1.2.3.2. Kubernetes](#1232-kubernetes)
       - [1.2.3.3. File](#1233-file)
         - [1.2.3.3.1. Provider Configuration](#12331-provider-configuration)
-    - [1.2.4. [TODO] Configuration Reload Frequency](#124-todo-configuration-reload-frequency)
+    - [1.2.4. Configuration Reload Frequency](#124-configuration-reload-frequency)
   - [1.3. Routing](#13-routing)
     - [1.3.1. Entrypoints](#131-entrypoints)
     - [1.3.2. Applications](#132-applications)
@@ -34,6 +34,19 @@ The Portal-Gateway is a Reverse Proxy (or Edge Router) inspired by [traefik](htt
     - [1.4.7. Replace Path Regex](#147-replace-path-regex)
     - [1.4.8. Show session content](#148-show-session-content)
   - [1.5. Providers](#15-providers)
+    - [1.5.1. Docker](#151-docker)
+      - [1.5.1.1. General](#1511-general)
+        - [1.5.1.1.1. Service definition](#15111-service-definition)
+      - [1.5.1.2. Routers](#1512-routers)
+      - [1.5.1.3. Services](#1513-services)
+      - [1.5.1.4. Middleware](#1514-middleware)
+      - [1.5.1.5. Specific Provider Options](#1515-specific-provider-options)
+    - [1.5.2. Kubernetes](#152-kubernetes)
+    - [1.5.3. File](#153-file)
+      - [1.5.3.1. General](#1531-general)
+      - [1.5.3.2. Routers](#1532-routers)
+      - [1.5.3.3. Services](#1533-services)
+      - [1.5.3.4. Middlewares](#1534-middlewares)
 
 ## 1.1. Configurations
 
@@ -46,7 +59,7 @@ The static configuration is known on startup. It specifies entrypoints, applicat
 There are three different, **mutually exclusive** (e.g. you can use only on at the same time), ways to define static configuration in Portal-Gateway:
 
 - In a config file
-- [TODO] With CLI arguments
+- With CLI arguments
 - As envionment variables
 
 These ways are evaluated in the order listed above (a later definition overwrites the previous).
@@ -58,13 +71,13 @@ At startup, Portal-Gateway searches for a file named `portal-gateway.json` in:
 - `PORTAL_GATEWAY_JSON`
 - `/etc/portal-gateway/`
 - `.` (the current working directory)
-- [TODO] defined by the CLI argument `--configFile`
+- defined by the CLI argument `--configFile` (TODO Status: not implemented)
 
 ### 1.1.2. Dynamic Configuration
 
 The dynamic configuration contains everything that defines how the requests are handled by the system. This configuration can change at runtime.
 
-## 1.2. Providers
+## 1.2. Configuration Discovery
 
 Configuration discovery is achieved through Providers. The Portal-Gateway queries the provider APIs in order to find relevant information about routing and when changes are detected, the routes are dynamically updated.
 
@@ -91,7 +104,7 @@ If you use multiple providers and wish to reference such an object declared in a
 Currently supported providers are:
 
 - Docker Containers (published container ports to the host)
-- [TODO] Kubernetes Services
+- Kubernetes Services
 
 #### 1.2.3.1. Docker
 
@@ -132,9 +145,11 @@ The Portal-Gateway requires access to the docker socket to get its dynmica confi
 - `defaultRule` (*Optional, Default="Host('${name}')*): Defines what routing rule to apply to a container if no rule is defined by a label. It must be a valid [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html). The container service name can be accessed with the `name` identifier, and the StringSubstitutor has access to all the labels defined on this container.
 - `watch` (*Optiona, Default=true*): Watch Docker events.
 
-#### 1.2.3.2. [TODO] Kubernetes
+#### 1.2.3.2. Kubernetes
 
-- TODO: endpoints, namespace, token, etc.
+TODO Status: not implemented
+
+endpoints, namespace, token, etc.
 
 #### 1.2.3.3. File
 
@@ -152,9 +167,9 @@ It supports providing configuration throught single configuration file or multip
 
 **Note**: The ``filename`` and ``directory`` are mutually exlusive.
 
-### 1.2.4. [TODO] Configuration Reload Frequency
+### 1.2.4. Configuration Reload Frequency
 
-Status: Functionality exists, but not yet configurable (default applies).
+TODO Status: Functionality exists, but not yet configurable (default applies).
 
 ```
 providers.providersThrottleDuration
@@ -203,7 +218,7 @@ entrypoint
 Required, String,
 ```
 
-TODO: Path the application is listen on
+Path the application is listen on (TODO Status: not implemented, default is `/`)
 
 ```
 requestSelector.urlPrefix
@@ -416,8 +431,6 @@ labels:
 
 The ReplacePathRegex replaces the path of an URL using regex matching and replacement.
 
-TODO: The ReplacePathRegex will store the original path in a `X-Replaced-Path` header.
-
 The regex option is the regular expression to match and capture the path from the request URL.
 
 ```
@@ -453,4 +466,102 @@ Example
 
 ## 1.5. Providers
 
-TODO
+### 1.5.1. Docker
+
+#### 1.5.1.1. General
+
+Portal-Gateway creates, for each container, a corresponding service and router.
+
+The service automatically gets a server per instance of the container and the router automatically gets a rule defined by `defaultRule` (if no rule for it was defined in labels).
+
+##### 1.5.1.1.1. Service definition
+
+In general when configuring a service assigned to one (or serveral) router(s) must be defined as well. There are execpetion when using label-based configurations:
+
+* If a label defines a router (e.g. thorugh a router rule) and a labels defines a service (e.g. though a server port), but the router does not specify any service, then that service is automatically assigned to the router.
+* If a labels defines router (e.g. through a router rule) but no service is defined, then a service is automatically created and assigned to the router.
+
+#### 1.5.1.2. Routers
+
+To update the configuration of the Router automatically attached to the container, add labels starting with `portal.http.routers.<name-of-your-router>.`, followed by the option you want to change. Available options are `rule`, `priority`, `entrypoints`, `middlewares` and `service`
+
+For example to change the rule, you could add the label `portal.http.routers.test-router.rule=Host('example.com')`.
+
+#### 1.5.1.3. Services
+
+To update the configuration of the Service automatically attached to the container, add labels starting with `portal.http.services.<name-of-your-service>.`, followed by the option you want to change. Available options are `server.host` and `server.port`.
+
+#### 1.5.1.4. Middleware
+
+You can declare middlewares using labels starting with `portal.http.middlewares.<name-of-your-middleware>.`, followed by the middleware type/options. See the dedicated middleware section for examples and detailed explanation.
+
+#### 1.5.1.5. Specific Provider Options
+
+```yaml
+labels:
+  - "portal.enable=true"
+```
+
+You can tell Portal-Gateway to consider (or not) the container by setting `portal.enable` to true or false. This options overwrites the value of `exposedByDefault`.
+
+```yaml
+labels:
+  - "portal.docker.network=test-network"
+```
+
+Overrides the default docker network to use for connections to the container. If a container is linked to several networks, be sure to set the proper network name, otherwise the container will be ignored.
+
+### 1.5.2. Kubernetes
+
+TODO Status: not implemented
+
+### 1.5.3. File
+
+#### 1.5.3.1. General
+
+The good old configuration file. This is the least magical way to configure Portal-Gateway. Here is nothing done automatically and you have to define everything on your own.
+
+The basic structure of the configuration file is
+
+```json
+{
+  "http": {
+    "routers": [],
+    "middlewares": [],
+    "services": []
+  }
+}
+```
+
+#### 1.5.3.2. Routers
+
+```json
+{
+  "name": "testRouter",
+  "middlewares": ["md1", "md2", "md3"],
+  "rule": "Path('/')",
+  "priority": 42,
+  "service": "testService"
+}
+```
+
+#### 1.5.3.3. Services
+
+```json
+{
+  "name": "testService",
+  "servers": [
+    {"host": "example.com", "port": 4242}
+  ]
+}
+```
+
+#### 1.5.3.4. Middlewares
+
+```json
+{
+  "name": "testMiddleware",
+  "type": "authorizationBearer",
+  "options": { "sessionScope": "testScope" }
+}
+```
