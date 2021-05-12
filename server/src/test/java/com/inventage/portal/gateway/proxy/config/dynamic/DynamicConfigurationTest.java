@@ -360,9 +360,7 @@ public class DynamicConfigurationTest {
         Arguments.of("accept single router with all properties", singleCompleteHttpRouter, incomplete, expectedTrue),
         Arguments.of("reject single router with unknown key", unkownKeyHttpRouter, incomplete, expectedFalse),
         Arguments.of("accept two minimal routers", doubleMinimalHttpRouters, incomplete, expectedTrue),
-        // TODO disallow duplicated routers (?)
-        // Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete,
-        //         expectedFalse),
+        Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete, expectedFalse),
         Arguments.of("reject minimal and empty routers", minimalAndEmptyHttpRouters, incomplete, expectedFalse),
 
         // middlewares
@@ -392,9 +390,7 @@ public class DynamicConfigurationTest {
 
         Arguments.of("reject unkown key middleware", unkownKeyHttpMiddleware, complete, expectedFalse),
         Arguments.of("accept two valid middelwares", doubleHttpMiddlewares, complete, expectedTrue),
-        // TODO disallow duplicated middlewares (?)
-        // Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete,
-        //         expectedFalse),
+        Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete, expectedFalse),
         Arguments.of("reject complete and empty middlewares", completeAndEmptyHttpMiddlewares, complete, expectedFalse),
 
         // services
@@ -413,9 +409,7 @@ public class DynamicConfigurationTest {
             expectedTrue),
         Arguments.of("reject single service with unkown key", unkownKeyHttpService, complete, expectedFalse),
         Arguments.of("accept two valid services", doubleHttpServices, complete, expectedTrue),
-        // TODO disallow duplicated services (?)
-        // Arguments.of("reject duplicated services", duplicatedHttpServices, complete,
-        //         expectedFalse),
+        Arguments.of("reject duplicated services", duplicatedHttpServices, complete, expectedFalse),
         Arguments.of("reject complete and empty services", completeAndEmptyHttpServices, complete, expectedFalse),
 
         // routers (complete)

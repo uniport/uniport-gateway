@@ -308,6 +308,18 @@ public class DynamicConfiguration {
       return Future.succeededFuture();
     }
 
+    Set<String> routerNames = new HashSet<>();
+    for (int i = 0; i < routers.size(); i++) {
+      JsonObject router = routers.getJsonObject(i);
+      String routerName = router.getString(ROUTER_NAME);
+      if (routerNames.contains(routerName)) {
+        String errMsg = String.format("validateRouters: duplicated router name '%s'. Should be unique.", routerName);
+        LOGGER.warn(errMsg);
+        return Future.failedFuture(errMsg);
+      }
+      routerNames.add(routerName);
+    }
+
     if (!complete) {
       return Future.succeededFuture();
     }
@@ -349,7 +361,7 @@ public class DynamicConfiguration {
     for (String svName : routerServiceNames) {
       if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
         String errMsg = String.format("validateRouters: unknown service '%s' defined", svName);
-        LOGGER.warn(errMsg, svName);
+        LOGGER.warn(errMsg);
         return Future.failedFuture(errMsg);
       }
     }
@@ -364,10 +376,20 @@ public class DynamicConfiguration {
       return Future.succeededFuture();
     }
 
+    Set<String> mwNames = new HashSet<>();
     for (int i = 0; i < mws.size(); i++) {
       JsonObject mw = mws.getJsonObject(i);
+      String mwName = mw.getString(MIDDLEWARE_NAME);
       String mwType = mw.getString(MIDDLEWARE_TYPE);
       JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS);
+
+      if (mwNames.contains(mwName)) {
+        String errMsg = String.format("validateMiddlewares: duplicated middleware name '%s'. Should be unique.",
+            mwName);
+        LOGGER.warn(errMsg);
+        return Future.failedFuture(errMsg);
+      }
+      mwNames.add(mwName);
 
       Boolean valid = true;
       String errMsg = "";
@@ -518,8 +540,17 @@ public class DynamicConfiguration {
       return Future.succeededFuture();
     }
 
+    Set<String> svNames = new HashSet<>();
     for (int i = 0; i < svs.size(); i++) {
       JsonObject sv = svs.getJsonObject(i);
+      String svName = sv.getString(SERVICE_NAME);
+      if (svNames.contains(svName)) {
+        String errMsg = String.format("validateServices: duplicated service name '%s'. Should be unique.", svName);
+        LOGGER.warn(errMsg);
+        return Future.failedFuture(errMsg);
+      }
+      svNames.add(svName);
+
       JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
       if (servers == null || servers.size() == 0) {
         String errorMsg = "validateServices: no servers defined";
