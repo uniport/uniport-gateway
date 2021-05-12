@@ -15,33 +15,33 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class ReplacePathRegexMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacePathRegexMiddleware.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplacePathRegexMiddleware.class);
 
-    private final Pattern pattern;
-    private final String replacement;
+  private final Pattern pattern;
+  private final String replacement;
 
-    public ReplacePathRegexMiddleware(String regex, String replacement) {
-        this.pattern = Pattern.compile(regex);
-        this.replacement = replacement;
+  public ReplacePathRegexMiddleware(String regex, String replacement) {
+    this.pattern = Pattern.compile(regex);
+    this.replacement = replacement;
+  }
+
+  @Override
+  public void handle(RoutingContext ctx) {
+    Handler<StringBuilder> reqUriModifier = uri -> {
+      uri.replace(0, uri.length(), apply(uri.toString()));
+    };
+    this.addModifier(ctx, reqUriModifier, Middleware.REQUEST_URI_MODIFIERS);
+
+    ctx.next();
+  }
+
+  String apply(String uri) {
+    if (!this.pattern.matcher(uri).matches()) {
+      LOGGER.debug("apply: Skipping path replacement of non matching URI '{}'", uri);
     }
+    String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
 
-    @Override
-    public void handle(RoutingContext ctx) {
-        Handler<StringBuilder> reqUriModifier = uri -> {
-            uri.replace(0, uri.length(), apply(uri.toString()));
-        };
-        this.addModifier(ctx, reqUriModifier, Middleware.REQUEST_URI_MODIFIERS);
-
-        ctx.next();
-    }
-
-    String apply(String uri) {
-        if (!this.pattern.matcher(uri).matches()) {
-            LOGGER.debug("apply: Skipping path replacement of non matching URI '{}'", uri);
-        }
-        String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
-
-        LOGGER.debug("apply: replace path '{}' with '{}", uri, newURI);
-        return newURI;
-    }
+    LOGGER.debug("apply: replace path '{}' with '{}", uri, newURI);
+    return newURI;
+  }
 }

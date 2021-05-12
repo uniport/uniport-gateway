@@ -11,18 +11,16 @@ import io.vertx.ext.web.Router;
 
 public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
 
-        @Override
-        public String provides() {
-                return DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX;
-        }
+  @Override
+  public String provides() {
+    return DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX;
+  }
 
-        @Override
-        public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-                LOGGER.debug("create: Created '{}' middleware successfully",
-                                DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX);
-                return Future.succeededFuture(new ReplacePathRegexMiddleware(
-                                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX),
-                                middlewareConfig.getString(
-                                                DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT)));
-        }
+  @Override
+  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+    LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX);
+    return Future.succeededFuture(new ReplacePathRegexMiddleware(
+        middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX),
+        middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT)));
+  }
 }

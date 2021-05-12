@@ -17,36 +17,36 @@ import io.vertx.httpproxy.HttpProxy;
  */
 public class ProxyMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
 
-    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+  private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
 
-    private HttpProxy httpProxy;
+  private HttpProxy httpProxy;
 
-    private String serverHost;
+  private String serverHost;
 
-    private int serverPort;
+  private int serverPort;
 
-    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
-        this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
-        this.httpProxy.target(serverPort, serverHost);
-        this.serverHost = serverHost;
-        this.serverPort = serverPort;
+  public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
+    this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
+    this.httpProxy.target(serverPort, serverHost);
+    this.serverHost = serverHost;
+    this.serverPort = serverPort;
+  }
+
+  @Override
+  public void handle(RoutingContext ctx) {
+    if (!ctx.request().headers().contains(X_FORWARDED_HOST)) {
+      ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
     }
 
-    @Override
-    public void handle(RoutingContext ctx) {
-        if (!ctx.request().headers().contains(X_FORWARDED_HOST)) {
-            ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
-        }
+    // Some manipulations are
+    // * not allowed by Vertx-Web
+    // * or have to be made on the response of the forwarded request
+    HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
 
-        // Some manipulations are 
-        // * not allowed by Vertx-Web 
-        // * or have to be made on the response of the forwarded request
-        HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
-
-        LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
-        httpProxy.handle(request);
-    }
+    LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
+    httpProxy.handle(request);
+  }
 
 }

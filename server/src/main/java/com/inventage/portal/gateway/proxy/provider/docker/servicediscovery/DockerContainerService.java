@@ -36,70 +36,70 @@ import io.vertx.servicediscovery.Record;
  */
 public class DockerContainerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerService.class.getName());
+  private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerService.class.getName());
 
-    private final String name;
-    private String containerId;
+  private final String name;
+  private String containerId;
 
-    private List<String> containerNames;
+  private List<String> containerNames;
 
-    private Record record;
+  private Record record;
 
-    public DockerContainerService(Container container) {
-        containerId = container.getId();
-        containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
-        if (!containerNames.isEmpty()) {
-            name = containerNames.get(0);
-        } else {
-            name = containerId;
-        }
-
-        record = createRecord(container);
+  public DockerContainerService(Container container) {
+    containerId = container.getId();
+    containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
+    if (!containerNames.isEmpty()) {
+      name = containerNames.get(0);
+    } else {
+      name = containerId;
     }
 
-    public Record record() {
-        return record;
+    record = createRecord(container);
+  }
+
+  public Record record() {
+    return record;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public String id() {
+    return containerId;
+  }
+
+  private Record createRecord(Container container) {
+    Record record = new Record().setName(name);
+
+    Map<String, String> labels = container.getLabels();
+    if (labels != null) {
+      for (Map.Entry<String, String> entry : labels.entrySet()) {
+        record.getMetadata().put(entry.getKey(), entry.getValue());
+      }
     }
 
-    public String name() {
-        return name;
+    JsonArray names = new JsonArray();
+    containerNames.forEach(names::add);
+    record.getMetadata().put("docker.names", names);
+    record.getMetadata().put("docker.name", name);
+    record.getMetadata().put("docker.id", containerId);
+
+    JsonArray ports = new JsonArray();
+    for (ContainerPort port : container.getPorts()) {
+      ports.add(port.getPrivatePort());
+    }
+    record.getMetadata().put("docker.ports", ports);
+
+    JsonObject hostPerNetwork = new JsonObject();
+    hostPerNetwork.put("defaultNetworkMode", container.getHostConfig().getNetworkMode());
+    for (Entry<String, ContainerNetwork> entry : container.getNetworkSettings().getNetworks().entrySet()) {
+      hostPerNetwork.put(entry.getKey(), entry.getValue().getIpAddress());
     }
 
-    public String id() {
-        return containerId;
-    }
+    record.getMetadata().put("docker.hostPerNetwork", hostPerNetwork);
 
-    private Record createRecord(Container container) {
-        Record record = new Record().setName(name);
-
-        Map<String, String> labels = container.getLabels();
-        if (labels != null) {
-            for (Map.Entry<String, String> entry : labels.entrySet()) {
-                record.getMetadata().put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        JsonArray names = new JsonArray();
-        containerNames.forEach(names::add);
-        record.getMetadata().put("docker.names", names);
-        record.getMetadata().put("docker.name", name);
-        record.getMetadata().put("docker.id", containerId);
-
-        JsonArray ports = new JsonArray();
-        for (ContainerPort port : container.getPorts()) {
-            ports.add(port.getPrivatePort());
-        }
-        record.getMetadata().put("docker.ports", ports);
-
-        JsonObject hostPerNetwork = new JsonObject();
-        hostPerNetwork.put("defaultNetworkMode", container.getHostConfig().getNetworkMode());
-        for (Entry<String, ContainerNetwork> entry : container.getNetworkSettings().getNetworks().entrySet()) {
-            hostPerNetwork.put(entry.getKey(), entry.getValue().getIpAddress());
-        }
-
-        record.getMetadata().put("docker.hostPerNetwork", hostPerNetwork);
-
-        // NOTE: record location is not set
-        return record;
-    }
+    // NOTE: record location is not set
+    return record;
+  }
 }

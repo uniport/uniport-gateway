@@ -1,22 +1,22 @@
 <settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd"
-    xmlns="http://maven.apache.org/SETTINGS/1.1.0">
-    <servers>
-        <server>
-            <id>inventage-projectware</id>
-            <username>${env.NEXUS2_CREDS_USR}</username>
-            <password>${env.NEXUS2_CREDS_PSW}</password>
-        </server>
-        <server>
-            <id>docker-registry.inventage.com:10000</id>
-            <username>${env.CI_REGISTRY_CREDS_USR}</username>
-            <password>${env.CI_REGISTRY_CREDS_PSW}</password>
-        </server>
-        <server>
-            <id>${env.DOCKER_PUSH_REGISTRY}</id>
-            <username>${env.CI_REGISTRY_CREDS_USR}</username>
-            <password>${env.CI_REGISTRY_CREDS_PSW}</password>
-        </server>
-    </servers>
-    <interactiveMode>false</interactiveMode>
+  xmlns="http://maven.apache.org/SETTINGS/1.1.0">
+  <servers>
+    <server>
+      <id>inventage-projectware</id>
+      <username>${env.NEXUS2_CREDS_USR}</username>
+      <password>${env.NEXUS2_CREDS_PSW}</password>
+    </server>
+    <server>
+      <id>docker-registry.inventage.com:10000</id>
+      <username>${env.CI_REGISTRY_CREDS_USR}</username>
+      <password>${env.CI_REGISTRY_CREDS_PSW}</password>
+    </server>
+    <server>
+      <id>${env.DOCKER_PUSH_REGISTRY}</id>
+      <username>${env.CI_REGISTRY_CREDS_USR}</username>
+      <password>${env.CI_REGISTRY_CREDS_PSW}</password>
+    </server>
+  </servers>
+  <interactiveMode>false</interactiveMode>
 
 </settings>

@@ -18,23 +18,22 @@ import io.vertx.ext.web.Router;
  */
 public interface MiddlewareFactory {
 
-    final Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
+  final Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
-    String provides();
+  String provides();
 
-    Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig);
+  Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig);
 
-    class Loader {
-        public static MiddlewareFactory getFactory(String middlewareName) {
-            LOGGER.debug("getFactory: middleware factory for '{}'", middlewareName);
-            final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()
-                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(middlewareName))
-                    .findFirst();
-            if (middleware.isPresent()) {
-                return middleware.get();
-            }
-            return null;
-        }
+  class Loader {
+    public static MiddlewareFactory getFactory(String middlewareName) {
+      LOGGER.debug("getFactory: middleware factory for '{}'", middlewareName);
+      final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()
+          .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(middlewareName)).findFirst();
+      if (middleware.isPresent()) {
+        return middleware.get();
+      }
+      return null;
     }
+  }
 
 }
