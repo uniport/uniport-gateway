@@ -1,9 +1,12 @@
 package com.inventage.portal.gateway.proxy.config;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.inventage.portal.gateway.proxy.provider.Provider;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -11,6 +14,10 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 
 public class MockProvider extends Provider {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MockProvider.class);
+
+  private Vertx vertx;
   private EventBus eb;
   private String configurationAddress;
 
@@ -22,10 +29,16 @@ public class MockProvider extends Provider {
   }
 
   public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages, long waitMs) {
+    this.vertx = vertx;
     this.eb = vertx.eventBus();
     this.configurationAddress = configurationAddress;
     this.messages = messages;
-    this.waitMs = waitMs;
+
+    if (waitMs == 0) {
+      this.waitMs = 20;
+    } else {
+      this.waitMs = waitMs;
+    }
   }
 
   public void start(Promise<Void> startPromise) {
@@ -34,23 +47,21 @@ public class MockProvider extends Provider {
 
   @Override
   public void provide(Promise<Void> startPromise) {
-    for (int i = 0; i < this.messages.size(); i++) {
-      JsonObject message = this.messages.get(i);
+    if (this.messages.isEmpty()) {
+      startPromise.complete();
+      return;
+    }
 
+    AtomicInteger count = new AtomicInteger(0);
+    this.vertx.setPeriodic(this.waitMs, timerID -> {
+      JsonObject message = this.messages.get(count.get());
       this.eb.publish(this.configurationAddress, message);
 
-      long waitMs = this.waitMs;
-      if (waitMs == 0) {
-        waitMs = 20;
+      if (count.incrementAndGet() == this.messages.size()) {
+        this.vertx.cancelTimer(timerID);
       }
-
-      System.out.printf("Wait %s %s\n", waitMs, System.currentTimeMillis());
-      try {
-        TimeUnit.MILLISECONDS.sleep(waitMs);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
+      LOGGER.debug("provide: Wait before sending next message");
+    });
     startPromise.complete();
   }
 
