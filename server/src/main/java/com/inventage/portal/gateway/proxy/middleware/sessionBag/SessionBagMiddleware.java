@@ -46,6 +46,12 @@ public class SessionBagMiddleware implements Middleware {
   @Override
   public void handle(RoutingContext ctx) {
 
+    if (ctx.session() == null) {
+      LOGGER.warn("handle: no session initialized. Skipping session bag middleware");
+      ctx.next();
+      return;
+    }
+
     // on request: set cookie from session bag if present
     String cookies = loadCookiesFromSessionBag(ctx);
     if (cookies != null && !cookies.isEmpty()) {
@@ -118,7 +124,7 @@ public class SessionBagMiddleware implements Middleware {
    output %x2F ("/") and skip the remaining step.
    4.  Output the characters of the uri-path from the first character up
    to, but not including, the right-most %x2F ("/").
-  
+
   A request-path path-matches a given cookie-path if at least one of
    the following conditions holds:
    -  The cookie-path and the request-path are identical.
@@ -127,7 +133,7 @@ public class SessionBagMiddleware implements Middleware {
    -  The cookie-path is a prefix of the request-path, and the first
   character of the request-path that is not included in the cookie-
   path is a %x2F ("/") character.
-  
+
   https://tools.ietf.org/html/rfc6265#section-5.1.4
   */
   private boolean matchesPath(Cookie cookie, String uriPath) {
