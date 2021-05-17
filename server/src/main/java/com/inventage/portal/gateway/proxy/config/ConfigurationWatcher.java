@@ -136,36 +136,45 @@ public class ConfigurationWatcher extends AbstractVerticle {
   // Note that in the case it receives N new configs in the timeframe of the throttle duration
   // after publishing, it will publish the last of the newly received configurations.
   private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
-    Queue<JsonObject> ring = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
-
-    this.vertx.setPeriodic(throttleMs, timerID -> {
-      JsonObject nextConfig = ring.poll();
-      if (nextConfig == null) {
-        return;
-      }
-      LOGGER.info("throttleProviderConfigReload: publishing configuration");
-      this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
-    });
+    Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
+    Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
     MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
-    consumer.handler(message -> onConfigReload(message, ring));
+    consumer.handler(message -> onConfigReload(message, throttleMs, nextConfigRing, prevConfigRing));
   }
 
   // handler for address: <provider> (e.g. file)
-  private void onConfigReload(Message<JsonObject> message, Queue<JsonObject> ring) {
+  private void onConfigReload(Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
+      Queue<JsonObject> prevConfigRing) {
     JsonObject nextConfig = message.body();
-    JsonObject previousConfig = ring.peek();
-    if (previousConfig == null) {
-      ring.offer(nextConfig.copy());
+    if (prevConfigRing.isEmpty()) {
+      LOGGER.debug("onConfigReload: publishing initial configuration immediately");
+      prevConfigRing.add(nextConfig.copy());
+      nextConfigRing.add(nextConfig.copy());
+      publishConfiguration(nextConfigRing);
+      this.vertx.setPeriodic(throttleMs, timerID -> {
+        publishConfiguration(nextConfigRing);
+      });
       return;
     }
 
-    if (previousConfig.equals(nextConfig)) {
+    LOGGER.debug("onConfigReload: received new config for throttling");
+    if (prevConfigRing.peek().equals(nextConfig)) {
       LOGGER.info("onConfigReload: skipping same configuration");
       return;
     }
 
-    ring.offer(nextConfig.copy());
+    prevConfigRing.add(nextConfig.copy());
+    nextConfigRing.add(nextConfig.copy());
+  }
+
+  private void publishConfiguration(Queue<JsonObject> nextConfigRing) {
+    JsonObject nextConfig = nextConfigRing.poll();
+    if (nextConfig == null) {
+      return;
+    }
+    LOGGER.info("publishConfiguration: publishing configuration");
+    this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
   }
 
   private void listenConfigurations() {
