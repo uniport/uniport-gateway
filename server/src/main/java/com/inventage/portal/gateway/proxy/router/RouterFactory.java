@@ -47,8 +47,6 @@ public class RouterFactory {
 
   private Vertx vertx;
   private String publicUrl;
-  private String publicHostname;
-  private String entrypointPort;
 
   public RouterFactory(Vertx vertx, String publicUrl) {
     this.vertx = vertx;
@@ -224,26 +222,26 @@ public class RouterFactory {
     RoutingRule routingRule;
     String ruleValue = m.group("ruleValue");
     switch (m.group("ruleName")) {
-    case "Path": {
-      routingRule = path(vertx, ruleValue);
-      break;
-    }
-    case "PathPrefix": {
-      // append * to do path prefix routing
-      String pathPrefix = ruleValue;
-      pathPrefix += "*";
+      case "Path": {
+        routingRule = path(vertx, ruleValue);
+        break;
+      }
+      case "PathPrefix": {
+        // append * to do path prefix routing
+        String pathPrefix = ruleValue;
+        pathPrefix += "*";
 
-      routingRule = pathPrefix(vertx, pathPrefix);
-      break;
-    }
-    case "Host": {
-      routingRule = host(vertx, ruleValue);
-      break;
-    }
-    default: {
-      routingRule = null;
-      break;
-    }
+        routingRule = pathPrefix(vertx, pathPrefix);
+        break;
+      }
+      case "Host": {
+        routingRule = host(vertx, ruleValue);
+        break;
+      }
+      default: {
+        routingRule = null;
+        break;
+      }
     }
     return routingRule;
   }
