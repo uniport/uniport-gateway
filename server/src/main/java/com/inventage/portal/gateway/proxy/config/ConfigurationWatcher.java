@@ -17,7 +17,8 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Future;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
@@ -29,7 +30,7 @@ import io.vertx.core.json.JsonObject;
  * It listens to incoming dynamic configurations. Upon passing several checks is passed to all
  * registered listeners. A namespace per provider exists to avoid clashes.
  */
-public class ConfigurationWatcher {
+public class ConfigurationWatcher extends AbstractVerticle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationWatcher.class);
 
@@ -65,10 +66,15 @@ public class ConfigurationWatcher {
     this.providerConfigReloadThrottler = new HashSet<>();
   }
 
-  public Future<String> start() {
+  public void start(Promise<Void> startPromise) {
     listenProviders();
     listenConfigurations();
-    return this.vertx.deployVerticle(this.provider);
+
+    this.vertx.deployVerticle(this.provider).onComplete(ar -> {
+      startPromise.complete();
+    }).onFailure(err -> {
+      startPromise.fail(err);
+    });
   }
 
   public void addListener(Listener listener) {
