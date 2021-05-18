@@ -63,8 +63,7 @@ public class ConfigurationWatcherTest {
       }
     });
 
-    vertx.deployVerticle(watcher)
-        .onFailure(err -> testCtx.verify(() -> assertTrue(false, String.format("%s: %s", errMsg, err.getMessage()))));
+    vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
   }
 
   @Test
@@ -95,8 +94,7 @@ public class ConfigurationWatcherTest {
       }
     });
 
-    vertx.deployVerticle(watcher)
-        .onFailure(err -> testCtx.verify(() -> assertTrue(false, String.format("%s: %s", errMsg, err.getMessage()))));
+    vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
     // give some time so that the configuration can be processed
     vertx.setTimer(10000, timerID -> {
@@ -130,8 +128,7 @@ public class ConfigurationWatcherTest {
       }
     });
 
-    vertx.deployVerticle(watcher)
-        .onFailure(err -> testCtx.verify(() -> assertTrue(false, String.format("%s: %s", errMsg, err.getMessage()))));
+    vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
     vertx.setTimer(2000, timerID -> {
       testCtx.completeNow();
@@ -169,8 +166,7 @@ public class ConfigurationWatcherTest {
       }
     });
 
-    vertx.deployVerticle(watcher)
-        .onFailure(err -> testCtx.verify(() -> assertTrue(false, String.format("%s: %s", errMsg, err.getMessage()))));
+    vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
     vertx.setTimer(2000, timerID -> {
       testCtx.completeNow();
@@ -203,8 +199,7 @@ public class ConfigurationWatcherTest {
       }
     });
 
-    vertx.deployVerticle(watcher)
-        .onFailure(err -> testCtx.verify(() -> assertTrue(false, String.format("%s: %s", errMsg, err.getMessage()))));
+    vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
     vertx.setTimer(2000, timerID -> {
       JsonObject expected = TestUtils.buildConfiguration(TestUtils.withRouters(
@@ -253,8 +248,7 @@ public class ConfigurationWatcherTest {
       }
     });
 
-    vertx.deployVerticle(watcher)
-        .onFailure(err -> testCtx.verify(() -> assertTrue(false, String.format("%s: %s", errMsg, err.getMessage()))));
+    vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
     vertx.setTimer(2000, timerID -> {
       testCtx.verify(() -> assertEquals(2, publishedConfigCount.get()));

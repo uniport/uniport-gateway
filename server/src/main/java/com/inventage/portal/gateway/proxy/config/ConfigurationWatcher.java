@@ -40,6 +40,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
   private EventBus eventBus;
 
+  private long timer;
+
   private Provider provider;
 
   private String configurationAddress;
@@ -66,6 +68,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     this.providerConfigReloadThrottler = new HashSet<>();
   }
 
+  @Override
   public void start(Promise<Void> startPromise) {
     listenProviders();
     listenConfigurations();
@@ -75,6 +78,12 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }).onFailure(err -> {
       startPromise.fail(err);
     });
+  }
+
+  @Override
+  public void stop(Promise<Void> stopPromise) {
+    this.vertx.cancelTimer(timer);
+    stopPromise.complete();
   }
 
   public void addListener(Listener listener) {
@@ -152,7 +161,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
       prevConfigRing.add(nextConfig.copy());
       nextConfigRing.add(nextConfig.copy());
       publishConfiguration(nextConfigRing);
-      this.vertx.setPeriodic(throttleMs, timerID -> {
+      timer = this.vertx.setPeriodic(throttleMs, timerID -> {
         publishConfiguration(nextConfigRing);
       });
       return;
