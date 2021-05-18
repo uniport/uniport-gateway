@@ -1,0 +1,30 @@
+{
+  "http": {
+    "routers": [
+      {
+        "name": "router3",
+        "service": "application-3"
+      }
+    ],
+    "services": [
+      {
+        "name": "application-1",
+        "servers": [
+          {
+            "host": "http://172.17.0.1",
+            "port": "80"
+          }
+        ]
+      },
+      {
+        "name": "application-2",
+        "servers": [
+          {
+            "host": "http://172.17.0.2",
+            "port": "80"
+          }
+        ]
+      }
+    ]
+  }
+}

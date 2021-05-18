@@ -1,0 +1,30 @@
+{
+  "http": {
+    "routers": [
+      {
+        "name": "router1",
+        "service": "application-1"
+      }
+    ],
+    "services": [
+      {
+        "name": "application-1",
+        "servers": [
+          {
+            "host": "${test.host}",
+            "port": "${test.port.string}"
+          }
+        ]
+      },
+      {
+        "name": "application-2",
+        "servers": [
+          {
+            "host": "${test.host}",
+            "port": "${test.port.number}"
+          }
+        ]
+      }
+    ]
+  }
+}
