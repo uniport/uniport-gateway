@@ -40,7 +40,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
   private EventBus eventBus;
 
-  private long timer;
+  private long timerId;
 
   private Provider provider;
 
@@ -82,7 +82,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
   @Override
   public void stop(Promise<Void> stopPromise) {
-    this.vertx.cancelTimer(timer);
+    this.vertx.cancelTimer(this.timerId);
     stopPromise.complete();
   }
 
@@ -161,7 +161,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
       prevConfigRing.add(nextConfig.copy());
       nextConfigRing.add(nextConfig.copy());
       publishConfiguration(nextConfigRing);
-      timer = this.vertx.setPeriodic(throttleMs, timerID -> {
+      this.timerId = this.vertx.setPeriodic(throttleMs, tId -> {
         publishConfiguration(nextConfigRing);
       });
       return;

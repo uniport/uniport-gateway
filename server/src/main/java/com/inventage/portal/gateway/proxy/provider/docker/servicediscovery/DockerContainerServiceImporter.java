@@ -47,7 +47,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
 
   private final static Logger LOGGER = LoggerFactory.getLogger(DockerContainerServiceImporter.class);
 
-  private long timer;
+  private long timerId;
   private DockerClient client;
 
   private List<DockerContainerService> services = new ArrayList<>();
@@ -124,7 +124,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
 
     long period = configuration.getLong("scan-period", 3000L);
     if (period > 0) {
-      timer = vertx.setPeriodic(period, l -> {
+      this.timerId = vertx.setPeriodic(period, tId -> {
         scan(null);
       });
     }
@@ -218,7 +218,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
 
   @Override
   public void close(Handler<Void> completionHandler) {
-    vertx.cancelTimer(timer);
+    vertx.cancelTimer(timerId);
     try {
       started = false;
       client.close();

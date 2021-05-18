@@ -52,7 +52,7 @@ public class MockServiceImporter implements ServiceImporter {
     this.publisher = publisher;
 
     if (this.scanPeriodMs > 0) {
-      timerId = vertx.setPeriodic(this.scanPeriodMs, l -> {
+      this.timerId = vertx.setPeriodic(this.scanPeriodMs, tId -> {
         scan(null);
       });
     }

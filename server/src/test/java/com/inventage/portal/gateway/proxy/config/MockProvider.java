@@ -24,6 +24,8 @@ public class MockProvider extends Provider {
   private List<JsonObject> messages;
   private long waitMs;
 
+  private long timerId;
+
   public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages) {
     this(vertx, configurationAddress, messages, 0);
   }
@@ -41,8 +43,15 @@ public class MockProvider extends Provider {
     }
   }
 
+  @Override
   public void start(Promise<Void> startPromise) {
     provide(startPromise);
+  }
+
+  @Override
+  public void stop(Promise<Void> stopPromise) {
+    vertx.cancelTimer(this.timerId);
+    stopPromise.complete();
   }
 
   @Override
@@ -53,12 +62,12 @@ public class MockProvider extends Provider {
     }
 
     AtomicInteger count = new AtomicInteger(0);
-    this.vertx.setPeriodic(this.waitMs, timerID -> {
+    this.timerId = this.vertx.setPeriodic(this.waitMs, tId -> {
       JsonObject message = this.messages.get(count.get());
       this.eb.publish(this.configurationAddress, message);
 
       if (count.incrementAndGet() == this.messages.size()) {
-        this.vertx.cancelTimer(timerID);
+        this.vertx.cancelTimer(tId);
       }
       LOGGER.debug("provide: Wait before sending next message");
     });
