@@ -9,7 +9,6 @@ import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.label.Parser;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.DockerContainerServiceImporter;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
@@ -23,6 +22,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 
 /**
  * Generates a complete dynamic configuration from announcements about created/removed docker
@@ -42,32 +42,36 @@ public class DockerContainerProvider extends Provider {
   private EventBus eb;
   private String configurationAddress;
 
+  private ServiceImporter serviceImporter;
   private ServiceDiscovery dockerDiscovery;
+  private JsonObject serviceImporterConfiguration;
 
-  private String endpoint;
   private Boolean exposedByDefault;
   private String network;
   private String defaultRule;
   private Boolean watch;
-  private Boolean TLS;
 
   private Map<String, JsonObject> configurations = new HashMap<String, JsonObject>();
 
-  public DockerContainerProvider(Vertx vertx, String configurationAddress, String endpoint, Boolean exposedByDefault,
-      String network, String defaultRule, Boolean watch) {
+  public DockerContainerProvider(Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
+      JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,
+      Boolean watch) {
     this.vertx = vertx;
     this.eb = this.vertx.eventBus();
     this.configurationAddress = configurationAddress;
+    this.serviceImporter = serviceImporter;
+    if (serviceImporterConfiguration == null) {
+      serviceImporterConfiguration = new JsonObject();
+    }
+    this.serviceImporterConfiguration = serviceImporterConfiguration;
 
-    this.endpoint = endpoint;
     this.exposedByDefault = exposedByDefault;
     this.network = network;
     this.defaultRule = defaultRule;
     this.watch = watch;
-
-    this.TLS = false;
   }
 
+  @Override
   public void start(Promise<Void> startPromise) {
     provide(startPromise);
   }
@@ -84,7 +88,7 @@ public class DockerContainerProvider extends Provider {
       validateAndPublish(config);
 
       if (!this.watch) {
-        LOGGER.debug("provde: stop listening for new configurations");
+        LOGGER.debug("provide: stop listening for new configurations");
         consumer.unregister();
       }
     });
@@ -102,8 +106,7 @@ public class DockerContainerProvider extends Provider {
     if (this.dockerDiscovery == null) {
       this.dockerDiscovery = ServiceDiscovery.create(this.vertx,
           new ServiceDiscoveryOptions().setAnnounceAddress(ANNOUNCE_ADDRESS).setName("docker-discovery"));
-      this.dockerDiscovery.registerServiceImporter(new DockerContainerServiceImporter(),
-          new JsonObject().put("docker-tls-verify", this.TLS).put("docker-host", this.endpoint));
+      this.dockerDiscovery.registerServiceImporter(this.serviceImporter, this.serviceImporterConfiguration);
     }
     return this.dockerDiscovery;
   }
@@ -164,7 +167,7 @@ public class DockerContainerProvider extends Provider {
 
     Map<String, String> model = new HashMap<String, String>();
     model.put("name", serviceName);
-    List<String> filteredKeys = Parser.filterKeys(labels.getMap(), filters);
+    List<String> filteredKeys = Parser.filterKeys(labels.getMap(), Arrays.asList(Parser.DEFAULT_ROOT_NAME));
     for (String filteredKey : filteredKeys) {
       model.put(filteredKey, (String) labels.getMap().get(filteredKey));
     }
