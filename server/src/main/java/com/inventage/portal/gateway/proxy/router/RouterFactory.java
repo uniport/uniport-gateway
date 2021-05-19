@@ -65,8 +65,10 @@ public class RouterFactory {
     JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
 
     JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-    JsonArray middlwares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+    JsonArray middlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
     JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+
+    JsonObject sessionBagOptions = retrieveSessionBagOptions(middlewares);
 
     sortByRuleLength(routers);
     LOGGER.debug("createRouter: creating router from config");
@@ -86,15 +88,17 @@ public class RouterFactory {
 
       List<Future> middlewareFutures = new ArrayList<Future>();
 
+      // TODO maybe move out of the for loop by introducing middlewares per entrypoint
       // required to be the first middleware to guarantee every request is processed
-      Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx);
+      Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
+          sessionBagOptions);
       middlewareFutures.add(sessionBagMiddlewareFuture);
 
       JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
       if (middlewareNames != null) {
         for (int j = 0; j < middlewareNames.size(); j++) {
           String middlewareName = middlewareNames.getString(j);
-          JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlwares,
+          JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
               DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
 
           String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
@@ -143,6 +147,36 @@ public class RouterFactory {
 
     // TODO ensure all routes are built
     handler.handle(Future.succeededFuture(router));
+  }
+
+  /**
+   * Retrieves the session bag options from the configured middlewares.
+   * If there are more than one configuration, only the first one is considered.
+   * As a side effect of this methods all session bag configurations are removed
+   * from the configured middlewares.
+   *
+   * @param middlewares all configured middlewares
+   * @return session bag options
+   */
+  private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
+    List<JsonObject> sessionBagMiddlewares = new ArrayList<JsonObject>();
+    for (int i = 0; i < middlewares.size(); i++) {
+      JsonObject middleware = middlewares.getJsonObject(i);
+      if (middleware.getString(DynamicConfiguration.MIDDLEWARE_TYPE)
+          .equals(DynamicConfiguration.MIDDLEWARE_SESSION_BAG)) {
+        sessionBagMiddlewares.add(middleware);
+      }
+    }
+    for (JsonObject sessionBagMiddleware : sessionBagMiddlewares) {
+      middlewares.remove(sessionBagMiddleware);
+    }
+    if (sessionBagMiddlewares.isEmpty()) {
+      return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES, new JsonArray());
+    }
+    if (sessionBagMiddlewares.size() > 1) {
+      LOGGER.warn("retrieveSessionBagOptions: more than one session bag configurations found. Using first one.");
+    }
+    return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
   }
 
   // To avoid path overlap, routes are sorted, by default, in descending order using rules length.

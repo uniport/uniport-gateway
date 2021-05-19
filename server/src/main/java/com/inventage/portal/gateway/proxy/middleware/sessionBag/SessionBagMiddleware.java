@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -32,15 +35,15 @@ public class SessionBagMiddleware implements Middleware {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
 
-  // These cookie are allowed to be passed back to the user agent.
-  // This is required for keycloak login logic of its SPA (i.e. the keycloak admin UI)
-  // https://github.com/keycloak/keycloak/blob/12.0.4/adapters/oidc/js/src/main/resources/login-status-iframe.html#L84
-  public static final List<String> WHITHELISTED_COOKIE_NAMES = List.of("KEYCLOAK_SESSION", "KEYCLOAK_SESSION_LEGACY");
-  public static final List<String> WHITHELISTED_COOKIE_PATHS = List.of("/auth/realms/master/");
-
   public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
-  public SessionBagMiddleware() {
+  // These cookies are allowed to be passed back to the user agent.
+  // This is required for some frontend logic to work properly
+  // (e.g. for keycloak login logic of its admin console)
+  private JsonArray whitelistedCookies;
+
+  public SessionBagMiddleware(JsonArray whithelistedCookies) {
+    this.whitelistedCookies = whithelistedCookies;
   }
 
   @Override
@@ -179,8 +182,7 @@ public class SessionBagMiddleware implements Middleware {
       if (decodedCookieToSet.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
         continue;
       }
-      if (WHITHELISTED_COOKIE_NAMES.contains(decodedCookieToSet.name())
-          && WHITHELISTED_COOKIE_PATHS.contains(decodedCookieToSet.path())) {
+      if (isWhithelisted(decodedCookieToSet)) {
         // we delegate all logic for whitelisted cookies to the user agent
         LOGGER.debug("handle: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
         headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
@@ -238,5 +240,19 @@ public class SessionBagMiddleware implements Middleware {
       }
     }
     return null;
+  }
+
+  private boolean isWhithelisted(Cookie cookie) {
+    for (int i = 0; i < this.whitelistedCookies.size(); i++) {
+      JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
+      String whitelistedCookieName = whitelistedCookie
+          .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME);
+      String whitelistedCookiePath = whitelistedCookie
+          .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH);
+      if (cookie.name().equals(whitelistedCookieName) && cookie.path().equals(whitelistedCookiePath)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

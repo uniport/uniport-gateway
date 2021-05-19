@@ -71,9 +71,14 @@ public class DynamicConfiguration {
 
   public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
 
+  public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
+  public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES = "whithelistedCookies";
+  public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME = "name";
+  public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH = "path";
+
   public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
       MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2,
-      MIDDLEWARE_SHOW_SESSION_CONTENT);
+      MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG);
 
   public static final String SERVICES = "services";
   public static final String SERVICE_NAME = "name";
@@ -101,7 +106,8 @@ public class DynamicConfiguration {
         .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
         .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
         .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
-        .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema()).allowAdditionalProperties(false);
+        .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+        .property(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES, Schemas.arraySchema()).allowAdditionalProperties(false);
 
     ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
         .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
@@ -394,135 +400,159 @@ public class DynamicConfiguration {
       Boolean valid = true;
       String errMsg = "";
       switch (mwType) {
-      case MIDDLEWARE_AUTHORIZATION_BEARER: {
-        String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
-        if (sessionScope == null || sessionScope.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No session scope defined", mwType);
-        }
-        break;
-      }
-      case MIDDLEWARE_HEADERS: {
-        JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
-        if (requestHeaders != null) {
-          if (requestHeaders.isEmpty()) {
+        case MIDDLEWARE_AUTHORIZATION_BEARER: {
+          String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+          if (sessionScope == null || sessionScope.length() == 0) {
             valid = false;
-            errMsg = String.format("%s: Empty request headers defined", mwType);
-            break;
+            errMsg = String.format("%s: No session scope defined", mwType);
           }
-
-          for (Entry<String, Object> entry : requestHeaders) {
-            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+          break;
+        }
+        case MIDDLEWARE_HEADERS: {
+          JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+          if (requestHeaders != null) {
+            if (requestHeaders.isEmpty()) {
               valid = false;
-              errMsg = String.format("%s: Request header and value can only be of type string", mwType);
+              errMsg = String.format("%s: Empty request headers defined", mwType);
+              break;
+            }
+
+            for (Entry<String, Object> entry : requestHeaders) {
+              if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                valid = false;
+                errMsg = String.format("%s: Request header and value can only be of type string", mwType);
+                break;
+              }
+            }
+            if (!valid) {
               break;
             }
           }
-          if (!valid) {
-            break;
-          }
-        }
 
-        JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
-        if (responseHeaders != null) {
-          if (responseHeaders.isEmpty()) {
-            valid = false;
-            errMsg = String.format("%s: Empty response headers defined", mwType);
-            break;
-          }
-
-          for (Entry<String, Object> entry : responseHeaders) {
-            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+          JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+          if (responseHeaders != null) {
+            if (responseHeaders.isEmpty()) {
               valid = false;
-              errMsg = String.format("%s: Response header and value can only be of type string", mwType);
+              errMsg = String.format("%s: Empty response headers defined", mwType);
+              break;
+            }
+
+            for (Entry<String, Object> entry : responseHeaders) {
+              if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                valid = false;
+                errMsg = String.format("%s: Response header and value can only be of type string", mwType);
+                break;
+              }
+            }
+            if (!valid) {
               break;
             }
           }
-          if (!valid) {
+
+          if (requestHeaders == null && responseHeaders == null) {
+            valid = false;
+            errMsg = String.format("%s: at least one response or request header has to be defined", mwType);
             break;
           }
-        }
 
-        if (requestHeaders == null && responseHeaders == null) {
-          valid = false;
-          errMsg = String.format("%s: at least one response or request header has to be defined", mwType);
           break;
         }
+        case MIDDLEWARE_OAUTH2: {
+          String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+          if (clientID == null || clientID.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No client ID defined", mwType);
+            break;
+          }
 
-        break;
-      }
-      case MIDDLEWARE_OAUTH2: {
-        String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
-        if (clientID == null || clientID.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No client ID defined", mwType);
+          String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+          if (clientSecret == null || clientSecret.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No client secret defined", mwType);
+            break;
+          }
+
+          String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+          if (discoveryUrl == null || discoveryUrl.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No discovery URL defined", mwType);
+            break;
+          }
+
+          String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+          if (sessionScope == null || sessionScope.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No session scope defined", mwType);
+            break;
+          }
+
           break;
         }
+        case MIDDLEWARE_REDIRECT_REGEX: {
+          String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+          if (regex == null || regex.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No regex defined", mwType);
+            break;
+          }
 
-        String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
-        if (clientSecret == null || clientSecret.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No client secret defined", mwType);
+          String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+          if (replacement == null || replacement.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No replacement defined", mwType);
+            break;
+          }
+
           break;
         }
+        case MIDDLEWARE_REPLACE_PATH_REGEX: {
+          String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+          if (regex == null || regex.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No regex defined", mwType);
+            break;
+          }
 
-        String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
-        if (discoveryUrl == null || discoveryUrl.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No discovery URL defined", mwType);
+          String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+          if (replacement == null || replacement.length() == 0) {
+            valid = false;
+            errMsg = String.format("%s: No replacement defined", mwType);
+            break;
+          }
+
           break;
         }
-
-        String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-        if (sessionScope == null || sessionScope.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No session scope defined", mwType);
+        case MIDDLEWARE_SHOW_SESSION_CONTENT: {
           break;
         }
-
-        break;
-      }
-      case MIDDLEWARE_REDIRECT_REGEX: {
-        String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
-        if (regex == null || regex.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No regex defined", mwType);
+        case MIDDLEWARE_SESSION_BAG: {
+          JsonArray whithelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES);
+          if (whithelistedCookies == null) {
+            valid = false;
+            errMsg = String.format("%s: No whitelisted cookies defined.", mwType);
+            break;
+          }
+          for (int j = 0; j < whithelistedCookies.size(); j++) {
+            JsonObject whithelistedCookie = whithelistedCookies.getJsonObject(j);
+            if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
+                || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME).isEmpty()) {
+              valid = false;
+              errMsg = String.format("%s: whithelisted cookie name has to contain a value", mwType);
+              break;
+            }
+            if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
+                || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH).isEmpty()) {
+              valid = false;
+              errMsg = String.format("%s: whithelisted cookie path has to contain a value", mwType);
+              break;
+            }
+          }
           break;
         }
-
-        String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
-        if (replacement == null || replacement.length() == 0) {
+        default: {
+          errMsg = String.format("Unknown middleware: '%s'", mwType);
           valid = false;
-          errMsg = String.format("%s: No replacement defined", mwType);
-          break;
         }
-
-        break;
-      }
-      case MIDDLEWARE_REPLACE_PATH_REGEX: {
-        String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
-        if (regex == null || regex.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No regex defined", mwType);
-          break;
-        }
-
-        String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
-        if (replacement == null || replacement.length() == 0) {
-          valid = false;
-          errMsg = String.format("%s: No replacement defined", mwType);
-          break;
-        }
-
-        break;
-      }
-      case MIDDLEWARE_SHOW_SESSION_CONTENT: {
-        break;
-      }
-      default: {
-        errMsg = String.format("Unknown middleware: '%s'", mwType);
-        valid = false;
-      }
       }
 
       if (!valid) {

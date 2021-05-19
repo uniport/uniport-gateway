@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
@@ -23,13 +25,15 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
   }
 
   @Override
-  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-    return this.create(vertx);
+  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareOptions) {
+    return this.create(vertx, middlewareOptions);
   }
 
-  public Future<Middleware> create(Vertx vertx) {
+  public Future<Middleware> create(Vertx vertx, JsonObject middlewareOptions) {
+    JsonArray whithelistedCookies = middlewareOptions
+        .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES);
     LOGGER.debug("create: Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
-    return Future.succeededFuture(new SessionBagMiddleware());
+    return Future.succeededFuture(new SessionBagMiddleware(whithelistedCookies));
   }
 
 }
