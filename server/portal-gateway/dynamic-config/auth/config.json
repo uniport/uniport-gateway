@@ -66,6 +66,31 @@
         "name": "ShowSessionContentMiddleware",
         "type": "_session_",
         "options": {}
+      },
+
+      {
+        "name": "whithelistedCookiesInSessionBag",
+        "type": "sessionBag",
+        "options": {
+          "whithelistedCookies": [
+            {
+              "name": "KEYCLOAK_SESSION",
+              "path": "/auth/realms/master/"
+            },
+            {
+              "name": "KEYCLOAK_SESSION_LEGACY",
+              "path": "/auth/realms/master/"
+            },
+            {
+              "name": "KEYCLOAK_SESSION",
+              "path": "/auth/realms/portal/"
+            },
+            {
+              "name": "KEYCLOAK_SESSION_LEGACY",
+              "path": "/auth/realms/portal/"
+            }
+          ]
+        }
       }
     ],
     "services": [

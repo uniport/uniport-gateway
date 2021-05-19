@@ -171,6 +171,22 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, "localhost:1234")
                         .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "blub")))));
 
+    JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+        new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+            new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
+                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+    JsonObject sessionBagHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+            new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
+                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                    new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+                        new JsonArray().add(new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME, "foo")
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH, "/bar")))))));
+
     JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
         new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
             new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
@@ -383,11 +399,15 @@ public class DynamicConfigurationTest {
             complete, expectedFalse),
         // authorization bearer middleware
         Arguments.of("accept authorization bearer middleware", authBearerHttpMiddleware, complete, expectedTrue),
-        Arguments.of("reject authorization bearer  with missing optionsmiddleware",
-            authBearerHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+        Arguments.of("reject authorization bearer  with missing options", authBearerHttpMiddlewareWithMissingOptions,
+            complete, expectedFalse),
         // oauth2 middleware
         Arguments.of("accept oAuth2 middleware", oauth2PathHttpMiddleware, complete, expectedTrue),
         Arguments.of("reject oAuth2 middleware with missing options", oauth2PathHttpMiddlewareWithMissingOptions,
+            complete, expectedFalse),
+        // session bag middleware
+        Arguments.of("accept session bag middleware", sessionBagHttpMiddleware, complete, expectedTrue),
+        Arguments.of("reject session bag middleware with missing options", sessionBagHttpMiddlewareWithMissingOptions,
             complete, expectedFalse),
 
         Arguments.of("reject unkown key middleware", unkownKeyHttpMiddleware, complete, expectedFalse),
