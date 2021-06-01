@@ -3,8 +3,8 @@
   <servers>
     <server>
       <id>inventage-projectware</id>
-      <username>${env.NEXUS2_CREDS_USR}</username>
-      <password>${env.NEXUS2_CREDS_PSW}</password>
+      <username>${env.CI_NEXUS2_CREDS_USR}</username>
+      <password>${env.CI_NEXUS2_CREDS_PSW}</password>
     </server>
     <server>
       <id>docker-registry.inventage.com:10000</id>
