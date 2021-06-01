@@ -1,0 +1,65 @@
+replicaCount: 1
+
+imagePullSecrets: {}
+
+image:
+  registry: ${docker.pull.registry}
+  baseName: ${project.groupId}
+  name: portal-gateway-server
+  tag: ${project.version}
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+
+service:
+  type: ClusterIP
+
+ports:
+  - name: http
+    port: 20000
+
+ingress:
+  enabled: true
+  port: 20000
+  className: ""
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+
+resources: {}
+
+storages: []
+
+env:
+  # HTTP protocol for external access
+  - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+    value: "http"
+  # HTTP host name for external access
+  - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+    value: "${deploymentDomain}"
+  # HTTP port for external access, must be the same as the exposed port
+  - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+    value: "80" # TODO
+
+  # IAM
+  - name: "portal-iam.host"
+    value: "portal-iam"
+  - name: "portal-iam.port"
+    value: "8080"
+  # Navigation
+  - name: "navigation-frontend.host"
+    value: "navigation-frontend"
+  - name: "navigation-service.host"
+    value: "navigation-service"
+  # Dashboard
+  - name: "dashboard-frontend.host"
+    value: "dashboard-frontend"
+  - name: "dashboard-service.host"
+    value: "dashboard-service"
+  # Organisation
+  - name: "organisation-service.host"
+    value: "organisation-proxy"
+  # Document
+  - name: "document-service.host"
+    value: "document-proxy"

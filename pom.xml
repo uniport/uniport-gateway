@@ -11,6 +11,7 @@
   <modules>
     <module>server</module>
     <module>docker-compose</module>
+    <module>helm</module>
   </modules>
 
   <properties>
