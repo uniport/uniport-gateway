@@ -13,6 +13,7 @@ pipeline {
 
     environment {
         LINE_SEPARATOR = '================================================================================'
+        NEXUS2_CREDS = credentials('inventage-ierp')
         CI_NEXUS2_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com'
@@ -73,10 +74,11 @@ pipeline {
 
                 sh 'mvn help:system'
 
+                mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE], 'clean', 'deploy')
                 script {
-                  mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE], 'clean', 'deploy')
-                  env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./pom/target/nexus-staging/staging/2784e0aacf5060.properties')
+                    env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./target/nexus-staging/staging/2784e0aacf5060.properties')
                 }
+
             }
         }
 
@@ -91,6 +93,7 @@ pipeline {
                     echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
                     ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
                     scp docker-compose/target/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target/portal-gateway/docker-compose.local.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
                     scp docker-compose/target/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
                     scp docker-compose/target/portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
                     echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
@@ -105,7 +108,7 @@ pipeline {
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml rm -f'"
 
                         echo 'Deploy new container…'
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml up -d'"
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.local.yml up -d'"
                     '''
                 }
             }

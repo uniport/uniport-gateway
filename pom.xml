@@ -169,19 +169,22 @@
           <artifactId>jib-maven-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.5</version>
-          <extensions>true</extensions>
-          <configuration>
-            <serverId>inventage-portal-staging</serverId>            <!-- auch im Jenkins Config File "settings.xml" referenziert -->
-            <nexusUrl>https://nexus.inventage.com</nexusUrl>
-            <stagingProfileId>2784e0aacf5060</stagingProfileId>            <!-- inventage-portal staging -->
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <!-- for staging with Nexus2 -->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.5</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>inventage-portal-staging</serverId>          <!-- auch im Jenkins Config File "settings.xml" referenziert -->
+          <nexusUrl>https://nexus.inventage.com</nexusUrl>
+          <stagingProfileId>2784e0aacf5060</stagingProfileId>          <!-- inventage-portal staging -->
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
   <!-- for accessing com.inventage.vertx.vertx-http-proxy -->
