@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  portal-gateway:
+    ports:
+      # docker-host.port:entrypoint.port, if not equals, docker-host.port must be same as PORTAL_GATEWAY_PUBLIC_PORT
+      - "20000:20000"

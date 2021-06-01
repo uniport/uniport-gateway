@@ -2,11 +2,19 @@
   <configuration default="false" name="portal-gateway: docker-compose" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
     <deployment type="docker-compose.yml">
       <settings>
-        <option name="sourceFilePath" value="docker-compose/target/classes/portal-gateway/docker-compose.yml" />
+        <option name="envFilePath" value="" />
+        <option name="sourceFilePath" value="docker-compose/target/portal-gateway/docker-compose.yml" />
+        <option name="secondarySourceFiles">
+          <list>
+            <option value="docker-compose/target/portal-gateway/docker-compose.local.yml" />
+          </list>
+        </option>
+        <option name="upExitCodeFromService" value="" />
+        <option name="upTimeout" value="" />
       </settings>
     </deployment>
     <method v="2">
-      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/docker-compose/pom.xml" goal="clean process-resources" />
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/docker-compose/pom.xml" goal="clean package" />
     </method>
   </configuration>
 </component>
