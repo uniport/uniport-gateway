@@ -3,12 +3,12 @@
     <deployment type="docker-compose.yml">
       <settings>
         <option name="envFilePath" value="" />
-        <option name="sourceFilePath" value="docker-compose/target/portal-gateway/docker-compose.yml" />
         <option name="secondarySourceFiles">
           <list>
-            <option value="docker-compose/target/portal-gateway/docker-compose.local.yml" />
+            <option value="docker-compose/target/portal-gateway/docker-compose.override.yml" />
           </list>
         </option>
+        <option name="sourceFilePath" value="docker-compose/target/portal-gateway/docker-compose.yml" />
         <option name="upExitCodeFromService" value="" />
         <option name="upTimeout" value="" />
       </settings>
