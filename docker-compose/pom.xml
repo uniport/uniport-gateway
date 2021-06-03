@@ -43,7 +43,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/portal-gateway</outputDirectory>
+              <outputDirectory>${project.build.directory}/classes/portal-gateway</outputDirectory>
               <resources>
                 <resource>
                   <directory>src/main/resources</directory>
