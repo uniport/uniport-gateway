@@ -2,7 +2,7 @@ version: "3.6"
 
 services:
   portal-gateway:
-    image: ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:${project.version}
+    image: ${docker.pull.registry}/${project.groupId}.portal-gateway:${project.version}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
