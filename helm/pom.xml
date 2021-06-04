@@ -15,19 +15,13 @@
     <plugins>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${project.build.directory}/classes</outputDirectory>
-          <resources>
-            <resource>
-              <directory>src/main/resources</directory>
-              <filtering>false</filtering>
-            </resource>
-          </resources>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
         <executions>
+          <execution>
+            <id>default-resources</id>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/without-substitution</outputDirectory>
+            </configuration>
+          </execution>
           <execution>
             <phase>prepare-package</phase>
             <id>with-substitution</id>
@@ -35,7 +29,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/portal-gateway</outputDirectory>
+              <outputDirectory>${project.build.directory}/classes/with-substitution</outputDirectory>
               <resources>
                 <resource>
                   <directory>src/main/resources</directory>

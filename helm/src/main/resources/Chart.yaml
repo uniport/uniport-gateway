@@ -8,5 +8,4 @@ version: 0.1.0
 
 dependencies:
   - name: portal-lib
-    repository: file://../../portal-lib
     version: "0.1.0"
