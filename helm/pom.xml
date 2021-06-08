@@ -40,6 +40,37 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.inventage.portal.helm-chart-library</groupId>
+                  <artifactId>helm</artifactId>
+                  <version>${portal-helm-chart-library.version}</version>
+                  <outputDirectory>${project.build.directory}/classes/without-substitution/charts</outputDirectory>
+                  <includes>portal-lib/**/*</includes>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.inventage.portal.helm-chart-library</groupId>
+                  <artifactId>helm</artifactId>
+                  <version>${portal-helm-chart-library.version}</version>
+                  <outputDirectory>${project.build.directory}/classes/with-substitution/charts</outputDirectory>
+                  <includes>portal-lib/**/*</includes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
