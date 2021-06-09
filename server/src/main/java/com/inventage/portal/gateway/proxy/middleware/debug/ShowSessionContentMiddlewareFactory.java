@@ -14,17 +14,18 @@ import io.vertx.ext.web.Router;
 
 public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddlewareFactory.class);
 
-  @Override
-  public String provides() {
-    return DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT;
-  }
+    @Override
+    public String provides() {
+        return DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT;
+    }
 
-  @Override
-  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-    LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT);
-    return Future.succeededFuture(new ShowSessionContentMiddleware());
-  }
+    @Override
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        LOGGER.debug("create: Created '{}' middleware successfully",
+                DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT);
+        return Future.succeededFuture(new ShowSessionContentMiddleware());
+    }
 
 }

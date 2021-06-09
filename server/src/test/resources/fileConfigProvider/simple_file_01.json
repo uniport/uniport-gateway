@@ -1,74 +1,74 @@
 {
-  "http": {
-    "routers": [
-      {
-        "name": "router1",
-        "service": "application-1"
-      },
-      {
-        "name": "router2",
-        "service": "application-2"
-      },
-      {
-        "name": "router3",
-        "service": "application-3"
-      }
-    ],
-    "services": [
-      {
-        "name": "application-1",
-        "servers": [
-          {
-            "host": "http://172.17.0.1",
-            "port": "80"
-          }
+    "http": {
+        "routers": [
+            {
+                "name": "router1",
+                "service": "application-1"
+            },
+            {
+                "name": "router2",
+                "service": "application-2"
+            },
+            {
+                "name": "router3",
+                "service": "application-3"
+            }
+        ],
+        "services": [
+            {
+                "name": "application-1",
+                "servers": [
+                    {
+                        "host": "http://172.17.0.1",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "application-2",
+                "servers": [
+                    {
+                        "host": "http://172.17.0.2",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "application-3",
+                "servers": [
+                    {
+                        "host": "http://172.17.0.3",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "application-4",
+                "servers": [
+                    {
+                        "host": "http://172.17.0.4",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "application-5",
+                "servers": [
+                    {
+                        "host": "http://172.17.0.5",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "application-6",
+                "servers": [
+                    {
+                        "host": "http://172.17.0.6",
+                        "port": "80"
+                    }
+                ]
+            }
         ]
-      },
-      {
-        "name": "application-2",
-        "servers": [
-          {
-            "host": "http://172.17.0.2",
-            "port": "80"
-          }
-        ]
-      },
-      {
-        "name": "application-3",
-        "servers": [
-          {
-            "host": "http://172.17.0.3",
-            "port": "80"
-          }
-        ]
-      },
-      {
-        "name": "application-4",
-        "servers": [
-          {
-            "host": "http://172.17.0.4",
-            "port": "80"
-          }
-        ]
-      },
-      {
-        "name": "application-5",
-        "servers": [
-          {
-            "host": "http://172.17.0.5",
-            "port": "80"
-          }
-        ]
-      },
-      {
-        "name": "application-6",
-        "servers": [
-          {
-            "host": "http://172.17.0.6",
-            "port": "80"
-          }
-        ]
-      }
-    ]
-  }
+    }
 }

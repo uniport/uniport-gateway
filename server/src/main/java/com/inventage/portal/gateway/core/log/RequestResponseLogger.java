@@ -11,19 +11,19 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class RequestResponseLogger implements Handler<RoutingContext> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
 
-  public static Handler<RoutingContext> create() {
-    return new RequestResponseLogger();
-  }
+    public static Handler<RoutingContext> create() {
+        return new RequestResponseLogger();
+    }
 
-  @Override
-  public void handle(RoutingContext routingContext) {
-    final long start = System.currentTimeMillis();
-    LOGGER.debug("handle: route uri '{}' for request '{}'", routingContext.request().uri(),
-        routingContext.request().hashCode());
-    routingContext.next();
-    LOGGER.debug("handle: routed uri '{}' for request '{}' in '{}' ms", routingContext.request().uri(),
-        routingContext.request().hashCode(), System.currentTimeMillis() - start);
-  }
+    @Override
+    public void handle(RoutingContext routingContext) {
+        final long start = System.currentTimeMillis();
+        LOGGER.debug("handle: route uri '{}' for request '{}'", routingContext.request().uri(),
+                routingContext.request().hashCode());
+        routingContext.next();
+        LOGGER.debug("handle: routed uri '{}' for request '{}' in '{}' ms", routingContext.request().uri(),
+                routingContext.request().hashCode(), System.currentTimeMillis() - start);
+    }
 }

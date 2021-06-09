@@ -14,18 +14,18 @@ import io.vertx.ext.web.Router;
 
 public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddlewareFactory.class);
 
-  @Override
-  public String provides() {
-    return DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX;
-  }
+    @Override
+    public String provides() {
+        return DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX;
+    }
 
-  @Override
-  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-    LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
-    return Future.succeededFuture(
-        new RedirectRegexMiddleware(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
-            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
-  }
+    @Override
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
+        return Future.succeededFuture(new RedirectRegexMiddleware(
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
+    }
 }

@@ -1,167 +1,185 @@
 {
-  "http": {
-    "routers": [
-      {
-        "name": "root",
-        "middlewares": ["rootRedirectregex"],
-        "rule": "Path('/')",
-        "service": "dashboard-frontend"
-      },
-      {
-        "name": "login",
-        "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
-        "rule": "PathPrefix('/login')",
-        "service": "dashboard-frontend"
-      },
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "middlewares": ["rootRedirectregex"],
+                "rule": "Path('/')",
+                "service": "dashboard-frontend"
+            },
+            {
+                "name": "login",
+                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
+                "rule": "PathPrefix('/login')",
+                "service": "dashboard-frontend"
+            },
 
-      {
-        "name": "dashboard-frontend",
-        "middlewares": [
-          "dashboardRedirectRegex",
-          "dashboardAuthBearer",
-          "dashboardReplacePath"
+            {
+                "name": "dashboard-frontend",
+                "middlewares": [
+                    "dashboardRedirectRegex",
+                    "dashboardAuthBearer",
+                    "dashboardReplacePath"
+                ],
+                "rule": "PathPrefix('/dashboard')",
+                "service": "dashboard-frontend"
+            },
+            {
+                "name": "dashboard-service",
+                "middlewares": ["dashboardAuthBearer"],
+                "rule": "PathPrefix('/dashboard/service')",
+                "service": "dashboard-service"
+            },
+
+            {
+                "name": "navigation-frontend",
+                "middlewares": [
+                    "navigationRedirectRegex",
+                    "navigationAuthBearer",
+                    "navigationReplacePath"
+                ],
+                "rule": "PathPrefix('/navigation')",
+                "service": "navigation-frontend"
+            },
+            {
+                "name": "navigation-service",
+                "middlewares": ["navigationAuthBearer"],
+                "rule": "PathPrefix('/navigation/service')",
+                "service": "navigation-service"
+            },
+
+            {
+                "name": "organisation-service",
+                "middlewares": [
+                    "organisationRedirectRegex",
+                    "ShowSessionContentMiddleware",
+                    "organisationOauth2",
+                    "organisationAuthBearer",
+                    "organisationReplacePath"
+                ],
+                "rule": "PathPrefix('/organisation')",
+                "service": "organisation-service"
+            },
+
+            {
+                "name": "document-service",
+                "middlewares": [
+                    "documentRedirectRegex",
+                    "documentOauth2",
+                    "documentAuthBearer",
+                    "documentReplacePath"
+                ],
+                "rule": "PathPrefix('/document')",
+                "service": "document-service"
+            }
         ],
-        "rule": "PathPrefix('/dashboard')",
-        "service": "dashboard-frontend"
-      },
-      {
-        "name": "dashboard-service",
-        "middlewares": ["dashboardAuthBearer"],
-        "rule": "PathPrefix('/dashboard/service')",
-        "service": "dashboard-service"
-      },
 
-      {
-        "name": "navigation-frontend",
         "middlewares": [
-          "navigationRedirectRegex",
-          "navigationAuthBearer",
-          "navigationReplacePath"
+            {
+                "name": "rootRedirectregex",
+                "type": "redirectRegex",
+                "options": { "regex": "^/$", "replacement": "/dashboard/" }
+            },
+            {
+                "name": "loginRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/login)$",
+                    "replacement": "/dashboard/"
+                }
+            },
+
+            {
+                "name": "navigationRedirectRegex",
+                "type": "redirectRegex",
+                "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+            },
+            {
+                "name": "navigationReplacePath",
+                "type": "replacePathRegex",
+                "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
+            },
+
+            {
+                "name": "dashboardRedirectRegex",
+                "type": "redirectRegex",
+                "options": { "regex": "^(/dashboard)$", "replacement": "$1/" }
+            },
+            {
+                "name": "dashboardReplacePath",
+                "type": "replacePathRegex",
+                "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
+            },
+
+            {
+                "name": "organisationRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/organisation)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "organisationReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/organisation/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+
+            {
+                "name": "documentRedirectRegex",
+                "type": "redirectRegex",
+                "options": { "regex": "^(/document)$", "replacement": "$1/" }
+            },
+            {
+                "name": "documentReplacePath",
+                "type": "replacePathRegex",
+                "options": { "regex": "/document/(.*)", "replacement": "/$1" }
+            }
         ],
-        "rule": "PathPrefix('/navigation')",
-        "service": "navigation-frontend"
-      },
-      {
-        "name": "navigation-service",
-        "middlewares": ["navigationAuthBearer"],
-        "rule": "PathPrefix('/navigation/service')",
-        "service": "navigation-service"
-      },
 
-      {
-        "name": "organisation-service",
-        "middlewares": [
-          "organisationRedirectRegex",
-          "ShowSessionContentMiddleware",
-          "organisationOauth2",
-          "organisationAuthBearer",
-          "organisationReplacePath"
-        ],
-        "rule": "PathPrefix('/organisation')",
-        "service": "organisation-service"
-      },
+        "services": [
+            {
+                "name": "dashboard-frontend",
+                "servers": [
+                    { "host": "${dashboard-frontend.host}", "port": 20025 }
+                ]
+            },
+            {
+                "name": "dashboard-service",
+                "servers": [
+                    { "host": "${dashboard-service.host}", "port": 20022 }
+                ]
+            },
 
-      {
-        "name": "document-service",
-        "middlewares": [
-          "documentRedirectRegex",
-          "documentOauth2",
-          "documentAuthBearer",
-          "documentReplacePath"
-        ],
-        "rule": "PathPrefix('/document')",
-        "service": "document-service"
-      }
-    ],
+            {
+                "name": "navigation-frontend",
+                "servers": [
+                    { "host": "${navigation-frontend.host}", "port": 20015 }
+                ]
+            },
+            {
+                "name": "navigation-service",
+                "servers": [
+                    { "host": "${navigation-service.host}", "port": 20012 }
+                ]
+            },
 
-    "middlewares": [
-      {
-        "name": "rootRedirectregex",
-        "type": "redirectRegex",
-        "options": { "regex": "^/$", "replacement": "/dashboard/" }
-      },
-      {
-        "name": "loginRedirectRegex",
-        "type": "redirectRegex",
-        "options": {
-          "regex": "^(/login)$",
-          "replacement": "/dashboard/"
-        }
-      },
+            {
+                "name": "organisation-service",
+                "servers": [
+                    { "host": "${organisation-service.host}", "port": 20030 }
+                ]
+            },
 
-      {
-        "name": "navigationRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
-      },
-      {
-        "name": "navigationReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
-      },
-
-      {
-        "name": "dashboardRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/dashboard)$", "replacement": "$1/" }
-      },
-      {
-        "name": "dashboardReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
-      },
-
-      {
-        "name": "organisationRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/organisation)$", "replacement": "$1/" }
-      },
-      {
-        "name": "organisationReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/organisation/(.*)", "replacement": "/$1" }
-      },
-
-      {
-        "name": "documentRedirectRegex",
-        "type": "redirectRegex",
-        "options": { "regex": "^(/document)$", "replacement": "$1/" }
-      },
-      {
-        "name": "documentReplacePath",
-        "type": "replacePathRegex",
-        "options": { "regex": "/document/(.*)", "replacement": "/$1" }
-      }
-    ],
-
-    "services": [
-      {
-        "name": "dashboard-frontend",
-        "servers": [{ "host": "${dashboard-frontend.host}", "port": 20025 }]
-      },
-      {
-        "name": "dashboard-service",
-        "servers": [{ "host": "${dashboard-service.host}", "port": 20022 }]
-      },
-
-      {
-        "name": "navigation-frontend",
-        "servers": [{ "host": "${navigation-frontend.host}", "port": 20015 }]
-      },
-      {
-        "name": "navigation-service",
-        "servers": [{ "host": "${navigation-service.host}", "port": 20012 }]
-      },
-
-      {
-        "name": "organisation-service",
-        "servers": [{ "host": "${organisation-service.host}", "port": 20030 }]
-      },
-
-      {
-        "name": "document-service",
-        "servers": [{ "host": "${document-service.host}", "port": 20050 }]
-      }
-    ]
-  }
+            {
+                "name": "document-service",
+                "servers": [
+                    { "host": "${document-service.host}", "port": 20050 }
+                ]
+            }
+        ]
+    }
 }

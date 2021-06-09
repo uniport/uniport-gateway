@@ -14,18 +14,19 @@ import io.vertx.ext.web.Router;
 
 public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddlewareFactory.class);
 
-  @Override
-  public String provides() {
-    return DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER;
-  }
+    @Override
+    public String provides() {
+        return DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER;
+    }
 
-  @Override
-  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-    LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
-    return Future.succeededFuture(new AuthorizationBearerMiddleware(
-        middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
-  }
+    @Override
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+        LOGGER.debug("create: Created '{}' middleware successfully",
+                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
+        return Future.succeededFuture(new AuthorizationBearerMiddleware(
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
+    }
 
 }

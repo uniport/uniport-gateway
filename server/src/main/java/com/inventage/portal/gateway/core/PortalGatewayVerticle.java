@@ -30,123 +30,123 @@ import io.vertx.core.json.JsonObject;
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
 
-  @Override
-  public void start(Promise<Void> startPromise) throws Exception {
-    LOGGER.info("start: ...");
+    @Override
+    public void start(Promise<Void> startPromise) throws Exception {
+        LOGGER.info("start: ...");
 
-    final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
-    retriever.getConfig(asyncResult -> {
-      try {
-        final JsonObject staticConfig = asyncResult.result();
-        StaticConfiguration.validate(vertx, staticConfig).onSuccess(handler -> {
-          // get the entrypoints from the configuration
-          List<Entrypoint> entrypoints = entrypoints(staticConfig);
+        final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
+        retriever.getConfig(asyncResult -> {
+            try {
+                final JsonObject staticConfig = asyncResult.result();
+                StaticConfiguration.validate(vertx, staticConfig).onSuccess(handler -> {
+                    // get the entrypoints from the configuration
+                    List<Entrypoint> entrypoints = entrypoints(staticConfig);
 
-          // get the applications from the configuration
-          final List<Application> applications = applications(staticConfig);
+                    // get the applications from the configuration
+                    final List<Application> applications = applications(staticConfig);
 
-          deployAndMountApplications(applications, entrypoints);
-          createListenersForEntrypoints(entrypoints, staticConfig, startPromise);
-        }).onFailure(err -> {
-          LOGGER.error("start: Failed to validate static configuration");
-          shutdownOnStartupFailure(err);
+                    deployAndMountApplications(applications, entrypoints);
+                    createListenersForEntrypoints(entrypoints, staticConfig, startPromise);
+                }).onFailure(err -> {
+                    LOGGER.error("start: Failed to validate static configuration");
+                    shutdownOnStartupFailure(err);
+                });
+            } catch (Exception e) {
+                shutdownOnStartupFailure(e);
+            }
         });
-      } catch (Exception e) {
-        shutdownOnStartupFailure(e);
-      }
-    });
-  }
-
-  private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
-    LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'", applications.size(),
-        entrypoints.size());
-    applications.stream().forEach(application -> {
-      application.deployOn(vertx).onSuccess(handler -> {
-        entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
-      }).onFailure(err -> {
-        shutdownOnStartupFailure(err);
-      });
-    });
-  }
-
-  private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config,
-      Promise<Void> startPromise) {
-    LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'", entrypoints.size());
-    listenOnEntrypoints(entrypoints).onSuccess(handler -> {
-      startPromise.complete();
-      LOGGER.info("createListenersForEntrypoints: start succeeded.");
-    }).onFailure(err -> {
-      startPromise.fail(err);
-      LOGGER.error("createListenersForEntrypoints: start failed.");
-    });
-  }
-
-  private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-    return CompositeFuture.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
-  }
-
-  private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
-    if (entrypoint.port() > 0) {
-      final HttpServerOptions options = new HttpServerOptions().setMaxHeaderSize(1024 * 20).setSsl(entrypoint.isTls())
-          .setKeyStoreOptions(entrypoint.jksOptions());
-      LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(), entrypoint.port());
-      return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
-    } else {
-      entrypoint.disable();
-      LOGGER.warn("listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
-          entrypoint.name(), entrypoint.port());
-      return Future.succeededFuture();
     }
-  }
 
-  private void shutdownOnStartupFailure(Throwable throwable) {
-    if (throwable instanceof IllegalArgumentException) {
-      LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage());
-    } else {
-      LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage(), throwable);
+    private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
+        LOGGER.debug("deployAndMountApplications: number of applications '{}' and entrypoints {}'", applications.size(),
+                entrypoints.size());
+        applications.stream().forEach(application -> {
+            application.deployOn(vertx).onSuccess(handler -> {
+                entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
+            }).onFailure(err -> {
+                shutdownOnStartupFailure(err);
+            });
+        });
     }
-    vertx.close();
-  }
 
-  private List<Entrypoint> entrypoints(JsonObject config) {
-    LOGGER.debug("entrypoints: reading from config key '{}'", StaticConfiguration.ENTRYPOINTS);
-    try {
-      final List<Entrypoint> entrypoints = new ArrayList<>();
-      final JsonArray configs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS);
-      if (configs != null) {
-        configs.stream().map(object -> new JsonObject(Json.encode(object)))
-            .map(entrypoint -> new Entrypoint(entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
-                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT), vertx))
-            .forEach(entrypoints::add);
-      }
-      return entrypoints;
-    } catch (Exception e) {
-      throw new IllegalStateException(
-          String.format("Couldn't read '%s' configuration", StaticConfiguration.ENTRYPOINTS));
+    private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config,
+            Promise<Void> startPromise) {
+        LOGGER.debug("createListenersForEntrypoints: number of entrypoints {}'", entrypoints.size());
+        listenOnEntrypoints(entrypoints).onSuccess(handler -> {
+            startPromise.complete();
+            LOGGER.info("createListenersForEntrypoints: start succeeded.");
+        }).onFailure(err -> {
+            startPromise.fail(err);
+            LOGGER.error("createListenersForEntrypoints: start failed.");
+        });
     }
-  }
 
-  private List<Application> applications(JsonObject config) {
-    LOGGER.debug("applications: reading from config key '{}'", StaticConfiguration.APPLICATIONS);
-    try {
-      final List<Application> applications = new ArrayList<>();
-      final JsonArray configs = config.getJsonArray(StaticConfiguration.APPLICATIONS);
-      if (configs != null) {
-        configs.stream().map(object -> new JsonObject(Json.encode(object)))
-            .map(application -> ApplicationFactory.Loader
-                .getProvider(application.getString(StaticConfiguration.APPLICATION_PROVIDER))
-                .create(application, config, vertx))
-            .forEach(applications::add);
-      }
-      return applications;
-    } catch (IllegalStateException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new IllegalStateException(
-          String.format("Couldn't read '%s' configuration", StaticConfiguration.APPLICATIONS));
+    private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
+        return CompositeFuture.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
     }
-  }
+
+    private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
+        if (entrypoint.port() > 0) {
+            final HttpServerOptions options = new HttpServerOptions().setMaxHeaderSize(1024 * 20)
+                    .setSsl(entrypoint.isTls()).setKeyStoreOptions(entrypoint.jksOptions());
+            LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(), entrypoint.port());
+            return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
+        } else {
+            entrypoint.disable();
+            LOGGER.warn("listOnEntrypoint: disabling endpoint '{}' because its port ('{}') must be great 0",
+                    entrypoint.name(), entrypoint.port());
+            return Future.succeededFuture();
+        }
+    }
+
+    private void shutdownOnStartupFailure(Throwable throwable) {
+        if (throwable instanceof IllegalArgumentException) {
+            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage());
+        } else {
+            LOGGER.error("shutdownOnStartupFailure: will shut down because '{}'", throwable.getMessage(), throwable);
+        }
+        vertx.close();
+    }
+
+    private List<Entrypoint> entrypoints(JsonObject config) {
+        LOGGER.debug("entrypoints: reading from config key '{}'", StaticConfiguration.ENTRYPOINTS);
+        try {
+            final List<Entrypoint> entrypoints = new ArrayList<>();
+            final JsonArray configs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS);
+            if (configs != null) {
+                configs.stream().map(object -> new JsonObject(Json.encode(object)))
+                        .map(entrypoint -> new Entrypoint(entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
+                                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT), vertx))
+                        .forEach(entrypoints::add);
+            }
+            return entrypoints;
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    String.format("Couldn't read '%s' configuration", StaticConfiguration.ENTRYPOINTS));
+        }
+    }
+
+    private List<Application> applications(JsonObject config) {
+        LOGGER.debug("applications: reading from config key '{}'", StaticConfiguration.APPLICATIONS);
+        try {
+            final List<Application> applications = new ArrayList<>();
+            final JsonArray configs = config.getJsonArray(StaticConfiguration.APPLICATIONS);
+            if (configs != null) {
+                configs.stream().map(object -> new JsonObject(Json.encode(object)))
+                        .map(application -> ApplicationFactory.Loader
+                                .getProvider(application.getString(StaticConfiguration.APPLICATION_PROVIDER))
+                                .create(application, config, vertx))
+                        .forEach(applications::add);
+            }
+            return applications;
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    String.format("Couldn't read '%s' configuration", StaticConfiguration.APPLICATIONS));
+        }
+    }
 
 }

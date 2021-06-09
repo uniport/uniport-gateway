@@ -1,20 +1,20 @@
 version: "3.6"
 
 services:
-  portal-gateway:
-    image: ${docker.pull.registry}/${project.groupId}.portal-gateway:${project.version}
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - portal-gateway
-    expose:
-      - "20000"
-    env_file:
-      - portal-gateway.common.env
-      - portal-gateway.specific.env # deployments must create this file by copying a environment specific file
-      - secrets.env
+    portal-gateway:
+        image: ${docker.pull.registry}/${project.groupId}.portal-gateway:${project.version}
+        restart: unless-stopped
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+            - portal-gateway
+        expose:
+            - "20000"
+        env_file:
+            - portal-gateway.common.env
+            - portal-gateway.specific.env # deployments must create this file by copying a environment specific file
+            - secrets.env
 
 networks:
-  portal-gateway:
-    external: true
+    portal-gateway:
+        external: true

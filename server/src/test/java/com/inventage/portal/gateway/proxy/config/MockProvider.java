@@ -15,63 +15,63 @@ import io.vertx.core.json.JsonObject;
 
 public class MockProvider extends Provider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MockProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockProvider.class);
 
-  private Vertx vertx;
-  private EventBus eb;
-  private String configurationAddress;
+    private Vertx vertx;
+    private EventBus eb;
+    private String configurationAddress;
 
-  private List<JsonObject> messages;
-  private long waitMs;
+    private List<JsonObject> messages;
+    private long waitMs;
 
-  private long timerId;
+    private long timerId;
 
-  public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages) {
-    this(vertx, configurationAddress, messages, 0);
-  }
-
-  public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages, long waitMs) {
-    this.vertx = vertx;
-    this.eb = vertx.eventBus();
-    this.configurationAddress = configurationAddress;
-    this.messages = messages;
-
-    if (waitMs == 0) {
-      this.waitMs = 20;
-    } else {
-      this.waitMs = waitMs;
-    }
-  }
-
-  @Override
-  public void start(Promise<Void> startPromise) {
-    provide(startPromise);
-  }
-
-  @Override
-  public void stop(Promise<Void> stopPromise) {
-    vertx.cancelTimer(this.timerId);
-    stopPromise.complete();
-  }
-
-  @Override
-  public void provide(Promise<Void> startPromise) {
-    if (this.messages.isEmpty()) {
-      startPromise.complete();
-      return;
+    public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages) {
+        this(vertx, configurationAddress, messages, 0);
     }
 
-    AtomicInteger count = new AtomicInteger(0);
-    this.timerId = this.vertx.setPeriodic(this.waitMs, tId -> {
-      JsonObject message = this.messages.get(count.get());
-      this.eb.publish(this.configurationAddress, message);
+    public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages, long waitMs) {
+        this.vertx = vertx;
+        this.eb = vertx.eventBus();
+        this.configurationAddress = configurationAddress;
+        this.messages = messages;
 
-      if (count.incrementAndGet() == this.messages.size()) {
-        this.vertx.cancelTimer(tId);
-      }
-      LOGGER.debug("provide: Wait before sending next message");
-    });
-    startPromise.complete();
-  }
+        if (waitMs == 0) {
+            this.waitMs = 20;
+        } else {
+            this.waitMs = waitMs;
+        }
+    }
+
+    @Override
+    public void start(Promise<Void> startPromise) {
+        provide(startPromise);
+    }
+
+    @Override
+    public void stop(Promise<Void> stopPromise) {
+        vertx.cancelTimer(this.timerId);
+        stopPromise.complete();
+    }
+
+    @Override
+    public void provide(Promise<Void> startPromise) {
+        if (this.messages.isEmpty()) {
+            startPromise.complete();
+            return;
+        }
+
+        AtomicInteger count = new AtomicInteger(0);
+        this.timerId = this.vertx.setPeriodic(this.waitMs, tId -> {
+            JsonObject message = this.messages.get(count.get());
+            this.eb.publish(this.configurationAddress, message);
+
+            if (count.incrementAndGet() == this.messages.size()) {
+                this.vertx.cancelTimer(tId);
+            }
+            LOGGER.debug("provide: Wait before sending next message");
+        });
+        startPromise.complete();
+    }
 
 }

@@ -14,37 +14,37 @@ import io.vertx.ext.web.Router;
  */
 public class RouterSwitchListener implements Listener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RouterSwitchListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterSwitchListener.class);
 
-  private static final String NAME = "RouterSwitchListener";
+    private static final String NAME = "RouterSwitchListener";
 
-  private Router router;
-  private RouterFactory routerFactory;
+    private Router router;
+    private RouterFactory routerFactory;
 
-  public RouterSwitchListener(Router router, RouterFactory routerFactory) {
-    this.router = router;
-    this.routerFactory = routerFactory;
-  }
+    public RouterSwitchListener(Router router, RouterFactory routerFactory) {
+        this.router = router;
+        this.routerFactory = routerFactory;
+    }
 
-  @Override
-  public void listen(JsonObject config) {
-    Future<Router> routerCreation = routerFactory.createRouter(config);
-    routerCreation.onSuccess(router -> {
-      setSubRouter(router);
-    }).onFailure(err -> {
-      LOGGER.warn("listen: Failed to create new router from config '{}': '{}'", config, err.getMessage());
-    });
+    @Override
+    public void listen(JsonObject config) {
+        Future<Router> routerCreation = routerFactory.createRouter(config);
+        routerCreation.onSuccess(router -> {
+            setSubRouter(router);
+        }).onFailure(err -> {
+            LOGGER.warn("listen: Failed to create new router from config '{}': '{}'", config, err.getMessage());
+        });
 
-  }
+    }
 
-  public String toString() {
-    return NAME;
-  }
+    public String toString() {
+        return NAME;
+    }
 
-  private void setSubRouter(Router subRouter) {
-    // TODO might this create a connection gap?
-    this.router.clear();
-    this.router.mountSubRouter("/", subRouter);
-  }
+    private void setSubRouter(Router subRouter) {
+        // TODO might this create a connection gap?
+        this.router.clear();
+        this.router.mountSubRouter("/", subRouter);
+    }
 
 }

@@ -22,61 +22,61 @@ import io.vertx.core.json.JsonObject;
  */
 public class ProviderAggregator extends Provider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProviderAggregator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProviderAggregator.class);
 
-  private static final String NAME = "providerAggregator";
+    private static final String NAME = "providerAggregator";
 
-  private Vertx vertx;
+    private Vertx vertx;
 
-  private String configurationAddress;
-  private JsonArray providers;
-  private JsonObject env;
+    private String configurationAddress;
+    private JsonArray providers;
+    private JsonObject env;
 
-  public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers, JsonObject env) {
-    this.vertx = vertx;
-    this.configurationAddress = configurationAddress;
-    this.providers = providers;
-    this.env = env;
-  }
-
-  public void start(Promise<Void> startPromise) {
-    provide(startPromise);
-  }
-
-  @Override
-  public void provide(Promise<Void> startPromise) {
-    List<Future> futures = new ArrayList<>();
-    for (int i = 0; i < this.providers.size(); i++) {
-      JsonObject providerConfig = this.providers.getJsonObject(i);
-
-      String providerName = providerConfig.getString(StaticConfiguration.PROVIDER_NAME);
-      ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
-
-      if (providerFactory == null) {
-        LOGGER.warn("provide: Ignoring unknown provider '{}'", providerName);
-        continue;
-      }
-
-      Provider provider = providerFactory.create(this.vertx, this.configurationAddress, providerConfig, this.env);
-
-      futures.add(launchProvider(provider));
+    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers, JsonObject env) {
+        this.vertx = vertx;
+        this.configurationAddress = configurationAddress;
+        this.providers = providers;
+        this.env = env;
     }
 
-    CompositeFuture.join(futures).onSuccess(cf -> {
-      LOGGER.info("provide: launched {}/{} providers successfully", futures.size(), this.providers.size());
-      startPromise.complete();
-    }).onFailure(err -> {
-      startPromise.fail(err.getMessage());
-    });
-  }
+    public void start(Promise<Void> startPromise) {
+        provide(startPromise);
+    }
 
-  public String toString() {
-    return NAME;
-  }
+    @Override
+    public void provide(Promise<Void> startPromise) {
+        List<Future> futures = new ArrayList<>();
+        for (int i = 0; i < this.providers.size(); i++) {
+            JsonObject providerConfig = this.providers.getJsonObject(i);
 
-  private Future<String> launchProvider(Provider provider) {
-    LOGGER.debug("launchProvider: provider '{}'", provider);
-    return this.vertx.deployVerticle(provider);
-  }
+            String providerName = providerConfig.getString(StaticConfiguration.PROVIDER_NAME);
+            ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
+
+            if (providerFactory == null) {
+                LOGGER.warn("provide: Ignoring unknown provider '{}'", providerName);
+                continue;
+            }
+
+            Provider provider = providerFactory.create(this.vertx, this.configurationAddress, providerConfig, this.env);
+
+            futures.add(launchProvider(provider));
+        }
+
+        CompositeFuture.join(futures).onSuccess(cf -> {
+            LOGGER.info("provide: launched {}/{} providers successfully", futures.size(), this.providers.size());
+            startPromise.complete();
+        }).onFailure(err -> {
+            startPromise.fail(err.getMessage());
+        });
+    }
+
+    public String toString() {
+        return NAME;
+    }
+
+    private Future<String> launchProvider(Provider provider) {
+        LOGGER.debug("launchProvider: provider '{}'", provider);
+        return this.vertx.deployVerticle(provider);
+    }
 
 }

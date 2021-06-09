@@ -42,241 +42,247 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class RouterFactory {
 
-  public static final String PUBLIC_URL = "publicUrl";
-  private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
+    public static final String PUBLIC_URL = "publicUrl";
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
-  private Vertx vertx;
-  private String publicUrl;
+    private Vertx vertx;
+    private String publicUrl;
 
-  public RouterFactory(Vertx vertx, String publicUrl) {
-    this.vertx = vertx;
-    this.publicUrl = publicUrl;
-  }
+    public RouterFactory(Vertx vertx, String publicUrl) {
+        this.vertx = vertx;
+        this.publicUrl = publicUrl;
+    }
 
-  public Future<Router> createRouter(JsonObject dynamicConfig) {
-    Promise<Router> promise = Promise.promise();
-    createRouter(dynamicConfig, promise);
-    return promise.future();
-  }
+    public Future<Router> createRouter(JsonObject dynamicConfig) {
+        Promise<Router> promise = Promise.promise();
+        createRouter(dynamicConfig, promise);
+        return promise.future();
+    }
 
-  private void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
-    Router router = Router.router(this.vertx);
+    private void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
+        Router router = Router.router(this.vertx);
 
-    JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
+        JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
 
-    JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-    JsonArray middlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-    JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+        JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+        JsonArray middlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+        JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
 
-    JsonObject sessionBagOptions = retrieveSessionBagOptions(middlewares);
+        JsonObject sessionBagOptions = retrieveSessionBagOptions(middlewares);
 
-    sortByRuleLength(routers);
-    LOGGER.debug("createRouter: creating router from config");
+        sortByRuleLength(routers);
+        LOGGER.debug("createRouter: creating router from config");
 
-    for (int i = 0; i < routers.size(); i++) {
-      JsonObject routerConfig = routers.getJsonObject(i);
+        for (int i = 0; i < routers.size(); i++) {
+            JsonObject routerConfig = routers.getJsonObject(i);
 
-      String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
+            String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
-      String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
-      RoutingRule routingRule = parseRule(this.vertx, rule);
-      if (routingRule == null) {
-        handler.handle(Future.failedFuture("Failed to parse rule of router " + routerName));
-        return;
-      }
-      Route route = routingRule.apply(router);
+            String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
+            RoutingRule routingRule = parseRule(this.vertx, rule);
+            if (routingRule == null) {
+                handler.handle(Future.failedFuture("Failed to parse rule of router " + routerName));
+                return;
+            }
+            Route route = routingRule.apply(router);
 
-      List<Future> middlewareFutures = new ArrayList<Future>();
+            List<Future> middlewareFutures = new ArrayList<Future>();
 
-      // TODO maybe move out of the for loop by introducing middlewares per entrypoint
-      // required to be the first middleware to guarantee every request is processed
-      Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
-          sessionBagOptions);
-      middlewareFutures.add(sessionBagMiddlewareFuture);
+            // TODO maybe move out of the for loop by introducing middlewares per entrypoint
+            // required to be the first middleware to guarantee every request is processed
+            Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
+                    sessionBagOptions);
+            middlewareFutures.add(sessionBagMiddlewareFuture);
 
-      JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-      if (middlewareNames != null) {
-        for (int j = 0; j < middlewareNames.size(); j++) {
-          String middlewareName = middlewareNames.getString(j);
-          JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
-              DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+            JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            if (middlewareNames != null) {
+                for (int j = 0; j < middlewareNames.size(); j++) {
+                    String middlewareName = middlewareNames.getString(j);
+                    JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
+                            DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
 
-          String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-          JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+                    String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
+                    JsonObject middlewareOptions = middlewareConfig
+                            .getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
-          // needed to ensure authenticating requests are routed through this application
-          if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
-            middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
-          }
+                    // needed to ensure authenticating requests are routed through this application
+                    if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
+                        middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
+                    }
 
-          MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
-          if (middlewareFactory != null) {
-            Future<Middleware> middlewareFuture = middlewareFactory.create(this.vertx, router, middlewareOptions);
-            middlewareFutures.add(middlewareFuture);
-            continue;
-          }
+                    MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+                    if (middlewareFactory != null) {
+                        Future<Middleware> middlewareFuture = middlewareFactory.create(this.vertx, router,
+                                middlewareOptions);
+                        middlewareFutures.add(middlewareFuture);
+                        continue;
+                    }
 
-          LOGGER.warn("createRouter: Ignoring unknown middleware '{}'", middlewareType);
+                    LOGGER.warn("createRouter: Ignoring unknown middleware '{}'", middlewareType);
+                }
+            }
+
+            String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
+            JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
+                    DynamicConfiguration.SERVICE_NAME, serviceName);
+            JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            // TODO support multipe servers
+            JsonObject serverConfig = serverConfigs.getJsonObject(0);
+
+            // required to be the last middleware
+            Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
+                    serverConfig);
+            middlewareFutures.add(proxyMiddlewareFuture);
+
+            CompositeFuture.all(middlewareFutures).onComplete(ar -> {
+                middlewareFutures.forEach(mf -> {
+                    if (mf.succeeded()) {
+                        route.handler((Handler<RoutingContext>) mf.result());
+                    } else {
+                        router.delete(route.getPath());
+                        LOGGER.warn("createRouter: Ignoring path '{}'. Failed to create middleware: '{}'",
+                                route.getPath(), mf.cause().getMessage());
+                        handler.handle(
+                                Future.failedFuture("Failed to create middleware '" + mf.cause().getMessage() + "'"));
+                    }
+                });
+            });
         }
-      }
 
-      String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
-      JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services, DynamicConfiguration.SERVICE_NAME,
-          serviceName);
-      JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-      // TODO support multipe servers
-      JsonObject serverConfig = serverConfigs.getJsonObject(0);
+        // TODO ensure all routes are built
+        handler.handle(Future.succeededFuture(router));
+    }
 
-      // required to be the last middleware
-      Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router, serverConfig);
-      middlewareFutures.add(proxyMiddlewareFuture);
+    /**
+     * Retrieves the session bag options from the configured middlewares.
+     * If there are more than one configuration, only the first one is considered.
+     * As a side effect of this methods all session bag configurations are removed
+     * from the configured middlewares.
+     *
+     * @param middlewares all configured middlewares
+     * @return session bag options
+     */
+    private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
+        List<JsonObject> sessionBagMiddlewares = new ArrayList<JsonObject>();
+        for (int i = 0; i < middlewares.size(); i++) {
+            JsonObject middleware = middlewares.getJsonObject(i);
+            if (middleware.getString(DynamicConfiguration.MIDDLEWARE_TYPE)
+                    .equals(DynamicConfiguration.MIDDLEWARE_SESSION_BAG)) {
+                sessionBagMiddlewares.add(middleware);
+            }
+        }
+        for (JsonObject sessionBagMiddleware : sessionBagMiddlewares) {
+            middlewares.remove(sessionBagMiddleware);
+        }
+        if (sessionBagMiddlewares.isEmpty()) {
+            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+                    new JsonArray());
+        }
+        if (sessionBagMiddlewares.size() > 1) {
+            LOGGER.warn("retrieveSessionBagOptions: more than one session bag configurations found. Using first one.");
+        }
+        return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+    }
 
-      CompositeFuture.all(middlewareFutures).onComplete(ar -> {
-        middlewareFutures.forEach(mf -> {
-          if (mf.succeeded()) {
-            route.handler((Handler<RoutingContext>) mf.result());
-          } else {
-            router.delete(route.getPath());
-            LOGGER.warn("createRouter: Ignoring path '{}'. Failed to create middleware: '{}'", route.getPath(),
-                mf.cause().getMessage());
-            handler.handle(Future.failedFuture("Failed to create middleware '" + mf.cause().getMessage() + "'"));
-          }
+    // To avoid path overlap, routes are sorted, by default, in descending order using rules length.
+    // The priority is directly equal to the length of the rule, and so the longest length has the
+    // highest priority.
+    // Additionally, a priority for each router can be defined. This overwrites priority calculates
+    // by the length of the rule.
+    private JsonArray sortByRuleLength(JsonArray routers) {
+        List<JsonObject> routerList = routers.getList();
+
+        Collections.sort(routerList, new Comparator<JsonObject>() {
+
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
+                String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
+
+                int priorityA = ruleA.length();
+                int priorityB = ruleB.length();
+
+                if (a.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
+                    priorityA = a.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+                }
+
+                if (b.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
+                    priorityB = b.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+                }
+
+                return priorityB - priorityA;
+            }
+
         });
-      });
+
+        return routers;
     }
 
-    // TODO ensure all routes are built
-    handler.handle(Future.succeededFuture(router));
-  }
-
-  /**
-   * Retrieves the session bag options from the configured middlewares.
-   * If there are more than one configuration, only the first one is considered.
-   * As a side effect of this methods all session bag configurations are removed
-   * from the configured middlewares.
-   *
-   * @param middlewares all configured middlewares
-   * @return session bag options
-   */
-  private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
-    List<JsonObject> sessionBagMiddlewares = new ArrayList<JsonObject>();
-    for (int i = 0; i < middlewares.size(); i++) {
-      JsonObject middleware = middlewares.getJsonObject(i);
-      if (middleware.getString(DynamicConfiguration.MIDDLEWARE_TYPE)
-          .equals(DynamicConfiguration.MIDDLEWARE_SESSION_BAG)) {
-        sessionBagMiddlewares.add(middleware);
-      }
+    private RoutingRule path(Vertx vertx, String path) {
+        return new RoutingRule() {
+            @Override
+            public Route apply(Router router) {
+                LOGGER.debug("apply: create route with exact path '{}'", path);
+                return router.route(path);
+            }
+        };
     }
-    for (JsonObject sessionBagMiddleware : sessionBagMiddlewares) {
-      middlewares.remove(sessionBagMiddleware);
+
+    private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {
+        return new RoutingRule() {
+            @Override
+            public Route apply(Router router) {
+                LOGGER.debug("apply: create route with path prefix '{}'", pathPrefix);
+                return router.route(pathPrefix);
+            }
+        };
     }
-    if (sessionBagMiddlewares.isEmpty()) {
-      return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES, new JsonArray());
+
+    private RoutingRule host(Vertx vertx, String host) {
+        return new RoutingRule() {
+            @Override
+            public Route apply(Router router) {
+                LOGGER.debug("apply: create route with host '{}'", host);
+                return router.route().virtualHost(host);
+            }
+
+        };
     }
-    if (sessionBagMiddlewares.size() > 1) {
-      LOGGER.warn("retrieveSessionBagOptions: more than one session bag configurations found. Using first one.");
-    }
-    return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
-  }
 
-  // To avoid path overlap, routes are sorted, by default, in descending order using rules length.
-  // The priority is directly equal to the length of the rule, and so the longest length has the
-  // highest priority.
-  // Additionally, a priority for each router can be defined. This overwrites priority calculates
-  // by the length of the rule.
-  private JsonArray sortByRuleLength(JsonArray routers) {
-    List<JsonObject> routerList = routers.getList();
+    // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
+    private RoutingRule parseRule(Vertx vertx, String rule) {
+        Pattern rulePattern = Pattern
+                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
+        Matcher m = rulePattern.matcher(rule);
 
-    Collections.sort(routerList, new Comparator<JsonObject>() {
-
-      @Override
-      public int compare(JsonObject a, JsonObject b) {
-        String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
-        String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
-
-        int priorityA = ruleA.length();
-        int priorityB = ruleB.length();
-
-        if (a.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
-          priorityA = a.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+        if (!m.find()) {
+            return null;
         }
 
-        if (b.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
-          priorityB = b.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+        RoutingRule routingRule;
+        String ruleValue = m.group("ruleValue");
+        switch (m.group("ruleName")) {
+            case "Path": {
+                routingRule = path(vertx, ruleValue);
+                break;
+            }
+            case "PathPrefix": {
+                // append * to do path prefix routing
+                String pathPrefix = ruleValue;
+                pathPrefix += "*";
+
+                routingRule = pathPrefix(vertx, pathPrefix);
+                break;
+            }
+            case "Host": {
+                routingRule = host(vertx, ruleValue);
+                break;
+            }
+            default: {
+                routingRule = null;
+                break;
+            }
         }
-
-        return priorityB - priorityA;
-      }
-
-    });
-
-    return routers;
-  }
-
-  private RoutingRule path(Vertx vertx, String path) {
-    return new RoutingRule() {
-      @Override
-      public Route apply(Router router) {
-        LOGGER.debug("apply: create route with exact path '{}'", path);
-        return router.route(path);
-      }
-    };
-  }
-
-  private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {
-    return new RoutingRule() {
-      @Override
-      public Route apply(Router router) {
-        LOGGER.debug("apply: create route with path prefix '{}'", pathPrefix);
-        return router.route(pathPrefix);
-      }
-    };
-  }
-
-  private RoutingRule host(Vertx vertx, String host) {
-    return new RoutingRule() {
-      @Override
-      public Route apply(Router router) {
-        LOGGER.debug("apply: create route with host '{}'", host);
-        return router.route().virtualHost(host);
-      }
-
-    };
-  }
-
-  // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
-  private RoutingRule parseRule(Vertx vertx, String rule) {
-    Pattern rulePattern = Pattern.compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
-    Matcher m = rulePattern.matcher(rule);
-
-    if (!m.find()) {
-      return null;
+        return routingRule;
     }
-
-    RoutingRule routingRule;
-    String ruleValue = m.group("ruleValue");
-    switch (m.group("ruleName")) {
-      case "Path": {
-        routingRule = path(vertx, ruleValue);
-        break;
-      }
-      case "PathPrefix": {
-        // append * to do path prefix routing
-        String pathPrefix = ruleValue;
-        pathPrefix += "*";
-
-        routingRule = pathPrefix(vertx, pathPrefix);
-        break;
-      }
-      case "Host": {
-        routingRule = host(vertx, ruleValue);
-        break;
-      }
-      default: {
-        routingRule = null;
-        break;
-      }
-    }
-    return routingRule;
-  }
 }

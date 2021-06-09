@@ -1,103 +1,103 @@
 {
-  "http": {
-    "routers": [
-      {
-        "name": "auth",
-        "rule": "PathPrefix('/auth')",
-        "service": "portal-iam"
-      }
-    ],
-    "middlewares": [
-      {
-        "name": "navigationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "id" }
-      },
-
-      {
-        "name": "dashboardAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "id" }
-      },
-      {
-        "name": "dashboardOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Portal-Gateway",
-          "clientSecret": "Portal-Gateway!",
-          "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "Dashboard"
-        }
-      },
-
-      {
-        "name": "organisationAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "Organisation" }
-      },
-      {
-        "name": "organisationOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Portal-Gateway",
-          "clientSecret": "Portal-Gateway!",
-          "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "Organisation"
-        }
-      },
-
-      {
-        "name": "documentAuthBearer",
-        "type": "authorizationBearer",
-        "options": { "sessionScope": "Document" }
-      },
-      {
-        "name": "documentOauth2",
-        "type": "oauth2",
-        "options": {
-          "clientId": "Portal-Gateway",
-          "clientSecret": "Portal-Gateway!",
-          "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
-          "sessionScope": "Document"
-        }
-      },
-
-      {
-        "name": "ShowSessionContentMiddleware",
-        "type": "_session_",
-        "options": {}
-      },
-
-      {
-        "name": "whithelistedCookiesInSessionBag",
-        "type": "sessionBag",
-        "options": {
-          "whithelistedCookies": [
+    "http": {
+        "routers": [
             {
-              "name": "KEYCLOAK_SESSION",
-              "path": "/auth/realms/master/"
-            },
-            {
-              "name": "KEYCLOAK_SESSION_LEGACY",
-              "path": "/auth/realms/master/"
-            },
-            {
-              "name": "KEYCLOAK_SESSION",
-              "path": "/auth/realms/portal/"
-            },
-            {
-              "name": "KEYCLOAK_SESSION_LEGACY",
-              "path": "/auth/realms/portal/"
+                "name": "auth",
+                "rule": "PathPrefix('/auth')",
+                "service": "portal-iam"
             }
-          ]
-        }
-      }
-    ],
-    "services": [
-      {
-        "name": "portal-iam",
-        "servers": [{ "host": "${portal-iam.host}", "port": 8080 }]
-      }
-    ]
-  }
+        ],
+        "middlewares": [
+            {
+                "name": "navigationAuthBearer",
+                "type": "authorizationBearer",
+                "options": { "sessionScope": "id" }
+            },
+
+            {
+                "name": "dashboardAuthBearer",
+                "type": "authorizationBearer",
+                "options": { "sessionScope": "id" }
+            },
+            {
+                "name": "dashboardOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
+                    "sessionScope": "Dashboard"
+                }
+            },
+
+            {
+                "name": "organisationAuthBearer",
+                "type": "authorizationBearer",
+                "options": { "sessionScope": "Organisation" }
+            },
+            {
+                "name": "organisationOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
+                    "sessionScope": "Organisation"
+                }
+            },
+
+            {
+                "name": "documentAuthBearer",
+                "type": "authorizationBearer",
+                "options": { "sessionScope": "Document" }
+            },
+            {
+                "name": "documentOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${portal-iam.host}:${portal-iam.port}/auth/realms/portal",
+                    "sessionScope": "Document"
+                }
+            },
+
+            {
+                "name": "ShowSessionContentMiddleware",
+                "type": "_session_",
+                "options": {}
+            },
+
+            {
+                "name": "whithelistedCookiesInSessionBag",
+                "type": "sessionBag",
+                "options": {
+                    "whithelistedCookies": [
+                        {
+                            "name": "KEYCLOAK_SESSION",
+                            "path": "/auth/realms/master/"
+                        },
+                        {
+                            "name": "KEYCLOAK_SESSION_LEGACY",
+                            "path": "/auth/realms/master/"
+                        },
+                        {
+                            "name": "KEYCLOAK_SESSION",
+                            "path": "/auth/realms/portal/"
+                        },
+                        {
+                            "name": "KEYCLOAK_SESSION_LEGACY",
+                            "path": "/auth/realms/portal/"
+                        }
+                    ]
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "portal-iam",
+                "servers": [{ "host": "${portal-iam.host}", "port": 8080 }]
+            }
+        ]
+    }
 }

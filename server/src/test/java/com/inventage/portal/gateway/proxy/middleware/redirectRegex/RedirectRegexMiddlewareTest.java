@@ -23,44 +23,44 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class RedirectRegexMiddlewareTest {
 
-  static Stream<Arguments> redirectTestData() {
-    // name, regex, replacement, URL, expectedStatusCode, expectedURL
-    return Stream.of(
-        Arguments.of("simple redirection", "^(/dashboard)$", "$1/", "/dashboard", HttpResponseStatus.FOUND.code(),
-            "/dashboard/"),
-        Arguments.of("URL doesn't match regex", "^/blub/(.*)$", "/$1", "/wont/match", HttpResponseStatus.OK.code(),
-            null));
-  }
+    static Stream<Arguments> redirectTestData() {
+        // name, regex, replacement, URL, expectedStatusCode, expectedURL
+        return Stream.of(
+                Arguments.of("simple redirection", "^(/dashboard)$", "$1/", "/dashboard",
+                        HttpResponseStatus.FOUND.code(), "/dashboard/"),
+                Arguments.of("URL doesn't match regex", "^/blub/(.*)$", "/$1", "/wont/match",
+                        HttpResponseStatus.OK.code(), null));
+    }
 
-  @ParameterizedTest
-  @MethodSource("redirectTestData")
-  void redirectTest(String name, String regex, String replacement, String URL, int expectedStatusCode,
-      String expectedURL, Vertx vertx, VertxTestContext testCtx) {
+    @ParameterizedTest
+    @MethodSource("redirectTestData")
+    void redirectTest(String name, String regex, String replacement, String URL, int expectedStatusCode,
+            String expectedURL, Vertx vertx, VertxTestContext testCtx) {
 
-    String failureMsg = String.format("Failure of '%s' test case", name);
+        String failureMsg = String.format("Failure of '%s' test case", name);
 
-    Checkpoint serverStarted = testCtx.checkpoint();
-    Checkpoint requestsServed = testCtx.checkpoint();
-    Checkpoint responsesReceived = testCtx.checkpoint();
+        Checkpoint serverStarted = testCtx.checkpoint();
+        Checkpoint requestsServed = testCtx.checkpoint();
+        Checkpoint responsesReceived = testCtx.checkpoint();
 
-    RedirectRegexMiddleware redirect = new RedirectRegexMiddleware(regex, replacement);
+        RedirectRegexMiddleware redirect = new RedirectRegexMiddleware(regex, replacement);
 
-    int port = TestUtils.findFreePort();
-    Router router = Router.router(vertx);
-    router.route().handler(redirect).handler(ctx -> ctx.response().end("ok"));
-    vertx.createHttpServer().requestHandler(req -> {
-      router.handle(req);
-      requestsServed.flag();
-    }).listen(port).onComplete(testCtx.succeeding(s -> {
-      serverStarted.flag();
+        int port = TestUtils.findFreePort();
+        Router router = Router.router(vertx);
+        router.route().handler(redirect).handler(ctx -> ctx.response().end("ok"));
+        vertx.createHttpServer().requestHandler(req -> {
+            router.handle(req);
+            requestsServed.flag();
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
+            serverStarted.flag();
 
-      vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", URL).compose(req -> req.send())
-          .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
-            assertEquals(expectedStatusCode, resp.statusCode(), failureMsg);
-            assertEquals(expectedURL, resp.headers().get(HttpHeaders.LOCATION), failureMsg);
-            responsesReceived.flag();
-          })));
-    }));
+            vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", URL).compose(req -> req.send())
+                    .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
+                        assertEquals(expectedStatusCode, resp.statusCode(), failureMsg);
+                        assertEquals(expectedURL, resp.headers().get(HttpHeaders.LOCATION), failureMsg);
+                        responsesReceived.flag();
+                    })));
+        }));
 
-  }
+    }
 }

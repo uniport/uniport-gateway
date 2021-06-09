@@ -33,226 +33,227 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class SessionBagMiddleware implements Middleware {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
 
-  public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
+    public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
-  // These cookies are allowed to be passed back to the user agent.
-  // This is required for some frontend logic to work properly
-  // (e.g. for keycloak login logic of its admin console)
-  private JsonArray whitelistedCookies;
+    // These cookies are allowed to be passed back to the user agent.
+    // This is required for some frontend logic to work properly
+    // (e.g. for keycloak login logic of its admin console)
+    private JsonArray whitelistedCookies;
 
-  public SessionBagMiddleware(JsonArray whithelistedCookies) {
-    this.whitelistedCookies = whithelistedCookies;
-  }
-
-  @Override
-  public void handle(RoutingContext ctx) {
-
-    if (ctx.session() == null) {
-      LOGGER.warn("handle: no session initialized. Skipping session bag middleware");
-      ctx.next();
-      return;
+    public SessionBagMiddleware(JsonArray whithelistedCookies) {
+        this.whitelistedCookies = whithelistedCookies;
     }
 
-    // on request: set cookie from session bag if present
-    String cookies = loadCookiesFromSessionBag(ctx);
-    if (cookies != null && !cookies.isEmpty()) {
-      ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookies);
+    @Override
+    public void handle(RoutingContext ctx) {
+
+        if (ctx.session() == null) {
+            LOGGER.warn("handle: no session initialized. Skipping session bag middleware");
+            ctx.next();
+            return;
+        }
+
+        // on request: set cookie from session bag if present
+        String cookies = loadCookiesFromSessionBag(ctx);
+        if (cookies != null && !cookies.isEmpty()) {
+            ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookies);
+        }
+
+        // on response: remove cookies if present and store them in session bag
+        Handler<MultiMap> respHeadersModifier = headers -> {
+            storeCookiesInSessionBag(ctx, headers);
+        };
+        this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
+
+        ctx.next();
     }
 
-    // on response: remove cookies if present and store them in session bag
-    Handler<MultiMap> respHeadersModifier = headers -> {
-      storeCookiesInSessionBag(ctx, headers);
-    };
-    this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
+    private String loadCookiesFromSessionBag(RoutingContext ctx) {
+        if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
+            return null;
+        }
+        LOGGER.debug("handle: Cookies in session found. Setting as cookie header.");
 
-    ctx.next();
-  }
+        List<String> requestCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE);
+        ctx.request().headers().remove(HttpHeaders.COOKIE);
 
-  private String loadCookiesFromSessionBag(RoutingContext ctx) {
-    if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
-      return null;
-    }
-    LOGGER.debug("handle: Cookies in session found. Setting as cookie header.");
+        Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
+        List<String> encodedStoredCookies = new ArrayList<String>();
+        for (Cookie storedCookie : storedCookies) {
+            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
+                encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
+            }
+        }
 
-    List<String> requestCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE);
-    ctx.request().headers().remove(HttpHeaders.COOKIE);
+        // https://github.com/vert-x3/vertx-web/issues/1716
+        String cookieDelimiter = "; "; // RFC 6265 4.2.1
+        String cookies = String.join(cookieDelimiter, encodedStoredCookies);
+        // check for conflicting request and stored cookies
+        // stored cookie have presedence to avoid cookie injection
+        for (String requestCookie : requestCookies) {
+            Cookie decodedRequestCookie = ClientCookieDecoder.STRICT.decode(requestCookie);
+            if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
+                continue;
+            }
+            cookies = String.join(cookieDelimiter, cookies, requestCookie);
+        }
 
-    Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-    List<String> encodedStoredCookies = new ArrayList<String>();
-    for (Cookie storedCookie : storedCookies) {
-      if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
-        encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
-      }
-    }
-
-    // https://github.com/vert-x3/vertx-web/issues/1716
-    String cookieDelimiter = "; "; // RFC 6265 4.2.1
-    String cookies = String.join(cookieDelimiter, encodedStoredCookies);
-    // check for conflicting request and stored cookies
-    // stored cookie have presedence to avoid cookie injection
-    for (String requestCookie : requestCookies) {
-      Cookie decodedRequestCookie = ClientCookieDecoder.STRICT.decode(requestCookie);
-      if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
-        continue;
-      }
-      cookies = String.join(cookieDelimiter, cookies, requestCookie);
+        return cookies;
     }
 
-    return cookies;
-  }
-
-  private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
-    return matchesSSL(cookie, isSSL) && matchesPath(cookie, path);
-  }
-
-  private boolean matchesSSL(Cookie cookie, boolean isSSL) {
-    return cookie.isSecure() == isSSL;
-  }
-
-  /*
-  The user agent MUST use an algorithm equivalent to the following
-  algorithm to compute the default-path of a cookie:
-   1.  Let uri-path be the path portion of the request-uri if such a
-   portion exists (and empty otherwise).  For example, if the
-   request-uri contains just a path (and optional query string),
-   then the uri-path is that path (without the %x3F ("?") character
-   or query string), and if the request-uri contains a full
-   absoluteURI, the uri-path is the path component of that URI.
-   2.  If the uri-path is empty or if the first character of the uri-
-   path is not a %x2F ("/") character, output %x2F ("/") and skip
-   the remaining steps.
-   3.  If the uri-path contains no more than one %x2F ("/") character,
-   output %x2F ("/") and skip the remaining step.
-   4.  Output the characters of the uri-path from the first character up
-   to, but not including, the right-most %x2F ("/").
-
-  A request-path path-matches a given cookie-path if at least one of
-   the following conditions holds:
-   -  The cookie-path and the request-path are identical.
-   -  The cookie-path is a prefix of the request-path, and the last
-  character of the cookie-path is %x2F ("/").
-   -  The cookie-path is a prefix of the request-path, and the first
-  character of the request-path that is not included in the cookie-
-  path is a %x2F ("/") character.
-
-  https://tools.ietf.org/html/rfc6265#section-5.1.4
-  */
-  private boolean matchesPath(Cookie cookie, String uriPath) {
-    String requestPath;
-    if (uriPath.isEmpty() || !uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
-      requestPath = "/";
-    } else {
-      requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
+    private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
+        return matchesSSL(cookie, isSSL) && matchesPath(cookie, path);
     }
 
-    if (cookie.path() == null) {
-      return false;
+    private boolean matchesSSL(Cookie cookie, boolean isSSL) {
+        return cookie.isSecure() == isSSL;
     }
 
-    String cookiePath;
-    if (cookie.path().isEmpty()) {
-      cookiePath = "/";
-    } else {
-      cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1) : cookie.path();
-    }
-    String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
-    return Pattern.compile(regex).matcher(requestPath).matches();
-  }
+    /*
+    The user agent MUST use an algorithm equivalent to the following
+    algorithm to compute the default-path of a cookie:
+     1.  Let uri-path be the path portion of the request-uri if such a
+     portion exists (and empty otherwise).  For example, if the
+     request-uri contains just a path (and optional query string),
+     then the uri-path is that path (without the %x3F ("?") character
+     or query string), and if the request-uri contains a full
+     absoluteURI, the uri-path is the path component of that URI.
+     2.  If the uri-path is empty or if the first character of the uri-
+     path is not a %x2F ("/") character, output %x2F ("/") and skip
+     the remaining steps.
+     3.  If the uri-path contains no more than one %x2F ("/") character,
+     output %x2F ("/") and skip the remaining step.
+     4.  Output the characters of the uri-path from the first character up
+     to, but not including, the right-most %x2F ("/").
 
-  private void storeCookiesInSessionBag(RoutingContext ctx, MultiMap headers) {
-    List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
-    if (cookiesToSet == null || cookiesToSet.isEmpty()) {
-      return;
-    }
+    A request-path path-matches a given cookie-path if at least one of
+     the following conditions holds:
+     -  The cookie-path and the request-path are identical.
+     -  The cookie-path is a prefix of the request-path, and the last
+    character of the cookie-path is %x2F ("/").
+     -  The cookie-path is a prefix of the request-path, and the first
+    character of the request-path that is not included in the cookie-
+    path is a %x2F ("/") character.
 
-    LOGGER.debug("handle: Set-Cookie detected. Removing and storing in session.");
-    headers.remove(HttpHeaders.SET_COOKIE);
+    https://tools.ietf.org/html/rfc6265#section-5.1.4
+    */
+    private boolean matchesPath(Cookie cookie, String uriPath) {
+        String requestPath;
+        if (uriPath.isEmpty() || !uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
+            requestPath = "/";
+        } else {
+            requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
+        }
 
-    Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-    if (storedCookies == null) {
-      storedCookies = new HashSet<Cookie>();
-    }
+        if (cookie.path() == null) {
+            return false;
+        }
 
-    for (String cookieToSet : cookiesToSet) {
-      // use netty cookie until maxAge getter is impemented
-      // https://github.com/eclipse-vertx/vert.x/issues/3906
-      Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
-      if (decodedCookieToSet.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
-        continue;
-      }
-      if (isWhithelisted(decodedCookieToSet)) {
-        // we delegate all logic for whitelisted cookies to the user agent
-        LOGGER.debug("handle: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
-        headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
-        continue;
-      }
-      updateSessionBag(storedCookies, decodedCookieToSet);
-    }
-    ctx.session().put(SESSION_BAG_COOKIES, storedCookies);
-  }
-
-  /*
-  If a new cookie is received with the same cookie-name, and
-  path-value as a cookie that it has already stored,
-  the existing cookie is evicted and replaced with the new cookie.
-  Cookies can be deleted by sending a new cookie with an Expires
-  attribute with a value in the past.
-  */
-  private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
-    if (newCookie.name() == null) {
-      LOGGER.warn("updateSessionBag: Ignoring cookie without a name");
-      return;
-    }
-    if (newCookie.path() == null) {
-      newCookie.setPath("/");
+        String cookiePath;
+        if (cookie.path().isEmpty()) {
+            cookiePath = "/";
+        } else {
+            cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
+                    : cookie.path();
+        }
+        String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
+        return Pattern.compile(regex).matcher(requestPath).matches();
     }
 
-    Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
-    if (foundCookie != null) {
-      boolean expired = (foundCookie.maxAge() == 0L);
-      storedCookies.remove(foundCookie);
-      if (expired) {
-        LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", newCookie.name());
-        return;
-      }
+    private void storeCookiesInSessionBag(RoutingContext ctx, MultiMap headers) {
+        List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
+        if (cookiesToSet == null || cookiesToSet.isEmpty()) {
+            return;
+        }
+
+        LOGGER.debug("handle: Set-Cookie detected. Removing and storing in session.");
+        headers.remove(HttpHeaders.SET_COOKIE);
+
+        Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
+        if (storedCookies == null) {
+            storedCookies = new HashSet<Cookie>();
+        }
+
+        for (String cookieToSet : cookiesToSet) {
+            // use netty cookie until maxAge getter is impemented
+            // https://github.com/eclipse-vertx/vert.x/issues/3906
+            Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
+            if (decodedCookieToSet.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
+                continue;
+            }
+            if (isWhithelisted(decodedCookieToSet)) {
+                // we delegate all logic for whitelisted cookies to the user agent
+                LOGGER.debug("handle: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
+                headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
+                continue;
+            }
+            updateSessionBag(storedCookies, decodedCookieToSet);
+        }
+        ctx.session().put(SESSION_BAG_COOKIES, storedCookies);
     }
 
-    if (newCookie.maxAge() == 0L) {
-      LOGGER.debug("updateSessionBag: Ignoring expired cookie");
-      return;
-    }
-    LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding", newCookie.name());
-    storedCookies.add(newCookie);
-  }
+    /*
+    If a new cookie is received with the same cookie-name, and
+    path-value as a cookie that it has already stored,
+    the existing cookie is evicted and replaced with the new cookie.
+    Cookies can be deleted by sending a new cookie with an Expires
+    attribute with a value in the past.
+    */
+    private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
+        if (newCookie.name() == null) {
+            LOGGER.warn("updateSessionBag: Ignoring cookie without a name");
+            return;
+        }
+        if (newCookie.path() == null) {
+            newCookie.setPath("/");
+        }
 
-  private String escapeSpecialRegexChars(String regex) {
-    return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.").replace("|", "\\.")
-        .replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(").replace(")", "\\)")
-        .replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
-  }
+        Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
+        if (foundCookie != null) {
+            boolean expired = (foundCookie.maxAge() == 0L);
+            storedCookies.remove(foundCookie);
+            if (expired) {
+                LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", newCookie.name());
+                return;
+            }
+        }
 
-  private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
-    for (Cookie c : set) {
-      if (c.name().equals(cookie.name()) && c.path().equals(cookie.path())) {
-        return c;
-      }
+        if (newCookie.maxAge() == 0L) {
+            LOGGER.debug("updateSessionBag: Ignoring expired cookie");
+            return;
+        }
+        LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding", newCookie.name());
+        storedCookies.add(newCookie);
     }
-    return null;
-  }
 
-  private boolean isWhithelisted(Cookie cookie) {
-    for (int i = 0; i < this.whitelistedCookies.size(); i++) {
-      JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
-      String whitelistedCookieName = whitelistedCookie
-          .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME);
-      String whitelistedCookiePath = whitelistedCookie
-          .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH);
-      if (cookie.name().equals(whitelistedCookieName) && cookie.path().equals(whitelistedCookiePath)) {
-        return true;
-      }
+    private String escapeSpecialRegexChars(String regex) {
+        return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
+                .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
+                .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
-    return false;
-  }
+
+    private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
+        for (Cookie c : set) {
+            if (c.name().equals(cookie.name()) && c.path().equals(cookie.path())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private boolean isWhithelisted(Cookie cookie) {
+        for (int i = 0; i < this.whitelistedCookies.size(); i++) {
+            JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
+            String whitelistedCookieName = whitelistedCookie
+                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME);
+            String whitelistedCookiePath = whitelistedCookie
+                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH);
+            if (cookie.name().equals(whitelistedCookieName) && cookie.path().equals(whitelistedCookiePath)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

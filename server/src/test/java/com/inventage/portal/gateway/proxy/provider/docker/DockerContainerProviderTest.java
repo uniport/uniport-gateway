@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.provider.docker;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;

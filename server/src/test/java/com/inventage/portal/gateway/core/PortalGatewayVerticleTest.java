@@ -12,13 +12,13 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class PortalGatewayVerticleTest {
 
-  @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new PortalGatewayVerticle(), testContext.succeeding(id -> testContext.completeNow()));
-  }
+    @BeforeEach
+    void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
+        vertx.deployVerticle(new PortalGatewayVerticle(), testContext.succeeding(id -> testContext.completeNow()));
+    }
 
-  @Test
-  void verticle_deployed(Vertx vertx, VertxTestContext testContext) {
-    testContext.completeNow();
-  }
+    @Test
+    void verticle_deployed(Vertx vertx, VertxTestContext testContext) {
+        testContext.completeNow();
+    }
 }

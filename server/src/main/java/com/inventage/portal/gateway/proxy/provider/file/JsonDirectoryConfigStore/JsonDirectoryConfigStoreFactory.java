@@ -7,14 +7,14 @@ import io.vertx.core.json.JsonObject;
 
 public class JsonDirectoryConfigStoreFactory implements ConfigStoreFactory {
 
-  @Override
-  public String name() {
-    return "jsonDirectory";
-  }
+    @Override
+    public String name() {
+        return "jsonDirectory";
+    }
 
-  @Override
-  public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new JsonDirectoryConfigStore(vertx, configuration);
-  }
+    @Override
+    public ConfigStore create(Vertx vertx, JsonObject configuration) {
+        return new JsonDirectoryConfigStore(vertx, configuration);
+    }
 
 }

@@ -5,13 +5,13 @@ import io.vertx.core.spi.logging.LogDelegateFactory;
 
 public class PortalGatewayLogDelegateFactory implements LogDelegateFactory {
 
-  @Override
-  public boolean isAvailable() {
-    return false;
-  }
+    @Override
+    public boolean isAvailable() {
+        return false;
+    }
 
-  @Override
-  public LogDelegate createDelegate(String name) {
-    return new PortalGatewayLogDelegate(name);
-  }
+    @Override
+    public LogDelegate createDelegate(String name) {
+        return new PortalGatewayLogDelegate(name);
+    }
 }

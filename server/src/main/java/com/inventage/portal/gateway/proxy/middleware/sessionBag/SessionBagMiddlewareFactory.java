@@ -15,25 +15,25 @@ import io.vertx.ext.web.Router;
 
 public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
 
-  private static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
+    private static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
 
-  @Override
-  public String provides() {
-    return MIDDLEWARE_SESSION_BAG;
-  }
+    @Override
+    public String provides() {
+        return MIDDLEWARE_SESSION_BAG;
+    }
 
-  @Override
-  public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareOptions) {
-    return this.create(vertx, middlewareOptions);
-  }
+    @Override
+    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareOptions) {
+        return this.create(vertx, middlewareOptions);
+    }
 
-  public Future<Middleware> create(Vertx vertx, JsonObject middlewareOptions) {
-    JsonArray whithelistedCookies = middlewareOptions
-        .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES);
-    LOGGER.debug("create: Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
-    return Future.succeededFuture(new SessionBagMiddleware(whithelistedCookies));
-  }
+    public Future<Middleware> create(Vertx vertx, JsonObject middlewareOptions) {
+        JsonArray whithelistedCookies = middlewareOptions
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES);
+        LOGGER.debug("create: Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
+        return Future.succeededFuture(new SessionBagMiddleware(whithelistedCookies));
+    }
 
 }

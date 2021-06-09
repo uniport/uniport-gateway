@@ -22,91 +22,91 @@ import io.vertx.core.json.JsonObject;
  */
 public class PortalGatewayConfigRetriever {
 
-  public static final String DEFAULT_CONFIG_FILE_NAME = "portal-gateway.json";
-  public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
-  public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway";
-  public static final String LOCAL_CONFIG_FILE_PATH = ".";
+    public static final String DEFAULT_CONFIG_FILE_NAME = "portal-gateway.json";
+    public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
+    public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway";
+    public static final String LOCAL_CONFIG_FILE_PATH = ".";
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);
-  private static ConfigRetrieverOptions options;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);
+    private static ConfigRetrieverOptions options;
 
-  /**
-   * returns a ConfigRetriever.
-   *
-   * @param vertx vertx instance
-   * @return ConfigRetriever
-   */
-  public static ConfigRetriever create(Vertx vertx) {
-    return ConfigRetriever.create(vertx, getOrCreateOptions());
-  }
-
-  public static Optional<Path> getStaticConfigPath() {
-    // 1.
-    String staticConfigFileName = System.getenv(PROPERTY);
-    if (existsAsFile(staticConfigFileName)) {
-      LOGGER.info("getPortalGatewayJson: reading from system env variable as '{}'", staticConfigFileName);
-      return Optional.of(Path.of(staticConfigFileName));
-    }
-    // 2.
-    staticConfigFileName = System.getProperty(PROPERTY);
-    if (existsAsFile(staticConfigFileName)) {
-      LOGGER.info("getPortalGatewayJson: reading from system property as '{}'", staticConfigFileName);
-      return Optional.of(Path.of(staticConfigFileName));
-    }
-    // 3.
-    staticConfigFileName = String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
-    if (existsAsFile(staticConfigFileName)) {
-      LOGGER.info("getPortalGatewayJson: reading from default file '{}'", staticConfigFileName);
-      return Optional.of(Path.of(staticConfigFileName));
-    }
-    // 4.
-    staticConfigFileName = String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
-    if (existsAsFile(staticConfigFileName)) {
-      LOGGER.info("getPortalGatewayJson: reading from default file within working directory '{}'",
-          staticConfigFileName);
-      return Optional.of(Path.of(staticConfigFileName));
-    }
-    LOGGER.warn("getPortalGatewayJson: no portal-gateway.json file configured");
-    return Optional.empty();
-  }
-
-  /**
-   * Stores added later to the options, will override properties from prior stores.
-   *
-   * @return ConfigRetrieverOptions
-   */
-  private static ConfigRetrieverOptions getOrCreateOptions() {
-    if (options == null) {
-      options = new ConfigRetrieverOptions();
-
-      getPortalGatewayJson().ifPresent(json -> options.addStore(json));
-      options.addStore(new ConfigStoreOptions().setType("env").setConfig(new JsonObject().put("raw-data", true)));
-    }
-    return options;
-  }
-
-  /**
-   * Implements the strategy for finding the static configuration file.
-   *
-   * @return
-   */
-  private static Optional<ConfigStoreOptions> getPortalGatewayJson() {
-    Optional<Path> staticConfigPath = getStaticConfigPath();
-    if (staticConfigPath.isEmpty()) {
-      return Optional.empty();
+    /**
+     * returns a ConfigRetriever.
+     *
+     * @param vertx vertx instance
+     * @return ConfigRetriever
+     */
+    public static ConfigRetriever create(Vertx vertx) {
+        return ConfigRetriever.create(vertx, getOrCreateOptions());
     }
 
-    return Optional.of(configStoreOptions(staticConfigPath.get()));
-  }
+    public static Optional<Path> getStaticConfigPath() {
+        // 1.
+        String staticConfigFileName = System.getenv(PROPERTY);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from system env variable as '{}'", staticConfigFileName);
+            return Optional.of(Path.of(staticConfigFileName));
+        }
+        // 2.
+        staticConfigFileName = System.getProperty(PROPERTY);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from system property as '{}'", staticConfigFileName);
+            return Optional.of(Path.of(staticConfigFileName));
+        }
+        // 3.
+        staticConfigFileName = String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from default file '{}'", staticConfigFileName);
+            return Optional.of(Path.of(staticConfigFileName));
+        }
+        // 4.
+        staticConfigFileName = String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
+        if (existsAsFile(staticConfigFileName)) {
+            LOGGER.info("getPortalGatewayJson: reading from default file within working directory '{}'",
+                    staticConfigFileName);
+            return Optional.of(Path.of(staticConfigFileName));
+        }
+        LOGGER.warn("getPortalGatewayJson: no portal-gateway.json file configured");
+        return Optional.empty();
+    }
 
-  private static ConfigStoreOptions configStoreOptions(Path filePath) {
-    return new ConfigStoreOptions().setType("file")
-        .setFormat(filePath.toString().endsWith("json") ? "json" : "properties")
-        .setConfig(new JsonObject().put("path", filePath.toAbsolutePath()).put("raw-data", true));
-  }
+    /**
+     * Stores added later to the options, will override properties from prior stores.
+     *
+     * @return ConfigRetrieverOptions
+     */
+    private static ConfigRetrieverOptions getOrCreateOptions() {
+        if (options == null) {
+            options = new ConfigRetrieverOptions();
 
-  private static boolean existsAsFile(String fileName) {
-    return fileName != null && new File(fileName).exists();
-  }
+            getPortalGatewayJson().ifPresent(json -> options.addStore(json));
+            options.addStore(new ConfigStoreOptions().setType("env").setConfig(new JsonObject().put("raw-data", true)));
+        }
+        return options;
+    }
+
+    /**
+     * Implements the strategy for finding the static configuration file.
+     *
+     * @return
+     */
+    private static Optional<ConfigStoreOptions> getPortalGatewayJson() {
+        Optional<Path> staticConfigPath = getStaticConfigPath();
+        if (staticConfigPath.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(configStoreOptions(staticConfigPath.get()));
+    }
+
+    private static ConfigStoreOptions configStoreOptions(Path filePath) {
+        return new ConfigStoreOptions().setType("file")
+                .setFormat(filePath.toString().endsWith("json") ? "json" : "properties")
+                .setConfig(new JsonObject().put("path", filePath.toAbsolutePath()).put("raw-data", true));
+    }
+
+    private static boolean existsAsFile(String fileName) {
+        return fileName != null && new File(fileName).exists();
+    }
 
 }

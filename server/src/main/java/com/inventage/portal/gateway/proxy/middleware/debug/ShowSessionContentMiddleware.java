@@ -21,59 +21,59 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class ShowSessionContentMiddleware implements Middleware {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddleware.class);
 
-  @Override
-  public void handle(RoutingContext ctx) {
-    if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
-      LOGGER.info("handle: url '{}'", ctx.request().absoluteURI());
-      ctx.end(getHtml(ctx));
-    } else {
-      LOGGER.info("handle: ignoring url '{}'", ctx.request().absoluteURI());
-      ctx.next();
+    @Override
+    public void handle(RoutingContext ctx) {
+        if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
+            LOGGER.info("handle: url '{}'", ctx.request().absoluteURI());
+            ctx.end(getHtml(ctx));
+        } else {
+            LOGGER.info("handle: ignoring url '{}'", ctx.request().absoluteURI());
+            ctx.next();
+        }
     }
-  }
 
-  // TODO: usage of vert.x templating for HTML generation
-  private String getHtml(RoutingContext ctx) {
-    final StringBuffer html = new StringBuffer();
+    // TODO: usage of vert.x templating for HTML generation
+    private String getHtml(RoutingContext ctx) {
+        final StringBuffer html = new StringBuffer();
 
-    html.append("session ID:\n").append(ctx.session().id());
-    html.append("\n\n");
-
-    final Set<Cookie> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
-    if (storedCookies != null) {
-      if (!storedCookies.isEmpty()) {
-        html.append("cookies stored in session bag (each block is one cookie):\n\n");
-      }
-      for (Cookie cookie : storedCookies) {
-        html.append(String.join("\n", cookie.toString().replace(", ", "\n")));
+        html.append("session ID:\n").append(ctx.session().id());
         html.append("\n\n");
-      }
+
+        final Set<Cookie> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
+        if (storedCookies != null) {
+            if (!storedCookies.isEmpty()) {
+                html.append("cookies stored in session bag (each block is one cookie):\n\n");
+            }
+            for (Cookie cookie : storedCookies) {
+                html.append(String.join("\n", cookie.toString().replace(", ", "\n")));
+                html.append("\n\n");
+            }
+        }
+
+        String idToken = ctx.session().get(OAuth2MiddlewareFactory.ID_TOKEN);
+        if (idToken != null) {
+            html.append("id token:\n");
+            html.append(decodeJWT(idToken));
+            html.append("\n");
+            html.append(idToken);
+        }
+
+        final Map<String, Object> data = ctx.session().data();
+        data.keySet().stream().filter(key -> key.endsWith("_access_token"))
+                .peek(key -> html.append("\n\n").append(key).append(":\n")).map(key -> data.get(key))
+                .forEach(value -> html.append(decodeJWT((String) value)).append("\n").append(value));
+
+        return html.toString();
     }
 
-    String idToken = ctx.session().get(OAuth2MiddlewareFactory.ID_TOKEN);
-    if (idToken != null) {
-      html.append("id token:\n");
-      html.append(decodeJWT(idToken));
-      html.append("\n");
-      html.append(idToken);
+    private String decodeJWT(String jwt) {
+        String[] chunks = jwt.split("\\.");
+        Base64.Decoder decoder = Base64.getDecoder();
+        String header = new String(decoder.decode(chunks[0]));
+        String payload = new String(decoder.decode(chunks[1]));
+        return new JsonObject(payload).encodePrettily();
     }
-
-    final Map<String, Object> data = ctx.session().data();
-    data.keySet().stream().filter(key -> key.endsWith("_access_token"))
-        .peek(key -> html.append("\n\n").append(key).append(":\n")).map(key -> data.get(key))
-        .forEach(value -> html.append(decodeJWT((String) value)).append("\n").append(value));
-
-    return html.toString();
-  }
-
-  private String decodeJWT(String jwt) {
-    String[] chunks = jwt.split("\\.");
-    Base64.Decoder decoder = Base64.getDecoder();
-    String header = new String(decoder.decode(chunks[0]));
-    String payload = new String(decoder.decode(chunks[1]));
-    return new JsonObject(payload).encodePrettily();
-  }
 
 }

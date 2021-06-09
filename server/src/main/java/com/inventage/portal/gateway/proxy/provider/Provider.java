@@ -8,8 +8,8 @@ import io.vertx.core.Promise;
  * interface.
  */
 public abstract class Provider extends AbstractVerticle {
-  public static final String PROVIDER_CONFIGURATION = "configuration";
-  public static final String PROVIDER_NAME = "name";
+    public static final String PROVIDER_CONFIGURATION = "configuration";
+    public static final String PROVIDER_NAME = "name";
 
-  public abstract void provide(Promise<Void> startPromise);
+    public abstract void provide(Promise<Void> startPromise);
 }

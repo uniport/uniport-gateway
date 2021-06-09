@@ -9,14 +9,14 @@ import io.vertx.core.json.JsonObject;
 
 public class KubernetesServiceProviderFactory implements ProviderFactory {
 
-  @Override
-  public String provides() {
-    return StaticConfiguration.PROVIDER_KUBERNETES;
-  }
+    @Override
+    public String provides() {
+        return StaticConfiguration.PROVIDER_KUBERNETES;
+    }
 
-  @Override
-  public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
-    return new KubernetesServiceProvider(vertx, configurationAddress);
-  }
+    @Override
+    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
+        return new KubernetesServiceProvider(vertx, configurationAddress);
+    }
 
 }

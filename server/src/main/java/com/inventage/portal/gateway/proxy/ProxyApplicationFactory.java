@@ -12,16 +12,16 @@ import io.vertx.core.json.JsonObject;
 
 public class ProxyApplicationFactory implements ApplicationFactory {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
-  @Override
-  public String provides() {
-    return ProxyApplication.class.getSimpleName();
-  }
+    @Override
+    public String provides() {
+        return ProxyApplication.class.getSimpleName();
+    }
 
-  @Override
-  public Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx) {
-    return new ProxyApplication(applicationConfig.getString(StaticConfiguration.APPLICATION_NAME),
-        applicationConfig.getString(StaticConfiguration.APPLICATION_ENTRYPOINT), globalConfig, vertx);
-  }
+    @Override
+    public Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx) {
+        return new ProxyApplication(applicationConfig.getString(StaticConfiguration.APPLICATION_NAME),
+                applicationConfig.getString(StaticConfiguration.APPLICATION_ENTRYPOINT), globalConfig, vertx);
+    }
 }

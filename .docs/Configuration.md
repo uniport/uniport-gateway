@@ -116,7 +116,7 @@ The private IP and port of containers are retrieved from the Docker API
 
 Network i.e IP selection works as follows
 
-- 
+-
 
 Port detection works as follows:
 
@@ -382,7 +382,7 @@ labels:
 
 ### 1.4.5. Authorization Bearer
 
-The AuthorizationBearer set a token in the HTTP header `Authorization: Bearer <token>` depending on the session scope. It is thightly coupled to the OAuth2 middleware as it uses tokens acquired by the authentication process. 
+The AuthorizationBearer set a token in the HTTP header `Authorization: Bearer <token>` depending on the session scope. It is thightly coupled to the OAuth2 middleware as it uses tokens acquired by the authentication process.
 
 The session scope defines what token should be set in the Auth Bearer header. This could either be an ID token or a access token. Per user there is one ID token and zero or more access tokens.
 
