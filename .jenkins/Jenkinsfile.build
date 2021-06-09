@@ -93,7 +93,7 @@ pipeline {
                     echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
                     ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
                     scp docker-compose/target/classes/with-substitution/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/with-substitution/docker-compose.local.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target/classes/with-substitution/docker-compose.override.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
                     scp docker-compose/target/classes/with-substitution/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
                     scp docker-compose/target/classes/with-substitution/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
                     echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
