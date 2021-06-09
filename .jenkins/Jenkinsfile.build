@@ -108,7 +108,7 @@ pipeline {
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml rm -f'"
 
                         echo 'Deploy new container…'
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.local.yml up -d'"
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.override.yml up -d'"
                     '''
                 }
             }
