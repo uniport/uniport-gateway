@@ -1,1 +1,1 @@
-{ { include "portal-lib.deployment" . - } }
+{{ include "portal-lib.deployment" . - }}

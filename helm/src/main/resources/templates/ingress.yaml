@@ -1,1 +1,1 @@
-{ { include "portal-lib.ingress" . - } }
+{{ include "portal-lib.ingress" . - }}
