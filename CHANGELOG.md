@@ -11,7 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1.2.0-[Unreleased]
 ------------
 
-### Added, Changed, Deprecated, Removed, Fixed or Security
+### Added
+
+- Session Bag ([PORTAL-194](https://issue.inventage.com/browse/PORTAL-194))
+- Configuration documentation ([PORTAL-206](https://issue.inventage.com/browse/PORTAL-206))
+- Helm charts ([PORTAL-216](https://issue.inventage.com/browse/PORTAL-216))
+
+### Changed
+
+- Artifact `docker-compose.jar` contains the files from the `src/main/resources` folder with and without any variable substitution ([PORTAL-260](https://issue.inventage.com/browse/PORTAL-260))
 
 [1.1.0]-202104301516-89-6ea3315 2021-04-30
 ------------
