@@ -5,10 +5,10 @@
                 <option name="envFilePath" value="" />
                 <option name="secondarySourceFiles">
                     <list>
-                        <option value="docker-compose/target/portal-gateway/docker-compose.override.yml" />
+                        <option value="docker-compose/target/classes/with-substitution/portal-gateway/docker-compose.override.yml" />
                     </list>
                 </option>
-                <option name="sourceFilePath" value="docker-compose/target/portal-gateway/docker-compose.yml" />
+                <option name="sourceFilePath" value="docker-compose/target/classes/with-substitution/portal-gateway/docker-compose.yml" />
                 <option name="upExitCodeFromService" value="" />
                 <option name="upTimeout" value="" />
             </settings>

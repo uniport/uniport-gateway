@@ -33,7 +33,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/with-substitution</outputDirectory>
+                            <outputDirectory>${project.build.directory}/classes/with-substitution/portal-gateway</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/resources</directory>

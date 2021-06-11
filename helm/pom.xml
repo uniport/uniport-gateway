@@ -29,7 +29,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/with-substitution</outputDirectory>
+                            <outputDirectory>${project.build.directory}/classes/with-substitution/portal-gateway</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/resources</directory>
@@ -63,7 +63,7 @@
                                     <groupId>com.inventage.portal.helm-chart-library</groupId>
                                     <artifactId>helm</artifactId>
                                     <version>${portal-helm-chart-library.version}</version>
-                                    <outputDirectory>${project.build.directory}/classes/with-substitution/charts</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/classes/with-substitution/portal-gateway/charts</outputDirectory>
                                     <includes>portal-lib/**/*</includes>
                                 </artifactItem>
                             </artifactItems>
