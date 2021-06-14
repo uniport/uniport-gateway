@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Git]() - [JIRA]() - [Nexus2]() - [Nexus3]()
 
-1.2.0-[Unreleased]
+1.3.0-[Unreleased]
+------------
+
+[1.2.0]- - 2021-06-14
 ------------
 
 ### Added
@@ -36,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [PORTAL-89](https://issue.inventage.com/browse/PORTAL-89): Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution.
 
-[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F1.0.0
-[1.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/commits?until=1.1.0
+[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F1.2.0
+[1.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F1.2.0&targetBranch=refs%2Ftags%2F1.1.0
+[1.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F1.1.0&targetBranch=refs%2Ftags%2F1.0.0
 [1.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/commits?until=1.0.0
