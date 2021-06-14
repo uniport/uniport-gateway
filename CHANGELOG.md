@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1.3.0-[Unreleased]
 ------------
 
-[1.2.0]- - 2021-06-14
+[1.2.0]-202106141557-113-657c581 - 2021-06-14
 ------------
 
 ### Added
@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Session Bag ([PORTAL-194](https://issue.inventage.com/browse/PORTAL-194))
 - Configuration documentation ([PORTAL-206](https://issue.inventage.com/browse/PORTAL-206))
 - Helm charts ([PORTAL-216](https://issue.inventage.com/browse/PORTAL-216))
+- Cookie configuration feature ([PORTAL-246](https://issue.inventage.com/browse/PORTAL-246))
 
 ### Changed
 
