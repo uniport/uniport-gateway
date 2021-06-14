@@ -25,7 +25,7 @@
         <docker.pull.registry>docker-registry.inventage.com:10094</docker.pull.registry>
         <docker.push.registry>docker-registry.inventage.com:10095</docker.push.registry>
 
-        <portal-helm-chart-library.version>1.0.0-202106101401-14-5b09850</portal-helm-chart-library.version>
+        <portal-helm-chart-library.version>1.0.0-202106141445-20-b0a14ff</portal-helm-chart-library.version>
 
     </properties>
 
