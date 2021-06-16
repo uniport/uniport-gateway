@@ -71,6 +71,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <!-- https://github.com/kiwigrid/helm-maven-plugin -->
+                <groupId>com.kiwigrid</groupId>
+                <artifactId>helm-maven-plugin</artifactId>
+                <configuration>
+                    <helmVersion>3.5.0</helmVersion>
+                    <addDefaultRepo>false</addDefaultRepo>
+                    <chartVersion>${project.version}</chartVersion>
+                    <chartDirectory>${project.build.directory}/classes/without-substitution</chartDirectory>
+                    <excludes>
+                        <exclude>${project.build.directory}/**/charts/*</exclude>
+                    </excludes>
+                    <uploadRepoStable>
+                        <name>${docker.push.registry}</name>
+                        <url>https://nexus3.inventage.com/repository/inventage-portal-helm-staging</url>
+                        <type>NEXUS</type>
+                    </uploadRepoStable>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>helm-push</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>init</goal>
+                            <goal>package</goal>
+                            <goal>upload</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
