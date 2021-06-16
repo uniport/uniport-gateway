@@ -17,14 +17,14 @@ import io.vertx.core.json.JsonObject;
  * The Json file for the portal gateway configuration is taken from one of these places:
  * 1. File pointed to by the system env variable 'PORTAL_GATEWAY_JSON'
  * 2. File pointed to by the system property 'PORTAL_GATEWAY_JSON'
- * 3. File 'portal-gateway.json' in '/etc/portal-gateway/'
+ * 3. File 'portal-gateway.json' in '/etc/portal-gateway/default/'
  * 4. File 'portal-gateway.json' in the current working directory
  */
 public class PortalGatewayConfigRetriever {
 
     public static final String DEFAULT_CONFIG_FILE_NAME = "portal-gateway.json";
     public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
-    public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway";
+    public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway/default";
     public static final String LOCAL_CONFIG_FILE_PATH = ".";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);

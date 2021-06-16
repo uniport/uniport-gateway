@@ -121,7 +121,7 @@
                         <paths>
                             <path>
                                 <from>./portal-gateway/</from>
-                                <into>/etc/portal-gateway/</into>
+                                <into>/etc/portal-gateway/default/</into>
                             </path>
                         </paths>
                     </extraDirectories>
