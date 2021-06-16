@@ -51,16 +51,28 @@ env:
     # Navigation
     - name: "navigation-frontend.host"
       value: "navigation-frontend"
+    - name: "navigation-frontend.port"
+      value: "20015"
     - name: "navigation-service.host"
       value: "navigation-service"
+    - name: "navigation-service.port"
+      value: "20012"
     # Dashboard
     - name: "dashboard-frontend.host"
       value: "dashboard-frontend"
+    - name: "dashboard-frontend.port"
+      value: "20025"
     - name: "dashboard-service.host"
       value: "dashboard-service"
+    - name: "dashboard-service.port"
+      value: "20022"
     # Organisation
     - name: "organisation-service.host"
       value: "organisation-proxy"
+    - name: "organisation-service.port"
+      value: "20030"
     # Document
     - name: "document-service.host"
       value: "document-proxy"
+    - name: "document-service.port"
+      value: "20050"
