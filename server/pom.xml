@@ -5,8 +5,9 @@
 
     <parent>
         <groupId>com.inventage.portal.gateway</groupId>
-        <artifactId>portal-gateway</artifactId>
+        <artifactId>pom</artifactId>
         <version>1.3.0-SNAPSHOT</version>
+        <relativePath>../pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>server</artifactId>
