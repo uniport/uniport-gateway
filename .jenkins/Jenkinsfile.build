@@ -130,10 +130,10 @@ pipeline {
                         --password jenkins \
                         --insecure-skip-tls-verify
 
-                    HELM_CHART=$(pwd)/helm/target/classes/with-substitution/dashboard/
+                    HELM_CHART=$(pwd)/helm/target/classes/with-substitution/portal-gateway/
                     HELM_VERSION=3.5.4
                     HELM_NAMESPACE=portal
-                    HELM_RELEASE_NAME=portal-dashboard
+                    HELM_RELEASE_NAME=portal-gateway
 
                     alias helm="docker run --rm \
                         -v $HELM_CHART:/apps -w /apps \
