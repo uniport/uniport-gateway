@@ -128,7 +128,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    set +x
+                    set -x
 
                     oc version --client
                     oc login https://octomore.inventage.com:8443 \
@@ -147,7 +147,12 @@ pipeline {
                         alpine/helm:$HELM_VERSION"
 
                     helm version
-                    helm upgrade --install --namespace $HELM_NAMESPACE $HELM_RELEASE_NAME /apps
+                    helm upgrade \
+                        --install \
+                        --namespace $HELM_NAMESPACE \
+                        --debug \
+                        $HELM_RELEASE_NAME \
+                        /apps
                 '''
             }
         }
