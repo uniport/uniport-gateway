@@ -21,6 +21,15 @@
                         <id>default-resources</id>
                         <configuration>
                             <outputDirectory>${project.build.directory}/classes/without-substitution</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <excludes>
+                                        <exclude>values.octomore.yaml</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                     <execution>
