@@ -25,7 +25,17 @@
                     <execution>
                         <id>default-resources</id>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/without-substitution</outputDirectory>
+                            <outputDirectory>${project.build.directory}/portal-gateway-template</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>docker-compose.yml</include>
+                                        <include>*.common.env</include>
+                                    </includes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                     <execution>
@@ -35,7 +45,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/with-substitution/portal-gateway</outputDirectory>
+                            <outputDirectory>${project.build.directory}/portal-gateway</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/resources</directory>
@@ -61,6 +71,21 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classesDirectory>${project.build.directory}/portal-gateway-template</classesDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

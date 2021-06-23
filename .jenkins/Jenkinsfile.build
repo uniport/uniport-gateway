@@ -85,7 +85,6 @@ pipeline {
                 script {
                     env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./pom/target/nexus-staging/staging/2784e0aacf5060.properties')
                 }
-
             }
         }
 
@@ -99,13 +98,13 @@ pipeline {
 
                     echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
                     ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/with-substitution/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/with-substitution/portal-gateway/docker-compose.override.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/with-substitution/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/with-substitution/portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
+                    scp docker-compose/target//portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target//portal-gateway/docker-compose.override.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target//portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target//portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
                     echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
                 '''
-                withDockerRegistry(credentialsId: "portal-registry-creds", url: "https://${DOCKER_PULL_REGISTRY}") {
+                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
                     sh '''
                         echo 'Download new container'
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml pull'"
@@ -136,7 +135,7 @@ pipeline {
                         --password jenkins \
                         --insecure-skip-tls-verify
 
-                    HELM_CHART=$(pwd)/helm/target/classes/with-substitution/portal-gateway/
+                    HELM_CHART=$(pwd)/helm/target//portal-gateway/
                     HELM_VERSION=3.5.4
                     HELM_NAMESPACE=portal
                     HELM_RELEASE_NAME=portal-gateway
@@ -158,12 +157,11 @@ pipeline {
             }
         }
 
-
         stage ('Tag Staging Repository') {
             steps {
-              echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
-              createTag nexusInstanceId: "nexus3.inventage.com", tagName: "${env.PROMOTION_TAG}"
-              associateTag nexusInstanceId: "nexus3.inventage.com", search: [[key: 'repository', value: "inventage-portal-docker-staging"], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG}"
+                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
+                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG}"
+                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG}"
             }
         }
 
@@ -172,7 +170,6 @@ pipeline {
                 build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', parameters: [string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"), string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")]
             }
         }
-
     }
 
     post {
