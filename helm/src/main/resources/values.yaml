@@ -2,6 +2,50 @@ replicaCount: 1
 
 imagePullSecrets: {}
 
+initContainers:
+    - name: init-portal-iam
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z portal-iam 8080; do true; done"
+    - name: init-navigation-frontend
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z navigation-frontend 20015; do true; done"
+    - name: init-navigation-service
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z navigation-service 20012; do true; done"
+    - name: init-dashboard-frontend
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z dashboard-frontend 20025; do true; done"
+    - name: init-dashboard-service
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z dashboard-service 20022; do true; done"
+    - name: init-document-proxy
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z document-proxy 20050; do true; done"
+    - name: init-organisation-proxy
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! nc -z organisation-proxy 20030; do true; done"
+
 image:
     registry: ${docker.pull.registry}
     baseName: ${project.groupId}
