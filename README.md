@@ -87,8 +87,8 @@ navigation-frontend.host=local-portal-navigation-frontend
 navigation-service.host=local-portal-navigation-service
 dashboard-frontend.host=local-portal-dashboard-frontend
 dashboard-service.host=local-portal-dashboard-service
-organisation-service.host=local-portal-organisation-proxy-public
-document-service.host=local-portal-document-proxy-public
+organisation-service.host=local-portal-organisation-proxy
+document-service.host=local-portal-document-proxy
 ```
 
 ## Visulisierungen
