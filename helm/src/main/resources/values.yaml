@@ -1,6 +1,7 @@
 replicaCount: 1
 
-imagePullSecrets: {}
+imagePullSecrets:
+  - name: inventage-portal-docker-group
 
 initContainers:
     - name: init-portal-iam
