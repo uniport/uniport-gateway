@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1.3.0-[Unreleased]
 ------------
 
+### Added
+
+- Kubernetes pods defer their start until all dependencies are up and running.
+- Pom module
+
+### Fixed
+
+- Version tiger
+
+### Changed
+
+- Path of default gateway configuration to `/etc/portal-gateway/default`
+- Docker-compose artifacts contains only the base `docker-compose.yml` and `*.common.env` files.
+
+### Removed
+
+- Remove suffix `-public` from proxy hostnames
+
 [1.2.0]-202106141557-113-657c581 - 2021-06-14
 ------------
 
