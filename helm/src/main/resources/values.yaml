@@ -1,8 +1,5 @@
 replicaCount: 1
 
-imagePullSecrets:
-  - name: inventage-portal-docker-group
-
 initContainers:
     - name: init-portal-iam
       image: busybox:1.33
