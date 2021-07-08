@@ -1,3 +1,7 @@
+global:
+    imagePullSecrets:
+        - name: inventage-portal-docker-group
+
 ports:
     - name: http
       port: 20000
@@ -10,6 +14,5 @@ envOverride:
     - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
       value: "portal.10.100.20.40.nip.io"
 
-global:
-    imagePullSecrets:
-        - name: inventage-portal-docker-group
+securityContext:
+    enabled: false
