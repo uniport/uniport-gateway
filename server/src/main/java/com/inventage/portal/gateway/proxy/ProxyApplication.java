@@ -134,7 +134,7 @@ public class ProxyApplication implements Application {
 
         watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
 
-        return watcher.start();
+        return vertx.deployVerticle(watcher);
     }
 
 }

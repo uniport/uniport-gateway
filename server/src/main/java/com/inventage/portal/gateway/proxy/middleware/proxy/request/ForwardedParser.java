@@ -101,19 +101,19 @@ class ForwardedParser {
         setHostAndPort(delegate.host(), port);
 
         switch (allowForward) {
-        case X_FORWARD:
-            calculateXForward();
-            break;
-        case FORWARD:
-            calculateForward();
-            break;
-        case ALL:
-            calculateXForward();
-            calculateForward();
-            break;
-        case NONE:
-        default:
-            break;
+            case X_FORWARD:
+                calculateXForward();
+                break;
+            case FORWARD:
+                calculateForward();
+                break;
+            case ALL:
+                calculateXForward();
+                calculateForward();
+                break;
+            case NONE:
+            default:
+                break;
         }
 
         if (((scheme.equalsIgnoreCase(HTTP_SCHEME) && port == 80)

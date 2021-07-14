@@ -112,12 +112,20 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withMiddleware(String middlewareName, Handler<JsonObject>... opts) {
+    public static Handler<JsonObject> withMiddleware(String middlewareName, String middlewareType,
+            Handler<JsonObject>... opts) {
         return middleware -> {
             middleware.put(DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+            middleware.put(DynamicConfiguration.MIDDLEWARE_TYPE, middlewareType);
             for (Handler<JsonObject> opt : opts) {
                 opt.handle(middleware);
             }
+        };
+    }
+
+    public static Handler<JsonObject> withMiddlewareOpts(JsonObject opts) {
+        return middleware -> {
+            middleware.put(DynamicConfiguration.MIDDLEWARE_OPTIONS, opts);
         };
     }
 

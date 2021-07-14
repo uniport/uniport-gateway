@@ -1,11 +1,14 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
 import java.util.Optional;
+
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.log.RequestResponseLogger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;
@@ -58,10 +61,8 @@ public class Entrypoint {
             // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
             router.route()
                     .handler(SessionHandler.create(LocalSessionStore.create(vertx))
-                            .setSessionCookieName(SESSION_COOKIE_NAME)
-                            .setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
-                            .setCookieSecureFlag(SESSION_COOKIE_SECURE)
-                            .setCookieSameSite(SESSION_COOKIE_SAME_SITE)
+                            .setSessionCookieName(SESSION_COOKIE_NAME).setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
+                            .setCookieSecureFlag(SESSION_COOKIE_SECURE).setCookieSameSite(SESSION_COOKIE_SAME_SITE)
                             .setMinLength(SESSION_COOKIE_MIN_LENGTH).setNagHttps(true));
         }
         return router;
@@ -76,9 +77,8 @@ public class Entrypoint {
                     LOGGER.info("mount: application '{}' for '{}' at endpoint '{}'", application,
                             application.rootPath(), name);
                 } else {
-                    LOGGER.warn(
-                            "mount: disabled endpoint '{}' can not mount application '{}' for '{}'",
-                            name, application, application.rootPath());
+                    LOGGER.warn("mount: disabled endpoint '{}' can not mount application '{}' for '{}'", name,
+                            application, application.rootPath());
                 }
             }
         });
@@ -124,11 +124,9 @@ public class Entrypoint {
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
         final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME)
-                        .equals(name))
+                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
                 .findFirst().orElseThrow(() -> {
-                    throw new IllegalStateException(
-                            String.format("Entrypoint '%s' not found!", name));
+                    throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
                 });
     }
 

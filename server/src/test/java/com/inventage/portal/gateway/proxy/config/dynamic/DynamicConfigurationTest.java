@@ -180,6 +180,24 @@ public class DynamicConfigurationTest {
                                         .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, "localhost:1234")
                                         .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "blub")))));
 
+        JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                        new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+
+        JsonObject sessionBagHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
+                DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
+                                DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+                                new JsonArray().add(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME,
+                                                "foo")
+                                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH,
+                                                "/bar")))))));
+
         JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
@@ -384,12 +402,10 @@ public class DynamicConfigurationTest {
                         expectedTrue),
                 Arguments.of("reject single router with unknown key", unkownKeyHttpRouter, incomplete, expectedFalse),
                 Arguments.of("accept two minimal routers", doubleMinimalHttpRouters, incomplete, expectedTrue),
-                // TODO disallow duplicated routers (?)
-                // Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete,
-                //         expectedFalse),
+                Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete, expectedFalse),
                 Arguments.of("reject minimal and empty routers", minimalAndEmptyHttpRouters, incomplete, expectedFalse),
 
-                // middlewares 
+                // middlewares
                 Arguments.of("reject null middlewares", nullHttpMiddlewares, complete, expectedFalse),
                 Arguments.of("accept empty middlewares", emptyHttpMiddlewares, complete, expectedTrue),
                 Arguments.of("reject unkown middleware", unkownHttpMiddleware, complete, expectedFalse),
@@ -408,18 +424,20 @@ public class DynamicConfigurationTest {
                 // authorization bearer middleware
                 Arguments.of("accept authorization bearer middleware", authBearerHttpMiddleware, complete,
                         expectedTrue),
-                Arguments.of("reject authorization bearer  with missing optionsmiddleware",
+                Arguments.of("reject authorization bearer  with missing options",
                         authBearerHttpMiddlewareWithMissingOptions, complete, expectedFalse),
                 // oauth2 middleware
                 Arguments.of("accept oAuth2 middleware", oauth2PathHttpMiddleware, complete, expectedTrue),
                 Arguments.of("reject oAuth2 middleware with missing options",
                         oauth2PathHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+                // session bag middleware
+                Arguments.of("accept session bag middleware", sessionBagHttpMiddleware, complete, expectedTrue),
+                Arguments.of("reject session bag middleware with missing options",
+                        sessionBagHttpMiddlewareWithMissingOptions, complete, expectedFalse),
 
                 Arguments.of("reject unkown key middleware", unkownKeyHttpMiddleware, complete, expectedFalse),
                 Arguments.of("accept two valid middelwares", doubleHttpMiddlewares, complete, expectedTrue),
-                // TODO disallow duplicated middlewares (?)
-                // Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete,
-                //         expectedFalse),
+                Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete, expectedFalse),
                 Arguments.of("reject complete and empty middlewares", completeAndEmptyHttpMiddlewares, complete,
                         expectedFalse),
 
@@ -440,9 +458,7 @@ public class DynamicConfigurationTest {
                         expectedTrue),
                 Arguments.of("reject single service with unkown key", unkownKeyHttpService, complete, expectedFalse),
                 Arguments.of("accept two valid services", doubleHttpServices, complete, expectedTrue),
-                // TODO disallow duplicated services (?)
-                // Arguments.of("reject duplicated services", duplicatedHttpServices, complete,
-                //         expectedFalse),
+                Arguments.of("reject duplicated services", duplicatedHttpServices, complete, expectedFalse),
                 Arguments.of("reject complete and empty services", completeAndEmptyHttpServices, complete,
                         expectedFalse),
 

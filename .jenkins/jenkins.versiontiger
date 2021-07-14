@@ -3,4 +3,4 @@
 projectRoot ..
 
 release .*
-version .* ${version:portal-gateway}-${VERSION_SUFFIX}
+version .* ${version:reactor}-${VERSION_SUFFIX}

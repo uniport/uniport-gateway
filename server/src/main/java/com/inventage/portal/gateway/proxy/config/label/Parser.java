@@ -201,14 +201,14 @@ public class Parser {
 
     private static String getName(String key) {
         switch (key) {
-        case ROUTERS:
-            return DynamicConfiguration.ROUTER_NAME;
-        case MIDDLEWARES:
-            return DynamicConfiguration.MIDDLEWARE_NAME;
-        case SERVICES:
-            return DynamicConfiguration.SERVICE_NAME;
-        default:
-            throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
+            case ROUTERS:
+                return DynamicConfiguration.ROUTER_NAME;
+            case MIDDLEWARES:
+                return DynamicConfiguration.MIDDLEWARE_NAME;
+            case SERVICES:
+                return DynamicConfiguration.SERVICE_NAME;
+            default:
+                throw new IllegalArgumentException("Unknown type. Cannot find name: " + key);
         }
     }
 

@@ -24,6 +24,4 @@ public interface Middleware extends Handler<RoutingContext> {
         modifiers.add(modifier);
         ctx.put(modifierType, modifiers);
     }
-
-    // TODO: implement option injection
 }

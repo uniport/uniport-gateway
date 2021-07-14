@@ -1,16 +1,16 @@
 version: "3"
 
 services:
-  whoami:
-    image: traefik/whoami
-    expose:
-      - "80"
-    networks:
-      - portal-gateway
-    labels:
-      - "portal.enable=true"
-      - "portal.http.routers.root.rule=Path('/')"
+    whoami:
+        image: traefik/whoami
+        expose:
+            - "80"
+        networks:
+            - portal-gateway
+        labels:
+            - "portal.enable=true"
+            - "portal.http.routers.root.rule=Path('/')"
 
 networks:
-  portal-gateway:
-    external: true
+    portal-gateway:
+        external: true

@@ -58,6 +58,9 @@ public class FileConfigProvider extends Provider {
         }
         this.watch = watch;
 
+        if (env == null) {
+            env = new JsonObject();
+        }
         this.env = env;
     }
 
@@ -115,7 +118,6 @@ public class FileConfigProvider extends Provider {
                 return options;
             }
 
-            // TODO allow any dir names for general/auth
             LOGGER.info("getOptions: reading directory '{}'", path);
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
                     .setConfig(new JsonObject().put("path", path.toString()).put("filesets",
@@ -152,16 +154,28 @@ public class FileConfigProvider extends Provider {
     }
 
     // To allow variable substitution by environment variables in the file config
-    // the server ports of the incoming dynamic file configuration need to be 
+    // the server ports of the incoming dynamic file configuration need to be
     // converted to integers.
     private JsonObject parseServerPorts(JsonObject config) {
+        if (!config.containsKey(DynamicConfiguration.HTTP)) {
+            return config;
+        }
         JsonObject http = config.getJsonObject(DynamicConfiguration.HTTP);
+        if (!http.containsKey(DynamicConfiguration.SERVICES)) {
+            return config;
+        }
         JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
         for (int i = 0; i < services.size(); i++) {
             JsonObject service = services.getJsonObject(i);
+            if (!service.containsKey(DynamicConfiguration.SERVICE_SERVERS)) {
+                continue;
+            }
             JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
             for (int j = 0; j < servers.size(); j++) {
                 JsonObject server = servers.getJsonObject(j);
+                if (!server.containsKey(DynamicConfiguration.SERVICE_SERVER_PORT)) {
+                    continue;
+                }
                 String portStr = server.getString(DynamicConfiguration.SERVICE_SERVER_PORT);
                 int port;
 

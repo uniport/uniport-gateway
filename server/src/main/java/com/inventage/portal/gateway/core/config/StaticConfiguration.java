@@ -118,23 +118,24 @@ public class StaticConfiguration {
             Boolean valid = true;
             String errMsg = "";
             switch (providerName) {
-            case PROVIDER_FILE: {
-                String filename = provider.getString(PROVIDER_FILE_FILENAME);
-                String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
-                if ((filename == null || filename.length() == 0) && (directory == null || directory.length() == 0)) {
-                    errMsg = String.format("%s: either filename or directory has to be defined", providerName);
-                    valid = false;
+                case PROVIDER_FILE: {
+                    String filename = provider.getString(PROVIDER_FILE_FILENAME);
+                    String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
+                    if ((filename == null || filename.length() == 0)
+                            && (directory == null || directory.length() == 0)) {
+                        errMsg = String.format("%s: either filename or directory has to be defined", providerName);
+                        valid = false;
+                    }
+                    break;
                 }
-                break;
-            }
-            case PROVIDER_DOCKER: {
-                break;
-            }
-            default: {
-                errMsg = "Unknown provider";
-                valid = false;
-                break;
-            }
+                case PROVIDER_DOCKER: {
+                    break;
+                }
+                default: {
+                    errMsg = "Unknown provider";
+                    valid = false;
+                    break;
+                }
             }
 
             if (!valid) {

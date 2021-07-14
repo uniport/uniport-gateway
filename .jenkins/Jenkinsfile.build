@@ -11,9 +11,16 @@ pipeline {
         ansiColor('xterm')
     }
 
+    parameters {
+        string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
+        booleanParam(defaultValue: true, description: 'Push docker images', name: 'PUSH_DOCKER_IMAGES')
+        booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
+    }
+
     environment {
         LINE_SEPARATOR = '================================================================================'
         NEXUS2_CREDS = credentials('inventage-ierp')
+        CI_NEXUS2_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com'
         DEV_DEPLOYMENT_HOST = 'inventage@docker-test.inventage.com'
@@ -24,6 +31,7 @@ pipeline {
     tools {
         maven 'maven-release-latest'
         jdk 'Open-JDK-11'
+        oc 'oc v4'
     }
 
     stages {
@@ -74,10 +82,13 @@ pipeline {
                 sh 'mvn help:system'
 
                 mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE], 'clean', 'deploy')
+                script {
+                    env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./pom/target/nexus-staging/staging/2784e0aacf5060.properties')
+                }
             }
         }
 
-        stage('Deployment') {
+        stage('Deployment-DockerTest') {
             when {
                 branch 'master'
             }
@@ -87,12 +98,13 @@ pipeline {
 
                     echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
                     ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/classes/portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
+                    scp docker-compose/target//portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target//portal-gateway/docker-compose.override.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target//portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
+                    scp docker-compose/target//portal-gateway/portal-gateway.docker-test.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
                     echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
                 '''
-                withDockerRegistry(credentialsId: "portal-registry-creds", url: "https://${DOCKER_PULL_REGISTRY}") {
+                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
                     sh '''
                         echo 'Download new container'
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml pull'"
@@ -102,26 +114,65 @@ pipeline {
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml rm -f'"
 
                         echo 'Deploy new container…'
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml up -d'"
+                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.override.yml up -d'"
                     '''
                 }
             }
         }
 
+        stage('Deployment-OpenShift') {
+            when {
+                branch params.BRANCH_FILTER
+                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
+            }
+            steps {
+                sh '''
+                    set -x
+
+                    oc version --client
+                    oc login https://octomore.inventage.com:8443 \
+                        --username inventage-portal \
+                        --password jenkins \
+                        --insecure-skip-tls-verify
+
+                    HELM_CHART=$(pwd)/helm/target//portal-gateway/
+                    HELM_VERSION=3.5.4
+                    HELM_NAMESPACE=portal
+                    HELM_RELEASE_NAME=portal-gateway
+
+                    alias helm="docker run --rm \
+                        -v $HELM_CHART:/apps -w /apps \
+                        -v ~/.kube:/root/.kube \
+                        alpine/helm:$HELM_VERSION"
+
+                    helm version
+                    helm upgrade \
+                        --install \
+                        --namespace $HELM_NAMESPACE \
+                        --values /apps/values.octomore.yaml \
+                        --debug \
+                        $HELM_RELEASE_NAME \
+                        /apps
+                '''
+            }
+        }
+
         stage ('Tag Staging Repository') {
             steps {
-              echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
-              createTag nexusInstanceId: "nexus3.inventage.com", tagName: "${env.PROMOTION_TAG}"
-              associateTag nexusInstanceId: "nexus3.inventage.com", search: [[key: 'repository', value: "inventage-portal-docker-staging"], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG}"
+                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
+                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG}"
+                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG}"
             }
         }
 
         stage ('Trigger Release Pipeline') {
             steps {
-                build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', parameters: [string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"), string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")]
+                build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', wait: false, parameters: [
+                    string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
+                    string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
+                ]
             }
         }
-
     }
 
     post {
@@ -167,7 +218,7 @@ def versiontiger(reactorFolder) {
 void setPackageEnvironmentVariables() {
     // @see https://jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#readmavenpom-read-a-maven-project-file
     // @see http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html
-    def pom = readMavenPom file: 'pom.xml'
+    def pom = readMavenPom file: 'pom/pom.xml'
 
     env.PACKAGE_VERSION = pom.version
     env.PACKAGE_GROUP_ID = pom.groupId

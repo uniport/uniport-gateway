@@ -40,8 +40,8 @@ public class ProxyMiddleware implements Middleware {
             ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
         }
 
-        // Some manipulations are 
-        // * not allowed by Vertx-Web 
+        // Some manipulations are
+        // * not allowed by Vertx-Web
         // * or have to be made on the response of the forwarded request
         HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
 
