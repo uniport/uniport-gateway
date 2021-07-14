@@ -53,11 +53,11 @@ image:
 
 nameOverride: ""
 
-securityContext:
-    enabled: true
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 1000
+podSecurityContext:
+    enabled: false
+
+containerSecurityContext:
+    enabled: false
 
 service:
     type: ClusterIP
