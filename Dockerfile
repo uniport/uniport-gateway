@@ -1,7 +1,7 @@
 FROM ghcr.io/graalvm/graalvm-ce:java11-21.1.0 AS buildEnv
 RUN gu install native-image
 
-ENV VERSION=1.2.0
+ENV VERSION=1.4.0
 WORKDIR /workdir
 COPY server/target/server-${VERSION}-SNAPSHOT-fat.jar ./portal-gateway.jar
 
@@ -22,7 +22,7 @@ RUN native-image \
     -H:+ReportExceptionStackTraces \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
-    -jar portal-gateway.jar 
+    -jar portal-gateway.jar
 
 FROM gcr.io/distroless/base
 COPY --from=buildEnv /workdir/portal-gateway portal-gateway

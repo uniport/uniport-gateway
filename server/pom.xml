@@ -13,9 +13,6 @@
     <artifactId>server</artifactId>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <jib.goal>build</jib.goal>
     </properties>
 
     <dependencies>
@@ -107,14 +104,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-            <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#additional-build-artifacts -->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <!-- <from></from> https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#setting-the-base-image -->
                     <to>
-                        <image>${docker.push.registry}/com.inventage.portal.gateway.portal-gateway</image>
+                        <image>${docker.push.registry}/${docker.image.name}</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
@@ -134,39 +129,39 @@
                             <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
                             <arg>-cluster</arg>
                         </args>
-                        <!--                        <ports>-->
-                        <!--                            <port>20000</port>-->
-                        <!--                        </ports>-->
                     </container>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>${jib.goal}</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <!-- To avoid "java.lang.SecurityException: Invalid signature file digest for Manifest main attributes" we need to exclude manifest signature files -->
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
+                            </manifestEntries>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    </transformers>
+                    <artifactSet>
+                    </artifactSet>
+                    <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar
+                    </outputFile>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>local</id>
-            <!-- needs to be deactivated in Jenkinsfile -->
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <!-- for local builds this should be the same as pull registry, so that we can use locally docker-compose.yml -->
-            <properties>
-                <docker.push.registry>${docker.pull.registry}</docker.push.registry>
-                <jib.goal>dockerBuild</jib.goal>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>
