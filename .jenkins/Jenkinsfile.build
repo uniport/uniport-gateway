@@ -167,7 +167,10 @@ pipeline {
 
         stage ('Trigger Release Pipeline') {
             steps {
-                build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', parameters: [string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"), string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")]
+                build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', wait: false, parameters: [
+                    string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
+                    string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
+                ]
             }
         }
     }
