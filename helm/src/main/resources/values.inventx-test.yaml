@@ -1,3 +1,8 @@
+image:
+    registry: private-registry.xaas.swissic.ch/aki
+
+storageClassName: netapp-file-eco-ndr-aki-prod
+
 podSecurityContext:
     enabled: true
     runAsUser: 1000
