@@ -1,9 +1,8 @@
 FROM ghcr.io/graalvm/graalvm-ce:java11-21.1.0 AS buildEnv
 RUN gu install native-image
 
-ENV VERSION=1.4.0
 WORKDIR /workdir
-COPY server/target/server-${VERSION}-SNAPSHOT-fat.jar ./portal-gateway.jar
+COPY ${project.artifactId}-${project.version}-fat.jar ./portal-gateway.jar
 
 # https://www.graalvm.org/reference-manual/native-image/Options/#options-to-native-image-builder
 RUN native-image \
@@ -30,7 +29,7 @@ COPY --from=buildEnv /usr/lib64/libz.so.1 /lib/x86_64-linux-gnu/libz.so.1
 COPY --from=buildEnv /usr/lib64/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so.6
 COPY --from=buildEnv /usr/lib64/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.1
 
-COPY server/portal-gateway /etc/portal-gateway
+COPY portal-gateway /etc/portal-gateway/default/
 
 EXPOSE 20000
 CMD ["./portal-gateway", "run", "-cluster"]
