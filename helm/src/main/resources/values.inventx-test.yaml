@@ -3,6 +3,9 @@ image:
 
 storageClassName: netapp-file-eco-ndr-aki-prod
 
+ingress:
+    host: kundenportal-uat.albinkistler.ch
+
 podSecurityContext:
     enabled: true
     runAsUser: 1000
