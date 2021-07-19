@@ -24,29 +24,24 @@ The following generates several configuration files and stores them in a place w
 export PORTAL_GATEWAY_JSON=server/portal-gateway/portal-gateway.json
 ${GRAALVM_HOME}/bin/java \
 -agentlib:native-image-agent=config-output-dir=server/src/main/resources/META-INF/native-image/com.inventage.portal.gateway/portal-gateway/reflect-config \
--jar server/target/server-1.2.0-SNAPSHOT-fat.jar run -cluster
-```
-
-Now the generated configurations need to be included in the Uber-JAR
-**Note**: The generated configurations can also be passed by CLI args.
-
-```bash
-mvn clean package
+-jar server/target/server-1.4.0-SNAPSHOT-fat.jar run -cluster
 ```
 
 Now we can finally build the native image
 **Note**: A Dockerfile is used here instaed of the `jib-maven-plugin`, because AFAIK there is no multi stage build feature in this plugin. The multi-stage feature is needed to keep the final docker images as slim as possible.
 
 ```bash
-docker build -t local/native-protal-gateway .
+mvn clean install
 ```
 
 ## Run
 
-Running the native-image is a bit more cumbersome, since we'd like to have the same environment as for the normal build. One hacky way is to change the `image` attribute of the [docker-compose.yml](docker-compose/src/main/resources/docker-compose.yml) to `local/native-protal-gateway`. Then run as usual.
-
 ```bash
-docker-compose -f docker-compose/src/main/resources/docker-compose.yml up
+docker-compose \
+-f docker-compose/target/portal-gateway/docker-compose.yml \
+-f docker-compose/target/portal-gateway/docker-compose.override.yml \
+-f docker-compose/target/portal-gateway/docker-compose.native.yml \
+up
 ```
 
 ## Helpful links
