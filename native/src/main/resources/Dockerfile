@@ -31,5 +31,4 @@ COPY --from=buildEnv /usr/lib64/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.
 
 COPY portal-gateway /etc/portal-gateway/default/
 
-EXPOSE 20000
 CMD ["./portal-gateway", "run", "-cluster"]
