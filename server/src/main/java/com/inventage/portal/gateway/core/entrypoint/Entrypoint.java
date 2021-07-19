@@ -35,14 +35,16 @@ public class Entrypoint {
     private final Vertx vertx;
     private final String name;
     private final int port;
+    private final boolean sessionDisabled;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(String name, int port, Vertx vertx) {
+    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
+        this.sessionDisabled = sessionDisabled;
         this.enabled = true;
     }
 
@@ -55,16 +57,29 @@ public class Entrypoint {
     }
 
     public Router router() {
-        if (router == null) {
-            router = Router.router(vertx);
-            router.route().handler(RequestResponseLogger.create());
-            // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
-            router.route()
-                    .handler(SessionHandler.create(LocalSessionStore.create(vertx))
-                            .setSessionCookieName(SESSION_COOKIE_NAME).setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
-                            .setCookieSecureFlag(SESSION_COOKIE_SECURE).setCookieSameSite(SESSION_COOKIE_SAME_SITE)
-                            .setMinLength(SESSION_COOKIE_MIN_LENGTH).setNagHttps(true));
+        if (router != null) {
+            return router;
         }
+        router = Router.router(vertx);
+        router.route().handler(RequestResponseLogger.create());
+
+        if (this.sessionDisabled) {
+            LOGGER.info("router: session managament is disabled");
+            return router;
+        }
+        LOGGER.info(
+                "router: session managament is enabled with\n" + "session cookie name: '{}'\n"
+                        + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
+                        + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
+                SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
+                SESSION_COOKIE_MIN_LENGTH);
+        // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+        router.route()
+                .handler(SessionHandler.create(LocalSessionStore.create(vertx))
+                        .setSessionCookieName(SESSION_COOKIE_NAME).setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
+                        .setCookieSecureFlag(SESSION_COOKIE_SECURE).setCookieSameSite(SESSION_COOKIE_SAME_SITE)
+                        .setMinLength(SESSION_COOKIE_MIN_LENGTH).setNagHttps(true));
+
         return router;
     }
 
