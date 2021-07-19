@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1.4.0-[Unreleased]
 ------------
 
+# Added
+
+- Native module
+
 [1.3.0]-202107070850-141-913856c - 2021-07-07
 ------------
 
