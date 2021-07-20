@@ -5,6 +5,7 @@ storageClassName: netapp-file-eco-ndr-aki-prod
 
 ingress:
     host: kundenportal-uat.albinkistler.ch
+    port: 23000
 
 podSecurityContext:
     enabled: true
@@ -16,10 +17,6 @@ containerSecurityContext:
     enabled: true
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: false
-
-ingress:
-    host: kundenportal-uat.albinkistler.ch
-    port: 23000
 
 envOverride:
     - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
