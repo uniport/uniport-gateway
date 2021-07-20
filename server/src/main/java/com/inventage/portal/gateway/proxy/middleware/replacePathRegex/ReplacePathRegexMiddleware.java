@@ -41,7 +41,7 @@ public class ReplacePathRegexMiddleware implements Middleware {
         }
         String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
 
-        LOGGER.debug("apply: replace path '{}' with '{}", uri, newURI);
+        LOGGER.debug("apply: replace path '{}' with '{}'", uri, newURI);
         return newURI;
     }
 }
