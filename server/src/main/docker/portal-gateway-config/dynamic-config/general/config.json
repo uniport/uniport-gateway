@@ -5,13 +5,13 @@
                 "name": "root",
                 "middlewares": ["rootRedirectregex"],
                 "rule": "Path('/')",
-                "service": "dashboard-frontend"
+                "service": "dashboard-proxy"
             },
             {
                 "name": "login",
                 "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
                 "rule": "PathPrefix('/login')",
-                "service": "dashboard-frontend"
+                "service": "dashboard-proxy"
             },
 
             {
