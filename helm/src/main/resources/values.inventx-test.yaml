@@ -11,7 +11,24 @@ podSecurityContext:
     runAsUser: 1000
     runAsGroup: 1000
     fsGroup: 1000
+
 containerSecurityContext:
     enabled: true
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: false
+
+ingress:
+    host: kundenportal-uat.albinkistler.ch
+    port: 23000
+
+envOverride:
+    - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+      value: "kundenportal-uat.albinkistler.ch"
+
+    - name: "report-service.host"
+      value: "report-proxy"
+    - name: "report-service.port"
+      value: "22100"
+
+    - name: "PORTAL_GATEWAY_JSON"
+      value: "/etc/portal-gateway/akkp/portal-gateway.json"
