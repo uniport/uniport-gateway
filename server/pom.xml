@@ -106,6 +106,27 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-configuration</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/docker</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.directory}/docker-context/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
@@ -118,7 +139,7 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>./portal-gateway/</from>
+                                <from>${project.build.directory}/docker-context/portal-gateway-config/</from>
                                 <into>/etc/portal-gateway/default/</into>
                             </path>
                         </paths>
@@ -150,7 +171,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>portal-gateway</classesDirectory>
+                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config</classesDirectory>
                             <classifier>configuration</classifier>
                         </configuration>
                     </execution>
