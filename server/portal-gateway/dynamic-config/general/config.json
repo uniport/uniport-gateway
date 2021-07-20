@@ -15,41 +15,29 @@
             },
 
             {
-                "name": "dashboard-frontend",
+                "name": "dashboard-proxy",
                 "middlewares": [
                     "dashboardRedirectRegex",
                     "dashboardAuthBearer",
                     "dashboardReplacePath"
                 ],
                 "rule": "PathPrefix('/dashboard')",
-                "service": "dashboard-frontend"
-            },
-            {
-                "name": "dashboard-service",
-                "middlewares": ["dashboardAuthBearer"],
-                "rule": "PathPrefix('/dashboard/service')",
-                "service": "dashboard-service"
+                "service": "dashboard-proxy"
             },
 
             {
-                "name": "navigation-frontend",
+                "name": "navigation-proxy",
                 "middlewares": [
                     "navigationRedirectRegex",
                     "navigationAuthBearer",
                     "navigationReplacePath"
                 ],
                 "rule": "PathPrefix('/navigation')",
-                "service": "navigation-frontend"
-            },
-            {
-                "name": "navigation-service",
-                "middlewares": ["navigationAuthBearer"],
-                "rule": "PathPrefix('/navigation/service')",
-                "service": "navigation-service"
+                "service": "navigation-proxy"
             },
 
             {
-                "name": "organisation-service",
+                "name": "organisation-proxy",
                 "middlewares": [
                     "organisationRedirectRegex",
                     "ShowSessionContentMiddleware",
@@ -58,11 +46,11 @@
                     "organisationReplacePath"
                 ],
                 "rule": "PathPrefix('/organisation')",
-                "service": "organisation-service"
+                "service": "organisation-proxy"
             },
 
             {
-                "name": "document-service",
+                "name": "document-proxy",
                 "middlewares": [
                     "documentRedirectRegex",
                     "documentOauth2",
@@ -70,7 +58,7 @@
                     "documentReplacePath"
                 ],
                 "rule": "PathPrefix('/document')",
-                "service": "document-service"
+                "service": "document-proxy"
             }
         ],
 
@@ -142,43 +130,29 @@
 
         "services": [
             {
-                "name": "dashboard-frontend",
+                "name": "dashboard-proxy",
                 "servers": [
-                    { "host": "${dashboard-frontend.host}", "port": 20025 }
-                ]
-            },
-            {
-                "name": "dashboard-service",
-                "servers": [
-                    { "host": "${dashboard-service.host}", "port": 20022 }
+                    { "host": "${dashboard-proxy.host}", "port": 20020 }
                 ]
             },
 
             {
-                "name": "navigation-frontend",
+                "name": "navigation-proxy",
                 "servers": [
-                    { "host": "${navigation-frontend.host}", "port": 20015 }
-                ]
-            },
-            {
-                "name": "navigation-service",
-                "servers": [
-                    { "host": "${navigation-service.host}", "port": 20012 }
+                    { "host": "${navigation-proxy.host}", "port": 20010 }
                 ]
             },
 
             {
-                "name": "organisation-service",
+                "name": "organisation-proxy",
                 "servers": [
-                    { "host": "${organisation-service.host}", "port": 20030 }
+                    { "host": "${organisation-proxy.host}", "port": 20030 }
                 ]
             },
 
             {
-                "name": "document-service",
-                "servers": [
-                    { "host": "${document-service.host}", "port": 20050 }
-                ]
+                "name": "document-proxy",
+                "servers": [{ "host": "${document-proxy.host}", "port": 20050 }]
             }
         ]
     }
