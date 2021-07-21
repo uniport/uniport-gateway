@@ -3,6 +3,10 @@ image:
 
 storageClassName: netapp-file-eco-ndr-aki-prod
 
+ports:
+    - name: http
+      port: 23000
+
 ingress:
     host: kundenportal-uat.albinkistler.ch
     port: 23000
