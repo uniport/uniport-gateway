@@ -8,7 +8,7 @@ ports:
       port: 23000
 
 ingress:
-    host: kundenportal-uat.albinkistler.ch
+    host: kundenportal.apps-prod.akintra.ch
     port: 23000
 
 podSecurityContext:
@@ -24,7 +24,7 @@ containerSecurityContext:
 
 envOverride:
     - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-      value: "kundenportal-uat.albinkistler.ch"
+      value: "kundenportal.apps-prod.akintra.ch"
 
     - name: "report-service.host"
       value: "report-proxy"
