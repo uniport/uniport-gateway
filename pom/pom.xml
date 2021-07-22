@@ -9,17 +9,19 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <vertx.version>4.0.3</vertx.version>
-        <junit-jupiter.version>5.7.0</junit-jupiter.version>
-        <jacoco.version>0.8.6</jacoco.version>
+        <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
 
+        <docker.image.name>${project.groupId}.${project.artifactId}</docker.image.name>
         <docker.pull.registry>docker-registry.inventage.com:10094</docker.pull.registry>
         <docker.push.registry>docker-registry.inventage.com:10095</docker.push.registry>
 
-        <portal-helm-chart-library.version>1.2.0-202107140911-38-29e2f17</portal-helm-chart-library.version>
+        <junit-jupiter.version>5.7.0</junit-jupiter.version>
+
+        <jib.goal>build</jib.goal>
+
+        <portal-helm-chart-library.version>1.2.0-202107221023-40-a82c300</portal-helm-chart-library.version>
     </properties>
 
     <dependencyManagement>
@@ -27,7 +29,7 @@
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-stack-depchain</artifactId>
-                <version>${vertx.version}</version>
+                <version>4.0.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -73,12 +75,6 @@
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!--            <dependency>-->
-            <!--                <groupId>org.jetbrains</groupId>-->
-            <!--                <artifactId>annotations</artifactId>-->
-            <!--                <version>RELEASE</version>-->
-            <!--                <scope>compile</scope>-->
-            <!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
@@ -99,29 +95,6 @@
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.2.4</version>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                            <configuration>
-                                <transformers>
-                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <manifestEntries>
-                                            <Main-Class>${launcher.class}</Main-Class>
-                                            <Main-Verticle>${main.verticle}</Main-Verticle>
-                                        </manifestEntries>
-                                    </transformer>
-                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                </transformers>
-                                <artifactSet>
-                                </artifactSet>
-                                <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar
-                                </outputFile>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -131,7 +104,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
+                    <version>0.8.6</version>
                     <executions>
                         <execution>
                             <id>default-prepare-agent</id>
@@ -161,9 +134,77 @@
                     <version>3.0.0-M1</version>
                 </plugin>
                 <plugin>
+                    <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>3.0.0</version>
+                    <executions>
+                        <execution>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>${jib.goal}</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <to>
+                            <image>${docker.push.registry}/${docker.image.name}</image>
+                            <tags>
+                                <tag>${project.version}</tag>
+                            </tags>
+                        </to>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.spotify</groupId>
+                    <artifactId>dockerfile-maven-plugin</artifactId>
+                    <version>1.4.13</version>
+                    <executions>
+                        <execution>
+                            <id>default</id>
+                        </execution>
+                        <execution>
+                            <id>install</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>install-latest</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>tag</goal>
+                            </goals>
+                            <configuration>
+                                <tag>latest</tag>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>deploy</id>
+                            <phase>deploy</phase>
+                            <goals>
+                                <goal>push</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>deploy-latest</id>
+                            <phase>deploy</phase>
+                            <goals>
+                                <goal>push</goal>
+                            </goals>
+                            <configuration>
+                                <tag>latest</tag>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <dockerfile>${dockerfile}</dockerfile>
+                        <repository>${docker.push.registry}/${docker.image.name}</repository>
+                        <tag>${project.version}</tag>
+                        <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+                        <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -182,6 +223,21 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>local</id>
+            <!-- needs to be deactivated in Jenkinsfile -->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <!-- for local builds this should be the same as pull registry, so that we can use locally docker-compose.yml -->
+            <properties>
+                <docker.push.registry>${docker.pull.registry}</docker.push.registry>
+                <jib.goal>dockerBuild</jib.goal>
+            </properties>
+        </profile>
+    </profiles>
 
     <repositories>        <!-- must be added as a server to ~/.m2/settings.xml -->
         <repository>

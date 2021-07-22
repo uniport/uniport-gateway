@@ -13,9 +13,7 @@
     <artifactId>server</artifactId>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <jib.goal>build</jib.goal>
+        <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
     </properties>
 
     <dependencies>
@@ -49,13 +47,14 @@
             <artifactId>vertx-service-discovery</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-discovery-bridge-docker</artifactId>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-core</artifactId>
+            <version>3.2.8</version>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-transport-httpclient5</artifactId>
-            <version>3.2.7</version>
+            <version>3.2.8</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -106,14 +105,33 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-            <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#additional-build-artifacts -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-configuration</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/docker</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.directory}/docker-context/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <!-- <from></from> https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#setting-the-base-image -->
                     <to>
-                        <image>${docker.push.registry}/com.inventage.portal.gateway.portal-gateway</image>
+                        <image>${docker.push.registry}/${docker.image.name}</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
@@ -121,7 +139,7 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>./portal-gateway/</from>
+                                <from>${project.build.directory}/docker-context/portal-gateway-config/</from>
                                 <into>/etc/portal-gateway/default/</into>
                             </path>
                         </paths>
@@ -133,36 +151,68 @@
                             <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
                             <arg>-cluster</arg>
                         </args>
-                        <!--                        <ports>-->
-                        <!--                            <port>20000</port>-->
-                        <!--                        </ports>-->
                     </container>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <id>default-jar</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>${jib.goal}</goal>
+                            <goal>jar</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>configuration</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config</classesDirectory>
+                            <classifier>configuration</classifier>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>fat</shadedClassifierName>
+                    <!-- To avoid "java.lang.SecurityException: Invalid signature file digest for Manifest main attributes" we need to exclude manifest signature files -->
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
+                            </manifestEntries>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    </transformers>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>local</id>
-            <!-- needs to be deactivated in Jenkinsfile -->
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <!-- for local builds this should be the same as pull registry, so that we can use locally docker-compose.yml -->
-            <properties>
-                <docker.push.registry>${docker.pull.registry}</docker.push.registry>
-                <jib.goal>dockerBuild</jib.goal>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>

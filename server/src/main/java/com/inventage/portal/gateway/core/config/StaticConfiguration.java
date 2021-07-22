@@ -25,6 +25,7 @@ public class StaticConfiguration {
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";
+    public static final String ENTRYPOINT_SESSION_DISABLED = "sessionDisabled";
 
     public static final String APPLICATIONS = "applications";
     public static final String APPLICATION_NAME = "name";
@@ -58,7 +59,8 @@ public class StaticConfiguration {
     private static Schema buildSchema(Vertx vertx) {
         ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
                 .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
-                .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema()).allowAdditionalProperties(false);
+                .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
+                .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema()).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
                 .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())

@@ -9,12 +9,13 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip> <!-- because we deploy via nexus-staging-maven-plugin -->
+        <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
     </properties>
 
     <modules>
         <module>pom</module>
         <module>server</module>
+        <module>native</module>
         <module>docker-compose</module>
         <module>helm</module>
     </modules>

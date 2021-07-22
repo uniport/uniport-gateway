@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1.4.0-[Unreleased]
 ------------
 
+# Added
+
+- Build as Uber/fat jar artifact
+- Build as native image
+- Option to disable session management
+
+# Changed
+
+- Use proxy for each microservice
+
 [1.3.0]-202107070850-141-913856c - 2021-07-07
 ------------
 

@@ -117,8 +117,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final JsonArray configs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                        .map(entrypoint -> new Entrypoint(entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
-                                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT), vertx))
+                        .map(entrypoint -> new Entrypoint(vertx,
+                                entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
+                                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT),
+                                entrypoint.getBoolean(StaticConfiguration.ENTRYPOINT_SESSION_DISABLED, false)))
                         .forEach(entrypoints::add);
             }
             return entrypoints;
