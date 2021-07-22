@@ -23,12 +23,10 @@ RUN native-image \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar
 
-FROM gcr.io/distroless/base
-COPY --from=buildEnv /workdir/portal-gateway portal-gateway
-COPY --from=buildEnv /usr/lib64/libz.so.1 /lib/x86_64-linux-gnu/libz.so.1
-COPY --from=buildEnv /usr/lib64/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so.6
-COPY --from=buildEnv /usr/lib64/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.1
+FROM debian:buster-slim
+
+COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
 COPY portal-gateway /etc/portal-gateway/default/
 
-CMD ["./portal-gateway", "run", "-cluster"]
+ENTRYPOINT ["portal-gateway", "run", "-cluster"]
