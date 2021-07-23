@@ -121,7 +121,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
             LOGGER.debug("buildAuthToken: Providing id token");
             rawToken = accessToken.opaqueIdToken();
         } else {
-            LOGGER.debug("buildAuthToken: Providing access token for session scope : '{}'", this.sessionScope);
+            LOGGER.debug("buildAuthToken: Providing access token for session scope: '{}'", this.sessionScope);
             rawToken = accessToken.opaqueAccessToken();
         }
 
