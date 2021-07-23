@@ -23,8 +23,12 @@ containerSecurityContext:
     readOnlyRootFilesystem: false
 
 envOverride:
+    - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+      value: "https"
     - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
       value: "kundenportal.apps-prod.akintra.ch"
+    - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+      value: "443"
 
     - name: "report-service.host"
       value: "report-proxy"
