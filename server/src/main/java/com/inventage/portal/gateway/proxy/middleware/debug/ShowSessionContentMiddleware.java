@@ -1,12 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
 import java.util.Base64;
-import java.util.Map;
 import java.util.Set;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 
 import org.slf4j.Logger;
@@ -14,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.Session;
 
 /**
  * Returns an HTML page with information from the current session if "_session_" is in the requested URL.
@@ -27,7 +27,7 @@ public class ShowSessionContentMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
             LOGGER.info("handle: url '{}'", ctx.request().absoluteURI());
-            ctx.end(getHtml(ctx));
+            ctx.end(getHtml(ctx.session()));
         } else {
             LOGGER.info("handle: ignoring url '{}'", ctx.request().absoluteURI());
             ctx.next();
@@ -35,13 +35,14 @@ public class ShowSessionContentMiddleware implements Middleware {
     }
 
     // TODO: usage of vert.x templating for HTML generation
-    private String getHtml(RoutingContext ctx) {
+    private String getHtml(Session session) {
+        LOGGER.info(session.toString());
         final StringBuffer html = new StringBuffer();
 
-        html.append("session ID:\n").append(ctx.session().id());
+        html.append("session ID:\n").append(session.id());
         html.append("\n\n");
 
-        final Set<Cookie> storedCookies = ctx.session().get(SessionBagMiddleware.SESSION_BAG_COOKIES);
+        final Set<Cookie> storedCookies = session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
         if (storedCookies != null) {
             if (!storedCookies.isEmpty()) {
                 html.append("cookies stored in session bag (each block is one cookie):\n\n");
@@ -52,18 +53,24 @@ public class ShowSessionContentMiddleware implements Middleware {
             }
         }
 
-        String idToken = ctx.session().get(OAuth2MiddlewareFactory.ID_TOKEN);
-        if (idToken != null) {
-            html.append("id token:\n");
-            html.append(decodeJWT(idToken));
-            html.append("\n");
-            html.append(idToken);
-        }
+        boolean idTokenDisplayed = false;
+        for (String key : session.data().keySet()) {
+            LOGGER.debug("getHtml: {}: {}", key, session.data().get(key));
+            if (!key.endsWith("_access_token")) {
+                continue;
+            }
 
-        final Map<String, Object> data = ctx.session().data();
-        data.keySet().stream().filter(key -> key.endsWith("_access_token"))
-                .peek(key -> html.append("\n\n").append(key).append(":\n")).map(key -> data.get(key))
-                .forEach(value -> html.append(decodeJWT((String) value)).append("\n").append(value));
+            AccessToken accessToken = (AccessToken) session.data().get(key);
+            if (!idTokenDisplayed) {
+                String rawIdToken = accessToken.opaqueIdToken();
+                html.append("id token:\n").append(decodeJWT(rawIdToken)).append("\n").append(rawIdToken);
+                idTokenDisplayed = true;
+            }
+
+            String rawAccessToken = accessToken.opaqueAccessToken();
+            html.append("\n\n").append(key).append(":\n").append(decodeJWT(rawAccessToken)).append("\n")
+                    .append(rawAccessToken);
+        }
 
         return html.toString();
     }
