@@ -14,8 +14,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
+import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.Route;
@@ -32,9 +34,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     public final static String SESSION_SCOPE_USER_FORMAT = "%s_user";
     public final static String SESSION_SCOPE_ACCESS_TOKEN_FORMAT = "%s_access_token";
-    public final static String ID_TOKEN = "id_token";
-
-    private final static String ACCESS_TOKEN = "access_token";
 
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final String OIDC_SCOPE = "openid";
@@ -65,20 +64,17 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 LOGGER.debug("create: Handling callback");
                 ctx.addEndHandler(event -> {
                     if (ctx.user() != null) {
-                        LOGGER.debug("create: Setting session scope user");
+                        LOGGER.debug("create: Setting user of session scope '{}'", sessionScope);
                         ctx.session().put(String.format(SESSION_SCOPE_USER_FORMAT, sessionScope), ctx.user());
 
                         if (ctx.user().principal() != null) {
+                            LOGGER.debug("create: principal found");
                             JsonObject principal = ctx.user().principal();
-
-                            LOGGER.debug("create: Setting id token");
-                            String idToken = principal.getString(ID_TOKEN);
-                            ctx.session().put(ID_TOKEN, idToken);
-
-                            LOGGER.debug("create: Setting access token for scope '{}'", sessionScope);
-                            String accessToken = principal.getString(ACCESS_TOKEN);
+                            AccessToken accessToken = new AccessTokenImpl(principal, authProvider);
                             ctx.session().put(String.format(SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
                                     accessToken);
+                        } else {
+                            LOGGER.debug("create: principal not found");
                         }
                     }
                 });
@@ -87,7 +83,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-            // the protocol, hostname or port can be different then the portal-gateway knows
+            // the protocol, hostname or port can be different than the portal-gateway knows
             String publicUrl = middlewareConfig.getString(RouterFactory.PUBLIC_URL);
             try {
                 final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
