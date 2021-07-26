@@ -31,7 +31,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
     private final static String BEARER = "Bearer ";
 
-    private final int EXPIRATION_LEEWAY_SECONDS = 600;
+    private final int EXPIRATION_LEEWAY_SECONDS = 5;
 
     private String sessionScope;
 
