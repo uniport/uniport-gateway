@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Git](https://git.inventage.com/projects/PORTAL/repos/portal-gateway/browse) - [JIRA](https://issue.inventage.com/browse/PORTAL-298?jql=project%20%3D%20PORTAL%20AND%20component%20%3D%20Portal-Gateway) - [Nexus2](https://nexus.inventage.com/content/repositories/inventage-portal/com/inventage/portal/gateway/) - [Nexus3](https://nexus3.inventage.com/#browse/browse:inventage-portal-docker)
 
-1.4.0-[Unreleased]
+2.1.0-[Unreleased]
+------------
+
+### Added, Changed, Deprecated, Removed, Fixed or Security
+
+[2.0.0]-202107261151-161-ad6799e - 2021-07-26
 ------------
 
 # Added
@@ -71,7 +76,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [PORTAL-89](https://issue.inventage.com/browse/PORTAL-89): Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution.
 
-[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F1.3.0
+[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.0.0
+[2.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.0.0&targetBranch=refs%2Ftags%2F1.3.0
 [1.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F1.3.0&targetBranch=refs%2Ftags%2F1.2.0
 [1.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F1.2.0&targetBranch=refs%2Ftags%2F1.1.0
 [1.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F1.1.0&targetBranch=refs%2Ftags%2F1.0.0
