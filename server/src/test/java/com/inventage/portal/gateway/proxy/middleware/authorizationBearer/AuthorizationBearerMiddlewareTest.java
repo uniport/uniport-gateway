@@ -18,6 +18,8 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -147,6 +149,12 @@ public class AuthorizationBearerMiddlewareTest {
                     }));
         }));
 
+    }
+
+    @Test
+    void refreshAccessToken(Vertx vertx, VertxTestContext testCtx) {
+        // TODO: https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/test/java/io/vertx/ext/web/handler/OAuth2AuthHandlerTest.java#L62
+        OAuth2Auth.create(vertx, new OAuth2Options().setClientID("test-client").setClientSecret("test-secret"));
     }
 
     @Test
