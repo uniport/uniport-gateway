@@ -19,10 +19,11 @@
                 "middlewares": [
                     "dashboardRedirectRegex",
                     "dashboardAuthBearer",
+                    "ShowSessionContentMiddleware",
                     "dashboardReplacePath"
                 ],
                 "rule": "PathPrefix('/dashboard')",
-                "service": "dashboard-proxy"
+                "service": "whoami"
             },
 
             {
@@ -40,13 +41,13 @@
                 "name": "organisation-proxy",
                 "middlewares": [
                     "organisationRedirectRegex",
-                    "ShowSessionContentMiddleware",
                     "organisationOauth2",
                     "organisationAuthBearer",
+                    "ShowSessionContentMiddleware",
                     "organisationReplacePath"
                 ],
                 "rule": "PathPrefix('/organisation')",
-                "service": "organisation-proxy"
+                "service": "whoami"
             },
 
             {
@@ -55,10 +56,11 @@
                     "documentRedirectRegex",
                     "documentOauth2",
                     "documentAuthBearer",
+                    "ShowSessionContentMiddleware",
                     "documentReplacePath"
                 ],
                 "rule": "PathPrefix('/document')",
-                "service": "document-proxy"
+                "service": "whoami"
             }
         ],
 
@@ -129,6 +131,11 @@
         ],
 
         "services": [
+            {
+                "name": "whoami",
+                "servers": [{ "host": "whoami", "port": 80 }]
+            },
+
             {
                 "name": "dashboard-proxy",
                 "servers": [
