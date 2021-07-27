@@ -9,6 +9,8 @@ import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -17,10 +19,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -54,7 +54,8 @@ public class AuthorizationBearerMiddlewareTest {
         int port = TestUtils.findFreePort();
         String sessionScope = "testScope";
         String rawIdToken = "thisIsWhoIAm";
-        AccessToken accessToken = new AccessTokenImpl(new JsonObject().put("id_token", rawIdToken), null);
+        User user = User.create(new JsonObject().put("id_token", rawIdToken));
+        Pair<OAuth2Auth, User> authPair = ImmutablePair.of(null, user);
 
         Checkpoint serverStarted = testCtx.checkpoint();
         Checkpoint requestServed = testCtx.checkpoint();
@@ -65,8 +66,8 @@ public class AuthorizationBearerMiddlewareTest {
 
         // mock OAuth2 authentication
         Handler<RoutingContext> injectTokenHandler = ctx -> {
-            ctx.session().put(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
-                    accessToken);
+            String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+            ctx.session().put(key, authPair);
             ctx.next();
         };
 
@@ -74,7 +75,6 @@ public class AuthorizationBearerMiddlewareTest {
                 DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
-        ;
 
         Router router = Router.router(vertx);
         router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);
@@ -105,7 +105,8 @@ public class AuthorizationBearerMiddlewareTest {
         int port = TestUtils.findFreePort();
         String sessionScope = "testScope";
         String rawAccessToken = "mayIAccessThisRessource";
-        AccessToken accessToken = new AccessTokenImpl(new JsonObject().put("access_token", rawAccessToken), null);
+        User user = User.create(new JsonObject().put("access_token", rawAccessToken));
+        Pair<OAuth2Auth, User> authPair = ImmutablePair.of(null, user);
 
         Checkpoint serverStarted = testCtx.checkpoint();
         Checkpoint requestServed = testCtx.checkpoint();
@@ -116,15 +117,14 @@ public class AuthorizationBearerMiddlewareTest {
 
         // mock OAuth2 authentication
         Handler<RoutingContext> injectTokenHandler = ctx -> {
-            ctx.session().put(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
-                    accessToken);
+            String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+            ctx.session().put(key, authPair);
             ctx.next();
         };
 
         AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
-        ;
 
         Router router = Router.router(vertx);
         router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);
