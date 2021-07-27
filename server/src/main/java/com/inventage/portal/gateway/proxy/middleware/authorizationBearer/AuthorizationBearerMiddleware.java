@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 
-import java.util.Optional;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
@@ -27,11 +29,11 @@ import io.vertx.ext.web.Session;
  */
 public class AuthorizationBearerMiddleware implements Middleware {
 
+    public static final int EXPIRATION_LEEWAY_SECONDS = 5;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
     private final static String BEARER = "Bearer ";
-
-    private final int EXPIRATION_LEEWAY_SECONDS = 5;
 
     private String sessionScope;
 
@@ -69,60 +71,72 @@ public class AuthorizationBearerMiddleware implements Middleware {
     }
 
     private void getAuthToken(Session session, Handler<AsyncResult<String>> handler) {
-        AccessToken accessToken = null;
+        Pair<OAuth2Auth, User> authPair = null;
         boolean idTokenDemanded = false;
 
         if (this.sessionScope.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
             idTokenDemanded = true;
             // all ID tokens are the same hence take the first one
             for (String key : session.data().keySet()) {
-                if (!key.endsWith("_access_token")) {
+                if (!key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX)) {
                     continue;
                 }
-                accessToken = (AccessToken) session.data().get(key);
+                authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
                 break;
             }
         } else if (this.sessionScope != null && this.sessionScope.length() != 0) {
-            accessToken = (AccessToken) session.data()
-                    .get(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_ACCESS_TOKEN_FORMAT, this.sessionScope));
+            String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+            authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
         } else {
             LOGGER.debug("getAuthToken: no token demanded");
             handler.handle(Future.succeededFuture());
             return;
         }
 
-        if (accessToken == null) {
-            String errMsg = "No token found";
+        if (authPair == null) {
+            String errMsg = "No user found";
             LOGGER.debug("getAuthToken: {}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
             return;
         }
 
-        // fix: Local variable defined in an enclosing scope must be final or effectively final
-        final AccessToken finalAccessToken = accessToken;
-        final boolean finalIdTokenDemanded = idTokenDemanded;
-
-        if (accessToken.expired(EXPIRATION_LEEWAY_SECONDS)) {
-            accessToken.refresh().onSuccess(ar -> {
-                String token = this.buildAuthToken(finalAccessToken, finalIdTokenDemanded);
-                handler.handle(Future.succeededFuture(token));
+        Promise<Pair<OAuth2Auth, User>> preparedUser = Promise.promise();
+        OAuth2Auth authProvider = authPair.getLeft();
+        User user = authPair.getRight();
+        if (user.expired(EXPIRATION_LEEWAY_SECONDS)) {
+            LOGGER.info("getAuthToken: refreshing access token");
+            authProvider.refresh(user).onSuccess(u -> {
+                Pair<OAuth2Auth, User> refreshedAuthPair = ImmutablePair.of(authProvider, u);
+                String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+                session.put(key, refreshedAuthPair);
+                preparedUser.complete(refreshedAuthPair);
             }).onFailure(err -> {
                 handler.handle(Future.failedFuture(err));
             });
         } else {
-            String token = this.buildAuthToken(accessToken, idTokenDemanded);
-            handler.handle(Future.succeededFuture(token));
+            LOGGER.debug("getAuthToken: use existing access token");
+            preparedUser.complete(authPair);
         }
+
+        // fix: Local variable defined in an enclosing scope must be final or effectively final
+        final boolean finalIdTokenDemanded = idTokenDemanded;
+        preparedUser.future().onSuccess(ap -> {
+            User u = ap.getRight();
+            String token = this.buildAuthToken(u.principal(), finalIdTokenDemanded);
+            handler.handle(Future.succeededFuture(token));
+        }).onFailure(err -> {
+            handler.handle(Future.failedFuture(err));
+        });
     }
 
-    private String buildAuthToken(AccessToken accessToken, boolean idTokenDemanded) {
+    private String buildAuthToken(JsonObject principal, boolean idTokenDemanded) {
         String rawToken;
         if (idTokenDemanded) {
             LOGGER.debug("buildAuthToken: Providing id token");
-            rawToken = accessToken.opaqueIdToken();
+            rawToken = principal.getString("id_token");
         } else {
             LOGGER.debug("buildAuthToken: Providing access token for session scope: '{}'", this.sessionScope);
-            rawToken = accessToken.opaqueAccessToken();
+            rawToken = principal.getString("access_token");
         }
 
         if (rawToken == null || rawToken.length() == 0) {

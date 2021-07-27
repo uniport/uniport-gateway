@@ -2,10 +2,12 @@ package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 
@@ -28,8 +30,10 @@ public class OAuth2AuthMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("handle: '{}'", ctx.request().absoluteURI());
-        User sessionScopeUser = ctx.session()
-                .get(String.format(OAuth2MiddlewareFactory.SESSION_SCOPE_USER_FORMAT, sessionScope));
+        String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+        Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
+        User sessionScopeUser = authPair.getRight();
+
         ctx.setUser(sessionScopeUser);
 
         LOGGER.debug("handle: Handling auth request");

@@ -7,6 +7,8 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +16,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
-import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.Route;
@@ -32,8 +33,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
-    public final static String SESSION_SCOPE_USER_FORMAT = "%s_user";
-    public final static String SESSION_SCOPE_ACCESS_TOKEN_FORMAT = "%s_access_token";
+    public final static String SESSION_SCOPE_SUFFIX = "_session";
 
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final String OIDC_SCOPE = "openid";
@@ -65,17 +65,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 ctx.addEndHandler(event -> {
                     if (ctx.user() != null) {
                         LOGGER.debug("create: Setting user of session scope '{}'", sessionScope);
-                        ctx.session().put(String.format(SESSION_SCOPE_USER_FORMAT, sessionScope), ctx.user());
-
-                        if (ctx.user().principal() != null) {
-                            LOGGER.debug("create: principal found");
-                            JsonObject principal = ctx.user().principal();
-                            AccessToken accessToken = new AccessTokenImpl(principal, authProvider);
-                            ctx.session().put(String.format(SESSION_SCOPE_ACCESS_TOKEN_FORMAT, sessionScope),
-                                    accessToken);
-                        } else {
-                            LOGGER.debug("create: principal not found");
-                        }
+                        // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User objects together.
+                        // However, it is marked as deprecated and therefore we use our own glue.
+                        Pair<OAuth2Auth, User> authPair = ImmutablePair.of(authProvider, ctx.user());
+                        ctx.session().put(String.format("%s%s", sessionScope, SESSION_SCOPE_SUFFIX), authPair);
                     }
                 });
                 ctx.next();
