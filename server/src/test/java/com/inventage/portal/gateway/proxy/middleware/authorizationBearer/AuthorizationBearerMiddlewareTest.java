@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
@@ -153,8 +156,80 @@ public class AuthorizationBearerMiddlewareTest {
 
     @Test
     void refreshAccessToken(Vertx vertx, VertxTestContext testCtx) {
-        // TODO: https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/test/java/io/vertx/ext/web/handler/OAuth2AuthHandlerTest.java#L62
-        OAuth2Auth.create(vertx, new OAuth2Options().setClientID("test-client").setClientSecret("test-secret"));
+        int port = TestUtils.findFreePort();
+        String sessionScope = "testScope";
+
+        int refreshedExpiresIn = 42;
+        String rawRefreshToken = "iAmARefresher";
+        String rawAccessToken = "mayIAccessThisRessource";
+        int expiresIn = 1;
+        JsonObject principal = new JsonObject().put("access_token", rawAccessToken).put("expires_in", expiresIn)
+                .put("refresh_token", rawRefreshToken);
+
+        User initialUser = MockOAuth2Auth.createUser(principal);
+        OAuth2Auth initialAuthProvider = new MockOAuth2Auth(principal, refreshedExpiresIn);
+        Pair<OAuth2Auth, User> initialAuthPair = ImmutablePair.of(initialAuthProvider, initialUser);
+
+        // wait for access token to expire
+        try {
+            CountDownLatch waiter = new CountDownLatch(1);
+            waiter.await(AuthorizationBearerMiddleware.EXPIRATION_LEEWAY_SECONDS + expiresIn + 1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Checkpoint serverStarted = testCtx.checkpoint();
+        Checkpoint requestServed = testCtx.checkpoint();
+        Checkpoint responseReceived = testCtx.checkpoint();
+
+        // needed to populate a session
+        Handler<RoutingContext> sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx));
+
+        // mock OAuth2 authentication
+        Handler<RoutingContext> injectTokenHandler = ctx -> {
+            String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+            ctx.session().put(key, initialAuthPair);
+            ctx.next();
+        };
+
+        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
+
+        Handler<RoutingContext> endHandler = ctx -> {
+            testCtx.verify(() -> {
+                String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+                Pair<OAuth2Auth, User> refreshedAuthPair = (Pair<OAuth2Auth, User>) ctx.session().data().get(key);
+                User refreshedUser = refreshedAuthPair.getRight();
+
+                assertEquals(refreshedUser.principal().getInteger("expires_in", -1), refreshedExpiresIn,
+                        "should be updated");
+                assertTrue(refreshedUser.attributes().getInteger("exp", -1) > initialUser.attributes().getInteger("exp",
+                        -1), "'exp' should be updated");
+            });
+            ctx.response().end("ok");
+        };
+
+        Router router = Router.router(vertx);
+        router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);
+        vertx.createHttpServer().requestHandler(req -> {
+            router.handle(req);
+            testCtx.verify(() -> {
+                assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION), "should contain auth header");
+                assertEquals(String.format("Bearer %s", rawAccessToken), req.headers().get(HttpHeaders.AUTHORIZATION),
+                        "should match token");
+            });
+            requestServed.flag();
+        }).listen(port).onComplete(testCtx.succeeding(s -> {
+            serverStarted.flag();
+            // server is started, we can proceed
+            vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
+                    .onComplete(testCtx.succeeding(resp -> {
+                        testCtx.verify(() -> {
+                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                                    "should not contain auth header");
+                        });
+                        responseReceived.flag();
+                    }));
+        }));
     }
 
     @Test
