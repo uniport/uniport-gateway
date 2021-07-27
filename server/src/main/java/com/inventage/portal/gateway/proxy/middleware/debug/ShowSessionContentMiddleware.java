@@ -5,14 +5,18 @@ import java.util.Set;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.AccessToken;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
@@ -56,18 +60,19 @@ public class ShowSessionContentMiddleware implements Middleware {
         boolean idTokenDisplayed = false;
         for (String key : session.data().keySet()) {
             LOGGER.debug("getHtml: {}: {}", key, session.data().get(key));
-            if (!key.endsWith("_access_token")) {
+            if (!key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX)) {
                 continue;
             }
 
-            AccessToken accessToken = (AccessToken) session.data().get(key);
+            Pair<OAuth2Auth, User> authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
+            User user = authPair.getRight();
             if (!idTokenDisplayed) {
-                String rawIdToken = accessToken.opaqueIdToken();
+                String rawIdToken = user.principal().getString("id_token");
                 html.append("id token:\n").append(decodeJWT(rawIdToken)).append("\n").append(rawIdToken);
                 idTokenDisplayed = true;
             }
 
-            String rawAccessToken = accessToken.opaqueAccessToken();
+            String rawAccessToken = user.principal().getString("access_token");
             html.append("\n\n").append(key).append(":\n").append(decodeJWT(rawAccessToken)).append("\n")
                     .append(rawAccessToken);
         }
