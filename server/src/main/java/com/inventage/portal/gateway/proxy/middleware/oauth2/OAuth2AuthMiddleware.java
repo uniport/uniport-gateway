@@ -35,6 +35,8 @@ public class OAuth2AuthMiddleware implements Middleware {
         Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
         if (authPair != null) {
             ctx.setUser(authPair.getRight());
+        } else {
+            ctx.setUser(null);
         }
 
         LOGGER.debug("handle: Handling auth request");
