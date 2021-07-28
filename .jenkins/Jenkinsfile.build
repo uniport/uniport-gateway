@@ -161,7 +161,7 @@ pipeline {
             steps {
                 echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
                 createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG}"
-                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG}"
+                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG}"
             }
         }
 
