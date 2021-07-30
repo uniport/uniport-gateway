@@ -31,9 +31,9 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
+    public final static String BEARER = "Bearer ";
 
-    private final static String BEARER = "Bearer ";
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
     private String sessionScope;
 
@@ -50,7 +50,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
                 return;
             }
 
-            ctx.request().headers().add(HttpHeaders.AUTHORIZATION, token);
+            ctx.request().headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
 
             Handler<MultiMap> respHeadersModifier = headers -> {
                 headers.remove(HttpHeaders.AUTHORIZATION);
@@ -144,7 +144,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
             return "";
         }
 
-        return new StringBuilder(BEARER).append(rawToken).toString();
+        return rawToken;
     }
 
 }
