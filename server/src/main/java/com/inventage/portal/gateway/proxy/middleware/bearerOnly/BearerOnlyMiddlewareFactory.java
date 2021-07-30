@@ -40,8 +40,10 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         JWTOptions jwtOptions = new JWTOptions().setIssuer(issuer).setAudience(audience.getList());
 
+        String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
+                "-----END PUBLIC KEY-----");
         JWTAuthOptions authConfig = new JWTAuthOptions()
-                .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKey))
+                .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
                 .setJWTOptions(jwtOptions);
 
         JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
