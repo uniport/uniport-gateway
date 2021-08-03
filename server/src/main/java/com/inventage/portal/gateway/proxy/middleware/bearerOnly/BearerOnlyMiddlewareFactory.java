@@ -49,7 +49,14 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
                     "-----END PUBLIC KEY-----");
-            JWTOptions jwtOptions = new JWTOptions().setIssuer(issuer).setAudience(audience.getList());
+
+            JWTOptions jwtOptions = new JWTOptions();
+            if (issuer != null) {
+                jwtOptions.setIssuer(issuer);
+            }
+            if (audience != null) {
+                jwtOptions.setAudience(audience.getList());
+            }
             JWTAuthOptions authConfig = new JWTAuthOptions()
                     .addPubSecKey(
                             new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))

@@ -482,23 +482,25 @@ public class DynamicConfiguration {
                     }
 
                     String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
-                    if (issuer == null || issuer.length() == 0) {
+                    if (issuer != null && issuer.length() == 0) {
                         valid = false;
-                        errMsg = String.format("%s: No issuer defined", mwType);
+                        errMsg = String.format("%s: Empty issuer defined", mwType);
                         break;
                     }
 
                     JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_AUDIENCE);
-                    if (audience == null || audience.size() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No audience defined.", mwType);
-                        break;
-                    }
-                    for (Object a : audience.getList()) {
-                        if (!(a instanceof String)) {
+                    if (audience != null) {
+                        if (audience.size() == 0) {
                             valid = false;
-                            errMsg = String.format("%s: Audience is required to be a list of strings.", mwType);
+                            errMsg = String.format("%s: Empty audience defined.", mwType);
                             break;
+                        }
+                        for (Object a : audience.getList()) {
+                            if (!(a instanceof String)) {
+                                valid = false;
+                                errMsg = String.format("%s: Audience is required to be a list of strings.", mwType);
+                                break;
+                            }
                         }
                     }
                     if (!valid) {
