@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.OAuth2AuthHandler;
+import io.vertx.ext.web.handler.AuthenticationHandler;
 
 /**
  * Redirects the user if not authenticated.
@@ -18,10 +18,10 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
 
-    private OAuth2AuthHandler authHandler;
+    private AuthenticationHandler authHandler;
     private String sessionScope;
 
-    public OAuth2AuthMiddleware(OAuth2AuthHandler authHandler, String sessionScope) {
+    public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope) {
         LOGGER.debug("constructor: for session scope '{}'", sessionScope);
         this.authHandler = authHandler;
         this.sessionScope = sessionScope;
@@ -39,8 +39,8 @@ public class OAuth2AuthMiddleware implements Middleware {
             ctx.setUser(null);
         }
 
-        LOGGER.debug("handle: Handling auth request");
+        LOGGER.debug("handle: Handling oauth2 auth request");
         authHandler.handle(ctx);
-        LOGGER.debug("handle: Handled auth request");
+        LOGGER.debug("handle: Handled oauth2 auth request");
     }
 }

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.inventage.portal.gateway.TestUtils;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +25,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(VertxExtension.class)
 public class DynamicConfigurationTest {
 
@@ -163,6 +166,50 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
                                 .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+
+        JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils
+                .buildConfiguration(TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
+                        DynamicConfiguration.MIDDLEWARE_BEARER_ONLY, TestUtils.withMiddlewareOpts(
+                                new JsonObject().put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "blub")))));
+
+        JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
+                TestUtils.withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+                        TestUtils.withMiddlewareOpts(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "notbase64*")
+                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
+                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
+                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                        new JsonArray().add("blub"))))));
+
+        JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils
+                .buildConfiguration(TestUtils
+                        .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+                                TestUtils.withMiddlewareOpts(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "Ymx1Ygo=")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                                new JsonArray().add("blub"))))));
+
+        JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils
+                .buildConfiguration(TestUtils
+                        .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+                                TestUtils.withMiddlewareOpts(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "Ymx1Ygo=")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                                new JsonArray().add("valid").add(123).add(true))))));
+
+        JsonObject bearerOnlyHttpMiddleware = TestUtils
+                .buildConfiguration(TestUtils
+                        .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+                                TestUtils.withMiddlewareOpts(new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "Ymx1Ygo=")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                                new JsonArray().add("blub"))))));
 
         JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
@@ -424,8 +471,18 @@ public class DynamicConfigurationTest {
                 // authorization bearer middleware
                 Arguments.of("accept authorization bearer middleware", authBearerHttpMiddleware, complete,
                         expectedTrue),
-                Arguments.of("reject authorization bearer  with missing options",
+                Arguments.of("reject authorization bearer with missing options",
                         authBearerHttpMiddlewareWithMissingOptions, complete, expectedFalse),
+                // bearer only middleware
+                Arguments.of("accept bearer only middleware", bearerOnlyHttpMiddleware, complete, expectedTrue),
+                Arguments.of("reject bearer only with missing options", bearerOnlyHttpMiddlewareWithMissingOptions,
+                        complete, expectedFalse),
+                Arguments.of("reject bearer with invalid public key", bearerOnlyHttpMiddlewareWithInvalidPublicKey,
+                        complete, expectedFalse),
+                Arguments.of("reject bearer with invalid public key format",
+                        bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat, complete, expectedFalse),
+                Arguments.of("reject bearer with invalid audience", bearerOnlyHttpMiddlewareWithInvalidAudience,
+                        complete, expectedFalse),
                 // oauth2 middleware
                 Arguments.of("accept oAuth2 middleware", oauth2PathHttpMiddleware, complete, expectedTrue),
                 Arguments.of("reject oAuth2 middleware with missing options",

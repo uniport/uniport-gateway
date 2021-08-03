@@ -1,7 +1,11 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,6 +66,13 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
 
+    public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
+    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
+    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL = "publicKeyFromUrl";
+    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
+    public static final String MIDDLEWARE_BEARER_ONLY_ISSUER = "issuer";
+    public static final String MIDDLEWARE_BEARER_ONLY_AUDIENCE = "audience";
+
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
     public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
@@ -77,8 +88,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH = "path";
 
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
-            MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_OAUTH2,
-            MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG);
+            MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
+            MIDDLEWARE_OAUTH2, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -101,6 +112,11 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
                 .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
                 .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
@@ -410,6 +426,87 @@ public class DynamicConfiguration {
                         valid = false;
                         errMsg = String.format("%s: No session scope defined", mwType);
                     }
+                    break;
+                }
+                case MIDDLEWARE_BEARER_ONLY: {
+                    boolean publicKeyProvided = false;
+
+                    String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
+                    if (publicKey != null) {
+                        if (publicKey.length() == 0) {
+                            valid = false;
+                            errMsg = String.format("%s: Empty public key defined", mwType);
+                            break;
+                        } else if (publicKey.length() > 0) {
+                            try {
+                                // public key has to be base64 encoded
+                                Base64.getDecoder().decode(publicKey);
+                            } catch (IllegalArgumentException e) {
+                                valid = false;
+                                errMsg = String.format("%s: Public key is required to be base64 encoded", mwType);
+                                break;
+                            }
+                            publicKeyProvided = true;
+                        }
+                    }
+
+                    String publicKeyFromUrl = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL);
+                    if (publicKeyFromUrl != null) {
+                        if (publicKeyFromUrl.length() == 0) {
+                            valid = false;
+                            errMsg = String.format("%s: Empty public key URL defined", mwType);
+                            break;
+                        } else if (publicKeyFromUrl.length() > 0) {
+                            try {
+                                new URL(publicKeyFromUrl).toURI();
+                            } catch (MalformedURLException | URISyntaxException e) {
+                                valid = false;
+                                errMsg = String.format("%s: Public key URL is required to be a valid URL", mwType);
+                                break;
+                            }
+                            publicKeyProvided = true;
+                        }
+                    }
+
+                    if (!publicKeyProvided) {
+                        valid = false;
+                        errMsg = String.format("%s: No public key defined", mwType);
+                        break;
+                    }
+
+                    String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
+                    if (publicKeyAlgorithm.length() == 0) {
+                        valid = false;
+                        errMsg = String.format("%s: Invalid public key algorithm", mwType);
+                        break;
+                    }
+
+                    String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
+                    if (issuer != null && issuer.length() == 0) {
+                        valid = false;
+                        errMsg = String.format("%s: Empty issuer defined", mwType);
+                        break;
+                    }
+
+                    JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_AUDIENCE);
+                    if (audience != null) {
+                        if (audience.size() == 0) {
+                            valid = false;
+                            errMsg = String.format("%s: Empty audience defined.", mwType);
+                            break;
+                        }
+                        for (Object a : audience.getList()) {
+                            if (!(a instanceof String)) {
+                                valid = false;
+                                errMsg = String.format("%s: Audience is required to be a list of strings.", mwType);
+                                break;
+                            }
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
+
                     break;
                 }
                 case MIDDLEWARE_HEADERS: {
