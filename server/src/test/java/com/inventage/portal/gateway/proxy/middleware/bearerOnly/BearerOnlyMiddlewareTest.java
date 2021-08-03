@@ -69,6 +69,16 @@ public class BearerOnlyMiddlewareTest {
     private static final String publicKeyRS256 = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5A7cv3Vyv2EaR/j4IPCIX4+W73XxUelSKr+D38DiLMb7Lpc7VWNC/dYq2u6FiLIIr/cdIe+zOnf0yfMnIZVbHVqLI6ll4gn07etpf97FhF7X3mg4EfoWIl+PNZze7dDrdfwfOle5hQX2WWdHKk860diw6e/YPsMQzfw0M1SL6mo44rgSx6hYeHOFaq/mcKzcUgwyQeWjhyu+JZnPxFYL2N3/AC/X6SzqrmR8JWJECxhW0ooJy6L+xsQQiCAqYjhRDslIcbKBYtavHx5s/Kzq1M8isyfBIJOUpltNTW/CwFnFJj6SAzPHLlxfrOz/X5p3SsfwH2UVIjaineMkiEPZfwIDAQAB\n-----END PUBLIC KEY-----\n";
     private static final String publicKeyAlgorithm = "RS256";
 
+    /*
+        Generate JWT with signature:
+        #!/bin/bash
+        base64_encode() { echo -n "$(</dev/stdin)" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n'; }
+        hmacsha256_sign() { echo -n "$(</dev/stdin)" | openssl dgst -sha256 -sign test_private_key.pem; }
+        header_payload=$(echo -n "$header" | jq -c | base64_encode).$(echo -n "$payload" | jq -c | base64_encode)
+        signature=$(echo -n "${header_payload}" | hmacsha256_sign | base64_encode )
+        echo -n "${header_payload}.${signature}"
+    */
+
     // signed with private key from above
     // header: {"alg": "RS256", "typ": "JWT"}
     // payload: {"typ": "Bearer", "exp": 1893452400, "iat": 1627053747, "iss": "http://test.issuer:1234/auth/realms/test", "azp": "test-authorized-parties", "aud": "test-audience", "scope": "openid email profile Test"}
