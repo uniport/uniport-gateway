@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -65,6 +68,7 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
+    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL = "publicKeyFromUrl";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
     public static final String MIDDLEWARE_BEARER_ONLY_ISSUER = "issuer";
     public static final String MIDDLEWARE_BEARER_ONLY_AUDIENCE = "audience";
@@ -109,6 +113,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
                 .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
@@ -424,20 +429,48 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_BEARER_ONLY: {
+                    boolean publicKeyProvided = false;
+
                     String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
-                    if (publicKey == null || publicKey.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No public key defined", mwType);
-                        break;
+                    if (publicKey != null) {
+                        if (publicKey.length() == 0) {
+                            valid = false;
+                            errMsg = String.format("%s: Empty public key defined", mwType);
+                            break;
+                        } else if (publicKey.length() > 0) {
+                            try {
+                                // public key has to be base64 encoded
+                                Base64.getDecoder().decode(publicKey);
+                            } catch (IllegalArgumentException e) {
+                                valid = false;
+                                errMsg = String.format("%s: Public key is required to be base64 encoded", mwType);
+                                break;
+                            }
+                            publicKeyProvided = true;
+                        }
                     }
 
-                    // public key has to be base64 encoded
-                    Base64.Decoder decoder = Base64.getDecoder();
-                    try {
-                        decoder.decode(publicKey);
-                    } catch (IllegalArgumentException iae) {
+                    String publicKeyFromUrl = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL);
+                    if (publicKeyFromUrl != null) {
+                        if (publicKeyFromUrl.length() == 0) {
+                            valid = false;
+                            errMsg = String.format("%s: Empty public key URL defined", mwType);
+                            break;
+                        } else if (publicKeyFromUrl.length() > 0) {
+                            try {
+                                new URL(publicKeyFromUrl).toURI();
+                            } catch (MalformedURLException | URISyntaxException e) {
+                                valid = false;
+                                errMsg = String.format("%s: Public key URL is required to be a valid URL", mwType);
+                                break;
+                            }
+                            publicKeyProvided = true;
+                        }
+                    }
+
+                    if (!publicKeyProvided) {
                         valid = false;
-                        errMsg = String.format("%s: Public key is required to be base64 encoded", mwType);
+                        errMsg = String.format("%s: No public key defined", mwType);
                         break;
                     }
 
