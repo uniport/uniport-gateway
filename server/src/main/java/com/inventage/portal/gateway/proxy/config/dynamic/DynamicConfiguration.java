@@ -417,14 +417,11 @@ public class DynamicConfiguration {
             }
             mwNames.add(mwName);
 
-            Boolean valid = true;
-            String errMsg = "";
             switch (mwType) {
                 case MIDDLEWARE_AUTHORIZATION_BEARER: {
                     String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No session scope defined", mwType);
+                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
                     break;
                 }
@@ -434,17 +431,14 @@ public class DynamicConfiguration {
                     String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
                     if (publicKey != null) {
                         if (publicKey.length() == 0) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty public key defined", mwType);
-                            break;
+                            return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
                         } else if (publicKey.length() > 0) {
                             try {
                                 // public key has to be base64 encoded
                                 Base64.getDecoder().decode(publicKey);
                             } catch (IllegalArgumentException e) {
-                                valid = false;
-                                errMsg = String.format("%s: Public key is required to be base64 encoded", mwType);
-                                break;
+                                return Future.failedFuture(
+                                        String.format("%s: Public key is required to be base64 encoded", mwType));
                             }
                             publicKeyProvided = true;
                         }
@@ -453,58 +447,43 @@ public class DynamicConfiguration {
                     String publicKeyFromUrl = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL);
                     if (publicKeyFromUrl != null) {
                         if (publicKeyFromUrl.length() == 0) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty public key URL defined", mwType);
-                            break;
+                            return Future.failedFuture(String.format("%s: Empty public key URL defined", mwType));
                         } else if (publicKeyFromUrl.length() > 0) {
                             try {
                                 new URL(publicKeyFromUrl).toURI();
                             } catch (MalformedURLException | URISyntaxException e) {
-                                valid = false;
-                                errMsg = String.format("%s: Public key URL is required to be a valid URL", mwType);
-                                break;
+                                return Future.failedFuture(
+                                        String.format("%s: Public key URL is required to be a valid URL", mwType));
                             }
                             publicKeyProvided = true;
                         }
                     }
 
                     if (!publicKeyProvided) {
-                        valid = false;
-                        errMsg = String.format("%s: No public key defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No public key defined", mwType));
                     }
 
                     String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
                     if (publicKeyAlgorithm.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: Invalid public key algorithm", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: Invalid public key algorithm", mwType));
                     }
 
                     String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
                     if (issuer != null && issuer.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: Empty issuer defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: Empty issuer defined", mwType));
                     }
 
                     JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_AUDIENCE);
                     if (audience != null) {
                         if (audience.size() == 0) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty audience defined.", mwType);
-                            break;
+                            return Future.failedFuture(String.format("%s: Empty audience defined.", mwType));
                         }
                         for (Object a : audience.getList()) {
                             if (!(a instanceof String)) {
-                                valid = false;
-                                errMsg = String.format("%s: Audience is required to be a list of strings.", mwType);
-                                break;
+                                return Future.failedFuture(
+                                        String.format("%s: Audience is required to be a list of strings.", mwType));
                             }
                         }
-                    }
-                    if (!valid) {
-                        break;
                     }
 
                     break;
@@ -513,49 +492,34 @@ public class DynamicConfiguration {
                     JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
                     if (requestHeaders != null) {
                         if (requestHeaders.isEmpty()) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty request headers defined", mwType);
-                            break;
+                            return Future.failedFuture(String.format("%s: Empty request headers defined", mwType));
                         }
 
                         for (Entry<String, Object> entry : requestHeaders) {
                             if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
-                                valid = false;
-                                errMsg = String.format("%s: Request header and value can only be of type string",
-                                        mwType);
-                                break;
+                                return Future.failedFuture(String
+                                        .format("%s: Request header and value can only be of type string", mwType));
                             }
-                        }
-                        if (!valid) {
-                            break;
                         }
                     }
 
                     JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
                     if (responseHeaders != null) {
                         if (responseHeaders.isEmpty()) {
-                            valid = false;
-                            errMsg = String.format("%s: Empty response headers defined", mwType);
-                            break;
+                            return Future.failedFuture(String.format("%s: Empty response headers defined", mwType));
                         }
 
                         for (Entry<String, Object> entry : responseHeaders) {
                             if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
-                                valid = false;
-                                errMsg = String.format("%s: Response header and value can only be of type string",
-                                        mwType);
-                                break;
+                                return Future.failedFuture(String
+                                        .format("%s: Response header and value can only be of type string", mwType));
                             }
-                        }
-                        if (!valid) {
-                            break;
                         }
                     }
 
                     if (requestHeaders == null && responseHeaders == null) {
-                        valid = false;
-                        errMsg = String.format("%s: at least one response or request header has to be defined", mwType);
-                        break;
+                        return Future.failedFuture(
+                                String.format("%s: at least one response or request header has to be defined", mwType));
                     }
 
                     break;
@@ -563,30 +527,22 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_OAUTH2: {
                     String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
                     if (clientID == null || clientID.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No client ID defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No client ID defined", mwType));
                     }
 
                     String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
                     if (clientSecret == null || clientSecret.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No client secret defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No client secret defined", mwType));
                     }
 
                     String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
                     if (discoveryUrl == null || discoveryUrl.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No discovery URL defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No discovery URL defined", mwType));
                     }
 
                     String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No session scope defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
 
                     break;
@@ -594,16 +550,12 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_REDIRECT_REGEX: {
                     String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
                     if (regex == null || regex.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No regex defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No regex defined", mwType));
                     }
 
                     String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
                     if (replacement == null || replacement.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No replacement defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No replacement defined", mwType));
                     }
 
                     break;
@@ -611,16 +563,12 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_REPLACE_PATH_REGEX: {
                     String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
                     if (regex == null || regex.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No regex defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No regex defined", mwType));
                     }
 
                     String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
                     if (replacement == null || replacement.length() == 0) {
-                        valid = false;
-                        errMsg = String.format("%s: No replacement defined", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No replacement defined", mwType));
                     }
 
                     break;
@@ -631,37 +579,28 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_SESSION_BAG: {
                     JsonArray whithelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES);
                     if (whithelistedCookies == null) {
-                        valid = false;
-                        errMsg = String.format("%s: No whitelisted cookies defined.", mwType);
-                        break;
+                        return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
                     }
                     for (int j = 0; j < whithelistedCookies.size(); j++) {
                         JsonObject whithelistedCookie = whithelistedCookies.getJsonObject(j);
                         if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
                                 || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
                                         .isEmpty()) {
-                            valid = false;
-                            errMsg = String.format("%s: whithelisted cookie name has to contain a value", mwType);
-                            break;
+                            return Future.failedFuture(
+                                    String.format("%s: whithelisted cookie name has to contain a value", mwType));
                         }
                         if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
                                 || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
                                         .isEmpty()) {
-                            valid = false;
-                            errMsg = String.format("%s: whithelisted cookie path has to contain a value", mwType);
-                            break;
+                            return Future.failedFuture(
+                                    String.format("%s: whithelisted cookie path has to contain a value", mwType));
                         }
                     }
                     break;
                 }
                 default: {
-                    errMsg = String.format("Unknown middleware: '%s'", mwType);
-                    valid = false;
+                    return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
                 }
-            }
-
-            if (!valid) {
-                return Future.failedFuture(errMsg);
             }
         }
 
@@ -689,9 +628,9 @@ public class DynamicConfiguration {
 
             JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
             if (servers == null || servers.size() == 0) {
-                String errorMsg = "validateServices: no servers defined";
-                LOGGER.debug(errorMsg);
-                return Future.failedFuture(errorMsg);
+                String errMsg = "validateServices: no servers defined";
+                LOGGER.debug(errMsg);
+                return Future.failedFuture(errMsg);
             }
         }
 

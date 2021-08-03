@@ -74,8 +74,8 @@ public class FileConfigProvider extends Provider {
         retriever.getConfig().onSuccess(config -> {
             this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
         }).onFailure(err -> {
-            String errorMsg = String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
-            LOGGER.warn(errorMsg);
+            String errMsg = String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
+            LOGGER.warn(errMsg);
         });
 
         if (this.watch) {
