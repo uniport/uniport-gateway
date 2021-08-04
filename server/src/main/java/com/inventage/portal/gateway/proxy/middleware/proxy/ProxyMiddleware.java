@@ -14,6 +14,7 @@ import io.vertx.httpproxy.HttpProxy;
 
 /**
  * Proxies requests and set the FORWARDED headers.
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling
  */
 public class ProxyMiddleware implements Middleware {
 

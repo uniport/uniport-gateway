@@ -93,18 +93,18 @@ public class BearerOnlyMiddlewareTest {
     private static final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
     private static final List<String> expectedAudience = List.of("test-audience");
 
-    private JWTAuth authProvider;
     private HttpServer server;
     private int port;
 
     @BeforeEach
     public void setup(Vertx vertx) throws Exception {
-        authProvider = JWTAuth.create(vertx,
+        JWTAuth authProvider = JWTAuth.create(vertx,
                 new JWTAuthOptions()
                         .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
                         .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));
+        boolean optional = false;
 
-        BearerOnlyMiddleware bearerOnly = new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider));
+        BearerOnlyMiddleware bearerOnly = new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().setStatusCode(200).end("ok");
 

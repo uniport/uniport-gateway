@@ -46,6 +46,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
         String publicKeyAlgorithm = middlewareConfig
                 .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
+        boolean optional = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, false);
 
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
@@ -66,7 +67,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
             AuthenticationHandler authHandler = JWTAuthHandler.create(authProvider);
 
-            bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler)));
+            bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
             LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
         }).onFailure(err -> {
             String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());

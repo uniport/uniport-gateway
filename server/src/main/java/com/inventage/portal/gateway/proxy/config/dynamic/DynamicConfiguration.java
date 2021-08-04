@@ -71,6 +71,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
     public static final String MIDDLEWARE_BEARER_ONLY_ISSUER = "issuer";
     public static final String MIDDLEWARE_BEARER_ONLY_AUDIENCE = "audience";
+    public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
@@ -115,6 +116,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
+                .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.booleanSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
