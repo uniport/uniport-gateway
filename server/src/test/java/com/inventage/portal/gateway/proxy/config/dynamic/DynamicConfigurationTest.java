@@ -175,7 +175,7 @@ public class DynamicConfigurationTest {
         JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
                 TestUtils.withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                         TestUtils.withMiddlewareOpts(new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "notbase64*")
+                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "notbase64*oraurl")
                                 .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
                                 .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
                                 .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,

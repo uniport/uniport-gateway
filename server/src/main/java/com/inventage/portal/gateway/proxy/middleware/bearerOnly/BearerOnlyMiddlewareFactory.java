@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Base64;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
@@ -38,7 +39,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
+        LOGGER.debug("create: Creating '{}' middleware", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
         Promise<Middleware> bearerOnlyPromise = Promise.promise();
 
         String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
@@ -66,6 +67,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             AuthenticationHandler authHandler = JWTAuthHandler.create(authProvider);
 
             bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler)));
+            LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
         }).onFailure(err -> {
             String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
             LOGGER.info(errMsg);
@@ -82,18 +84,17 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
     }
 
     private void fetchPublicKey(Vertx vertx, JsonObject middlewareConfig, Handler<AsyncResult<String>> handler) {
+        // the public key is either base64 encoded OR a valid URL to fetch it from
+        String publicKey = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
 
-        String publicKeyFromConfig = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
-        if (publicKeyFromConfig != null) {
-            handler.handle(Future.succeededFuture(publicKeyFromConfig));
+        try {
+            Base64.getDecoder().decode(publicKey);
+            handler.handle(Future.succeededFuture(publicKey));
             return;
+        } catch (IllegalArgumentException e) {
         }
 
-        String rawUrl = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_FROM_URL);
-        if (rawUrl != null) {
-            this.fetchPublicKeyFromURL(vertx, rawUrl, handler);
-            return;
-        }
+        this.fetchPublicKeyFromURL(vertx, publicKey, handler);
     }
 
     private void fetchPublicKeyFromURL(Vertx vertx, String rawUrl, Handler<AsyncResult<String>> handler) {
