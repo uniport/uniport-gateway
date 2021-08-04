@@ -46,7 +46,8 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
         String publicKeyAlgorithm = middlewareConfig
                 .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
-        boolean optional = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, false);
+        String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
+        boolean optional = Boolean.parseBoolean(optionalStr);
 
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,

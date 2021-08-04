@@ -116,7 +116,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
-                .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.booleanSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
