@@ -436,7 +436,7 @@ public class DynamicConfiguration {
                     // the public key has to be either a valid URL to fetch it from or base64 encoded
                     boolean isBase64 = false;
                     try {
-                        Base64.getMimeDecoder().decode(publicKey);
+                        Base64.getDecoder().decode(publicKey);
                         isBase64 = true;
                     } catch (IllegalArgumentException e) {
                     }
