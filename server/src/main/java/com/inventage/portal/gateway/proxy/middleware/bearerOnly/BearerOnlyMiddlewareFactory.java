@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Base64;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
@@ -89,13 +89,20 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         // the public key is either base64 encoded OR a valid URL to fetch it from
         String publicKey = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
 
+        boolean isURL = false;
         try {
-            Base64.getMimeDecoder().decode(publicKey);
-            handler.handle(Future.succeededFuture(publicKey));
-            return;
-        } catch (IllegalArgumentException e) {
+            new URL(publicKey).toURI();
+            isURL = true;
+        } catch (MalformedURLException | URISyntaxException e) {
         }
 
+        if (!isURL) {
+            handler.handle(Future.succeededFuture(publicKey));
+            LOGGER.info("fetchPublicKey: public key provided directly");
+            return;
+        }
+
+        LOGGER.info("fetchPublicKey: public key provided by URL");
         this.fetchPublicKeyFromURL(vertx, publicKey, handler);
     }
 
