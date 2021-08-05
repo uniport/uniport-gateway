@@ -63,6 +63,12 @@
             },
 
             {
+                "name": "filestorageAuthBearer",
+                "type": "authorizationBearer",
+                "options": { "sessionScope": "id" }
+            },
+
+            {
                 "name": "ShowSessionContentMiddleware",
                 "type": "_session_",
                 "options": {}
