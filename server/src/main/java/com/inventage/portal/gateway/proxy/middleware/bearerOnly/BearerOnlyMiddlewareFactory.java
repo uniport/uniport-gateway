@@ -90,7 +90,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         String publicKey = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
 
         try {
-            Base64.getDecoder().decode(publicKey);
+            Base64.getMimeDecoder().decode(publicKey);
             handler.handle(Future.succeededFuture(publicKey));
             return;
         } catch (IllegalArgumentException e) {
