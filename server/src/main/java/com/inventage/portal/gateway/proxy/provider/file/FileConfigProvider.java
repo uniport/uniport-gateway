@@ -150,6 +150,7 @@ public class FileConfigProvider extends Provider {
     }
 
     private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
+        // TODO parse parsable values like boolean and integers (rhen rm parseServerPorts and optionalStr)
         return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
     }
 

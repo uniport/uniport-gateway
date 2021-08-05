@@ -89,7 +89,7 @@ env:
       value: "${deploymentDomain}"
     # HTTP port for external access, must be the same as the exposed port
     - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-      value: "80" # TODO
+      value: "80"
 
     # IAM
     - name: "portal-iam.host"
