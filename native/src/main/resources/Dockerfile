@@ -19,7 +19,7 @@ RUN native-image \
     --initialize-at-run-time=io.netty.util \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
     -H:+ReportExceptionStackTraces \
-    -H:IncludeResources=vertx-version.txt \
+    -H:IncludeResources='.*/vertx/.*$' \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar
