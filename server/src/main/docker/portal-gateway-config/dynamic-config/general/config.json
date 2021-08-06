@@ -59,6 +59,17 @@
                 ],
                 "rule": "PathPrefix('/document')",
                 "service": "document-proxy"
+            },
+
+            {
+                "name": "filestorage-proxy",
+                "middlewares": [
+                    "filestorageRedirectRegex",
+                    "filestorageAuthBearer",
+                    "filestorageReplacePath"
+                ],
+                "rule": "PathPrefix('/filestorage')",
+                "service": "filestorage-proxy"
             }
         ],
 
@@ -125,6 +136,17 @@
                 "name": "documentReplacePath",
                 "type": "replacePathRegex",
                 "options": { "regex": "/document/(.*)", "replacement": "/$1" }
+            },
+
+            {
+                "name": "filestorageRedirectRegex",
+                "type": "redirectRegex",
+                "options": { "regex": "^(/filestorage)$", "replacement": "$1/" }
+            },
+            {
+                "name": "filestorageReplacePath",
+                "type": "replacePathRegex",
+                "options": { "regex": "/filestorage/(.*)", "replacement": "/$1" }
             }
         ],
 
@@ -153,6 +175,11 @@
             {
                 "name": "document-proxy",
                 "servers": [{ "host": "${document-proxy.host}", "port": 20050 }]
+            },
+
+            {
+                "name": "filestorage-proxy",
+                "servers": [{ "host": "${filestorage-proxy.host}", "port": 20090 }]
             }
         ]
     }

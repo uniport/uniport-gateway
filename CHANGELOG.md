@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for Refresh tokens in AuthorizationBearer middleware
 - BearerOnly middleware
+- Routing for microservice FileStorage added [PORTAL-352](https://issue.inventage.com/browse/PORTAL-352)
 
 [2.0.0]-202107261151-161-ad6799e - 2021-07-26
 ------------
