@@ -40,7 +40,10 @@ public class BearerOnlyMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         LOGGER.debug("handle: '{}'", ctx.request().absoluteURI());
 
-        if (!ctx.request().headers().contains(HttpHeaders.AUTHORIZATION) && optional) {
+        final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
+        if (authorization != null) {
+            LOGGER.debug("handle: authentication by '{}'", authorization);
+        } else if (authorization == null && optional) {
             LOGGER.debug("handle: letting through request with no authorization header");
             ctx.next();
             return;
@@ -49,7 +52,6 @@ public class BearerOnlyMiddleware implements Middleware {
         LOGGER.debug("handle: Handling jwt auth request");
         authHandler.handle(ctx);
         LOGGER.debug("handle: Handled jwt auth request");
-
     }
 
 }
