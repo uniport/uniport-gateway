@@ -119,10 +119,22 @@ public class FileConfigProvider extends Provider {
             }
 
             LOGGER.info("getOptions: reading directory '{}'", path);
+            JsonArray fileSets = new JsonArray();
+            File[] children = path.toFile().listFiles();
+            if (children == null) {
+                throw new IllegalArgumentException("The `path` must be a directory");
+            } else {
+                for (File file : children) {
+                    // we only take files into account at depth 2 (like general/test.json)
+                    if (file.isDirectory()) {
+                        LOGGER.debug("getOptions: attempting to read json config from '{}'", file.getAbsolutePath());
+                        fileSets.add(new JsonObject().put("pattern", String.format("%s/*.json", file.getName())));
+                    }
+                }
+            }
+
             ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
-                    .setConfig(new JsonObject().put("path", path.toString()).put("filesets",
-                            new JsonArray().add(new JsonObject().put("pattern", "general/*.json"))
-                                    .add(new JsonObject().put("pattern", "auth/*.json"))));
+                    .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
 
             this.source = "directory";
             return options.addStore(dirStore);
