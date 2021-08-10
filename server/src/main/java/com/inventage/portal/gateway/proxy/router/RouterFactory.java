@@ -170,6 +170,10 @@ public class RouterFactory {
      * @return session bag options
      */
     private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
+        if (middlewares == null) {
+            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+                    new JsonArray());
+        }
         List<JsonObject> sessionBagMiddlewares = new ArrayList<JsonObject>();
         for (int i = 0; i < middlewares.size(); i++) {
             JsonObject middleware = middlewares.getJsonObject(i);

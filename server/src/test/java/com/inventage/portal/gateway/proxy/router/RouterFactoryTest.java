@@ -28,6 +28,7 @@ interface ConfigCreator {
 }
 
 @ExtendWith(VertxExtension.class)
+@SuppressWarnings("unchecked")
 public class RouterFactoryTest {
     static final String host = "localhost";
     static final String requestPath = "/path";
@@ -60,8 +61,8 @@ public class RouterFactoryTest {
                             TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, port)))));
         };
 
-        return Stream.of(/*Arguments.of("Ok", configWithService, HttpResponseStatus.OK.code()),
-                         Arguments.of("Empty backend", configWithEmptyService, HttpResponseStatus.NOT_FOUND.code()),*/
+        return Stream.of(Arguments.of("Ok", configWithService, HttpResponseStatus.OK.code()),
+                Arguments.of("Empty backend", configWithEmptyService, HttpResponseStatus.NOT_FOUND.code()),
                 Arguments.of("Redirect middleware", configWithRedirectMiddleware, HttpResponseStatus.FOUND.code()));
     }
 
@@ -102,8 +103,6 @@ public class RouterFactoryTest {
                 proxyStarted.flag();
                 proxyStartedPromise.complete();
             }));
-            testCtx.verify(() -> {
-            });
         })).onFailure(err -> {
             testCtx.failNow(err);
         });
