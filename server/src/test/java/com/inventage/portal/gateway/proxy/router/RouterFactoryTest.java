@@ -118,6 +118,18 @@ public class RouterFactoryTest {
         }));
     }
 
+    @Test
+    public void healthCheck(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(TestUtils.withRouters(), TestUtils.withMiddlewares(),
+                TestUtils.withServices());
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/health");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+        }));
+    }
+
     void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
         reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
         vertx.createHttpClient().request(reqOpts).compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
