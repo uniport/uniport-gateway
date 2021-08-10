@@ -59,6 +59,39 @@ podSecurityContext:
 containerSecurityContext:
     enabled: false
 
+livenessProbe:
+    enabled: true
+    httpGet:
+        path: /health
+        port: http
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 20
+    failureThreshold: 6
+    successThreshold: 1
+
+readinessProbe:
+    enabled: true
+    httpGet:
+        path: /health
+        port: http
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 20
+    failureThreshold: 6
+    successThreshold: 1
+
+startupProbe:
+    enabled: true
+    httpGet:
+        path: /health
+        port: http
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 20
+    failureThreshold: 6
+    successThreshold: 1
+
 service:
     type: ClusterIP
 

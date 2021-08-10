@@ -61,6 +61,7 @@ public class RouterFactory {
 
     private void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
+        addHealthRoute(router);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
 
@@ -151,6 +152,12 @@ public class RouterFactory {
 
         // TODO ensure all routes are built
         handler.handle(Future.succeededFuture(router));
+    }
+
+    private void addHealthRoute(Router router) {
+        router.route("/health").handler(ctx -> {
+            ctx.response().setStatusCode(200).end("healthy");
+        });
     }
 
     /**
