@@ -60,7 +60,7 @@ public class RouterFactory {
         return promise.future();
     }
 
-    private void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
+    private void createRouter(JsonObject dynamicConfig, Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
@@ -72,90 +72,127 @@ public class RouterFactory {
         JsonObject sessionBagOptions = retrieveSessionBagOptions(middlewares);
 
         sortByRuleLength(routers);
-        LOGGER.debug("createRouter: creating router from config");
 
+        LOGGER.debug("createRouter: creating router from config");
+        List<Future> routerFutures = new ArrayList<Future>();
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
-
-            String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
-
-            String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
-            RoutingRule routingRule = parseRule(this.vertx, rule);
-            if (routingRule == null) {
-                handler.handle(Future.failedFuture("Failed to parse rule of router " + routerName));
-                return;
-            }
-            Route route = routingRule.apply(router);
-
-            List<Future> middlewareFutures = new ArrayList<Future>();
-
-            // TODO maybe move out of the for loop by introducing middlewares per entrypoint
-            // required to be the first middleware to guarantee every request is processed
-            Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
-                    sessionBagOptions);
-            middlewareFutures.add(sessionBagMiddlewareFuture);
-
-            JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            if (middlewareNames != null) {
-                for (int j = 0; j < middlewareNames.size(); j++) {
-                    String middlewareName = middlewareNames.getString(j);
-                    JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
-                            DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
-
-                    String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-                    JsonObject middlewareOptions = middlewareConfig
-                            .getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
-
-                    // needed to ensure authenticating requests are routed through this application
-                    if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
-                        middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
-                    }
-
-                    MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
-                    if (middlewareFactory != null) {
-                        Future<Middleware> middlewareFuture = middlewareFactory.create(this.vertx, router,
-                                middlewareOptions);
-                        middlewareFutures.add(middlewareFuture);
-                        continue;
-                    }
-
-                    LOGGER.warn("createRouter: Ignoring unknown middleware '{}'", middlewareType);
-                }
-            }
-
-            String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
-            JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
-                    DynamicConfiguration.SERVICE_NAME, serviceName);
-            JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-            // TODO support multipe servers
-            JsonObject serverConfig = serverConfigs.getJsonObject(0);
-
-            // required to be the last middleware
-            Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
-                    serverConfig);
-            middlewareFutures.add(proxyMiddlewareFuture);
-
-            CompositeFuture.all(middlewareFutures).onComplete(ar -> {
-                middlewareFutures.forEach(mf -> {
-                    if (mf.succeeded()) {
-                        route.handler((Handler<RoutingContext>) mf.result());
-                    } else {
-                        router.delete(route.getPath());
-                        LOGGER.warn("createRouter: Ignoring path '{}'. Failed to create middleware: '{}'",
-                                route.getPath(), mf.cause().getMessage());
-                        handler.handle(
-                                Future.failedFuture("Failed to create middleware '" + mf.cause().getMessage() + "'"));
-                    }
-                });
-            });
+            routerFutures.add(createRoute(routerConfig, router, middlewares, services, sessionBagOptions));
         }
 
-        addHealthRoute(router);
+        CompositeFuture.all(routerFutures).onComplete(ar -> {
+            routerFutures.forEach(rf -> {
+                if (rf.failed()) {
+                    Route route = ((Route) rf.result());
+                    router.delete(route.getPath());
+                    LOGGER.warn("createRouter: Ignoring path '{}'. Failed to create middleware: '{}'", route.getPath(),
+                            rf.cause().getMessage());
+                }
+            });
 
-        // TODO ensure all routes are built
-        handler.handle(Future.succeededFuture(router));
+            addHealthRoute(router);
+
+            handler.handle(Future.succeededFuture(router));
+        });
     }
 
+    private Future<Route> createRoute(JsonObject routerConfig, Router router, JsonArray middlewares, JsonArray services,
+            JsonObject sessionBagOptions) {
+        Promise<Route> promise = Promise.promise();
+        createRoute(routerConfig, router, middlewares, services, sessionBagOptions, promise);
+        return promise.future();
+    }
+
+    private void createRoute(JsonObject routerConfig, Router router, JsonArray middlewares, JsonArray services,
+            JsonObject sessionBagOptions, Handler<AsyncResult<Route>> handler) {
+        String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
+
+        String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
+        RoutingRule routingRule = parseRule(this.vertx, rule);
+        if (routingRule == null) {
+            handler.handle(Future.failedFuture("Failed to parse rule of router " + routerName));
+            return;
+        }
+        Route route = routingRule.apply(router);
+
+        List<Future> middlewareFutures = new ArrayList<Future>();
+
+        // TODO maybe move out of the for loop by introducing middlewares per entrypoint
+        // required to be the first middleware to guarantee every request is processed
+        Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
+                sessionBagOptions);
+        middlewareFutures.add(sessionBagMiddlewareFuture);
+
+        JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
+        for (int j = 0; j < middlewareNames.size(); j++) {
+            String middlewareName = middlewareNames.getString(j);
+            JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
+                    DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+            middlewareFutures.add(createMiddlware(middlewareConfig, router));
+        }
+
+        String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
+        JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
+                DynamicConfiguration.SERVICE_NAME, serviceName);
+        JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+        // TODO support multipe servers
+        JsonObject serverConfig = serverConfigs.getJsonObject(0);
+
+        // required to be the last middleware
+        Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router, serverConfig);
+        middlewareFutures.add(proxyMiddlewareFuture);
+
+        CompositeFuture.all(middlewareFutures).onComplete(ar -> {
+            middlewareFutures.forEach(mf -> {
+                if (mf.succeeded()) {
+                    route.handler((Handler<RoutingContext>) mf.result());
+                } else {
+                    String errMsg = String.format("Failed to create middleware '{}'", mf.cause().getMessage());
+                    LOGGER.warn("createRoute: {}", errMsg);
+                    handler.handle(Future.failedFuture(errMsg));
+                }
+            });
+            handler.handle(Future.succeededFuture(route));
+        });
+    }
+
+    private Future<Middleware> createMiddlware(JsonObject middlewareConfig, Router router) {
+        Promise<Middleware> promise = Promise.promise();
+        createMiddleware(middlewareConfig, router, promise);
+        return promise.future();
+    }
+
+    private void createMiddleware(JsonObject middlewareConfig, Router router,
+            Handler<AsyncResult<Middleware>> handler) {
+        String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
+        JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+
+        // needed to ensure authenticating requests are routed through this application
+        if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
+            middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
+        }
+
+        MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        if (middlewareFactory == null) {
+            String errMsg = String.format("Unknown middleware '%s'", middlewareType);
+            LOGGER.warn("createMiddleware: {}", errMsg);
+            handler.handle(Future.failedFuture(errMsg));
+            return;
+        }
+
+        Future<Middleware> middlewareFuture = middlewareFactory.create(this.vertx, router, middlewareOptions);
+        handler.handle(middlewareFuture);
+    }
+
+    /**
+     * Adds a healthcheck route to the given router. The healtcheck return '200
+     * OK' for a successful healthcheack and '500 Internal Server Error' for a
+     * failed healthcheck.
+     * No routes configured (apart from the healthcheck) results in an unhealthy
+     * state.
+     *
+     * @param router used as the proxy router
+     */
     private void addHealthRoute(Router router) {
         boolean isHealthy = true;
         if (router.getRoutes().size() == 0) {
@@ -209,11 +246,13 @@ public class RouterFactory {
         return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
     }
 
-    // To avoid path overlap, routes are sorted, by default, in descending order using rules length.
-    // The priority is directly equal to the length of the rule, and so the longest length has the
-    // highest priority.
-    // Additionally, a priority for each router can be defined. This overwrites priority calculates
-    // by the length of the rule.
+    /**
+    * To avoid path overlap, routes are sorted, by default, in descending order using rules length.
+    * The priority is directly equal to the length of the rule, and so the longest length has the
+    * highest priority.
+    * Additionally, a priority for each router can be defined. This overwrites priority calculates
+    * by the length of the rule.
+    */
     private JsonArray sortByRuleLength(JsonArray routers) {
         List<JsonObject> routerList = routers.getList();
 
