@@ -119,14 +119,29 @@ public class RouterFactoryTest {
     }
 
     @Test
-    public void healthCheck(Vertx vertx, VertxTestContext testCtx) {
+    public void healthyHealthCheck(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule(routerRule))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/health");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+        }));
+    }
+
+    @Test
+    public void unhealthyHealthCheck(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(TestUtils.withRouters(), TestUtils.withMiddlewares(),
                 TestUtils.withServices());
 
         routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
             proxyRouter = router;
             RequestOptions reqOpts = new RequestOptions().setURI("/health");
-            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
         }));
     }
 
