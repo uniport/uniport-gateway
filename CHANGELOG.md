@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 2.2.0-[Unreleased]
 
-### Added, Changed, Deprecated, Removed, Fixed or Security
+### Added
+
+- docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
 
 [2.1.0]-202108060813-181-e0baeec - 2021-08-09
 ------------
@@ -20,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Refresh tokens in AuthorizationBearer middleware [PORTAL-298](https://issue.inventage.com/browse/PORTAL-298)
 - BearerOnly middleware [PORTAL-341](https://issue.inventage.com/browse/PORTAL-341)
 - Routing for microservice FileStorage added [PORTAL-352](https://issue.inventage.com/browse/PORTAL-352)
+- docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
 
 [2.0.0]-202107261151-161-ad6799e - 2021-07-26
 ------------

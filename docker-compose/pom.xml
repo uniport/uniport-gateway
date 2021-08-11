@@ -85,6 +85,38 @@
                             <classesDirectory>${project.build.directory}/portal-gateway-template</classesDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>substituted-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classesDirectory>${project.build.directory}/portal-messaging</classesDirectory>
+                            <classifier>substituted</classifier>
+                            <includes>
+                                <include>docker-compose.*</include>
+                                <include>*.common.env</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>acceptance-tests</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classesDirectory>${project.build.directory}/organisation</classesDirectory>
+                            <classifier>acceptance-test</classifier>
+                            <includes>
+                                <include>docker-compose.yml</include>
+                                <include>*.common.env</include>
+                                <include>*.acceptance-tests-graphql.env</include>
+                                <include>secrets.env</include>
+                            </includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
