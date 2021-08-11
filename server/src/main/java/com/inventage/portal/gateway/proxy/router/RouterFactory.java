@@ -16,6 +16,7 @@ import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -61,7 +62,6 @@ public class RouterFactory {
 
     private void createRouter(JsonObject dynamicConfig, final Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
-        addHealthRoute(router);
 
         JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
 
@@ -150,13 +150,27 @@ public class RouterFactory {
             });
         }
 
+        addHealthRoute(router);
+
         // TODO ensure all routes are built
         handler.handle(Future.succeededFuture(router));
     }
 
     private void addHealthRoute(Router router) {
+        boolean isHealthy = true;
+        if (router.getRoutes().size() == 0) {
+            LOGGER.info("addHealthRoute: no routes configured yet");
+            isHealthy = false;
+        }
+
+        final int statusCode;
+        if (isHealthy) {
+            statusCode = HttpResponseStatus.OK.code();
+        } else {
+            statusCode = HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
+        }
         router.route("/health").handler(ctx -> {
-            ctx.response().setStatusCode(200).end("healthy");
+            ctx.response().setStatusCode(statusCode).end();
         });
     }
 
