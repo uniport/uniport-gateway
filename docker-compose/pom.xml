@@ -92,7 +92,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>${project.build.directory}/portal-messaging</classesDirectory>
+                            <classesDirectory>${project.build.directory}/portal-gateway</classesDirectory>
                             <classifier>substituted</classifier>
                             <includes>
                                 <include>docker-compose.*</include>
@@ -107,7 +107,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>${project.build.directory}/organisation</classesDirectory>
+                            <classesDirectory>${project.build.directory}/portal-gateway</classesDirectory>
                             <classifier>acceptance-test</classifier>
                             <includes>
                                 <include>docker-compose.yml</include>
