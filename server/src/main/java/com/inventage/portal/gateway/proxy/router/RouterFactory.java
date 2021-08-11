@@ -74,43 +74,47 @@ public class RouterFactory {
         sortByRuleLength(routers);
 
         LOGGER.debug("createRouter: creating router from config");
-        List<Future> routerFutures = new ArrayList<Future>();
+        List<Future> subRouterFutures = new ArrayList<Future>();
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
-            routerFutures.add(createRoute(routerConfig, router, middlewares, services, sessionBagOptions));
+            subRouterFutures.add(createSubRouter(routerConfig, middlewares, services, sessionBagOptions));
         }
 
-        CompositeFuture.all(routerFutures).onComplete(ar -> {
-            routerFutures.forEach(rf -> {
-                if (rf.failed()) {
-                    Route route = ((Route) rf.result());
-                    router.delete(route.getPath());
-                    LOGGER.warn("createRouter: Ignoring path '{}'. Failed to create middleware: '{}'", route.getPath(),
-                            rf.cause().getMessage());
+        // Handlers will get called if and only if
+        // - all futures are completed
+        CompositeFuture.join(subRouterFutures).onComplete(ar -> {
+            subRouterFutures.forEach(srf -> {
+                if (srf.succeeded()) {
+                    router.mountSubRouter("/", (Router) srf.result());
+                } else {
+                    String errMsg = String.format("Ignoring route '%s'", srf.cause().getMessage());
+                    LOGGER.warn("createRouter: {}", errMsg);
                 }
             });
 
             addHealthRoute(router);
-
             handler.handle(Future.succeededFuture(router));
         });
     }
 
-    private Future<Route> createRoute(JsonObject routerConfig, Router router, JsonArray middlewares, JsonArray services,
+    private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
             JsonObject sessionBagOptions) {
-        Promise<Route> promise = Promise.promise();
-        createRoute(routerConfig, router, middlewares, services, sessionBagOptions, promise);
+        Promise<Router> promise = Promise.promise();
+        createSubRouter(routerConfig, middlewares, services, sessionBagOptions, promise);
         return promise.future();
     }
 
-    private void createRoute(JsonObject routerConfig, Router router, JsonArray middlewares, JsonArray services,
-            JsonObject sessionBagOptions, Handler<AsyncResult<Route>> handler) {
+    private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
+            JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
+        Router router = Router.router(this.vertx);
         String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
         String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
         RoutingRule routingRule = parseRule(this.vertx, rule);
         if (routingRule == null) {
-            handler.handle(Future.failedFuture("Failed to parse rule of router " + routerName));
+            String errMsg = String.format("Failed to parse rule of router '%s'", routerName);
+            LOGGER.warn("createSubRouter: {}", errMsg);
+            handler.handle(Future.failedFuture(errMsg));
             return;
         }
         Route route = routingRule.apply(router);
@@ -142,17 +146,19 @@ public class RouterFactory {
         Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router, serverConfig);
         middlewareFutures.add(proxyMiddlewareFuture);
 
-        CompositeFuture.all(middlewareFutures).onComplete(ar -> {
+        // Handlers will get called if and only if
+        // - all futures are succeeded and completed
+        // - any future is failed.
+        CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
             middlewareFutures.forEach(mf -> {
-                if (mf.succeeded()) {
-                    route.handler((Handler<RoutingContext>) mf.result());
-                } else {
-                    String errMsg = String.format("Failed to create middleware '{}'", mf.cause().getMessage());
-                    LOGGER.warn("createRoute: {}", errMsg);
-                    handler.handle(Future.failedFuture(errMsg));
-                }
+                route.handler((Handler<RoutingContext>) mf.result());
             });
-            handler.handle(Future.succeededFuture(route));
+            LOGGER.debug("createSubRouter: Middlewares of router '{}' created successfully", routerName);
+            handler.handle(Future.succeededFuture(router));
+        }).onFailure(cfErr -> {
+            String errMsg = String.format("Failed to create middlewares of router '%s'", routerName);
+            LOGGER.warn("createSubRouter: {}", errMsg);
+            handler.handle(Future.failedFuture(errMsg));
         });
     }
 
@@ -180,8 +186,7 @@ public class RouterFactory {
             return;
         }
 
-        Future<Middleware> middlewareFuture = middlewareFactory.create(this.vertx, router, middlewareOptions);
-        handler.handle(middlewareFuture);
+        handler.handle(middlewareFactory.create(this.vertx, router, middlewareOptions));
     }
 
     /**
