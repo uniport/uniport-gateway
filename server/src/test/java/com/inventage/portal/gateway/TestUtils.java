@@ -100,6 +100,12 @@ public class TestUtils {
         };
     }
 
+    public static Handler<JsonObject> withRouterPriority(int priority) {
+        return router -> {
+            router.put(DynamicConfiguration.ROUTER_PRIORITY, priority);
+        };
+    }
+
     public static Handler<JsonObject> withMiddlewares(Handler<JsonObject>... opts) {
         return conf -> {
             JsonArray middlewares = new JsonArray();
