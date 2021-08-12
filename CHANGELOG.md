@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 2.2.0-[Unreleased]
 
-### Added, Changed, Deprecated, Removed, Fixed or Security
+### Added
+
+- health route and check
 
 [2.1.0]-202108060813-181-e0baeec - 2021-08-09
 ------------
