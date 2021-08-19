@@ -186,7 +186,9 @@ public class RouterFactory {
             return;
         }
 
-        handler.handle(middlewareFactory.create(this.vertx, router, middlewareOptions));
+        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(ar -> {
+            handler.handle(ar);
+        });
     }
 
     /**
