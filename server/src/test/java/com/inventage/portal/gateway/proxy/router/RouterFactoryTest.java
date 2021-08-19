@@ -2,121 +2,306 @@ package com.inventage.portal.gateway.proxy.router;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.stream.Stream;
+import java.util.concurrent.CountDownLatch;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
-interface ConfigCreator {
-    JsonObject create(int port);
-}
-
 @ExtendWith(VertxExtension.class)
+@SuppressWarnings("unchecked")
 public class RouterFactoryTest {
     static final String host = "localhost";
-    static final String requestPath = "/path";
 
-    static Stream<Arguments> serverResponseTestData() {
-        String routeRule = String.format("Path('%s')", requestPath);
+    private HttpServer proxy;
+    private HttpServer server;
+    private int proxyPort;
+    private int serverPort;
+    private RouterFactory routerFactory;
+    private Router proxyRouter;
 
-        ConfigCreator configWithService = (int port) -> {
-            return TestUtils.buildConfiguration(
-                    TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                            TestUtils.withRouterRule(routeRule))),
-                    TestUtils.withServices(
-                            TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, port)))));
-        };
+    @BeforeEach
+    public void setup(Vertx vertx) throws Exception {
+        final CountDownLatch latch = new CountDownLatch(2);
 
-        ConfigCreator configWithEmptyService = (int port) -> {
-            return TestUtils.buildConfiguration(TestUtils.withRouters(), TestUtils.withMiddlewares(),
-                    TestUtils.withServices());
-        };
+        proxyPort = TestUtils.findFreePort();
+        proxy = vertx.createHttpServer().requestHandler(req -> {
+            proxyRouter.handle(req);
+        }).listen(proxyPort, ready -> {
+            if (ready.failed()) {
+                throw new RuntimeException(ready.cause());
+            }
+            latch.countDown();
+        });
 
-        ConfigCreator configWithRedirectMiddleware = (int port) -> {
-            return TestUtils.buildConfiguration(
-                    TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                            TestUtils.withRouterRule(routeRule), TestUtils.withRouterMiddlewares("redirect"))),
-                    TestUtils.withMiddlewares(TestUtils.withMiddleware("redirect", "redirectRegex",
-                            TestUtils.withMiddlewareOpts(new JsonObject()
-                                    .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX, ".*")
-                                    .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, "/redirect")))),
-                    TestUtils.withServices(
-                            TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, port)))));
-        };
+        serverPort = TestUtils.findFreePort();
+        server = vertx.createHttpServer().requestHandler(req -> {
+            req.response().setStatusCode(200).end("ok");
+        }).listen(serverPort, ready -> {
+            if (ready.failed()) {
+                throw new RuntimeException(ready.cause());
+            }
+            latch.countDown();
+        });
 
-        return Stream.of(/*Arguments.of("Ok", configWithService, HttpResponseStatus.OK.code()),
-                         Arguments.of("Empty backend", configWithEmptyService, HttpResponseStatus.NOT_FOUND.code()),*/
-                Arguments.of("Redirect middleware", configWithRedirectMiddleware, HttpResponseStatus.FOUND.code()));
+        latch.await();
+
+        routerFactory = new RouterFactory(vertx, String.format("http://%s", host));
     }
 
-    @ParameterizedTest
-    @MethodSource("serverResponseTestData")
-    void serverResponseTest(String name, ConfigCreator configCreator, int expectedStatusCode, Vertx vertx,
-            VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", name);
-        int proxyPort = TestUtils.findFreePort();
-        int serverPort = TestUtils.findFreePort();
+    @AfterEach
+    public void tearDown() throws Exception {
+        proxy.close();
+        server.close();
+    }
 
-        Checkpoint proxyStarted = testCtx.checkpoint();
-        Checkpoint serverStarted = testCtx.checkpoint();
-        Checkpoint reqProxied = testCtx.checkpoint();
-        Checkpoint respReceived = testCtx.checkpoint();
+    @Test
+    public void configWithService(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("Path('/path')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
-        Promise<Void> serverStartedPromise = Promise.promise();
-        Promise<Void> proxyStartedPromise = Promise.promise();
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
 
-        // start server
-        Router r = Router.router(vertx);
-        r.route().handler(ctx -> ctx.response().end("ok"));
-        vertx.createHttpServer().requestHandler(req -> {
-            r.handle(req);
-        }).listen(serverPort).onComplete(testCtx.succeeding(s -> {
-            serverStarted.flag();
-            serverStartedPromise.complete();
+    @Test
+    public void configWithEmptyService(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(TestUtils.withRouters(), TestUtils.withMiddlewares(),
+                TestUtils.withServices());
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.NOT_FOUND.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void configWithRedirectMiddleware(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("Path('/path')"), TestUtils.withRouterMiddlewares("redirect"))),
+                TestUtils.withMiddlewares(TestUtils.withMiddleware("redirect", "redirectRegex",
+                        TestUtils.withMiddlewareOpts(
+                                new JsonObject().put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX, ".*").put(
+                                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, "/redirect")))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.FOUND.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void healthyHealthCheck(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("Path('/path')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/health");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void unhealthyHealthCheck(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(TestUtils.withRouters(), TestUtils.withMiddlewares(),
+                TestUtils.withServices());
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/health");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void hostRule(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("Host('localhost')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            reqOpts.setURI("/path/another");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void pathRule(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(
+                        TestUtils.withRouter("shortPath", TestUtils.withRouterService("bar"),
+                                TestUtils.withRouterRule("Path('/path')")),
+                        TestUtils.withRouter("longPath", TestUtils.withRouterService("bar"),
+                                TestUtils.withRouterRule("Path('/path/long')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            reqOpts.setURI("/path/long");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void pathPrefixRule(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("PathPrefix('/path')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            reqOpts.setURI("/path/long");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void unknownRule(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("unknownRule('blub')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.NOT_FOUND.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void defaultRoutePriority(Vertx vertx, VertxTestContext testCtx) {
+        // routes are per default ordered by length
+        JsonObject config = TestUtils
+                .buildConfiguration(
+                        TestUtils
+                                .withRouters(
+                                        TestUtils.withRouter("shortPath", TestUtils.withRouterService("noServer"),
+                                                TestUtils.withRouterRule("PathPrefix('/path')")),
+                                        TestUtils.withRouter("longPath", TestUtils.withRouterService("bar"),
+                                                TestUtils.withRouterRule("PathPrefix('/path/long')"))),
+                        TestUtils.withServices(
+                                TestUtils.withService("bar",
+                                        TestUtils.withServers(TestUtils.withServer(host, serverPort))),
+                                TestUtils.withService("noServer",
+                                        TestUtils.withServers(TestUtils.withServer("some.host", 1234)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path/long");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void customRoutePriority(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils
+                .buildConfiguration(
+                        TestUtils.withRouters(TestUtils.withRouter("shortPath", TestUtils.withRouterService("bar"),
+                                TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100)),
+                                TestUtils
+                                        .withRouter("longPath", TestUtils.withRouterService("noServer"),
+                                                TestUtils.withRouterRule("PathPrefix('/path/long')"))),
+                        TestUtils.withServices(
+                                TestUtils.withService("bar",
+                                        TestUtils.withServers(TestUtils.withServer(host, serverPort))),
+                                TestUtils.withService("noServer",
+                                        TestUtils.withServers(TestUtils.withServer("some.host", 1234)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path/long");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void failingMiddlewareCreation(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("Path('/path')"),
+                        TestUtils.withRouterMiddlewares("unknownMiddleware"))),
+                TestUtils.withMiddlewares(TestUtils.withMiddleware("unknownMiddleware", "unknownMiddleware",
+                        TestUtils.withMiddlewareOpts(new JsonObject()))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.NOT_FOUND.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
+        vertx.createHttpClient().request(reqOpts).compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
+            testCtx.verify(() -> {
+                assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
+                latch.countDown();
+            });
         }));
 
-        // start proxy with router created from config
-        JsonObject config = configCreator.create(serverPort);
-        RouterFactory routerFactory = new RouterFactory(vertx, String.format("http://%s", host));
-        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
-            vertx.createHttpServer().requestHandler(req -> {
-                router.handle(req);
-                reqProxied.flag();
-            }).listen(proxyPort).onComplete(testCtx.succeeding(p -> {
-                proxyStarted.flag();
-                proxyStartedPromise.complete();
-            }));
-            testCtx.verify(() -> {
-            });
-        })).onFailure(err -> {
-            testCtx.failNow(err);
-        });
-
-        // do request when proxy and server are started
-        CompositeFuture.all(serverStartedPromise.future(), proxyStartedPromise.future()).onComplete(ar -> {
-            vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, requestPath).compose(req -> req.send())
-                    .onComplete(testCtx.succeeding(resp -> {
-                        testCtx.verify(() -> {
-                            assertEquals(expectedStatusCode, resp.statusCode(), errMsg);
-                        });
-                        respReceived.flag();
-                    }));
-        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            testCtx.failNow(e);
+        }
     }
 }
