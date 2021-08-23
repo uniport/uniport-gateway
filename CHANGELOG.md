@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [2.2.0]-202108231142-190-927586e - 2021-08-23
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17064) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.2.0-202108231142-190-927586e~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.2.0-202108231142-190-927586e)
+
+### Added
+
 - docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
 - health route and check ([PORTAL-255](https://issue.inventage.com/browse/PORTAL-255))
 
@@ -85,7 +101,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.1.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.2.0
+[2.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.2.0&targetBranch=refs%2Ftags%2F2.1.0
 [2.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.1.0&targetBranch=refs%2Ftags%2F2.0.0
 [2.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.0.0&targetBranch=refs%2Ftags%2F1.3.0
 [1.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F1.3.0&targetBranch=refs%2Ftags%2F1.2.0
