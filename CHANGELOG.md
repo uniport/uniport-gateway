@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
 - health route and check ([PORTAL-255](https://issue.inventage.com/browse/PORTAL-255))
 
+### Changed
+
+- Updated `helm-chart-library` to version `1.3.0` (`1.3.0-202108231107-49-5f559db`).
+
 ## [2.1.0]-202108060813-181-e0baeec - 2021-08-09
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/16990) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.1.0-202108060813-181-e0baeec~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.1.0-202108060813-181-e0baeec)
