@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
-- health route and check
+- health route and check ([PORTAL-255](https://issue.inventage.com/browse/PORTAL-255))
 
 [2.1.0]-202108060813-181-e0baeec - 2021-08-09
 ------------
