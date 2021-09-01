@@ -21,6 +21,7 @@ public class ProxyMiddleware implements Middleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
 
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
 
     private HttpProxy httpProxy;
 
@@ -39,6 +40,9 @@ public class ProxyMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         if (!ctx.request().headers().contains(X_FORWARDED_HOST)) {
             ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
+        }
+        if (!ctx.request().headers().contains(X_FORWARDED_PROTO)) {
+            ctx.request().headers().add(X_FORWARDED_PROTO, ctx.request().scheme());
         }
 
         // Some manipulations are

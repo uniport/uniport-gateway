@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
 
+import io.vertx.core.http.HttpClientRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -19,6 +20,7 @@ import io.vertx.junit5.VertxTestContext;
 public class ProxyMiddlewareTest {
 
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
 
     @Test
     void proxyTest(Vertx vertx, VertxTestContext testCtx) {
@@ -46,22 +48,19 @@ public class ProxyMiddlewareTest {
 
             vertx.createHttpServer().requestHandler(req -> {
                 assertEquals(String.format("%s:%s", host, proxyPort), req.headers().get(X_FORWARDED_HOST));
+                assertEquals("http", req.headers().get(X_FORWARDED_PROTO));
                 req.response().end(serverResponse);
                 requestServed.flag();
             }).listen(serverPort).onComplete(testCtx.succeeding(p -> {
                 serverStarted.flag();
 
-                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(req -> req.send())
+                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(HttpClientRequest::send)
                         .onComplete(testCtx.succeeding(resp -> {
                             testCtx.verify(() -> {
                                 assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
                                 responseReceived.flag();
                             });
-                            resp.body().onComplete(testCtx.succeeding(body -> {
-                                testCtx.verify(() -> {
-                                    assertEquals(serverResponse, body.toString());
-                                });
-                            }));
+                            resp.body().onComplete(testCtx.succeeding(body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
                         }));
             }));
         }));
