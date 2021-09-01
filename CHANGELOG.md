@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added X-Forwarded-Proto to headers that are forwarded to the target service to enable proper redirects. Required for [PORTAL-353](https://issue.inventage.com/browse/PORTAL-353).
+
 ### Changed
 
 ### Deprecated
