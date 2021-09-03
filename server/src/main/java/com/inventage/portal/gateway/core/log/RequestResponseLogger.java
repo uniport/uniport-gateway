@@ -20,10 +20,10 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
         final long start = System.currentTimeMillis();
-        LOGGER.debug("handle: route uri '{}' for request '{}'", routingContext.request().uri(),
+        LOGGER.debug("handle: incoming uri '{}' for request '{}'", routingContext.request().uri(),
                 routingContext.request().hashCode());
         routingContext.next();
-        LOGGER.debug("handle: routed uri '{}' for request '{}' in '{}' ms", routingContext.request().uri(),
-                routingContext.request().hashCode(), System.currentTimeMillis() - start);
+        LOGGER.debug("handle: outgoing uri '{}' for request '{}' with status '{}' in '{}' ms", routingContext.request().uri(),
+                routingContext.request().hashCode(), routingContext.response().getStatusCode(), System.currentTimeMillis() - start);
     }
 }

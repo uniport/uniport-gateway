@@ -5,21 +5,12 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]
+[Unreleased]- - ???
 
 ### Added
 
 - Added X-Forwarded-Proto to headers that are forwarded to the target service to enable proper redirects. Required for [PORTAL-353](https://issue.inventage.com/browse/PORTAL-353).
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- RequestResponseLogger logs now also the status code of the response
 
 ## [2.2.0]-202108231142-190-927586e - 2021-08-23
 
