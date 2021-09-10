@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]- - ???
+## [Unreleased]
+
+## [2.3.0]-202109100643-197-6a6ac10 - 2021-09-10
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17079) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.3.0-202109100643-197-6a6ac10~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.3.0-202109100643-197-6a6ac10)
 
 ### Added
 
@@ -94,7 +98,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.2.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.3.0
+[2.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.3.0&targetBranch=refs%2Ftags%2F2.2.0
 [2.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.2.0&targetBranch=refs%2Ftags%2F2.1.0
 [2.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.1.0&targetBranch=refs%2Ftags%2F2.0.0
 [2.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.0.0&targetBranch=refs%2Ftags%2F1.3.0
