@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added X-Forwarded-Proto to headers that are forwarded to the target service to enable proper redirects. Required for [PORTAL-353](https://issue.inventage.com/browse/PORTAL-353).
-- RequestResponseLogger logs now also the status code of the response
+- Added `X-Forwarded-Proto` to headers that are forwarded to the target service to enable proper redirects. Required for [PORTAL-353](https://issue.inventage.com/browse/PORTAL-353).
+- `RequestResponseLogger` logs now the status code of the response
 
 ## [2.2.0]-202108231142-190-927586e - 2021-08-23
 
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
+- `docker-compose.jar` is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
 - health route and check ([PORTAL-255](https://issue.inventage.com/browse/PORTAL-255))
 
 ### Changed
@@ -31,10 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for Refresh tokens in AuthorizationBearer middleware ([PORTAL-298](https://issue.inventage.com/browse/PORTAL-298))
-- BearerOnly middleware ([PORTAL-341](https://issue.inventage.com/browse/PORTAL-341))
+- Support for Refresh tokens in `AuthorizationBearer` middleware ([PORTAL-298](https://issue.inventage.com/browse/PORTAL-298))
+- `BearerOnly` middleware ([PORTAL-341](https://issue.inventage.com/browse/PORTAL-341))
 - Routing for microservice FileStorage added ([PORTAL-352](https://issue.inventage.com/browse/PORTAL-352))
-- docker-compose.jar is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
+- `docker-compose.jar` is built with and without Maven variable substitution ([PORTAL-360](https://issue.inventage.com/browse/PORTAL-360))
 
 ## [2.0.0]-202107261151-161-ad6799e - 2021-07-26
 
