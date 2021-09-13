@@ -38,12 +38,8 @@ public class ProxyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        if (!ctx.request().headers().contains(X_FORWARDED_HOST)) {
-            ctx.request().headers().add(X_FORWARDED_HOST, ctx.request().host());
-        }
-        if (!ctx.request().headers().contains(X_FORWARDED_PROTO)) {
-            ctx.request().headers().add(X_FORWARDED_PROTO, ctx.request().scheme());
-        }
+        useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx);
+        useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx);
 
         // Some manipulations are
         // * not allowed by Vertx-Web
@@ -54,4 +50,20 @@ public class ProxyMiddleware implements Middleware {
         httpProxy.handle(request);
     }
 
+    /**
+     * If the given header name is already contained in the request, this header will be used, otherwise the given header value is used.
+     *
+     * @param headerName to check the request for
+     * @param headerValue to use if the header name is not yet in the request
+     * @param ctx of the execution
+     */
+    protected void useOrSetHeader(String headerName, String headerValue, RoutingContext ctx) {
+        if (ctx.request().headers().contains(headerName)) { // use
+            LOGGER.debug("handle: using provided header '%s' with '%s'", headerName, ctx.request().headers().get(headerName));
+        }
+        else { // set
+            LOGGER.debug("handle: setting header '%s' to '%s'", headerName, headerValue);
+            ctx.request().headers().add(headerName, headerValue);
+        }
+    }
 }
