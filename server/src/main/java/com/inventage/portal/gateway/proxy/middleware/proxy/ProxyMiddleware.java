@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.ProxiedHttpServerRequest;
 
+import io.vertx.core.MultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
+
 
 /**
  * Proxies requests and set the FORWARDED headers.
@@ -26,7 +28,6 @@ public class ProxyMiddleware implements Middleware {
     private HttpProxy httpProxy;
 
     private String serverHost;
-
     private int serverPort;
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
@@ -38,8 +39,8 @@ public class ProxyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx);
-        useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx);
+        useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
+        useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
 
         // Some manipulations are
         // * not allowed by Vertx-Web
@@ -55,15 +56,15 @@ public class ProxyMiddleware implements Middleware {
      *
      * @param headerName to check the request for
      * @param headerValue to use if the header name is not yet in the request
-     * @param ctx of the execution
+     * @param headers of the request
      */
-    protected void useOrSetHeader(String headerName, String headerValue, RoutingContext ctx) {
-        if (ctx.request().headers().contains(headerName)) { // use
-            LOGGER.debug("handle: using provided header '%s' with '%s'", headerName, ctx.request().headers().get(headerName));
+    protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
+        if (headers.contains(headerName)) { // use
+            LOGGER.debug("handle: using provided header '{}' with '{}'", headerName, headers.get(headerName));
         }
         else { // set
-            LOGGER.debug("handle: setting header '%s' to '%s'", headerName, headerValue);
-            ctx.request().headers().add(headerName, headerValue);
+            headers.add(headerName, headerValue);
+            LOGGER.debug("handle: set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
 }
