@@ -74,7 +74,7 @@ public class SessionBagMiddleware implements Middleware {
         if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             return null;
         }
-        LOGGER.debug("handle: Cookies in session found. Setting as cookie header.");
+        LOGGER.debug("loadCookiesFromSessionBag: Cookies in session found. Setting as cookie header.");
 
         List<String> requestCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE);
         ctx.request().headers().remove(HttpHeaders.COOKIE);
@@ -168,7 +168,7 @@ public class SessionBagMiddleware implements Middleware {
             return;
         }
 
-        LOGGER.debug("handle: Set-Cookie detected. Removing and storing in session.");
+        LOGGER.debug("storeCookiesInSessionBag: Set-Cookie detected. Removing and storing in session.");
         headers.remove(HttpHeaders.SET_COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
@@ -185,7 +185,7 @@ public class SessionBagMiddleware implements Middleware {
             }
             if (isWhithelisted(decodedCookieToSet)) {
                 // we delegate all logic for whitelisted cookies to the user agent
-                LOGGER.debug("handle: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
+                LOGGER.debug("storeCookiesInSessionBag: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
             }
