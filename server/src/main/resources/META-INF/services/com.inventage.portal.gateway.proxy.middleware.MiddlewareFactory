@@ -5,3 +5,4 @@ com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlew
 com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.debug.ShowSessionContentMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory

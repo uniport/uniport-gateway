@@ -422,6 +422,30 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
                                         DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
 
+        JsonObject controlApiMiddlewareWithSessionTermination = new JsonObject().put(DynamicConfiguration.HTTP,
+                new JsonObject()
+                        .put(DynamicConfiguration.ROUTERS,
+                                new JsonArray().add(new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray().add("middlewareFoo"))
+                                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray().add(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_CONTROL_API)
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                                        .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_TERMINATE")
+                                )))
+                        .put(DynamicConfiguration.SERVICES,
+                                new JsonArray()
+                                        .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "serviceFoo").put(
+                                                DynamicConfiguration.SERVICE_SERVERS,
+                                                new JsonArray().add(new JsonObject()
+                                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
+
+
+
+
         // the sole purpose of the following variable are to improve readability
         boolean expectedTrue = true;
         boolean expectedFalse = false;
@@ -498,6 +522,9 @@ public class DynamicConfigurationTest {
                 Arguments.of("reject complete and empty middlewares", completeAndEmptyHttpMiddlewares, complete,
                         expectedFalse),
 
+                // controlapi middleware
+                Arguments.of("accept control api with 'SESSION_TERMINATE' action middleware", controlApiMiddlewareWithSessionTermination, complete, expectedTrue),
+
                 // services
                 Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),
                 Arguments.of("accept empty services", emptyHttpServices, complete, expectedTrue),
@@ -526,6 +553,8 @@ public class DynamicConfigurationTest {
                         httpRouterWithMissingMiddleware, complete, expectedFalse),
                 Arguments.of("accept http config with router referencing missing service", httpRouterWithMissingService,
                         complete, expectedFalse));
+
+
     }
 
     @ParameterizedTest

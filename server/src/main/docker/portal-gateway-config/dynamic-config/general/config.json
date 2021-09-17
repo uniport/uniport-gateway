@@ -7,11 +7,19 @@
                 "rule": "Path('/')",
                 "service": "dashboard-proxy"
             },
+
             {
                 "name": "login",
                 "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
                 "rule": "PathPrefix('/login')",
                 "service": "dashboard-proxy"
+            },
+
+            {
+                "name": "logout",
+                "middlewares": ["logoutRedirectRegex"],
+                "rule": "PathPrefix('/logout')",
+                "service": "navigation-proxy"
             },
 
             {
@@ -30,7 +38,8 @@
                 "middlewares": [
                     "navigationRedirectRegex",
                     "navigationAuthBearer",
-                    "navigationReplacePath"
+                    "navigationReplacePath",
+                    "sessionTerminate"
                 ],
                 "rule": "PathPrefix('/navigation')",
                 "service": "navigation-proxy"
@@ -79,12 +88,21 @@
                 "type": "redirectRegex",
                 "options": { "regex": "^/$", "replacement": "/dashboard/" }
             },
+
             {
                 "name": "loginRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/login)$",
                     "replacement": "/dashboard/"
+                }
+            },
+
+            {
+                "name": "logoutRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/logout)$", "replacement": "/navigation/service/logout"
                 }
             },
 
@@ -147,6 +165,13 @@
                 "name": "filestorageReplacePath",
                 "type": "replacePathRegex",
                 "options": { "regex": "/filestorage/(.*)", "replacement": "/$1" }
+            },
+            {
+                "name": "sessionTerminate",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_TERMINATE"
+                }
             }
         ],
 

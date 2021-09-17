@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `ControlApiMiddleware`. Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie. Supported actions:
+  - SESSION_TERMINATE: invalidates the session and calls "end_session_endpoint" on Keycloak
+
 ## [2.3.0]-202109100643-197-6a6ac10 - 2021-09-10
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17079) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.3.0-202109100643-197-6a6ac10~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.3.0-202109100643-197-6a6ac10)
