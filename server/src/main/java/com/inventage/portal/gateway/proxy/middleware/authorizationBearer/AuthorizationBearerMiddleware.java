@@ -22,8 +22,8 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
 /**
- * Manages the authentication bearer. If the use is authenticated it provides either an ID token or
- * a access token as defined in the sessionScope. Access tokens are only provided if the
+ * Manages the authentication bearer. If the user is authenticated it provides either an ID token or
+ * an access token as defined in the sessionScope. Access tokens are only provided if the
  * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
  * token is sent to the Client.
  */
