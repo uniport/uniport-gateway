@@ -12,9 +12,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -51,15 +53,23 @@ public class ControlApiMiddleware implements Middleware {
             final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
             if (isNotEmpty(storedCookies)) {
                 // find the first control api cookie with an action equals to the configured one
-                final Optional<Cookie> controlApiActionToExecute = storedCookies.stream()
+                final List<Cookie> actionCookies = storedCookies.stream()
                         .filter(cookie -> Objects.equals(cookie.name(), CONTROL_COOKIE_NAME))
                         .filter(cookie -> Objects.equals(action, cookie.value()))
-                        .findFirst();
+                        .collect(Collectors.toList());
 
+                final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
                 if (controlApiActionToExecute.isPresent()) {
                     LOGGER.info("handle: provided cookie {}", controlApiActionToExecute.get());
                     handleAction(action, ctx);
                 }
+
+                // remove action cookies from session bag
+                actionCookies.forEach(cookieToRemove -> {
+                    if (storedCookies.remove(cookieToRemove)) {
+                        LOGGER.debug("handle: Removing handled control api cookie from SessionBag '{}'", cookieToRemove.name());
+                    }
+                });
             }
         };
         this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
