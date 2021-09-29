@@ -137,3 +137,8 @@ env:
       value: "document-proxy"
     - name: "document-proxy.port"
       value: "20050"
+    # FileStorage
+    - name: "filestorage-proxy.host"
+      value: "filestorage-proxy"
+    - name: "filestorage-proxy.port"
+      value: "20090"
