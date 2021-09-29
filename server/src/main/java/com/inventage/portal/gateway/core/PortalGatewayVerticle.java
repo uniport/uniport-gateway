@@ -10,6 +10,7 @@ import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 
+import io.vertx.core.tracing.TracingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,8 +90,11 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
         if (entrypoint.port() > 0) {
-            final HttpServerOptions options = new HttpServerOptions().setMaxHeaderSize(1024 * 20)
-                    .setSsl(entrypoint.isTls()).setKeyStoreOptions(entrypoint.jksOptions());
+            final HttpServerOptions options = new HttpServerOptions()
+                    .setMaxHeaderSize(1024 * 20)
+                    .setSsl(entrypoint.isTls())
+                    .setKeyStoreOptions(entrypoint.jksOptions())
+                    .setTracingPolicy(TracingPolicy.ALWAYS);
             LOGGER.info("listOnEntrypoint: '{}' at port '{}'", entrypoint.name(), entrypoint.port());
             return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
         } else {

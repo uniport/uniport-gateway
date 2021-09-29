@@ -1,12 +1,12 @@
 package com.inventage.portal.gateway;
 
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
-
+import io.vertx.core.Launcher;
+import io.vertx.core.VertxOptions;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.tracing.opentracing.OpenTracingOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.vertx.core.Launcher;
-import io.vertx.core.logging.SLF4JLogDelegateFactory;
 
 /**
  * Custom Vert.x Launcher for the portal gateway.
@@ -47,4 +47,9 @@ public class PortalGatewayLauncher extends Launcher {
         LOGGER.info("main: PortalGatewayLauncher started.");
     }
 
+    @Override
+    public void beforeStartingVertx(VertxOptions options) {
+        LOGGER.info("beforeStartingVertx");
+        options.setTracingOptions(new OpenTracingOptions());
+    }
 }

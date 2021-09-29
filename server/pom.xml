@@ -39,6 +39,10 @@
             <artifactId>vertx-auth-jwt</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-opentracing</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.inventage.vertx</groupId>
             <artifactId>vertx-http-proxy</artifactId>
         </dependency>
