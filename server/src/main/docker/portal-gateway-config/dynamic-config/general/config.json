@@ -179,32 +179,32 @@
             {
                 "name": "dashboard-proxy",
                 "servers": [
-                    { "host": "${dashboard-proxy.host}", "port": 20020 }
+                    { "host": "${dashboard-proxy.host}", "port": "${dashboard-proxy.port}" }
                 ]
             },
 
             {
                 "name": "navigation-proxy",
                 "servers": [
-                    { "host": "${navigation-proxy.host}", "port": 20010 }
+                    { "host": "${navigation-proxy.host}", "port": "${navigation-proxy.port}" }
                 ]
             },
 
             {
                 "name": "organisation-proxy",
                 "servers": [
-                    { "host": "${organisation-proxy.host}", "port": 20030 }
+                    { "host": "${organisation-proxy.host}", "port": "${organisation-proxy.port}" }
                 ]
             },
 
             {
                 "name": "document-proxy",
-                "servers": [{ "host": "${document-proxy.host}", "port": 20050 }]
+                "servers": [{ "host": "${document-proxy.host}", "port": "${document-proxy.port}" }]
             },
 
             {
                 "name": "filestorage-proxy",
-                "servers": [{ "host": "${filestorage-proxy.host}", "port": 20090 }]
+                "servers": [{ "host": "${filestorage-proxy.host}", "port": "${filestorage-proxy.port}" }]
             }
         ]
     }

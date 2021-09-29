@@ -102,7 +102,7 @@
         "services": [
             {
                 "name": "portal-iam",
-                "servers": [{ "host": "${portal-iam.host}", "port": 8080 }]
+                "servers": [{ "host": "${portal-iam.host}", "port": "${portal-iam.port}" }]
             }
         ]
     }
