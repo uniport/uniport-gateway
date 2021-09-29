@@ -29,6 +29,11 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class FileConfigProviderTest {
 
+    // necessary for jaeger (OpenTracing)
+    static {
+        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+    }
+
     @Test
     @DisplayName("no config published when empty/invalid")
     void errorWhenEmptyConfigTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {

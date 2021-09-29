@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 
 public class ReplacePathRegexMiddlewareTest {
 
+    // necessary for jaeger (OpenTracing)
+    static {
+        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+    }
+
     @Test
     public void test_starting_with() {
         // given

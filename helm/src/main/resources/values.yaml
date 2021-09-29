@@ -102,9 +102,6 @@ resources: {}
 storages: []
 
 env:
-    # JAEGER_SERVICE_NAME is the service name
-    - name: "JAEGER_SERVICE_NAME"
-      value: "portal-gateway"
     # HTTP protocol for external access
     - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
       value: "http"

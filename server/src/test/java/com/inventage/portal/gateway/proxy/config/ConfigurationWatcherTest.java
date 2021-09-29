@@ -26,6 +26,11 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class ConfigurationWatcherTest {
 
+  // necessary for jaeger (OpenTracing)
+  static {
+    System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+  }
+
   private JsonObject assembleMessage(String providerName, JsonObject providerConfig) {
     return new JsonObject().put(Provider.PROVIDER_NAME, providerName).put(Provider.PROVIDER_CONFIGURATION,
         providerConfig);

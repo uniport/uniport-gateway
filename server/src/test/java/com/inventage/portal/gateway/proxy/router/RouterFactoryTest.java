@@ -25,6 +25,12 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("unchecked")
 public class RouterFactoryTest {
+
+    // necessary for jaeger (OpenTracing)
+    static {
+        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+    }
+
     static final String host = "localhost";
 
     private HttpServer proxy;

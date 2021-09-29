@@ -11,6 +11,12 @@ import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class StaticConfigurationTest {
+
+    // necessary for jaeger (OpenTracing)
+    static {
+        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+    }
+
     @Test
     public void acceptEmptyConfig(Vertx vertx, VertxTestContext testCtx) {
         JsonObject json = new JsonObject();

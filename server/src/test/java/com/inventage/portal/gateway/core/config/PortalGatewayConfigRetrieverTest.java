@@ -14,6 +14,11 @@ import org.junit.jupiter.api.io.TempDir;
 
 public class PortalGatewayConfigRetrieverTest {
 
+    // necessary for jaeger (OpenTracing)
+    static {
+        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+    }
+
     @TempDir
     static Path tempDir;
     static Path tempFile;

@@ -29,6 +29,11 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class DynamicConfigurationTest {
 
+    // necessary for jaeger (OpenTracing)
+    static {
+        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+    }
+
     static Stream<Arguments> validateTestData() {
         /*
         covered cases:

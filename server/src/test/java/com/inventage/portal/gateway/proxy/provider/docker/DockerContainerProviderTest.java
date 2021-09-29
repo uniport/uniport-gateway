@@ -30,6 +30,12 @@ import io.vertx.servicediscovery.spi.ServiceImporter;
 
 @ExtendWith(VertxExtension.class)
 public class DockerContainerProviderTest {
+
+  // necessary for jaeger (OpenTracing)
+  static {
+    System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
+  }
+
   private static final String TEST_NETWORK = "test-network";
 
   /*
