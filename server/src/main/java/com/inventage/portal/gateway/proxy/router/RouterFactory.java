@@ -192,10 +192,10 @@ public class RouterFactory {
     }
 
     /**
-     * Adds a healthcheck route to the given router. The healtcheck return '200
-     * OK' for a successful healthcheack and '500 Internal Server Error' for a
-     * failed healthcheck.
-     * No routes configured (apart from the healthcheck) results in an unhealthy
+     * Adds a health check route to the given router. The health check return '200
+     * OK' for a successful health check and '500 Internal Server Error' for a
+     * failed health check.
+     * No routes configured (apart from the health check) results in an unhealthy
      * state.
      *
      * @param router used as the proxy router
