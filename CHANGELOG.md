@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `ControlApiMiddleware`. Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie. Supported actions:
   - SESSION_TERMINATE: invalidates the session and calls "end_session_endpoint" on Keycloak
+- Tracing enabled [PORTAL-418](https://issue.inventage.com/browse/PORTAL-418)
 
 ## [2.3.0]-202109100643-197-6a6ac10 - 2021-09-10
 
