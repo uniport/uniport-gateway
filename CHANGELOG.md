@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `ControlApiMiddleware`. Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie. Supported actions:
+## [2.4.0]- - 
+
+### Added
+
+- Added `ControlApiMiddleware` (PORTAL-195). Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie. Supported actions:
   - SESSION_TERMINATE: invalidates the session and calls "end_session_endpoint" on Keycloak
 - Tracing enabled [PORTAL-418](https://issue.inventage.com/browse/PORTAL-418)
+- Ports can now also be defined by env variables [PORTAL-417](https://issue.inventage.com/browse/PORTAL-417)
 
 ## [2.3.0]-202109100643-197-6a6ac10 - 2021-09-10
 
@@ -104,7 +109,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.3.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F2.4.0
+[2.4.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.4.0&targetBranch=refs%2Ftags%2F2.3.0
 [2.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.3.0&targetBranch=refs%2Ftags%2F2.2.0
 [2.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.2.0&targetBranch=refs%2Ftags%2F2.1.0
 [2.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.1.0&targetBranch=refs%2Ftags%2F2.0.0
