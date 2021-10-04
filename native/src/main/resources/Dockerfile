@@ -20,7 +20,6 @@ RUN native-image \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
     -H:+ReportExceptionStackTraces \
     -H:IncludeResources='.*/vertx/.*$' \
-    -H:IncludeResources='jaeger.properties' \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar

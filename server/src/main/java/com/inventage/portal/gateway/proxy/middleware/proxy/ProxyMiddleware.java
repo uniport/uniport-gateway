@@ -2,18 +2,14 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.ProxiedHttpServerRequest;
-
 import io.vertx.core.MultiMap;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.tracing.TracingPolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,9 +29,7 @@ public class ProxyMiddleware implements Middleware {
     private int serverPort;
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
-        this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient(
-                new HttpClientOptions()
-                        .setTracingPolicy(TracingPolicy.PROPAGATE)));
+        this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
         this.httpProxy.target(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;

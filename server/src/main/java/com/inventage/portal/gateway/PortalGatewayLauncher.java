@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import io.vertx.core.Launcher;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
-import io.vertx.tracing.opentracing.OpenTracingOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
