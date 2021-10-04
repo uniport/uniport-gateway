@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-## [2.4.0]- - 
+## [2.4.0]-202110040810-216-85d8f83 - 2021-10-04
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17097) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.4.0-202110040810-216-85d8f83~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.4.0-202110040810-216-85d8f83)
 
 ### Added
 
