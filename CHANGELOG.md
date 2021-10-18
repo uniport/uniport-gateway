@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
 ### Added
+
+## [2.5.0]
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+### Changed
+
+- Version updated of portal-helm-chart-library.version dependency
 
 ## [2.4.1]-202110041214-219-5351207 - 2021-10-04
 
