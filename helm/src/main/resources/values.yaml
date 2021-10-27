@@ -6,31 +6,7 @@ initContainers:
       command:
           - "sh"
           - "-c"
-          - "while ! nc -z portal-iam 8080; do true; done"
-    - name: init-navigation-proxy
-      image: busybox:1.33
-      command:
-          - "sh"
-          - "-c"
-          - "while ! nc -z navigation-proxy 20010; do true; done"
-    - name: init-dashboard-proxy
-      image: busybox:1.33
-      command:
-          - "sh"
-          - "-c"
-          - "while ! nc -z dashboard-proxy 20020; do true; done"
-    - name: init-document-proxy
-      image: busybox:1.33
-      command:
-          - "sh"
-          - "-c"
-          - "while ! nc -z document-proxy 20050; do true; done"
-    - name: init-organisation-proxy
-      image: busybox:1.33
-      command:
-          - "sh"
-          - "-c"
-          - "while ! nc -z organisation-proxy 20030; do true; done"
+          - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do true; done"
 
 image:
     registry: ${docker.pull.registry}
