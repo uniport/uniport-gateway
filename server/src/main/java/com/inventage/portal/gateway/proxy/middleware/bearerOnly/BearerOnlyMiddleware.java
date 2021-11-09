@@ -25,8 +25,8 @@ public class BearerOnlyMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddleware.class);
 
-    private AuthenticationHandler authHandler;
-    private boolean optional;
+    private final AuthenticationHandler authHandler;
+    private final boolean optional;
 
     public BearerOnlyMiddleware(AuthenticationHandler authHandler, boolean optional) {
         this.authHandler = authHandler;
@@ -43,7 +43,7 @@ public class BearerOnlyMiddleware implements Middleware {
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization != null) {
             LOGGER.debug("handle: authentication by '{}'", authorization);
-        } else if (authorization == null && optional) {
+        } else if (optional) {
             LOGGER.debug("handle: letting through request with no authorization header");
             ctx.next();
             return;
