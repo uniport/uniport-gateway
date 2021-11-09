@@ -9,6 +9,18 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 
+/**
+ * The BearerOnly middleware checks if incoming requests are authenticated.
+ *
+ * Per default, incoming requests are required to have a header with 'Authorization: Bearer <token>'.
+ * The token has to be a valid JWT matching its signature, expiration, audience and issuer with
+ * the properties configured for this middleware.
+ * The middleware may be configured to allow requests with no 'Authorization' header to pass through.
+ *
+ *
+ * If no valid token is provided, then a '401 Unauthorized' is returned.
+ * Otherwise, the request is forwarded.
+ */
 public class BearerOnlyMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddleware.class);
@@ -24,18 +36,6 @@ public class BearerOnlyMiddleware implements Middleware {
         }
     }
 
-    /**
-     * The BearerOnly middleware checks if incoming requests are authenticated.
-     *
-     * Per default, incoming requests are required to have a header with 'Authorization: Bearer <token>'.
-     * The token has to be a valid JWT matching its signature, expiration, audience and issuer with
-     * the properties configured for this middleware.
-     * The middleware may be configured to allow requests with no 'Authorization' header to pass through.
-     *
-     *
-     * If no valid token is provided, then a '401 Unauthorized' is returned.
-     * Otherwise, the request is forwared.
-     */
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("handle: '{}'", ctx.request().absoluteURI());
