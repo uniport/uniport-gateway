@@ -19,7 +19,7 @@ pipeline {
 
     environment {
         LINE_SEPARATOR = '================================================================================'
-        NEXUS2_CREDS = credentials('inventage-ierp')
+        NEXUS2_CREDS = cred entials('inventage-ierp')
         CI_NEXUS2_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com stefan@incos.media'
@@ -31,7 +31,6 @@ pipeline {
     tools {
         maven 'maven-release-latest'
         jdk 'Open-JDK-11'
-        oc 'oc v4'
     }
 
     stages {
@@ -117,43 +116,6 @@ pipeline {
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.override.yml up -d'"
                     '''
                 }
-            }
-        }
-
-        stage('Deployment-OpenShift') {
-            when {
-                branch params.BRANCH_FILTER
-                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
-            }
-            steps {
-                sh '''
-                    set -x
-
-                    oc version --client
-                    oc login https://octomore.inventage.com:8443 \
-                        --username inventage-portal \
-                        --password jenkins \
-                        --insecure-skip-tls-verify
-
-                    HELM_CHART=$(pwd)/helm/target//portal-gateway/
-                    HELM_VERSION=3.5.4
-                    HELM_NAMESPACE=portal
-                    HELM_RELEASE_NAME=portal-gateway
-
-                    alias helm="docker run --rm \
-                        -v $HELM_CHART:/apps -w /apps \
-                        -v ~/.kube:/root/.kube \
-                        alpine/helm:$HELM_VERSION"
-
-                    helm version
-                    helm upgrade \
-                        --install \
-                        --namespace $HELM_NAMESPACE \
-                        --values /apps/values.octomore.yaml \
-                        --debug \
-                        $HELM_RELEASE_NAME \
-                        /apps
-                '''
             }
         }
 
