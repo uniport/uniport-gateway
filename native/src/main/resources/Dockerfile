@@ -1,4 +1,4 @@
-FROM ${docker.pull.registry}/ghcr.io/graalvm/graalvm-ce:java11-21.1.0 AS buildEnv
+FROM ghcr.io/graalvm/graalvm-ce:java11-21.1.0 AS buildEnv
 RUN gu install native-image
 
 WORKDIR /workdir
