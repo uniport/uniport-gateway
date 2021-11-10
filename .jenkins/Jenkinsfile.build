@@ -19,7 +19,7 @@ pipeline {
 
     environment {
         LINE_SEPARATOR = '================================================================================'
-        NEXUS2_CREDS = cred entials('inventage-ierp')
+        NEXUS2_CREDS = credentials('inventage-ierp')
         CI_NEXUS2_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com stefan@incos.media'
