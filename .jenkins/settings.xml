@@ -22,6 +22,11 @@
             <password>${env.CI_REGISTRY_CREDS_PSW}</password>
         </server>
         <server>
+            <id>${env.DOCKER_PULL_REGISTRY}</id>
+            <username>${env.CI_REGISTRY_CREDS_USR}</username>
+            <password>${env.CI_REGISTRY_CREDS_PSW}</password>
+        </server>
+        <server>
             <id>inventage-portal-group</id>
             <username>${env.CI_NEXUS2_CREDS_USR}</username>
             <password>${env.CI_NEXUS2_CREDS_PSW}</password>
