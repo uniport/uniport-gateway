@@ -24,7 +24,7 @@ RUN native-image \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar
 
-FROM debian:buster-slim
+FROM ${docker.pull.registry}/debian:buster-slim
 
 COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
