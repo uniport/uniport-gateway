@@ -77,11 +77,13 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-            // the protocol, hostname or port can be different than the portal-gateway knows
+            // the protocol, hostname or port can be different than the portal-gateway knows, therefor
+            // in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
+            // configuration
             String publicUrl = middlewareConfig.getString(RouterFactory.PUBLIC_URL);
             try {
                 final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
-                final String newAuthorizationPath = String.format("%s%s", publicUrl, uri.getPath());
+                final String newAuthorizationPath = authorizationPath(publicUrl, uri);
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
             } catch (Exception e) {
                 LOGGER.warn("create: Failed to patch authorization path");
@@ -105,4 +107,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         return oauth2Promise.future();
     }
 
+    protected String authorizationPath(String publicUrl, URI keycloakAuthorizationEndpoint) {
+        return String.format("%s%s", publicUrl, keycloakAuthorizationEndpoint.getPath());
+    }
 }

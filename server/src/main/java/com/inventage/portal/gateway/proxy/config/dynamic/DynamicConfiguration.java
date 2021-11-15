@@ -66,6 +66,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
+    public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
     public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
     public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
@@ -84,7 +85,7 @@ public class DynamicConfiguration {
 
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
-            MIDDLEWARE_OAUTH2, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG, MIDDLEWARE_CONTROL_API);
+            MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG, MIDDLEWARE_CONTROL_API);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -112,6 +113,10 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
                 .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
@@ -512,7 +517,7 @@ public class DynamicConfiguration {
 
                     break;
                 }
-                case MIDDLEWARE_OAUTH2: {
+                case MIDDLEWARE_OAUTH2: case MIDDLEWARE_OAUTH2_REGISTRATION: {
                     String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
                     if (clientID == null || clientID.length() == 0) {
                         return Future.failedFuture(String.format("%s: No client ID defined", mwType));

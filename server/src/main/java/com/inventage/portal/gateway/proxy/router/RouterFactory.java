@@ -174,7 +174,7 @@ public class RouterFactory {
         JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
         // needed to ensure authenticating requests are routed through this application
-        if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)) {
+        if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2) || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
             middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
         }
 
