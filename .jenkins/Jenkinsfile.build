@@ -83,6 +83,19 @@ pipeline {
                 mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE], 'clean', 'deploy')
                 script {
                     env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./pom/target/nexus-staging/staging/2784e0aacf5060.properties')
+
+                    sh '''
+                        set -x
+
+                        HELM_CHART=$(pwd)/helm/target/portal-gateway
+                        HELM_VERSION=3.5.4
+
+                        alias helm="docker run --rm \
+                            --mount type=bind,source=$HELM_CHART,target=/app/helm,readonly \
+                            ${DOCKER_PULL_REGISTRY}/alpine/helm:$HELM_VERSION"
+
+                        helm template -g /app/helm
+                    '''
                 }
             }
         }
