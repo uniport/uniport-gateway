@@ -4,10 +4,20 @@
             {
                 "name": "auth",
                 "rule": "PathPrefix('/auth')",
+                "middlewares": ["authRedirectRegex"],
                 "service": "portal-iam"
             }
         ],
         "middlewares": [
+            {
+                "name": "authRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/(?!auth/realms/portal|auth/resources).*",
+                    "replacement": "/login"
+                }
+            },
+
             {
                 "name": "navigationAuthBearer",
                 "type": "authorizationBearer",

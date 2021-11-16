@@ -33,8 +33,20 @@ public class RedirectRegexMiddlewareTest {
         return Stream.of(
                 Arguments.of("simple redirection", "^(/dashboard)$", "$1/", "/dashboard",
                         HttpResponseStatus.FOUND.code(), "/dashboard/"),
+                Arguments.of("Don't allow admin or master realm", "^/auth(/|/admin.*|/realms/master.*)?$", "/login", "/auth/admin",
+                        HttpResponseStatus.FOUND.code(), "/login"),
                 Arguments.of("URL doesn't match regex", "^/blub/(.*)$", "/$1", "/wont/match",
-                        HttpResponseStatus.OK.code(), null));
+                        HttpResponseStatus.OK.code(), null),
+                Arguments.of("only /auth/realms/portal* or /auth/resources*", "^/(?!auth/realms/portal|auth/resources).*", "", "/auth/realms/portal/protocol/",
+                        HttpResponseStatus.OK.code(), null),
+                Arguments.of("only /auth/realms/portal* or /auth/resources*", "^/(?!auth/realms/portal|auth/resources).*", "", "/auth/resources/",
+                        HttpResponseStatus.OK.code(), null),
+                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*", "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth/realms/master/protocol/",
+                        HttpResponseStatus.FOUND.code(), "/login"),
+                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*", "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth/admin",
+                        HttpResponseStatus.FOUND.code(), "/login"),
+                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*", "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth",
+                        HttpResponseStatus.FOUND.code(), "/login"));
     }
 
     @ParameterizedTest
