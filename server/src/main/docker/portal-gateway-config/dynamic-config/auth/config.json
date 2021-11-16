@@ -13,7 +13,7 @@
                 "name": "authRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^/(?!auth/realms/portal|auth/resources).*",
+                    "regex": "^/(?!auth/realms/portal|auth/resources|auth/js).*",
                     "replacement": "/login"
                 }
             },
