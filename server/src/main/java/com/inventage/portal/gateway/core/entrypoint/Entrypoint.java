@@ -28,7 +28,7 @@ public class Entrypoint {
 
     public static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
     public static final boolean SESSION_COOKIE_HTTP_ONLY = true;
-    public static final boolean SESSION_COOKIE_SECURE = false;
+    public static final boolean SESSION_COOKIE_SECURE = true;
     public static final CookieSameSite SESSION_COOKIE_SAME_SITE = CookieSameSite.STRICT;
     public static final int SESSION_COOKIE_MIN_LENGTH = 32;
 
@@ -76,9 +76,12 @@ public class Entrypoint {
         // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
         router.route()
                 .handler(SessionHandler.create(LocalSessionStore.create(vertx))
-                        .setSessionCookieName(SESSION_COOKIE_NAME).setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
-                        .setCookieSecureFlag(SESSION_COOKIE_SECURE).setCookieSameSite(SESSION_COOKIE_SAME_SITE)
-                        .setMinLength(SESSION_COOKIE_MIN_LENGTH).setNagHttps(true));
+                        .setSessionCookieName(SESSION_COOKIE_NAME)
+                        .setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
+                        .setCookieSecureFlag(SESSION_COOKIE_SECURE)
+                        .setCookieSameSite(SESSION_COOKIE_SAME_SITE)
+                        .setMinLength(SESSION_COOKIE_MIN_LENGTH)
+                        .setNagHttps(true));
 
         return router;
     }
