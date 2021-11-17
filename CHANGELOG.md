@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+## [2.7.0]-Unreleased - ???
+
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+### Changed
+
+- SecureFlag set for inventage-portal-gateway.session cookie
+
 ## [2.6.0]-202111100757-232-3f0c716 - 2021-11-10
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.6.0-202111100757-232-3f0c716~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.6.0-202111100757-232-3f0c716)
