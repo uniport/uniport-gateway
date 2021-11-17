@@ -28,7 +28,7 @@ public class Entrypoint {
 
     public static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
     public static final boolean SESSION_COOKIE_HTTP_ONLY = true;
-    public static final boolean SESSION_COOKIE_SECURE = true;
+    public static final boolean SESSION_COOKIE_SECURE = false;
     public static final CookieSameSite SESSION_COOKIE_SAME_SITE = CookieSameSite.STRICT;
     public static final int SESSION_COOKIE_MIN_LENGTH = 32;
 
