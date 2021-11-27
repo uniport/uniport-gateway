@@ -46,8 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `ControlApiMiddleware` (PORTAL-195). Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie. Supported actions:
   - SESSION_TERMINATE: invalidates the session and calls "end_session_endpoint" on Keycloak
-- Tracing enabled [PORTAL-418](https://issue.inventage.com/browse/PORTAL-418)
-- Ports can now also be defined by env variables [PORTAL-417](https://issue.inventage.com/browse/PORTAL-417)
+- Tracing enabled ([PORTAL-418](https://issue.inventage.com/browse/PORTAL-418))
+- Ports can now also be defined by env variables ([PORTAL-417](https://issue.inventage.com/browse/PORTAL-417))
 
 ## [2.3.0]-202109100643-197-6a6ac10 - 2021-09-10
 
@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `X-Forwarded-Proto` to headers that are forwarded to the target service to enable proper redirects. Required for [PORTAL-353](https://issue.inventage.com/browse/PORTAL-353).
+- Added `X-Forwarded-Proto` to headers that are forwarded to the target service to enable proper redirects. Required for ([PORTAL-353](https://issue.inventage.com/browse/PORTAL-353)).
 - `RequestResponseLogger` logs now the status code of the response
 
 ## [2.2.0]-202108231142-190-927586e - 2021-08-23
