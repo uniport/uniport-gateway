@@ -12,7 +12,7 @@
                 "name": "login",
                 "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
                 "rule": "PathPrefix('/login')",
-                "service": "dashboard-proxy"
+                "service": "navigation-proxy"
             },
 
             {
@@ -94,7 +94,7 @@
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/login)$",
-                    "replacement": "/dashboard/"
+                    "replacement": "/navigation/service/redirect"
                 }
             },
 
