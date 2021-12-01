@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Added memory limits to the services defined in Docker Compose files using `mem_limit`. This also means using [Docker Compose files version `2.4`](https://docs.docker.com/compose/compose-file/compose-versioning/#version-24) which has support for this feature.
+
 ### Changed
 
-- SecureFlag set for inventage-portal-gateway.session cookie
+- SecureFlag set for `inventage-portal-gateway.session` cookie
 
 ## [2.6.0]-202111100757-232-3f0c716 - 2021-11-10
 
