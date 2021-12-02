@@ -94,7 +94,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             OAuth2AuthHandler authHandler = OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
                     // add the sessionScope as a OIDC scope for "aud" in JWT
                     // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
-                    .setupCallback(callback).withScope(OIDC_SCOPE + " " + sessionScope);
+                    .setupCallback(callback).withScope(OIDC_SCOPE + " " + sessionScope)
+                    // https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
+                    .pkceVerifierLength(43);
 
             oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
             LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
