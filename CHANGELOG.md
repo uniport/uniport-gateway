@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - SecureFlag set for `inventage-portal-gateway.session` cookie
+- Use OAuth2 `response_mode=form_post` for delivering authorization code ([PORTAL-513](https://issue.inventage.com/browse/PORTAL-513))
 
 ## [2.6.0]-202111100757-232-3f0c716 - 2021-11-10
 
