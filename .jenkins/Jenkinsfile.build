@@ -135,8 +135,10 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
+                        set +x
+
                         curl -X GET \
-                            -u "{env.CI_NEXUS2_BITBUCKET_CREDS_USR:${env.CI_NEXUS2_BITBUCKET_CREDS_PSW}" \
+                            -u "$CI_NEXUS2_BITBUCKET_CREDS_USR:$CI_NEXUS2_BITBUCKET_CREDS_PSW" \
                             https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh \
                             > service.sh
 
