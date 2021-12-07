@@ -146,7 +146,7 @@ pipeline {
                             https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh \
                             > .bin/kubernetes/service.sh
 
-                        KUBECONFIG=$KUBECONFIG_FILE bash .bin/kubernetesservice.sh portal-gateway install ips dev
+                        KUBECONFIG=$KUBECONFIG_FILE bash .bin/kubernetes/service.sh portal-gateway install ips dev
 
                         rm -f service.sh
                     '''
