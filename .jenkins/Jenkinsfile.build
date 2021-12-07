@@ -140,6 +140,20 @@ pipeline {
             }
         }
 
+        stage('Deployment DEV') {
+            when {
+                branch params.BRANCH_FILTER
+                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
+            }
+            steps {
+                withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    sh '''
+                        KUBECONFIG=$KUBECONFIG_FILE ./.bin/kubernetes/service.sh portal-gateway install ips dev
+                    '''
+                }
+            }
+        }
+
         stage ('Tag Staging Repository') {
             steps {
                 echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
