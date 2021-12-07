@@ -139,7 +139,7 @@ pipeline {
 
                         echo "Downloading service.sh"
 
-                        mkdir .bin/kubernetes
+                        mkdir -p .bin/kubernetes
 
                         curl -X GET \
                             -u "$CI_NEXUS2_BITBUCKET_CREDS_USR:$CI_NEXUS2_BITBUCKET_CREDS_PSW" \
