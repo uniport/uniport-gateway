@@ -25,7 +25,7 @@ pipeline {
     environment {
         LINE_SEPARATOR = '================================================================================'
         NEXUS2_CREDS = credentials('inventage-ierp')
-        CI_NEXUS2_CREDS = credentials('inventage-portal')
+        CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com stefan@incos.media'
         DEV_DEPLOYMENT_HOST = 'ips@ardbeg.inventage.com'
@@ -90,19 +90,6 @@ pipeline {
                 withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
                     script {
                         env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./pom/target/nexus-staging/staging/2784e0aacf5060.properties')
-
-                        sh '''
-                            set -x
-
-                            HELM_CHART=$(pwd)/helm/target/portal-gateway
-                            HELM_VERSION=3.5.4
-
-                            alias helm="docker run --rm \
-                                --mount type=bind,source=$HELM_CHART,target=/app/helm,readonly \
-                                ${DOCKER_PULL_REGISTRY}/alpine/helm:$HELM_VERSION"
-
-                            helm template -g /app/helm
-                        '''
                     }
                 }
             }
@@ -148,7 +135,14 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
-                        KUBECONFIG=$KUBECONFIG_FILE ./.bin/kubernetes/service.sh portal-gateway install ips dev
+                        curl -X GET \
+                            -u "{env.CI_NEXUS2_BITBUCKET_CREDS_USR:${env.CI_NEXUS2_BITBUCKET_CREDS_PSW}" \
+                            https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh \
+                            > service.sh
+
+                        KUBECONFIG=$KUBECONFIG_FILE bash service.sh portal-gateway install ips dev
+
+                        rm -f service.sh
                     '''
                 }
             }

@@ -8,8 +8,8 @@
         </server>
         <server>
             <id>inventage-portal-staging</id>
-            <username>${env.CI_NEXUS2_CREDS_USR}</username>
-            <password>${env.CI_NEXUS2_CREDS_PSW}</password>
+            <username>${env.CI_NEXUS2_BITBUCKET_CREDS_USR}</username>
+            <password>${env.CI_NEXUS2_BITBUCKET_CREDS_PSW}</password>
         </server>
         <server>
             <id>docker-registry.inventage.com:10000</id>
@@ -28,8 +28,8 @@
         </server>
         <server>
             <id>inventage-portal-group</id>
-            <username>${env.CI_NEXUS2_CREDS_USR}</username>
-            <password>${env.CI_NEXUS2_CREDS_PSW}</password>
+            <username>${env.CI_NEXUS2_BITBUCKET_CREDS_USR}</username>
+            <password>${env.CI_NEXUS2_BITBUCKET_CREDS_PSW}</password>
         </server>
     </servers>
     <interactiveMode>false</interactiveMode>
