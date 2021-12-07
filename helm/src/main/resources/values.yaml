@@ -83,7 +83,7 @@ env:
       value: "http"
     # HTTP host name for external access
     - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-      value: "portal.10.100.20.40.nip.io"
+      value: "portal.minikube"
     # HTTP port for external access, must be the same as the exposed port
     - name: "PORTAL_GATEWAY_PUBLIC_PORT"
       value: "80"
