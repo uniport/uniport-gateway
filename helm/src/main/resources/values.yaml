@@ -1,3 +1,6 @@
+helm:
+    priority: 10
+
 replicaCount: 1
 
 initContainers:
