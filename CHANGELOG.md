@@ -13,11 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added memory limits to the services defined in Docker Compose files using `mem_limit`. This also means using [Docker Compose files version `2.4`](https://docs.docker.com/compose/compose-file/compose-versioning/#version-24) which has support for this feature.
 - Use PKCE for OIDC ([PORTAL-512](https://issue.inventage.com/browse/PORTAL-512))
+- Prevent access to various /auth* URLs
 
 ### Changed
 
 - SecureFlag set for `inventage-portal-gateway.session` cookie
-- Use OAuth2 `response_mode=form_post` for delivering authorization code ([PORTAL-513](https://issue.inventage.com/browse/PORTAL-513))
 
 ## [2.6.0]-202111100757-232-3f0c716 - 2021-11-10
 
