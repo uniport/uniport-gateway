@@ -10,14 +10,14 @@
 
             {
                 "name": "login",
-                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
+                "middlewares": ["dashboardOauth2", "loginRedirectRegex_deprecated"],
                 "rule": "PathPrefix('/login')",
                 "service": "base-proxy"
             },
 
             {
                 "name": "logout",
-                "middlewares": ["logoutRedirectRegex"],
+                "middlewares": ["logoutRedirectRegex_deprecated"],
                 "rule": "PathPrefix('/logout')",
                 "service": "base-proxy"
             },
@@ -39,6 +39,18 @@
                     "baseRedirectRegex",
                     "baseAuthBearer",
                     "baseReplacePath",
+                    "sessionTerminate"
+                ],
+                "rule": "PathPrefix('/base')",
+                "service": "base-proxy"
+            },
+
+            {
+                "name": "base-proxy_deprecated",
+                "middlewares": [
+                    "baseRedirectRegex_deprecated",
+                    "baseAuthBearer",
+                    "baseReplacePath_deprecated",
                     "sessionTerminate"
                 ],
                 "rule": "PathPrefix('/navigation')",
@@ -94,12 +106,29 @@
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/login)$",
+                    "replacement": "/base/service/redirect"
+                }
+            },
+
+            {
+                "name": "loginRedirectRegex_deprecated",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/login)$",
                     "replacement": "/navigation/service/redirect"
                 }
             },
 
             {
                 "name": "logoutRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/logout)$", "replacement": "/base/service/logout"
+                }
+            },
+
+            {
+                "name": "logoutRedirectRegex_deprecated",
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/logout)$", "replacement": "/navigation/service/logout"
@@ -109,10 +138,21 @@
             {
                 "name": "baseRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+                "options": { "regex": "^(/base)$", "replacement": "$1/" }
             },
             {
                 "name": "baseReplacePath",
+                "type": "replacePathRegex",
+                "options": { "regex": "/base/(.*)", "replacement": "/$1" }
+            },
+
+            {
+                "name": "baseRedirectRegex_deprecated",
+                "type": "redirectRegex",
+                "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+            },
+            {
+                "name": "baseReplacePath_deprecated",
                 "type": "replacePathRegex",
                 "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
             },
