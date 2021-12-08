@@ -83,7 +83,7 @@ Zum Beispiel mit einer `artifactId` von `local-portal` kann die `portal-gateway.
 portal-iam.host=local-portal-portal-iam
 portal-iam.port=8080
 
-navigation-proxy.host=local-portal-navigation-proxy
+base-proxy.host=local-portal-base-proxy
 dashboard-proxy.host=local-portal-dashboard-proxy
 organisation-proxy.host=local-portal-organisation-proxy
 document-proxy.host=local-portal-document-proxy

@@ -19,7 +19,7 @@
             },
 
             {
-                "name": "navigationAuthBearer",
+                "name": "baseAuthBearer",
                 "type": "authorizationBearer",
                 "options": { "sessionScope": "id" }
             },

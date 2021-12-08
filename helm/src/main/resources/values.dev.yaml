@@ -31,10 +31,10 @@ env:
       value: "portal-iam"
     - name: "portal-iam.port"
       value: "8080"
-    # Navigation
-    - name: "navigation-proxy.host"
-      value: "navigation-proxy"
-    - name: "navigation-proxy.port"
+    # Base
+    - name: "base-proxy.host"
+      value: "base-proxy"
+    - name: "base-proxy.port"
       value: "20010"
     # Dashboard
     - name: "dashboard-proxy.host"

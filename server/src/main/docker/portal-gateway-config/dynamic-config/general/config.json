@@ -12,14 +12,14 @@
                 "name": "login",
                 "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
                 "rule": "PathPrefix('/login')",
-                "service": "navigation-proxy"
+                "service": "base-proxy"
             },
 
             {
                 "name": "logout",
                 "middlewares": ["logoutRedirectRegex"],
                 "rule": "PathPrefix('/logout')",
-                "service": "navigation-proxy"
+                "service": "base-proxy"
             },
 
             {
@@ -34,15 +34,15 @@
             },
 
             {
-                "name": "navigation-proxy",
+                "name": "base-proxy",
                 "middlewares": [
-                    "navigationRedirectRegex",
-                    "navigationAuthBearer",
-                    "navigationReplacePath",
+                    "baseRedirectRegex",
+                    "baseAuthBearer",
+                    "baseReplacePath",
                     "sessionTerminate"
                 ],
-                "rule": "PathPrefix('/navigation')",
-                "service": "navigation-proxy"
+                "rule": "PathPrefix('/base')",
+                "service": "base-proxy"
             },
 
             {
@@ -94,7 +94,7 @@
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/login)$",
-                    "replacement": "/navigation/service/redirect"
+                    "replacement": "/base/service/redirect"
                 }
             },
 
@@ -102,19 +102,19 @@
                 "name": "logoutRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^(/logout)$", "replacement": "/navigation/service/logout"
+                    "regex": "^(/logout)$", "replacement": "/base/service/logout"
                 }
             },
 
             {
-                "name": "navigationRedirectRegex",
+                "name": "baseRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+                "options": { "regex": "^(/base)$", "replacement": "$1/" }
             },
             {
-                "name": "navigationReplacePath",
+                "name": "baseReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
+                "options": { "regex": "/base/(.*)", "replacement": "/$1" }
             },
 
             {
@@ -184,9 +184,9 @@
             },
 
             {
-                "name": "navigation-proxy",
+                "name": "base-proxy",
                 "servers": [
-                    { "host": "${navigation-proxy.host}", "port": "${navigation-proxy.port}" }
+                    { "host": "${base-proxy.host}", "port": "${base-proxy.port}" }
                 ]
             },
 
