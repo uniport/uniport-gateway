@@ -41,7 +41,7 @@
                     "baseReplacePath",
                     "sessionTerminate"
                 ],
-                "rule": "PathPrefix('/base')",
+                "rule": "PathPrefix('/navigation')",
                 "service": "base-proxy"
             },
 
@@ -94,7 +94,7 @@
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/login)$",
-                    "replacement": "/base/service/redirect"
+                    "replacement": "/navigation/service/redirect"
                 }
             },
 
@@ -102,19 +102,19 @@
                 "name": "logoutRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^(/logout)$", "replacement": "/base/service/logout"
+                    "regex": "^(/logout)$", "replacement": "/navigation/service/logout"
                 }
             },
 
             {
                 "name": "baseRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/base)$", "replacement": "$1/" }
+                "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
             },
             {
                 "name": "baseReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/base/(.*)", "replacement": "/$1" }
+                "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
             },
 
             {
