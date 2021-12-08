@@ -83,7 +83,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                     .setupCallback(callback)
                     .withScope(OIDC_SCOPE + " " + sessionScope)
                     // https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html
-                    .extraParams(new JsonObject().put(OAUTH2_RESPONSE_MODE, OAUTH2_RESPONSE_MODE_FORM_POST))
+//                    .extraParams(new JsonObject().put(OAUTH2_RESPONSE_MODE, OAUTH2_RESPONSE_MODE_FORM_POST))
                     // https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
                     .pkceVerifierLength(43);
 
@@ -99,7 +99,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     protected Route createCallbackRoute(Router router, String sessionScope, OAuth2Auth authProvider) {
-        Route callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
+        Route callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
         // BodyHandler is necessary to support response_mode=form_post
         callback.handler(BodyHandler.create());
         callback.handler(ctx -> {
