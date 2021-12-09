@@ -10,14 +10,14 @@
 
             {
                 "name": "login",
-                "middlewares": ["dashboardOauth2", "loginRedirectRegex_deprecated"],
+                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
                 "rule": "PathPrefix('/login')",
                 "service": "base-proxy"
             },
 
             {
                 "name": "logout",
-                "middlewares": ["logoutRedirectRegex_deprecated"],
+                "middlewares": ["logoutRedirectRegex"],
                 "rule": "PathPrefix('/logout')",
                 "service": "base-proxy"
             },
@@ -110,28 +110,12 @@
                 }
             },
 
-            {
-                "name": "loginRedirectRegex_deprecated",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/login)$",
-                    "replacement": "/navigation/service/redirect"
-                }
-            },
 
             {
                 "name": "logoutRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/logout)$", "replacement": "/base/service/logout"
-                }
-            },
-
-            {
-                "name": "logoutRedirectRegex_deprecated",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/logout)$", "replacement": "/navigation/service/logout"
                 }
             },
 
