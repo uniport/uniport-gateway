@@ -151,6 +151,9 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <from>
+                            <image>${docker.pull.registry}/adoptopenjdk:11-jre</image>
+                        </from>
                         <to>
                             <image>${docker.push.registry}/${docker.image.name}</image>
                             <tags>
