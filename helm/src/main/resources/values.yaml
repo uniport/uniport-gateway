@@ -1,70 +1,9 @@
 helm:
     priority: 10
 
+version: ${project.version}
+
 replicaCount: 1
-
-initContainers:
-    - name: init-portal-iam
-      image: busybox:1.33
-      command:
-          - "sh"
-          - "-c"
-          - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do true; done"
-
-image:
-    registry: ${docker.pull.registry}
-    baseName: ${project.groupId}
-    name: portal-gateway
-    tag: ${project.version}
-    pullPolicy: IfNotPresent
-
-nameOverride: ""
-
-podSecurityContext:
-    enabled: false
-
-containerSecurityContext:
-    enabled: false
-
-livenessProbe:
-    enabled: true
-    httpGet:
-        path: /health
-        port: http
-    initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 20
-    failureThreshold: 6
-    successThreshold: 1
-
-readinessProbe:
-    enabled: true
-    httpGet:
-        path: /health
-        port: http
-    initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 20
-    failureThreshold: 6
-    successThreshold: 1
-
-startupProbe:
-    enabled: true
-    httpGet:
-        path: /health
-        port: http
-    initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 20
-    failureThreshold: 6
-    successThreshold: 1
-
-service:
-    type: ClusterIP
-
-ports:
-    - name: http
-      port: 20000
 
 ingress:
     enabled: true
@@ -76,47 +15,105 @@ ingress:
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
 
-resources: {}
+service:
+    type: ClusterIP
+    ports:
+        - name: http
+          port: 20000
 
-storages: []
+podSecurityContext:
+    enabled: false
 
-env:
-    # HTTP protocol for external access
-    - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
-      value: "http"
-    # HTTP host name for external access
-    - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-      value: "portal.minikube"
-    # HTTP port for external access, must be the same as the exposed port
-    - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-      value: "80"
-    # IAM
-    - name: "portal-iam.host"
-      value: "portal-iam"
-    - name: "portal-iam.port"
-      value: "8080"
-    # Base
-    - name: "base-proxy.host"
-      value: "base-proxy"
-    - name: "base-proxy.port"
-      value: "20010"
-    # Dashboard
-    - name: "dashboard-proxy.host"
-      value: "dashboard-proxy"
-    - name: "dashboard-proxy.port"
-      value: "20020"
-    # Organisation
-    - name: "organisation-proxy.host"
-      value: "organisation-proxy"
-    - name: "organisation-proxy.port"
-      value: "20030"
-    # Document
-    - name: "document-proxy.host"
-      value: "document-proxy"
-    - name: "document-proxy.port"
-      value: "20050"
-    # FileStorage
-    - name: "filestorage-proxy.host"
-      value: "filestorage-proxy"
-    - name: "filestorage-proxy.port"
-      value: "20090"
+initContainers:
+    - name: init-portal-iam
+      image: busybox:1.33
+      command:
+          - "sh"
+          - "-c"
+          - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do true; done"
+
+containers:
+    - name: portal-gateway
+      image:
+          registry: ${docker.pull.registry}
+          baseName: ${project.groupId}
+          name: portal-gateway
+          tag: ${project.version}
+          pullPolicy: IfNotPresent
+      containerSecurityContext:
+          enabled: false
+      ports:
+          - name: http
+            port: 20000
+      resources: {}
+      env:
+          # HTTP protocol for external access
+          - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+            value: "http"
+            # HTTP host name for external access
+          - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+            value: "portal.minikube"
+            # HTTP port for external access, must be the same as the exposed port
+          - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+            value: "80"
+            # IAM
+          - name: "portal-iam.host"
+            value: "portal-iam"
+          - name: "portal-iam.port"
+            value: "8080"
+            # Base
+          - name: "base-proxy.host"
+            value: "base-proxy"
+          - name: "base-proxy.port"
+            value: "20010"
+            # Dashboard
+          - name: "dashboard-proxy.host"
+            value: "dashboard-proxy"
+          - name: "dashboard-proxy.port"
+            value: "20020"
+            # Organisation
+          - name: "organisation-proxy.host"
+            value: "organisation-proxy"
+          - name: "organisation-proxy.port"
+            value: "20030"
+            # Document
+          - name: "document-proxy.host"
+            value: "document-proxy"
+          - name: "document-proxy.port"
+            value: "20050"
+            # FileStorage
+          - name: "filestorage-proxy.host"
+            value: "filestorage-proxy"
+          - name: "filestorage-proxy.port"
+            value: "20090"
+      storages: []
+      livenessProbe:
+          enabled: true
+          httpGet:
+              path: /health
+              port: http
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 20
+          failureThreshold: 6
+          successThreshold: 1
+      readinessProbe:
+          enabled: true
+          httpGet:
+              path: /health
+              port: http
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 20
+          failureThreshold: 6
+          successThreshold: 1
+      startupProbe:
+      enabled: true
+      httpGet:
+          path: /health
+          port: http
+      initialDelaySeconds: 10
+      timeoutSeconds: 1
+      periodSeconds: 20
+      failureThreshold: 6
+      successThreshold: 1
