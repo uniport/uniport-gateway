@@ -1,6 +1,3 @@
-helm:
-    priority: 10
-
 version: ${project.version}
 
 replicaCount: 1
