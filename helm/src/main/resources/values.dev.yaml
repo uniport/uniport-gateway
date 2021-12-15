@@ -1,57 +1,57 @@
 global:
-    imagePullSecrets:
-        - name: inventage-nexus-registry
+  imagePullSecrets:
+    - name: inventage-nexus-registry
 
 ports:
-    - name: http
-      port: 20000
+  - name: http
+    port: 20000
 
 ingress:
-    host: ips.inventage.dev
-    port: 20000
-    className: nginx
-    annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-    tls:
-        enabled: true
+  host: ips.inventage.dev
+  port: 20000
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+    enabled: true
 
 env:
-    # HTTP protocol for external access
-    - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
-      value: "https"
-    # HTTP host name for external access
-    - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-      value: "ips.inventage.dev"
-    # HTTP port for external access, must be the same as the exposed port
-    - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-      value: "443"
-    # IAM
-    - name: "portal-iam.host"
-      value: "portal-iam"
-    - name: "portal-iam.port"
-      value: "8080"
-    # Base
-    - name: "base-proxy.host"
-      value: "base-proxy"
-    - name: "base-proxy.port"
-      value: "20010"
-    # Dashboard
-    - name: "dashboard-proxy.host"
-      value: "dashboard-proxy"
-    - name: "dashboard-proxy.port"
-      value: "20020"
-    # Organisation
-    - name: "organisation-proxy.host"
-      value: "organisation-proxy"
-    - name: "organisation-proxy.port"
-      value: "20030"
-    # Document
-    - name: "document-proxy.host"
-      value: "document-proxy"
-    - name: "document-proxy.port"
-      value: "20050"
-    # FileStorage
-    - name: "filestorage-proxy.host"
-      value: "filestorage-proxy"
-    - name: "filestorage-proxy.port"
-      value: "20090"
+  # HTTP protocol for external access
+  - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+    value: "https"
+  # HTTP host name for external access
+  - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+    value: "ips.inventage.dev"
+  # HTTP port for external access, must be the same as the exposed port
+  - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+    value: "443"
+  # IAM
+  - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
+    value: "portal-iam"
+  - name: "portal-iam.port"
+    value: "8080"
+  # Base
+  - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
+    value: "base-proxy"
+  - name: "base-proxy.port"
+    value: "20010"
+  # Dashboard
+  - name: "PORTAL_GATEWAY_DASHBOARD_PROXY_HOST"
+    value: "dashboard-proxy"
+  - name: "dashboard-proxy.port"
+    value: "20020"
+  # Organisation
+  - name: "PORTAL_GATEWAY_ORGANISATION_PROXY_HOST"
+    value: "organisation-proxy"
+  - name: "organisation-proxy.port"
+    value: "20030"
+  # Document
+  - name: "PORTAL_GATEWAY_DOCUMENT_PROXY_HOST"
+    value: "document-proxy"
+  - name: "document-proxy.port"
+    value: "20050"
+  # FileStorage
+  - name: "PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST"
+    value: "filestorage-proxy"
+  - name: "filestorage-proxy.port"
+    value: "20090"

@@ -33,7 +33,7 @@ containers:
           registry: ${docker.pull.registry}
           baseName: ${project.groupId}
           name: portal-gateway
-          tag: ${project.version}
+          tag: 2.8.0-202112141623-2-2f3bf3a
           pullPolicy: IfNotPresent
       containerSecurityContext:
           enabled: false
@@ -52,35 +52,23 @@ containers:
           - name: "PORTAL_GATEWAY_PUBLIC_PORT"
             value: "80"
             # IAM
-          - name: "portal-iam.host"
+          - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
             value: "portal-iam"
-          - name: "portal-iam.port"
-            value: "8080"
             # Base
-          - name: "base-proxy.host"
+          - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
             value: "base-proxy"
-          - name: "base-proxy.port"
-            value: "20010"
             # Dashboard
-          - name: "dashboard-proxy.host"
+          - name: "PORTAL_GATEWAY_DASHBOARD_PROXY_HOST"
             value: "dashboard-proxy"
-          - name: "dashboard-proxy.port"
-            value: "20020"
             # Organisation
-          - name: "organisation-proxy.host"
+          - name: "PORTAL_GATEWAY_ORGANISATION_PROXY_HOST"
             value: "organisation-proxy"
-          - name: "organisation-proxy.port"
-            value: "20030"
             # Document
-          - name: "document-proxy.host"
+          - name: "PORTAL_GATEWAY_DOCUMENT_PROXY_HOST"
             value: "document-proxy"
-          - name: "document-proxy.port"
-            value: "20050"
             # FileStorage
-          - name: "filestorage-proxy.host"
+          - name: "PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST"
             value: "filestorage-proxy"
-          - name: "filestorage-proxy.port"
-            value: "20090"
       storages: []
       livenessProbe:
           enabled: true

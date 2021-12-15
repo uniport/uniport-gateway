@@ -80,13 +80,13 @@ Für den Start der produktiven Backend Systemen, kann der [Archetype](https://gi
 Zum Beispiel mit einer `artifactId` von `local-portal` kann die `portal-gateway.specific.env` so aussehen:
 
 ```
-portal-iam.host=local-portal-portal-iam
+PORTAL_GATEWAY_PORTAL_IAM_HOST=local-portal-portal-iam
 portal-iam.port=8080
 
-base-proxy.host=local-portal-base-proxy
-dashboard-proxy.host=local-portal-dashboard-proxy
-organisation-proxy.host=local-portal-organisation-proxy
-document-proxy.host=local-portal-document-proxy
+PORTAL_GATEWAY_BASE_PROXY_HOST=local-portal-base-proxy
+PORTAL_GATEWAY_DASHBOARD_PROXY_HOST=local-portal-dashboard-proxy
+PORTAL_GATEWAY_ORGANISATION_PROXY_HOST=local-portal-organisation-proxy
+PORTAL_GATEWAY_DOCUMENT_PROXY_HOST=local-portal-document-proxy
 ```
 
 ## Visulisierungen

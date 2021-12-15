@@ -110,12 +110,12 @@
                 }
             },
 
-
             {
                 "name": "logoutRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^(/logout)$", "replacement": "/base/service/logout"
+                    "regex": "^(/logout)$",
+                    "replacement": "/base/service/logout"
                 }
             },
 
@@ -188,7 +188,10 @@
             {
                 "name": "filestorageReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/filestorage/(.*)", "replacement": "/$1" }
+                "options": {
+                    "regex": "/filestorage/(.*)",
+                    "replacement": "/$1"
+                }
             },
             {
                 "name": "sessionTerminate",
@@ -203,32 +206,51 @@
             {
                 "name": "dashboard-proxy",
                 "servers": [
-                    { "host": "${dashboard-proxy.host}", "port": "${dashboard-proxy.port}" }
+                    {
+                        "host": "${PORTAL_GATEWAY_DASHBOARD_PROXY_HOST}",
+                        "port": "20020"
+                    }
                 ]
             },
 
             {
                 "name": "base-proxy",
                 "servers": [
-                    { "host": "${base-proxy.host}", "port": "${base-proxy.port}" }
+                    {
+                        "host": "${PORTAL_GATEWAY_BASE_PROXY_HOST}",
+                        "port": "20010"
+                    }
                 ]
             },
 
             {
                 "name": "organisation-proxy",
                 "servers": [
-                    { "host": "${organisation-proxy.host}", "port": "${organisation-proxy.port}" }
+                    {
+                        "host": "${PORTAL_GATEWAY_ORGANISATION_PROXY_HOST}",
+                        "port": "20030"
+                    }
                 ]
             },
 
             {
                 "name": "document-proxy",
-                "servers": [{ "host": "${document-proxy.host}", "port": "${document-proxy.port}" }]
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_DOCUMENT_PROXY_HOST}",
+                        "port": "20050"
+                    }
+                ]
             },
 
             {
                 "name": "filestorage-proxy",
-                "servers": [{ "host": "${filestorage-proxy.host}", "port": "${filestorage-proxy.port}" }]
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST}",
+                        "port": "20090"
+                    }
+                ]
             }
         ]
     }
