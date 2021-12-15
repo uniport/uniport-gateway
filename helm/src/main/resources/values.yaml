@@ -7,10 +7,8 @@ ingress:
     host: portal
     port: 20000
     className: ""
-    annotations:
-        {}
-        # kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
+    annotations: {}
+    defaultRule: enabled
 
 service:
     type: ClusterIP
