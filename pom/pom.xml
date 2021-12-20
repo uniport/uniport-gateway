@@ -21,7 +21,7 @@
 
         <jib.goal>build</jib.goal>
 
-        <portal-helm-chart-library.version>2.0.0-202112201136-76-06d7129</portal-helm-chart-library.version>
+        <portal-helm-chart-library.version>2.0.0-202112201148-77-e97ab41</portal-helm-chart-library.version>
     </properties>
 
     <dependencyManagement>
