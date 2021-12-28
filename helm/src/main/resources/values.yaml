@@ -56,19 +56,19 @@ containers:
             value: "portal-iam"
             # Base
           - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
-            value: "base-proxy"
+            value: "base"
             # Dashboard
           - name: "PORTAL_GATEWAY_DASHBOARD_PROXY_HOST"
-            value: "dashboard-proxy"
+            value: "dashboard"
             # Organisation
           - name: "PORTAL_GATEWAY_ORGANISATION_PROXY_HOST"
-            value: "organisation-proxy"
+            value: "organisation"
             # Document
           - name: "PORTAL_GATEWAY_DOCUMENT_PROXY_HOST"
-            value: "document-proxy"
+            value: "document"
             # FileStorage
           - name: "PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST"
-            value: "filestorage-proxy"
+            value: "filestorage"
       storages: []
       livenessProbe:
           enabled: true
