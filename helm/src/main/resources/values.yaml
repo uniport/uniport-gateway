@@ -33,7 +33,7 @@ containers:
           registry: ${docker.pull.registry}
           baseName: ${project.groupId}
           name: portal-gateway
-          tag: 2.8.0-202112141623-2-2f3bf3a
+          tag: ${project.version}
           pullPolicy: IfNotPresent
       containerSecurityContext:
           enabled: false
