@@ -27,7 +27,7 @@ pipeline {
         NEXUS2_CREDS = credentials('inventage-ierp')
         CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
-        BUILD_STATUS_EMAIL_RECIPIENTS = 'esteiner@inventage.com fbuetler@inventage.com stefan@incos.media'
+        BUILD_STATUS_EMAIL_RECIPIENTS = 'inventage-portal-devops@inventage.com'
         DEV_DEPLOYMENT_HOST = 'ips@ardbeg.inventage.com'
         DEV_DEPLOYMENT_DIR = '/home/ips/docker/portal-gateway'
         DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
