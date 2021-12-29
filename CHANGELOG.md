@@ -9,9 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Created helm values for minikube environment
+
 ### Changed
 
 - **BREAKING** Switched from `navigation` microservice to `base`. You will need to have at least version `1.0.0` of the base microservice deployed if you want to use this version as a portal proxy.
+- Updgraded portal-helm-chart-library
+- Pulling images from Nexus instead of Docker Hub
+- Use SCREAMING_SNAKE_CASE for environment variables
 
 ## [2.7.0]-202112080733-264-ce3614d  - 2021-12-08
 
