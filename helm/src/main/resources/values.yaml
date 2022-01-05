@@ -76,7 +76,11 @@ ingress:
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
 
-resources: {}
+resources:
+  requests:
+    memory: "200Mi"
+  limits:
+    memory: "500Mi"
 
 storages: []
 
