@@ -56,3 +56,9 @@ env:
       value: "filestorage-proxy"
     - name: "filestorage-proxy.port"
       value: "20090"
+
+resources:
+    requests:
+        memory: "200Mi"
+    limits:
+        memory: "500Mi"
