@@ -45,7 +45,7 @@ public class ProxyMiddleware implements Middleware {
         // * or have to be made on the response of the forwarded request
         HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
 
-        LOGGER.debug("handle: Sending request to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
+        LOGGER.debug("handle: sending to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
         httpProxy.handle(request);
     }
 
