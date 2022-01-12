@@ -22,8 +22,9 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
         final long start = System.currentTimeMillis();
         LOGGER.debug("handle: incoming uri '{}' for request '{}'", routingContext.request().uri(),
                 routingContext.request().hashCode());
+        routingContext.addBodyEndHandler(v ->
+                LOGGER.debug("handle: outgoing uri '{}' for request '{}' with status '{}' in '{}' ms", routingContext.request().uri(),
+                        routingContext.request().hashCode(), routingContext.response().getStatusCode(), System.currentTimeMillis() - start));
         routingContext.next();
-        LOGGER.debug("handle: outgoing uri '{}' for request '{}' with status '{}' in '{}' ms", routingContext.request().uri(),
-                routingContext.request().hashCode(), routingContext.response().getStatusCode(), System.currentTimeMillis() - start);
     }
 }
