@@ -1,20 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import java.net.URI;
-import java.util.Base64;
-
 import com.inventage.portal.gateway.core.session.SessionAdapter;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.reactiverse.contextual.logging.ContextualData;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -27,6 +18,12 @@ import io.vertx.ext.auth.oauth2.providers.KeycloakAuth;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 
 import static com.inventage.portal.gateway.core.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
 
@@ -129,19 +126,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     protected String authorizationPath(String publicUrl, URI keycloakAuthorizationEndpoint) {
         return String.format("%s%s", publicUrl, keycloakAuthorizationEndpoint.getPath());
-    }
-
-    private JsonObject getAccessToken(User user) {
-        String rawAccessToken = user.principal().getString("access_token");
-        return decodeJWT(rawAccessToken);
-    }
-
-    private JsonObject decodeJWT(String jwt) {
-        String[] chunks = jwt.split("\\.");
-        Base64.Decoder decoder = Base64.getDecoder();
-        String header = new String(decoder.decode(chunks[0]));
-        String payload = new String(decoder.decode(chunks[1]));
-        return new JsonObject(payload);
     }
 
 }
