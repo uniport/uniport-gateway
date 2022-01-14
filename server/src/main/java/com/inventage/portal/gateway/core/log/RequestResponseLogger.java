@@ -13,6 +13,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class RequestResponseLogger implements Handler<RoutingContext> {
 
+    public static final String HTTP_HEADER_REQUEST_ID = "ips-request-id";
     public static final String CONTEXTUAL_DATA_REQUEST_ID = "requestId";
     public static final String CONTEXTUAL_DATA_SESSION_ID = "sessionId";
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
@@ -23,15 +24,23 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        ContextualData.put(CONTEXTUAL_DATA_REQUEST_ID, String.valueOf(routingContext.request().hashCode()));
+        final String request_id = String.valueOf(routingContext.request().hashCode());
+        // add the ips-request-id to the HTTP header, if it is not yet set
+        if (!routingContext.request().headers().contains(HTTP_HEADER_REQUEST_ID)) {
+            routingContext.request().headers().add(HTTP_HEADER_REQUEST_ID, request_id);
+        }
+        ContextualData.put(CONTEXTUAL_DATA_REQUEST_ID, request_id);
         ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(routingContext.session()));
         final long start = System.currentTimeMillis();
         LOGGER.debug("handle: incoming uri '{}'", routingContext.request().uri());
+        routingContext.addHeadersEndHandler(v ->
+                routingContext.response().putHeader(HTTP_HEADER_REQUEST_ID, request_id));
         routingContext.addBodyEndHandler(v ->
                 LOGGER.debug("handle: outgoing uri '{}' with status '{}' in '{}' ms",
-                        routingContext.request().uri(),
-                        routingContext.response().getStatusCode(),
-                        System.currentTimeMillis() - start));
+                    routingContext.request().uri(),
+                    routingContext.response().getStatusCode(),
+                    System.currentTimeMillis() - start)
+        );
         routingContext.next();
     }
 

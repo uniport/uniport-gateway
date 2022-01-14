@@ -6,6 +6,8 @@ import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.log.RequestResponseLogger;
 
+import com.inventage.portal.gateway.core.session.ReplacedSessionCookieDetectionHandler;
+import com.inventage.portal.gateway.core.session.ResponseSessionCookieHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +75,7 @@ public class Entrypoint {
                 SESSION_COOKIE_MIN_LENGTH);
         // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
         router = Router.router(vertx);
+        router.route().handler(new ResponseSessionCookieHandler(SESSION_COOKIE_NAME));
         router.route()
                 .handler(SessionHandler.create(LocalSessionStore.create(vertx))
                         .setSessionCookieName(SESSION_COOKIE_NAME)
@@ -82,6 +85,7 @@ public class Entrypoint {
                         .setMinLength(SESSION_COOKIE_MIN_LENGTH)
                         .setNagHttps(true));
         router.route().handler(RequestResponseLogger.create());
+        router.route().handler(ReplacedSessionCookieDetectionHandler.create());
         return router;
     }
 
