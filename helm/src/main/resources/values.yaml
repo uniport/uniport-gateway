@@ -26,83 +26,83 @@ resources:
         memory: "500Mi"
 
 initContainers:
-    - name: init-portal-iam
-      image: busybox:1.33
-      command:
-          - "sh"
-          - "-c"
-          - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do true; done"
+    init-portal-iam:
+        image: busybox:1.33
+        command:
+            - "sh"
+            - "-c"
+            - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do true; done"
 
 containers:
-    - name: portal-gateway
-      image:
-          registry: ${docker.pull.registry}
-          baseName: ${project.groupId}
-          name: portal-gateway
-          tag: ${project.version}
-          pullPolicy: IfNotPresent
-      containerSecurityContext:
-          enabled: false
-      ports:
-          - name: http
-            port: 20000
-      resources: {}
-      env:
-          # HTTP protocol for external access
-          - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
-            value: "http"
-            # HTTP host name for external access
-          - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-            value: "portal.minikube"
-            # HTTP port for external access, must be the same as the exposed port
-          - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-            value: "80"
-            # IAM
-          - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
-            value: "portal-iam"
-            # Base
-          - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
-            value: "base"
-            # Dashboard
-          - name: "PORTAL_GATEWAY_DASHBOARD_PROXY_HOST"
-            value: "dashboard"
-            # Organisation
-          - name: "PORTAL_GATEWAY_ORGANISATION_PROXY_HOST"
-            value: "organisation"
-            # Document
-          - name: "PORTAL_GATEWAY_DOCUMENT_PROXY_HOST"
-            value: "document"
-            # FileStorage
-          - name: "PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST"
-            value: "filestorage"
-      storages: []
-      livenessProbe:
-          enabled: true
-          httpGet:
-              path: /health
-              port: http
-          initialDelaySeconds: 10
-          timeoutSeconds: 1
-          periodSeconds: 20
-          failureThreshold: 6
-          successThreshold: 1
-      readinessProbe:
-          enabled: true
-          httpGet:
-              path: /health
-              port: http
-          initialDelaySeconds: 10
-          timeoutSeconds: 1
-          periodSeconds: 20
-          failureThreshold: 6
-          successThreshold: 1
-      startupProbe:
-      enabled: true
-      httpGet:
-          path: /health
-          port: http
-      initialDelaySeconds: 10
-      timeoutSeconds: 1
-      periodSeconds: 20
-      failureThreshold: 6
-      successThreshold: 1
+    portal-gateway:
+        image:
+            registry: ${docker.pull.registry}
+            baseName: ${project.groupId}
+            name: portal-gateway
+            tag: ${project.version}
+            pullPolicy: IfNotPresent
+        containerSecurityContext:
+            enabled: false
+        ports:
+            - name: http
+              port: 20000
+        resources: {}
+        env:
+            # HTTP protocol for external access
+            - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+              value: "http"
+              # HTTP host name for external access
+            - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+              value: "portal.minikube"
+              # HTTP port for external access, must be the same as the exposed port
+            - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+              value: "80"
+              # IAM
+            - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
+              value: "portal-iam"
+              # Base
+            - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
+              value: "base"
+              # Dashboard
+            - name: "PORTAL_GATEWAY_DASHBOARD_PROXY_HOST"
+              value: "dashboard"
+              # Organisation
+            - name: "PORTAL_GATEWAY_ORGANISATION_PROXY_HOST"
+              value: "organisation"
+              # Document
+            - name: "PORTAL_GATEWAY_DOCUMENT_PROXY_HOST"
+              value: "document"
+              # FileStorage
+            - name: "PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST"
+              value: "filestorage"
+        storages: []
+        livenessProbe:
+            enabled: true
+            httpGet:
+                path: /health
+                port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 20
+            failureThreshold: 6
+            successThreshold: 1
+        readinessProbe:
+            enabled: true
+            httpGet:
+                path: /health
+                port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 20
+            failureThreshold: 6
+            successThreshold: 1
+        startupProbe:
+        enabled: true
+        httpGet:
+            path: /health
+            port: http
+        initialDelaySeconds: 10
+        timeoutSeconds: 1
+        periodSeconds: 20
+        failureThreshold: 6
+        successThreshold: 1

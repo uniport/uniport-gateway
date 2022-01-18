@@ -10,13 +10,15 @@ ingress:
     tls:
         enabled: true
 
-envOverride:
-    # HTTP protocol for external access
-    - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
-      value: "https"
-    # HTTP host name for external access
-    - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-      value: "ips.inventage.dev"
-    # HTTP port for external access, must be the same as the exposed port
-    - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-      value: "443"
+containers:
+    portal-gateway:
+        envOverride:
+            # HTTP protocol for external access
+            - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+              value: "https"
+            # HTTP host name for external access
+            - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+              value: "ips.inventage.dev"
+            # HTTP port for external access, must be the same as the exposed port
+            - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+              value: "443"
