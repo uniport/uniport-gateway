@@ -1,24 +1,21 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
-import java.util.Base64;
-import java.util.Set;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
-
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.Session;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.AccessToken;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.Session;
+import java.util.Base64;
+import java.util.Set;
 
 /**
  * Returns an HTML page with information from the current session if "_session_" is in the requested URL.
@@ -40,10 +37,11 @@ public class ShowSessionContentMiddleware implements Middleware {
 
     // TODO: usage of vert.x templating for HTML generation
     private String getHtml(Session session) {
-        LOGGER.info(session.toString());
         final StringBuffer html = new StringBuffer();
 
         html.append("session ID:\n").append(session.id());
+        html.append("\n");
+        html.append("session last access:\n").append(session.lastAccessed()); // https://www.epochconverter.com/?q=ms
         html.append("\n\n");
 
         final Set<Cookie> storedCookies = session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);

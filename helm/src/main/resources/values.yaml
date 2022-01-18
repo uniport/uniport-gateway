@@ -19,6 +19,12 @@ service:
 podSecurityContext:
     enabled: false
 
+resources:
+    requests:
+        memory: "200Mi"
+    limits:
+        memory: "500Mi"
+
 initContainers:
     - name: init-portal-iam
       image: busybox:1.33

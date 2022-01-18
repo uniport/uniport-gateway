@@ -45,6 +45,12 @@
                 <artifactId>logback-classic</artifactId>
                 <version>1.2.3</version>
             </dependency>
+            <!-- contextual logging (like MDC) -->
+            <dependency>
+                <groupId>io.reactiverse</groupId>
+                <artifactId>reactiverse-contextual-logging</artifactId>
+                <version>1.1.2</version>
+            </dependency>
             <!-- data pump for proxying -->
             <dependency>
                 <groupId>com.inventage.vertx</groupId>
