@@ -74,7 +74,7 @@ public class SessionBagMiddleware implements Middleware {
         if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             return null;
         }
-        LOGGER.debug("loadCookiesFromSessionBag: Cookies in session found. Setting as cookie header.");
+        LOGGER.debug("loadCookiesFromSessionBag: cookies in session found. Setting as cookie header.");
 
         List<String> requestCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE);
         ctx.request().headers().remove(HttpHeaders.COOKIE);
@@ -83,6 +83,7 @@ public class SessionBagMiddleware implements Middleware {
         List<String> encodedStoredCookies = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
+                LOGGER.debug("loadCookiesFromSessionBag: add cookie '{}' to request.", storedCookie.name());
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
@@ -95,6 +96,7 @@ public class SessionBagMiddleware implements Middleware {
         for (String requestCookie : requestCookies) {
             Cookie decodedRequestCookie = ClientCookieDecoder.STRICT.decode(requestCookie);
             if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
+                LOGGER.debug("loadCookiesFromSessionBag: ignoring cookie '{}' from request.", decodedRequestCookie.name());
                 continue;
             }
             cookies = String.join(cookieDelimiter, cookies, requestCookie);
@@ -185,7 +187,7 @@ public class SessionBagMiddleware implements Middleware {
             }
             if (isWhithelisted(decodedCookieToSet)) {
                 // we delegate all logic for whitelisted cookies to the user agent
-                LOGGER.debug("storeCookiesInSessionBag: Pass whitelisted cookie to user agent: '{}'", cookieToSet);
+                LOGGER.debug("storeCookiesInSessionBag: pass whitelisted cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
             }
@@ -203,7 +205,7 @@ public class SessionBagMiddleware implements Middleware {
     */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
         if (newCookie.name() == null) {
-            LOGGER.warn("updateSessionBag: Ignoring cookie without a name");
+            LOGGER.warn("updateSessionBag: ignoring cookie without a name");
             return;
         }
         if (newCookie.path() == null) {
@@ -215,16 +217,16 @@ public class SessionBagMiddleware implements Middleware {
             boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
-                LOGGER.debug("updateSessionBag: Removing expired cookie '{}'", newCookie.name());
+                LOGGER.debug("updateSessionBag: removing expired cookie '{}' from session bag", newCookie.name());
                 return;
             }
         }
 
         if (newCookie.maxAge() == 0L) {
-            LOGGER.debug("updateSessionBag: Ignoring expired cookie");
+            LOGGER.debug("updateSessionBag: ignoring expired cookie '{}'", newCookie.name());
             return;
         }
-        LOGGER.debug("updateSessionBag: {} cookie '{}'", foundCookie != null ? "Updating" : "Adding", newCookie.name());
+        LOGGER.debug("updateSessionBag: {} cookie '{}' to session bag.", foundCookie != null ? "updating" : "adding", newCookie.name());
         storedCookies.add(newCookie);
     }
 
