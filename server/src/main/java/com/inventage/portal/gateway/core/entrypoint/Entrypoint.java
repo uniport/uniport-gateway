@@ -64,7 +64,7 @@ public class Entrypoint {
         }
 
         if (this.sessionDisabled) {
-            LOGGER.info("router: session managament is disabled");
+            LOGGER.info("router: session management is disabled");
             return router;
         }
         LOGGER.info(

@@ -83,11 +83,8 @@ public class SessionBagMiddleware implements Middleware {
         List<String> encodedStoredCookies = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
-                LOGGER.debug("loadCookiesFromSessionBag: add cookie '{}' to request.", storedCookie.name());
+                LOGGER.debug("loadCookiesFromSessionBag: add cookie '{}' to request", storedCookie.name());
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
-            }
-            else {
-                LOGGER.debug("loadCookiesFromSessionBag: cookie '{}' won't be added", storedCookie.name());
             }
         }
 
@@ -109,10 +106,18 @@ public class SessionBagMiddleware implements Middleware {
     }
 
     private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
-        return matchesSSL(cookie, isSSL) && matchesPath(cookie, path);
+        if (matchesSSL(cookie, isSSL) && matchesPath(cookie, path)) {
+            return true;
+        }
+        LOGGER.debug("cookieMatchesRequest: ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(), matchesPath(cookie, path), matchesSSL(cookie, isSSL));
+        return false;
     }
 
     private boolean matchesSSL(Cookie cookie, boolean isSSL) {
+        // hardcoded to true, necessary for Keycloak login flow, otherwise special handling for Keycloak
+        // cookies `AUTH_SESSION` and `AUTH_SESSION_LEGACY` is required. Keycloak seems to set the secure
+        // flag on both cookies if the request is forwarded via HTTPS, even if the Portal-Gateway --> Keycloak
+        // connection is HTTP.
         return true;
     }
 
