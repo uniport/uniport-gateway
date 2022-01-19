@@ -29,3 +29,6 @@ release.properties
 # env file for a specific environment
 /docker-compose/src/main/resources/portal-gateway.specific.env
 /docker-compose/src/main/resources/secrets.env
+
+# ASDF
+.tool-versions

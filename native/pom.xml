@@ -14,7 +14,6 @@
 
     <properties>
         <docker.context>${project.build.directory}/docker-context</docker.context>
-        <dockerfile>${docker.context}/Dockerfile</dockerfile>
         <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
     </properties>
 
@@ -76,11 +75,10 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
                 <configuration>
-                    <tag>${project.version}-native</tag>
-                    <contextDirectory>${docker.context}</contextDirectory>
+                    <tagName>${project.version}-native</tagName>
                 </configuration>
             </plugin>
         </plugins>
