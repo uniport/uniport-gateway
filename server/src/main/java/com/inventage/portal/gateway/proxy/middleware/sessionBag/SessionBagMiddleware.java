@@ -56,9 +56,9 @@ public class SessionBagMiddleware implements Middleware {
         }
 
         // on request: set cookie from session bag if present
-        String cookies = loadCookiesFromSessionBag(ctx);
-        if (cookies != null && !cookies.isEmpty()) {
-            ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookies);
+        String cookieHeaderValue = loadCookiesFromSessionBag(ctx);
+        if (cookieHeaderValue != null && !cookieHeaderValue.isEmpty()) {
+            ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookieHeaderValue);
         }
 
         // on response: remove cookies if present and store them in session bag
@@ -86,6 +86,9 @@ public class SessionBagMiddleware implements Middleware {
                 LOGGER.debug("loadCookiesFromSessionBag: add cookie '{}' to request.", storedCookie.name());
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
+            else {
+                LOGGER.debug("loadCookiesFromSessionBag: cookie '{}' won't be added", storedCookie.name());
+            }
         }
 
         // https://github.com/vert-x3/vertx-web/issues/1716
@@ -110,7 +113,7 @@ public class SessionBagMiddleware implements Middleware {
     }
 
     private boolean matchesSSL(Cookie cookie, boolean isSSL) {
-        return cookie.isSecure() == isSSL;
+        return true;
     }
 
     /*
