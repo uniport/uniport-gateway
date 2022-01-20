@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.inventage.portal.gateway</groupId>
@@ -9,7 +10,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
+        <!-- because we deploy via nexus-staging-maven-plugin -->
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <modules>
