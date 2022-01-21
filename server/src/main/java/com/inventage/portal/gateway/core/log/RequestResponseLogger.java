@@ -2,11 +2,10 @@ package com.inventage.portal.gateway.core.log;
 
 import com.inventage.portal.gateway.core.session.SessionAdapter;
 import io.reactiverse.contextual.logging.ContextualData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
@@ -38,7 +37,7 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
         routingContext.addBodyEndHandler(v -> {
             // More logging when response is >= 400
             if (routingContext.response().getStatusCode() >= 400) {
-                LOGGER.debug("handle: outgoing uri '{}' with status '{}' (message: '{}') in '{}' ms",
+                LOGGER.debug("handle: outgoing uri '{}' with status '{}' and message: '{}' in '{}' ms",
                         routingContext.request().uri(),
                         routingContext.response().getStatusCode(),
                         routingContext.response().getStatusMessage(),
