@@ -166,7 +166,8 @@
                         </args>
                         <jvmFlags>
                             <jvmFlag>-Xdebug</jvmFlag>
-                            <jvmFlag>-Xrunjdwp:transport=dt_socket,address=0.0.0.0:20099,server=y,suspend=n</jvmFlag>
+<!--                            <jvmFlag>-Xrunjdwp:transport=dt_socket,address=0.0.0.0:20099,server=y,suspend=n</jvmFlag>-->
+                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20099,server=y,suspend=n</jvmFlag>
                         </jvmFlags>
                     </container>
                 </configuration>
