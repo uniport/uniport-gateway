@@ -5,6 +5,8 @@ global:
 ports:
     - name: http
       port: 20000
+    - name: http-debug
+      port: 20099
 
 ingress:
     host: ips.inventage.dev
