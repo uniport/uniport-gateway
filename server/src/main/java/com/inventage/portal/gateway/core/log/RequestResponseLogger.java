@@ -35,12 +35,22 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
         LOGGER.debug("handle: incoming uri '{}'", routingContext.request().uri());
         routingContext.addHeadersEndHandler(v ->
                 routingContext.response().putHeader(HTTP_HEADER_REQUEST_ID, request_id));
-        routingContext.addBodyEndHandler(v ->
-                LOGGER.debug("handle: outgoing uri '{}' with status '{}' in '{}' ms",
+        routingContext.addBodyEndHandler(v -> {
+            // More logging when response is >= 400
+            if (routingContext.response().getStatusCode() >= 400) {
+                LOGGER.debug("handle: outgoing uri '{}' with status '{}' (message: '{}') in '{}' ms",
+                        routingContext.request().uri(),
+                        routingContext.response().getStatusCode(),
+                        routingContext.response().getStatusMessage(),
+                        System.currentTimeMillis() - start);
+                return;
+            }
+
+            LOGGER.debug("handle: outgoing uri '{}' with status '{}' in '{}' ms",
                     routingContext.request().uri(),
                     routingContext.response().getStatusCode(),
-                    System.currentTimeMillis() - start)
-        );
+                    System.currentTimeMillis() - start);
+        });
         routingContext.next();
     }
 
