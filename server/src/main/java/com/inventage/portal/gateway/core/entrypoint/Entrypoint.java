@@ -68,7 +68,7 @@ public class Entrypoint {
             return router;
         }
         LOGGER.info(
-                "router: session managament is enabled with\n" + "session cookie name: '{}'\n"
+                "router: session management is enabled with\n" + "session cookie name: '{}'\n"
                         + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
                         + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
                 SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
