@@ -95,7 +95,10 @@ public class SessionBagMiddleware implements Middleware {
         // stored cookie have presedence to avoid cookie injection
         for (String requestCookie : requestCookies) {
             Cookie decodedRequestCookie = ClientCookieDecoder.STRICT.decode(requestCookie);
-            if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
+            if (decodedRequestCookie == null) {
+                LOGGER.warn("loadCookiesFromSessionBag: could not decode cookie '{}' from request.", requestCookie);
+                continue;
+            } else if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
                 LOGGER.debug("loadCookiesFromSessionBag: ignoring cookie '{}' from request.", decodedRequestCookie.name());
                 continue;
             }
