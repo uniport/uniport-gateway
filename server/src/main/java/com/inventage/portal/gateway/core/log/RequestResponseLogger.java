@@ -13,7 +13,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class RequestResponseLogger implements Handler<RoutingContext> {
 
-    public static final String HTTP_HEADER_REQUEST_ID = "ips-request-id";
+    public static final String HTTP_HEADER_REQUEST_ID = "X-IPS-Request-Id";
     public static final String CONTEXTUAL_DATA_REQUEST_ID = "requestId";
     public static final String CONTEXTUAL_DATA_SESSION_ID = "sessionId";
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
