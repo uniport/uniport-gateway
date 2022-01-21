@@ -1,18 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
@@ -21,6 +11,14 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
@@ -34,6 +32,8 @@ import io.vertx.ext.web.RoutingContext;
 public class SessionBagMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
+    // https://github.com/vert-x3/vertx-web/issues/1716
+    private static final String cookieDelimiter = "; "; // RFC 6265 4.2.1
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
@@ -76,10 +76,27 @@ public class SessionBagMiddleware implements Middleware {
         }
         LOGGER.debug("loadCookiesFromSessionBag: cookies in session found. Setting as cookie header.");
 
-        List<String> requestCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE);
+        // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
+        final Set<Cookie> requestCookies = CookieUtil.fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
+        String cookieHeaderValue = encodeMatchingCookies(storedCookies, ctx);
+
+        // check for conflicting request and stored cookies
+        // stored cookie have precedence to avoid cookie injection
+        for (Cookie requestCookie : requestCookies) {
+            if (this.containsCookie(storedCookies, requestCookie, ctx.request().path()) != null) {
+                LOGGER.debug("loadCookiesFromSessionBag: ignoring cookie '{}' from request.", requestCookie.name());
+                continue;
+            }
+            cookieHeaderValue = String.join(cookieDelimiter, cookieHeaderValue, requestCookie.toString());
+        }
+
+        return cookieHeaderValue;
+    }
+
+    private String encodeMatchingCookies(Set<Cookie> storedCookies, RoutingContext ctx) {
         List<String> encodedStoredCookies = new ArrayList<String>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
@@ -87,25 +104,7 @@ public class SessionBagMiddleware implements Middleware {
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
-
-        // https://github.com/vert-x3/vertx-web/issues/1716
-        String cookieDelimiter = "; "; // RFC 6265 4.2.1
-        String cookies = String.join(cookieDelimiter, encodedStoredCookies);
-        // check for conflicting request and stored cookies
-        // stored cookie have presedence to avoid cookie injection
-        for (String requestCookie : requestCookies) {
-            Cookie decodedRequestCookie = ClientCookieDecoder.STRICT.decode(requestCookie);
-            if (decodedRequestCookie == null) {
-                LOGGER.warn("loadCookiesFromSessionBag: could not decode cookie '{}' from request.", requestCookie);
-                continue;
-            } else if (this.containsCookie(storedCookies, decodedRequestCookie) != null) {
-                LOGGER.debug("loadCookiesFromSessionBag: ignoring cookie '{}' from request.", decodedRequestCookie.name());
-                continue;
-            }
-            cookies = String.join(cookieDelimiter, cookies, requestCookie);
-        }
-
-        return cookies;
+        return String.join(cookieDelimiter, encodedStoredCookies);
     }
 
     private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
@@ -250,6 +249,15 @@ public class SessionBagMiddleware implements Middleware {
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
         for (Cookie c : set) {
             if (c.name().equals(cookie.name()) && c.path().equals(cookie.path())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private Cookie containsCookie(Set<Cookie> set, Cookie cookie, String path) {
+        for (Cookie c : set) {
+            if (c.name().equals(cookie.name()) && path.startsWith(c.path())) {
                 return c;
             }
         }

@@ -140,6 +140,7 @@
                 </executions>
             </plugin>
             <plugin>
+                <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
