@@ -164,6 +164,10 @@
                             <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
                             <arg>-cluster</arg>
                         </args>
+                        <jvmFlags>
+                            <jvmFlag>-Xdebug</jvmFlag>
+                            <jvmFlag>-Xrunjdwp:transport=dt_socket,address=0.0.0.0:20099,server=y,suspend=n</jvmFlag>
+                        </jvmFlags>
                     </container>
                 </configuration>
             </plugin>
