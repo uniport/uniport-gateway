@@ -3,6 +3,9 @@ RUN gu install native-image
 
 WORKDIR /workdir
 COPY ${project.artifactId}-${project.version}-fat.jar ./portal-gateway.jar
+# reflection configuration so that logback can use io.reactiverse.contextual.logging.LogbackConverter
+# https://www.graalvm.org/21.3/reference-manual/native-image/Reflection/#manual-configuration
+COPY META-INF/native-image/reflection-config.json ./reflection-config.json
 
 # https://www.graalvm.org/reference-manual/native-image/Options/#options-to-native-image-builder
 RUN native-image \
@@ -20,6 +23,7 @@ RUN native-image \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
     -H:+ReportExceptionStackTraces \
     -H:IncludeResources='.*/vertx/.*$' \
+    -H:ReflectionConfigurationFiles=reflection-config.json \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar

@@ -46,6 +46,18 @@
             },
 
             {
+                "name": "base-proxy_deprecated",
+                "middlewares": [
+                    "baseRedirectRegex_deprecated",
+                    "baseAuthBearer",
+                    "baseReplacePath_deprecated",
+                    "sessionTerminate"
+                ],
+                "rule": "PathPrefix('/navigation')",
+                "service": "base-proxy"
+            },
+
+            {
                 "name": "organisation-proxy",
                 "middlewares": [
                     "organisationRedirectRegex",
@@ -116,6 +128,17 @@
                 "name": "baseReplacePath",
                 "type": "replacePathRegex",
                 "options": { "regex": "/base/(.*)", "replacement": "/$1" }
+            },
+
+            {
+                "name": "baseRedirectRegex_deprecated",
+                "type": "redirectRegex",
+                "options": { "regex": "^(/navigation)$", "replacement": "$1/" }
+            },
+            {
+                "name": "baseReplacePath_deprecated",
+                "type": "replacePathRegex",
+                "options": { "regex": "/navigation/(.*)", "replacement": "/$1" }
             },
 
             {

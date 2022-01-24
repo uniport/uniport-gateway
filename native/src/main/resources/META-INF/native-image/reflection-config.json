@@ -1,0 +1,11 @@
+[
+    {
+        "name" : "io.reactiverse.contextual.logging.LogbackConverter",
+        "allDeclaredConstructors" : true,
+        "allPublicConstructors" : true,
+        "allDeclaredMethods" : true,
+        "allPublicMethods" : true,
+        "allDeclaredClasses" : true,
+        "allPublicClasses" : true
+    }
+]

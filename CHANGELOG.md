@@ -15,10 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING** Switched from `navigation` microservice to `base`. You will need to have at least version `1.0.0` of the base microservice deployed if you want to use this version as a portal proxy. All `/navigation` paths have been replaced by `/base`.
+- **BREAKING** Switched from `navigation` microservice to `base`. You will need to have at least version `1.0.0` of the base microservice deployed if you want to use this version as a portal proxy.
 - Updgraded portal-helm-chart-library
 - Pulling images from Nexus instead of Docker Hub
 - Use SCREAMING_SNAKE_CASE for environment variables
+- Replaced `com.spotify.dockerfile-maven-plugin` with `io.fabric8.docker-maven-plugin` for building docker images ([PORTAL-571](https://issue.inventage.com/browse/PORTAL-571)).
 
 ### Added
 

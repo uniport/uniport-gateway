@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.inventage.portal.gateway</groupId>
@@ -11,11 +12,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.deploy.skip>true</maven.deploy.skip>        <!-- because we deploy via nexus-staging-maven-plugin -->
+        <!-- because we deploy via nexus-staging-maven-plugin -->
+        <maven.deploy.skip>true</maven.deploy.skip>
 
         <docker.image.name>${project.groupId}.${project.artifactId}</docker.image.name>
         <docker.pull.registry>docker-registry.inventage.com:10094</docker.pull.registry>
         <docker.push.registry>docker-registry.inventage.com:10095</docker.push.registry>
+        <docker.verbose>true</docker.verbose>
 
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
 
@@ -169,55 +172,51 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>com.spotify</groupId>
-                    <artifactId>dockerfile-maven-plugin</artifactId>
-                    <version>1.4.13</version>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.38.1</version>
+                    <configuration>
+                        <images>
+                            <image>
+                                <name>${docker.push.registry}/${docker.image.name}</name>
+                                <build>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <contextDir>${docker.context}</contextDir>
+                                    <tags>
+                                        <tag>latest</tag>
+                                        <tag>${project.version}</tag>
+                                    </tags>
+                                    <filter>false</filter>
+                                </build>
+                            </image>
+                        </images>
+                    </configuration>
                     <executions>
+                        <!-- build image -->
                         <execution>
-                            <id>default</id>
-                        </execution>
-                        <execution>
-                            <id>install</id>
+                            <id>build-image</id>
                             <phase>install</phase>
                             <goals>
                                 <goal>build</goal>
                             </goals>
                         </execution>
+                        <!-- tag image -->
                         <execution>
-                            <id>install-latest</id>
+                            <id>tag-image</id>
                             <phase>install</phase>
                             <goals>
                                 <goal>tag</goal>
                             </goals>
-                            <configuration>
-                                <tag>latest</tag>
-                            </configuration>
                         </execution>
+                        <!-- push image -->
                         <execution>
-                            <id>deploy</id>
+                            <id>push-image</id>
                             <phase>deploy</phase>
                             <goals>
                                 <goal>push</goal>
                             </goals>
-                        </execution>
-                        <execution>
-                            <id>deploy-latest</id>
-                            <phase>deploy</phase>
-                            <goals>
-                                <goal>push</goal>
-                            </goals>
-                            <configuration>
-                                <tag>latest</tag>
-                            </configuration>
                         </execution>
                     </executions>
-                    <configuration>
-                        <dockerfile>${dockerfile}</dockerfile>
-                        <repository>${docker.push.registry}/${docker.image.name}</repository>
-                        <tag>${project.version}</tag>
-                        <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-                        <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -229,9 +228,11 @@
                 <version>1.6.5</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>inventage-portal-staging</serverId>                    <!-- auch im Jenkins Config File "settings.xml" referenziert -->
+                    <!-- auch im Jenkins Config File "settings.xml" referenziert -->
+                    <serverId>inventage-portal-staging</serverId>
                     <nexusUrl>https://nexus.inventage.com</nexusUrl>
-                    <stagingProfileId>2784e0aacf5060</stagingProfileId>                    <!-- inventage-portal staging -->
+                    <!-- inventage-portal staging -->
+                    <stagingProfileId>2784e0aacf5060</stagingProfileId>
                 </configuration>
             </plugin>
         </plugins>
@@ -252,7 +253,8 @@
         </profile>
     </profiles>
 
-    <repositories>        <!-- must be added as a server to ~/.m2/settings.xml -->
+    <!-- must be added as a server to ~/.m2/settings.xml -->
+    <repositories>
         <repository>
             <!-- for accessing com.inventage.vertx.vertx-http-proxy -->
             <id>inventage-projectware</id>

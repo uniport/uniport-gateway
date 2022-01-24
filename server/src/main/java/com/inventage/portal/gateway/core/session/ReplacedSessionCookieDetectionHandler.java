@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.core.session;
 
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.vertx.core.Handler;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
@@ -104,23 +105,18 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         if (isUserInSession(ctx)) {
             return false;
         }
-        final String cookieSessionFromHeader = getCookieFromHeader(ctx, SESSION_COOKIE_PREFIX);
-        if (cookieSessionFromHeader != null) {
-            LOGGER.debug("noUserInSession: for received session cookie value '{}'", getCookieFromHeader(ctx, SESSION_COOKIE_PREFIX));
+        final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx, SESSION_COOKIE_PREFIX);
+        if (sessionCookie != null) {
+            LOGGER.debug("noUserInSession: for received session cookie value '{}'", sessionCookie.value());
         }
         return true;
     }
 
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
-    private String getCookieFromHeader(RoutingContext ctx, String cookieName) {
-        final String cookie = ctx.request().getHeader(HttpHeaders.COOKIE);
-        if (cookie == null) {
-            return null;
-        }
-        return Arrays.stream(cookie.split(";"))
-                .filter(entry -> entry.startsWith(cookieName))
-                .map(entry -> entry.substring(cookieName.length()))
-                .findFirst().orElse("");
+    private io.netty.handler.codec.http.cookie.Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
+        return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
+                .get(cookieName);
+
     }
 
 
