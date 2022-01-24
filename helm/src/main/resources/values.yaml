@@ -31,7 +31,7 @@ initContainers:
         command:
             - "sh"
             - "-c"
-            - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do true; done"
+            - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do sleep 1; done"
 
 containers:
     portal-gateway:
