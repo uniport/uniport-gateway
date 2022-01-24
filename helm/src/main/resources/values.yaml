@@ -61,7 +61,7 @@ containers:
             - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
               value: "portal-iam"
             - name: "PORTAL_GATEWAY_PORTAL_IAM_PORT"
-              values: "8080"
+              value: "8080"
               # Base
             - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
               value: "base"
