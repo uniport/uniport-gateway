@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
- * stores them in the session and sets them again for follow up requests.
+ * stores them in the session and sets them again for follow-up requests.
  * It guarantees that no cookies except the session ID is sent to the client.
  *
  * Divergences from RFC 6265:
@@ -40,10 +40,10 @@ public class SessionBagMiddleware implements Middleware {
     // These cookies are allowed to be passed back to the user agent.
     // This is required for some frontend logic to work properly
     // (e.g. for keycloak login logic of its admin console)
-    private JsonArray whitelistedCookies;
+    private final JsonArray whitelistedCookies;
 
-    public SessionBagMiddleware(JsonArray whithelistedCookies) {
-        this.whitelistedCookies = whithelistedCookies;
+    public SessionBagMiddleware(JsonArray whitelistedCookies) {
+        this.whitelistedCookies = whitelistedCookies;
     }
 
     @Override
@@ -62,9 +62,7 @@ public class SessionBagMiddleware implements Middleware {
         }
 
         // on response: remove cookies if present and store them in session bag
-        Handler<MultiMap> respHeadersModifier = headers -> {
-            storeCookiesInSessionBag(ctx, headers);
-        };
+        Handler<MultiMap> respHeadersModifier = headers -> storeCookiesInSessionBag(ctx, headers);
         this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
 
         ctx.next();
@@ -97,7 +95,7 @@ public class SessionBagMiddleware implements Middleware {
     }
 
     private String encodeMatchingCookies(Set<Cookie> storedCookies, RoutingContext ctx) {
-        List<String> encodedStoredCookies = new ArrayList<String>();
+        List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
                 LOGGER.debug("loadCookiesFromSessionBag: add cookie '{}' to request", storedCookie.name());
@@ -153,7 +151,7 @@ public class SessionBagMiddleware implements Middleware {
     */
     private boolean matchesPath(Cookie cookie, String uriPath) {
         String requestPath;
-        if (uriPath.isEmpty() || !uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
+        if (!uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
             requestPath = "/";
         } else {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
@@ -185,17 +183,17 @@ public class SessionBagMiddleware implements Middleware {
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
         if (storedCookies == null) {
-            storedCookies = new HashSet<Cookie>();
+            storedCookies = new HashSet<>();
         }
 
         for (String cookieToSet : cookiesToSet) {
-            // use netty cookie until maxAge getter is impemented
+            // use netty cookie until maxAge getter is implemented
             // https://github.com/eclipse-vertx/vert.x/issues/3906
             Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
             if (decodedCookieToSet.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
                 continue;
             }
-            if (isWhithelisted(decodedCookieToSet)) {
+            if (isWhitelisted(decodedCookieToSet)) {
                 // we delegate all logic for whitelisted cookies to the user agent
                 LOGGER.debug("storeCookiesInSessionBag: pass whitelisted cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
@@ -264,7 +262,7 @@ public class SessionBagMiddleware implements Middleware {
         return null;
     }
 
-    private boolean isWhithelisted(Cookie cookie) {
+    private boolean isWhitelisted(Cookie cookie) {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
             JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
             String whitelistedCookieName = whitelistedCookie
