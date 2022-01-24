@@ -35,7 +35,7 @@
                 "options": {
                     "clientId": "Portal-Gateway",
                     "clientSecret": "Portal-Gateway!",
-                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${portal-iam.port}/auth/realms/portal",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Dashboard"
                 }
             },
@@ -51,7 +51,7 @@
                 "options": {
                     "clientId": "Portal-Gateway",
                     "clientSecret": "Portal-Gateway!",
-                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${portal-iam.port}/auth/realms/portal",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Organisation"
                 }
             },
@@ -67,7 +67,7 @@
                 "options": {
                     "clientId": "Portal-Gateway",
                     "clientSecret": "Portal-Gateway!",
-                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${portal-iam.port}/auth/realms/portal",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Document"
                 }
             },
@@ -115,7 +115,7 @@
                 "servers": [
                     {
                         "host": "${PORTAL_GATEWAY_PORTAL_IAM_HOST}",
-                        "port": "8080"
+                        "port": "${PORTAL_GATEWAY_PORTAL_IAM_PORT}"
                     }
                 ]
             }
