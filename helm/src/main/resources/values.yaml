@@ -48,7 +48,7 @@ containers:
               port: 20000
         resources: {}
         env:
-            # HTTP protocol for external access
+              # HTTP protocol for external access
             - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
               value: "http"
               # HTTP host name for external access
@@ -62,21 +62,36 @@ containers:
               value: "portal-iam"
             - name: "PORTAL_GATEWAY_PORTAL_IAM_PORT"
               value: "8080"
-              # Base
-            - name: "PORTAL_GATEWAY_BASE_PROXY_HOST"
+              # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
+            - name: "PORTAL_GATEWAY_BASE_HOST"
               value: "base"
-              # Dashboard
-            - name: "PORTAL_GATEWAY_DASHBOARD_PROXY_HOST"
+              # PORTAL_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
+            - name: "PORTAL_GATEWAY_BASE_PORT"
+              value: "20010"
+              # PORTAL_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
+            - name: "PORTAL_GATEWAY_DASHBOARD_HOST"
               value: "dashboard"
-              # Organisation
-            - name: "PORTAL_GATEWAY_ORGANISATION_PROXY_HOST"
+              # PORTAL_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
+            - name: "PORTAL_GATEWAY_DASHBOARD_PORT"
+              value: "20020"
+              # PORTAL_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
+            - name: "PORTAL_GATEWAY_ORGANISATION_HOST"
               value: "organisation"
-              # Document
-            - name: "PORTAL_GATEWAY_DOCUMENT_PROXY_HOST"
+              # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
+            - name: "PORTAL_GATEWAY_ORGANISATION_PORT"
+              value: "20030"
+              # PORTAL_GATEWAY_DOCUMENT_HOST is the hostname for accessing Document microservice via HTTP
+            - name: "PORTAL_GATEWAY_DOCUMENT_HOST"
               value: "document"
-              # FileStorage
-            - name: "PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST"
+              # PORTAL_GATEWAY_DOCUMENT_PORT is the port for accessing Document microservice via HTTP
+            - name: "PORTAL_GATEWAY_DOCUMENT_PORT"
+              value: "20050"
+              # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
+            - name: "PORTAL_GATEWAY_FILESTORAGE_HOST"
               value: "filestorage"
+              # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
+            - name: "PORTAL_GATEWAY_FILESTORAGE_PORT"
+              value: "20090"
         storages: []
         livenessProbe:
             enabled: true

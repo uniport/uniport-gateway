@@ -207,8 +207,8 @@
                 "name": "dashboard-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_DASHBOARD_PROXY_HOST}",
-                        "port": "20020"
+                        "host": "${PORTAL_GATEWAY_DASHBOARD_HOST}",
+                        "port": "${PORTAL_GATEWAY_DASHBOARD_PORT}"
                     }
                 ]
             },
@@ -217,8 +217,8 @@
                 "name": "base-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_BASE_PROXY_HOST}",
-                        "port": "20010"
+                        "host": "${PORTAL_GATEWAY_BASE_HOST}",
+                        "port": "${PORTAL_GATEWAY_BASE_PORT}"
                     }
                 ]
             },
@@ -227,8 +227,8 @@
                 "name": "organisation-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_ORGANISATION_PROXY_HOST}",
-                        "port": "20030"
+                        "host": "${PORTAL_GATEWAY_ORGANISATION_HOST}",
+                        "port": "${PORTAL_GATEWAY_ORGANISATION_PORT}"
                     }
                 ]
             },
@@ -237,8 +237,8 @@
                 "name": "document-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_DOCUMENT_PROXY_HOST}",
-                        "port": "20050"
+                        "host": "${PORTAL_GATEWAY_DOCUMENT_HOST}",
+                        "port": "${PORTAL_GATEWAY_DOCUMENT_PORT}"
                     }
                 ]
             },
@@ -247,8 +247,8 @@
                 "name": "filestorage-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_FILESTORAGE_PROXY_HOST}",
-                        "port": "20090"
+                        "host": "${PORTAL_GATEWAY_FILESTORAGE_HOST}",
+                        "port": "${PORTAL_GATEWAY_FILESTORAGE_PORT}"
                     }
                 ]
             }
