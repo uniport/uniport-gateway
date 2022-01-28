@@ -19,12 +19,6 @@ service:
 podSecurityContext:
     enabled: false
 
-resources:
-    requests:
-        memory: "200Mi"
-    limits:
-        memory: "500Mi"
-
 initContainers:
     init-portal-iam:
         image: busybox:1.33
@@ -46,7 +40,11 @@ containers:
         ports:
             - name: http
               port: 20000
-        resources: {}
+        resources:
+            requests:
+                memory: "200Mi"
+            limits:
+                memory: "500Mi"
         env:
               # HTTP protocol for external access
             - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
