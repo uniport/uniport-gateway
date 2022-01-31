@@ -80,7 +80,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                     if (event.failed()) {
                         LOGGER.warn("callback: end handler failed '{}'", event.cause());
                     }
-                    OAuth2AuthMiddleware.endAndRemovePendingAuth(ctx, sessionScope);
+                    OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
                 });
                 ctx.next(); // io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl.setupCallback#route.handler(ctx -> {...})
                 //

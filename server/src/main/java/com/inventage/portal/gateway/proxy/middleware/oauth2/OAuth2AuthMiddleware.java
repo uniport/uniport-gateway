@@ -1,8 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -19,11 +17,14 @@ import org.slf4j.LoggerFactory;
  */
 public class OAuth2AuthMiddleware implements Middleware {
 
+    // the following keys are used by OAuth2AuthHandlerImpl
     public static final String OIDC_PARAM_STATE = "state";
+    public static final String OIDC_PARAM_REDIRECT_URI = "redirect_uri";
+    public static final String OIDC_PARAM_PKCE = "pkce";
 
-    public static final String PREFIX_STATE = "state_";
+    // prefix of the key for storing the oauth2 states in the session as a JSON structure
+    private static final String PREFIX_STATE = "oauth2_state_";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
-    private static final String PENDING_AUTH = "pendingAuth";
 
     private AuthenticationHandler authHandler;
     private String sessionScope;
@@ -49,46 +50,6 @@ public class OAuth2AuthMiddleware implements Middleware {
             startAndStorePendingAuth(ctx);
             LOGGER.debug("handle: done for uri '{}'", ctx.request().uri());
         }
-//
-//        if (user == null && pendingAuth(ctx)) {
-//            waitForPendingAuth(ctx).onComplete(event -> {
-//                retryByRedirect(ctx);
-//            });
-//        }
-//        else {
-//            synchronized (authHandler) {
-//                authHandler.handle(ctx);
-//                startAndStorePendingAuth(ctx);
-//                LOGGER.debug("handle: done for uri '{}'", ctx.request().uri());
-//            }
-//        }
-    }
-
-    /**
-     *
-     * @param ctx
-     * @return a future for the pending authentication
-     */
-    private Future<Object> waitForPendingAuth(RoutingContext ctx) {
-        LOGGER.debug("waitForPendingAuth");
-
-        final Object pendingAuth = ctx.session().get(PENDING_AUTH);
-        if (pendingAuth instanceof Promise) {
-            LOGGER.debug("waitForPendingAuth: promise='{}'", pendingAuth.hashCode());
-            final Future pendingAuthFuture = ((Promise) pendingAuth).future();
-            return pendingAuthFuture;
-        }
-        else {
-            LOGGER.debug("waitForPendingAuth: no promise found in session");
-            final Promise<Object> promise = Promise.promise();
-            promise.complete();
-            return promise.future();
-        }
-    }
-
-    private void retryByRedirect(RoutingContext ctx) {
-        LOGGER.debug("retryByRedirect: to same uri '{}'", ctx.request().uri());
-        ctx.redirect(ctx.request().uri());
     }
 
     private User setUserForScope(String sessionScope, RoutingContext ctx) {
@@ -109,48 +70,62 @@ public class OAuth2AuthMiddleware implements Middleware {
      */
     private void startAndStorePendingAuth(RoutingContext ctx) {
         final Object state = ctx.session().get(OIDC_PARAM_STATE);
-        if (state != null) {
-            ctx.session().put(PENDING_AUTH, Promise.promise());
+        if (oAuth2FlowStarted(ctx)) {
             // create JSON object for authentication parameters and store in session at "state_<state>"
-            final JsonObject jsonAuthParameters = new JsonObject().put(OIDC_PARAM_STATE, state);
-            ctx.session().put(PREFIX_STATE+"json_"+state, jsonAuthParameters);
+            final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
+            ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
             LOGGER.debug("startAndStorePendingAuth: for scope '{}'", sessionScope);
         }
     }
 
-    /**
-     * is an auth flow running for this session
-     * @param ctx
-     * @return
-     */
-    private boolean pendingAuth(RoutingContext ctx) {
-        final Object pendingAuth = ctx.session().get(PENDING_AUTH);
-        return pendingAuth != null;
+    private boolean oAuth2FlowStarted(RoutingContext ctx) {
+        return ctx.session().get(OIDC_PARAM_STATE) != null;
+    }
+
+    private JsonObject oAuth2FlowState(RoutingContext ctx) {
+        final JsonObject oAuth2FlowState = new JsonObject();
+        oAuth2FlowState.put(OIDC_PARAM_STATE, ctx.session().get(OIDC_PARAM_STATE));
+        oAuth2FlowState.put(OIDC_PARAM_REDIRECT_URI, ctx.session().get(OIDC_PARAM_REDIRECT_URI));
+        oAuth2FlowState.put(OIDC_PARAM_PKCE, ctx.session().get(OIDC_PARAM_PKCE));
+        return oAuth2FlowState;
     }
 
     /**
-     * Complete and remove the 'PENDING_AUTH' promise if it is stored in the session.
+     * Remove the OAuth2 state JSON structure for a specific state from the session.
      * @param ctx
      * @param sessionScope
      */
-    public static void endAndRemovePendingAuth(RoutingContext ctx, String sessionScope) {
-        final Object pendingAuth = ctx.session().get(PENDING_AUTH);
-        if (pendingAuth instanceof Promise) {
-            LOGGER.debug("endPendingAuth: promise='{}' for scope '{}'", pendingAuth.hashCode(), sessionScope);
-            ctx.session().remove(PENDING_AUTH);
-            ((Promise)pendingAuth).complete();
+    public static void removeOAuth2FlowState(RoutingContext ctx, String sessionScope) {
+        final String requestState = ctx.request().getParam(OIDC_PARAM_STATE);
+        if (requestState != null) {
+            ctx.session().remove(PREFIX_STATE + requestState);
         }
     }
 
+    /**
+     * Put the OAuth2 flow parameters back into the session for the state parameter from the request.
+     *
+     * @param ctx
+     * @param sessionScope
+     */
     public static void restoreStateParameterFromRequest(RoutingContext ctx, String sessionScope) {
         final String requestState = ctx.request().getParam(OIDC_PARAM_STATE);
         if (requestState != null) {
-            final Object authParameters = ctx.session().get(PREFIX_STATE + "json_" + requestState);
+            final Object authParameters = ctx.session().get(PREFIX_STATE + requestState);
             if (authParameters instanceof JsonObject) {
-                JsonObject jsonAuthParamaters = (JsonObject) authParameters;
-                ctx.session().put(OIDC_PARAM_STATE, jsonAuthParamaters.getString(OIDC_PARAM_STATE));
-                LOGGER.debug("restoreAuthParameterFromRequest: for scope '{}'", sessionScope);
+                JsonObject oAuth2FlowState = (JsonObject) authParameters;
+                ctx.session().put(OIDC_PARAM_STATE, oAuth2FlowState.getString(OIDC_PARAM_STATE));
+                ctx.session().put(OIDC_PARAM_REDIRECT_URI, oAuth2FlowState.getString(OIDC_PARAM_REDIRECT_URI));
+                ctx.session().put(OIDC_PARAM_PKCE, oAuth2FlowState.getString(OIDC_PARAM_PKCE));
+
+                LOGGER.debug("restoreAuthParameterFromRequest: for state '{}' and scope '{}'", requestState, sessionScope);
             }
+            else {
+                LOGGER.warn("restoreAuthParameterFromRequest: no OAuth2 state found in session for state '{}' and scope '{}'", requestState, sessionScope);
+            }
+        }
+        else {
+            LOGGER.warn("restoreAuthParameterFromRequest: not state found in request for scope '{}'", sessionScope);
         }
     }
 
