@@ -104,6 +104,10 @@
                         {
                             "name": "KEYCLOAK_SESSION_LEGACY",
                             "path": "/auth/realms/portal/"
+                        },
+                        {
+                            "name": "ips.language",
+                            "path": "/"
                         }
                     ]
                 }

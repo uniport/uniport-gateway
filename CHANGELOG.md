@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Created helm values for minikube environment
+- Memory requirements and limits in Kubernetes added. [PORTAL-570](https://issue.inventage.com/browse/PORTAL-570)
+- Language Cookie Handler Middleware added. [PORTAL-590](https://issue.inventage.com/browse/PORTAL-590)
 
 ### Changed
 
@@ -20,10 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pulling images from Nexus instead of Docker Hub
 - Use SCREAMING_SNAKE_CASE for environment variables
 - Replaced `com.spotify.dockerfile-maven-plugin` with `io.fabric8.docker-maven-plugin` for building docker images ([PORTAL-571](https://issue.inventage.com/browse/PORTAL-571)).
-
-### Added
-
-- Memory requirements and limits in Kubernetes added. [PORTAL-570](https://issue.inventage.com/browse/PORTAL-570)
 
 ## [2.7.0]-202112080733-264-ce3614d  - 2021-12-08
 

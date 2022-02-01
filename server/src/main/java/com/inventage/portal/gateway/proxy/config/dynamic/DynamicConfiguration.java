@@ -58,6 +58,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
 
+    public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
+
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
@@ -85,7 +87,8 @@ public class DynamicConfiguration {
 
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
-            MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG, MIDDLEWARE_CONTROL_API);
+            MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
+            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -566,7 +569,8 @@ public class DynamicConfiguration {
 
                     break;
                 }
-                case MIDDLEWARE_SHOW_SESSION_CONTENT: {
+                case MIDDLEWARE_SHOW_SESSION_CONTENT:
+                case MIDDLEWARE_LANGUAGE_COOKIE: {
                     break;
                 }
                 case MIDDLEWARE_SESSION_BAG: {
