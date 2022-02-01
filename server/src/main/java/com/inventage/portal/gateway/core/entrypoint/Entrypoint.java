@@ -62,30 +62,33 @@ public class Entrypoint {
         if (router != null) {
             return router;
         }
-
-        if (this.sessionDisabled) {
-            LOGGER.info("router: session management is disabled");
-            return router;
-        }
-        LOGGER.info(
-                "router: session management is enabled with\n" + "session cookie name: '{}'\n"
-                        + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
-                        + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
-                SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
-                SESSION_COOKIE_MIN_LENGTH);
-        // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
         router = Router.router(vertx);
         router.route().handler(new ResponseSessionCookieHandler(SESSION_COOKIE_NAME));
-        router.route()
-                .handler(SessionHandler.create(LocalSessionStore.create(vertx))
-                        .setSessionCookieName(SESSION_COOKIE_NAME)
-                        .setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
-                        .setCookieSecureFlag(SESSION_COOKIE_SECURE)
-                        .setCookieSameSite(SESSION_COOKIE_SAME_SITE)
-                        .setMinLength(SESSION_COOKIE_MIN_LENGTH)
-                        .setNagHttps(true));
+
+        if (!this.sessionDisabled) {
+            LOGGER.info(
+                    "router: session management is enabled with\n" + "session cookie name: '{}'\n"
+                            + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
+                            + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
+                    SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
+                    SESSION_COOKIE_MIN_LENGTH);
+            // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+            router.route()
+                    .handler(SessionHandler.create(LocalSessionStore.create(vertx))
+                            .setSessionCookieName(SESSION_COOKIE_NAME)
+                            .setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
+                            .setCookieSecureFlag(SESSION_COOKIE_SECURE)
+                            .setCookieSameSite(SESSION_COOKIE_SAME_SITE)
+                            .setMinLength(SESSION_COOKIE_MIN_LENGTH)
+                            .setNagHttps(true));
+        }
+        else {
+            LOGGER.info("router: session management is disabled");
+        }
         router.route().handler(RequestResponseLogger.create());
-        router.route().handler(ReplacedSessionCookieDetectionHandler.create());
+        if (!this.sessionDisabled) {
+            router.route().handler(ReplacedSessionCookieDetectionHandler.create());
+        }
         return router;
     }
 
