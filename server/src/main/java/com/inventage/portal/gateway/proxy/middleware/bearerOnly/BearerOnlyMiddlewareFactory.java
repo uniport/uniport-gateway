@@ -56,9 +56,11 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
+                LOGGER.debug("create: with issuer '{}'", issuer);
             }
             if (audience != null) {
                 jwtOptions.setAudience(audience.getList());
+                LOGGER.debug("create: with audience '{}'", audience);
             }
             JWTAuthOptions authConfig = new JWTAuthOptions()
                     .addPubSecKey(
