@@ -199,6 +199,11 @@
                 "options": {
                     "action": "SESSION_TERMINATE"
                 }
+            },
+            {
+                "name": "languageCookie",
+                "type": "languageCookie",
+                "options": {}
             }
         ],
 

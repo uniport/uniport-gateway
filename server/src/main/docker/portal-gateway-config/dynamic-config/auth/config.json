@@ -4,7 +4,7 @@
             {
                 "name": "auth",
                 "rule": "PathPrefix('/auth')",
-                "middlewares": ["authRedirectRegex"],
+                "middlewares": ["authRedirectRegex", "languageCookie"],
                 "service": "portal-iam"
             }
         ],
@@ -111,6 +111,11 @@
                         }
                     ]
                 }
+            },
+            {
+                "name": "languageCookie",
+                "type": "languageCookie",
+                "options": {}
             }
         ],
         "services": [
