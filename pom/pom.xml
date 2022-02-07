@@ -175,18 +175,6 @@
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>0.38.1</version>
-                    <configuration>
-                        <images>
-                            <image>
-                                <name>${docker.push.registry}/${docker.image.name}</name>
-                                <build>
-                                    <!--suppress UnresolvedMavenProperty -->
-                                    <contextDir>${docker.context}</contextDir>
-                                    <filter>false</filter>
-                                </build>
-                            </image>
-                        </images>
-                    </configuration>
                     <executions>
                         <!-- build image -->
                         <execution>

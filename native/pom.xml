@@ -14,8 +14,6 @@
 
     <properties>
         <docker.context>${project.build.directory}/docker-context</docker.context>
-        <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
-        <docker.image.tag>${project.version}-native</docker.image.tag>
     </properties>
 
     <build>
@@ -78,6 +76,22 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <name>${docker.push.registry}/${project.groupId}.portal-gateway:${project.version}-native</name>
+                                    <build>
+                                        <contextDir>${docker.context}</contextDir>
+                                        <filter>false</filter>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

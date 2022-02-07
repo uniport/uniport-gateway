@@ -14,6 +14,7 @@
 
     <properties>
         <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
+        <docker.build.jib>true</docker.build.jib>
     </properties>
 
     <dependencies>
