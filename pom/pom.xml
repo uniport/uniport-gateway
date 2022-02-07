@@ -15,6 +15,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <docker.image.name>${project.groupId}.${project.artifactId}</docker.image.name>
+        <docker.image.tag>${project.version}</docker.image.tag>
         <docker.pull.registry>docker-registry.inventage.com:10094</docker.pull.registry>
         <docker.push.registry>docker-registry.inventage.com:10095</docker.push.registry>
         <docker.verbose>true</docker.verbose>
@@ -175,7 +176,6 @@
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>0.38.1</version>
                     <configuration>
-                        <tagName>${project.version}</tagName>
                         <images>
                             <image>
                                 <name>${docker.push.registry}/${docker.image.name}</name>

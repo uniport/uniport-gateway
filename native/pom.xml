@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -16,6 +15,7 @@
     <properties>
         <docker.context>${project.build.directory}/docker-context</docker.context>
         <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
+        <docker.image.tag>${project.version}-native</docker.image.tag>
     </properties>
 
     <build>
@@ -78,9 +78,6 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <configuration>
-                    <tagName>${project.version}-native</tagName>
-                </configuration>
             </plugin>
         </plugins>
     </build>
