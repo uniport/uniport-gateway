@@ -134,7 +134,8 @@ public class FileConfigProviderTest {
         // port as int/no variables
         return Stream.of(Arguments.of("simple file", "fileConfigProvider/simple_file_01.json", 3, 6),
                 Arguments.of("simple directory", "fileConfigProvider/simple_dir_01", 2, 3),
-                Arguments.of("merge directories", "fileConfigProvider/merge_dir_01", 3, 3));
+                Arguments.of("merge directories", "fileConfigProvider/merge_dir_01", 3, 3),
+                Arguments.of("merge directories with arbitrary folder names", "fileConfigProvider/merge_dir_02", 3, 3));
 
     }
 
