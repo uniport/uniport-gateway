@@ -14,8 +14,7 @@
         <!-- because we deploy via nexus-staging-maven-plugin -->
         <maven.deploy.skip>true</maven.deploy.skip>
 
-        <docker.image.name>${project.groupId}.${project.artifactId}</docker.image.name>
-        <docker.image.tag>${project.version}</docker.image.tag>
+        <docker.image.name>${project.groupId}.${project.artifactId}:${project.version}</docker.image.name>
         <docker.pull.registry>docker-registry.inventage.com:10094</docker.pull.registry>
         <docker.push.registry>docker-registry.inventage.com:10095</docker.push.registry>
         <docker.verbose>true</docker.verbose>
@@ -174,6 +173,17 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
+                    <configuration>
+                        <images>
+                            <image>
+                                <name>${docker.push.registry}/${docker.image.name}</name>
+                                <build>
+                                    <contextDir>${docker.context}</contextDir>
+                                    <filter>false</filter>
+                                </build>
+                            </image>
+                        </images>
+                    </configuration>
                     <version>0.38.1</version>
                     <executions>
                         <!-- build image -->
