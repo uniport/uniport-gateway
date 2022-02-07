@@ -175,16 +175,13 @@
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>0.38.1</version>
                     <configuration>
+                        <tagName>${project.version}</tagName>
                         <images>
                             <image>
                                 <name>${docker.push.registry}/${docker.image.name}</name>
                                 <build>
                                     <!--suppress UnresolvedMavenProperty -->
                                     <contextDir>${docker.context}</contextDir>
-                                    <tags>
-                                        <tag>latest</tag>
-                                        <tag>${project.version}</tag>
-                                    </tags>
                                     <filter>false</filter>
                                 </build>
                             </image>

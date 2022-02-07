@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -140,7 +139,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
+                <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-ilugin -->
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
@@ -166,9 +165,9 @@
                             <arg>-cluster</arg>
                         </args>
                         <!-- for enabling remote debugging -->
-<!--                        <jvmFlags>-->
-<!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>-->
-<!--                        </jvmFlags>-->
+                        <!--                        <jvmFlags>-->
+                        <!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>-->
+                        <!--                        </jvmFlags>-->
                     </container>
                 </configuration>
             </plugin>
@@ -221,15 +220,13 @@
                         </filter>
                     </filters>
                     <transformers>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
                                 <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
                                 <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
                             </manifestEntries>
                         </transformer>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                     </transformers>
                 </configuration>
             </plugin>
