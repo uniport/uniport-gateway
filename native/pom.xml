@@ -13,7 +13,7 @@
     <artifactId>native</artifactId>
 
     <properties>
-        <docker.image.name>${project.groupId}.portal-gateway:${project.version}</docker.image.name>
+        <docker.image.name>${project.groupId}.portal-gateway:${project.version}-native</docker.image.name>
         <docker.context>${project.build.directory}/docker-context</docker.context>
     </properties>
 
