@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Native build and tagging fixed.
 
+### Changed
+
+- The File Config Provider for dynamic configurations allows arbitrary directory names instead of the hard-coded `auth` and `general` ones ([PORTAL-205](https://issue.inventage.com/browse/PORTAL-205)).
+
 ## [3.0.0]-202202071120-328-c8f8caa - 2022-02-07
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
