@@ -26,27 +26,32 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
  */
 public class Entrypoint {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
-
     public static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
     public static final boolean SESSION_COOKIE_HTTP_ONLY = true;
     public static final boolean SESSION_COOKIE_SECURE = false;
     public static final CookieSameSite SESSION_COOKIE_SAME_SITE = CookieSameSite.STRICT;
     public static final int SESSION_COOKIE_MIN_LENGTH = 32;
+    public static final int DEFAULT_SESSION_IDLE_TIMEOUT_MINUTES = 30;
+
+    private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
+    private static long MINUTES_AS_MILLISECONDS = 60 * 1000;
 
     private final Vertx vertx;
     private final String name;
     private final int port;
     private final boolean sessionDisabled;
+    // sessionIdleTimeout is how many minutes an idle session is kept before deletion
+    private final int sessionIdleTimeout;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled) {
+    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled, int sessionIdleTimeoutMinutes) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
         this.sessionDisabled = sessionDisabled;
+        this.sessionIdleTimeout = sessionIdleTimeoutMinutes;
         this.enabled = true;
     }
 
@@ -67,14 +72,16 @@ public class Entrypoint {
 
         if (!this.sessionDisabled) {
             LOGGER.info(
-                    "router: session management is enabled with\n" + "session cookie name: '{}'\n"
+                    "router: session management is enabled with\n"
+                            + "idle timeout: '{}' (minutes)\n" + "session cookie name: '{}'\n"
                             + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
                             + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
-                    SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
+                    sessionIdleTimeout, SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
                     SESSION_COOKIE_MIN_LENGTH);
             // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
             router.route()
                     .handler(SessionHandler.create(LocalSessionStore.create(vertx))
+                            .setSessionTimeout(sessionIdleTimeout * MINUTES_AS_MILLISECONDS)
                             .setSessionCookieName(SESSION_COOKIE_NAME)
                             .setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
                             .setCookieSecureFlag(SESSION_COOKIE_SECURE)

@@ -2,7 +2,8 @@
     "entrypoints": [
         {
             "name": "http20000",
-            "port": 20000
+            "port": 20000,
+            "sessionIdleTimeout": 15
         }
     ],
     "applications": [
