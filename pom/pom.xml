@@ -184,7 +184,7 @@
                             </image>
                         </images>
                     </configuration>
-                    <version>0.38.1</version>
+                    <version>0.39.1</version>
                     <executions>
                         <!-- build image -->
                         <execution>
