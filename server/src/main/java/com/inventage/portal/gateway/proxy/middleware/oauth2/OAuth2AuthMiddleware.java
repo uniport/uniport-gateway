@@ -42,7 +42,7 @@ public class OAuth2AuthMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("handle: uri '{}'", ctx.request().uri());
-        final User user = setUserForScope(this.sessionScope, ctx);
+        setUserForScope(this.sessionScope, ctx);
 
         // synchronized: to prevent conflicts in writing the "state" value into the session data
         synchronized (ctx.session()) {
@@ -52,15 +52,11 @@ public class OAuth2AuthMiddleware implements Middleware {
         }
     }
 
-    private User setUserForScope(String sessionScope, RoutingContext ctx) {
+    private void setUserForScope(String sessionScope, RoutingContext ctx) {
         String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
         Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
         if (authPair != null) {
             ctx.setUser(authPair.getRight());
-            return authPair.getRight();
-        } else {
-            ctx.setUser(null);
-            return null;
         }
     }
 

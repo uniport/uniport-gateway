@@ -56,7 +56,7 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         ctx.put(ResponseSessionCookieHandler.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
         // delay before retry
         ctx.vertx().setTimer(WAIT_BEFORE_RETRY_MS, v -> {
-            LOGGER.debug("retryWithCookieFromBrowser: invalid sessionId cookie for state, delaying retry for '{}' ms", WAIT_BEFORE_RETRY_MS);
+            LOGGER.debug("retryWithCookieFromBrowser: invalid sessionId cookie for state, delayed retry for '{}' ms", WAIT_BEFORE_RETRY_MS);
             redirectForRetry(ctx);
         });
     }
@@ -109,14 +109,25 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         if (sessionCookie != null) {
             LOGGER.debug("noUserInSession: for received session cookie value '{}'", sessionCookie.value());
         }
+        else {
+            LOGGER.debug("noUserInSession: no session cookie '{}' received", SESSION_COOKIE_PREFIX);
+        }
         return true;
+    }
+
+    private boolean cookieReceived(RoutingContext ctx, String cookieName) {
+        if (ctx.request().getCookie(cookieName) != null) {
+            return true;
+        }
+        else {
+            return getCookieFromHeader(ctx, cookieName) != null;
+        }
     }
 
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
     private io.netty.handler.codec.http.cookie.Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
         return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
                 .get(cookieName);
-
     }
 
 
