@@ -42,22 +42,35 @@ public class OAuth2AuthMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("handle: uri '{}'", ctx.request().uri());
-        setUserForScope(this.sessionScope, ctx);
+        final User user = ctx.user();
+        final User userForScope = setUserForScope(this.sessionScope, ctx);
 
         // synchronized: to prevent conflicts in writing the "state" value into the session data
         synchronized (ctx.session()) {
             authHandler.handle(ctx);
+            if (userForScope == null) {
+                ctx.setUser(user);
+            }
             startAndStorePendingAuth(ctx);
             LOGGER.debug("handle: done for uri '{}'", ctx.request().uri());
         }
     }
 
-    private void setUserForScope(String sessionScope, RoutingContext ctx) {
+    /**
+     * Set the user for the given sessionScope in the RoutingContext or clear user if not available.
+     * @param sessionScope
+     * @param ctx
+     */
+    private User setUserForScope(String sessionScope, RoutingContext ctx) {
         String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
         Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
         if (authPair != null) {
             ctx.setUser(authPair.getRight());
         }
+        else {
+            ctx.clearUser();
+        }
+        return ctx.user();
     }
 
     /**
