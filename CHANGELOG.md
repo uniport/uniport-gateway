@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.3.0-[Unreleased] - ???
 
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+### Fixed
+
+- Fix timezone on server and native docker image ([PORTAL-606](https://issue.inventage.com/browse/PORTAL-606)).
+
 ## [3.2.0]-202202200055-343-81de06f - 2022-02-21
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~3.2.0-202202200055-343-81de06f~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D3.2.0-202202200055-343-81de06f)

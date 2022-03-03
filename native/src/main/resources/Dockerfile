@@ -34,4 +34,6 @@ COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
 COPY portal-gateway /etc/portal-gateway/default/
 
+ENV TZ="Europe/Zurich"
+
 ENTRYPOINT ["portal-gateway", "run", "-cluster"]
