@@ -79,6 +79,16 @@
                 ],
                 "rule": "PathPrefix('/filestorage')",
                 "service": "filestorage-proxy"
+            },
+
+            {
+                "name": "content-proxy",
+                "middlewares": [
+                    "contentRedirectRegex",
+                    "ShowSessionContentMiddleware"
+                ],
+                "rule": "PathPrefix('/content')",
+                "service": "content-proxy"
             }
         ],
 
@@ -170,6 +180,16 @@
                     "replacement": "/$1"
                 }
             },
+
+            {
+                "name": "contentRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/content)$",
+                    "replacement": "$1/"
+                }
+            },
+
             {
                 "name": "sessionTerminate",
                 "type": "controlApi",
