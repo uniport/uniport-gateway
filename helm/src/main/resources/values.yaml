@@ -90,6 +90,12 @@ containers:
               # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
             - name: "PORTAL_GATEWAY_FILESTORAGE_PORT"
               value: "20090"
+                # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
+            - name: "PORTAL_GATEWAY_CONTENT_HOST"
+              value: "content"
+                # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
+            - name: "PORTAL_GATEWAY_CONTENT_PORT"
+              value: "20110"
         storages: []
         livenessProbe:
             enabled: true
