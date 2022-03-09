@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix timezone on server and native docker image ([PORTAL-606](https://issue.inventage.com/browse/PORTAL-606)).
+- Fix user handling in Vert.x context ([PORTAL-647](https://issue.inventage.com/browse/PORTAL-647)).
 
 ## [3.2.0]-202202200055-343-81de06f - 2022-02-21
 

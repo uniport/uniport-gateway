@@ -57,8 +57,8 @@ public class OAuth2AuthMiddleware implements Middleware {
     }
 
     /**
-     * Set the user for the given sessionScope in the RoutingContext or clear user if not available.
-     * @param sessionScope
+     * Update the RoutingContext with the user for the given sessionScope or clear the user if not available.
+     * @param sessionScope an OAuth2 authentication is requested
      * @param ctx
      */
     private User setUserForScope(String sessionScope, RoutingContext ctx) {
