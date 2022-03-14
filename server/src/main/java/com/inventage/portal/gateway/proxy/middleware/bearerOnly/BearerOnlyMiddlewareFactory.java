@@ -62,6 +62,10 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 jwtOptions.setAudience(audience.getList());
                 LOGGER.debug("create: with audience '{}'", audience);
             }
+
+            LOGGER.debug("create: with public key algorithm '{}'", publicKeyAlgorithm);
+            LOGGER.debug("create: with public key '{}'", publicKeyInPEMFormat);
+
             JWTAuthOptions authConfig = new JWTAuthOptions()
                     .addPubSecKey(
                             new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
