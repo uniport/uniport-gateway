@@ -55,7 +55,6 @@ public class BearerOnlyMiddleware implements Middleware {
             LOGGER.warn("handle: Handling jwt auth request failed with '{}'", ctx.failure().getMessage());
             return;
         }
-        LOGGER.warn("handle: Handling jwt auth request failure '{}'", ctx.failure());
         LOGGER.debug("handle: Handled jwt auth request");
     }
 
