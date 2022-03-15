@@ -89,6 +89,16 @@
                 ],
                 "rule": "PathPrefix('/content')",
                 "service": "content-proxy"
+            },
+
+            {
+                "name": "portal-kowl-proxy",
+                "middlewares": [
+                    "portalKowlRedirectRegex",
+                    "portalKowlReplacePath"
+                ],
+                "rule": "PathPrefix('/ips/portal-messaging')",
+                "service": "portal-kowl-proxy"
             }
         ],
 
@@ -191,6 +201,23 @@
             },
 
             {
+                "name": "portalKowlRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/portal-messaging)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "portalKowlReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/ips/portal-messaging/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+
+            {
                 "name": "sessionTerminate",
                 "type": "controlApi",
                 "options": {
@@ -261,6 +288,16 @@
                     {
                         "host": "${PORTAL_GATEWAY_CONTENT_HOST}",
                         "port": "${PORTAL_GATEWAY_CONTENT_PORT}"
+                    }
+                ]
+            },
+
+            {
+                "name": "portal-kowl-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_PORTAL_KOWL_HOST}",
+                        "port": "${PORTAL_GATEWAY_PORTAL_KOWL_PORT}"
                     }
                 ]
             }
