@@ -102,6 +102,10 @@ containers:
               # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
             - name: PORTAL_GATEWAY_PORTAL_KOWL_PORT
               value: "8080"
+            - name: PORTAL_GATEWAY_PORTAL_PGADMIN_HOST
+              value: portal-pgadmin
+            - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
+              value: 80
         storages: []
         livenessProbe:
             enabled: true
