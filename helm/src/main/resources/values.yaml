@@ -105,7 +105,7 @@ containers:
             - name: PORTAL_GATEWAY_PORTAL_PGADMIN_HOST
               value: portal-pgadmin
             - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
-              value: 80
+              value: "80"
         storages: []
         livenessProbe:
             enabled: true
