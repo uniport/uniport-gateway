@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+- (Ongoing) Extended claim verification in the bearer only middleware. It should be possible to verify arbitrary claims (e.g does this entry exist, does this entry contain this value etc). 
+([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
+
 ## [3.3.0]-202203091113-353-e988dae - 2022-03-09
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~3.3.0-202203091113-353-e988dae~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D3.3.0-202203091113-353-e988dae)

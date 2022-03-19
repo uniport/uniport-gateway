@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
+import io.vertx.ext.auth.ChainAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +31,12 @@ public class BearerOnlyMiddleware implements Middleware {
 
     public BearerOnlyMiddleware(AuthenticationHandler authHandler, boolean optional) {
         this.authHandler = authHandler;
+
         this.optional = optional;
         if (optional) {
             LOGGER.info("constructor: Requests are not required to carry a 'Authorization' header");
         }
+
     }
 
     @Override
@@ -48,9 +51,9 @@ public class BearerOnlyMiddleware implements Middleware {
             ctx.next();
             return;
         }
-
         LOGGER.debug("handle: Handling jwt auth request");
         authHandler.handle(ctx);
+
         LOGGER.debug("handle: Handled jwt auth request");
     }
 

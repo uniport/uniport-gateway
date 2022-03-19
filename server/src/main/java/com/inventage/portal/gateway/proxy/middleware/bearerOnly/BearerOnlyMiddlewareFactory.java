@@ -8,6 +8,9 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,16 +47,20 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
         JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
+        JsonArray additionalClaims = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIMS);
+
         String publicKeyAlgorithm = middlewareConfig
                 .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
         String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
         boolean optional = Boolean.parseBoolean(optionalStr);
 
+
+
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
                     "-----END PUBLIC KEY-----");
 
-            JWTOptions jwtOptions = new JWTOptions();
+            JWTClaimOptions jwtOptions = new JWTClaimOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
                 LOGGER.debug("create: with issuer '{}'", issuer);
@@ -62,13 +69,15 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 jwtOptions.setAudience(audience.getList());
                 LOGGER.debug("create: with audience '{}'", audience);
             }
+            jwtOptions.setOtherClaims(additionalClaims);
+
             JWTAuthOptions authConfig = new JWTAuthOptions()
                     .addPubSecKey(
                             new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
                     .setJWTOptions(jwtOptions);
 
-            JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
-            AuthenticationHandler authHandler = JWTAuthHandler.create(authProvider);
+            JWTAuth authProvider = JWTAuthClaim.create(vertx, authConfig);
+            AuthenticationHandler authHandler = JWTAuthClaimHandler.create(authProvider);
 
             bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
             LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);

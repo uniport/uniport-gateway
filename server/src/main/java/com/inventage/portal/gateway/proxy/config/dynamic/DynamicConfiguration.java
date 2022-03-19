@@ -66,6 +66,14 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_ISSUER = "issuer";
     public static final String MIDDLEWARE_BEARER_ONLY_AUDIENCE = "audience";
     public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIMS = "claims";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR = "operator";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS = "=";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS = "contains";
+
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_PATH = "claimPath";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE = "value";
+
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
@@ -116,6 +124,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
                 .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_CLAIMS, Schemas.arraySchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
@@ -481,6 +490,46 @@ public class DynamicConfiguration {
                             }
                         }
                     }
+                    JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_CLAIMS);
+                    if(claims != null){
+                        if(claims.size() == 0){
+                            return Future.failedFuture(String.format("%s: Empty claims defined.", mwType));
+                        }
+                        for (Object c: claims.getList()){
+
+                            if (!(c instanceof JsonObject)){
+                                return Future.failedFuture(String.format("%s: Claim is required to be a JsonObject"));
+                            }
+                            else{
+                                JsonObject cObj = (JsonObject) c;
+                                if (cObj.size() != 3){
+                                    return Future.failedFuture(String.format("%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",mwType));
+                                }
+                                if(!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))){
+                                    return Future.failedFuture(String.format("%s: Claim is missing at least 1 key. Required keys: %s, %s, %s",mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH, MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
+                                }
+
+                                if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null){
+                                    return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
+                                }
+                                if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null){
+                                    return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
+                                }else{
+                                    //TODO: ? Extend this check in case that we need to support more than the equals and contain operator
+                                    String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
+                                    if(!operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS)){
+                                        return Future.failedFuture(String.format("%s: %s value is illegal. Allowed operators: %s, %s", mwType,
+                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
 
                     break;
                 }
