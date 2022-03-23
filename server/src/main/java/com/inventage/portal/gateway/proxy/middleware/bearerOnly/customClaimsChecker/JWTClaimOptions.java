@@ -11,12 +11,13 @@ import java.util.List;
 
 public class JWTClaimOptions extends JWTOptions {
 
-    private List<JWTClaim> claimList = new ArrayList<>();
+    private final List<JWTClaim> claimList = new ArrayList<>();
 
-    public JWTClaimOptions setOtherClaims(JsonArray claims){
-
-        for (int i = 0; i < claims.size(); i++){
-            claimList.add(new JWTClaim(claims.getJsonObject(i)));
+    public JWTClaimOptions setOtherClaims(JsonArray claims) {
+        if(claims != null) {
+            for (Object claim : claims) {
+                claimList.add(new JWTClaim((JsonObject) claim));
+            }
         }
         return this;
     }
