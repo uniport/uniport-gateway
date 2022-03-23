@@ -68,8 +68,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIMS = "claims";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR = "operator";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS = "=";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS = "contains";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS = "EQUALS";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS = "CONTAINS";
 
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_PATH = "claimPath";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE = "value";
@@ -193,9 +193,7 @@ public class DynamicConfiguration {
         JsonArray httpMiddlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         JsonArray httpServices = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
 
-        Boolean httpEmpty = httpRouters == null && httpMiddlewares == null && httpServices == null;
-
-        return httpEmpty;
+        return httpRouters == null && httpMiddlewares == null && httpServices == null;
     }
 
     public static JsonObject merge(Map<String, JsonObject> configurations) {
@@ -228,7 +226,7 @@ public class DynamicConfiguration {
                     JsonObject rt = rts.getJsonObject(i);
                     String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
                     if (!routers.containsKey(rtName)) {
-                        routers.put(rtName, new ArrayList<String>());
+                        routers.put(rtName, new ArrayList<>());
                     }
                     routers.get(rtName).add(key);
                     if (!addRouter(mergedHttpConfig, rtName, rt)) {
@@ -241,7 +239,7 @@ public class DynamicConfiguration {
                     JsonObject mw = mws.getJsonObject(i);
                     String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
                     if (!middlewares.containsKey(mwName)) {
-                        middlewares.put(mwName, new ArrayList<String>());
+                        middlewares.put(mwName, new ArrayList<>());
                     }
                     middlewares.get(mwName).add(key);
                     if (!addMiddleware(mergedHttpConfig, mwName, mw)) {
@@ -254,7 +252,7 @@ public class DynamicConfiguration {
                     JsonObject sv = svs.getJsonObject(i);
                     String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
                     if (!services.containsKey(svName)) {
-                        services.put(svName, new ArrayList<String>());
+                        services.put(svName, new ArrayList<>());
                     }
                     services.get(svName).add(key);
                     if (!addService(mergedHttpConfig, svName, sv)) {
@@ -493,41 +491,57 @@ public class DynamicConfiguration {
                     JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_CLAIMS);
                     if(claims != null){
                         if(claims.size() == 0){
-                            return Future.failedFuture(String.format("%s: Empty claims defined.", mwType));
+                            LOGGER.debug("Claims is empty");
+                            //return Future.failedFuture(String.format("%s: Empty claims defined.", mwType));
                         }
-                        for (Object c: claims.getList()){
 
-                            if (!(c instanceof JsonObject)){
-                                return Future.failedFuture(String.format("%s: Claim is required to be a JsonObject"));
+                        for (Object claim: claims.getList()){
+                            if (claim instanceof Map){
+                                claim = new JsonObject((Map<String, Object>) claim);
+                            }
+                            if (!(claim instanceof JsonObject)){
+                                return Future.failedFuture("Claim is required to be a JsonObject");
                             }
                             else{
-                                JsonObject cObj = (JsonObject) c;
+                                JsonObject cObj = (JsonObject) claim;
                                 if (cObj.size() != 3){
+                                    LOGGER.debug("Claims 0");
                                     return Future.failedFuture(String.format("%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",mwType));
                                 }
                                 if(!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))){
+                                    LOGGER.debug("Claims 1");
+
                                     return Future.failedFuture(String.format("%s: Claim is missing at least 1 key. Required keys: %s, %s, %s",mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH, MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
                                 }
 
                                 if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null){
+                                    LOGGER.debug("Claims 2");
+
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
                                 }
                                 if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null){
+                                    LOGGER.debug("Claims 3");
+
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
                                 }else{
+                                    LOGGER.debug("Claims 4");
+
                                     //TODO: ? Extend this check in case that we need to support more than the equals and contain operator
                                     String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
-                                    if(!operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS)){
-                                        return Future.failedFuture(String.format("%s: %s value is illegal. Allowed operators: %s, %s", mwType,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
+                                    if(! (operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))){
+                                        return Future.failedFuture(String.format("%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s", mwType,
+                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, operator,
+                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
                                     }
                                 }
 
                             }
                         }
+                    }else{
+                        LOGGER.debug("Claims is null");
                     }
 
 

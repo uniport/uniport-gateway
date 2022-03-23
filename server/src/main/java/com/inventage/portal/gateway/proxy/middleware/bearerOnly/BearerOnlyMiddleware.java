@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
-import io.vertx.ext.auth.ChainAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
