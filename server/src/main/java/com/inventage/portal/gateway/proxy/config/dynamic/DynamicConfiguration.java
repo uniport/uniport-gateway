@@ -70,6 +70,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR = "operator";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS = "EQUALS";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS = "CONTAINS";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
+    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
+
 
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_PATH = "claimPath";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE = "value";
@@ -505,30 +508,22 @@ public class DynamicConfiguration {
                             else{
                                 JsonObject cObj = (JsonObject) claim;
                                 if (cObj.size() != 3){
-                                    LOGGER.debug("Claims 0");
                                     return Future.failedFuture(String.format("%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",mwType));
                                 }
-                                if(!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))){
-                                    LOGGER.debug("Claims 1");
-
+                                if(!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE)))
+                                {
                                     return Future.failedFuture(String.format("%s: Claim is missing at least 1 key. Required keys: %s, %s, %s",mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH, MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
                                 }
 
                                 if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null){
-                                    LOGGER.debug("Claims 2");
-
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
                                 }
                                 if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null){
-                                    LOGGER.debug("Claims 3");
-
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
                                 }else{
-                                    LOGGER.debug("Claims 4");
-
                                     //TODO: ? Extend this check in case that we need to support more than the equals and contain operator
                                     String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
                                     if(! (operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))){
@@ -541,7 +536,7 @@ public class DynamicConfiguration {
                             }
                         }
                     }else{
-                        LOGGER.debug("Claims is null");
+                        LOGGER.debug("No custom claims defined!");
                     }
 
 
