@@ -323,7 +323,7 @@ public class RouterFactory {
     // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
     private RoutingRule parseRule(Vertx vertx, String rule) {
         Pattern rulePattern = Pattern
-                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/]+)'\\)$");
+                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[0-9a-zA-Z\\/-]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {

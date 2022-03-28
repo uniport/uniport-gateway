@@ -46,7 +46,7 @@ containers:
             limits:
                 memory: "500Mi"
         env:
-              # HTTP protocol for external access
+            # HTTP protocol for external access
             - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
               value: "http"
               # HTTP host name for external access
@@ -90,12 +90,22 @@ containers:
               # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
             - name: "PORTAL_GATEWAY_FILESTORAGE_PORT"
               value: "20090"
-                # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
+              # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
             - name: "PORTAL_GATEWAY_CONTENT_HOST"
               value: "content"
-                # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
+              # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
             - name: "PORTAL_GATEWAY_CONTENT_PORT"
               value: "20110"
+              # PORTAL_GATEWAY_PORTAL_KOWL_HOST is the hostname for accessing Portal-Kowl via HTTP
+            - name: PORTAL_GATEWAY_PORTAL_KOWL_HOST
+              value: "portal-kowl"
+              # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
+            - name: PORTAL_GATEWAY_PORTAL_KOWL_PORT
+              value: "8080"
+            - name: PORTAL_GATEWAY_PORTAL_PGADMIN_HOST
+              value: portal-pgadmin
+            - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
+              value: "80"
         storages: []
         livenessProbe:
             enabled: true

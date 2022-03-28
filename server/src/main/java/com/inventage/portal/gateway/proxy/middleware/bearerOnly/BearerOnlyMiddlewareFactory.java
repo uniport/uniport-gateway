@@ -8,9 +8,6 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +50,6 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
         String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
         boolean optional = Boolean.parseBoolean(optionalStr);
-
-
 
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,

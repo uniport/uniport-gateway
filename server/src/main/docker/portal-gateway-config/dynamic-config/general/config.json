@@ -89,6 +89,22 @@
                 ],
                 "rule": "PathPrefix('/content')",
                 "service": "content-proxy"
+            },
+
+            {
+                "name": "portal-kowl-proxy",
+                "middlewares": [
+                    "portalKowlRedirectRegex",
+                    "portalKowlReplacePath"
+                ],
+                "rule": "PathPrefix('/ips/portal-messaging')",
+                "service": "portal-kowl-proxy"
+            },
+            {
+                "name": "portal-pgadmin-proxy",
+                "middlewares": ["portalPgadminRedirectRegex"],
+                "rule": "PathPrefix('/ips/portal-database')",
+                "service": "portal-pgadmin-proxy"
             }
         ],
 
@@ -191,6 +207,40 @@
             },
 
             {
+                "name": "portalKowlRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/portal-messaging)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "portalKowlReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/ips/portal-messaging/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+
+            {
+                "name": "portalPgadminRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/portal-database)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "portalPgadminReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/ips/portal-database/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+
+            {
                 "name": "sessionTerminate",
                 "type": "controlApi",
                 "options": {
@@ -261,6 +311,25 @@
                     {
                         "host": "${PORTAL_GATEWAY_CONTENT_HOST}",
                         "port": "${PORTAL_GATEWAY_CONTENT_PORT}"
+                    }
+                ]
+            },
+
+            {
+                "name": "portal-kowl-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_PORTAL_KOWL_HOST}",
+                        "port": "${PORTAL_GATEWAY_PORTAL_KOWL_PORT}"
+                    }
+                ]
+            },
+            {
+                "name": "portal-pgadmin-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_PORTAL_PGADMIN_HOST}",
+                        "port": "${PORTAL_GATEWAY_PORTAL_PGADMIN_PORT}"
                     }
                 ]
             }

@@ -30,12 +30,10 @@ public class BearerOnlyMiddleware implements Middleware {
 
     public BearerOnlyMiddleware(AuthenticationHandler authHandler, boolean optional) {
         this.authHandler = authHandler;
-
         this.optional = optional;
         if (optional) {
             LOGGER.info("constructor: Requests are not required to carry a 'Authorization' header");
         }
-
     }
 
     @Override
@@ -50,9 +48,13 @@ public class BearerOnlyMiddleware implements Middleware {
             ctx.next();
             return;
         }
+
         LOGGER.debug("handle: Handling jwt auth request");
         authHandler.handle(ctx);
-
+        if (ctx.failed()) {
+            LOGGER.warn("handle: Handling jwt auth request failed with '{}'", ctx.failure().getMessage());
+            return;
+        }
         LOGGER.debug("handle: Handled jwt auth request");
     }
 
