@@ -236,7 +236,7 @@
             },
             {
                 "name": "portalPgadminReplacePath",
-                "type": "redirectRegex",
+                "type": "replacePathRegex",
                 "options": {
                     "regex": "/ips/portal-database/(.*)",
                     "replacement": "/$1"
