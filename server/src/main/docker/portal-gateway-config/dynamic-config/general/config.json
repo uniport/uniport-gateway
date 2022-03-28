@@ -102,7 +102,10 @@
             },
             {
                 "name": "portal-pgadmin-proxy",
-                "middlewares": ["portalPgadminRedirectRegex"],
+                "middlewares": [
+                    "portalPgadminRedirectRegex",
+                    "portalPgadminOauth2"
+                ],
                 "rule": "PathPrefix('/ips/portal-database')",
                 "service": "portal-pgadmin-proxy"
             }
