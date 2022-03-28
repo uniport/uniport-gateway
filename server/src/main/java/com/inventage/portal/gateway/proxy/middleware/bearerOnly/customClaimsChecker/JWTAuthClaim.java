@@ -7,17 +7,21 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 
-
+/**
+In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
+This class is a copy of its superclass, with the difference that in the create method we return our customized implementation for the jwt verification
+ */
 public interface JWTAuthClaim extends JWTAuth {
 
     /**
-     * Create a JWT auth provider
+     * Create a JWT auth provider, call our custom implementation
      *
      * @param vertx the Vertx instance
      * @param config  the config
      * @return the auth provider
      */
     static JWTAuthProviderImpl create(Vertx vertx, JWTAuthOptions config) {
+        //Return our custom implementation
         return new JWTAuthClaimProviderImpl(vertx, config);
     }
 

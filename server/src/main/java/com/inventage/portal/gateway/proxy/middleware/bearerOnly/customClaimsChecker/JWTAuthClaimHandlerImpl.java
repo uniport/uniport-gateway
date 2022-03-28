@@ -10,7 +10,10 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 
-
+/**
+ In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
+ This class is a copy of its superclass, with the difference that we extend from our custom HTTPAuthHandler
+ */
 public class JWTAuthClaimHandlerImpl extends HTTPAuthClaimHandler<JWTAuth> implements JWTAuthHandler {
 
 

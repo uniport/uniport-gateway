@@ -8,7 +8,10 @@ import io.vertx.ext.auth.JWTOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ The JWTOptions are part of the authentication configuration. By default, JWTOptions does not support custom claims.
+ We extend the JWTOptions by adding a list of our custom claims.
+ */
 public class JWTClaimOptions extends JWTOptions {
 
     private final List<JWTClaim> claimList = new ArrayList<>();

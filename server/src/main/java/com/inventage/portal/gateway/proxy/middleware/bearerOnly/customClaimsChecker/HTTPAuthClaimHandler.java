@@ -11,8 +11,11 @@ import io.vertx.ext.web.handler.impl.AuthenticationHandlerImpl;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 /**
- * HTTPAuthorizationHandler's constructor is not public, hence we copy the class and make our version's constructor public.
- * Required for the custom JWTClaimHandlerImpl implementation
+ In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
+ This class is a copy of its superclass, except that its constructor is public.
+
+ HTTPAuthorizationHandler's constructor is not public, hence we copy the class and make our version's constructor public.
+ Required for our custom JWTClaimHandlerImpl implementation
  */
 public abstract class HTTPAuthClaimHandler<T extends AuthenticationProvider> extends AuthenticationHandlerImpl<T> {
 
@@ -94,11 +97,6 @@ public abstract class HTTPAuthClaimHandler<T extends AuthenticationProvider> ext
         }
     }
 
-    /**
-     * Returns
-     * @param context
-     * @return
-     */
     @Override
     public String authenticateHeader(RoutingContext context) {
         if (realm != null && realm.length() > 0) {
