@@ -1,30 +1,24 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.httpServer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import com.inventage.portal.gateway.TestUtils;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
@@ -98,84 +92,82 @@ public class BearerOnlyMiddlewareTest {
     private static final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
     private static final List<String> expectedAudience = List.of("test-audience");
 
-    private HttpServer server;
     private int port;
 
     @BeforeEach
-    public void setup(Vertx vertx) throws Exception {
-        JWTAuth authProvider = JWTAuth.create(vertx,
+    public void setup() throws Exception {
+        port = TestUtils.findFreePort();
+    }
+
+    @Test
+    public void noBearer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        httpServer(vertx, port).withBearerOnlyMiddleware(jwtAuth(vertx), false)
+                // when
+                .doRequest(testCtx, new RequestOptions(), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void invalidSignature(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        httpServer(vertx, port).withBearerOnlyMiddleware(jwtAuth(vertx), false)
+                // when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidSignatureToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void issuerMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        httpServer(vertx, port).withBearerOnlyMiddleware(jwtAuth(vertx), false)
+                // when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidIssuerToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void audienceMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        httpServer(vertx, port).withBearerOnlyMiddleware(jwtAuth(vertx), false)
+                // when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidAudienceToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void validWithRSA256_(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        httpServer(vertx, port).withBearerOnlyMiddleware(jwtAuth(vertx), false)
+                // when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+
+    private JWTAuth jwtAuth(Vertx vertx) {
+        return JWTAuth.create(vertx,
                 new JWTAuthOptions()
                         .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
                         .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));
-        boolean optional = false;
-
-        BearerOnlyMiddleware bearerOnly = new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional);
-
-        Handler<RoutingContext> endHandler = ctx -> ctx.response().setStatusCode(200).end("ok");
-
-        Router router = Router.router(vertx);
-        router.route().handler(bearerOnly).handler(endHandler);
-
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        port = TestUtils.findFreePort();
-        server = vertx.createHttpServer().requestHandler(req -> {
-            router.handle(req);
-        }).listen(port, ready -> {
-            if (ready.failed()) {
-                throw new RuntimeException(ready.cause());
-            }
-            latch.countDown();
-        });
-
-        latch.await();
     }
 
-    @AfterEach
-    public void tearDown() throws Exception {
-        server.close();
-    }
-
-    @Test
-    public void noBearer(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions();
-        doRequest(vertx, testCtx, reqOpts, 401);
-    }
-
-    @Test
-    public void invalidSignature(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                "Bearer " + invalidSignatureToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
-    }
-
-    @Test
-    public void issuerMismatch(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                "Bearer " + invalidIssuerToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
-    }
-
-    @Test
-    public void audienceMismatch(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                "Bearer " + invalidAudienceToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
-    }
-
-    @Test
-    public void validWithRSA256(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + validToken);
-        doRequest(vertx, testCtx, reqOpts, 200);
-    }
-
-    void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
-        reqOpts.setHost(host).setPort(port).setURI("/").setMethod(HttpMethod.GET);
-        vertx.createHttpClient().request(reqOpts).compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-            testCtx.verify(() -> {
-                assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
-            });
-            testCtx.completeNow();
-        }));
+    private String bearer(String value) {
+        return "Bearer " + value;
     }
 }
