@@ -22,6 +22,7 @@ import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import net.minidev.json.JSONArray;
+import org.apache.commons.compress.archivers.dump.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
- This class is a copy of its superclass, with the difference that in the create method we return our customized implementation for the jwt verification
- We extend the built-in JWTAuth verifier to support further claims checks.
+ * In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
+ * This class is a copy of its superclass, with the difference that in the create method we return our customized implementation for the jwt verification
+ * We extend the built-in JWTAuth verifier to support further claims checks.
  */
 
 public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
@@ -135,7 +136,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                     //Verify if the value stored in that path complies to the claim.
                     if (!verifyClaim(payloadValue, otherClaim.value, otherClaim.operator)) {
                         resultHandler.handle(Future.failedFuture(ERROR_MESSAGE));
-                        throw new RuntimeException(String.format("%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
+                        throw new IllegalStateException(String.format("%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
                                 ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
                     }
                 }
@@ -147,7 +148,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         }
     }
 
-      private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator) throws JsonProcessingException {
+    private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator) throws JsonProcessingException {
 
         //We need to convert the dynamic type of the payload to ensure compatibility when using method calls from external libraries.
         payloadValue = convertPayloadType(payloadValue);
@@ -165,7 +166,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
             JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimContains(payloadArray, claimValue);
         } else {
-            throw new RuntimeException(String.format("%s. No support for the following operator: %s", ERROR_MESSAGE, operator));
+            throw new IllegalStateException(String.format("%s. No support for the following operator: %s", ERROR_MESSAGE, operator));
         }
     }
 
@@ -178,7 +179,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        //throw new RuntimeException(String.format("%s. Claim and payload value are not equal. Path: %s, Claim: %s, Payload: %s",claimPath, ERROR_MESSAGE, payloadValue, claimValue));
         return mapper.readTree(payloadValue.toString()).equals(mapper.readTree(claimValue.toString()));
     }
 
@@ -196,7 +196,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 }
             }
             return false;
-            //throw new RuntimeException(String.format("%s. Payload is not contained in claim. Path: %s, Claim: %s, Payload: %s",claimPath, ERROR_MESSAGE, claimArray, claimValue));
         }
     }
 
@@ -215,7 +214,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
             //If the entry has been found, the code will terminate before reaching this statement
             if (!found) {
                 return false;
-                //throw new RuntimeException(String.format("%s. Payload is not a subset of claim. Path: %s, Claim: %s, Payload: %s",claimPath, ERROR_MESSAGE, claimArray, payloadArray));
             }
         }
         return true;

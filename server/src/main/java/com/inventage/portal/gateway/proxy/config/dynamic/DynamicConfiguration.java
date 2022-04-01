@@ -492,41 +492,39 @@ public class DynamicConfiguration {
                         }
                     }
                     JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_CLAIMS);
-                    if(claims != null){
-                        if(claims.size() == 0){
+                    if (claims != null) {
+                        if (claims.size() == 0) {
                             LOGGER.debug("Claims is empty");
                             //return Future.failedFuture(String.format("%s: Empty claims defined.", mwType));
                         }
 
-                        for (Object claim: claims.getList()){
-                            if (claim instanceof Map){
+                        for (Object claim : claims.getList()) {
+                            if (claim instanceof Map) {
                                 claim = new JsonObject((Map<String, Object>) claim);
                             }
-                            if (!(claim instanceof JsonObject)){
+                            if (!(claim instanceof JsonObject)) {
                                 return Future.failedFuture("Claim is required to be a JsonObject");
-                            }
-                            else{
+                            } else {
                                 JsonObject cObj = (JsonObject) claim;
-                                if (cObj.size() != 3){
-                                    return Future.failedFuture(String.format("%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",mwType));
+                                if (cObj.size() != 3) {
+                                    return Future.failedFuture(String.format("%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value", mwType));
                                 }
-                                if(!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE)))
-                                {
-                                    return Future.failedFuture(String.format("%s: Claim is missing at least 1 key. Required keys: %s, %s, %s",mwType,
+                                if (!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))) {
+                                    return Future.failedFuture(String.format("%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH, MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
                                 }
 
-                                if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null){
+                                if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null) {
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
                                 }
-                                if(cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null){
+                                if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null) {
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
-                                }else{
+                                } else {
                                     //TODO: ? Extend this check in case that we need to support more than the equals and contain operator
                                     String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
-                                    if(! (operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))){
+                                    if (!(operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
                                         return Future.failedFuture(String.format("%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s", mwType,
                                                 MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, operator,
                                                 MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
@@ -535,7 +533,7 @@ public class DynamicConfiguration {
 
                             }
                         }
-                    }else{
+                    } else {
                         LOGGER.debug("No custom claims defined!");
                     }
 
@@ -578,7 +576,8 @@ public class DynamicConfiguration {
 
                     break;
                 }
-                case MIDDLEWARE_OAUTH2: case MIDDLEWARE_OAUTH2_REGISTRATION: {
+                case MIDDLEWARE_OAUTH2:
+                case MIDDLEWARE_OAUTH2_REGISTRATION: {
                     String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
                     if (clientID == null || clientID.length() == 0) {
                         return Future.failedFuture(String.format("%s: No client ID defined", mwType));
@@ -640,13 +639,13 @@ public class DynamicConfiguration {
                         JsonObject whithelistedCookie = whithelistedCookies.getJsonObject(j);
                         if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
                                 || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
-                                        .isEmpty()) {
+                                .isEmpty()) {
                             return Future.failedFuture(
                                     String.format("%s: whithelisted cookie name has to contain a value", mwType));
                         }
                         if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
                                 || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
-                                        .isEmpty()) {
+                                .isEmpty()) {
                             return Future.failedFuture(
                                     String.format("%s: whithelisted cookie path has to contain a value", mwType));
                         }
