@@ -39,8 +39,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_origin_allowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        httpServer(vertx, port)
-                .withCorsMiddleware("http://portal.minikube")
+        httpServer(vertx, port).withCorsMiddleware("http://portal.minikube")
                 // when
                 .doRequest(testCtx, new RequestOptions().addHeader(ORIGIN, "http://portal.minikube"), (resp) -> {
                     // then
@@ -54,8 +53,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_all_allowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        httpServer(vertx, port)
-                .withCorsMiddleware("*")
+        httpServer(vertx, port).withCorsMiddleware("*")
                 // when
                 .doRequest(testCtx, new RequestOptions().addHeader(ORIGIN, "http://other.com"), (resp) -> {
                     // then
@@ -69,8 +67,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_origin_not_allowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        httpServer(vertx, port)
-                .withCorsMiddleware("http://portal.minikube")
+        httpServer(vertx, port).withCorsMiddleware("http://portal.minikube")
                 // when
                 .doRequest(testCtx, new RequestOptions().addHeader(ORIGIN, "http://bad.com"), (resp) -> {
                     // then
@@ -82,8 +79,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_OPTIONS_no_origin2(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        httpServer(vertx, port)
-                .withCorsMiddleware("http://portal.minikube")
+        httpServer(vertx, port).withCorsMiddleware("http://portal.minikube")
                 // when
                 .doRequest(testCtx, new RequestOptions(), (resp) -> {
                     // then
