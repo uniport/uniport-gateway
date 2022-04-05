@@ -13,7 +13,13 @@ mvn clean package
 ```
 
 To successfully compile a JAR to a binary, we need to configure the GraalVM native image tooling to work with reflection, incomplete classpath issues and unsafe memory access.
-This configuration needs to be done for our app and all dependencies. This is the hairy part. Luckily, [GraalVM provides a native-image-agent](https://www.graalvm.org/reference-manual/native-image/BuildConfiguration/#assisted-configuration-of-native-image-builds) to help creating these configurations. Unfortunately, this step requires [GraalVM installed](https://www.graalvm.org/docs/getting-started/#install-graalvm) locally.
+This configuration needs to be done for our app and all dependencies. This is the hairy part. Luckily, [GraalVM provides a native-image-agent](https://www.graalvm.org/reference-manual/native-image/BuildConfiguration/#assisted-configuration-of-native-image-builds) to help creating these configurations.
+
+Unfortunately, this step requires
+* [GraalVM](https://www.graalvm.org/docs/getting-started/#install-graalvm) and
+* [Native Image](https://www.graalvm.org/22.0/docs/getting-started/#native-images)
+
+installed locally.
 
 The following commands assume you are in the project root folder.
 
