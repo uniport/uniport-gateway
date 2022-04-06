@@ -3,11 +3,9 @@ package com.inventage.portal.gateway.proxy.middleware.mock;
 
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
-import org.apache.commons.collections4.MapIterator;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import java.util.HashMap;
 import java.util.Map;
 
 public class TestBearerOnlyJWTProvider {
@@ -20,6 +18,10 @@ public class TestBearerOnlyJWTProvider {
         System.setProperty("smallrye.jwt.new-token.lifespan", "" + (1*60*60*24*365));
     }
 
+    public static void main(String[] args) {
+        String token = signToken(new HashMap<String, Object>());
+        System.out.println(token);
+    }
 
     public static String signToken(Map<String,Object> jsonMap){
         JwtClaimsBuilder builder = Jwt.issuer(ISSUER).subject("admin").preferredUserName("admin");
