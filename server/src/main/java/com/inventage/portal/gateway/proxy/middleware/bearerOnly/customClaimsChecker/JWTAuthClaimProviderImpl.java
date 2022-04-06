@@ -22,7 +22,6 @@ import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import net.minidev.json.JSONArray;
-import org.apache.commons.compress.archivers.dump.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
