@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -33,6 +35,11 @@ public class MiddlewareServerBuilder {
     public MiddlewareServer withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) throws InterruptedException {
         return withMiddleware(new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional));
     }
+
+    public MiddlewareServer withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider, boolean optional) throws InterruptedException{
+        return withMiddleware(new BearerOnlyMiddleware(JWTAuthClaimHandler.create(authProvider) , optional));
+    }
+
 
     public MiddlewareServer withMiddleware(Middleware middleware) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);

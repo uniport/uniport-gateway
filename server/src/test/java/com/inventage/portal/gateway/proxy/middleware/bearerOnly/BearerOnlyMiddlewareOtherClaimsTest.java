@@ -1,30 +1,26 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.*;
-import io.vertx.core.Handler;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
+import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.httpServer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -37,9 +33,6 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     static {
         System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
     }
-
-    private static final String host = "localhost";
-
 
     private static final String publicKeyRS256 = "-----BEGIN PUBLIC KEY-----\n" + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z\n" + "1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2v\n" + "IcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5h\n" + "nB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuI\n" + "N5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jW\n" + "yBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hv\n" + "RQIDAQAB\n" + "-----END PUBLIC KEY-----";
 
@@ -136,7 +129,8 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
      * }
      * }'
      */
-    private static final String validToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJCZWFyZXIiLCJleHAiOjE4OTM0NTI0MDAsImlhdCI6MTYyNzA1Mzc0NywiaXNzIjoiaHR0cDovL3Rlc3QuaXNzdWVyOjEyMzQvYXV0aC9yZWFsbXMvdGVzdCIsImF6cCI6InRlc3QtYXV0aG9yaXplZC1wYXJ0aWVzIiwiYXVkIjoiT3JnYW5pc2F0aW9uIiwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSBUZXN0Iiwib3JnYW5pc2F0aW9uIjoicG9ydGFsIiwiZW1haWwtdmVyaWZpZWQiOmZhbHNlLCJhY3IiOjEsInVzZXJzIjp7ImJsYSI6WzEsMiw1LDZdLCJkYXRhIjpbeyJuYW1lIjoiYWxpY2UiLCJhZ2UiOjQyLCJlbWFpbCI6ImFsaWNlQHRlc3QuY2gifSx7Im5hbWUiOiJib2IiLCJhZ2UiOjQzLCJlbWFpbCI6ImJvYkB0ZXN0LmNoIn0seyJuYW1lIjoiZXZlIiwiYWdlIjoyMCwiZW1haWwiOiJldmVAdGVzdC5jaCJ9XX0sImxvdHRvIjpbMSw1LDEyLDIyLDQzLDQ0XSwiaHR0cDovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLXBvcnRhbHVzZXItaWQiOiIxMjM0IiwieC1oYXN1cmEtYWxsb3dlZC1yb2xlcyI6WyJLRVlDTE9BSyIsInBvcnRhbHVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJPcmdhbmlzYXRpb24iOnsicm9sZXMiOiJURU5BTlQifX19.ktCaVHgzgjHMUFSZxqft1AiyTc-5VIn6xj9vYl0aPn2Bgee0Nydupy0_qfwgvSTF7nlui4xhhn9WYhmmKFn30oe_dA20cJHJUyO9MiYe19gExicbNeT0P8PdwBD5uJjG7ngKa0E6Z0aQCCyCLp623Q28_bTwYNRghPAu27Ov59aPwVHIA9uq3rwy5cxvbFyheb5dZ_9J5O1ftrTeJ4jDfkxSB3P0K_DUT1KpZrEb7L03vqt6efWuTo9MchW1zfZDc-K0OBXK0cxGg95GZsvMUJE0EGyzKWq2AaXqLEWes266a0QFr1MdQd10-KyiYcJcswOH2UtRxl7MwTODszTCzA";
+    private static final String validToken =
+            "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJCZWFyZXIiLCJleHAiOjE4OTM0NTI0MDAsImlhdCI6MTYyNzA1Mzc0NywiaXNzIjoiaHR0cDovL3Rlc3QuaXNzdWVyOjEyMzQvYXV0aC9yZWFsbXMvdGVzdCIsImF6cCI6InRlc3QtYXV0aG9yaXplZC1wYXJ0aWVzIiwiYXVkIjoiT3JnYW5pc2F0aW9uIiwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSBUZXN0Iiwib3JnYW5pc2F0aW9uIjoicG9ydGFsIiwiZW1haWwtdmVyaWZpZWQiOmZhbHNlLCJhY3IiOjEsInVzZXJzIjp7ImJsYSI6WzEsMiw1LDZdLCJkYXRhIjpbeyJuYW1lIjoiYWxpY2UiLCJhZ2UiOjQyLCJlbWFpbCI6ImFsaWNlQHRlc3QuY2gifSx7Im5hbWUiOiJib2IiLCJhZ2UiOjQzLCJlbWFpbCI6ImJvYkB0ZXN0LmNoIn0seyJuYW1lIjoiZXZlIiwiYWdlIjoyMCwiZW1haWwiOiJldmVAdGVzdC5jaCJ9XX0sImxvdHRvIjpbMSw1LDEyLDIyLDQzLDQ0XSwiaHR0cDovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLXBvcnRhbHVzZXItaWQiOiIxMjM0IiwieC1oYXN1cmEtYWxsb3dlZC1yb2xlcyI6WyJLRVlDTE9BSyIsInBvcnRhbHVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJPcmdhbmlzYXRpb24iOnsicm9sZXMiOiJURU5BTlQifX19.ktCaVHgzgjHMUFSZxqft1AiyTc-5VIn6xj9vYl0aPn2Bgee0Nydupy0_qfwgvSTF7nlui4xhhn9WYhmmKFn30oe_dA20cJHJUyO9MiYe19gExicbNeT0P8PdwBD5uJjG7ngKa0E6Z0aQCCyCLp623Q28_bTwYNRghPAu27Ov59aPwVHIA9uq3rwy5cxvbFyheb5dZ_9J5O1ftrTeJ4jDfkxSB3P0K_DUT1KpZrEb7L03vqt6efWuTo9MchW1zfZDc-K0OBXK0cxGg95GZsvMUJE0EGyzKWq2AaXqLEWes266a0QFr1MdQd10-KyiYcJcswOH2UtRxl7MwTODszTCzA";
 
     //Testing the whitespace contains function. Removed profile & test from the validToken scope entry.
     private static final String validTokenContainsWhitespaceScope =
@@ -209,101 +203,196 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     private static final JsonObject claimEqualInteger = new JsonObject("{\"claimPath\":\"$['acr']\",\"operator\":\"EQUALS\",\"value\":1}");
 
     /**
+     * "{
+     *  "claimPath":"$['acr']",
+     *  "operator":"EQUALS",
+     *  "value":1
+     *  }"
+     */
+    private static final JsonObject claimEqualObjectDifferentOrder = new JsonObject("{\"claimPath\":\"$['users']\",\"operator\":\"EQUALS\",\"value\":{\n" + "     \"data\":[\n" + "     {\"name\":\"alice\", \"age\":42, \"email\": \"alice@test.ch\"},\n" + "     {\"name\":\"bob\", \"age\": 43, \"email\": \"bob@test.ch\"},\n" + "     {\"name\":\"eve\", \"age\": 20, \"email\": \"eve@test.ch\"}\n" + "     ],\n" + "     \"bla\":[1,2,5,6]    \n" + "     }}");
+
+    /**
+     * {
+     * "claimPath":"$['lotto']",
+     * "operator":"CONTAINS",
+     * "value":[1,5,12,22,43,44,50,59]
+     * }
+     */
+    private static final JsonObject claimContainIntegerArray = new JsonObject("{\"claimPath\":\"$['lotto']\",\"operator\":\"CONTAINS\",\"value\":[1,5,12,22,43,44,50,59]}");
+    /**
+     * {
+     * "claimPath":"$['acr']",
+     * "operator":"CONTAINS",
+     * "value":[1,9]
+     * }
+     */
+    private static final JsonObject claimContainInteger = new JsonObject("{\"claimPath\":\"$['acr']\",\"operator\":\"CONTAINS\",\"value\":[1,9]}");
+    /**
+     * {
+     * "claimPath":"$['scope']",
+     * "operator":"CONTAINS_SUBSTRING_WHITESPACE",
+     * "value":" + "["openid", "email", "profile", "Test"]
+     * }
+     */
+    private static final JsonObject claimContainSubstringWhitespace = new JsonObject("{\"claimPath\":\"$['scope']\",\"operator\":\"CONTAINS_SUBSTRING_WHITESPACE\",\"value\":" + "[\"openid\", \"email\", \"profile\", \"Test\"]}");
+
+
+    /**
      * claimPath is defined according to the Jsonpath standard. To know more on how to formulate specific path or queries, please refer to:
      * https://github.com/json-path/JsonPath
      * or
      */
 
 
-    private static final JsonObject claimEqualObjectDifferentOrder = new JsonObject("{\"claimPath\":\"$['users']\",\"operator\":\"EQUALS\",\"value\":{\n" + "     \"data\":[\n" + "     {\"name\":\"alice\", \"age\":42, \"email\": \"alice@test.ch\"},\n" + "     {\"name\":\"bob\", \"age\": 43, \"email\": \"bob@test.ch\"},\n" + "     {\"name\":\"eve\", \"age\": 20, \"email\": \"eve@test.ch\"}\n" + "     ],\n" + "     \"bla\":[1,2,5,6]    \n" + "     }}");
-
-    private static final JsonObject claimContainIntegerArray = new JsonObject("{\"claimPath\":\"$['lotto']\",\"operator\":\"CONTAINS\",\"value\":[1,5,12,22,43,44,50,59]}");
-
-    private static final JsonObject claimContainInteger = new JsonObject("{\"claimPath\":\"$['acr']\",\"operator\":\"CONTAINS\",\"value\":[1,9]}");
-
-    private static final JsonObject claimContainSubstringWhitespace = new JsonObject("{\"claimPath\":\"$['scope']\",\"operator\":\"CONTAINS_SUBSTRING_WHITESPACE\",\"value\":" + "[\"openid\", \"email\", \"profile\", \"Test\"]}");
 
     private static final JsonArray claims = new JsonArray(List.of(claimEqualString, claimContainStringArray, claimEqualObject, claimEqualBoolean, claimEqualInteger, claimEqualObjectDifferentOrder, claimContainIntegerArray, claimContainInteger, claimContainSubstringWhitespace));
 
-    private HttpServer server;
+    private static final JsonObject validPayloadTemplate = new JsonObject("{\n" +
+            "  \"typ\": \"Bearer\",\n" +
+            "  \"exp\": 1893452400,\n" +
+            "  \"iat\": 1627053747,\n" +
+            "  \"iss\": \"http://test.issuer:1234/auth/realms/test\",\n" +
+            "  \"azp\": \"test-authorized-parties\",\n" +
+            "  \"aud\": \"Organisation\",\n" +
+            "  \"scope\": \"openid email profile Test\",\n" +
+            "  \"organisation\": \"portal\",\n" +
+            "  \"email-verified\": false,\n" +
+            "  \"acr\": 1,\n" +
+            "  \"users\": {\n" +
+            "    \"bla\": [\n" +
+            "      1,\n" +
+            "      2,\n" +
+            "      5,\n" +
+            "      6\n" +
+            "    ],\n" +
+            "    \"data\": [\n" +
+            "      {\n" +
+            "        \"name\": \"alice\",\n" +
+            "        \"age\": 42,\n" +
+            "        \"email\": \"alice@test.ch\"\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"name\": \"bob\",\n" +
+            "        \"age\": 43,\n" +
+            "        \"email\": \"bob@test.ch\"\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"name\": \"eve\",\n" +
+            "        \"age\": 20,\n" +
+            "        \"email\": \"eve@test.ch\"\n" +
+            "      }\n" +
+            "    ]\n" +
+            "  },\n" +
+            "  \"lotto\": [\n" +
+            "    1,\n" +
+            "    5,\n" +
+            "    12,\n" +
+            "    22,\n" +
+            "    43,\n" +
+            "    44\n" +
+            "  ],\n" +
+            "  \"http://hasura.io/jwt/claims\": {\n" +
+            "    \"x-hasura-portaluser-id\": \"1234\",\n" +
+            "    \"x-hasura-allowed-roles\": [\n" +
+            "      \"KEYCLOAK\",\n" +
+            "      \"portaluser\"\n" +
+            "    ]\n" +
+            "  },\n" +
+            "  \"resource_access\": {\n" +
+            "    \"Organisation\": {\n" +
+            "      \"roles\": \"TENANT\"\n" +
+            "    }\n" +
+            "  }\n" +
+            "}");
     private int port;
 
     @BeforeEach
-    public void setup(Vertx vertx) throws Exception {
-        JWTAuth claimProvider = JWTAuthClaim.create(vertx, new JWTAuthOptions().addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256)).setJWTOptions(new JWTClaimOptions().setOtherClaims(claims).setIssuer(expectedIssuer).setAudience(expectedAudience)));
-
-        boolean optional = false;
-
-
-        BearerOnlyMiddleware bearerOnly = new BearerOnlyMiddleware(JWTAuthClaimHandler.create(claimProvider), optional);
-
-        Handler<RoutingContext> endHandler = ctx -> ctx.response().setStatusCode(200).end("ok");
-
-        Router router = Router.router(vertx);
-        router.route().handler(bearerOnly).handler(endHandler);
-
-        final CountDownLatch latch = new CountDownLatch(1);
-
+    public void setup() throws Exception {
         port = TestUtils.findFreePort();
-        server = vertx.createHttpServer().requestHandler(req -> router.handle(req)).listen(port, ready -> {
-            if (ready.failed()) {
-                throw new RuntimeException(ready.cause());
-            }
-            latch.countDown();
-        });
-
-        latch.await();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        server.close();
     }
 
     @Test
-    public void validToken(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + validToken);
-        doRequest(vertx, testCtx, reqOpts, 200);
+    public void validToken(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //Throws illegalstateexception: No configproviderresolver implementation found
+        String validStringToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate.getMap());
+        //given
+        httpServer(vertx, port).withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims),false)
+                //when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
-    public void validTokenContainsWhitespaceScope(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + validTokenContainsWhitespaceScope);
-        doRequest(vertx, testCtx, reqOpts, 200);
+    public void validTokenContainsWhitespaceScope(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //given
+        httpServer(vertx, port).withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims),false)
+                //when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenContainsWhitespaceScope)), (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
-    public void pathKeyMismatch(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + invalidPathKeyToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
+    public void pathKeyMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //given
+        httpServer(vertx, port).withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims),false)
+                //when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidPathKeyToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
-    public void booleanValueMismatch(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + invalidBooleanValueToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
+    public void booleanValueMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //given
+        httpServer(vertx, port).withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims),false)
+                //when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidBooleanValueToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
-    public void entryMismatch(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + invalidHasuraClaimsToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
+    public void entryMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //given
+        httpServer(vertx, port).withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims),false)
+                //when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidHasuraClaimsToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
-    public void entryContainsMismatch(Vertx vertx, VertxTestContext testCtx) {
-        RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + invalidRoleToken);
-        doRequest(vertx, testCtx, reqOpts, 401);
+    public void entryContainsMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //given
+        httpServer(vertx, port).withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims),false)
+                //when
+                .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidRoleToken)), (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
+    private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience, JsonArray claims) {
+        return JWTAuthClaim.create(vertx,
+                new JWTAuthOptions()
+                        .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
+                        .setJWTOptions(new JWTClaimOptions().setOtherClaims(claims).setIssuer(expectedIssuer).setAudience(expectedAudience)));
+    }
 
-    void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
-        reqOpts.setHost(host).setPort(port).setURI("/").setMethod(HttpMethod.GET);
-        vertx.createHttpClient().request(reqOpts).compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-            testCtx.verify(() -> {
-                assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
-            });
-            testCtx.completeNow();
-        }));
+    private String bearer(String value) {
+        return "Bearer " + value;
     }
 }
