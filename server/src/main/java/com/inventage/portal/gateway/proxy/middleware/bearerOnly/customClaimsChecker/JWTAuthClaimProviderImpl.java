@@ -56,6 +56,9 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
     public JWTAuthClaimProviderImpl(Vertx vertx, JWTAuthOptions config) {
         super(vertx, config);
         this.jwtOptions = config.getJWTOptions();
+
+        LOGGER.debug("Init ClaimProvider");
+
         // set the nonce algorithm
         jwt.nonceAlgorithm(jwtOptions.getNonceAlgorithm());
 
@@ -117,9 +120,10 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
      */
     @Override
     public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
-        try {
 
+        try {
             TokenCredentials authInfo = (TokenCredentials) credentials;
+
             authInfo.checkValid(null);
 
             final JsonObject payload = jwt.decode(authInfo.getToken());
@@ -200,22 +204,17 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
     private static boolean verifyClaimContainsArray(JsonArray payloadArray, JsonArray claimArray) throws JsonProcessingException {
         //Every entry in the payload array must be contained in the claimed array
-        for (int i = 0; i < payloadArray.size(); i++) {
-            Object payloadItem = payloadArray.getValue(i);
-            boolean found = false;
-            for (int j = 0; j < claimArray.size(); j++) {
-                Object claimItem = claimArray.getValue(j);
+        boolean found = false;
+        for (Object payloadItem : payloadArray) {
+            for (Object claimItem : claimArray) {
                 if (verifyClaimEquals(payloadItem, claimItem)) {
                     found = true;
                     break;
                 }
             }
-            //If the entry has been found, the code will terminate before reaching this statement
-            if (!found) {
-                return false;
-            }
         }
-        return true;
+        //If the entry has been found, the code will terminate before reaching this statement
+        return found;
     }
 
     private static Object convertPayloadType(Object payloadValue) {

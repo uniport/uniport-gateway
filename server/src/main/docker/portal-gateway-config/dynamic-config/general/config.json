@@ -90,12 +90,12 @@
                 "rule": "PathPrefix('/content')",
                 "service": "content-proxy"
             },
-
             {
                 "name": "portal-kowl-proxy",
                 "middlewares": [
                     "portalKowlRedirectRegex",
-                    "portalKowlReplacePath"
+                    "portalKowlReplacePath",
+                    "portalKowlBearerOnly"
                 ],
                 "rule": "PathPrefix('/ips/portal-messaging')",
                 "service": "portal-kowl-proxy"
@@ -104,7 +104,8 @@
                 "name": "portal-pgadmin-proxy",
                 "middlewares": [
                     "portalPgadminRedirectRegex",
-                    "portalPgadminOauth2"
+                    "portalPgadminOauth2",
+                    "portalPgadminBearerOnly"
                 ],
                 "rule": "PathPrefix('/ips/portal-database')",
                 "service": "portal-pgadmin-proxy"
@@ -225,6 +226,26 @@
                     "replacement": "/$1"
                 }
             },
+            {
+                "name": "portalKowlBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": [
+                        "Portal-Messaging"
+                    ],
+                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Messaging']['roles']",
+                            "operator": "CONTAINS",
+                            "value": ["ADMIN"]
+                        }
+                    ]
+                }
+            },
 
             {
                 "name": "portalPgadminRedirectRegex",
@@ -240,6 +261,26 @@
                 "options": {
                     "regex": "/ips/portal-database/(.*)",
                     "replacement": "/$1"
+                }
+            },
+            {
+                "name": "portalPgadminBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": [
+                        "Portal-Database"
+                    ],
+                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Database']['roles']",
+                            "operator": "CONTAINS",
+                            "value": ["ADMIN"]
+                        }
+                    ]
                 }
             },
 
