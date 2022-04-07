@@ -10,7 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
 ### Added
-- (Ongoing) Extending the claim verification in the bearer only middleware. It should be possible to verify arbitrary claims. 
+- Add custom claim check for prefix urls `/ips/portal-database`and `/ips/portal-messaging`. Only jwt with valid claims can access those urls.
+([PORTAL-626](https://issue.inventage.com/browse/PORTAL-626))
+
+- Extend the claim verification in the bearer only middleware. It should be possible to verify arbitrary claims. 
 ([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
 
 ## [3.3.0]-202203091113-353-e988dae - 2022-03-09
