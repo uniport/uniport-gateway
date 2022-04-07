@@ -118,7 +118,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 //when
                 .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidStringToken)), (resp) -> {
                     // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -140,7 +140,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 //when
                 .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
                     // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -163,7 +163,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 //when
                 .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
                     // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }

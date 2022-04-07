@@ -21,6 +21,7 @@ import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
+import io.vertx.ext.web.handler.impl.HttpStatusException;
 import net.minidev.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
     public JWTAuthClaimProviderImpl(Vertx vertx, JWTAuthOptions config) {
         super(vertx, config);
         this.jwtOptions = config.getJWTOptions();
-
-        LOGGER.debug("Init ClaimProvider");
 
         // set the nonce algorithm
         jwt.nonceAlgorithm(jwtOptions.getNonceAlgorithm());
@@ -138,7 +137,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
                     //Verify if the value stored in that path complies to the claim.
                     if (!verifyClaim(payloadValue, otherClaim.value, otherClaim.operator)) {
-                        resultHandler.handle(Future.failedFuture(ERROR_MESSAGE));
                         throw new IllegalStateException(String.format("%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
                                 ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
                     }
@@ -147,7 +145,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
             super.authenticate(credentials, resultHandler);
         } catch (RuntimeException | JsonProcessingException e) {
             LOGGER.debug(e.getMessage());
-            resultHandler.handle(Future.failedFuture(e));
+            resultHandler.handle(Future.failedFuture(new HttpStatusException(403, e)));
         }
     }
 
