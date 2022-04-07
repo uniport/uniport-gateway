@@ -168,7 +168,6 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 });
     }
 
-
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience, JsonArray claims) {
         return JWTAuthClaim.create(vertx, new JWTAuthOptions().addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256)).setJWTOptions(new JWTClaimOptions().setOtherClaims(claims).setIssuer(expectedIssuer).setAudience(expectedAudience)));
     }

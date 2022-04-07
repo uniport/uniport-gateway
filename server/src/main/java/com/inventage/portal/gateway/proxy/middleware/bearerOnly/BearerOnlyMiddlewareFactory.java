@@ -21,14 +21,12 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.handler.AuthenticationHandler;
-import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.codec.BodyCodec;
 
 public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
@@ -69,7 +67,11 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 jwtOptions.setAudience(audience.getList());
                 LOGGER.debug("create: with audience '{}'", audience);
             }
-            jwtOptions.setOtherClaims(additionalClaims);
+
+            if(additionalClaims != null){
+                jwtOptions.setOtherClaims(additionalClaims);
+                LOGGER.debug("create: with claims '{}'", additionalClaims);
+            }
 
             JWTAuthOptions authConfig = new JWTAuthOptions()
                     .addPubSecKey(
