@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.mock;
 
 import io.smallrye.jwt.build.Jwt;
 
+import javax.json.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,5 +30,12 @@ public class TestBearerOnlyJWTProvider {
      */
     public static String signToken(Map<String, Object> jsonMap) {
         return Jwt.sign(jsonMap);
+    }
+    /**
+     * @param jsonObject to be signed.
+     * @return jwt string token, signed with the private key stored under /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
+     */
+    public static String signToken(JsonObject jsonObject){
+        return Jwt.sign(jsonObject);
     }
 }

@@ -200,6 +200,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         //We need to convert the dynamic type of the payload to ensure compatibility when using method calls from external libraries.
         payloadValue = convertPayloadType(payloadValue);
 
+
         if (operator == JWTClaimOperator.EQUALS) {
             return verifyClaimEquals(payloadValue, claimValue);
         } else if (operator == JWTClaimOperator.CONTAINS) {
@@ -231,7 +232,8 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
     private static boolean verifyClaimContains(Object payloadValue, Object claimValue) throws JsonProcessingException {
         //By definition, we require that contains can only work with an array/list.
-        JsonArray claimArray = (JsonArray) claimValue;
+
+        JsonArray claimArray = new JsonArray(claimValue.toString());
 
         if (payloadValue instanceof JsonArray) {
             JsonArray payloadArray = (JsonArray) payloadValue;
@@ -271,6 +273,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         if (payloadValue instanceof JSONArray) {
             payloadValue = new JsonArray(payloadValue.toString());
         }
+
 
         return payloadValue;
     }

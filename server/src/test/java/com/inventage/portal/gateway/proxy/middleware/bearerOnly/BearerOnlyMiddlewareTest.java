@@ -3,13 +3,15 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.httpServer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.google.common.io.Resources;
 import com.inventage.portal.gateway.TestUtils;
 
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
-import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,9 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+
 @ExtendWith(VertxExtension.class)
 public class BearerOnlyMiddlewareTest {
 
@@ -32,21 +37,17 @@ public class BearerOnlyMiddlewareTest {
         System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
     }
 
-    /**
-     * Corresponding private key stored in /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
-     */
-    private static final String publicKeyRS256 = "-----BEGIN PUBLIC KEY-----\n" + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z\n" + "1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2v\n" + "IcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5h\n" + "nB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuI\n" + "N5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jW\n" + "yBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hv\n" + "RQIDAQAB\n" + "-----END PUBLIC KEY-----";
     private static final String publicKeyAlgorithm = "RS256";
 
-    private static final JsonObject validPayloadTemplate = new JsonObject("{\n" +
-            "  \"typ\": \"Bearer\",\n" +
-            "  \"exp\": 1893452400,\n" +
-            "  \"iat\": 1627053747,\n" +
-            "  \"iss\": \"http://test.issuer:1234/auth/realms/test\",\n" +
-            "  \"azp\": \"test-authorized-parties\",\n" +
-            "  \"aud\": \"test-audience\",\n" +
-            "  \"scope\": \"openid email profile Test\"\n" +
-            "}");
+    private static final JsonObject validPayloadTemplate = Json.createObjectBuilder()
+            .add("typ", "Bearer")
+            .add("exp", 1893452400)
+            .add("iat", 1627053747)
+            .add("iss", "http://test.issuer:1234/auth/realms/test")
+            .add("azp", "test-authorized-parties")
+            .add("aud", "test-audience")
+            .add("scope", "openid email profile Test")
+            .build();
 
     private int port;
 
@@ -93,9 +94,12 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject invalidPayload = new JsonObject(validPayloadTemplate.toString());
-        invalidPayload.put("iss", "http://malory.issuer:1234/auth/realms/test");
-        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
+        final JsonObject invalidPayload =
+                Json.createObjectBuilder(validPayloadTemplate)
+                        .add("iss", "http://malory.issuer:1234/auth/realms/test")
+                        .build();
+
+        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         httpServer(vertx, port).withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
                 // when
@@ -109,9 +113,11 @@ public class BearerOnlyMiddlewareTest {
     @Test
     public void audienceMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final JsonObject invalidPayload = new JsonObject(validPayloadTemplate.toString());
-        invalidPayload.put("aud", "malory-audience");
-        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
+        final JsonObject invalidPayload =
+                Json.createObjectBuilder(validPayloadTemplate)
+                        .add("aud", "malory-audience")
+                        .build();
+        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
@@ -128,7 +134,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     public void validWithRSA256_(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate.getMap());
+        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
@@ -144,6 +150,13 @@ public class BearerOnlyMiddlewareTest {
 
 
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience) {
+        String publicKeyRS256 = null;
+        try {
+            publicKeyRS256 = Resources.toString(Resources.getResource("FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem"),
+                    StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return JWTAuthClaim.create(vertx,
                 new JWTAuthOptions()
                         .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
