@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystemException;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
@@ -17,6 +18,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -34,9 +36,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
@@ -51,13 +51,14 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
     private final JWT jwt = new JWT();
 
     private final JWTOptions jwtOptions;
-
+    private static final JsonArray EMPTY_ARRAY = new JsonArray();
+    private final String permissionsClaimKey;
     private static final String ERROR_MESSAGE = "Invalid JWT token: Payload does not comply to claims.";
 
     public JWTAuthClaimProviderImpl(Vertx vertx, JWTAuthOptions config) {
         super(vertx, config);
+        this.permissionsClaimKey = config.getPermissionsClaimKey();
         this.jwtOptions = config.getJWTOptions();
-
         // set the nonce algorithm
         jwt.nonceAlgorithm(jwtOptions.getNonceAlgorithm());
 
@@ -119,14 +120,25 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
      */
     @Override
     public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+        TokenCredentials authInfo;
+        JsonObject payload;
 
         try {
-            TokenCredentials authInfo = (TokenCredentials) credentials;
-
+            authInfo = (TokenCredentials) credentials;
             authInfo.checkValid(null);
+            //Decode throws a IllegalstateException if the jwt format is not correct and a RuntimeException if the signature verification fails.
+            payload = jwt.decode(authInfo.getToken());
+        }catch(IllegalStateException e){
+            LOGGER.debug(e.getMessage());
+            resultHandler.handle(Future.failedFuture(new HttpStatusException(400, e)));
+            return;
+        } catch(RuntimeException e){
+            LOGGER.debug(e.getMessage());
+            resultHandler.handle(Future.failedFuture(new HttpStatusException(401, e)));
+            return;
+        }
 
-            final JsonObject payload = jwt.decode(authInfo.getToken());
-
+        try {
             if (this.jwtOptions instanceof JWTClaimOptions) {
                 final List<JWTClaim> otherClaims = ((JWTClaimOptions) this.jwtOptions).getClaims();
 
@@ -142,7 +154,41 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                     }
                 }
             }
-            super.authenticate(credentials, resultHandler);
+
+            if (jwtOptions.getAudience() != null) {
+                JsonArray target;
+                if (payload.getValue("aud") instanceof String) {
+                    target = new JsonArray().add(payload.getValue("aud", ""));
+                } else {
+                    target = payload.getJsonArray("aud", EMPTY_ARRAY);
+                }
+
+                if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
+                    throw new IllegalStateException("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
+                }
+            }
+
+            if (jwtOptions.getIssuer() != null) {
+                if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
+                    throw new IllegalStateException("Invalid JWT issuer. expected: " + jwtOptions.getIssuer());
+                }
+            }
+
+            if (!jwt.isScopeGranted(payload, jwtOptions)) {
+                throw new IllegalStateException("Invalid JWT token: missing required scopes");
+            }
+
+            final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
+
+            if (user.expired(jwtOptions.getLeeway())) {
+                if (!jwtOptions.isIgnoreExpiration()) {
+                    throw new IllegalStateException("Invalid JWT token: token expired.");
+                }
+            }
+
+            LOGGER.debug("Successful JWT verification");
+            resultHandler.handle(Future.succeededFuture(user));
+
         } catch (RuntimeException | JsonProcessingException e) {
             LOGGER.debug(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(403, e)));
@@ -227,6 +273,100 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         }
 
         return payloadValue;
+    }
+
+    @Override
+    public String generateToken(JsonObject claims, final JWTOptions options) {
+        final JsonObject _claims = claims.copy();
+
+        // we do some "enhancement" of the claims to support roles and permissions
+        if (options.getPermissions() != null && !_claims.containsKey(permissionsClaimKey)) {
+            _claims.put(permissionsClaimKey, new JsonArray(options.getPermissions()));
+        }
+
+        return jwt.sign(_claims, options);
+    }
+
+    @Override
+    public String generateToken(JsonObject claims) {
+        return generateToken(claims, jwtOptions);
+    }
+
+    private static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
+        if (permissionsClaimKey.contains("/")) {
+            return getNestedJsonValue(jwtToken, permissionsClaimKey);
+        }
+        return jwtToken.getJsonArray(permissionsClaimKey, null);
+    }
+
+    private static final Collection<String> SPECIAL_KEYS = Arrays.asList("access_token", "exp", "iat", "nbf");
+
+    /**
+     * @deprecated This method is deprecated as it introduces an exception to the internal representation of {@link User}
+     * object data.
+     * In the future a simple call to User.create() should be used
+     */
+    @Deprecated
+    private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
+        User result = User.fromToken(accessToken);
+
+        // update the attributes
+        result.attributes()
+                .put("accessToken", jwtToken);
+
+        // copy the expiration check properties + sub to the attributes root
+        copyProperties(jwtToken, result.attributes(), "exp", "iat", "nbf", "sub");
+        // as the token is immutable, the decoded values will be added to the principal
+        // with the exception of the above ones
+        for (String key : jwtToken.fieldNames()) {
+            if (!SPECIAL_KEYS.contains(key)) {
+                result.principal().put(key, jwtToken.getValue(key));
+            }
+        }
+
+        // root claim meta data for JWT AuthZ
+        result.attributes()
+                .put("rootClaim", "accessToken");
+
+        JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
+        if (jsonPermissions != null) {
+            for (Object item : jsonPermissions) {
+                if (item instanceof String) {
+                    String permission = (String) item;
+                    result.authorizations().add("jwt-authentication", PermissionBasedAuthorization.create(permission));
+                }
+            }
+        }
+        return result;
+    }
+
+    private static void copyProperties(JsonObject source, JsonObject target, String... keys) {
+        if (source != null && target != null) {
+            for (String key : keys) {
+                if (source.containsKey(key) && !target.containsKey(key)) {
+                    target.put(key, source.getValue(key));
+                }
+            }
+        }
+    }
+
+    private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
+        String[] keys = permissionsClaimKey.split("/");
+        JsonObject obj = null;
+        for (int i = 0; i < keys.length; i++) {
+            if (i == 0) {
+                obj = jwtToken.getJsonObject(keys[i]);
+            } else if (i == keys.length - 1) {
+                if (obj != null) {
+                    return obj.getJsonArray(keys[i]);
+                }
+            } else {
+                if (obj != null) {
+                    obj = obj.getJsonObject(keys[i]);
+                }
+            }
+        }
+        return null;
     }
 
 }
