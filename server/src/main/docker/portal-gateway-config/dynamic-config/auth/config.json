@@ -4,7 +4,10 @@
             {
                 "name": "auth",
                 "rule": "PathPrefix('/auth')",
-                "middlewares": ["authRedirectRegex", "languageCookie"],
+                "middlewares": [
+                    "authRedirectRegex",
+                    "languageCookie"
+                ],
                 "service": "portal-iam"
             }
         ],
@@ -17,17 +20,19 @@
                     "replacement": "/login"
                 }
             },
-
             {
                 "name": "baseAuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "id" }
+                "options": {
+                    "sessionScope": "id"
+                }
             },
-
             {
                 "name": "dashboardAuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "id" }
+                "options": {
+                    "sessionScope": "id"
+                }
             },
             {
                 "name": "dashboardOauth2",
@@ -39,11 +44,12 @@
                     "sessionScope": "Dashboard"
                 }
             },
-
             {
                 "name": "organisationAuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "Organisation" }
+                "options": {
+                    "sessionScope": "Organisation"
+                }
             },
             {
                 "name": "organisationOauth2",
@@ -55,11 +61,12 @@
                     "sessionScope": "Organisation"
                 }
             },
-
             {
                 "name": "documentAuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "Document" }
+                "options": {
+                    "sessionScope": "Document"
+                }
             },
             {
                 "name": "documentOauth2",
@@ -71,13 +78,13 @@
                     "sessionScope": "Document"
                 }
             },
-
             {
                 "name": "filestorageAuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "id" }
+                "options": {
+                    "sessionScope": "id"
+                }
             },
-
             {
                 "name": "portalPgadminOauth2",
                 "type": "oauth2",
@@ -88,13 +95,11 @@
                     "sessionScope": "Portal-Database"
                 }
             },
-
             {
                 "name": "ShowSessionContentMiddleware",
                 "type": "_session_",
                 "options": {}
             },
-
             {
                 "name": "whithelistedCookiesInSessionBag",
                 "type": "sessionBag",
@@ -127,6 +132,50 @@
                 "name": "languageCookie",
                 "type": "languageCookie",
                 "options": {}
+            },
+            {
+                "name": "portalKowlBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": [
+                        "Portal-Messaging"
+                    ],
+                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Messaging']['roles']",
+                            "operator": "CONTAINS",
+                            "value": [
+                                "ADMIN"
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "portalPgadminBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": [
+                        "Portal-Database"
+                    ],
+                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Database']['roles']",
+                            "operator": "CONTAINS",
+                            "value": [
+                                "ADMIN"
+                            ]
+                        }
+                    ]
+                }
             }
         ],
         "services": [

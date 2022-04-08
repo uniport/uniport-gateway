@@ -37,8 +37,8 @@ public class BearerOnlyMiddlewareTest {
         System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
     }
 
+    private static final String publicKeyPath = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String publicKeyAlgorithm = "RS256";
-
     private static final JsonObject validPayloadTemplate = Json.createObjectBuilder()
             .add("typ", "Bearer")
             .add("exp", 1893452400)
@@ -152,7 +152,7 @@ public class BearerOnlyMiddlewareTest {
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience) {
         String publicKeyRS256 = null;
         try {
-            publicKeyRS256 = Resources.toString(Resources.getResource("FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem"),
+            publicKeyRS256 = Resources.toString(Resources.getResource(publicKeyPath),
                     StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();

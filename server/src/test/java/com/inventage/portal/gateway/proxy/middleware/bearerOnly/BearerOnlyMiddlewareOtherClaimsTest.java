@@ -38,12 +38,8 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
     }
 
-    /**
-     * Corresponding private key stored in /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
-     */
-
+    private static final String publicKeyPath = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String publicKeyAlgorithm = "RS256";
-
     private static final JsonObject validPayloadTemplate =
             Json.createObjectBuilder()
                     .add("typ", "Bearer")
@@ -91,7 +87,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                         .add("x-hasura-user-id", 1234)
                         .build()
         );
-        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.valueOf(false));
+        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.FALSE);
         final JWTClaim claimContainInteger = new JWTClaim("$['acr']", JWTClaimOperator.CONTAINS,
                 Json.createArrayBuilder(List.of(1, 9)).build());
         final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
@@ -159,7 +155,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     @Test
     public void booleanValueMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.valueOf(false));
+        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.FALSE);
         final List<JWTClaim> claims = List.of(claimEqualBoolean);
 
         JsonObject invalidPayload =
@@ -216,7 +212,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience, List<JWTClaim> claims) {
         String publicKeyRS256 = null;
         try {
-            publicKeyRS256 = Resources.toString(Resources.getResource("FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem"),
+            publicKeyRS256 = Resources.toString(Resources.getResource(publicKeyPath),
                     StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
