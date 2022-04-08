@@ -1,14 +1,15 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import com.google.common.io.Resources;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaim;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -18,6 +19,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.json.*;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.httpServer;
@@ -37,17 +41,35 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     /**
      * Corresponding private key stored in /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
      */
-    private static final String publicKeyRS256 = "-----BEGIN PUBLIC KEY-----\n" + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z\n" + "1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2v\n" + "IcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5h\n" + "nB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuI\n" + "N5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jW\n" + "yBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hv\n" + "RQIDAQAB\n" + "-----END PUBLIC KEY-----";
 
     private static final String publicKeyAlgorithm = "RS256";
 
-
-    /**
-     * claimPath is defined according to the Jsonpath standard. To know more on how to formulate specific path or queries, please refer to:
-     * https://github.com/json-path/JsonPath
-     * or
-     */
-    private static final JsonObject validPayloadTemplate = new JsonObject("{\n" + "  \"typ\": \"Bearer\",\n" + "  \"exp\": 1893452400,\n" + "  \"iat\": 1627053747,\n" + "  \"iss\": \"http://test.issuer:1234/auth/realms/test\",\n" + "  \"azp\": \"test-authorized-parties\",\n" + "  \"aud\": \"Organisation\",\n" + "  \"scope\": \"openid email profile Test\",\n" + "  \"organisation\": \"portal\",\n" + "  \"email-verified\": false,\n" + "  \"acr\": 1,\n" + "  \"http://hasura.io/jwt/claims\": {\n" + "    \"x-hasura-portaluser-id\": \"1234\",\n" + "    \"x-hasura-allowed-roles\": [\n" + "      \"KEYCLOAK\",\n" + "      \"portaluser\"\n" + "    ]\n" + "  },\n" + "  \"resource_access\": {\n" + "    \"Organisation\": {\n" + "      \"roles\": \"TENANT\"\n" + "    }\n" + "  }\n" + "}");
+    private static final JsonObject validPayloadTemplate =
+            Json.createObjectBuilder()
+                    .add("typ", "Bearer")
+                    .add("exp", 1893452400)
+                    .add("iat", 1627053747)
+                    .add("iss", "http://test.issuer:1234/auth/realms/test")
+                    .add("azp", "test-authorized-parties")
+                    .add("aud", "Organisation")
+                    .add("scope", "openid email profile Test")
+                    .add("organisation", "portal")
+                    .add("email-verified", false)
+                    .add("acr", 1)
+                    .add("http://hasura.io/jwt/claims", Json.createObjectBuilder()
+                            .add("x-hasura-user-id", 1234)
+                            .add("x-hasura-allowed-roles", Json.createArrayBuilder(List.of("KEYCLOAK", "portaluser"))
+                                    .build())
+                            .build()
+                    )
+                    .add("resource_access", Json.createObjectBuilder()
+                            .add("Organisation", Json.createObjectBuilder()
+                                    .add("roles", Json.createArrayBuilder(List.of("TENANT")))
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build();
     private int port;
 
     @BeforeEach
@@ -58,15 +80,25 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     @Test
     public void validToken(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final JsonObject claimEqualString = new JsonObject("{\"claimPath\":\"$['organisation']\",\"operator\":\"EQUALS\",\"value\":\"portal\"}");
-        final JsonObject claimContainRole = new JsonObject("{\"claimPath\":\"$['resource_access']['Organisation']['roles']\",\"operator\":\"CONTAINS\",\"value\":[\"ADMINISTRATOR\",\"TENANT\"]}");
-        final JsonObject claimEqualObject = new JsonObject("{\"claimPath\":\"$['http://hasura.io/jwt/claims']\",\"operator\":\"EQUALS\",\"value\":{\"x-hasura-allowed-roles\":[\"KEYCLOAK\",\"portaluser\"],\"x-hasura-portaluser-id\":\"1234\"}}");
-        final JsonObject claimEqualBoolean = new JsonObject("{\"claimPath\":\"$['email-verified']\",\"operator\":\"EQUALS\",\"value\":false}");
-        final JsonObject claimContainInteger = new JsonObject("{\"claimPath\":\"$['acr']\",\"operator\":\"CONTAINS\",\"value\":[1,9]}");
-        final JsonObject claimContainSubstringWhitespace = new JsonObject("{\"claimPath\":\"$['scope']\",\"operator\":\"CONTAINS_SUBSTRING_WHITESPACE\",\"value\":" + "[\"openid\", \"email\", \"profile\", \"Test\"]}");
-        final JsonArray claims = new JsonArray(List.of(claimEqualString, claimContainRole, claimEqualObject, claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace));
+        final JWTClaim claimEqualString = new JWTClaim("$['organisation']", JWTClaimOperator.EQUALS, "portal");
+        final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']", JWTClaimOperator.CONTAINS,
+                Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
+                        .build()
+        );
+        final JWTClaim claimEqualObject = new JWTClaim("$['http://hasura.io/jwt/claims']", JWTClaimOperator.EQUALS,
+                Json.createObjectBuilder()
+                        .add("x-hasura-allowed-roles", Json.createArrayBuilder(List.of("KEYCLOAK", "portaluser")))
+                        .add("x-hasura-user-id", 1234)
+                        .build()
+        );
+        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.valueOf(false));
+        final JWTClaim claimContainInteger = new JWTClaim("$['acr']", JWTClaimOperator.CONTAINS,
+                Json.createArrayBuilder(List.of(1, 9)).build());
+        final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
+                Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
+        final List<JWTClaim> claims = List.of(claimContainRole, claimEqualString, claimEqualObject, claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
 
-        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate.getMap());
+        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
@@ -79,15 +111,14 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 });
     }
 
-
     @Test
     public void validTokenContainsWhitespaceScope(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final JsonObject claimContainSubstringWhitespace = new JsonObject("{\"claimPath\":\"$['scope']\",\"operator\":\"CONTAINS_SUBSTRING_WHITESPACE\",\"value\":" + "[\"openid\", \"email\", \"profile\", \"Test\"]}");
-        final JsonArray claims = new JsonArray(List.of(claimContainSubstringWhitespace));
+        final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
+                Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
+        final List<JWTClaim> claims = List.of(claimContainSubstringWhitespace);
 
-        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate.getMap());
-
+        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
@@ -103,10 +134,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     @Test
     public void pathKeyMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final JsonObject claimContainRole = new JsonObject("{\"claimPath\":\"$['resource_access']['Organisation']['roles']\"," + "\"operator\":\"CONTAINS\"," + "\"value\":[\"ADMINISTRATOR\",\"TENANT\"]}");
-        final JsonArray claims = new JsonArray(List.of(claimContainRole));
+        final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']", JWTClaimOperator.CONTAINS,
+                Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
+                        .build()
+        );
+        final List<JWTClaim> claims = List.of(claimContainRole);
 
-        final JsonObject invalidPayload = new JsonObject(validPayloadTemplate.toString());
+        final io.vertx.core.json.JsonObject invalidPayload = new io.vertx.core.json.JsonObject(validPayloadTemplate.toString());
         invalidPayload.remove("resource_access");
         final String invalidStringToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
 
@@ -125,12 +159,14 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     @Test
     public void booleanValueMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final JsonObject claimEqualBoolean = new JsonObject("{\"claimPath\":\"$['email-verified']\"," + "\"operator\":\"EQUALS\"," + "\"value\":false}");
-        final JsonArray claims = new JsonArray(List.of(claimEqualBoolean));
+        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.valueOf(false));
+        final List<JWTClaim> claims = List.of(claimEqualBoolean);
 
-        final JsonObject invalidPayload = new JsonObject(validPayloadTemplate.toString());
-        invalidPayload.put("email-verified", true);
-        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
+        JsonObject invalidPayload =
+                Json.createObjectBuilder(validPayloadTemplate).add("email-verified",
+                        true).build();
+
+        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
@@ -147,13 +183,22 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     @Test
     public void entryMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final JsonObject claimContainRole = new JsonObject("{\"claimPath\":\"$['resource_access']['Organisation']['roles']\"," + "\"operator\":\"CONTAINS\"," + "\"value\":[\"ADMINISTRATOR\",\"TENANT\"]}");
+        final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']", JWTClaimOperator.CONTAINS,
+                Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
+                        .build()
+        );
+        final List<JWTClaim> claims = List.of(claimContainRole);
 
-        final JsonArray claims = new JsonArray(List.of(claimContainRole));
 
-        final JsonObject invalidPayload = new JsonObject(validPayloadTemplate.toString());
-        invalidPayload.getJsonObject("resource_access").getJsonObject("Organisation").put("roles", "Root");
-        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
+        JsonObject invalidPayload =
+                Json.createObjectBuilder(validPayloadTemplate)
+                        .add("resource_access", Json.createObjectBuilder()
+                                .add("Organisation", Json.createObjectBuilder()
+                                        .add("roles", "Root")
+                                        .build())
+                                .build())
+                        .build();
+        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
@@ -167,7 +212,15 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 });
     }
 
-    private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience, JsonArray claims) {
+
+    private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience, List<JWTClaim> claims) {
+        String publicKeyRS256 = null;
+        try {
+            publicKeyRS256 = Resources.toString(Resources.getResource("FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem"),
+                    StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return JWTAuthClaim.create(vertx, new JWTAuthOptions().addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256)).setJWTOptions(new JWTClaimOptions().setOtherClaims(claims).setIssuer(expectedIssuer).setAudience(expectedAudience)));
     }
 
