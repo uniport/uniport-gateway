@@ -3,25 +3,29 @@
         "routers": [
             {
                 "name": "root",
-                "middlewares": ["rootRedirectregex"],
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
                 "rule": "Path('/')",
                 "service": "dashboard-proxy"
             },
-
             {
                 "name": "login",
-                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
+                "middlewares": [
+                    "dashboardOauth2",
+                    "loginRedirectRegex"
+                ],
                 "rule": "PathPrefix('/login')",
                 "service": "base-proxy"
             },
-
             {
                 "name": "logout",
-                "middlewares": ["logoutRedirectRegex"],
+                "middlewares": [
+                    "logoutRedirectRegex"
+                ],
                 "rule": "PathPrefix('/logout')",
                 "service": "base-proxy"
             },
-
             {
                 "name": "dashboard-proxy",
                 "middlewares": [
@@ -32,7 +36,6 @@
                 "rule": "PathPrefix('/dashboard')",
                 "service": "dashboard-proxy"
             },
-
             {
                 "name": "base-proxy",
                 "middlewares": [
@@ -44,7 +47,6 @@
                 "rule": "PathPrefix('/base')",
                 "service": "base-proxy"
             },
-
             {
                 "name": "organisation-proxy",
                 "middlewares": [
@@ -57,7 +59,6 @@
                 "rule": "PathPrefix('/organisation')",
                 "service": "organisation-proxy"
             },
-
             {
                 "name": "document-proxy",
                 "middlewares": [
@@ -69,7 +70,6 @@
                 "rule": "PathPrefix('/document')",
                 "service": "document-proxy"
             },
-
             {
                 "name": "filestorage-proxy",
                 "middlewares": [
@@ -80,7 +80,6 @@
                 "rule": "PathPrefix('/filestorage')",
                 "service": "filestorage-proxy"
             },
-
             {
                 "name": "content-proxy",
                 "middlewares": [
@@ -111,14 +110,15 @@
                 "service": "portal-pgadmin-proxy"
             }
         ],
-
         "middlewares": [
             {
                 "name": "rootRedirectregex",
                 "type": "redirectRegex",
-                "options": { "regex": "^/$", "replacement": "/dashboard/" }
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/dashboard/"
+                }
             },
-
             {
                 "name": "loginRedirectRegex",
                 "type": "redirectRegex",
@@ -127,7 +127,6 @@
                     "replacement": "/base/service/redirect"
                 }
             },
-
             {
                 "name": "logoutRedirectRegex",
                 "type": "redirectRegex",
@@ -136,29 +135,38 @@
                     "replacement": "/base/service/logout"
                 }
             },
-
             {
                 "name": "baseRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/base)$", "replacement": "$1/" }
+                "options": {
+                    "regex": "^(/base)$",
+                    "replacement": "$1/"
+                }
             },
             {
                 "name": "baseReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/base/(.*)", "replacement": "/$1" }
+                "options": {
+                    "regex": "/base/(.*)",
+                    "replacement": "/$1"
+                }
             },
-
             {
                 "name": "dashboardRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/dashboard)$", "replacement": "$1/" }
+                "options": {
+                    "regex": "^(/dashboard)$",
+                    "replacement": "$1/"
+                }
             },
             {
                 "name": "dashboardReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/dashboard/(.*)", "replacement": "/$1" }
+                "options": {
+                    "regex": "/dashboard/(.*)",
+                    "replacement": "/$1"
+                }
             },
-
             {
                 "name": "organisationRedirectRegex",
                 "type": "redirectRegex",
@@ -175,22 +183,29 @@
                     "replacement": "/$1"
                 }
             },
-
             {
                 "name": "documentRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/document)$", "replacement": "$1/" }
+                "options": {
+                    "regex": "^(/document)$",
+                    "replacement": "$1/"
+                }
             },
             {
                 "name": "documentReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/document/(.*)", "replacement": "/$1" }
+                "options": {
+                    "regex": "/document/(.*)",
+                    "replacement": "/$1"
+                }
             },
-
             {
                 "name": "filestorageRedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/filestorage)$", "replacement": "$1/" }
+                "options": {
+                    "regex": "^(/filestorage)$",
+                    "replacement": "$1/"
+                }
             },
             {
                 "name": "filestorageReplacePath",
@@ -200,7 +215,6 @@
                     "replacement": "/$1"
                 }
             },
-
             {
                 "name": "contentRedirectRegex",
                 "type": "redirectRegex",
@@ -209,7 +223,6 @@
                     "replacement": "$1/"
                 }
             },
-
             {
                 "name": "portalKowlRedirectRegex",
                 "type": "redirectRegex",
@@ -227,27 +240,6 @@
                 }
             },
             {
-                "name": "portalKowlBearerOnly",
-                "type": "bearerOnly",
-                "options": {
-                    "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}",
-                    "publicKeyAlgorithm": "RS256",
-                    "audience": [
-                        "Portal-Messaging"
-                    ],
-                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}",
-                    "claims": [
-                        {
-                            "claimPath": "$['resource_access']['Portal-Messaging']['roles']",
-                            "operator": "CONTAINS",
-                            "value": ["ADMIN"]
-                        }
-                    ]
-                }
-            },
-
-            {
                 "name": "portalPgadminRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
@@ -264,27 +256,6 @@
                 }
             },
             {
-                "name": "portalPgadminBearerOnly",
-                "type": "bearerOnly",
-                "options": {
-                    "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}",
-                    "publicKeyAlgorithm": "RS256",
-                    "audience": [
-                        "Portal-Database"
-                    ],
-                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}",
-                    "claims": [
-                        {
-                            "claimPath": "$['resource_access']['Portal-Database']['roles']",
-                            "operator": "CONTAINS",
-                            "value": ["ADMIN"]
-                        }
-                    ]
-                }
-            },
-
-            {
                 "name": "sessionTerminate",
                 "type": "controlApi",
                 "options": {
@@ -297,7 +268,6 @@
                 "options": {}
             }
         ],
-
         "services": [
             {
                 "name": "dashboard-proxy",
@@ -308,7 +278,6 @@
                     }
                 ]
             },
-
             {
                 "name": "base-proxy",
                 "servers": [
@@ -318,7 +287,6 @@
                     }
                 ]
             },
-
             {
                 "name": "organisation-proxy",
                 "servers": [
@@ -328,7 +296,6 @@
                     }
                 ]
             },
-
             {
                 "name": "document-proxy",
                 "servers": [
@@ -338,7 +305,6 @@
                     }
                 ]
             },
-
             {
                 "name": "filestorage-proxy",
                 "servers": [
@@ -348,7 +314,6 @@
                     }
                 ]
             },
-
             {
                 "name": "content-proxy",
                 "servers": [
@@ -358,7 +323,6 @@
                     }
                 ]
             },
-
             {
                 "name": "portal-kowl-proxy",
                 "servers": [
