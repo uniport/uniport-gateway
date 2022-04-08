@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.inventage.portal.gateway.TestUtils;
 
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,7 +101,7 @@ public class BearerOnlyMiddlewareTest {
                 // when
                 .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
                     // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -119,7 +120,7 @@ public class BearerOnlyMiddlewareTest {
                 // when
                 .doRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
                     // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -143,7 +144,7 @@ public class BearerOnlyMiddlewareTest {
 
 
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience) {
-        return JWTAuth.create(vertx,
+        return JWTAuthClaim.create(vertx,
                 new JWTAuthOptions()
                         .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
                         .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));

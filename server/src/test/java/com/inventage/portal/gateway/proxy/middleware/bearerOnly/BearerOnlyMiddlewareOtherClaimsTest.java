@@ -67,7 +67,6 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final JsonArray claims = new JsonArray(List.of(claimEqualString, claimContainRole, claimEqualObject, claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace));
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate.getMap());
-
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
