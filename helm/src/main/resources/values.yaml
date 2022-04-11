@@ -106,6 +106,12 @@ containers:
               value: portal-pgadmin
             - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
               value: "80"
+            - name: PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY
+              value: http://portal-iam:8080/auth/realms/portal
+            - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
+              value: http://portal.minikube/auth/realms/portal
+            - name: PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL
+              value: "false"
         storages: []
         livenessProbe:
             enabled: true

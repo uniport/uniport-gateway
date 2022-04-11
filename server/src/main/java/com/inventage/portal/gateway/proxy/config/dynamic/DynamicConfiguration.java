@@ -466,7 +466,7 @@ public class DynamicConfiguration {
 
                     if (!isBase64 && !isURL) {
                         return Future.failedFuture(String
-                                .format("%s: Public is required to either be base64 encoded or a valid URL", mwType));
+                                .format("%s: Public key is required to either be base64 encoded or a valid URL", mwType));
                     }
 
                     String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
