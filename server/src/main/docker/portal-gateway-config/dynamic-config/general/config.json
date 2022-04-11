@@ -94,6 +94,7 @@
                 "middlewares": [
                     "portalKowlRedirectRegex",
                     "portalKowlReplacePath",
+                    "portalKowlAuthBearer",
                     "portalKowlBearerOnly"
                 ],
                 "rule": "PathPrefix('/ips/portal-messaging')",
@@ -104,6 +105,7 @@
                 "middlewares": [
                     "portalPgadminRedirectRegex",
                     "portalPgadminOauth2",
+                    "portalPgadminAuthBearer",
                     "portalPgadminBearerOnly"
                 ],
                 "rule": "PathPrefix('/ips/portal-database')",

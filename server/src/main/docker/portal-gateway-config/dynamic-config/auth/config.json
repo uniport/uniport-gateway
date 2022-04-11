@@ -149,6 +149,13 @@
                 }
             },
             {
+                "name": "portalKowlAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Organisation"
+                }
+            },
+            {
                 "name": "portalPgadminBearerOnly",
                 "type": "bearerOnly",
                 "options": {
@@ -164,6 +171,13 @@
                             "value": ["ADMIN"]
                         }
                     ]
+                }
+            },
+            {
+                "name": "portalPgadminAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Portal-Database"
                 }
             }
         ],
