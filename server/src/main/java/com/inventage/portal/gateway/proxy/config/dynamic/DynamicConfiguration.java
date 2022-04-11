@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
+import com.jayway.jsonpath.internal.Path;
+import com.jayway.jsonpath.internal.path.PathCompiler;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -517,12 +521,20 @@ public class DynamicConfiguration {
                                 if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null) {
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
+                                } else {
+                                    String path = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
+                                    try {
+                                        Path p =  PathCompiler.compile(path);
+                                        LOGGER.debug(p.toString());
+                                    } catch (RuntimeException e){
+                                        LOGGER.debug(String.format("Invalid claimpath %s", path));
+                                        return Future.failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
+                                    }
                                 }
                                 if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null) {
                                     return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
                                             MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
                                 } else {
-                                    //TODO: ? Extend this check in case that we need to support more than the equals and contain operator
                                     String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
                                     if (!(operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
                                         return Future.failedFuture(String.format("%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s", mwType,
