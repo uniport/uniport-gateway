@@ -52,19 +52,7 @@ public class BearerOnlyMiddleware implements Middleware {
             return;
         }
         LOGGER.debug("handle: Handling jwt auth request");
-        User user = ctx.user();
-        if(user != null) {
-            LOGGER.debug("User before handle '{}'", user.attributes());
-        }else{
-            LOGGER.debug("User before handle is null");
-        }
-        ctx.setUser(null);
         authHandler.handle(ctx);
-        if(ctx.user() != null) {
-            LOGGER.debug("User after handle: '{}'", ctx.user().attributes());
-        }
-        ctx.setUser(user);
-
         LOGGER.debug("handle: Handled jwt auth request");
     }
 

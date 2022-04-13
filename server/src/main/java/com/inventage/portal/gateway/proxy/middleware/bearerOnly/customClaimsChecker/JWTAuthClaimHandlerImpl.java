@@ -4,11 +4,16 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChe
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.JWTAuthHandler;
+import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 /**
  In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
@@ -32,5 +37,54 @@ public class JWTAuthClaimHandlerImpl extends HTTPAuthClaimHandler<JWTAuth> imple
 
             handler.handle(Future.succeededFuture(new TokenCredentials(parseAuthorization.result())));
         });
+    }
+
+    //We override the post authentication because the handle method in the super class calls our authenticate method in the JWTAuthClaimProviderImpl only if the user is not null.    @Override
+    public void postAuthentication(RoutingContext ctx) {
+        HttpServerRequest request = ctx.request();
+        final boolean parseEnded = request.isEnded();
+        if (!parseEnded) {
+            request.pause();
+        }
+        // parse the request in order to extract the credentials object
+        parseCredentials(ctx, res -> {
+            if (res.failed()) {
+                resume(request, parseEnded);
+                processException(ctx, res.cause());
+                return;
+            }
+            // proceed to authN
+            getAuthProvider(ctx).authenticate(res.result(), authN -> {
+                if (authN.succeeded()) {
+                    User authenticated = authN.result();
+                    ctx.setUser(authenticated);
+                    Session session = ctx.session();
+                    if (session != null) {
+                        // the user has upgraded from unauthenticated to authenticated
+                        // session should be upgraded as recommended by owasp
+                        session.regenerateId();
+                    }
+                    // proceed with the router
+                    resume(request, parseEnded);
+                    super.postAuthentication(ctx);
+                } else {
+                    String header = authenticateHeader(ctx);
+                    if (header != null) {
+                        ctx.response()
+                                .putHeader("WWW-Authenticate", header);
+                    }
+                    // to allow further processing if needed
+                    resume(request, parseEnded);
+                    Throwable cause = authN.cause();
+                    processException(ctx, cause instanceof HttpStatusException ?cause:new HttpStatusException(401, cause));
+                }
+            });
+        });
+    }
+    private void resume(HttpServerRequest request, boolean parseEnded) {
+        // resume as the error handler may allow this request to become valid again
+        if (!parseEnded && !request.headers().contains(HttpHeaders.UPGRADE, HttpHeaders.WEBSOCKET, true)) {
+            request.resume();
+        }
     }
 }
