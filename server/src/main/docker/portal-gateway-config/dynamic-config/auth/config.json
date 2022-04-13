@@ -152,7 +152,7 @@
                 "name": "portalKowlAuthBearer",
                 "type": "authorizationBearer",
                 "options": {
-                    "sessionScope": "Organisation"
+                    "sessionScope": "Portal-Messaging"
                 }
             },
             {
