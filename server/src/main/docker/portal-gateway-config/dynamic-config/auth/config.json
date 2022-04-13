@@ -93,6 +93,31 @@
                 }
             },
             {
+                "name": "portalPgadminAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Portal-Database"
+                }
+            },
+            {
+                "name": "portalPgadminBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": ["Portal-Database"],
+                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Database']['roles']",
+                            "operator": "CONTAINS",
+                            "value": ["ADMIN"]
+                        }
+                    ]
+                }
+            },
+            {
                 "name": "ShowSessionContentMiddleware",
                 "type": "_session_",
                 "options": {}
@@ -131,6 +156,23 @@
                 "options": {}
             },
             {
+                "name": "portalKowlOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Portal-Messaging"
+                }
+            },
+            {
+                "name": "portalKowlAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Portal-Messaging"
+                }
+            },
+            {
                 "name": "portalKowlBearerOnly",
                 "type": "bearerOnly",
                 "options": {
@@ -146,38 +188,6 @@
                             "value": ["ADMIN"]
                         }
                     ]
-                }
-            },
-            {
-                "name": "portalKowlAuthBearer",
-                "type": "authorizationBearer",
-                "options": {
-                    "sessionScope": "Portal-Messaging"
-                }
-            },
-            {
-                "name": "portalPgadminBearerOnly",
-                "type": "bearerOnly",
-                "options": {
-                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
-                    "publicKeyAlgorithm": "RS256",
-                    "audience": ["Portal-Database"],
-                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
-                    "claims": [
-                        {
-                            "claimPath": "$['resource_access']['Portal-Database']['roles']",
-                            "operator": "CONTAINS",
-                            "value": ["ADMIN"]
-                        }
-                    ]
-                }
-            },
-            {
-                "name": "portalPgadminAuthBearer",
-                "type": "authorizationBearer",
-                "options": {
-                    "sessionScope": "Portal-Database"
                 }
             }
         ],

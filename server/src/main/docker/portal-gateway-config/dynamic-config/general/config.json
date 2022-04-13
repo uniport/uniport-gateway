@@ -94,6 +94,7 @@
                 "middlewares": [
                     "portalKowlRedirectRegex",
                     "portalKowlReplacePath",
+                    "portalKowlOauth2",
                     "portalKowlAuthBearer",
                     "portalKowlBearerOnly"
                 ],
