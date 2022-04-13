@@ -2,7 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
-import io.vertx.ext.auth.ChainAuth;
+import io.vertx.ext.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +52,13 @@ public class BearerOnlyMiddleware implements Middleware {
             return;
         }
         LOGGER.debug("handle: Handling jwt auth request");
+        User user = ctx.user();
+        LOGGER.debug("Original user: '{}'", ctx.user().attributes());
+        LOGGER.debug("User is null '{}'", user == null);
+        ctx.clearUser();
         authHandler.handle(ctx);
-
+        LOGGER.debug("User after handle: '{}'", ctx.user().attributes());
+        ctx.setUser(user);
         LOGGER.debug("handle: Handled jwt auth request");
     }
 
