@@ -4,7 +4,10 @@
             {
                 "name": "auth",
                 "rule": "PathPrefix('/auth')",
-                "middlewares": ["authRedirectRegex", "languageCookie"],
+                "middlewares": [
+                    "authRedirectRegex",
+                    "languageCookie"
+                ],
                 "service": "portal-iam"
             }
         ],
@@ -105,14 +108,18 @@
                 "options": {
                     "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
                     "publicKeyAlgorithm": "RS256",
-                    "audience": ["Portal-Database"],
+                    "audience": [
+                        "Portal-Database"
+                    ],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
                     "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Portal-Database']['roles']",
                             "operator": "CONTAINS",
-                            "value": ["ADMIN"]
+                            "value": [
+                                "ADMIN"
+                            ]
                         }
                     ]
                 }
@@ -178,14 +185,57 @@
                 "options": {
                     "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
                     "publicKeyAlgorithm": "RS256",
-                    "audience": ["Portal-Messaging"],
+                    "audience": [
+                        "Portal-Messaging"
+                    ],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
                     "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Portal-Messaging']['roles']",
                             "operator": "CONTAINS",
-                            "value": ["ADMIN"]
+                            "value": [
+                                "ADMIN"
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "portalMonitoringOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Portal-Monitoring"
+                }
+            },
+            {
+                "name": "portalMonitoringAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Portal-Monitoring"
+                }
+            },
+            {
+                "name": "portalMonitoringBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": [
+                        "Portal-Monitoring"
+                    ],
+                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Monitoring']['roles']",
+                            "operator": "CONTAINS",
+                            "value": [
+                                "ADMIN"
+                            ]
                         }
                     ]
                 }
