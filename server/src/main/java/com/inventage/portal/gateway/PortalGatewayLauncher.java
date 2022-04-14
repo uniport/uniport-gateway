@@ -1,9 +1,13 @@
 package com.inventage.portal.gateway;
 
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
 import io.vertx.core.Launcher;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +55,10 @@ public class PortalGatewayLauncher extends Launcher {
     @Override
     public void beforeStartingVertx(VertxOptions options) {
         LOGGER.info("beforeStartingVertx");
-        //options.setTracingOptions(new OpenTracingOptions());
+        options.setTracingOptions(new OpenTelemetryOptions(configureOpenTelemetry()));
+    }
+
+    public OpenTelemetry configureOpenTelemetry() {
+            return OpenTelemetrySdkAutoConfiguration.initialize();
     }
 }

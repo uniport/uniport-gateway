@@ -1,33 +1,37 @@
 global:
-  imagePullSecrets:
-    - name: inventage-nexus-registry
+    imagePullSecrets:
+        - name: inventage-nexus-registry
 
 ingress:
-  host: ips.inventage.dev
-  className: nginx
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-  tls:
-    enabled: true
+    host: ips.inventage.dev
+    className: nginx
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls:
+        enabled: true
 
 service:
-  ports:
-    - name: http
-      port: 20000
-    - name: http-debug
-      port: 20099
+    ports:
+        - name: http
+          port: 20000
+        - name: http-debug
+          port: 20099
 
 containers:
-  portal-gateway:
-    envOverride:
-      # HTTP protocol for external access
-      - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
-        value: "https"
-        # HTTP host name for external access
-      - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-        value: "ips.inventage.dev"
-        # HTTP port for external access, must be the same as the exposed port
-      - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-        value: "443"
-      - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
-        value: https://ips.inventage.dev/auth/realms/portal
+    portal-gateway:
+        envOverride:
+              # HTTP protocol for external access
+            - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+              value: "https"
+              # HTTP host name for external access
+            - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+              value: "ips.inventage.dev"
+              # HTTP port for external access, must be the same as the exposed port
+            - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+              value: "443"
+            - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
+              value: "https://ips.inventage.dev/auth/realms/portal"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://portal-monitoring-open-telemetry-collector:4317"

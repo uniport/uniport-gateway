@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Extend the claim verification in the bearer only middleware. It should be possible to verify arbitrary claims. 
 ([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
+- OpenTelemetry: traces and spans are created using opentelemetry sdk and extension of vertx. The configuration of the opentelemetry logic occurs using [opentelemetry sdk autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) ([PORTAL-642](https://issue.inventage.com/browse/PORTAL-642)).
+
+### Removed
+
+- Native build is disabled at the moment, since its image leads to error during health checks on Kubernetes.
+
+### Changed
+
+- Changed `X-IPS-Request-Id` header name to `X-IPS-Trace-Id`.
 
 ## [3.3.0]-202203091113-353-e988dae - 2022-03-09
 

@@ -21,6 +21,7 @@ RUN native-image \
     --initialize-at-run-time=io.netty.resolver \
     --initialize-at-run-time=io.netty.util \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
+    --initialize-at-run-time=io.grpc.netty.shaded.io.netty \
     -H:+ReportExceptionStackTraces \
     -H:IncludeResources='.*/vertx/.*$' \
     -H:ReflectionConfigurationFiles=reflection-config.json \

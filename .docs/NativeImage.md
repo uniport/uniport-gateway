@@ -60,3 +60,4 @@ up
 * [GraalVM: Native Images in Containers](https://cdn.app.compendium.com/uploads/user/e7c690e8-6ff9-102a-ac6d-e4aebca50425/34d3828b-c12e-4c7e-8942-b6b7deb02e12/File/913f2b04a820c11be614de5b371ad626/graalvm__native_images_in_containers.pdf)
 * [Vert.x native image awesomeness!](https://www.jetdrone.xyz/2018/08/10/Vertx-native-image-10mb.html)
 * [Trust me! SSL works on native images](https://www.jetdrone.xyz/2019/04/16/Full-SSL-Trust-in-Native-Images.html)
+* [Fix for io.netty.channel.socket.nio.NioSocketChannel: NioSocketChannel does not have a public non-arg constructor](https://github.com/micronaut-projects/micronaut-core/issues/2516#issuecomment-566184883)
