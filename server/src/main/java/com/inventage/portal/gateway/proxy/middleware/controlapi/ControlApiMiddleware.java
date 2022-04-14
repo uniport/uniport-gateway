@@ -100,7 +100,7 @@ public class ControlApiMiddleware implements Middleware {
                         })
                         .map(auth -> auth.endSessionURL(ctx.user()))
                         .ifPresent(endSessionURL -> {
-                            LOGGER.debug("handleAction: endSessionURL {}", endSessionURL.substring(0, 150) + "...");
+                            LOGGER.debug("handleAction: endSessionURL {}", endSessionURL);
                             webClient.getAbs(endSessionURL).send()
                                     .onSuccess(response -> LOGGER.info("handleAction callback: end_session_endpoint call succeeded"))
                                     .onFailure(throwable -> LOGGER.warn("handleAction callback: end_session_endpoint call failed: {}", throwable.getMessage()));
