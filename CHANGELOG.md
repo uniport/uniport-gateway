@@ -12,10 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add custom claim check for prefix urls `/ips/portal-database`and `/ips/portal-messaging`. Only jwt with valid claims can access those urls.
 ([PORTAL-626](https://issue.inventage.com/browse/PORTAL-626))
-
 - Extend the claim verification in the bearer only middleware. It should be possible to verify arbitrary claims. 
 ([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
 - OpenTelemetry: traces and spans are created using opentelemetry sdk and extension of vertx. The configuration of the opentelemetry logic occurs using [opentelemetry sdk autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) ([PORTAL-642](https://issue.inventage.com/browse/PORTAL-642)).
+- HTTP header `X-Forwarded-Port´ is set for outgoing requests to services ([PORTAL-713](https://issue.inventage.com/browse/PORTAL-713)).
 
 ### Removed
 

@@ -20,8 +20,9 @@ public class ProxyMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
 
-    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     private HttpProxy httpProxy;
 
@@ -37,8 +38,12 @@ public class ProxyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
+        useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
+        useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
+                portFromHostValue(ctx.request().headers().get(X_FORWARDED_HOST),
+                        portFromHostValue(ctx.request().host(), -1))
+        ), ctx.request().headers());
 
         // Some manipulations are
         // * not allowed by Vertx-Web
@@ -58,11 +63,45 @@ public class ProxyMiddleware implements Middleware {
      */
     protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // use
-            LOGGER.debug("handle: using provided header '{}' with '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("useOrSetHeader: using provided header '{}' with '{}'", headerName, headers.get(headerName));
         }
         else { // set
             headers.add(headerName, headerValue);
-            LOGGER.debug("handle: set header '{}' to '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("useOrSetHeader: set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
+    protected void addOrSetHeader(String headerName, String headerValue, MultiMap headers) {
+        if (headers.contains(headerName)) { // add == append
+            String existingHeader = headers.get(headerName);
+            headers.set(headerName, existingHeader + ", " + headerValue);
+            LOGGER.debug("addOrSetHeader: appended to header '{}' to '{}' ", headerName, headers.get(headerName));
+        }
+        else { // set
+            headers.add(headerName, headerValue);
+            LOGGER.debug("addOrSetHeader: set header '{}' to '{}'", headerName, headers.get(headerName));
+        }
+    }
+
+    private int portFromHostValue(String hostToParse, int defaultPort) {
+        if (hostToParse == null) {
+            return -1;
+        } else {
+            int portSeparatorIdx = hostToParse.lastIndexOf(':');
+            if (portSeparatorIdx > hostToParse.lastIndexOf(']')) {
+                return parsePort(hostToParse.substring(portSeparatorIdx + 1), defaultPort);
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    private int parsePort(String portToParse, int defaultPort) {
+        try {
+            return Integer.parseInt(portToParse);
+        } catch (NumberFormatException ignored) {
+            LOGGER.debug("parsePort: failed to parse a port from '{}'", portToParse);
+            return defaultPort;
+        }
+    }
+
 }
