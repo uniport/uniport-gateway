@@ -144,8 +144,10 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             path = "/";
         }
 
-        LOGGER.debug("fetchPublicKeyFromURL: reading public key from URL '{}://{}:{}{}'", protocol, host, port, path);
-        WebClient.create(vertx).get(port, host, path).as(BodyCodec.jsonObject()).send().onSuccess(resp -> {
+        final int iamPort = port;
+        final String iamPath = path;
+        LOGGER.debug("fetchPublicKeyFromURL: reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
+        WebClient.create(vertx).get(iamPort, host, iamPath).as(BodyCodec.jsonObject()).send().onSuccess(resp -> {
             JsonObject json = resp.body();
 
             String publicKey = json.getString("public_key");
@@ -158,7 +160,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             LOGGER.debug("fetchPublicKeyFromURL: Successfully retrieved public key from URL");
             handler.handle(Future.succeededFuture(publicKey));
         }).onFailure(err -> {
-            LOGGER.info("fetchPublicKeyFromURL: Failed to read public key from URL");
+            LOGGER.info("fetchPublicKeyFromURL: Failed to read public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
             handler.handle(Future.failedFuture(err));
         });
     }
