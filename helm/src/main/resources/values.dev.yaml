@@ -34,4 +34,4 @@ containers:
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://portal-monitoring-open-telemetry-collector:4317"
+              value: "http://portal-monitoring-open-telemetry-collector.monitoring:4317"
