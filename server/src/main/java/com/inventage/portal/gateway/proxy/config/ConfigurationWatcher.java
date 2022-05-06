@@ -233,9 +233,11 @@ public class ConfigurationWatcher extends AbstractVerticle {
         for (int i = 0; i < rs.size(); i++) {
             JsonObject r = rs.getJsonObject(i);
             JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
+            String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
             if (rEntrypoints == null || rEntrypoints.size() == 0) {
-                LOGGER.info(
-                        "applyEntrypoints: No entryPoint defined for this router, using the default one(s) instead '{}'",
+                LOGGER.debug(
+                        "applyEntrypoints: No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
+                        routerName,
                         entrypoints.toString());
                 r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
             }
