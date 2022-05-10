@@ -110,7 +110,8 @@
                 "middlewares": [
                     "portalGrafanaOauth2",
                     "portalGrafanaAuthBearer",
-                    "portalGrafanaBearerOnly"
+                    "portalGrafanaBearerOnly",
+                    "portalGrafanaHeaders"
                 ],
                 "rule": "PathPrefix('/ips/portal-monitoring')",
                 "service": "portal-grafana-proxy"
@@ -259,6 +260,15 @@
                 "options": {
                     "regex": "^(/ips/portal-monitoring)$",
                     "replacement": "$1/"
+                }
+            },
+            {
+                "name": "portalGrafanaHeaders",
+                "type": "headers",
+                "options": {
+                    "customresponseheaders": {
+                        "Authorization": ""
+                    }
                 }
             },
             {
