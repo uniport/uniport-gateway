@@ -107,7 +107,7 @@ containers:
             - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
               value: "80"
             - name: PORTAL_GATEWAY_PORTAL_GRAFANA_HOST
-              value: "grafana-service"
+              value: "grafana-service.monitoring"
             - name: PORTAL_GATEWAY_PORTAL_GRAFANA_PORT
               value: "3000"
             - name: "PROXY_BEARER_TOKEN_ISSUER"
