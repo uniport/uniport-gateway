@@ -28,24 +28,29 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
         MultiMap requestHeaders = new HeadersMultiMap();
         MultiMap responseHeaders = new HeadersMultiMap();
 
-        middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST).forEach(entry -> {
-            if (entry.getValue() instanceof String) {
-                requestHeaders.set(entry.getKey(), (String) entry.getValue());
-            } else if (entry.getValue() instanceof Iterable) {
-                requestHeaders.set(entry.getKey(), (Iterable<String>) entry.getValue());
-            } else {
-                LOGGER.warn("create: Invalid header value type: '{}'", entry.getValue());
-            }
-        });
-        middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_RESPONSE).forEach(entry -> {
-            if (entry.getValue() instanceof String) {
-                responseHeaders.set(entry.getKey(), (String) entry.getValue());
-            } else if (entry.getValue() instanceof Iterable) {
-                responseHeaders.set(entry.getKey(), (Iterable<String>) entry.getValue());
-            } else {
-                LOGGER.warn("create: Invalid header value type: '{}'", entry.getValue());
-            }
-        });
+        if (middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST) != null) {
+            middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST).forEach(entry -> {
+                if (entry.getValue() instanceof String) {
+                    requestHeaders.set(entry.getKey(), (String) entry.getValue());
+                } else if (entry.getValue() instanceof Iterable) {
+                    requestHeaders.set(entry.getKey(), (Iterable<String>) entry.getValue());
+                } else {
+                    LOGGER.warn("create: Invalid header value type: '{}'", entry.getValue());
+                }
+            });
+        }
+
+        if (middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_RESPONSE) != null) {
+            middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_RESPONSE).forEach(entry -> {
+                if (entry.getValue() instanceof String) {
+                    responseHeaders.set(entry.getKey(), (String) entry.getValue());
+                } else if (entry.getValue() instanceof Iterable) {
+                    responseHeaders.set(entry.getKey(), (Iterable<String>) entry.getValue());
+                } else {
+                    LOGGER.warn("create: Invalid header value type: '{}'", entry.getValue());
+                }
+            });
+        }
 
         LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_HEADERS);
         return Future.succeededFuture(new HeaderMiddleware(requestHeaders, responseHeaders));
