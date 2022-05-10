@@ -266,7 +266,7 @@
                 "name": "portalGrafanaHeaders",
                 "type": "headers",
                 "options": {
-                    "customresponseheaders": {
+                    "customResponseHeaders": {
                         "Authorization": ""
                     }
                 }
