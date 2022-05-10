@@ -3,26 +3,19 @@
         "routers": [
             {
                 "name": "root",
-                "middlewares": [
-                    "rootRedirectregex"
-                ],
+                "middlewares": ["rootRedirectregex"],
                 "rule": "Path('/')",
                 "service": "dashboard-proxy"
             },
             {
                 "name": "login",
-                "middlewares": [
-                    "dashboardOauth2",
-                    "loginRedirectRegex"
-                ],
+                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
                 "rule": "PathPrefix('/login')",
                 "service": "base-proxy"
             },
             {
                 "name": "logout",
-                "middlewares": [
-                    "logoutRedirectRegex"
-                ],
+                "middlewares": ["logoutRedirectRegex"],
                 "rule": "PathPrefix('/logout')",
                 "service": "base-proxy"
             },
@@ -111,6 +104,17 @@
                 ],
                 "rule": "PathPrefix('/ips/portal-database')",
                 "service": "portal-pgadmin-proxy"
+            },
+            {
+                "name": "portal-grafana-proxy",
+                "middlewares": [
+                    "portalGrafanaRedirectRegex",
+                    "portalGrafanaOauth2",
+                    "portalGrafanaAuthBearer",
+                    "portalGrafanaBearerOnly"
+                ],
+                "rule": "PathPrefix('/ips/portal-monitoring')",
+                "service": "portal-grafana-proxy"
             }
         ],
         "middlewares": [
@@ -251,11 +255,11 @@
                 }
             },
             {
-                "name": "portalPgadminReplacePath",
-                "type": "replacePathRegex",
+                "name": "portalGrafanaRedirectRegex",
+                "type": "redirectRegex",
                 "options": {
-                    "regex": "/ips/portal-database/(.*)",
-                    "replacement": "/$1"
+                    "regex": "^(/ips/portal-monitoring)$",
+                    "replacement": "$1/"
                 }
             },
             {
@@ -341,6 +345,15 @@
                     {
                         "host": "${PORTAL_GATEWAY_PORTAL_PGADMIN_HOST}",
                         "port": "${PORTAL_GATEWAY_PORTAL_PGADMIN_PORT}"
+                    }
+                ]
+            },
+            {
+                "name": "portal-grafana-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_PORTAL_GRAFANA_HOST}",
+                        "port": "${PORTAL_GATEWAY_PORTAL_GRAFANA_PORT}"
                     }
                 ]
             }

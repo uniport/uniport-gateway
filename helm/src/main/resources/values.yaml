@@ -106,6 +106,10 @@ containers:
               value: portal-pgadmin
             - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
               value: "80"
+            - name: PORTAL_GATEWAY_PORTAL_GRAFANA_HOST
+              value: "grafana-service"
+            - name: PORTAL_GATEWAY_PORTAL_GRAFANA_PORT
+              value: "3000"
             - name: "PROXY_BEARER_TOKEN_ISSUER"
               value: "https://ips.inventage.dev/auth/realms/portal"
             - name: PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY
