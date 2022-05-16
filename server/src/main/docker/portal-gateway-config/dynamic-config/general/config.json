@@ -77,7 +77,8 @@
                 "name": "content-proxy",
                 "middlewares": [
                     "contentRedirectRegex",
-                    "ShowSessionContentMiddleware"
+                    "ShowSessionContentMiddleware",
+                    "contentReplacePath"
                 ],
                 "rule": "PathPrefix('/content')",
                 "service": "content-proxy"
@@ -228,6 +229,14 @@
                 "options": {
                     "regex": "^(/content)$",
                     "replacement": "$1/"
+                }
+            },
+            {
+                "name": "contentReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/content/(.*)",
+                    "replacement": "/$1"
                 }
             },
             {
