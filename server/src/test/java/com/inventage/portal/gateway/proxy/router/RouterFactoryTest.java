@@ -92,6 +92,22 @@ public class RouterFactoryTest {
     }
 
     @Test
+    public void configWithServiceAndMoreComplexPathSyntax(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("Path('/.well-known/any-path')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/.well-known/any-path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
     public void configWithEmptyService(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(TestUtils.withRouters(), TestUtils.withMiddlewares(),
                 TestUtils.withServices());
@@ -205,6 +221,24 @@ public class RouterFactoryTest {
             RequestOptions reqOpts = new RequestOptions().setURI("/path");
             doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
             reqOpts.setURI("/path/long");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void pathPrefixRuleWithMoreComplexPathPrefixSyntax(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject config = TestUtils.buildConfiguration(
+                TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
+                        TestUtils.withRouterRule("PathPrefix('/.well-known/any-path')"))),
+                TestUtils.withServices(
+                        TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+            proxyRouter = router;
+            RequestOptions reqOpts = new RequestOptions().setURI("/.well-known/any-path");
+            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
+            reqOpts.setURI("/.well-known/any-path/long");
             doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code());
             testCtx.completeNow();
         }));
