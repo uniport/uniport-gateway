@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * request to the corresponding server. Since Vertx does not allow to manipulate the URI of a
  * request, this manipulation is done in the proxy middleware. The OAuth2 middleware requires to
  * know the public hostname (like localhost or example.com) and the entrypoint port of this
- * application to route all authenticating requests throught this application as well. To avoid path
+ * application to route all authenticating requests through this application as well. To avoid path
  * overlap, routes are sorted, by default, in descending order using rules length. The priority is
  * directly equal to the length of the rule, and so the longest length has the highest priority.
  */
@@ -124,14 +124,14 @@ public class RouterFactory {
             String middlewareName = middlewareNames.getString(j);
             JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
                     DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
-            middlewareFutures.add(createMiddlware(middlewareConfig, router));
+            middlewareFutures.add(createMiddleware(middlewareConfig, router));
         }
 
         String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
         JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
                 DynamicConfiguration.SERVICE_NAME, serviceName);
         JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-        // TODO support multipe servers
+        // TODO support multiple servers
         JsonObject serverConfig = serverConfigs.getJsonObject(0);
 
         // required to be the last middleware
@@ -152,7 +152,7 @@ public class RouterFactory {
         });
     }
 
-    private Future<Middleware> createMiddlware(JsonObject middlewareConfig, Router router) {
+    private Future<Middleware> createMiddleware(JsonObject middlewareConfig, Router router) {
         Promise<Middleware> promise = Promise.promise();
         createMiddleware(middlewareConfig, router, promise);
         return promise.future();
@@ -209,7 +209,7 @@ public class RouterFactory {
     /**
      * Retrieves the session bag options from the configured middlewares.
      * If there are more than one configuration, only the first one is considered.
-     * As a side effect of this methods all session bag configurations are removed
+     * As a side effect of these methods all session bag configurations are removed
      * from the configured middlewares.
      *
      * @param middlewares all configured middlewares
