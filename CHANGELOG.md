@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ([PORTAL-626](https://issue.inventage.com/browse/PORTAL-626))
 - Extend the claim verification in the bearer only middleware. It should be possible to verify arbitrary claims.
 ([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
-- OpenTelemetry: traces and spans are created using OpenTelemetry SDK and extension of Vert.X. The configuration of the OpenTelemetry logic occurs using [OpenTelemetry SDK Autoconfigure](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) ([PORTAL-642](https://issue.inventage.com/browse/PORTAL-642)).
+- OpenTelemetry: traces and spans are created using OpenTelemetry SDK and extension of Vert.x. The configuration of the OpenTelemetry logic occurs using [OpenTelemetry SDK Autoconfigure](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) ([PORTAL-642](https://issue.inventage.com/browse/PORTAL-642)).
 - HTTP header `X-Forwarded-Port` is set for outgoing requests to services ([PORTAL-713](https://issue.inventage.com/browse/PORTAL-713)).
 - Add route to portal-monitoring UI ([PORTAL-695](https://issue.inventage.com/browse/PORTAL-695))
 - Allow literal dot `.` characters in `Path` and `PathPrefix` and `Host` rule values in the router factory.
