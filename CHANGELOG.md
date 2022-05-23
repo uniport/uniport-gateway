@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
-## [4.0.0]-xxx - 2022-05-23
+## [4.0.0]-202205231117-426-efc4093 - 2022-05-23
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17350) -
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~4.0.0-202205231117-426-efc4093~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.0.0-202205231117-426-efc4093)
 
 ### Added
 
