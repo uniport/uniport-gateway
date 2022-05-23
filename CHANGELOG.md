@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Native build is disabled at the moment, since its image leads to error during health checks on Kubernetes.
+- **BREAKING**: Disabled the native image build. The added OpenTelemetry features lead to errors during health checks on Kubernetes.
 
 ### Changed
 
@@ -220,14 +220,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F3.4.0
-[3.4.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.3.0&sourceBranch=refs%2Ftags%2F3.4.0&targetRepoId=596
-[3.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.2.0&sourceBranch=refs%2Ftags%2F3.3.0&targetRepoId=596
-[3.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.1.0&sourceBranch=refs%2Ftags%2F3.2.0&targetRepoId=596
-[3.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.0.0&sourceBranch=refs%2Ftags%2F3.1.0&targetRepoId=596
-[3.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F2.7.0&sourceBranch=refs%2Ftags%2F3.0.0&targetRepoId=596
-[2.7.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F2.6.0&sourceBranch=refs%2Ftags%2F2.7.0&targetRepoId=596
-[2.6.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F2.5.0&sourceBranch=refs%2Ftags%2F2.6.0&targetRepoId=596
+[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F4.0.0
+[4.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.3.0&sourceBranch=refs%2Ftags%2F4.0.0
+[3.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.2.0&sourceBranch=refs%2Ftags%2F3.3.0
+[3.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.1.0&sourceBranch=refs%2Ftags%2F3.2.0
+[3.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.0.0&sourceBranch=refs%2Ftags%2F3.1.0
+[3.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F2.7.0&sourceBranch=refs%2Ftags%2F3.0.0
+[2.7.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F2.6.0&sourceBranch=refs%2Ftags%2F2.7.0
+[2.6.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F2.5.0&sourceBranch=refs%2Ftags%2F2.6.0
 [2.5.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.5.0&targetBranch=refs%2Ftags%2F2.4.1
 [2.4.1]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.4.1&targetBranch=refs%2Ftags%2F2.3.0
 [2.4.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F2.4.0&targetBranch=refs%2Ftags%2F2.3.0
