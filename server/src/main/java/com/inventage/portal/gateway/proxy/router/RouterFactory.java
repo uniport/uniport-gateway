@@ -110,7 +110,7 @@ public class RouterFactory {
         String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
         String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
-        RoutingRule routingRule = parseRule(this.vertx, rule);
+        RoutingRule routingRule = parseRule(rule);
         if (routingRule == null) {
             String errMsg = String.format("Failed to parse rule of router '%s'", routerName);
             LOGGER.warn("createSubRouter: {}", errMsg);
@@ -289,39 +289,29 @@ public class RouterFactory {
         return routers;
     }
 
-    private RoutingRule path(Vertx vertx, String path) {
-        return new RoutingRule() {
-            @Override
-            public Route apply(Router router) {
-                LOGGER.debug("apply: create route with exact path '{}'", path);
-                return router.route(path);
-            }
+    private RoutingRule path(String path) {
+        return router -> {
+            LOGGER.debug("apply: create route with exact path '{}'", path);
+            return router.route(path);
         };
     }
 
-    private RoutingRule pathPrefix(Vertx vertx, String pathPrefix) {
-        return new RoutingRule() {
-            @Override
-            public Route apply(Router router) {
-                LOGGER.debug("apply: create route with path prefix '{}'", pathPrefix);
-                return router.route(pathPrefix);
-            }
+    private RoutingRule pathPrefix(String pathPrefix) {
+        return router -> {
+            LOGGER.debug("apply: create route with path prefix '{}'", pathPrefix);
+            return router.route(pathPrefix);
         };
     }
 
-    private RoutingRule host(Vertx vertx, String host) {
-        return new RoutingRule() {
-            @Override
-            public Route apply(Router router) {
-                LOGGER.debug("apply: create route with host '{}'", host);
-                return router.route().virtualHost(host);
-            }
-
+    private RoutingRule host(String host) {
+        return router -> {
+            LOGGER.debug("apply: create route with host '{}'", host);
+            return router.route().virtualHost(host);
         };
     }
 
-    // only rules like Path("/blub"), PathPrefix('/abc') and Host('example.com') are supported
-    private RoutingRule parseRule(Vertx vertx, String rule) {
+    // only rules like Path("/foo"), PathPrefix('/bar') and Host('example.com') are supported
+    protected RoutingRule parseRule(String rule) {
         Pattern rulePattern = Pattern
                 .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");
         Matcher m = rulePattern.matcher(rule);
@@ -334,7 +324,7 @@ public class RouterFactory {
         String ruleValue = m.group("ruleValue");
         switch (m.group("ruleName")) {
             case "Path": {
-                routingRule = path(vertx, ruleValue);
+                routingRule = path(ruleValue);
                 break;
             }
             case "PathPrefix": {
@@ -342,11 +332,11 @@ public class RouterFactory {
                 String pathPrefix = ruleValue;
                 pathPrefix += "*";
 
-                routingRule = pathPrefix(vertx, pathPrefix);
+                routingRule = pathPrefix(pathPrefix);
                 break;
             }
             case "Host": {
-                routingRule = host(vertx, ruleValue);
+                routingRule = host(ruleValue);
                 break;
             }
             default: {
