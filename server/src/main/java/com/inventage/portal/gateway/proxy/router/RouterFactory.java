@@ -1,33 +1,25 @@
 package com.inventage.portal.gateway.proxy.router;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Essentially it translates the dynamic configuration to what vertx understands. It creates a new
@@ -46,8 +38,8 @@ public class RouterFactory {
     public static final String PUBLIC_URL = "publicUrl";
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
-    private Vertx vertx;
-    private String publicUrl;
+    private final Vertx vertx;
+    private final String publicUrl;
 
     public RouterFactory(Vertx vertx, String publicUrl) {
         this.vertx = vertx;
@@ -74,7 +66,7 @@ public class RouterFactory {
         sortByRuleLength(routers);
 
         LOGGER.debug("createRouter: creating router from config");
-        List<Future> subRouterFutures = new ArrayList<Future>();
+        List<Future> subRouterFutures = new ArrayList<>();
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
             subRouterFutures.add(createSubRouter(routerConfig, middlewares, services, sessionBagOptions));
@@ -98,14 +90,14 @@ public class RouterFactory {
     }
 
     private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-            JsonObject sessionBagOptions) {
+                                           JsonObject sessionBagOptions) {
         Promise<Router> promise = Promise.promise();
         createSubRouter(routerConfig, middlewares, services, sessionBagOptions, promise);
         return promise.future();
     }
 
     private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-            JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
+                                 JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
         String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -119,7 +111,7 @@ public class RouterFactory {
         }
         Route route = routingRule.apply(router);
 
-        List<Future> middlewareFutures = new ArrayList<Future>();
+        List<Future> middlewareFutures = new ArrayList<>();
 
         // TODO maybe move out of the for loop by introducing middlewares per entrypoint
         // required to be the first middleware to guarantee every request is processed
@@ -150,9 +142,7 @@ public class RouterFactory {
         // - all futures are succeeded and completed
         // - any future is failed.
         CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
-            middlewareFutures.forEach(mf -> {
-                route.handler((Handler<RoutingContext>) mf.result());
-            });
+            middlewareFutures.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
             LOGGER.debug("createSubRouter: Middlewares of router '{}' created successfully", routerName);
             handler.handle(Future.succeededFuture(router));
         }).onFailure(cfErr -> {
@@ -169,13 +159,13 @@ public class RouterFactory {
     }
 
     private void createMiddleware(JsonObject middlewareConfig, Router router,
-            Handler<AsyncResult<Middleware>> handler) {
+                                  Handler<AsyncResult<Middleware>> handler) {
         String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
         // needed to ensure authenticating requests are routed through this application
         if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2) || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
-            middlewareOptions.put(PUBLIC_URL, this.publicUrl.toString());
+            middlewareOptions.put(PUBLIC_URL, this.publicUrl);
         }
 
         MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
@@ -186,9 +176,7 @@ public class RouterFactory {
             return;
         }
 
-        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(ar -> {
-            handler.handle(ar);
-        });
+        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(handler);
     }
 
     /**
@@ -232,7 +220,7 @@ public class RouterFactory {
             return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
                     new JsonArray());
         }
-        List<JsonObject> sessionBagMiddlewares = new ArrayList<JsonObject>();
+        List<JsonObject> sessionBagMiddlewares = new ArrayList<>();
         for (int i = 0; i < middlewares.size(); i++) {
             JsonObject middleware = middlewares.getJsonObject(i);
             if (middleware.getString(DynamicConfiguration.MIDDLEWARE_TYPE)
@@ -254,39 +242,33 @@ public class RouterFactory {
     }
 
     /**
-    * To avoid path overlap, routes are sorted, by default, in descending order using rules length.
-    * The priority is directly equal to the length of the rule, and so the longest length has the
-    * highest priority.
-    * Additionally, a priority for each router can be defined. This overwrites priority calculates
-    * by the length of the rule.
-    */
-    private JsonArray sortByRuleLength(JsonArray routers) {
+     * To avoid path overlap, routes are sorted, by default, in descending order using rules length.
+     * The priority is directly equal to the length of the rule, and so the longest length has the
+     * highest priority.
+     * Additionally, a priority for each router can be defined. This overwrites priority calculates
+     * by the length of the rule.
+     */
+    private void sortByRuleLength(JsonArray routers) {
         List<JsonObject> routerList = routers.getList();
 
-        Collections.sort(routerList, new Comparator<JsonObject>() {
+        Collections.sort(routerList, (a, b) -> {
+            String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
+            String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
 
-            @Override
-            public int compare(JsonObject a, JsonObject b) {
-                String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
-                String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
+            int priorityA = ruleA.length();
+            int priorityB = ruleB.length();
 
-                int priorityA = ruleA.length();
-                int priorityB = ruleB.length();
-
-                if (a.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
-                    priorityA = a.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
-                }
-
-                if (b.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
-                    priorityB = b.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
-                }
-
-                return priorityB - priorityA;
+            if (a.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
+                priorityA = a.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
             }
 
+            if (b.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
+                priorityB = b.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+            }
+
+            return priorityB - priorityA;
         });
 
-        return routers;
     }
 
     private RoutingRule path(String path) {

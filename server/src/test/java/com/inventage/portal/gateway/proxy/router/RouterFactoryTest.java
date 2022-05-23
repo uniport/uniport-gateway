@@ -4,6 +4,7 @@ import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.RequestOptions;
@@ -46,9 +47,7 @@ public class RouterFactoryTest {
         final CountDownLatch latch = new CountDownLatch(2);
 
         proxyPort = TestUtils.findFreePort();
-        proxy = vertx.createHttpServer().requestHandler(req -> {
-            proxyRouter.handle(req);
-        }).listen(proxyPort, ready -> {
+        proxy = vertx.createHttpServer().requestHandler(req -> proxyRouter.handle(req)).listen(proxyPort, ready -> {
             if (ready.failed()) {
                 throw new RuntimeException(ready.cause());
             }
@@ -56,9 +55,7 @@ public class RouterFactoryTest {
         });
 
         serverPort = TestUtils.findFreePort();
-        server = vertx.createHttpServer().requestHandler(req -> {
-            req.response().setStatusCode(200).end("ok");
-        }).listen(serverPort, ready -> {
+        server = vertx.createHttpServer().requestHandler(req -> req.response().setStatusCode(200).end("ok")).listen(serverPort, ready -> {
             if (ready.failed()) {
                 throw new RuntimeException(ready.cause());
             }
@@ -71,7 +68,7 @@ public class RouterFactoryTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         proxy.close();
         server.close();
     }
@@ -372,12 +369,10 @@ public class RouterFactoryTest {
         CountDownLatch latch = new CountDownLatch(1);
 
         reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
-        vertx.createHttpClient().request(reqOpts).compose(req -> req.send()).onComplete(testCtx.succeeding(resp -> {
-            testCtx.verify(() -> {
-                assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
-                latch.countDown();
-            });
-        }));
+        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
+            assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
+            latch.countDown();
+        })));
 
         try {
             latch.await();
