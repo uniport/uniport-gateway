@@ -218,6 +218,10 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
+                    <from>
+                        <!-- PORTAL-453: upgrade to Java 17 because of https://github.com/docker/for-mac/issues/6118 -->
+                        <image>registry://docker-registry.inventage.com:10094/eclipse-temurin:17-jre</image>
+                    </from>
                     <to>
                         <image>${docker.push.registry}/${docker.image.name}</image>
                         <tags>
@@ -240,11 +244,22 @@
                             <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
                             <arg>-cluster</arg>
                         </args>
-                        <!-- for enabling remote debugging -->
-                        <!--                        <jvmFlags>-->
-                        <!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>-->
-                        <!--                        </jvmFlags>-->
-
+                        <jvmFlags>
+                            <!-- for using 75% of memory limit as max heap size -->
+                            <jvmFlag>-XX:MaxRAMPercentage=75.0</jvmFlag>
+                            <!-- for printing setting out on VM startup -->
+                            <jvmFlag>-XX:+PrintFlagsFinal</jvmFlag>
+                            <!-- for enabling remote debugging -->
+<!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>&ndash;&gt;-->
+                            <!-- for enabling jmx for jconsole -->
+<!--                            <jvmFlag>-Dcom.sun.management.jmxremote</jvmFlag>-->
+<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.local.only=false</jvmFlag>-->
+<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>-->
+<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.port=9010</jvmFlag>-->
+<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=9010</jvmFlag>-->
+<!--                            <jvmFlag>-Djava.rmi.server.hostname=0.0.0.0</jvmFlag>-->
+<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false'</jvmFlag>-->
+                        </jvmFlags>
                         <environment>
                             <TZ>Europe/Zurich</TZ>
                         </environment>

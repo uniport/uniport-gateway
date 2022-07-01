@@ -5,4 +5,6 @@ services:
         ports:
             # docker-host.port:entrypoint.port, if not equals, docker-host.port must be same as PORTAL_GATEWAY_PUBLIC_PORT
             - "20000:20000"
+            # jmx remote port
+            - "9010:9010"
         mem_limit: '256m'

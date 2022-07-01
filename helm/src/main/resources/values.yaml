@@ -42,9 +42,9 @@ containers:
               port: 20000
         resources:
             requests:
-                memory: "200Mi"
+                memory: "256Mi"
             limits:
-                memory: "500Mi"
+                memory: "256Mi"
         env:
             # HTTP protocol for external access
             - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
