@@ -20,7 +20,7 @@ service:
 containers:
     portal-gateway:
         envOverride:
-              # HTTP protocol for external access
+            # HTTP protocol for external access
             - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
               value: "https"
               # HTTP host name for external access
@@ -35,3 +35,5 @@ containers:
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://portal-monitoring-open-telemetry-collector.monitoring:4317"
+            - name: USE_STRUCTURAL_LOGGING
+              value: "true"
