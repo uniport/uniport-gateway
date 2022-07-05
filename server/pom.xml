@@ -245,8 +245,8 @@
                             <arg>-cluster</arg>
                         </args>
                         <jvmFlags>
-                            <!-- for using 75% of memory limit as max heap size -->
-                            <jvmFlag>-XX:MaxRAMPercentage=75.0</jvmFlag>
+                            <!-- for using 50% of memory limit as max heap size -->
+                            <jvmFlag>-XX:MaxRAMPercentage=50.0</jvmFlag>
                             <!-- for printing setting out on VM startup -->
                             <jvmFlag>-XX:+PrintFlagsFinal</jvmFlag>
                             <!-- for enabling remote debugging -->

@@ -12,7 +12,7 @@ services:
             - "20000"
         env_file:
             - portal-gateway.common.env
-            - portal-gateway.specific.env # deployments must create this file by copying a environment specific file
+            - portal-gateway.specific.env # deployments must create this file by copying an environment specific file
             - secrets.env
         mem_limit: '256m'
 

@@ -7,4 +7,3 @@ services:
             - "20000:20000"
             # jmx remote port
             - "9010:9010"
-        mem_limit: '256m'
