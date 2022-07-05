@@ -28,6 +28,18 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.reactiverse</groupId>
             <artifactId>reactiverse-contextual-logging</artifactId>
         </dependency>
@@ -250,15 +262,15 @@
                             <!-- for printing setting out on VM startup -->
                             <jvmFlag>-XX:+PrintFlagsFinal</jvmFlag>
                             <!-- for enabling remote debugging -->
-<!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>&ndash;&gt;-->
+                            <!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>&ndash;&gt;-->
                             <!-- for enabling jmx for jconsole -->
-<!--                            <jvmFlag>-Dcom.sun.management.jmxremote</jvmFlag>-->
-<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.local.only=false</jvmFlag>-->
-<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>-->
-<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.port=9010</jvmFlag>-->
-<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=9010</jvmFlag>-->
-<!--                            <jvmFlag>-Djava.rmi.server.hostname=0.0.0.0</jvmFlag>-->
-<!--                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false'</jvmFlag>-->
+                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote</jvmFlag>-->
+                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.local.only=false</jvmFlag>-->
+                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>-->
+                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.port=9010</jvmFlag>-->
+                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=9010</jvmFlag>-->
+                            <!--                            <jvmFlag>-Djava.rmi.server.hostname=0.0.0.0</jvmFlag>-->
+                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false'</jvmFlag>-->
                         </jvmFlags>
                         <environment>
                             <TZ>Europe/Zurich</TZ>
