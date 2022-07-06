@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add route to portal-monitoring UI ([PORTAL-695](https://issue.inventage.com/browse/PORTAL-695))
 - Allow literal dot `.` characters in `Path` and `PathPrefix` and `Host` rule values in the router factory.
 - Added multi-architecture builds of docker image ([PORTAL-745](https://issue.inventage.com/browse/PORTAL-745)).
+- Added strucutal logging ([PORTAL-741](https://issue.inventage.com/browse/PORTAL-741)).
 
 ### Removed
 
