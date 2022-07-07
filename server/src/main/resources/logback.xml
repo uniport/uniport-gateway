@@ -16,9 +16,9 @@
                                 "line": "%line",
                                 "method": "%method",
                                 "message": "%message",
-                                "userId": "%vcl{userId}"
+                                "userId": "%vcl{userId}",
                                 "sessionId": "%vcl{sessionId}",
-                                "traceId": "%vcl{traceId}",
+                                "traceId": "%vcl{traceId}"
                             }
                             </pattern>
                         </pattern>
