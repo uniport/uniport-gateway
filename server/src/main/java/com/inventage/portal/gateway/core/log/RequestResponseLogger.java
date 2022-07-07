@@ -60,6 +60,9 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
     }
 
     private String getUserId(User u) {
+        if (u == null) {
+            return "";
+        }
         JsonObject prinicipal = u.principal();
         if (prinicipal == null) {
             return "";
