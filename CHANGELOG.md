@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## 4.1.0-[Unreleased]
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+### Added
+
+- Added multi-architecture builds of docker image ([PORTAL-745](https://issue.inventage.com/browse/PORTAL-745)).
+- Added structural logging ([PORTAL-741](https://issue.inventage.com/browse/PORTAL-741)).
+- Update to Eclipse-Temurin JRE v17 for Docker-Desktop cgroup v2 support & MaxRAMPercentage=50.0 ([PORTAL-453](https://issue.inventage.com/browse/PORTAL-453)).
 
 ## [4.0.0]-202205231117-426-efc4093 - 2022-05-23
 
@@ -25,8 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTTP header `X-Forwarded-Port` is set for outgoing requests to services ([PORTAL-713](https://issue.inventage.com/browse/PORTAL-713)).
 - Add route to portal-monitoring UI ([PORTAL-695](https://issue.inventage.com/browse/PORTAL-695))
 - Allow literal dot `.` characters in `Path` and `PathPrefix` and `Host` rule values in the router factory.
-- Added multi-architecture builds of docker image ([PORTAL-745](https://issue.inventage.com/browse/PORTAL-745)).
-- Added strucutal logging ([PORTAL-741](https://issue.inventage.com/browse/PORTAL-741)).
 
 ### Removed
 
