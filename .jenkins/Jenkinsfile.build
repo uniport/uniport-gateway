@@ -85,7 +85,7 @@ pipeline {
 
                 sh 'mvn help:system'
 
-                mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE], 'clean', 'deploy')
+                mvn(settings: '.jenkins/settings.xml', profiles: '!local', properties: ['java.io.tmpdir': WORKSPACE, 'multiArchBuild': true], 'clean', 'deploy')
 
                 withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
                     script {
