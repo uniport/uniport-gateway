@@ -89,7 +89,7 @@ pipeline {
 
                 withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
                     script {
-                        env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./pom/target/nexus-staging/staging/2784e0aacf5060.properties')
+                        env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./target/nexus-staging/staging/2784e0aacf5060.properties')
                     }
                 }
             }
@@ -214,7 +214,7 @@ def versiontiger(reactorFolder) {
 void setPackageEnvironmentVariables() {
     // @see https://jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#readmavenpom-read-a-maven-project-file
     // @see http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html
-    def pom = readMavenPom file: 'pom/pom.xml'
+    def pom = readMavenPom file: 'pom.xml'
 
     env.PACKAGE_VERSION = pom.version
     env.PACKAGE_GROUP_ID = pom.groupId
