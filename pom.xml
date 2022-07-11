@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.inventage.portal.gateway</groupId>
@@ -30,7 +29,7 @@
 
     <modules>
         <module>server</module>
-<!--        <module>native</module>-->
+        <!--<module>native</module>-->
         <module>docker-compose</module>
         <module>helm</module>
     </modules>
@@ -279,7 +278,7 @@
                     <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.2.1</version>
                     <executions>
                         <execution>
                             <phase>install</phase>
