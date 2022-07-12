@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added structural logging ([PORTAL-741](https://issue.inventage.com/browse/PORTAL-741)).
 - Update to Eclipse-Temurin JRE v17 for Docker-Desktop cgroup v2 support & MaxRAMPercentage=50.0 ([PORTAL-453](https://issue.inventage.com/browse/PORTAL-453)).
 
+  **IMPORTANT**: The `portal-gateway` process needs 256 MB memory when running in a container (`docker-comose` = `mem_limit: '256m'`, `kubernetes` = `rescources: / limits: / memory: "256Mi"`). This also applies when `portal-gateway` is used as a proxy in a microservice. The JVM inside the container image is configured in a way that the maximum amount of memory allocated for the heap is 50%.
+
 ## [4.0.0]-202205231117-426-efc4093 - 2022-05-23
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17350) -
