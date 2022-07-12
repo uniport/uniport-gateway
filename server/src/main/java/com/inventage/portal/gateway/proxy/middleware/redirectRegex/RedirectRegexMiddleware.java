@@ -2,10 +2,10 @@ package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
 import java.util.regex.Pattern;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
 import io.vertx.ext.web.RoutingContext;
 
@@ -30,14 +30,14 @@ public class RedirectRegexMiddleware implements Middleware {
 
         // If the Regexp doesn't match, skip to the next handler.
         if (!this.pattern.matcher(oldURI).matches()) {
-            LOGGER.debug("handle: Skipping redirect of non maching URI '{}'", oldURI);
+            LOGGER.debug("Skipping redirect of non maching URI '{}'", oldURI);
             ctx.next();
             return;
         }
 
         String newURI = this.pattern.matcher(oldURI).replaceAll(this.replacement);
 
-        LOGGER.debug("handle: Redirecting from '{}' to '{}'", oldURI, newURI);
+        LOGGER.debug("Redirecting from '{}' to '{}'", oldURI, newURI);
         ctx.redirect(newURI);
     }
 }

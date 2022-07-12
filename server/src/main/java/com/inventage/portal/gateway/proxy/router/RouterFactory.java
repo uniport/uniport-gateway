@@ -1,25 +1,32 @@
 package com.inventage.portal.gateway.proxy.router;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.*;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Route;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Route;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 
 /**
  * Essentially it translates the dynamic configuration to what vertx understands. It creates a new
@@ -65,7 +72,7 @@ public class RouterFactory {
 
         sortByRuleLength(routers);
 
-        LOGGER.debug("createRouter: creating router from config");
+        LOGGER.debug("creating router from config");
         List<Future> subRouterFutures = new ArrayList<>();
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
@@ -80,7 +87,7 @@ public class RouterFactory {
                     router.mountSubRouter("/", (Router) srf.result());
                 } else {
                     String errMsg = String.format("Ignoring route '%s'", srf.cause().getMessage());
-                    LOGGER.warn("createRouter: {}", errMsg);
+                    LOGGER.warn("{}", errMsg);
                 }
             });
 
@@ -90,14 +97,14 @@ public class RouterFactory {
     }
 
     private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-                                           JsonObject sessionBagOptions) {
+            JsonObject sessionBagOptions) {
         Promise<Router> promise = Promise.promise();
         createSubRouter(routerConfig, middlewares, services, sessionBagOptions, promise);
         return promise.future();
     }
 
     private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-                                 JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
+            JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
         Router router = Router.router(this.vertx);
         String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -105,7 +112,7 @@ public class RouterFactory {
         RoutingRule routingRule = parseRule(rule);
         if (routingRule == null) {
             String errMsg = String.format("Failed to parse rule of router '%s'", routerName);
-            LOGGER.warn("createSubRouter: {}", errMsg);
+            LOGGER.warn("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
             return;
         }
@@ -143,11 +150,11 @@ public class RouterFactory {
         // - any future is failed.
         CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
             middlewareFutures.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
-            LOGGER.debug("createSubRouter: Middlewares of router '{}' created successfully", routerName);
+            LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
             handler.handle(Future.succeededFuture(router));
         }).onFailure(cfErr -> {
             String errMsg = String.format("Failed to create middlewares of router '%s'", routerName);
-            LOGGER.warn("createSubRouter: {}", errMsg);
+            LOGGER.warn("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
         });
     }
@@ -159,19 +166,20 @@ public class RouterFactory {
     }
 
     private void createMiddleware(JsonObject middlewareConfig, Router router,
-                                  Handler<AsyncResult<Middleware>> handler) {
+            Handler<AsyncResult<Middleware>> handler) {
         String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
         // needed to ensure authenticating requests are routed through this application
-        if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2) || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
+        if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)
+                || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
             middlewareOptions.put(PUBLIC_URL, this.publicUrl);
         }
 
         MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory == null) {
             String errMsg = String.format("Unknown middleware '%s'", middlewareType);
-            LOGGER.warn("createMiddleware: {}", errMsg);
+            LOGGER.warn("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
             return;
         }
@@ -191,7 +199,7 @@ public class RouterFactory {
     private void addHealthRoute(Router router) {
         boolean isHealthy = true;
         if (router.getRoutes().size() == 0) {
-            LOGGER.info("addHealthRoute: no routes configured yet");
+            LOGGER.info("no routes configured yet");
             isHealthy = false;
         }
 
@@ -236,7 +244,7 @@ public class RouterFactory {
                     new JsonArray());
         }
         if (sessionBagMiddlewares.size() > 1) {
-            LOGGER.warn("retrieveSessionBagOptions: more than one session bag configurations found. Using first one.");
+            LOGGER.warn("more than one session bag configurations found. Using first one.");
         }
         return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
     }
@@ -273,21 +281,21 @@ public class RouterFactory {
 
     private RoutingRule path(String path) {
         return router -> {
-            LOGGER.debug("apply: create route with exact path '{}'", path);
+            LOGGER.debug("create route with exact path '{}'", path);
             return router.route(path);
         };
     }
 
     private RoutingRule pathPrefix(String pathPrefix) {
         return router -> {
-            LOGGER.debug("apply: create route with path prefix '{}'", pathPrefix);
+            LOGGER.debug("create route with path prefix '{}'", pathPrefix);
             return router.route(pathPrefix);
         };
     }
 
     private RoutingRule host(String host) {
         return router -> {
-            LOGGER.debug("apply: create route with host '{}'", host);
+            LOGGER.debug("create route with host '{}'", host);
             return router.route().virtualHost(host);
         };
     }

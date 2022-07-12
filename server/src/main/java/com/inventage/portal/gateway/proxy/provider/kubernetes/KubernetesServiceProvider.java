@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.proxy.provider.kubernetes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -89,12 +89,12 @@ public class KubernetesServiceProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
-            LOGGER.info("validateAndPublish: configuration published");
+            LOGGER.info("configuration published");
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_KUBERNETES)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
         }).onFailure(err -> {
-            LOGGER.warn("validateAndPublish: cannot publish invalid configuration '{}'", err.getMessage());
+            LOGGER.warn("cannot publish invalid configuration '{}'", err.getMessage());
         });
     }
 }

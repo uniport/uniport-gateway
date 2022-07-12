@@ -1,8 +1,18 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
@@ -11,14 +21,6 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
@@ -50,7 +52,7 @@ public class SessionBagMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
 
         if (ctx.session() == null) {
-            LOGGER.warn("handle: no session initialized. Skipping session bag middleware");
+            LOGGER.warn("no session initialized. Skipping session bag middleware");
             ctx.next();
             return;
         }
@@ -72,10 +74,11 @@ public class SessionBagMiddleware implements Middleware {
         if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             return null;
         }
-        LOGGER.debug("loadCookiesFromSessionBag: cookies in session found. Setting as cookie header.");
+        LOGGER.debug("cookies in session found. Setting as cookie header.");
 
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
-        final Set<Cookie> requestCookies = CookieUtil.fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+        final Set<Cookie> requestCookies = CookieUtil
+                .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
@@ -85,7 +88,7 @@ public class SessionBagMiddleware implements Middleware {
         // stored cookie have precedence to avoid cookie injection
         for (Cookie requestCookie : requestCookies) {
             if (this.containsCookie(storedCookies, requestCookie, ctx.request().path()) != null) {
-                LOGGER.debug("loadCookiesFromSessionBag: ignoring cookie '{}' from request.", requestCookie.name());
+                LOGGER.debug("ignoring cookie '{}' from request.", requestCookie.name());
                 continue;
             }
             cookieHeaderValue = String.join(cookieDelimiter, cookieHeaderValue, requestCookie.toString());
@@ -98,7 +101,7 @@ public class SessionBagMiddleware implements Middleware {
         List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
-                LOGGER.debug("loadCookiesFromSessionBag: add cookie '{}' to request", storedCookie.name());
+                LOGGER.debug("add cookie '{}' to request", storedCookie.name());
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
@@ -109,7 +112,8 @@ public class SessionBagMiddleware implements Middleware {
         if (matchesSSL(cookie, isSSL) && matchesPath(cookie, path)) {
             return true;
         }
-        LOGGER.debug("cookieMatchesRequest: ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(), matchesPath(cookie, path), matchesSSL(cookie, isSSL));
+        LOGGER.debug("ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
+                matchesPath(cookie, path), matchesSSL(cookie, isSSL));
         return false;
     }
 
@@ -178,7 +182,7 @@ public class SessionBagMiddleware implements Middleware {
             return;
         }
 
-        LOGGER.debug("storeCookiesInSessionBag: Set-Cookie detected. Removing and storing in session.");
+        LOGGER.debug("Set-Cookie detected. Removing and storing in session.");
         headers.remove(HttpHeaders.SET_COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
@@ -195,7 +199,7 @@ public class SessionBagMiddleware implements Middleware {
             }
             if (isWhitelisted(decodedCookieToSet)) {
                 // we delegate all logic for whitelisted cookies to the user agent
-                LOGGER.debug("storeCookiesInSessionBag: pass whitelisted cookie to user agent: '{}'", cookieToSet);
+                LOGGER.debug("'{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
             }
@@ -213,7 +217,7 @@ public class SessionBagMiddleware implements Middleware {
     */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
         if (newCookie.name() == null) {
-            LOGGER.warn("updateSessionBag: ignoring cookie without a name");
+            LOGGER.warn("ignoring cookie without a name");
             return;
         }
         if (newCookie.path() == null) {
@@ -225,16 +229,16 @@ public class SessionBagMiddleware implements Middleware {
             boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
-                LOGGER.debug("updateSessionBag: removing expired cookie '{}' from session bag", newCookie.name());
+                LOGGER.debug("removing expired cookie '{}' from session bag", newCookie.name());
                 return;
             }
         }
 
         if (newCookie.maxAge() == 0L) {
-            LOGGER.debug("updateSessionBag: ignoring expired cookie '{}'", newCookie.name());
+            LOGGER.debug("ignoring expired cookie '{}'", newCookie.name());
             return;
         }
-        LOGGER.debug("updateSessionBag: {} cookie '{}' to session bag.", foundCookie != null ? "updating" : "adding", newCookie.name());
+        LOGGER.debug(""adding", newCookie.name());
         storedCookies.add(newCookie);
     }
 

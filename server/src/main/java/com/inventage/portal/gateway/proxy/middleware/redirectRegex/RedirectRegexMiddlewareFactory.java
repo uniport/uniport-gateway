@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -23,7 +23,7 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
+        LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
         return Future.succeededFuture(new RedirectRegexMiddleware(
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));

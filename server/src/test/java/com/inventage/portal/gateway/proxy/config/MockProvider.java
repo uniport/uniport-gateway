@@ -3,10 +3,10 @@ package com.inventage.portal.gateway.proxy.config;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.inventage.portal.gateway.proxy.provider.Provider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.provider.Provider;
 
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -69,7 +69,7 @@ public class MockProvider extends Provider {
             if (count.incrementAndGet() == this.messages.size()) {
                 this.vertx.cancelTimer(tId);
             }
-            LOGGER.debug("provide: Wait before sending next message");
+            LOGGER.debug("Wait before sending next message");
         });
         startPromise.complete();
     }

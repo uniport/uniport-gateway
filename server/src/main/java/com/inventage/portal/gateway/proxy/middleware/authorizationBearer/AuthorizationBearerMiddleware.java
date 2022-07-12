@@ -1,13 +1,13 @@
 package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -45,7 +45,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         this.getAuthToken(ctx.session()).onSuccess(token -> {
             if (token == null || token.length() == 0) {
-                LOGGER.debug("handle: Skipping empty token");
+                LOGGER.debug("Skipping empty token");
                 ctx.next();
                 return;
             }
@@ -59,7 +59,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
             ctx.next();
         }).onFailure(err -> {
-            LOGGER.debug("handle: Providing no token '{}'", err.getMessage());
+            LOGGER.debug("Providing no token '{}'", err.getMessage());
             ctx.next();
         });
     }
@@ -88,14 +88,14 @@ public class AuthorizationBearerMiddleware implements Middleware {
             String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
             authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
         } else {
-            LOGGER.debug("getAuthToken: no token demanded");
+            LOGGER.debug("no token demanded");
             handler.handle(Future.succeededFuture());
             return;
         }
 
         if (authPair == null) {
             String errMsg = "No user found";
-            LOGGER.debug("getAuthToken: {}", errMsg);
+            LOGGER.debug("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
             return;
         }
@@ -104,7 +104,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
         OAuth2Auth authProvider = authPair.getLeft();
         User user = authPair.getRight();
         if (user.expired(EXPIRATION_LEEWAY_SECONDS)) {
-            LOGGER.info("getAuthToken: refreshing access token");
+            LOGGER.info("refreshing access token");
             authProvider.refresh(user).onSuccess(u -> {
                 Pair<OAuth2Auth, User> refreshedAuthPair = ImmutablePair.of(authProvider, u);
                 String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
@@ -114,7 +114,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
                 handler.handle(Future.failedFuture(err));
             });
         } else {
-            LOGGER.debug("getAuthToken: use existing access token");
+            LOGGER.debug("use existing access token");
             preparedUser.complete(authPair);
         }
 
@@ -132,15 +132,15 @@ public class AuthorizationBearerMiddleware implements Middleware {
     private String buildAuthToken(JsonObject principal, boolean idTokenDemanded) {
         String rawToken;
         if (idTokenDemanded) {
-            LOGGER.debug("buildAuthToken: Providing id token");
+            LOGGER.debug("Providing id token");
             rawToken = principal.getString("id_token");
         } else {
-            LOGGER.debug("buildAuthToken: Providing access token for session scope: '{}'", this.sessionScope);
+            LOGGER.debug("Providing access token for session scope: '{}'", this.sessionScope);
             rawToken = principal.getString("access_token");
         }
 
         if (rawToken == null || rawToken.length() == 0) {
-            LOGGER.warn("buildAuthToken: token is empty");
+            LOGGER.warn("token is empty");
             return "";
         }
 

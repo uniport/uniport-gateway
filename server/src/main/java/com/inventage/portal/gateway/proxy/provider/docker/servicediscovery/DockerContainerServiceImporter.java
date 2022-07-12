@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -28,9 +31,6 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -144,7 +144,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
                 if (completion != null) {
                     completion.fail(ar.cause());
                 } else {
-                    LOGGER.warn("scan: Failed to import services from docker", ar.cause());
+                    LOGGER.warn("Failed to import services from docker", ar.cause());
                 }
                 return;
             }
@@ -179,15 +179,15 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     private void publish(DockerContainerService service) {
         publisher.publish(service.record()).onSuccess(record -> {
             service.record().setRegistration(record.getRegistration());
-            LOGGER.info("publish: Service from container '{}' has been published", service.name());
+            LOGGER.info("Service from container '{}' has been published", service.name());
         }).onFailure(err -> {
-            LOGGER.warn("publish: Service from container '{}' could not have been published", service.name());
+            LOGGER.warn("Service from container '{}' could not have been published", service.name());
         });
     }
 
     private void unpublish(DockerContainerService service) {
         publisher.unpublish(service.record().getRegistration(), ar -> {
-            LOGGER.info("unpublish: Service from container '{}' has been unpublished", service.name());
+            LOGGER.info("Service from container '{}' has been unpublished", service.name());
         });
     }
 

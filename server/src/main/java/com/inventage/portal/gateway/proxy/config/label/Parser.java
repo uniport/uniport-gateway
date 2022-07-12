@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -65,7 +65,7 @@ public class Parser {
             JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("decode: Failed to decode labels to json '{}', (labels: '{}')", e.getMessage(),
+            LOGGER.warn("'{}')", e.getMessage(),
                     labels.toString());
         }
         return null;
@@ -76,7 +76,7 @@ public class Parser {
         Collections.sort(sortedKeys);
 
         if (sortedKeys.isEmpty()) {
-            LOGGER.info("decodeToJson: No matching labels");
+            LOGGER.info("No matching labels");
             return null;
         }
 

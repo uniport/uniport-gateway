@@ -37,13 +37,13 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
         ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(routingContext.session()));
 
         final long start = System.currentTimeMillis();
-        LOGGER.debug("handle: incoming uri '{}'", routingContext.request().uri());
+        LOGGER.debug("incoming uri '{}'", routingContext.request().uri());
         // add the ips-request-id to the HTTP header, if it is not yet set
         routingContext.addHeadersEndHandler(v -> routingContext.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
         routingContext.addBodyEndHandler(v -> {
             // More logging when response is >= 400
             if (routingContext.response().getStatusCode() >= 400) {
-                LOGGER.debug("handle: outgoing uri '{}' with status '{}' and message: '{}' in '{}' ms",
+                LOGGER.debug("'{}' in '{}' ms",
                         routingContext.request().uri(),
                         routingContext.response().getStatusCode(),
                         routingContext.response().getStatusMessage(),
@@ -51,7 +51,7 @@ public class RequestResponseLogger implements Handler<RoutingContext> {
                 return;
             }
 
-            LOGGER.debug("handle: outgoing uri '{}' with status '{}' in '{}' ms",
+            LOGGER.debug("outgoing uri '{}' with status '{}' in '{}' ms",
                     routingContext.request().uri(),
                     routingContext.response().getStatusCode(),
                     System.currentTimeMillis() - start);

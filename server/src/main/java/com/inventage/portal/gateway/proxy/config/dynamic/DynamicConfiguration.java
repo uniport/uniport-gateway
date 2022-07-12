@@ -1,9 +1,25 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.JsonPathException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -16,14 +32,6 @@ import io.vertx.json.schema.SchemaRouter;
 import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * It defines the structure of the dynamic configuration.
@@ -77,10 +85,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
 
-
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_PATH = "claimPath";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE = "value";
-
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
@@ -270,19 +276,19 @@ public class DynamicConfiguration {
         }
 
         for (String routerName : routersToDelete) {
-            LOGGER.warn("merge: Router defined multiple times with different configurations in '{}'",
+            LOGGER.warn("Router defined multiple times with different configurations in '{}'",
                     routers.get(routerName));
             mergedHttpConfig.remove(routerName);
         }
 
         for (String middlewareName : middlewaresToDelete) {
-            LOGGER.warn("merge: Middleware defined multiple times with different configurations in '{}'",
+            LOGGER.warn("Middleware defined multiple times with different configurations in '{}'",
                     routers.get(middlewareName));
             mergedConfig.remove(middlewareName);
         }
 
         for (String serviceName : servicesToDelete) {
-            LOGGER.warn("merge: Service defined multiple times with different configurations in '{}'",
+            LOGGER.warn("Service defined multiple times with different configurations in '{}'",
                     routers.get(serviceName));
             mergedHttpConfig.remove(serviceName);
         }
@@ -347,7 +353,7 @@ public class DynamicConfiguration {
     private static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
         JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
-            LOGGER.warn("validateRouters: no routers defined");
+            LOGGER.warn("no routers defined");
             return Future.succeededFuture();
         }
 
@@ -416,7 +422,7 @@ public class DynamicConfiguration {
     private static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
-            LOGGER.debug("validateMiddlewares: no middlewares defined");
+            LOGGER.debug("no middlewares defined");
             return Future.succeededFuture();
         }
 
@@ -470,7 +476,8 @@ public class DynamicConfiguration {
 
                     if (!isBase64 && !isURL) {
                         return Future.failedFuture(String
-                                .format("%s: Public key is required to either be base64 encoded or a valid URL", mwType));
+                                .format("%s: Public key is required to either be base64 encoded or a valid URL",
+                                        mwType));
                     }
 
                     String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
@@ -511,35 +518,48 @@ public class DynamicConfiguration {
                             } else {
                                 JsonObject cObj = (JsonObject) claim;
                                 if (cObj.size() != 3) {
-                                    return Future.failedFuture(String.format("%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value", mwType));
+                                    return Future.failedFuture(String.format(
+                                            "%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",
+                                            mwType));
                                 }
-                                if (!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))) {
-                                    return Future.failedFuture(String.format("%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH, MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
+                                if (!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH)
+                                        && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR)
+                                        && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))) {
+                                    return Future.failedFuture(String.format(
+                                            "%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
                                 }
 
                                 if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null) {
-                                    return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
+                                    return Future.failedFuture(
+                                            String.format("%s: %s value is required to be a String", mwType,
+                                                    MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
                                 } else {
                                     String path = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
                                     try {
-                                        Path p =  PathCompiler.compile(path);
+                                        Path p = PathCompiler.compile(path);
                                         LOGGER.debug(p.toString());
-                                    } catch (RuntimeException e){
+                                    } catch (RuntimeException e) {
                                         LOGGER.debug(String.format("Invalid claimpath %s", path));
-                                        return Future.failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
+                                        return Future
+                                                .failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
                                     }
                                 }
                                 if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null) {
-                                    return Future.failedFuture(String.format("%s: %s value is required to be a String", mwType,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
+                                    return Future.failedFuture(
+                                            String.format("%s: %s value is required to be a String", mwType,
+                                                    MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
                                 } else {
                                     String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
-                                    if (!(operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS) || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
-                                        return Future.failedFuture(String.format("%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s", mwType,
+                                    if (!(operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS)
+                                            || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
+                                        return Future.failedFuture(String.format(
+                                                "%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s",
+                                                mwType,
                                                 MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, operator,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS, MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
+                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS,
+                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
                                     }
                                 }
 
@@ -548,7 +568,6 @@ public class DynamicConfiguration {
                     } else {
                         LOGGER.debug("No custom claims defined!");
                     }
-
 
                     break;
                 }
@@ -651,13 +670,13 @@ public class DynamicConfiguration {
                         JsonObject whithelistedCookie = whithelistedCookies.getJsonObject(j);
                         if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
                                 || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
-                                .isEmpty()) {
+                                        .isEmpty()) {
                             return Future.failedFuture(
                                     String.format("%s: whithelisted cookie name has to contain a value", mwType));
                         }
                         if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
                                 || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
-                                .isEmpty()) {
+                                        .isEmpty()) {
                             return Future.failedFuture(
                                     String.format("%s: whithelisted cookie path has to contain a value", mwType));
                         }
@@ -667,10 +686,12 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_CONTROL_API:
                     String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
                     if (action == null) {
-                        return Future.failedFuture(String.format("%s: No control api action defined [SESSION_TRERMINATE]", mwType));
+                        return Future.failedFuture(
+                                String.format("%s: No control api action defined [SESSION_TRERMINATE]", mwType));
                     }
                     if (!Objects.equals(action, "SESSION_TERMINATE")) {
-                        return Future.failedFuture(String.format("%s: Not supported control api action defined [SESSION_TRERMINATE]", mwType));
+                        return Future.failedFuture(String
+                                .format("%s: Not supported control api action defined [SESSION_TRERMINATE]", mwType));
                     }
                     break;
                 default: {
@@ -685,7 +706,7 @@ public class DynamicConfiguration {
     private static Future<Void> validateServices(JsonObject httpConfig) {
         JsonArray svs = httpConfig.getJsonArray(SERVICES);
         if (svs == null || svs.size() == 0) {
-            LOGGER.debug("validateServices: no services defined");
+            LOGGER.debug("no services defined");
             return Future.succeededFuture();
         }
 

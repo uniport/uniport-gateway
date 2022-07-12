@@ -1,10 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
-import io.vertx.ext.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
@@ -34,26 +33,26 @@ public class BearerOnlyMiddleware implements Middleware {
 
         this.optional = optional;
         if (optional) {
-            LOGGER.info("constructor: Requests are not required to carry a 'Authorization' header");
+            LOGGER.info("Requests are not required to carry a 'Authorization' header");
         }
 
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("handle: '{}'", ctx.request().absoluteURI());
+        LOGGER.debug("'{}'", ctx.request().absoluteURI());
 
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization != null) {
-            LOGGER.debug("handle: authentication by '{}'", authorization);
+            LOGGER.debug("authentication by '{}'", authorization);
         } else if (optional) {
-            LOGGER.debug("handle: letting through request with no authorization header");
+            LOGGER.debug("letting through request with no authorization header");
             ctx.next();
             return;
         }
-        LOGGER.debug("handle: Handling jwt auth request");
+        LOGGER.debug("Handling jwt auth request");
         authHandler.handle(ctx);
-        LOGGER.debug("handle: Handled jwt auth request");
+        LOGGER.debug("Handled jwt auth request");
     }
 
 }

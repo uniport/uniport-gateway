@@ -2,10 +2,10 @@ package com.inventage.portal.gateway.proxy.middleware.replacePathRegex;
 
 import java.util.regex.Pattern;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
@@ -37,11 +37,11 @@ public class ReplacePathRegexMiddleware implements Middleware {
 
     String apply(String uri) {
         if (!this.pattern.matcher(uri).matches()) {
-            LOGGER.debug("apply: Skipping path replacement of non matching URI '{}'", uri);
+            LOGGER.debug("Skipping path replacement of non matching URI '{}'", uri);
         }
         String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
 
-        LOGGER.debug("apply: replace path '{}' with '{}'", uri, newURI);
+        LOGGER.debug("replace path '{}' with '{}'", uri, newURI);
         return newURI;
     }
 }

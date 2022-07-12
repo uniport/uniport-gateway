@@ -3,10 +3,10 @@ package com.inventage.portal.gateway.proxy.middleware.headers;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -34,12 +34,12 @@ public class HeaderMiddleware implements Middleware {
         for (Entry<String, String> header : this.requestHeaders.entries()) {
             switch (header.getValue()) {
                 case "": {
-                    LOGGER.debug("handler: removing request header '{}'", header.getKey());
+                    LOGGER.debug("removing request header '{}'", header.getKey());
                     ctx.request().headers().remove(header.getKey());
                     break;
                 }
                 default: {
-                    LOGGER.debug("handler: setting request header '{}:{}'", header.getKey(), header.getValue());
+                    LOGGER.debug("setting request header '{}:{}'", header.getKey(), header.getValue());
                     ctx.request().headers().add(header.getKey(), header.getValue());
                 }
             }
@@ -50,7 +50,7 @@ public class HeaderMiddleware implements Middleware {
                 switch (header.getValue()) {
                     case "": {
                         if (headers.contains(header.getKey())) {
-                            LOGGER.debug("handler: removing response header '{}'", header.getKey());
+                            LOGGER.debug("removing response header '{}'", header.getKey());
                             headers.remove(header.getKey());
                         }
                         break;
@@ -58,7 +58,7 @@ public class HeaderMiddleware implements Middleware {
                     default: {
                         List<String> hs = headers.getAll(header.getKey());
                         if (hs == null || !hs.contains(header.getValue())) {
-                            LOGGER.debug("handler: setting response header '{}:{}'", header.getKey(),
+                            LOGGER.debug("setting response header '{}:{}'", header.getKey(),
                                     header.getValue());
                             headers.add(header.getKey(), header.getValue());
                         }

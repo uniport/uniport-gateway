@@ -1,18 +1,19 @@
 package com.inventage.portal.gateway.core.session;
 
+import static com.inventage.portal.gateway.core.entrypoint.Entrypoint.SESSION_COOKIE_NAME;
+import static io.vertx.core.http.Cookie.cookie;
+
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
+
 import io.vertx.core.Handler;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Optional;
-
-import static com.inventage.portal.gateway.core.entrypoint.Entrypoint.SESSION_COOKIE_NAME;
-import static io.vertx.core.http.Cookie.cookie;
 
 /**
  * Handle situations, where the browser has sent requests during the session id regeneration.
@@ -56,7 +57,7 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         ctx.put(ResponseSessionCookieHandler.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
         // delay before retry
         ctx.vertx().setTimer(WAIT_BEFORE_RETRY_MS, v -> {
-            LOGGER.debug("retryWithCookieFromBrowser: invalid sessionId cookie for state, delayed retry for '{}' ms", WAIT_BEFORE_RETRY_MS);
+            LOGGER.debug("invalid sessionId cookie for state, delayed retry for '{}' ms", WAIT_BEFORE_RETRY_MS);
             redirectForRetry(ctx);
         });
     }
@@ -86,14 +87,15 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         final Optional<Cookie> cookie = getCookie(ctx);
         final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(cookie.get().getValue());
         final String newValue = detectionCookieValue.increment();
-        LOGGER.debug("incrementCookieValue: new value is '{}'", newValue);
+        LOGGER.debug("new value is '{}'", newValue);
         return String.valueOf(newValue);
     }
 
     private void responseWithCookie(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
-            LOGGER.debug("responseWithCookie: adding cookie '{}'", COOKIE_NAME);
-            ctx.response().addCookie(cookie(COOKIE_NAME, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
+            LOGGER.debug("adding cookie '{}'", COOKIE_NAME);
+            ctx.response().addCookie(
+                    cookie(COOKIE_NAME, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
         }
     }
 
@@ -107,10 +109,9 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         }
         final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx, SESSION_COOKIE_PREFIX);
         if (sessionCookie != null) {
-            LOGGER.debug("noUserInSession: for received session cookie value '{}'", sessionCookie.value());
-        }
-        else {
-            LOGGER.debug("noUserInSession: no session cookie '{}' received", SESSION_COOKIE_PREFIX);
+            LOGGER.debug("for received session cookie value '{}'", sessionCookie.value());
+        } else {
+            LOGGER.debug("no session cookie '{}' received", SESSION_COOKIE_PREFIX);
         }
         return true;
     }
@@ -118,8 +119,7 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
     private boolean cookieReceived(RoutingContext ctx, String cookieName) {
         if (ctx.request().getCookie(cookieName) != null) {
             return true;
-        }
-        else {
+        } else {
             return getCookieFromHeader(ctx, cookieName) != null;
         }
     }
@@ -129,6 +129,5 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
                 .get(cookieName);
     }
-
 
 }

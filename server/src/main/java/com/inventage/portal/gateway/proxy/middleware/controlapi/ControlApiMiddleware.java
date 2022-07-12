@@ -1,16 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.WebClient;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,8 +9,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.WebClient;
 
 /**
  * Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie.
@@ -43,7 +45,7 @@ public class ControlApiMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         if (ctx.session() == null) {
-            LOGGER.warn("handle: no session initialized. Skipping session termination");
+            LOGGER.warn("no session initialized. Skipping session termination");
             ctx.next();
             return;
         }
@@ -60,14 +62,14 @@ public class ControlApiMiddleware implements Middleware {
 
                 final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
                 if (controlApiActionToExecute.isPresent()) {
-                    LOGGER.info("handle: provided cookie {}", controlApiActionToExecute.get());
+                    LOGGER.info("provided cookie {}", controlApiActionToExecute.get());
                     handleAction(action, ctx);
                 }
 
                 // remove action cookies from session bag
                 actionCookies.forEach(cookieToRemove -> {
                     if (storedCookies.remove(cookieToRemove)) {
-                        LOGGER.debug("handle: Removing handled control api cookie from SessionBag '{}'", cookieToRemove.name());
+                        LOGGER.debug("Removing handled control api cookie from SessionBag '{}'", cookieToRemove.name());
                     }
                 });
             }
@@ -80,7 +82,7 @@ public class ControlApiMiddleware implements Middleware {
         switch (action) {
             case SESSION_TERMINATE_ACTION:
                 // calls OIDC end_session_endpoint given by OAuth2Auth and destroys the vertx session
-                LOGGER.info("handleAction: terminate session {}", action);
+                LOGGER.info("terminate session {}", action);
 
                 // 1. look for a key that references to any session scope in the current session. ID tokens are the same in all session scopes hence take the first one.
                 // 2. get the OAuth2Auth context out of the session scope
@@ -100,14 +102,14 @@ public class ControlApiMiddleware implements Middleware {
                         })
                         .map(auth -> auth.endSessionURL(ctx.user()))
                         .ifPresent(endSessionURL -> {
-                            LOGGER.debug("handleAction: endSessionURL {}", endSessionURL);
+                            LOGGER.debug("endSessionURL {}", endSessionURL);
                             webClient.getAbs(endSessionURL).send()
-                                    .onSuccess(response -> LOGGER.info("handleAction callback: end_session_endpoint call succeeded"))
-                                    .onFailure(throwable -> LOGGER.warn("handleAction callback: end_session_endpoint call failed: {}", throwable.getMessage()));
+                                    .onSuccess(response -> LOGGER.info("end_session_endpoint call succeeded"))
+                                    .onFailure(throwable -> LOGGER.warn("{}", throwable.getMessage()));
                         });
 
                 // destroy gateway session anyway
-                LOGGER.info("handleAction: vertx session destroyed");
+                LOGGER.info("vertx session destroyed");
                 ctx.session().destroy();
                 break;
             default:

@@ -2,14 +2,14 @@ package com.inventage.portal.gateway.core.entrypoint;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.log.RequestResponseLogger;
-
 import com.inventage.portal.gateway.core.session.ReplacedSessionCookieDetectionHandler;
 import com.inventage.portal.gateway.core.session.ResponseSessionCookieHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.CookieSameSite;
@@ -76,7 +76,8 @@ public class Entrypoint {
                             + "idle timeout: '{}' (minutes)\n" + "session cookie name: '{}'\n"
                             + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
                             + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
-                    sessionIdleTimeout, SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE, SESSION_COOKIE_SAME_SITE,
+                    sessionIdleTimeout, SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE,
+                    SESSION_COOKIE_SAME_SITE,
                     SESSION_COOKIE_MIN_LENGTH);
             // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
             router.route()
@@ -88,9 +89,8 @@ public class Entrypoint {
                             .setCookieSameSite(SESSION_COOKIE_SAME_SITE)
                             .setMinLength(SESSION_COOKIE_MIN_LENGTH)
                             .setNagHttps(true));
-        }
-        else {
-            LOGGER.info("router: session management is disabled");
+        } else {
+            LOGGER.info("session management is disabled");
         }
         router.route().handler(RequestResponseLogger.create());
         if (!this.sessionDisabled) {
@@ -105,10 +105,10 @@ public class Entrypoint {
             if (name.equals(application.entrypoint())) {
                 if (enabled()) {
                     router().mountSubRouter(application.rootPath(), applicationRouter);
-                    LOGGER.info("mount: application '{}' for '{}' at endpoint '{}'", application,
+                    LOGGER.info("application '{}' for '{}' at endpoint '{}'", application,
                             application.rootPath(), name);
                 } else {
-                    LOGGER.warn("mount: disabled endpoint '{}' can not mount application '{}' for '{}'", name,
+                    LOGGER.warn("disabled endpoint '{}' can not mount application '{}' for '{}'", name,
                             application, application.rootPath());
                 }
             }

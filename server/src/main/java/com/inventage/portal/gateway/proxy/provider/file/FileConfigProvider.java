@@ -3,14 +3,14 @@ package com.inventage.portal.gateway.proxy.provider.file;
 import java.io.File;
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -79,7 +79,7 @@ public class FileConfigProvider extends Provider {
         });
 
         if (this.watch) {
-            LOGGER.info("provider: Listening to configuration changes");
+            LOGGER.info("Listening to configuration changes");
             retriever.listen(ar -> {
                 JsonObject config = ar.getNewConfiguration();
                 this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
@@ -95,13 +95,13 @@ public class FileConfigProvider extends Provider {
     private ConfigRetrieverOptions getOptions() {
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
-            LOGGER.info("getOptions: setting scan period to '{}'", this.scanPeriodMs);
+            LOGGER.info("setting scan period to '{}'", this.scanPeriodMs);
             options.setScanPeriod(this.scanPeriodMs);
         }
 
         if (this.filename != null) {
             File file = this.getAbsoluteConfigPath(this.filename).toFile();
-            LOGGER.info("getOptions: reading file '{}'", file.getAbsolutePath());
+            LOGGER.info("reading file '{}'", file.getAbsolutePath());
 
             ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
                     .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
@@ -113,12 +113,12 @@ public class FileConfigProvider extends Provider {
         if (this.directory != null) {
             Path path = this.getAbsoluteConfigPath(this.directory);
             if (path == null) {
-                LOGGER.warn("getOptions: failed to create absolute config path of '{}'", this.directory);
+                LOGGER.warn("failed to create absolute config path of '{}'", this.directory);
                 this.source = "undefined";
                 return options;
             }
 
-            LOGGER.info("getOptions: reading directory '{}'", path);
+            LOGGER.info("reading directory '{}'", path);
             JsonArray fileSets = new JsonArray();
             File[] children = path.toFile().listFiles();
             if (children == null) {
@@ -127,7 +127,7 @@ public class FileConfigProvider extends Provider {
                 for (File file : children) {
                     // we only take files into account at depth 2 (like general/test.json)
                     if (file.isDirectory()) {
-                        LOGGER.debug("getOptions: attempting to read json config from '{}'", file.getAbsolutePath());
+                        LOGGER.debug("attempting to read json config from '{}'", file.getAbsolutePath());
                         fileSets.add(new JsonObject().put("pattern", String.format("%s/*.json", file.getName())));
                     }
                 }
@@ -141,13 +141,13 @@ public class FileConfigProvider extends Provider {
         }
 
         this.source = "undefined";
-        LOGGER.warn("getOptions: neither filename or directory defined");
+        LOGGER.warn("neither filename or directory defined");
         return options;
     }
 
     private Path getAbsoluteConfigPath(Path path) {
         if (path.isAbsolute()) {
-            LOGGER.debug("getAbsoluteConfigPath: using absolute file path");
+            LOGGER.debug("using absolute file path");
             return path;
         }
         if (this.staticConfigDir == null) {
@@ -156,7 +156,7 @@ public class FileConfigProvider extends Provider {
                     path);
             return null;
         }
-        LOGGER.debug("getAbsoluteConfigPath: using path relative to the static config file in '{}'",
+        LOGGER.debug("using path relative to the static config file in '{}'",
                 this.staticConfigDir.toAbsolutePath());
         return this.staticConfigDir.resolve(path).normalize();
     }
@@ -195,7 +195,7 @@ public class FileConfigProvider extends Provider {
                 try {
                     port = Integer.parseInt(portStr);
                 } catch (NumberFormatException e) {
-                    LOGGER.warn("parseServerPorts: failed to parse server port '{}'", portStr);
+                    LOGGER.warn("failed to parse server port '{}'", portStr);
                     return config;
                 }
 
@@ -210,9 +210,9 @@ public class FileConfigProvider extends Provider {
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
-            LOGGER.info("validateAndPublish: configuration published from '{}'", this.source);
+            LOGGER.info("configuration published from '{}'", this.source);
         }).onFailure(err -> {
-            LOGGER.warn("validateAndPublish: Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
+            LOGGER.warn("Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
                     this.source);
         });
     }

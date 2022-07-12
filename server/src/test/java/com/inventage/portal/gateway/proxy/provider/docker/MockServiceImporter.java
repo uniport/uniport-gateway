@@ -30,7 +30,7 @@ public class MockServiceImporter implements ServiceImporter {
 
     public MockServiceImporter(List<JsonObject> containers, long scanPeriodMs) {
         if (containers == null) {
-            LOGGER.warn("constructor: initializing undefined publishedServices");
+            LOGGER.warn("initializing undefined publishedServices");
             containers = new ArrayList<JsonObject>();
         }
         this.containers = containers;
@@ -77,15 +77,15 @@ public class MockServiceImporter implements ServiceImporter {
     private void publish(Record service) {
         publisher.publish(service).onSuccess(r -> {
             service.setRegistration(r.getRegistration());
-            LOGGER.info("publish: Service from container '{}' has been published", service.getName());
+            LOGGER.info("Service from container '{}' has been published", service.getName());
         }).onFailure(err -> {
-            LOGGER.warn("publish: Service from container '{}' could not have been published", service.getName());
+            LOGGER.warn("Service from container '{}' could not have been published", service.getName());
         });
     }
 
     private void unpublish(Record service) {
         publisher.unpublish(service.getRegistration(), ar -> {
-            LOGGER.info("unpublish: Service from container '{}' has been unpublished", service.getName());
+            LOGGER.info("Service from container '{}' has been unpublished", service.getName());
         });
     }
 

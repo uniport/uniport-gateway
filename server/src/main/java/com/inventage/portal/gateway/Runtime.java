@@ -20,7 +20,7 @@ public class Runtime {
         final boolean envValue = toBoolean(System.getenv(DEVELOPMENT_MODE_KEY));
         final boolean propValue = toBoolean(System.getProperty(DEVELOPMENT_MODE_KEY));
         if (envValue || propValue) {
-            LOGGER.warn("isDevelopment: Development mode is active");
+            LOGGER.warn("Development mode is active");
             return true;
         }
         return false;
@@ -34,20 +34,20 @@ public class Runtime {
     public static String numberOfVerticleInstances() {
         try {
             final int envValue = toInt(System.getenv(VERTICLE_INSTANCES_KEY));
-            LOGGER.info("numberOfVerticleInstances: from environment is '{}'", envValue);
+            LOGGER.info("from environment is '{}'", envValue);
             return String.valueOf(envValue);
         } catch (Exception e) {
             //
         }
         try {
             final int propvalue = toInt(System.getProperty(VERTICLE_INSTANCES_KEY));
-            LOGGER.warn("numberOfVerticleInstances: from system property is '{}'", propvalue);
+            LOGGER.warn("from system property is '{}'", propvalue);
             return String.valueOf(propvalue);
         } catch (Exception e) {
             //
         }
         final int defaultNumber = 1;
-        LOGGER.warn("numberOfVerticleInstances: from default is '{}'", defaultNumber);
+        LOGGER.warn("from default is '{}'", defaultNumber);
         return String.valueOf(defaultNumber);
     }
 

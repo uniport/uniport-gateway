@@ -1,15 +1,16 @@
 package com.inventage.portal.gateway;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
+
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
 import io.vertx.core.Launcher;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Custom Vert.x Launcher for the portal gateway.
@@ -30,7 +31,7 @@ public class PortalGatewayLauncher extends Launcher {
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
         LOGGER = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
-        LOGGER.info("main: Portal Gateway starting....");
+        LOGGER.info("Portal Gateway starting....");
 
         // enable metrics
         System.setProperty("vertx.metrics.options.enabled", "true");
@@ -49,7 +50,7 @@ public class PortalGatewayLauncher extends Launcher {
         final String[] arguments = new String[] { "run", PortalGatewayVerticle.class.getName(), "--instances",
                 Runtime.numberOfVerticleInstances() };
         new PortalGatewayLauncher().dispatch(arguments);
-        LOGGER.info("main: PortalGatewayLauncher started.");
+        LOGGER.info("PortalGatewayLauncher started.");
     }
 
     @Override
@@ -59,6 +60,6 @@ public class PortalGatewayLauncher extends Launcher {
     }
 
     public OpenTelemetry configureOpenTelemetry() {
-            return OpenTelemetrySdkAutoConfiguration.initialize();
+        return OpenTelemetrySdkAutoConfiguration.initialize();
     }
 }

@@ -1,14 +1,16 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Middleware for handling parallel OAuth2 flows for a Vert.x session.
@@ -30,7 +32,7 @@ public class OAuth2AuthMiddleware implements Middleware {
     private String sessionScope;
 
     public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope) {
-        LOGGER.debug("constructor: for session scope '{}'", sessionScope);
+        LOGGER.debug("for session scope '{}'", sessionScope);
         this.authHandler = authHandler;
         this.sessionScope = sessionScope;
     }
@@ -41,7 +43,7 @@ public class OAuth2AuthMiddleware implements Middleware {
      */
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("handle: uri '{}'", ctx.request().uri());
+        LOGGER.debug("uri '{}'", ctx.request().uri());
         final User user = ctx.user();
         final User userForScope = setUserForScope(this.sessionScope, ctx);
 
@@ -52,7 +54,7 @@ public class OAuth2AuthMiddleware implements Middleware {
                 ctx.setUser(user);
             }
             startAndStorePendingAuth(ctx);
-            LOGGER.debug("handle: done for uri '{}'", ctx.request().uri());
+            LOGGER.debug("done for uri '{}'", ctx.request().uri());
         }
     }
 
@@ -66,8 +68,7 @@ public class OAuth2AuthMiddleware implements Middleware {
         Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
         if (authPair != null) {
             ctx.setUser(authPair.getRight());
-        }
-        else {
+        } else {
             ctx.clearUser();
         }
         return ctx.user();
@@ -83,7 +84,7 @@ public class OAuth2AuthMiddleware implements Middleware {
             // create JSON object for authentication parameters and store in session at "state_<state>"
             final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
             ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
-            LOGGER.debug("startAndStorePendingAuth: for scope '{}'", sessionScope);
+            LOGGER.debug("for scope '{}'", sessionScope);
         }
     }
 
@@ -127,14 +128,13 @@ public class OAuth2AuthMiddleware implements Middleware {
                 ctx.session().put(OIDC_PARAM_REDIRECT_URI, oAuth2FlowState.getString(OIDC_PARAM_REDIRECT_URI));
                 ctx.session().put(OIDC_PARAM_PKCE, oAuth2FlowState.getString(OIDC_PARAM_PKCE));
 
-                LOGGER.debug("restoreAuthParameterFromRequest: for state '{}' and scope '{}'", requestState, sessionScope);
+                LOGGER.debug("for state '{}' and scope '{}'", requestState, sessionScope);
+            } else {
+                LOGGER.warn("no OAuth2 state found in session for state '{}' and scope '{}'", requestState,
+                        sessionScope);
             }
-            else {
-                LOGGER.warn("restoreAuthParameterFromRequest: no OAuth2 state found in session for state '{}' and scope '{}'", requestState, sessionScope);
-            }
-        }
-        else {
-            LOGGER.warn("restoreAuthParameterFromRequest: not state found in request for scope '{}'", sessionScope);
+        } else {
+            LOGGER.warn("not state found in request for scope '{}'", sessionScope);
         }
     }
 

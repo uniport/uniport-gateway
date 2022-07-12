@@ -36,7 +36,7 @@ public interface ApplicationFactory {
 
     class Loader {
         public static ApplicationFactory getProvider(String providerId) {
-            LOGGER.debug("getProvider: for '{}'", providerId);
+            LOGGER.debug("for '{}'", providerId);
             final Optional<ApplicationFactory> provider = ServiceLoader.load(ApplicationFactory.class).stream()
                     .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerId))
                     .findFirst();

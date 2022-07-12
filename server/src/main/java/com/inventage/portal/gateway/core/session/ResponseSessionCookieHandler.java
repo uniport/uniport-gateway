@@ -1,9 +1,10 @@
 package com.inventage.portal.gateway.core.session;
 
-import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.Handler;
+import io.vertx.ext.web.RoutingContext;
 
 /**
  * Remove the session cookie from the response, if the context holds a data for the key `REMOVE_SESSION_COOKIE_SIGNAL`.
@@ -29,7 +30,7 @@ public class ResponseSessionCookieHandler implements Handler<RoutingContext> {
 
     protected void removeSessionCookie(RoutingContext ctx) {
         if (ctx.get(REMOVE_SESSION_COOKIE_SIGNAL) != null) {
-            LOGGER.debug("removeSessionCookie: with value '{}'", ctx.getCookie(sessionCookieName).getValue());
+            LOGGER.debug("with value '{}'", ctx.getCookie(sessionCookieName).getValue());
             // invalidate=false: session cookie should only be removed from response, not unset in client
             ctx.removeCookie(sessionCookieName, false);
         }

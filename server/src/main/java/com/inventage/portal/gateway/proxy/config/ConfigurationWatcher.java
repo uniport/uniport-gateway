@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.listener.Listener;
-import com.inventage.portal.gateway.proxy.provider.Provider;
-
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.listener.Listener;
+import com.inventage.portal.gateway.proxy.provider.Provider;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -87,7 +87,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     public void addListener(Listener listener) {
-        LOGGER.debug("addListener: listener '{}'", listener);
+        LOGGER.debug("listener '{}'", listener);
         if (this.configurationListeners == null) {
             this.configurationListeners = new ArrayList<>();
         }
@@ -109,7 +109,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         JsonObject nextConfig = message.body();
 
         String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        LOGGER.debug("onConfigurationAnnounce: received next configuration from '{}'", providerName);
+        LOGGER.debug("received next configuration from '{}'", providerName);
 
         preloadConfiguration(nextConfig);
     }
@@ -117,7 +117,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private void preloadConfiguration(JsonObject nextConfig) {
         if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
                 || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
-            LOGGER.warn("preloadConfiguration: invalid configuration received");
+            LOGGER.warn("invalid configuration received");
             return;
         }
 
@@ -125,7 +125,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
 
         if (DynamicConfiguration.isEmptyConfiguration(providerConfig)) {
-            LOGGER.info("preloadConfiguration: skipping empty configuration for provider '{}'", providerName);
+            LOGGER.info("skipping empty configuration for provider '{}'", providerName);
             return;
         }
 
@@ -136,7 +136,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             this.throttleProviderConfigReload(this.providersThrottleIntervalMs, providerName);
         }
 
-        LOGGER.info("preloadConfiguration: publishing next configuration from '{}' provider", providerName);
+        LOGGER.info("publishing next configuration from '{}' provider", providerName);
         this.eventBus.publish(providerName, nextConfig);
     }
 
@@ -158,7 +158,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             Queue<JsonObject> prevConfigRing) {
         JsonObject nextConfig = message.body();
         if (prevConfigRing.isEmpty()) {
-            LOGGER.debug("onConfigReload: publishing initial configuration immediately");
+            LOGGER.debug("publishing initial configuration immediately");
             prevConfigRing.add(nextConfig.copy());
             nextConfigRing.add(nextConfig.copy());
             publishConfiguration(nextConfigRing);
@@ -168,9 +168,9 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return;
         }
 
-        LOGGER.debug("onConfigReload: received new config for throttling");
+        LOGGER.debug("received new config for throttling");
         if (prevConfigRing.peek().equals(nextConfig)) {
-            LOGGER.info("onConfigReload: skipping same configuration");
+            LOGGER.info("skipping same configuration");
             return;
         }
 
@@ -183,7 +183,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         if (nextConfig == null) {
             return;
         }
-        LOGGER.info("publishConfiguration: publishing configuration");
+        LOGGER.info("publishing configuration");
         this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
     }
 
@@ -212,12 +212,12 @@ public class ConfigurationWatcher extends AbstractVerticle {
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
         DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
-            LOGGER.debug("onValidConfiguration: Informing listeners about new configuration '{}'", mergedConfig);
+            LOGGER.debug("Informing listeners about new configuration '{}'", mergedConfig);
             for (Listener listener : this.configurationListeners) {
                 listener.listen(mergedConfig);
             }
         }).onFailure(err -> {
-            LOGGER.warn("onValidConfiguration: Ignoring invalid configuration for '{}' because of '{}'", providerName,
+            LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
                     err.getMessage());
         });
     }

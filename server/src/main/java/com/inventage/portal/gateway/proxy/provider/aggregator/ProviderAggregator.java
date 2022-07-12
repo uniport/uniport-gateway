@@ -3,12 +3,12 @@ package com.inventage.portal.gateway.proxy.provider.aggregator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -53,7 +53,7 @@ public class ProviderAggregator extends Provider {
             ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
 
             if (providerFactory == null) {
-                LOGGER.warn("provide: Ignoring unknown provider '{}'", providerName);
+                LOGGER.warn("Ignoring unknown provider '{}'", providerName);
                 continue;
             }
 
@@ -63,7 +63,7 @@ public class ProviderAggregator extends Provider {
         }
 
         CompositeFuture.join(futures).onSuccess(cf -> {
-            LOGGER.info("provide: launched {}/{} providers successfully", futures.size(), this.providers.size());
+            LOGGER.info("launched {}/{} providers successfully", futures.size(), this.providers.size());
             startPromise.complete();
         }).onFailure(err -> {
             startPromise.fail(err.getMessage());
@@ -75,7 +75,7 @@ public class ProviderAggregator extends Provider {
     }
 
     private Future<String> launchProvider(Provider provider) {
-        LOGGER.debug("launchProvider: provider '{}'", provider);
+        LOGGER.debug("provider '{}'", provider);
         return this.vertx.deployVerticle(provider);
     }
 

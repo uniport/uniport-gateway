@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.core.session;
 
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,7 @@ public class DetectionCookieValue {
                 lastSessionAccess = Long.parseLong(parts[1]);
             }
         } catch (Throwable t) {
-            LOGGER.warn("constructor: the received cookie value '{}' couldn't be parsed", cookieValue);
+            LOGGER.warn("the received cookie value '{}' couldn't be parsed", cookieValue);
         }
     }
 
@@ -49,14 +48,14 @@ public class DetectionCookieValue {
 
     boolean isWithInLimit() {
         if (counter >= MAX_RETRIES) {
-            LOGGER.warn("isWithInLimit: counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
+            LOGGER.warn("counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
             return false;
         }
         if ((System.currentTimeMillis() - lastSessionAccess >= 30 * 60 * 1000)) {
-            LOGGER.warn("isWithInLimit: cookie with last session access date '{}' is outdated", lastSessionAccess);
+            LOGGER.warn("cookie with last session access date '{}' is outdated", lastSessionAccess);
             return false;
         }
-        LOGGER.debug("isWithInLimit: value '{}'", toString());
+        LOGGER.debug("value '{}'", toString());
         return true;
     }
 

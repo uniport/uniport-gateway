@@ -4,15 +4,15 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -26,8 +26,8 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.codec.BodyCodec;
+import io.vertx.ext.web.handler.AuthenticationHandler;
 
 public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
@@ -40,7 +40,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("create: Creating '{}' middleware", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
+        LOGGER.debug("Creating '{}' middleware", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
         Promise<Middleware> bearerOnlyPromise = Promise.promise();
 
         String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
@@ -52,8 +52,6 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
         boolean optional = Boolean.parseBoolean(optionalStr);
 
-
-
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
                     "-----END PUBLIC KEY-----");
@@ -61,16 +59,16 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             JWTClaimOptions jwtOptions = new JWTClaimOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
-                LOGGER.debug("create: with issuer '{}'", issuer);
+                LOGGER.debug("with issuer '{}'", issuer);
             }
             if (audience != null) {
                 jwtOptions.setAudience(audience.getList());
-                LOGGER.debug("create: with audience '{}'", audience);
+                LOGGER.debug("with audience '{}'", audience);
             }
 
-            if(additionalClaims != null){
+            if (additionalClaims != null) {
                 jwtOptions.setOtherClaims(additionalClaims);
-                LOGGER.debug("create: with claims '{}'", additionalClaims);
+                LOGGER.debug("with claims '{}'", additionalClaims);
             }
 
             JWTAuthOptions authConfig = new JWTAuthOptions()
@@ -82,7 +80,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             AuthenticationHandler authHandler = JWTAuthClaimHandler.create(authProvider);
 
             bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
-            LOGGER.debug("create: Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
+            LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
         }).onFailure(err -> {
             String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
             LOGGER.info(errMsg);
@@ -111,11 +109,11 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         if (!isURL) {
             handler.handle(Future.succeededFuture(publicKey));
-            LOGGER.info("fetchPublicKey: public key provided directly");
+            LOGGER.info("public key provided directly");
             return;
         }
 
-        LOGGER.info("fetchPublicKey: public key provided by URL");
+        LOGGER.info("public key provided by URL");
         this.fetchPublicKeyFromURL(vertx, publicKey, handler);
     }
 
@@ -124,7 +122,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         try {
             parsedURL = new URL(rawUrl);
         } catch (MalformedURLException e) {
-            LOGGER.info("fetchPublicKeyFromURL: Malformed URL '{}'", rawUrl);
+            LOGGER.info("Malformed URL '{}'", rawUrl);
             handler.handle(Future.failedFuture(e));
             return;
         }
@@ -146,7 +144,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         final int iamPort = port;
         final String iamPath = path;
-        LOGGER.debug("fetchPublicKeyFromURL: reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
+        LOGGER.debug("reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
         WebClient.create(vertx).get(iamPort, host, iamPath).as(BodyCodec.jsonObject()).send().onSuccess(resp -> {
             JsonObject json = resp.body();
 
@@ -157,10 +155,10 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 handler.handle(Future.failedFuture(errMsg));
             }
 
-            LOGGER.debug("fetchPublicKeyFromURL: Successfully retrieved public key from URL");
+            LOGGER.debug("Successfully retrieved public key from URL");
             handler.handle(Future.succeededFuture(publicKey));
         }).onFailure(err -> {
-            LOGGER.info("fetchPublicKeyFromURL: Failed to read public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
+            LOGGER.info("Failed to read public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
             handler.handle(Future.failedFuture(err));
         });
     }

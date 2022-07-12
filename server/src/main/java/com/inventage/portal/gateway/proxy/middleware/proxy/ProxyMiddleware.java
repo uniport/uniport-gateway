@@ -1,16 +1,17 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.request.ProxiedHttpServerRequest;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Proxies requests and set the FORWARDED headers.
@@ -42,15 +43,15 @@ public class ProxyMiddleware implements Middleware {
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
                 portFromHostValue(ctx.request().headers().get(X_FORWARDED_HOST),
-                        portFromHostValue(ctx.request().host(), -1))
-        ), ctx.request().headers());
+                        portFromHostValue(ctx.request().host(), -1))),
+                ctx.request().headers());
 
         // Some manipulations are
         // * not allowed by Vertx-Web
         // * or have to be made on the response of the forwarded request
         HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
 
-        LOGGER.debug("handle: sending to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
+        LOGGER.debug("sending to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
         httpProxy.handle(request);
     }
 
@@ -63,22 +64,21 @@ public class ProxyMiddleware implements Middleware {
      */
     protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // use
-            LOGGER.debug("useOrSetHeader: using provided header '{}' with '{}'", headerName, headers.get(headerName));
-        }
-        else { // set
+            LOGGER.debug("using provided header '{}' with '{}'", headerName, headers.get(headerName));
+        } else { // set
             headers.add(headerName, headerValue);
-            LOGGER.debug("useOrSetHeader: set header '{}' to '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
+
     protected void addOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // add == append
             String existingHeader = headers.get(headerName);
             headers.set(headerName, existingHeader + ", " + headerValue);
-            LOGGER.debug("addOrSetHeader: appended to header '{}' to '{}' ", headerName, headers.get(headerName));
-        }
-        else { // set
+            LOGGER.debug("appended to header '{}' to '{}' ", headerName, headers.get(headerName));
+        } else { // set
             headers.add(headerName, headerValue);
-            LOGGER.debug("addOrSetHeader: set header '{}' to '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
 
@@ -99,7 +99,7 @@ public class ProxyMiddleware implements Middleware {
         try {
             return Integer.parseInt(portToParse);
         } catch (NumberFormatException ignored) {
-            LOGGER.debug("parsePort: failed to parse a port from '{}'", portToParse);
+            LOGGER.debug("failed to parse a port from '{}'", portToParse);
             return defaultPort;
         }
     }

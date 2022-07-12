@@ -1,21 +1,23 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
+import java.util.Base64;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Base64;
-import java.util.Set;
 
 /**
  * Returns an HTML page with information from the current session if "_session_" is in the requested URL.
@@ -27,10 +29,10 @@ public class ShowSessionContentMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
-            LOGGER.info("handle: url '{}'", ctx.request().absoluteURI());
+            LOGGER.info("url '{}'", ctx.request().absoluteURI());
             ctx.end(getHtml(ctx.session()));
         } else {
-            LOGGER.info("handle: ignoring url '{}'", ctx.request().absoluteURI());
+            LOGGER.info("ignoring url '{}'", ctx.request().absoluteURI());
             ctx.next();
         }
     }
@@ -57,7 +59,7 @@ public class ShowSessionContentMiddleware implements Middleware {
 
         boolean idTokenDisplayed = false;
         for (String key : session.data().keySet()) {
-            LOGGER.debug("getHtml: {}: {}", key, session.data().get(key));
+            LOGGER.debug("{}: {}", key, session.data().get(key));
             if (!key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX)) {
                 continue;
             }
