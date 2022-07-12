@@ -65,7 +65,7 @@ public class Parser {
             JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("'{}')", e.getMessage(),
+            LOGGER.warn("Decoding to JSON failed: '{}'", e.getMessage(),
                     labels.toString());
         }
         return null;

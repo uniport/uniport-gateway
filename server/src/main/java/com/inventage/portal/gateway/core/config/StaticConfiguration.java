@@ -113,7 +113,7 @@ public class StaticConfiguration {
             validPromise.complete();
             return;
         }
-        LOGGER.debug("'{}'", providers);
+        LOGGER.debug("Validating providers: '{}'", providers);
 
         for (int i = 0; i < providers.size(); i++) {
             JsonObject provider = providers.getJsonObject(i);

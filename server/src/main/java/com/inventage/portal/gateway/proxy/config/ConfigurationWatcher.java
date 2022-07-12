@@ -87,7 +87,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     public void addListener(Listener listener) {
-        LOGGER.debug("Listener '{}'", listener);
+        LOGGER.debug("Adding listener '{}'", listener);
         if (this.configurationListeners == null) {
             this.configurationListeners = new ArrayList<>();
         }

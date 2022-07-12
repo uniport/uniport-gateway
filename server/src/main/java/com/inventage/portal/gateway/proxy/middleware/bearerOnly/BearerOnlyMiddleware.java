@@ -40,7 +40,7 @@ public class BearerOnlyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("'{}'", ctx.request().absoluteURI());
+        LOGGER.debug("Handling '{}'", ctx.request().absoluteURI());
 
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization != null) {

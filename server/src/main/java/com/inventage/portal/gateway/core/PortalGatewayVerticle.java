@@ -34,7 +34,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        LOGGER.info("Starting...");
+        LOGGER.info("Portal-Gateway verticle is starting...");
 
         final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
         retriever.getConfig(asyncResult -> {
@@ -93,7 +93,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                     .setMaxHeaderSize(1024 * 20)
                     .setSsl(entrypoint.isTls())
                     .setKeyStoreOptions(entrypoint.jksOptions());
-            LOGGER.info("'{}' at port '{}'", entrypoint.name(), entrypoint.port());
+            LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
             return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
         } else {
             entrypoint.disable();

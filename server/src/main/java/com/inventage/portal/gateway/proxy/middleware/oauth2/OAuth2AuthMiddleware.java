@@ -43,7 +43,7 @@ public class OAuth2AuthMiddleware implements Middleware {
      */
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("URI '{}'", ctx.request().uri());
+        LOGGER.debug("Handling URI '{}'", ctx.request().uri());
         final User user = ctx.user();
         final User userForScope = setUserForScope(this.sessionScope, ctx);
 
@@ -54,7 +54,7 @@ public class OAuth2AuthMiddleware implements Middleware {
                 ctx.setUser(user);
             }
             startAndStorePendingAuth(ctx);
-            LOGGER.debug("Done for URI '{}'", ctx.request().uri());
+            LOGGER.debug("Handled URI '{}'", ctx.request().uri());
         }
     }
 

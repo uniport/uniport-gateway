@@ -29,10 +29,10 @@ public class ShowSessionContentMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
-            LOGGER.info("Url '{}'", ctx.request().absoluteURI());
+            LOGGER.info("Handling URL '{}'", ctx.request().absoluteURI());
             ctx.end(getHtml(ctx.session()));
         } else {
-            LOGGER.info("Ignoring url '{}'", ctx.request().absoluteURI());
+            LOGGER.info("Ignoring URL '{}'", ctx.request().absoluteURI());
             ctx.next();
         }
     }
@@ -59,7 +59,7 @@ public class ShowSessionContentMiddleware implements Middleware {
 
         boolean idTokenDisplayed = false;
         for (String key : session.data().keySet()) {
-            LOGGER.debug("{}: {}", key, session.data().get(key));
+            LOGGER.debug("Processing {}: {}", key, session.data().get(key));
             if (!key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX)) {
                 continue;
             }

@@ -199,7 +199,7 @@ public class SessionBagMiddleware implements Middleware {
             }
             if (isWhitelisted(decodedCookieToSet)) {
                 // we delegate all logic for whitelisted cookies to the user agent
-                LOGGER.debug("'{}'", cookieToSet);
+                LOGGER.debug("'Passing cookie to user agent: {}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
             }

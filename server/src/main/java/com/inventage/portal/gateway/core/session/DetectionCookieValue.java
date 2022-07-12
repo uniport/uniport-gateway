@@ -55,7 +55,7 @@ public class DetectionCookieValue {
             LOGGER.warn("Cookie with last session access date '{}' is outdated", lastSessionAccess);
             return false;
         }
-        LOGGER.debug("Value '{}'", toString());
+        LOGGER.debug("Counter value '{}'", toString());
         return true;
     }
 

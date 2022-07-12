@@ -31,7 +31,7 @@ public class PortalGatewayLauncher extends Launcher {
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
         LOGGER = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
-        LOGGER.info("Portal Gateway starting....");
+        LOGGER.info("Portal Gateway is starting....");
 
         // enable metrics
         System.setProperty("vertx.metrics.options.enabled", "true");
@@ -55,7 +55,7 @@ public class PortalGatewayLauncher extends Launcher {
 
     @Override
     public void beforeStartingVertx(VertxOptions options) {
-        LOGGER.info("Before starting vertx");
+        LOGGER.info("Before starting Vertx");
         options.setTracingOptions(new OpenTelemetryOptions(configureOpenTelemetry()));
     }
 

@@ -86,8 +86,7 @@ public class RouterFactory {
                 if (srf.succeeded()) {
                     router.mountSubRouter("/", (Router) srf.result());
                 } else {
-                    String errMsg = String.format("Ignoring route '%s'", srf.cause().getMessage());
-                    LOGGER.warn("{}", errMsg);
+                    LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
             });
 
@@ -199,7 +198,7 @@ public class RouterFactory {
     private void addHealthRoute(Router router) {
         boolean isHealthy = true;
         if (router.getRoutes().size() == 0) {
-            LOGGER.info("No routes configured yet");
+            LOGGER.info("No routes configured");
             isHealthy = false;
         }
 

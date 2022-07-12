@@ -75,7 +75,7 @@ public class ProviderAggregator extends Provider {
     }
 
     private Future<String> launchProvider(Provider provider) {
-        LOGGER.debug("Provider '{}'", provider);
+        LOGGER.debug("Launching provider '{}'", provider);
         return this.vertx.deployVerticle(provider);
     }
 
