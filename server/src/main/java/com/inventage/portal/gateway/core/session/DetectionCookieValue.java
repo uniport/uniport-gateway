@@ -32,7 +32,7 @@ public class DetectionCookieValue {
                 lastSessionAccess = Long.parseLong(parts[1]);
             }
         } catch (Throwable t) {
-            LOGGER.warn("the received cookie value '{}' couldn't be parsed", cookieValue);
+            LOGGER.warn("The received cookie value '{}' couldn't be parsed", cookieValue);
         }
     }
 
@@ -48,14 +48,14 @@ public class DetectionCookieValue {
 
     boolean isWithInLimit() {
         if (counter >= MAX_RETRIES) {
-            LOGGER.warn("counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
+            LOGGER.warn("Counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
             return false;
         }
         if ((System.currentTimeMillis() - lastSessionAccess >= 30 * 60 * 1000)) {
-            LOGGER.warn("cookie with last session access date '{}' is outdated", lastSessionAccess);
+            LOGGER.warn("Cookie with last session access date '{}' is outdated", lastSessionAccess);
             return false;
         }
-        LOGGER.debug("value '{}'", toString());
+        LOGGER.debug("Value '{}'", toString());
         return true;
     }
 

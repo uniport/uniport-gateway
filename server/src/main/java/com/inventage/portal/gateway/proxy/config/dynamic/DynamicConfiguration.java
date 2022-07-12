@@ -353,7 +353,7 @@ public class DynamicConfiguration {
     private static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
         JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
-            LOGGER.warn("no routers defined");
+            LOGGER.warn("No routers defined");
             return Future.succeededFuture();
         }
 
@@ -422,7 +422,7 @@ public class DynamicConfiguration {
     private static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
-            LOGGER.debug("no middlewares defined");
+            LOGGER.debug("No middlewares defined");
             return Future.succeededFuture();
         }
 
@@ -706,7 +706,7 @@ public class DynamicConfiguration {
     private static Future<Void> validateServices(JsonObject httpConfig) {
         JsonArray svs = httpConfig.getJsonArray(SERVICES);
         if (svs == null || svs.size() == 0) {
-            LOGGER.debug("no services defined");
+            LOGGER.debug("No services defined");
             return Future.succeededFuture();
         }
 

@@ -32,7 +32,7 @@ public class OAuth2AuthMiddleware implements Middleware {
     private String sessionScope;
 
     public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope) {
-        LOGGER.debug("for session scope '{}'", sessionScope);
+        LOGGER.debug("For session scope '{}'", sessionScope);
         this.authHandler = authHandler;
         this.sessionScope = sessionScope;
     }
@@ -43,7 +43,7 @@ public class OAuth2AuthMiddleware implements Middleware {
      */
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("uri '{}'", ctx.request().uri());
+        LOGGER.debug("URI '{}'", ctx.request().uri());
         final User user = ctx.user();
         final User userForScope = setUserForScope(this.sessionScope, ctx);
 
@@ -54,7 +54,7 @@ public class OAuth2AuthMiddleware implements Middleware {
                 ctx.setUser(user);
             }
             startAndStorePendingAuth(ctx);
-            LOGGER.debug("done for uri '{}'", ctx.request().uri());
+            LOGGER.debug("Done for URI '{}'", ctx.request().uri());
         }
     }
 
@@ -84,7 +84,7 @@ public class OAuth2AuthMiddleware implements Middleware {
             // create JSON object for authentication parameters and store in session at "state_<state>"
             final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
             ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
-            LOGGER.debug("for scope '{}'", sessionScope);
+            LOGGER.debug("For scope '{}'", sessionScope);
         }
     }
 
@@ -128,13 +128,13 @@ public class OAuth2AuthMiddleware implements Middleware {
                 ctx.session().put(OIDC_PARAM_REDIRECT_URI, oAuth2FlowState.getString(OIDC_PARAM_REDIRECT_URI));
                 ctx.session().put(OIDC_PARAM_PKCE, oAuth2FlowState.getString(OIDC_PARAM_PKCE));
 
-                LOGGER.debug("for state '{}' and scope '{}'", requestState, sessionScope);
+                LOGGER.debug("For state '{}' and scope '{}'", requestState, sessionScope);
             } else {
-                LOGGER.warn("no OAuth2 state found in session for state '{}' and scope '{}'", requestState,
+                LOGGER.warn("No OAuth2 state found in session for state '{}' and scope '{}'", requestState,
                         sessionScope);
             }
         } else {
-            LOGGER.warn("not state found in request for scope '{}'", sessionScope);
+            LOGGER.warn("Not state found in request for scope '{}'", sessionScope);
         }
     }
 

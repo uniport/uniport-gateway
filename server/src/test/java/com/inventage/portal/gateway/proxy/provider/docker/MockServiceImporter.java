@@ -30,7 +30,7 @@ public class MockServiceImporter implements ServiceImporter {
 
     public MockServiceImporter(List<JsonObject> containers, long scanPeriodMs) {
         if (containers == null) {
-            LOGGER.warn("initializing undefined publishedServices");
+            LOGGER.warn("Initializing undefined publishedServices");
             containers = new ArrayList<JsonObject>();
         }
         this.containers = containers;

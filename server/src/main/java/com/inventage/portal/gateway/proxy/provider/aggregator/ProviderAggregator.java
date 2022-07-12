@@ -63,7 +63,7 @@ public class ProviderAggregator extends Provider {
         }
 
         CompositeFuture.join(futures).onSuccess(cf -> {
-            LOGGER.info("launched {}/{} providers successfully", futures.size(), this.providers.size());
+            LOGGER.info("Launched {}/{} providers successfully", futures.size(), this.providers.size());
             startPromise.complete();
         }).onFailure(err -> {
             startPromise.fail(err.getMessage());
@@ -75,7 +75,7 @@ public class ProviderAggregator extends Provider {
     }
 
     private Future<String> launchProvider(Provider provider) {
-        LOGGER.debug("provider '{}'", provider);
+        LOGGER.debug("Provider '{}'", provider);
         return this.vertx.deployVerticle(provider);
     }
 

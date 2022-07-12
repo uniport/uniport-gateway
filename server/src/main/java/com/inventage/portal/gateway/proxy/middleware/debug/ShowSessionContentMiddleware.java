@@ -29,10 +29,10 @@ public class ShowSessionContentMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         if (ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
-            LOGGER.info("url '{}'", ctx.request().absoluteURI());
+            LOGGER.info("Url '{}'", ctx.request().absoluteURI());
             ctx.end(getHtml(ctx.session()));
         } else {
-            LOGGER.info("ignoring url '{}'", ctx.request().absoluteURI());
+            LOGGER.info("Ignoring url '{}'", ctx.request().absoluteURI());
             ctx.next();
         }
     }

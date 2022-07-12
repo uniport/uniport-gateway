@@ -90,7 +90,7 @@ public class Entrypoint {
                             .setMinLength(SESSION_COOKIE_MIN_LENGTH)
                             .setNagHttps(true));
         } else {
-            LOGGER.info("session management is disabled");
+            LOGGER.info("Session management is disabled");
         }
         router.route().handler(RequestResponseLogger.create());
         if (!this.sessionDisabled) {
@@ -105,10 +105,10 @@ public class Entrypoint {
             if (name.equals(application.entrypoint())) {
                 if (enabled()) {
                     router().mountSubRouter(application.rootPath(), applicationRouter);
-                    LOGGER.info("application '{}' for '{}' at endpoint '{}'", application,
+                    LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
                             application.rootPath(), name);
                 } else {
-                    LOGGER.warn("disabled endpoint '{}' can not mount application '{}' for '{}'", name,
+                    LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
                             application, application.rootPath());
                 }
             }

@@ -59,16 +59,16 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             JWTClaimOptions jwtOptions = new JWTClaimOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
-                LOGGER.debug("with issuer '{}'", issuer);
+                LOGGER.debug("With issuer '{}'", issuer);
             }
             if (audience != null) {
                 jwtOptions.setAudience(audience.getList());
-                LOGGER.debug("with audience '{}'", audience);
+                LOGGER.debug("With audience '{}'", audience);
             }
 
             if (additionalClaims != null) {
                 jwtOptions.setOtherClaims(additionalClaims);
-                LOGGER.debug("with claims '{}'", additionalClaims);
+                LOGGER.debug("With claims '{}'", additionalClaims);
             }
 
             JWTAuthOptions authConfig = new JWTAuthOptions()
@@ -109,11 +109,11 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         if (!isURL) {
             handler.handle(Future.succeededFuture(publicKey));
-            LOGGER.info("public key provided directly");
+            LOGGER.info("Public key provided directly");
             return;
         }
 
-        LOGGER.info("public key provided by URL");
+        LOGGER.info("Public key provided by URL");
         this.fetchPublicKeyFromURL(vertx, publicKey, handler);
     }
 
@@ -144,7 +144,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         final int iamPort = port;
         final String iamPath = path;
-        LOGGER.debug("reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
+        LOGGER.debug("Reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
         WebClient.create(vertx).get(iamPort, host, iamPath).as(BodyCodec.jsonObject()).send().onSuccess(resp -> {
             JsonObject json = resp.body();
 

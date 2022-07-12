@@ -45,7 +45,7 @@ public class ControlApiMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         if (ctx.session() == null) {
-            LOGGER.warn("no session initialized. Skipping session termination");
+            LOGGER.warn("No session initialized. Skipping session termination");
             ctx.next();
             return;
         }
@@ -62,7 +62,7 @@ public class ControlApiMiddleware implements Middleware {
 
                 final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
                 if (controlApiActionToExecute.isPresent()) {
-                    LOGGER.info("provided cookie {}", controlApiActionToExecute.get());
+                    LOGGER.info("Provided cookie {}", controlApiActionToExecute.get());
                     handleAction(action, ctx);
                 }
 
@@ -82,7 +82,7 @@ public class ControlApiMiddleware implements Middleware {
         switch (action) {
             case SESSION_TERMINATE_ACTION:
                 // calls OIDC end_session_endpoint given by OAuth2Auth and destroys the vertx session
-                LOGGER.info("terminate session {}", action);
+                LOGGER.info("Terminate session {}", action);
 
                 // 1. look for a key that references to any session scope in the current session. ID tokens are the same in all session scopes hence take the first one.
                 // 2. get the OAuth2Auth context out of the session scope
@@ -102,14 +102,14 @@ public class ControlApiMiddleware implements Middleware {
                         })
                         .map(auth -> auth.endSessionURL(ctx.user()))
                         .ifPresent(endSessionURL -> {
-                            LOGGER.debug("endSessionURL {}", endSessionURL);
+                            LOGGER.debug("EndSessionURL {}", endSessionURL);
                             webClient.getAbs(endSessionURL).send()
-                                    .onSuccess(response -> LOGGER.info("end_session_endpoint call succeeded"))
+                                    .onSuccess(response -> LOGGER.info("End_session_endpoint call succeeded"))
                                     .onFailure(throwable -> LOGGER.warn("{}", throwable.getMessage()));
                         });
 
                 // destroy gateway session anyway
-                LOGGER.info("vertx session destroyed");
+                LOGGER.info("Vertx session destroyed");
                 ctx.session().destroy();
                 break;
             default:

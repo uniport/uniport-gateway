@@ -51,7 +51,7 @@ public class ProxyMiddleware implements Middleware {
         // * or have to be made on the response of the forwarded request
         HttpServerRequest request = new ProxiedHttpServerRequest(ctx, AllowForwardHeaders.ALL);
 
-        LOGGER.debug("sending to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
+        LOGGER.debug("Sending to '{}:{}{}'", this.serverHost, this.serverPort, request.uri());
         httpProxy.handle(request);
     }
 
@@ -64,10 +64,10 @@ public class ProxyMiddleware implements Middleware {
      */
     protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // use
-            LOGGER.debug("using provided header '{}' with '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("Using provided header '{}' with '{}'", headerName, headers.get(headerName));
         } else { // set
             headers.add(headerName, headerValue);
-            LOGGER.debug("set header '{}' to '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
 
@@ -75,10 +75,10 @@ public class ProxyMiddleware implements Middleware {
         if (headers.contains(headerName)) { // add == append
             String existingHeader = headers.get(headerName);
             headers.set(headerName, existingHeader + ", " + headerValue);
-            LOGGER.debug("appended to header '{}' to '{}' ", headerName, headers.get(headerName));
+            LOGGER.debug("Appended to header '{}' to '{}' ", headerName, headers.get(headerName));
         } else { // set
             headers.add(headerName, headerValue);
-            LOGGER.debug("set header '{}' to '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
 
@@ -99,7 +99,7 @@ public class ProxyMiddleware implements Middleware {
         try {
             return Integer.parseInt(portToParse);
         } catch (NumberFormatException ignored) {
-            LOGGER.debug("failed to parse a port from '{}'", portToParse);
+            LOGGER.debug("Failed to parse a port from '{}'", portToParse);
             return defaultPort;
         }
     }

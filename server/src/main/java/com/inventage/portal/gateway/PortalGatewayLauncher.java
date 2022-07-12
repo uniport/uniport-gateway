@@ -55,7 +55,7 @@ public class PortalGatewayLauncher extends Launcher {
 
     @Override
     public void beforeStartingVertx(VertxOptions options) {
-        LOGGER.info("beforeStartingVertx");
+        LOGGER.info("Before starting vertx");
         options.setTracingOptions(new OpenTelemetryOptions(configureOpenTelemetry()));
     }
 

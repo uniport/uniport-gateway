@@ -24,7 +24,7 @@ public interface ProviderFactory {
 
     class Loader {
         public static ProviderFactory getFactory(String providerName) {
-            LOGGER.debug("get provider factory '{}'", providerName);
+            LOGGER.debug("Get provider factory '{}'", providerName);
             final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class).stream()
                     .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
                     .findFirst();

@@ -95,13 +95,13 @@ public class FileConfigProvider extends Provider {
     private ConfigRetrieverOptions getOptions() {
         ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
-            LOGGER.info("setting scan period to '{}'", this.scanPeriodMs);
+            LOGGER.info("Setting scan period to '{}'", this.scanPeriodMs);
             options.setScanPeriod(this.scanPeriodMs);
         }
 
         if (this.filename != null) {
             File file = this.getAbsoluteConfigPath(this.filename).toFile();
-            LOGGER.info("reading file '{}'", file.getAbsolutePath());
+            LOGGER.info("Reading file '{}'", file.getAbsolutePath());
 
             ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
                     .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
@@ -113,12 +113,12 @@ public class FileConfigProvider extends Provider {
         if (this.directory != null) {
             Path path = this.getAbsoluteConfigPath(this.directory);
             if (path == null) {
-                LOGGER.warn("failed to create absolute config path of '{}'", this.directory);
+                LOGGER.warn("Failed to create absolute config path of '{}'", this.directory);
                 this.source = "undefined";
                 return options;
             }
 
-            LOGGER.info("reading directory '{}'", path);
+            LOGGER.info("Reading directory '{}'", path);
             JsonArray fileSets = new JsonArray();
             File[] children = path.toFile().listFiles();
             if (children == null) {
@@ -127,7 +127,7 @@ public class FileConfigProvider extends Provider {
                 for (File file : children) {
                     // we only take files into account at depth 2 (like general/test.json)
                     if (file.isDirectory()) {
-                        LOGGER.debug("attempting to read json config from '{}'", file.getAbsolutePath());
+                        LOGGER.debug("Attempting to read json config from '{}'", file.getAbsolutePath());
                         fileSets.add(new JsonObject().put("pattern", String.format("%s/*.json", file.getName())));
                     }
                 }
@@ -141,13 +141,13 @@ public class FileConfigProvider extends Provider {
         }
 
         this.source = "undefined";
-        LOGGER.warn("neither filename or directory defined");
+        LOGGER.warn("Neither filename or directory defined");
         return options;
     }
 
     private Path getAbsoluteConfigPath(Path path) {
         if (path.isAbsolute()) {
-            LOGGER.debug("using absolute file path");
+            LOGGER.debug("Using absolute file path");
             return path;
         }
         if (this.staticConfigDir == null) {
@@ -156,7 +156,7 @@ public class FileConfigProvider extends Provider {
                     path);
             return null;
         }
-        LOGGER.debug("using path relative to the static config file in '{}'",
+        LOGGER.debug("Using path relative to the static config file in '{}'",
                 this.staticConfigDir.toAbsolutePath());
         return this.staticConfigDir.resolve(path).normalize();
     }
@@ -195,7 +195,7 @@ public class FileConfigProvider extends Provider {
                 try {
                     port = Integer.parseInt(portStr);
                 } catch (NumberFormatException e) {
-                    LOGGER.warn("failed to parse server port '{}'", portStr);
+                    LOGGER.warn("Failed to parse server port '{}'", portStr);
                     return config;
                 }
 
@@ -210,7 +210,7 @@ public class FileConfigProvider extends Provider {
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
-            LOGGER.info("configuration published from '{}'", this.source);
+            LOGGER.info("Configuration published from '{}'", this.source);
         }).onFailure(err -> {
             LOGGER.warn("Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
                     this.source);

@@ -109,7 +109,7 @@ public class StaticConfiguration {
 
     private static void validateProviders(JsonArray providers, Promise<Void> validPromise) {
         if (providers == null || providers.size() == 0) {
-            LOGGER.warn("no providers defined");
+            LOGGER.warn("No providers defined");
             validPromise.complete();
             return;
         }

@@ -34,20 +34,20 @@ public class Runtime {
     public static String numberOfVerticleInstances() {
         try {
             final int envValue = toInt(System.getenv(VERTICLE_INSTANCES_KEY));
-            LOGGER.info("from environment is '{}'", envValue);
+            LOGGER.info("From environment is '{}'", envValue);
             return String.valueOf(envValue);
         } catch (Exception e) {
             //
         }
         try {
             final int propvalue = toInt(System.getProperty(VERTICLE_INSTANCES_KEY));
-            LOGGER.warn("from system property is '{}'", propvalue);
+            LOGGER.warn("From system property is '{}'", propvalue);
             return String.valueOf(propvalue);
         } catch (Exception e) {
             //
         }
         final int defaultNumber = 1;
-        LOGGER.warn("from default is '{}'", defaultNumber);
+        LOGGER.warn("From default is '{}'", defaultNumber);
         return String.valueOf(defaultNumber);
     }
 

@@ -52,7 +52,7 @@ public class SessionBagMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
 
         if (ctx.session() == null) {
-            LOGGER.warn("no session initialized. Skipping session bag middleware");
+            LOGGER.warn("No session initialized. Skipping session bag middleware");
             ctx.next();
             return;
         }
@@ -74,7 +74,7 @@ public class SessionBagMiddleware implements Middleware {
         if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             return null;
         }
-        LOGGER.debug("cookies in session found. Setting as cookie header.");
+        LOGGER.debug("Cookies in session found. Setting as cookie header.");
 
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         final Set<Cookie> requestCookies = CookieUtil
@@ -88,7 +88,7 @@ public class SessionBagMiddleware implements Middleware {
         // stored cookie have precedence to avoid cookie injection
         for (Cookie requestCookie : requestCookies) {
             if (this.containsCookie(storedCookies, requestCookie, ctx.request().path()) != null) {
-                LOGGER.debug("ignoring cookie '{}' from request.", requestCookie.name());
+                LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.name());
                 continue;
             }
             cookieHeaderValue = String.join(cookieDelimiter, cookieHeaderValue, requestCookie.toString());
@@ -101,7 +101,7 @@ public class SessionBagMiddleware implements Middleware {
         List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
-                LOGGER.debug("add cookie '{}' to request", storedCookie.name());
+                LOGGER.debug("Add cookie '{}' to request", storedCookie.name());
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
@@ -112,7 +112,7 @@ public class SessionBagMiddleware implements Middleware {
         if (matchesSSL(cookie, isSSL) && matchesPath(cookie, path)) {
             return true;
         }
-        LOGGER.debug("ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
+        LOGGER.debug("Ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
                 matchesPath(cookie, path), matchesSSL(cookie, isSSL));
         return false;
     }
@@ -217,7 +217,7 @@ public class SessionBagMiddleware implements Middleware {
     */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
         if (newCookie.name() == null) {
-            LOGGER.warn("ignoring cookie without a name");
+            LOGGER.warn("Ignoring cookie without a name");
             return;
         }
         if (newCookie.path() == null) {
@@ -229,16 +229,16 @@ public class SessionBagMiddleware implements Middleware {
             boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
-                LOGGER.debug("removing expired cookie '{}' from session bag", newCookie.name());
+                LOGGER.debug("Removing expired cookie '{}' from session bag", newCookie.name());
                 return;
             }
         }
 
         if (newCookie.maxAge() == 0L) {
-            LOGGER.debug("ignoring expired cookie '{}'", newCookie.name());
+            LOGGER.debug("Ignoring expired cookie '{}'", newCookie.name());
             return;
         }
-        LOGGER.debug(""adding", newCookie.name());
+        LOGGER.debug("adding", newCookie.name());
         storedCookies.add(newCookie);
     }
 

@@ -72,7 +72,7 @@ public class RouterFactory {
 
         sortByRuleLength(routers);
 
-        LOGGER.debug("creating router from config");
+        LOGGER.debug("Creating router from config");
         List<Future> subRouterFutures = new ArrayList<>();
         for (int i = 0; i < routers.size(); i++) {
             JsonObject routerConfig = routers.getJsonObject(i);
@@ -199,7 +199,7 @@ public class RouterFactory {
     private void addHealthRoute(Router router) {
         boolean isHealthy = true;
         if (router.getRoutes().size() == 0) {
-            LOGGER.info("no routes configured yet");
+            LOGGER.info("No routes configured yet");
             isHealthy = false;
         }
 
@@ -244,7 +244,7 @@ public class RouterFactory {
                     new JsonArray());
         }
         if (sessionBagMiddlewares.size() > 1) {
-            LOGGER.warn("more than one session bag configurations found. Using first one.");
+            LOGGER.warn("More than one session bag configurations found. Using first one.");
         }
         return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
     }
@@ -281,21 +281,21 @@ public class RouterFactory {
 
     private RoutingRule path(String path) {
         return router -> {
-            LOGGER.debug("create route with exact path '{}'", path);
+            LOGGER.debug("Create route with exact path '{}'", path);
             return router.route(path);
         };
     }
 
     private RoutingRule pathPrefix(String pathPrefix) {
         return router -> {
-            LOGGER.debug("create route with path prefix '{}'", pathPrefix);
+            LOGGER.debug("Create route with path prefix '{}'", pathPrefix);
             return router.route(pathPrefix);
         };
     }
 
     private RoutingRule host(String host) {
         return router -> {
-            LOGGER.debug("create route with host '{}'", host);
+            LOGGER.debug("Create route with host '{}'", host);
             return router.route().virtualHost(host);
         };
     }

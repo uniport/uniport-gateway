@@ -30,7 +30,7 @@ public class ResponseSessionCookieHandler implements Handler<RoutingContext> {
 
     protected void removeSessionCookie(RoutingContext ctx) {
         if (ctx.get(REMOVE_SESSION_COOKIE_SIGNAL) != null) {
-            LOGGER.debug("with value '{}'", ctx.getCookie(sessionCookieName).getValue());
+            LOGGER.debug("With value '{}'", ctx.getCookie(sessionCookieName).getValue());
             // invalidate=false: session cookie should only be removed from response, not unset in client
             ctx.removeCookie(sessionCookieName, false);
         }

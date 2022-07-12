@@ -66,7 +66,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             LOGGER.debug("Successfully completed Keycloak discovery");
 
             callback.handler(ctx -> {
-                LOGGER.debug("processing request for state '{}' and code '{}...'", ctx.request().getParam("state"),
+                LOGGER.debug("Processing request for state '{}' and code '{}...'", ctx.request().getParam("state"),
                         ctx.request().getParam("code").substring(0, 5));
                 OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope);
                 ctx.addEndHandler(event -> {
@@ -83,16 +83,16 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                         }
                     }
                     if (event.failed()) {
-                        LOGGER.warn("end handler failed '{}'", event.cause());
+                        LOGGER.warn("End handler failed '{}'", event.cause());
                     }
                     OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
                 });
                 ctx.next(); // io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl.setupCallback#route.handler(ctx -> {...})
                 //
-                LOGGER.debug("processed request for state '{}'", ctx.request().getParam("state"));
+                LOGGER.debug("Processed request for state '{}'", ctx.request().getParam("state"));
             });
             callback.failureHandler(ctx -> {
-                LOGGER.debug("processing failed for state '{}' caused by '{}'", ctx.request().getParam("state"),
+                LOGGER.debug("Processing failed for state '{}' caused by '{}'", ctx.request().getParam("state"),
                         ctx.failure() == null ? "unknown error" : ctx.failure().getMessage());
             });
 
