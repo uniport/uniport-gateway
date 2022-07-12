@@ -72,7 +72,7 @@ public class Entrypoint {
 
         if (!this.sessionDisabled) {
             LOGGER.info(
-                    "router: session management is enabled with\n"
+                    "Session management is enabled with\n"
                             + "idle timeout: '{}' (minutes)\n" + "session cookie name: '{}'\n"
                             + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
                             + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",

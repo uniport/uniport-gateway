@@ -183,7 +183,7 @@ public class DockerContainerProvider extends Provider {
             this.configurations.put(containerId, confFromLabels);
         }).onFailure(err -> {
             LOGGER.warn(
-                    "buildConfiguration: invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
+                    "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
                     err.getMessage(), containerName, confFromLabels);
         });
 
@@ -235,7 +235,7 @@ public class DockerContainerProvider extends Provider {
             } else if (this.network != null && this.network.length() != 0) {
                 network = this.network;
                 LOGGER.debug(
-                        "getHost: trying network '{}' as specified in the provider configuration of container '{}'",
+                        "Trying network '{}' as specified in the provider configuration of container '{}'",
                         network, containerName);
             }
 
@@ -357,7 +357,7 @@ public class DockerContainerProvider extends Provider {
         if (routers.size() == 0) {
             if (services.size() > 1) {
                 LOGGER.warn(
-                        "buildRouterConfiguration: could not create a router for the container: too many services '{}'",
+                        "Could not create a router for the container: too many services '{}'",
                         services.toString());
                 return null;
             } else {

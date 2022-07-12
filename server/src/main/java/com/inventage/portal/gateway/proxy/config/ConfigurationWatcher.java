@@ -98,7 +98,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     // The configuration message then gets passed along a series of check
     // to finally end up in a throttler that sends it to listenConfigurations.
     private void listenProviders() {
-        LOGGER.debug("ListenProviders");
+        LOGGER.debug("Listening for new configuration...");
         MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
 
         configConsumer.handler(message -> onConfigurationAnnounce(message));
@@ -188,7 +188,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     private void listenConfigurations() {
-        LOGGER.debug("ListenConfigurations");
+        LOGGER.debug("Listening for new configuration...");
         MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
                 .consumer(CONFIG_VALIDATED_ADDRESS);
 
@@ -236,7 +236,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
             if (rEntrypoints == null || rEntrypoints.size() == 0) {
                 LOGGER.debug(
-                        "applyEntrypoints: No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
+                        "No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
                         routerName,
                         entrypoints.toString());
                 r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
@@ -247,7 +247,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
-        LOGGER.debug("MergeConfigurations");
+        LOGGER.debug("Merge configurations");
         JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
         JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
 

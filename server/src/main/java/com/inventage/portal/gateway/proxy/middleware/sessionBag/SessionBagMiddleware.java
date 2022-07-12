@@ -238,7 +238,7 @@ public class SessionBagMiddleware implements Middleware {
             LOGGER.debug("Ignoring expired cookie '{}'", newCookie.name());
             return;
         }
-        LOGGER.debug("adding", newCookie.name());
+        LOGGER.debug("Adding new cookie '{}'", newCookie.name());
         storedCookies.add(newCookie);
     }
 

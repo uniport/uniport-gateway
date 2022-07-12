@@ -152,7 +152,7 @@ public class FileConfigProvider extends Provider {
         }
         if (this.staticConfigDir == null) {
             LOGGER.warn(
-                    "getAbsoluteConfigPath: no static config dir defined. Cannot assemble absolute config path from '{}'",
+                    "No static config dir defined. Cannot assemble absolute config path from '{}'",
                     path);
             return null;
         }

@@ -184,7 +184,7 @@ public class Parser {
             } else {
                 if (root.containsKey(key)) {
                     LOGGER.warn(
-                            "decodeToJson: Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
+                            "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
                             key, root.getString(key), value);
                 }
                 if (isInteger(value)) {
