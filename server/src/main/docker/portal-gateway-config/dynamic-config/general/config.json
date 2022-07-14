@@ -131,7 +131,7 @@
                 "name": "loginRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^(/login)$",
+                    "regex": "^/login$",
                     "replacement": "/base/service/redirect"
                 }
             },
