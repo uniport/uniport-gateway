@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.2.0]-202207191024-463-b0dd7e7 - 2022-07-19
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17561) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~4.2.0-202207191024-463-b0dd7e7~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.2.0-202207191024-463-b0dd7e7)
 
 ### Changed
