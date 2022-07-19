@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- remove old parent pom module ([PORTAL-799](https://issue.inventage.com/browse/PORTAL-799)).
+- Remove old parent pom module ([PORTAL-799](https://issue.inventage.com/browse/PORTAL-799)).
 
 ## [4.1.0]-202207080655-447-ed21a2a - 2022-07-08
 
