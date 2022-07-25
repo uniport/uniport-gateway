@@ -1,61 +1,160 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
+import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.handler.JWTAuthHandler;
+import io.vertx.ext.web.handler.SessionHandler;
+import io.vertx.ext.web.sstore.LocalSessionStore;
+import io.vertx.ext.web.sstore.SessionStore;
+import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MiddlewareServerBuilder {
 
+    private static final String SESSION_COOKIE_NAME = "test.session.cookie";
+    private static final int TIMEOUT_SERVER_START_SECONDS = 5;
+
+    private final String host;
     private final Vertx vertx;
     private final int port;
     private final Router router;
 
-    public static MiddlewareServerBuilder httpServer(Vertx vertx, int port) throws InterruptedException {
-        return new MiddlewareServerBuilder(vertx, port);
-    }
-
-    private MiddlewareServerBuilder(Vertx vertx, int port) throws InterruptedException {
+    private MiddlewareServerBuilder(Vertx vertx, String host, int port) {
         this.vertx = vertx;
         this.port = port;
+        this.host = host;
         router = Router.router(vertx);
+
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(SESSION_COOKIE_NAME);
+        router.route().handler(sessionHandler);
     }
 
-    public MiddlewareServer withCorsMiddleware(String allowedOrigin) throws InterruptedException {
+    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, int port) throws InterruptedException {
+        return new MiddlewareServerBuilder(vertx, host, port);
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
         return withMiddleware(new CorsMiddleware(router, allowedOrigin));
     }
 
-    public MiddlewareServer withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) throws InterruptedException {
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) {
         return withMiddleware(new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional));
     }
 
-    public MiddlewareServer withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider, boolean optional) throws InterruptedException{
-        return withMiddleware(new BearerOnlyMiddleware(JWTAuthClaimHandler.create(authProvider) , optional));
+    public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider, boolean optional) {
+        return withMiddleware(new BearerOnlyMiddleware(JWTAuthClaimHandler.create(authProvider), optional));
     }
 
+    public MiddlewareServerBuilder withLanguageCookieMiddleware() {
+        return withMiddleware(new LanguageCookieMiddleware());
+    }
 
-    public MiddlewareServer withMiddleware(Middleware middleware) throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
+    public MiddlewareServerBuilder withControlApiMiddleware(String action) {
+        return withMiddleware(new ControlApiMiddleware(action, WebClient.create(vertx)));
+    }
 
-        HttpServer httpServer = vertx.createHttpServer().requestHandler(router::handle).listen(port, ready -> {
-            if (ready.failed()) {
-                throw new RuntimeException(ready.cause());
-            }
-            latch.countDown();
+    public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
+        return withMiddleware(new SessionBagMiddleware(whitelistedCookies));
+    }
+
+    public MiddlewareServerBuilder withProxyMiddleware(int port) {
+        return withMiddleware(new ProxyMiddleware(vertx, host, port));
+    }
+
+    public MiddlewareServerBuilder withBackend(Vertx vertx) throws InterruptedException {
+        VertxTestContext testContext = new VertxTestContext();
+        Router serviceRouter = Router.router(vertx);
+        int servicePort = TestUtils.findFreePort();
+
+        serviceRouter.route().handler(ctx -> {
+            ctx.response().end();
         });
 
-        latch.await();
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort).onComplete(testContext.succeedingThenComplete());
 
+        if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Timeout: Server did not start in time.");
+        }
+
+        return this;
+    }
+
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler) throws InterruptedException {
+        VertxTestContext testContext = new VertxTestContext();
+        Router serviceRouter = Router.router(vertx);
+
+        serviceRouter.route().handler(handler);
+
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(port).onComplete(testContext.succeedingThenComplete());
+
+        if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Timeout: Server did not start in time.");
+        }
+
+        return this;
+    }
+
+    public MiddlewareServerBuilder withMockOAuth2Middleware() {
+        final String sessionScope = "testScope";
+        final String rawAccessToken = "mayIAccessThisRessource";
+        final User user = User.create(new JsonObject().put("access_token", rawAccessToken));
+        final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(null, user);
+
+        // mock OAuth2 authentication
+        Handler<RoutingContext> injectTokenHandler = ctx -> {
+            String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+            ctx.session().put(key, authPair);
+            ctx.next();
+        };
+
+        router.route().handler(injectTokenHandler);
+
+        return this;
+    }
+
+    public MiddlewareServerBuilder withRoutingContextHolder(AtomicReference<RoutingContext> routingContext) {
+        final Handler<RoutingContext> holdRoutingContext = ctx -> {
+            routingContext.set(ctx);
+            ctx.next();
+        };
+
+        router.route().handler(holdRoutingContext);
+        return this;
+    }
+
+    public MiddlewareServerBuilder withMiddleware(Handler<RoutingContext> middleware) {
         router.route().handler(middleware);
+        return this;
+    }
+
+    public MiddlewareServer build() {
         router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
 
-        return new MiddlewareServer(vertx, httpServer, port);
+        HttpServer httpServer = vertx.createHttpServer().requestHandler(router::handle);
+
+        return new MiddlewareServer(vertx, httpServer, port, host);
     }
 }

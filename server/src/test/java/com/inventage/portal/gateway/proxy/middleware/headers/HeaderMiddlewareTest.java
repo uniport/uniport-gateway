@@ -1,21 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
-import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
-
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -24,6 +10,18 @@ import io.vertx.ext.web.Router;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
+import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
 public class HeaderMiddlewareTest {
@@ -102,6 +100,7 @@ public class HeaderMiddlewareTest {
     @MethodSource("responseHeaderTestData")
     void responseHeaderTest(String name, MultiMap respHeaders, MultiMap expectedRespHeaders, Vertx vertx,
             VertxTestContext testCtx) {
+        // given
         int port = TestUtils.findFreePort();
         int servicePort = TestUtils.findFreePort();
 
@@ -132,8 +131,11 @@ public class HeaderMiddlewareTest {
             }).listen(port).onComplete(testCtx.succeeding(p -> {
                 serverStarted.flag();
 
+                // when
                 vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
                         .onComplete(testCtx.succeeding(resp -> {
+                            // then
+
                             // cannot use assertEquals since response headers include
                             // date, content-length etc.
                             assertHeaders(expectedRespHeaders, resp.headers(), errMsgFormat, name);

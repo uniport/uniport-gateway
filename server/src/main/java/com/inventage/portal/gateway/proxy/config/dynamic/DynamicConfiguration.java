@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -687,11 +688,12 @@ public class DynamicConfiguration {
                     String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
                     if (action == null) {
                         return Future.failedFuture(
-                                String.format("%s: No control api action defined [SESSION_TRERMINATE]", mwType));
+                                String.format("%s: No control api action defined", mwType));
                     }
-                    if (!Objects.equals(action, "SESSION_TERMINATE")) {
-                        return Future.failedFuture(String
-                                .format("%s: Not supported control api action defined [SESSION_TRERMINATE]", mwType));
+
+                    if (!Objects.equals(action, ControlApiMiddleware.SESSION_TERMINATE_ACTION) &&
+                            !Objects.equals(action, ControlApiMiddleware.SESSION_RESET_ACTION)) {
+                        return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
                     }
                     break;
                 default: {

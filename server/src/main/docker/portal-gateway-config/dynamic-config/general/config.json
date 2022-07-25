@@ -35,7 +35,8 @@
                     "baseRedirectRegex",
                     "baseAuthBearer",
                     "baseReplacePath",
-                    "sessionTerminate"
+                    "sessionTerminate",
+                    "sessionReset"
                 ],
                 "rule": "PathPrefix('/base')",
                 "service": "base-proxy"
@@ -288,6 +289,13 @@
                 "type": "controlApi",
                 "options": {
                     "action": "SESSION_TERMINATE"
+                }
+            },
+            {
+                "name": "sessionReset",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_RESET"
                 }
             },
             {

@@ -3,19 +3,20 @@ package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 import com.inventage.portal.gateway.TestUtils;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.ext.web.Router;
-import io.vertx.junit5.Checkpoint;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.IPS_LANGUAGE_COOKIE_NAME;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(VertxExtension.class)
 public class LanguageCookieMiddlewareTest {
@@ -27,51 +28,54 @@ public class LanguageCookieMiddlewareTest {
 
     private static final String host = "localhost";
 
-    @Test
-    void removeCookieInRequests(Vertx vertx, VertxTestContext testCtx) {
-        int port = TestUtils.findFreePort();
-        final Checkpoint serverStarted = testCtx.checkpoint();
-        final Checkpoint requestServed = testCtx.checkpoint();
-        final LanguageCookieMiddleware languageHandler = new LanguageCookieMiddleware();
-        final Router router = Router.router(vertx);
+    private int port;
 
-        router.route().handler(languageHandler);
-        vertx.createHttpServer().requestHandler(req -> {
-            router.handle(req);
-            testCtx.verify(() -> {
-                assertTrue(req.headers().contains(HttpHeaders.ACCEPT_LANGUAGE), "should contain accept language header");
-                assertEquals("de", req.headers().get(HttpHeaders.ACCEPT_LANGUAGE),
-                        "should match language");
-            });
-            requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(s -> {
-            serverStarted.flag();
-            final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-            headers.add(HttpHeaders.COOKIE, IPS_LANGUAGE_COOKIE_NAME + "=de");
-            vertx.createHttpClient().request(new RequestOptions().setMethod(HttpMethod.GET).setPort(port)
-                    .setHost(host).setURI("/blub").setHeaders(headers)).compose(HttpClientRequest::send);
-        }));
+    @BeforeEach
+    public void setup() {
+        port = TestUtils.findFreePort();
     }
 
     @Test
-    void noCookieAvailable(Vertx vertx, VertxTestContext testCtx) {
-        int port = TestUtils.findFreePort();
-        final Checkpoint serverStarted = testCtx.checkpoint();
-        final Checkpoint requestServed = testCtx.checkpoint();
-        final LanguageCookieMiddleware languageHandler = new LanguageCookieMiddleware();
-        final Router router = Router.router(vertx);
+    public void removeCookieInRequestsTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        headers.add(HttpHeaders.COOKIE, IPS_LANGUAGE_COOKIE_NAME + "=de");
+        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        router.route().handler(languageHandler);
-        vertx.createHttpServer().requestHandler(req -> {
-            router.handle(req);
-            testCtx.verify(() -> {
-                assertFalse(req.headers().contains(HttpHeaders.ACCEPT_LANGUAGE), "should contain accept language header");
-            });
-            requestServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(s -> {
-            serverStarted.flag();
-            vertx.createHttpClient().request(new RequestOptions().setMethod(HttpMethod.GET).setPort(port)
-                    .setHost(host)).compose(HttpClientRequest::send);
-        }));
+        portalGateway(vertx, host, port)
+                .withRoutingContextHolder(routingContext)
+                .withLanguageCookieMiddleware()
+                .build()
+                // when
+                .incomingRequest(testCtx, new RequestOptions().setHeaders(headers), (incomingResponse) -> {
+                    // then
+                    Assertions.assertTrue(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
+                            "request should contain accept language");
+                    Assertions.assertEquals("de", routingContext.get().request().getHeader(HttpHeaders.ACCEPT_LANGUAGE),
+                            "accept-language header should be set to 'de'");
+                    Assertions.assertNotNull(routingContext.get().request().getCookie(IPS_LANGUAGE_COOKIE_NAME),
+                            "request should contain IPS language cookie.");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void noCookieAvailableTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
+
+        portalGateway(vertx, host, port)
+                .withRoutingContextHolder(routingContext)
+                .withLanguageCookieMiddleware()
+                .build()
+                // when
+                .incomingRequest(testCtx, new RequestOptions(), (incomingResponse) -> {
+                    // then
+                    Assertions.assertFalse(routingContext.get().request().headers().contains(IPS_LANGUAGE_COOKIE_NAME),
+                            "response should not contain IPS language cookie.");
+                    Assertions.assertFalse(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
+                            "response should not contain accept language");
+                    testCtx.completeNow();
+                });
     }
 }

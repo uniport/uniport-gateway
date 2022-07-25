@@ -35,7 +35,6 @@ public class BearerOnlyMiddleware implements Middleware {
         if (optional) {
             LOGGER.info("Requests are not required to carry a 'Authorization' header");
         }
-
     }
 
     @Override
@@ -54,5 +53,4 @@ public class BearerOnlyMiddleware implements Middleware {
         authHandler.handle(ctx);
         LOGGER.debug("Handled jwt auth request");
     }
-
 }
