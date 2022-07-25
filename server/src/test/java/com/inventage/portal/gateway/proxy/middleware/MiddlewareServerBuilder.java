@@ -52,7 +52,7 @@ public class MiddlewareServerBuilder {
         router.route().handler(sessionHandler);
     }
 
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, int port) throws InterruptedException {
+    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, int port) {
         return new MiddlewareServerBuilder(vertx, host, port);
     }
 
