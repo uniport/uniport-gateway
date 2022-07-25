@@ -68,12 +68,12 @@ public class ControlApiMiddlewareTest {
                 // when
                 .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), (outgoingResponse) -> {
                     // then
-                    assertSessionTermination(outgoingResponse, routingContext.get(), testCookie);
+                    assertSessionTermination(outgoingResponse, routingContext.get());
                     responseReceived.flag();
                 });
     }
 
-    private void assertSessionTermination(HttpClientResponse outgoingResponse, RoutingContext routingContext, io.vertx.core.http.Cookie testCookie) {
+    private void assertSessionTermination(HttpClientResponse outgoingResponse, RoutingContext routingContext) {
         // TODO: Test endSessionUrl send action
         Assertions.assertEquals(200, outgoingResponse.statusCode(), "expected status code: 200");
         Assertions.assertTrue(routingContext.session().isDestroyed(), "session should be destroyed");
