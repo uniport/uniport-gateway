@@ -84,16 +84,15 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new ProxyMiddleware(vertx, host, port));
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx) throws InterruptedException {
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
         VertxTestContext testContext = new VertxTestContext();
         Router serviceRouter = Router.router(vertx);
-        int servicePort = TestUtils.findFreePort();
 
         serviceRouter.route().handler(ctx -> {
             ctx.response().end();
         });
 
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort).onComplete(testContext.succeedingThenComplete());
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(port).onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
