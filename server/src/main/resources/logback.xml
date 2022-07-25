@@ -35,7 +35,7 @@
     </appender>
 
     <!-- loggers -->
-    <logger name="com.inventage.portal.gateway" level="DEBUG"/>
+    <logger name="com.inventage" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
