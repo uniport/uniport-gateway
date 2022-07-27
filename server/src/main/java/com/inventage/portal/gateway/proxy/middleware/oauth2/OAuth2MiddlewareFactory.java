@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.core.log.RequestResponseLogger.CONTEX
 
 import java.net.URI;
 
+import io.vertx.ext.web.handler.BodyHandler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -37,8 +38,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
-    public final static String SESSION_SCOPE_SUFFIX = "_session";
-
+    public static final String SESSION_SCOPE_SUFFIX = "_session";
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final String OIDC_SCOPE = "openid";
 
@@ -50,8 +50,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-
-        Route callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase());
+        Route callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
 
         OAuth2Options oauth2Options = new OAuth2Options()
                 .setClientID(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
@@ -112,8 +111,14 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             String callbackURL = String.format("%s%s", publicUrl, callback.getPath());
 
+            //PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
+            JsonObject responseModeParam = new JsonObject();
+            responseModeParam.put("response_mode", "form_post");
+
             OAuth2AuthHandler authHandler = OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
                     .setupCallback(callback)
+                    .pkceVerifierLength(64)
+                    .extraParams(responseModeParam)
                     // add the sessionScope as a OIDC scope for "aud" in JWT
                     // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
                     .withScope(OIDC_SCOPE + " " + sessionScope);

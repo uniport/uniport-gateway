@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
@@ -9,6 +8,7 @@ import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCook
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -28,6 +28,7 @@ import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -80,6 +81,24 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new SessionBagMiddleware(whitelistedCookies));
     }
 
+    public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) {
+        OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
+        Future<Middleware> middlewareFuture = factory.create(vertx, router, oAuth2AuthConfig);
+        int atMost = 20;
+        while(!middlewareFuture.isComplete() && atMost > 0){
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+                atMost--;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if(middlewareFuture.failed()){
+            throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
+        }
+        return withMiddleware(middlewareFuture.result());
+    }
+
     public MiddlewareServerBuilder withProxyMiddleware(int port) {
         return withMiddleware(new ProxyMiddleware(vertx, host, port));
     }
@@ -128,9 +147,16 @@ public class MiddlewareServerBuilder {
             ctx.session().put(key, authPair);
             ctx.next();
         };
-
         router.route().handler(injectTokenHandler);
+        return this;
+    }
 
+    public MiddlewareServerBuilder withCustomSessionState(Map<String, Object> sessionEntries){
+        Handler<RoutingContext> handler = ctx -> {
+            sessionEntries.forEach((key, value) -> ctx.session().put(key,value));
+            ctx.next();
+        };
+        router.route().handler(handler);
         return this;
     }
 

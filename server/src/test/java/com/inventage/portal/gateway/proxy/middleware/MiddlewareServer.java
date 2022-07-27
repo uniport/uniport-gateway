@@ -8,7 +8,7 @@ import io.vertx.junit5.VertxTestContext;
 public class MiddlewareServer {
 
     private final Vertx vertx;
-    private HttpServer httpServer;
+    private final HttpServer httpServer;
     private final int port;
     private final String host;
 
@@ -24,6 +24,11 @@ public class MiddlewareServer {
         httpServer.listen(port, host).onComplete(testCtx.succeeding(p -> {
             createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
         }));
+    }
+
+    public void incomingPostRequest(VertxTestContext testCtx, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler, String URI) {
+        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(HttpMethod.POST);
+        createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
     }
 
     private void createHttpClientWithRequestOptionsAndResponseHandler(VertxTestContext testCtx, RequestOptions reqOpts,
