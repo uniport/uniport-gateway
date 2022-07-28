@@ -55,6 +55,8 @@ containers:
               # HTTP port for external access, must be the same as the exposed port
             - name: "PORTAL_GATEWAY_PUBLIC_PORT"
               value: "80"
+            - name: PORTAL_GATEWAY_LOG_LEVEL
+              value: "INFO"
               # IAM
             - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
               value: "portal-iam"

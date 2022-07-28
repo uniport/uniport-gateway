@@ -34,10 +34,7 @@
         </if>
     </appender>
 
-    <!-- loggers -->
-    <logger name="com.inventage" level="INFO"/>
-
-    <root level="INFO">
+    <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
