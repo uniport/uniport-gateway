@@ -3,155 +3,155 @@ version: ${project.version}
 replicaCount: 1
 
 ingress:
-    enabled: true
-    host: portal
-    port: 20000
-    className: ""
-    annotations: {}
-    defaultRule: enabled
+  enabled: true
+  host: portal
+  port: 20000
+  className: ""
+  annotations: {}
+  defaultRule: enabled
 
 service:
-    type: ClusterIP
-    ports:
-        - name: portal-gateway
-          port: 20000
+  type: ClusterIP
+  ports:
+    - name: portal-gateway
+      port: 20000
 
 podSecurityContext:
-    enabled: false
+  enabled: false
 
 initContainers:
-    init-portal-iam:
-        image: busybox:1.33
-        command:
-            - "sh"
-            - "-c"
-            - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do sleep 1; done"
+  init-portal-iam:
+    image: busybox:1.33
+    command:
+      - "sh"
+      - "-c"
+      - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do sleep 1; done"
 
 containers:
-    portal-gateway:
-        image:
-            registry: ${docker.pull.registry}
-            baseName: ${project.groupId}
-            name: portal-gateway
-            tag: ${project.version}
-            pullPolicy: IfNotPresent
-        containerSecurityContext:
-            enabled: false
-        ports:
-            - name: http
-              port: 20000
-        resources:
-            requests:
-                memory: "256Mi"
-            limits:
-                memory: "256Mi"
-        env:
-            # HTTP protocol for external access
-            - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
-              value: "http"
-              # HTTP host name for external access
-            - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
-              value: "portal.minikube"
-              # HTTP port for external access, must be the same as the exposed port
-            - name: "PORTAL_GATEWAY_PUBLIC_PORT"
-              value: "80"
-            - name: PORTAL_GATEWAY_LOG_LEVEL
-              value: "INFO"
-              # IAM
-            - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
-              value: "portal-iam"
-            - name: "PORTAL_GATEWAY_PORTAL_IAM_PORT"
-              value: "8080"
-              # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
-            - name: "PORTAL_GATEWAY_BASE_HOST"
-              value: "base"
-              # PORTAL_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
-            - name: "PORTAL_GATEWAY_BASE_PORT"
-              value: "20010"
-              # PORTAL_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
-            - name: "PORTAL_GATEWAY_DASHBOARD_HOST"
-              value: "dashboard"
-              # PORTAL_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
-            - name: "PORTAL_GATEWAY_DASHBOARD_PORT"
-              value: "20020"
-              # PORTAL_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
-            - name: "PORTAL_GATEWAY_ORGANISATION_HOST"
-              value: "organisation"
-              # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
-            - name: "PORTAL_GATEWAY_ORGANISATION_PORT"
-              value: "20030"
-              # PORTAL_GATEWAY_DOCUMENT_HOST is the hostname for accessing Document microservice via HTTP
-            - name: "PORTAL_GATEWAY_DOCUMENT_HOST"
-              value: "document"
-              # PORTAL_GATEWAY_DOCUMENT_PORT is the port for accessing Document microservice via HTTP
-            - name: "PORTAL_GATEWAY_DOCUMENT_PORT"
-              value: "20050"
-              # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
-            - name: "PORTAL_GATEWAY_FILESTORAGE_HOST"
-              value: "filestorage"
-              # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
-            - name: "PORTAL_GATEWAY_FILESTORAGE_PORT"
-              value: "20090"
-              # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
-            - name: "PORTAL_GATEWAY_CONTENT_HOST"
-              value: "content"
-              # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
-            - name: "PORTAL_GATEWAY_CONTENT_PORT"
-              value: "20110"
-              # PORTAL_GATEWAY_PORTAL_KOWL_HOST is the hostname for accessing Portal-Kowl via HTTP
-            - name: PORTAL_GATEWAY_PORTAL_KOWL_HOST
-              value: "portal-kowl"
-              # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
-            - name: PORTAL_GATEWAY_PORTAL_KOWL_PORT
-              value: "8080"
-            - name: PORTAL_GATEWAY_PORTAL_PGADMIN_HOST
-              value: portal-pgadmin
-            - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
-              value: "80"
-            - name: PORTAL_GATEWAY_PORTAL_GRAFANA_HOST
-              value: "grafana-service.monitoring"
-            - name: PORTAL_GATEWAY_PORTAL_GRAFANA_PORT
-              value: "3000"
-            - name: "PROXY_BEARER_TOKEN_ISSUER"
-              value: "https://ips.inventage.dev/auth/realms/portal"
-            - name: PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY
-              value: "http://portal-iam:8080/auth/realms/portal"
-            - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
-              value: "http://portal.minikube/auth/realms/portal"
-            - name: OTEL_SERVICE_NAME
-              value: "portal-gateway"
-            - name: OTEL_TRACES_EXPORTER
-              value: "none"
-            - name: OTEL_METRICS_EXPORTER
-              value: "none"
-        storages: []
-        livenessProbe:
-            enabled: true
-            httpGet:
-                path: /health
-                port: http
-            initialDelaySeconds: 10
-            timeoutSeconds: 1
-            periodSeconds: 20
-            failureThreshold: 6
-            successThreshold: 1
-        readinessProbe:
-            enabled: true
-            httpGet:
-                path: /health
-                port: http
-            initialDelaySeconds: 10
-            timeoutSeconds: 1
-            periodSeconds: 20
-            failureThreshold: 6
-            successThreshold: 1
-        startupProbe:
-            enabled: true
-            httpGet:
-                path: /health
-                port: http
-            initialDelaySeconds: 10
-            timeoutSeconds: 1
-            periodSeconds: 20
-            failureThreshold: 6
-            successThreshold: 1
+  portal-gateway:
+    image:
+      registry: ${docker.pull.registry}
+      baseName: ${project.groupId}
+      name: portal-gateway
+      tag: ${project.version}
+      pullPolicy: IfNotPresent
+    containerSecurityContext:
+      enabled: false
+    ports:
+      - name: http
+        port: 20000
+    resources:
+      requests:
+        memory: "256Mi"
+      limits:
+        memory: "256Mi"
+    env:
+      # HTTP protocol for external access
+      - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+        value: "http"
+        # HTTP host name for external access
+      - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+        value: "portal.minikube"
+        # HTTP port for external access, must be the same as the exposed port
+      - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+        value: "80"
+      - name: PORTAL_GATEWAY_LOG_LEVEL
+        value: "INFO"
+        # IAM
+      - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
+        value: "portal-iam"
+      - name: "PORTAL_GATEWAY_PORTAL_IAM_PORT"
+        value: "8080"
+        # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
+      - name: "PORTAL_GATEWAY_BASE_HOST"
+        value: "base"
+        # PORTAL_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
+      - name: "PORTAL_GATEWAY_BASE_PORT"
+        value: "20010"
+        # PORTAL_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
+      - name: "PORTAL_GATEWAY_DASHBOARD_HOST"
+        value: "dashboard"
+        # PORTAL_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
+      - name: "PORTAL_GATEWAY_DASHBOARD_PORT"
+        value: "20020"
+        # PORTAL_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
+      - name: "PORTAL_GATEWAY_ORGANISATION_HOST"
+        value: "organisation"
+        # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
+      - name: "PORTAL_GATEWAY_ORGANISATION_PORT"
+        value: "20030"
+        # PORTAL_GATEWAY_DOCUMENT_HOST is the hostname for accessing Document microservice via HTTP
+      - name: "PORTAL_GATEWAY_DOCUMENT_HOST"
+        value: "document"
+        # PORTAL_GATEWAY_DOCUMENT_PORT is the port for accessing Document microservice via HTTP
+      - name: "PORTAL_GATEWAY_DOCUMENT_PORT"
+        value: "20050"
+        # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
+      - name: "PORTAL_GATEWAY_FILESTORAGE_HOST"
+        value: "filestorage"
+        # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
+      - name: "PORTAL_GATEWAY_FILESTORAGE_PORT"
+        value: "20090"
+        # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
+      - name: "PORTAL_GATEWAY_CONTENT_HOST"
+        value: "content"
+        # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
+      - name: "PORTAL_GATEWAY_CONTENT_PORT"
+        value: "20110"
+        # PORTAL_GATEWAY_PORTAL_KOWL_HOST is the hostname for accessing Portal-Kowl via HTTP
+      - name: PORTAL_GATEWAY_PORTAL_KOWL_HOST
+        value: "portal-kowl"
+        # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
+      - name: PORTAL_GATEWAY_PORTAL_KOWL_PORT
+        value: "8080"
+      - name: PORTAL_GATEWAY_PORTAL_PGADMIN_HOST
+        value: portal-pgadmin
+      - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
+        value: "80"
+      - name: PORTAL_GATEWAY_PORTAL_GRAFANA_HOST
+        value: "grafana-service.monitoring"
+      - name: PORTAL_GATEWAY_PORTAL_GRAFANA_PORT
+        value: "3000"
+      - name: "PROXY_BEARER_TOKEN_ISSUER"
+        value: "https://ips.inventage.dev/auth/realms/portal"
+      - name: PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY
+        value: "http://portal-iam:8080/auth/realms/portal"
+      - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
+        value: "http://portal.minikube/auth/realms/portal"
+      - name: OTEL_SERVICE_NAME
+        value: "portal-gateway"
+      - name: OTEL_TRACES_EXPORTER
+        value: "none"
+      - name: OTEL_METRICS_EXPORTER
+        value: "none"
+    storages: []
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      timeoutSeconds: 1
+      periodSeconds: 20
+      failureThreshold: 6
+      successThreshold: 1
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      timeoutSeconds: 1
+      periodSeconds: 20
+      failureThreshold: 6
+      successThreshold: 1
+    startupProbe:
+      enabled: true
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      timeoutSeconds: 1
+      periodSeconds: 20
+      failureThreshold: 6
+      successThreshold: 1

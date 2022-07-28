@@ -172,7 +172,6 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
         </dependency>
-
         <!-- OpenTelemetry - Exporters -->
         <dependency>
             <groupId>io.opentelemetry</groupId>
@@ -236,16 +235,6 @@
                     <from>
                         <!-- PORTAL-453: upgrade to Java 17 because of https://github.com/docker/for-mac/issues/6118 -->
                         <image>registry://docker-registry.inventage.com:10094/eclipse-temurin:17-jre</image>
-<!--                        <platforms>-->
-<!--                            <platform>-->
-<!--                                <architecture>amd64</architecture>-->
-<!--                                <os>linux</os>-->
-<!--                            </platform>-->
-<!--                            <platform>-->
-<!--                                <architecture>arm64</architecture>-->
-<!--                                <os>linux</os>-->
-<!--                            </platform>-->
-<!--                        </platforms>-->
                     </from>
                     <to>
                         <image>${docker.push.registry}/${docker.image.name}</image>
@@ -302,14 +291,14 @@
                         </goals>
                     </execution>
                     <execution>
+                        <!-- needed in for the native build -->
                         <id>configuration</id>
                         <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config
-                            </classesDirectory>
+                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config</classesDirectory>
                             <classifier>configuration</classifier>
                         </configuration>
                     </execution>

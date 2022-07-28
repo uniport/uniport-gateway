@@ -1,6 +1,6 @@
 global:
-    imagePullSecrets:
-        - name: inventage-portal-docker-group
+  imagePullSecrets:
+    - name: inventage-portal-docker-group
 
 ingress:
-    host: portal.minikube
+  host: portal.minikube
