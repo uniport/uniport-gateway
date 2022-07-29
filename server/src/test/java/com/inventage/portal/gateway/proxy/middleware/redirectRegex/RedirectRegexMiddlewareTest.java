@@ -23,11 +23,6 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class RedirectRegexMiddlewareTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     static Stream<Arguments> redirectTestData() {
         // name, regex, replacement, URL, expectedStatusCode, expectedURL
         return Stream.of(

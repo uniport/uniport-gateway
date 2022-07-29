@@ -25,11 +25,6 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class ParserTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     static Stream<Arguments> filterKeysTestData() {
         Map<String, Object> labels = new HashMap<String, Object>(Map.ofEntries(//
                 new AbstractMap.SimpleEntry<String, Object>("testA", "value"), //

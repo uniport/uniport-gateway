@@ -19,11 +19,6 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class ProxyMiddlewareTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
 

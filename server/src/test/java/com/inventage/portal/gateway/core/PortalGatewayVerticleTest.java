@@ -12,11 +12,6 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class PortalGatewayVerticleTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     @BeforeEach
     void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
         vertx.deployVerticle(new PortalGatewayVerticle(), testContext.succeeding(id -> testContext.completeNow()));

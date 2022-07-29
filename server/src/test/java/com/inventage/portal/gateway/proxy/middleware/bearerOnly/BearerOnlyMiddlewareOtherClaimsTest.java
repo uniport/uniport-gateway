@@ -34,11 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(VertxExtension.class)
 public class BearerOnlyMiddlewareOtherClaimsTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     private static final String host = "localhost";
     private static final String publicKeyPath = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String publicKeyAlgorithm = "RS256";

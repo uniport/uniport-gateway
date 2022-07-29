@@ -26,11 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(VertxExtension.class)
 public class HeaderMiddlewareTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     String host = "localhost";
 
     static Stream<Arguments> requestHeaderTestData() {

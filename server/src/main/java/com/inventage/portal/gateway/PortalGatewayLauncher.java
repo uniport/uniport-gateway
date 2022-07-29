@@ -39,8 +39,6 @@ public class PortalGatewayLauncher extends Launcher {
         System.setProperty("vertx.metrics.options.registryName", "PortalGatewayMetrics");
         // increase timeout for worker execution to 2 min
         System.setProperty("vertx.options.maxWorkerExecuteTime", "240000000000");
-        // default service name for jaeger tracing
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
 
         if (Runtime.isDevelopment()) {
             // increase the max event loop time to 10 min (default is 2000000000 ns = 2s) to omit

@@ -28,11 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("unchecked")
 public class RouterFactoryTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     static final String host = "localhost";
 
     private HttpServer proxy;

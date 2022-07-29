@@ -30,11 +30,6 @@ import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBa
 @ExtendWith(VertxExtension.class)
 public class ControlApiMiddlewareTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     private static final String host = "localhost";
 
     private int port;

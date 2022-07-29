@@ -43,11 +43,6 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class SessionBagMiddlewareTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     static final String host = "localhost";
     static final String sessionCookieName = "portal-gateway-test.session";
 

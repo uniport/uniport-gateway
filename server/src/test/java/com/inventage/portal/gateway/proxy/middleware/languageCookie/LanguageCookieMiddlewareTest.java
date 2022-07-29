@@ -21,11 +21,6 @@ import static com.inventage.portal.gateway.proxy.middleware.languageCookie.Langu
 @ExtendWith(VertxExtension.class)
 public class LanguageCookieMiddlewareTest {
 
-    // necessary for jaeger (OpenTracing)
-    static {
-        System.setProperty("JAEGER_SERVICE_NAME", "portal-gateway");
-    }
-
     private static final String host = "localhost";
 
     private int port;
