@@ -205,16 +205,8 @@ def getVersionSuffix() {
  * Sets the appropriate version in `pom.xml`.
  */
 void updateVersion() {
-    sh 'echo UpdateVersion'
     env.VERSION_SUFFIX = getVersionSuffix()
-
-    versiontiger('.')
-}
-
-def versiontiger(reactorFolder) {
-    dir(reactorFolder) {
-        sh 'mvn com.inventage.tools.versiontiger:versiontiger-maven-plugin:execute -B -DstatementsFile=.jenkins/jenkins.versiontiger'
-    }
+    sh('mvn build-helper:parse-version versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.incrementalVersion}-${VERSION_SUFFIX} -DoldVersion=* -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false')
 }
 
 /**

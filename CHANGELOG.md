@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `SESSION_RESET` action in `ControlApiMiddelware` added ([PORTAL-747](https://issue.inventage.com/browse/PORTAL-747)).
 
+### Removed
+
+- Removed `versiontiger` in favor of the [versions-maven-plugin](https://www.mojohaus.org/versions-maven-plugin/index.html) for version management ([PORTAL-743](https://issue.inventage.com/browse/PORTAL-743)).
+
 ## [4.2.0]-202207191024-463-b0dd7e7 - 2022-07-19
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17561) -

@@ -1,6 +1,0 @@
-# Version Tiger (https://github.com/inventage/version-tiger/wiki)
-# Universe definition, because this file is not in the project root, we must go up one step
-projectRoot ..
-
-release .*
-version .* ${version:reactor}-${VERSION_SUFFIX}
