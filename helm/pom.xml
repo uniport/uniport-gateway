@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -66,8 +65,7 @@
                                     <groupId>com.inventage.portal.helm-chart-library</groupId>
                                     <artifactId>helm</artifactId>
                                     <version>${portal-helm-chart-library.version}</version>
-                                    <outputDirectory>${project.build.directory}/portal-gateway-template/charts
-                                    </outputDirectory>
+                                    <outputDirectory>${project.build.directory}/portal-gateway-template/charts</outputDirectory>
                                     <includes>portal-lib/**/*</includes>
                                 </artifactItem>
                                 <artifactItem>

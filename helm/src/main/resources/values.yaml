@@ -57,6 +57,8 @@ containers:
         value: "80"
       - name: PORTAL_GATEWAY_LOG_LEVEL
         value: "INFO"
+      - name: PORTAL_GATEWAY_LOGGING_CONFIG
+        value: "/etc/portal-gateway/logback.xml"
         # IAM
       - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
         value: "portal-iam"

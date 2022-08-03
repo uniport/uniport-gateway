@@ -1,10 +1,15 @@
 package com.inventage.portal.gateway;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 
+import ch.qos.logback.classic.util.ContextInitializer;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
 import io.vertx.core.Launcher;
@@ -17,6 +22,10 @@ import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
  */
 public class PortalGatewayLauncher extends Launcher {
 
+    private static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
+    private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/portal-gateway";
+    private static final String DEFAULT_LOGGING_CONFIG_FILE_NAME = "logback.xml";
+
     private static Logger LOGGER;
 
     private PortalGatewayLauncher() {
@@ -28,10 +37,23 @@ public class PortalGatewayLauncher extends Launcher {
      * @param args startup arguments
      */
     public static void main(String[] args) {
+        // https://logback.qos.ch/manual/configuration.html#configFileProperty
+        Optional<Path> loggingConfigPath = getLoggingConfigPath();
+        if (loggingConfigPath.isPresent()) {
+            System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, loggingConfigPath.get().toString());
+        }
+
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
+
         LOGGER = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
         LOGGER.info("Portal Gateway is starting....");
+
+        if (loggingConfigPath.isPresent()) {
+            LOGGER.info("Using logback configuration file from '{}'", loggingConfigPath.get());
+        } else {
+            LOGGER.info("No custom logback configuration file found");
+        }
 
         // enable metrics
         System.setProperty("vertx.metrics.options.enabled", "true");
@@ -49,6 +71,40 @@ public class PortalGatewayLauncher extends Launcher {
                 Runtime.numberOfVerticleInstances() };
         new PortalGatewayLauncher().dispatch(arguments);
         LOGGER.info("PortalGatewayLauncher started.");
+    }
+
+    /**
+     *
+     * The logback.xml for the logback configuration is taken from one of these places:
+     * 1. File pointed to by the env variable 'PORTAL_GATEWAY_LOGGING_CONFIG'
+     * 2. File pointed to by the system property 'PORTAL_GATEWAY_LOGGING_CONFIG'
+     * 3. File 'logback.xml' in '/etc/portal-gateway/logback.xml'
+     * 4. Normal configuration discovery process as configured by logback
+     */
+    private static Optional<Path> getLoggingConfigPath() {
+        // take path from env var
+        String loggingConfigFileName = System.getenv(LOGGING_CONFIG_PROPERTY);
+        if (existsAsFile(loggingConfigFileName)) {
+            return Optional.of(Path.of(loggingConfigFileName));
+        }
+
+        loggingConfigFileName = System.getProperty(LOGGING_CONFIG_PROPERTY);
+        if (existsAsFile(loggingConfigFileName)) {
+            return Optional.of(Path.of(loggingConfigFileName));
+        }
+
+        // take path from the default path
+        loggingConfigFileName = String.format("%s/%s", DEFAULT_LOGGING_CONFIG_FILE_PATH,
+                DEFAULT_LOGGING_CONFIG_FILE_NAME);
+        if (existsAsFile(loggingConfigFileName)) {
+            return Optional.of(Path.of(loggingConfigFileName));
+        }
+
+        return Optional.empty();
+    }
+
+    private static boolean existsAsFile(String fileName) {
+        return fileName != null && new File(fileName).exists();
     }
 
     @Override

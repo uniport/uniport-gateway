@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `SESSION_RESET` action in `ControlApiMiddelware` added ([PORTAL-747](https://issue.inventage.com/browse/PORTAL-747)).
+- Added possibility to configure logback by providing a `logback.xml` and pointing `PORTAL_GATEWAY_LOGGING_CONFIG` to it ([PORTAL-741](https://issue.inventage.com/browse/PORTAL-741)).
 
 ### Removed
 
