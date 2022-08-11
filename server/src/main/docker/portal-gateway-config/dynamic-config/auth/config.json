@@ -158,10 +158,10 @@
                 "options": {}
             },
             {
-                "name": "whithelistedCookiesInSessionBag",
+                "name": "whitelistedCookiesInSessionBag",
                 "type": "sessionBag",
                 "options": {
-                    "whithelistedCookies": [
+                    "whitelistedCookies": [
                         {
                             "name": "KEYCLOAK_SESSION",
                             "path": "/auth/realms/master/"
