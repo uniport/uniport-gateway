@@ -224,7 +224,7 @@ public class RouterFactory {
      */
     private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
         if (middlewares == null) {
-            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
                     new JsonArray());
         }
         List<JsonObject> sessionBagMiddlewares = new ArrayList<>();
@@ -239,7 +239,7 @@ public class RouterFactory {
             middlewares.remove(sessionBagMiddleware);
         }
         if (sessionBagMiddlewares.isEmpty()) {
-            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
                     new JsonArray());
         }
         if (sessionBagMiddlewares.size() > 1) {

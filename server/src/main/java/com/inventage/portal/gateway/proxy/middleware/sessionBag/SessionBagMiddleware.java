@@ -270,9 +270,9 @@ public class SessionBagMiddleware implements Middleware {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
             JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
             String whitelistedCookieName = whitelistedCookie
-                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME);
+                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
             String whitelistedCookiePath = whitelistedCookie
-                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH);
+                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
             if (whitelistedCookieName.equals(cookie.name()) && whitelistedCookiePath.equals(cookie.path())) {
                 return true;
             }

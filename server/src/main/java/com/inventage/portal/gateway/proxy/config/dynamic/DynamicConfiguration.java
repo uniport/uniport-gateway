@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -100,9 +101,12 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
 
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
-    public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES = "whithelistedCookies";
-    public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME = "name";
-    public static final String MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH = "path";
+    public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
+    //PORTAL-620: Typo in the variable name. We should still provide support for configuration files that contain this typo (whithe.. instead of whitelist)
+    public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY = "whithelistedCookies";
+
+    public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH = "path";
 
     public static final String MIDDLEWARE_CONTROL_API = "controlApi";
     public static final String MIDDLEWARE_CONTROL_API_ACTION = "action";
@@ -149,7 +153,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
                 .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
-                .property(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES, Schemas.arraySchema())
+                .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
+                .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
                 .allowAdditionalProperties(false);
 
@@ -663,23 +668,26 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_SESSION_BAG: {
-                    JsonArray whithelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES);
-                    if (whithelistedCookies == null) {
-                        return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
-                    }
-                    for (int j = 0; j < whithelistedCookies.size(); j++) {
-                        JsonObject whithelistedCookie = whithelistedCookies.getJsonObject(j);
-                        if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
-                                || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME)
-                                        .isEmpty()) {
-                            return Future.failedFuture(
-                                    String.format("%s: whithelisted cookie name has to contain a value", mwType));
+                    JsonArray whitelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
+                    if (whitelistedCookies == null) {
+                        whitelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY);
+                        if (whitelistedCookies == null) {
+                            return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
                         }
-                        if (!whithelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
-                                || whithelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH)
-                                        .isEmpty()) {
+                    }
+                    for (int j = 0; j < whitelistedCookies.size(); j++) {
+                        JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
+                        if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
+                                || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
+                                .isEmpty()) {
                             return Future.failedFuture(
-                                    String.format("%s: whithelisted cookie path has to contain a value", mwType));
+                                    String.format("%s: whitelisted cookie name has to contain a value", mwType));
+                        }
+                        if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
+                                || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
+                                .isEmpty()) {
+                            return Future.failedFuture(
+                                    String.format("%s: whitelisted cookie path has to contain a value", mwType));
                         }
                     }
                     break;
