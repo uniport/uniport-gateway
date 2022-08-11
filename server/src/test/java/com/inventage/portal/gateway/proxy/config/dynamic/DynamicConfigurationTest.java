@@ -238,11 +238,11 @@ public class DynamicConfigurationTest {
                 new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                         .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
-                                DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIES,
+                                DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
                                 new JsonArray().add(new JsonObject()
-                                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME,
+                                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME,
                                                 "foo")
-                                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH,
+                                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
                                                 "/bar")))))));
 
         JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(

@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Changed
+
+- **BREAKING**: Fix typo in config file. From "whithelistedCookies" to "whitelistedCookies". Old config files containing the typo in the variable name are still being supported!
+
 ### Added
 
 - `SESSION_RESET` action in `ControlApiMiddelware` added ([PORTAL-747](https://issue.inventage.com/browse/PORTAL-747)).

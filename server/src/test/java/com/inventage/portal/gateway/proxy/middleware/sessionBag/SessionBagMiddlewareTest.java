@@ -157,11 +157,11 @@ public class SessionBagMiddlewareTest {
         Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/portal/")
                 .setMaxAge(3600);
         JsonArray whitelistedCookies = new JsonArray().add(new JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
-                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH, "/auth/realms/master/"))
+                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
+                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH, "/auth/realms/master/"))
                 .add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH,
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
                                 "/auth/realms/portal/"));
         SessionStore sessionStore = LocalSessionStore.create(vertx);
         AtomicBoolean isFirstReq = new AtomicBoolean(true);
@@ -261,7 +261,6 @@ public class SessionBagMiddlewareTest {
             // setup proxy
             SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(sessionCookieName);
             SessionBagMiddleware sessionBag = new SessionBagMiddleware(whitelistedCookies);
-
             ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
             Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);
@@ -318,7 +317,7 @@ public class SessionBagMiddlewareTest {
      * @param expectedSessionBagCookies cookie expected to be stored in the session bag
      */
     void expectedCookies(VertxTestContext testCtx, String errMsg, SessionStore sessionStore,
-            AtomicReference<String> sessionId, JsonArray whithelistedCookies, HttpClientResponse resp,
+            AtomicReference<String> sessionId, JsonArray whitelistedCookies, HttpClientResponse resp,
             List<Cookie> expectedSessionBagCookies) {
         testCtx.verify(() -> {
             io.netty.handler.codec.http.cookie.Cookie sessionCookie = null;
@@ -335,10 +334,10 @@ public class SessionBagMiddlewareTest {
                 }
 
                 assertTrue(
-                        whithelistedCookies.contains(new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_NAME,
+                        whitelistedCookies.contains(new JsonObject()
+                                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME,
                                         decodedRespCookie.name())
-                                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITHELISTED_COOKIE_PATH,
+                                .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
                                         decodedRespCookie.path())),
                         String.format("%s: Not whitelisted cookie was passed to user agent '%s'", errMsg, respCookie));
             }
