@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+- Keycloak Mockserver + OAuth2Auth Middleware tests for PORTAL-512 and PORTAL-513
+- Enable PKCE in OIDC flow ([PORTAL-512](https://issue.inventage.com/browse/PORTAL-512)).
+- PKCE and Authorization code are sent in the request body ([PORTAL-513](https://issue.inventage.com/browse/PORTAL-513)).
+
 ## [4.3.0]-202208121035-483-5b7b069
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17574)
