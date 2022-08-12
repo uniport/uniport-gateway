@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING**: Fix typo in config file. From "whithelistedCookies" to "whitelistedCookies". Old config files containing the typo in the variable name are still being supported!
+-  Typo in variable name. Backward compatibility for configuration files that contain the typo is still provided. From `whithelistedCookies` to `whitelistedCookies` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
 
 ### Added
 

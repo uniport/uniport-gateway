@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
-
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -102,7 +101,11 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
-    //PORTAL-620: Typo in the variable name. We should still provide support for configuration files that contain this typo (whithe.. instead of whitelist)
+    /**
+     * @deprecated This field should no longer be used as of version 4.3.0.
+     * <p> Use {@link DynamicConfiguration#MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES } instead</p>
+     */
+    @Deprecated(since = "4.3.0")
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY = "whithelistedCookies";
 
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME = "name";
@@ -687,7 +690,7 @@ public class DynamicConfiguration {
                                 || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
                                 .isEmpty()) {
                             return Future.failedFuture(
-                                    String.format("%s: whitelisted cookie path has to contain a value", mwType));
+                                    String.format("%s: whithelisted cookie path has to contain a value", mwType));
                         }
                     }
                     break;
