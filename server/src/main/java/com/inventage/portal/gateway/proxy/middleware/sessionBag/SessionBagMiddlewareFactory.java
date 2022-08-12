@@ -32,8 +32,8 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, JsonObject middlewareOptions) {
         JsonArray whitelistedCookies = middlewareOptions
                 .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
-        //PORTAL-620: Typo in the variable name. We should still provide support for configuration files that contain this typo (whithe.. instead of whitelist)
-        if (whitelistedCookies == null){
+        // PORTAL-620: Typo in variable name. Backward compatibility for configuration files that contain the typo is still provided.
+        if (whitelistedCookies == null) {
             whitelistedCookies = middlewareOptions.getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY);
         }
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
