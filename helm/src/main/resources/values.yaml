@@ -114,12 +114,12 @@ containers:
         value: "grafana-service.monitoring"
       - name: PORTAL_GATEWAY_PORTAL_GRAFANA_PORT
         value: "3000"
-      - name: "PROXY_BEARER_TOKEN_ISSUER"
-        value: "https://ips.inventage.dev/auth/realms/portal"
       - name: PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY
         value: "http://portal-iam:8080/auth/realms/portal"
       - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
         value: "http://portal.minikube/auth/realms/portal"
+      - name: PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL
+        value: "false"
       - name: OTEL_SERVICE_NAME
         value: "portal-gateway"
       - name: OTEL_TRACES_EXPORTER
