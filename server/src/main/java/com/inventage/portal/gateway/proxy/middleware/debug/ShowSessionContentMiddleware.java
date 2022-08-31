@@ -38,7 +38,7 @@ public class ShowSessionContentMiddleware implements Middleware {
 
     // TODO: usage of vert.x templating for HTML generation
     private String getHtml(Session session) {
-        final StringBuffer html = new StringBuffer();
+        final StringBuilder html = new StringBuilder();
 
         html.append("session ID:\n").append(session.id());
         html.append("\n");
@@ -86,5 +86,4 @@ public class ShowSessionContentMiddleware implements Middleware {
         String payload = new String(decoder.decode(chunks[1]));
         return new JsonObject(payload).encodePrettily();
     }
-
 }
