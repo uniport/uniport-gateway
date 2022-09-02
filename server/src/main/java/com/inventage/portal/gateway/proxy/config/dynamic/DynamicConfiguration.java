@@ -752,7 +752,7 @@ public class DynamicConfiguration {
                                 || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
                                 .isEmpty()) {
                             return Future.failedFuture(
-                                    String.format("%s: whithelisted cookie path has to contain a value", mwType));
+                                    String.format("%s: whitelisted cookie path has to contain a value", mwType));
                         }
                     }
                     break;
