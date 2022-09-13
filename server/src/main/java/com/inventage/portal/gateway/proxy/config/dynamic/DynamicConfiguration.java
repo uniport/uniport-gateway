@@ -128,12 +128,28 @@ public class DynamicConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
+        ObjectSchemaBuilder routerSchema = buildRouterSchema();
+        ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
+        ObjectSchemaBuilder serviceSchema = buildServiceSchema();
+        ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
+
+        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
+                .allowAdditionalProperties(false);
+
+        SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
+        SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
+        return dynamicConfigBuilder.build(schemaParser);
+    }
+
+    private static ObjectSchemaBuilder buildRouterSchema() {
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema().requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema())
                 .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
-
+        return routerSchema;
+    }
+    private static ObjectSchemaBuilder buildMiddlewareSchema() {
         ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
@@ -165,7 +181,9 @@ public class DynamicConfiguration {
                 .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                 .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
                 .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
-
+        return middlewareSchema;
+    }
+    private static ObjectSchemaBuilder buildServiceSchema() {
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
                 .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
@@ -173,20 +191,18 @@ public class DynamicConfiguration {
                                 .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
                                 .allowAdditionalProperties(false)))
                 .allowAdditionalProperties(false);
-
+        return serviceSchema;
+    }
+    private static ObjectSchemaBuilder buildHttpSchema(ObjectSchemaBuilder routerSchema, ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema){
         ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
                 .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
                 .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
                 .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
-
-        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
-                .allowAdditionalProperties(false);
-
-        SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
-        SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
-        return dynamicConfigBuilder.build(schemaParser);
+        return httpSchema;
     }
-
+    public static ObjectSchemaBuilder getBuildMiddlewareSchema(){
+        return buildMiddlewareSchema();
+    }
     public static JsonObject buildDefaultConfiguration() {
         JsonObject config = new JsonObject();
 
@@ -515,7 +531,6 @@ public class DynamicConfiguration {
                     if (claims != null) {
                         if (claims.size() == 0) {
                             LOGGER.debug("Claims is empty");
-                            //return Future.failedFuture(String.format("%s: Empty claims defined.", mwType));
                         }
 
                         for (Object claim : claims.getList()) {

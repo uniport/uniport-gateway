@@ -1,7 +1,14 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import io.vertx.core.*;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +18,6 @@ import com.inventage.portal.gateway.core.log.RequestResponseLogger;
 import com.inventage.portal.gateway.core.session.ReplacedSessionCookieDetectionHandler;
 import com.inventage.portal.gateway.core.session.ResponseSessionCookieHandler;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -42,17 +48,20 @@ public class Entrypoint {
     private final boolean sessionDisabled;
     // sessionIdleTimeout is how many minutes an idle session is kept before deletion
     private final int sessionIdleTimeout;
+
+    private final JsonArray preMiddlewares;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled, int sessionIdleTimeoutMinutes) {
+    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled, int sessionIdleTimeoutMinutes, JsonArray preMiddlewares) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
         this.sessionDisabled = sessionDisabled;
         this.sessionIdleTimeout = sessionIdleTimeoutMinutes;
         this.enabled = true;
+        this.preMiddlewares = preMiddlewares;
     }
 
     public String name() {
@@ -96,6 +105,7 @@ public class Entrypoint {
         if (!this.sessionDisabled) {
             router.route().handler(ReplacedSessionCookieDetectionHandler.create());
         }
+        this.setupPreMiddlewares(this.preMiddlewares, router);
         return router;
     }
 
@@ -160,5 +170,44 @@ public class Entrypoint {
                     throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
                 });
     }
+
+    private void setupPreMiddlewares(JsonArray preMiddlewares, Router router) {
+        List<Future> middlewareFutures = new ArrayList<>();
+
+        for (int i = 0; i < preMiddlewares.size(); i++){
+            middlewareFutures.add(createMiddleware(preMiddlewares.getJsonObject(i), router));
+        }
+
+        CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
+            middlewareFutures.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
+            LOGGER.debug("PreMiddlewares created successfully");
+        }).onFailure(cfErr -> {
+            String errMsg = String.format("Failed to create PreMiddlewares");
+            LOGGER.warn("{}", errMsg);
+        });
+    }
+
+    private Future<Middleware> createMiddleware(JsonObject middlewareConfig, Router router) {
+        Promise<Middleware> promise = Promise.promise();
+        createMiddleware(middlewareConfig, router, promise);
+        return promise.future();
+    }
+
+    private void createMiddleware(JsonObject middlewareConfig, Router router,
+                                  Handler<AsyncResult<Middleware>> handler) {
+        String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
+        JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+
+        MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        if (middlewareFactory == null) {
+            String errMsg = String.format("Unknown middleware '%s'", middlewareType);
+            LOGGER.warn("{}", errMsg);
+            handler.handle(Future.failedFuture(errMsg));
+            return;
+        }
+
+        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(handler);
+    }
+
 
 }

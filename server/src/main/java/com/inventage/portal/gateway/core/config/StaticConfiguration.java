@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.core.config;
 
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,7 @@ public class StaticConfiguration {
                 .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
                 .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
                 .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
+                .property(DynamicConfiguration.MIDDLEWARES, Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
                 .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
 
         ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
