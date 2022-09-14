@@ -215,10 +215,33 @@ public class StaticConfigurationTest {
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                                 .add(new JsonObject()
                                         .put("name", "languagePremiddleware")
-                                        .put("type", "nonExistentMiddleware")
+                                        .put("type", "nonExistingMiddleware")
                                         .put("options", new JsonObject()))
                         )));
         StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
+    }
+
+    @Test
+    public void acceptMultipleEntrypointsWithPremiddlewares(Vertx vertx, VertxTestContext testCtx) {
+        JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS,
+                new JsonArray().add(new JsonObject()
+                        .put(StaticConfiguration.ENTRYPOINT_NAME, "testEntrypoint1")
+                        .put(StaticConfiguration.ENTRYPOINT_PORT, 1234)
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                                .add(new JsonObject()
+                                        .put("name", "languagePremiddleware")
+                                        .put("type", "languageCookie")
+                                        .put("options", new JsonObject()))
+                        )).add(new JsonObject()
+                        .put(StaticConfiguration.ENTRYPOINT_NAME, "testEntrypoint2")
+                        .put(StaticConfiguration.ENTRYPOINT_PORT, 1235)
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                                .add(new JsonObject()
+                                        .put("name", "languagePremiddleware")
+                                        .put("type", "languageCookie")
+                                        .put("options", new JsonObject()))
+                        )));
+        StaticConfiguration.validate(vertx, json).onComplete(testCtx.succeedingThenComplete());
     }
 
 }
