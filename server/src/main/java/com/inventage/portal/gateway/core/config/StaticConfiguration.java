@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.config;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import io.vertx.core.CompositeFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,9 @@ import io.vertx.json.schema.SchemaRouter;
 import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * It defines the structure of the static configuration.
@@ -101,19 +105,45 @@ public class StaticConfiguration {
 
         Promise<Void> validPromise = Promise.promise();
         schema.validateAsync(json).onSuccess(f -> {
-            validateProviders(json.getJsonArray(PROVIDERS), validPromise);
+            boolean validProviders = validateProviders(json.getJsonArray(PROVIDERS), validPromise);
+            if(validProviders) {
+                JsonArray entrypoints = json.getJsonArray(ENTRYPOINTS);
+                if (entrypoints != null) {
+                    validateApplications(json.getJsonArray(ENTRYPOINTS), validPromise);
+                }
+                else {
+                    validPromise.complete();
+                }
+            }
         }).onFailure(err -> {
             validPromise.fail(err.getMessage());
         });
-
         return validPromise.future();
     }
 
-    private static void validateProviders(JsonArray providers, Promise<Void> validPromise) {
+    private static void validateApplications(JsonArray applications, Promise<Void> validPromise) {
+        List<Future> middlewareFutures = new ArrayList<>();
+        for (int i = 0; i < applications.size(); i++) {
+            JsonObject applicationJson = applications.getJsonObject(i);
+            JsonArray middlewares = applicationJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            middlewareFutures.add(validatePremiddleware(middlewares));
+        }
+        CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
+            validPromise.complete();
+        }).onFailure(cfErr -> {
+            validPromise.fail(cfErr.getMessage());
+        });
+    }
+
+    private static Future<Void> validatePremiddleware(JsonArray preMiddlewares) {
+        JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, preMiddlewares);
+        return DynamicConfiguration.validateMiddlewares(toValidate);
+    }
+
+    private static boolean validateProviders(JsonArray providers, Promise<Void> validPromise) {
         if (providers == null || providers.size() == 0) {
             LOGGER.warn("No providers defined");
-            validPromise.complete();
-            return;
+            return true;
         }
         LOGGER.debug("Validating providers: '{}'", providers);
 
@@ -146,9 +176,9 @@ public class StaticConfiguration {
 
             if (!valid) {
                 validPromise.fail(errMsg);
-                return;
+                return false;
             }
         }
-        validPromise.complete();
+        return true;
     }
 }

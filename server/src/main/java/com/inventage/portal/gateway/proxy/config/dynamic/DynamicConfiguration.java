@@ -444,7 +444,7 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    private static Future<Void> validateMiddlewares(JsonObject httpConfig) {
+    public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
             LOGGER.debug("No middlewares defined");
