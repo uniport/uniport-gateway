@@ -109,7 +109,7 @@ public class StaticConfiguration {
             if(validProviders) {
                 JsonArray entrypoints = json.getJsonArray(ENTRYPOINTS);
                 if (entrypoints != null) {
-                    validateApplications(json.getJsonArray(ENTRYPOINTS), validPromise);
+                    validateEntrypoints(json.getJsonArray(ENTRYPOINTS), validPromise);
                 }
                 else {
                     validPromise.complete();
@@ -121,21 +121,21 @@ public class StaticConfiguration {
         return validPromise.future();
     }
 
-    private static void validateApplications(JsonArray applications, Promise<Void> validPromise) {
+    private static void validateEntrypoints(JsonArray entrypoints, Promise<Void> validPromise) {
         List<Future> middlewareFutures = new ArrayList<>();
-        for (int i = 0; i < applications.size(); i++) {
-            JsonObject applicationJson = applications.getJsonObject(i);
-            JsonArray middlewares = applicationJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            middlewareFutures.add(validatePremiddleware(middlewares));
+        for (int i = 0; i < entrypoints.size(); i++) {
+            JsonObject entrypointJson = entrypoints.getJsonObject(i);
+            JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            middlewareFutures.add(validatePremiddlewareFuture(middlewares));
         }
         CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
             validPromise.complete();
         }).onFailure(cfErr -> {
-            validPromise.fail(cfErr.getMessage());
+            validPromise.fail("Premiddleware validation failed: " + cfErr.getMessage());
         });
     }
 
-    private static Future<Void> validatePremiddleware(JsonArray preMiddlewares) {
+    private static Future<Void> validatePremiddlewareFuture(JsonArray preMiddlewares) {
         JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, preMiddlewares);
         return DynamicConfiguration.validateMiddlewares(toValidate);
     }

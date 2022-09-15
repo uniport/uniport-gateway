@@ -172,15 +172,18 @@ public class Entrypoint {
     }
 
     private void setupPreMiddlewares(JsonArray preMiddlewares, Router router) {
-        List<Future> middlewareFutures = new ArrayList<>();
-
+        if(preMiddlewares == null){
+            LOGGER.info("No PreMiddlewares defined");
+            return;
+        }
+        List<Future> preMiddlewaresFuture = new ArrayList<>();
         for (int i = 0; i < preMiddlewares.size(); i++){
-            middlewareFutures.add(createMiddleware(preMiddlewares.getJsonObject(i), router));
+            preMiddlewaresFuture.add(createMiddleware(preMiddlewares.getJsonObject(i), router));
         }
 
-        CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
-            middlewareFutures.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
-            LOGGER.debug("PreMiddlewares created successfully");
+        CompositeFuture.all(preMiddlewaresFuture).onSuccess(cf -> {
+            preMiddlewaresFuture.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
+            LOGGER.info("PreMiddlewares created successfully");
         }).onFailure(cfErr -> {
             String errMsg = String.format("Failed to create PreMiddlewares");
             LOGGER.warn("{}", errMsg);
