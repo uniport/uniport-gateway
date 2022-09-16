@@ -46,22 +46,25 @@ containers:
       limits:
         memory: "256Mi"
     env:
-      # HTTP protocol for external access
+        # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
       - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
         value: "http"
-        # HTTP host name for external access
+        # PORTAL_GATEWAY_PUBLIC_HOSTNAME HTTP host name for external access
       - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
         value: "portal.minikube"
-        # HTTP port for external access, must be the same as the exposed port
+        # PORTAL_GATEWAY_PUBLIC_PORT HTTP port for external access, must be the same as the exposed port
       - name: "PORTAL_GATEWAY_PUBLIC_PORT"
         value: "80"
+        # PORTAL_GATEWAY_LOG_LEVEL is the overall log level and can be one of TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF
       - name: PORTAL_GATEWAY_LOG_LEVEL
         value: "INFO"
+        # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
       - name: PORTAL_GATEWAY_LOGGING_CONFIG
         value: "/etc/portal-gateway/logback.xml"
-        # IAM
+        # PORTAL_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
       - name: "PORTAL_GATEWAY_PORTAL_IAM_HOST"
         value: "portal-iam"
+        # PORTAL_GATEWAY_PORTAL_IAM_PORT is the port of the portal-iam host
       - name: "PORTAL_GATEWAY_PORTAL_IAM_PORT"
         value: "8080"
         # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
@@ -106,24 +109,34 @@ containers:
         # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
       - name: PORTAL_GATEWAY_PORTAL_KOWL_PORT
         value: "8080"
+        # PORTAL_GATEWAY_PORTAL_PGADMIN_HOST is the hostname for accessing PgAdmin via HTTP
       - name: PORTAL_GATEWAY_PORTAL_PGADMIN_HOST
         value: portal-pgadmin
+        # PORTAL_GATEWAY_PORTAL_PGADMIN_PORT is the port for accessing PgAdmin via HTTP
       - name: PORTAL_GATEWAY_PORTAL_PGADMIN_PORT
         value: "80"
+        # PORTAL_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
       - name: PORTAL_GATEWAY_PORTAL_GRAFANA_HOST
         value: "grafana-service.monitoring"
+        # PORTAL_GATEWAY_PORTAL_GRAFANA_PORT is the port for accessing Grafana via HTTP
       - name: PORTAL_GATEWAY_PORTAL_GRAFANA_PORT
         value: "3000"
+      # PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY describes the path or url to the public key. this is required to verify the signature of incoming jwts.
       - name: PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY
         value: "http://portal-iam:8080/auth/realms/portal"
+      # PORTAL_GATEWAY_BEARER_TOKEN_ISSUER the issuer expected in the access token
       - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
         value: "http://portal.minikube/auth/realms/portal"
+      # PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL dictates if the proxy should expect (and therefore verify) an access token
       - name: PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL
         value: "false"
+      # OTEL_SERVICE_NAME is the name of the service
       - name: OTEL_SERVICE_NAME
         value: "portal-gateway"
+      # OTEL_TRACES_EXPORTER is the list of exporters used for tracing, separated by commas
       - name: OTEL_TRACES_EXPORTER
         value: "none"
+      # OTEL_METRICS_EXPORTER is the list of exporters user for metrics, separated by commas
       - name: OTEL_METRICS_EXPORTER
         value: "none"
     storages: []
