@@ -125,14 +125,14 @@ public class StaticConfiguration {
             for (int i = 0; i < entrypoints.size(); i++) {
                 JsonObject entrypointJson = entrypoints.getJsonObject(i);
                 JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                middlewareFutures.add(validatePremiddlewareFuture(middlewares));
+                middlewareFutures.add(validateEntryMiddlewareFuture(middlewares));
             }
         }
         return middlewareFutures;
     }
 
-    private static Future<Void> validatePremiddlewareFuture(JsonArray preMiddlewares) {
-        JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, preMiddlewares);
+    private static Future<Void> validateEntryMiddlewareFuture(JsonArray entryMiddleware) {
+        JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, entryMiddleware);
         return DynamicConfiguration.validateMiddlewares(toValidate);
     }
 

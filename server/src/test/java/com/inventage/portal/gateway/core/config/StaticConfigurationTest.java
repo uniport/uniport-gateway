@@ -181,7 +181,7 @@ public class StaticConfigurationTest {
     }
 
     @Test
-    public void acceptApplicationWithPremiddlewares(Vertx vertx, VertxTestContext testCtx) {
+    public void acceptApplicationWithEntryMiddlewares(Vertx vertx, VertxTestContext testCtx) {
         JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS,
                 new JsonArray().add(new JsonObject()
                         .put(StaticConfiguration.ENTRYPOINT_NAME, "testEntrypoint")
@@ -192,14 +192,14 @@ public class StaticConfigurationTest {
     }
 
     @Test
-    public void acceptApplicationWithValidPremiddlewares(Vertx vertx, VertxTestContext testCtx) {
+    public void acceptApplicationWithValidEntryMiddlewares(Vertx vertx, VertxTestContext testCtx) {
         JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS,
                 new JsonArray().add(new JsonObject()
                         .put(StaticConfiguration.ENTRYPOINT_NAME, "testEntrypoint")
                         .put(StaticConfiguration.ENTRYPOINT_PORT, 1234)
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                                 .add(new JsonObject()
-                                        .put("name", "languagePremiddleware")
+                                        .put("name", "languageEntryMiddleware")
                                         .put("type", "languageCookie")
                                         .put("options", new JsonObject()))
                         )));
@@ -207,14 +207,14 @@ public class StaticConfigurationTest {
     }
 
     @Test
-    public void acceptApplicationWithNonExistingPremiddlewares(Vertx vertx, VertxTestContext testCtx) {
+    public void acceptApplicationWithNonExistingEntryMiddlewares(Vertx vertx, VertxTestContext testCtx) {
         JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS,
                 new JsonArray().add(new JsonObject()
                         .put(StaticConfiguration.ENTRYPOINT_NAME, "testEntrypoint")
                         .put(StaticConfiguration.ENTRYPOINT_PORT, 1234)
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                                 .add(new JsonObject()
-                                        .put("name", "languagePremiddleware")
+                                        .put("name", "languageEntryMiddleware")
                                         .put("type", "nonExistingMiddleware")
                                         .put("options", new JsonObject()))
                         )));
@@ -222,14 +222,14 @@ public class StaticConfigurationTest {
     }
 
     @Test
-    public void acceptMultipleEntrypointsWithPremiddlewares(Vertx vertx, VertxTestContext testCtx) {
+    public void acceptMultipleEntrypointsWithEntryMiddlewares(Vertx vertx, VertxTestContext testCtx) {
         JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS,
                 new JsonArray().add(new JsonObject()
                         .put(StaticConfiguration.ENTRYPOINT_NAME, "testEntrypoint1")
                         .put(StaticConfiguration.ENTRYPOINT_PORT, 1234)
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                                 .add(new JsonObject()
-                                        .put("name", "languagePremiddleware")
+                                        .put("name", "languageEntryMiddleware")
                                         .put("type", "languageCookie")
                                         .put("options", new JsonObject()))
                         )).add(new JsonObject()
@@ -237,7 +237,7 @@ public class StaticConfigurationTest {
                         .put(StaticConfiguration.ENTRYPOINT_PORT, 1235)
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                                 .add(new JsonObject()
-                                        .put("name", "languagePremiddleware")
+                                        .put("name", "languageEntryMiddleware")
                                         .put("type", "languageCookie")
                                         .put("options", new JsonObject()))
                         )));

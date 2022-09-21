@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (Pre-)middlewares can be attached to each entrypoint, which are first traversed before a request is forwarded to the route-specific middlewares. ([PORTAL-895](https://issue.inventage.com/browse/PORTAL-895)).
+- Middlewares can be attached to each entrypoint, which are first traversed before a request is forwarded to the route-specific middlewares. ([PORTAL-895](https://issue.inventage.com/browse/PORTAL-895)).
 - Keycloak Mockserver + OAuth2Auth Middleware tests for PORTAL-512 and PORTAL-513
 - Enable PKCE in OIDC flow ([PORTAL-512](https://issue.inventage.com/browse/PORTAL-512)).
 - PKCE and Authorization code are sent in the request body ([PORTAL-513](https://issue.inventage.com/browse/PORTAL-513)).

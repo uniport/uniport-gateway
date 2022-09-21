@@ -49,19 +49,19 @@ public class Entrypoint {
     // sessionIdleTimeout is how many minutes an idle session is kept before deletion
     private final int sessionIdleTimeout;
 
-    private final JsonArray preMiddlewares;
+    private final JsonArray entryMiddlewares;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled, int sessionIdleTimeoutMinutes, JsonArray preMiddlewares) {
+    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled, int sessionIdleTimeoutMinutes, JsonArray entryMiddlewares) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
         this.sessionDisabled = sessionDisabled;
         this.sessionIdleTimeout = sessionIdleTimeoutMinutes;
         this.enabled = true;
-        this.preMiddlewares = preMiddlewares;
+        this.entryMiddlewares = entryMiddlewares;
     }
 
     public String name() {
@@ -105,7 +105,7 @@ public class Entrypoint {
         if (!this.sessionDisabled) {
             router.route().handler(ReplacedSessionCookieDetectionHandler.create());
         }
-        this.setupPreMiddlewares(this.preMiddlewares, router);
+        this.setupEntryMiddlewares(this.entryMiddlewares, router);
         return router;
     }
 
@@ -171,33 +171,33 @@ public class Entrypoint {
                 });
     }
 
-    private void setupPreMiddlewares(JsonArray preMiddlewares, Router router) {
-        if(preMiddlewares == null){
-            LOGGER.info("No PreMiddlewares defined");
+    private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
+        if(entryMiddlewares == null){
+            LOGGER.info("No EntryMiddlewares defined");
             return;
         }
-        List<Future> preMiddlewaresFuture = new ArrayList<>();
-        for (int i = 0; i < preMiddlewares.size(); i++){
-            preMiddlewaresFuture.add(createMiddleware(preMiddlewares.getJsonObject(i), router));
+        List<Future> entryMiddlewaresFuture = new ArrayList<>();
+        for (int i = 0; i < entryMiddlewares.size(); i++){
+            entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
         }
 
-        CompositeFuture.all(preMiddlewaresFuture).onSuccess(cf -> {
-            preMiddlewaresFuture.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
-            LOGGER.info("PreMiddlewares created successfully");
+        CompositeFuture.all(entryMiddlewaresFuture).onSuccess(cf -> {
+            entryMiddlewaresFuture.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
+            LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(cfErr -> {
-            String errMsg = String.format("Failed to create PreMiddlewares");
+            String errMsg = String.format("Failed to create EntryMiddlewares");
             LOGGER.warn("{}", errMsg);
         });
     }
 
-    private Future<Middleware> createMiddleware(JsonObject middlewareConfig, Router router) {
+    private Future<Middleware> createEntryMiddleware(JsonObject middlewareConfig, Router router) {
         Promise<Middleware> promise = Promise.promise();
-        createMiddleware(middlewareConfig, router, promise);
+        createEntryMiddleware(middlewareConfig, router, promise);
         return promise.future();
     }
 
-    private void createMiddleware(JsonObject middlewareConfig, Router router,
-                                  Handler<AsyncResult<Middleware>> handler) {
+    private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
+                                       Handler<AsyncResult<Middleware>> handler) {
         String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
