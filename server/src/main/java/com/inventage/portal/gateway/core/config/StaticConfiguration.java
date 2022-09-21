@@ -105,34 +105,30 @@ public class StaticConfiguration {
 
         Promise<Void> validPromise = Promise.promise();
         schema.validateAsync(json).onSuccess(f -> {
-            boolean validProviders = validateProviders(json.getJsonArray(PROVIDERS), validPromise);
-            if(validProviders) {
-                JsonArray entrypoints = json.getJsonArray(ENTRYPOINTS);
-                if (entrypoints != null) {
-                    validateEntrypoints(json.getJsonArray(ENTRYPOINTS), validPromise);
-                }
-                else {
-                    validPromise.complete();
-                }
-            }
+            List<Future> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
+            futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
+
+            CompositeFuture.all(futures).onSuccess(cf -> {
+                validPromise.complete();
+            }).onFailure(cfErr -> {
+                validPromise.fail(cfErr.getMessage());
+            });
         }).onFailure(err -> {
             validPromise.fail(err.getMessage());
         });
         return validPromise.future();
     }
 
-    private static void validateEntrypoints(JsonArray entrypoints, Promise<Void> validPromise) {
+    private static List<Future> validateEntrypoints(JsonArray entrypoints) {
         List<Future> middlewareFutures = new ArrayList<>();
-        for (int i = 0; i < entrypoints.size(); i++) {
-            JsonObject entrypointJson = entrypoints.getJsonObject(i);
-            JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            middlewareFutures.add(validatePremiddlewareFuture(middlewares));
+        if (entrypoints != null) {
+            for (int i = 0; i < entrypoints.size(); i++) {
+                JsonObject entrypointJson = entrypoints.getJsonObject(i);
+                JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                middlewareFutures.add(validatePremiddlewareFuture(middlewares));
+            }
         }
-        CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
-            validPromise.complete();
-        }).onFailure(cfErr -> {
-            validPromise.fail("Premiddleware validation failed: " + cfErr.getMessage());
-        });
+        return middlewareFutures;
     }
 
     private static Future<Void> validatePremiddlewareFuture(JsonArray preMiddlewares) {
@@ -140,10 +136,10 @@ public class StaticConfiguration {
         return DynamicConfiguration.validateMiddlewares(toValidate);
     }
 
-    private static boolean validateProviders(JsonArray providers, Promise<Void> validPromise) {
+    private static Future<Void> validateProviders(JsonArray providers) {
         if (providers == null || providers.size() == 0) {
             LOGGER.warn("No providers defined");
-            return true;
+            return Future.succeededFuture();
         }
         LOGGER.debug("Validating providers: '{}'", providers);
 
@@ -170,15 +166,13 @@ public class StaticConfiguration {
                 default: {
                     errMsg = "Unknown provider";
                     valid = false;
-                    break;
                 }
             }
 
             if (!valid) {
-                validPromise.fail(errMsg);
-                return false;
+                return Future.failedFuture(errMsg);
             }
         }
-        return true;
+        return Future.succeededFuture();
     }
 }
