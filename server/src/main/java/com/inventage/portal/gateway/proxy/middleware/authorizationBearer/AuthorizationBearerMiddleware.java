@@ -52,10 +52,8 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
             ctx.request().headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
 
-            Handler<MultiMap> respHeadersModifier = headers -> {
-                headers.remove(HttpHeaders.AUTHORIZATION);
-            };
-            this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
+            Handler<MultiMap> removeAuthorizationHeader = headers -> headers.remove(HttpHeaders.AUTHORIZATION);
+            addResponseHeaderModifier(ctx, removeAuthorizationHeader);
 
             ctx.next();
         }).onFailure(err -> {
