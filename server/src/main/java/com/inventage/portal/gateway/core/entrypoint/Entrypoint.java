@@ -172,12 +172,12 @@ public class Entrypoint {
     }
 
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
-        if(entryMiddlewares == null){
+        if (entryMiddlewares == null) {
             LOGGER.info("No EntryMiddlewares defined");
             return;
         }
         List<Future> entryMiddlewaresFuture = new ArrayList<>();
-        for (int i = 0; i < entryMiddlewares.size(); i++){
+        for (int i = 0; i < entryMiddlewares.size(); i++) {
             entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
         }
 
