@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.core.log.RequestResponseLogger;
-import com.inventage.portal.gateway.core.session.ReplacedSessionCookieDetectionHandler;
-import com.inventage.portal.gateway.core.session.ResponseSessionCookieHandler;
+import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionHandler;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieHandler;
 
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;

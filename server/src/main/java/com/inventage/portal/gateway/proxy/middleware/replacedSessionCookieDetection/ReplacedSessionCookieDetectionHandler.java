@@ -1,10 +1,11 @@
-package com.inventage.portal.gateway.core.session;
+package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
 import static com.inventage.portal.gateway.core.entrypoint.Entrypoint.SESSION_COOKIE_NAME;
 import static io.vertx.core.http.Cookie.cookie;
 
 import java.util.Optional;
 
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

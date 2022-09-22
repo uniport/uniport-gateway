@@ -1,10 +1,10 @@
-package com.inventage.portal.gateway.core.session;
+package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static com.inventage.portal.gateway.core.session.DetectionCookieValue.MAX_RETRIES;
-import static com.inventage.portal.gateway.core.session.DetectionCookieValue.SPLITTER;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.MAX_RETRIES;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.SPLITTER;
 
 public class DetectionCookieValueTest {
 

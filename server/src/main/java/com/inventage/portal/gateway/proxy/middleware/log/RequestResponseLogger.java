@@ -1,11 +1,9 @@
-package com.inventage.portal.gateway.core.log;
+package com.inventage.portal.gateway.proxy.middleware.log;
 
 import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.inventage.portal.gateway.core.session.SessionAdapter;
 
 import io.opentelemetry.api.trace.Span;
 import io.reactiverse.contextual.logging.ContextualData;

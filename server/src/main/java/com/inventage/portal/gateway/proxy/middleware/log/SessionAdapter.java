@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.session;
+package com.inventage.portal.gateway.proxy.middleware.log;
 
 import io.vertx.ext.web.Session;
 
