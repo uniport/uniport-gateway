@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
-import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionHandler;
-import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieHandler;
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieMiddleware;
 
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;
@@ -77,7 +77,7 @@ public class Entrypoint {
             return router;
         }
         router = Router.router(vertx);
-        router.route().handler(new ResponseSessionCookieHandler(SESSION_COOKIE_NAME));
+        router.route().handler(new ResponseSessionCookieMiddleware(SESSION_COOKIE_NAME));
 
         if (!this.sessionDisabled) {
             LOGGER.info(
@@ -103,7 +103,7 @@ public class Entrypoint {
         }
         router.route().handler(RequestResponseLogger.create());
         if (!this.sessionDisabled) {
-            router.route().handler(ReplacedSessionCookieDetectionHandler.create());
+            router.route().handler(ReplacedSessionCookieDetectionMiddleware.create());
         }
         this.setupEntryMiddlewares(this.entryMiddlewares, router);
         return router;

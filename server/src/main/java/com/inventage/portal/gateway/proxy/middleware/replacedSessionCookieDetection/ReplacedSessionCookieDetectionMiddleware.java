@@ -5,7 +5,8 @@ import static io.vertx.core.http.Cookie.cookie;
 
 import java.util.Optional;
 
-import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieHandler;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieMiddleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,18 +24,29 @@ import io.vertx.ext.web.RoutingContext;
  * new session id.
  * See also Portal-Gateway.drawio for a visual explanation.
  */
-public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingContext> {
+public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
     public static final String COOKIE_NAME = "ipg.state";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionHandler.class);
     private static final String SESSION_COOKIE_PREFIX = SESSION_COOKIE_NAME + "=";
-
     // wait time in ms before retry is sent to the browser
     private static final int WAIT_BEFORE_RETRY_MS = 50;
+    private final String cookieName;
+    private final String sessionCookiePrefix;
+    private final int waitBeforeRetryMs;
 
+    public ReplacedSessionCookieDetectionMiddleware(String cookieName, String cookiePrefix, int waitBeforeRetryInMs){
+            this.cookieName = cookieName;
+            this.sessionCookiePrefix = this.cookieName + cookiePrefix;
+            this.waitBeforeRetryMs = waitBeforeRetryInMs;
+    }
+
+    //TODO: Replace instantiation by factory
     public static Handler<RoutingContext> create() {
-        return new ReplacedSessionCookieDetectionHandler();
+        return new ReplacedSessionCookieDetectionMiddleware(
+                COOKIE_NAME, SESSION_COOKIE_PREFIX, WAIT_BEFORE_RETRY_MS
+        );
     }
 
     @Override
@@ -54,11 +66,11 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
     }
 
     private void retryWithCookieFromBrowser(RoutingContext ctx) {
-        ctx.response().addCookie(cookie(COOKIE_NAME, incrementCookieValue(ctx)).setPath("/").setHttpOnly(true));
-        ctx.put(ResponseSessionCookieHandler.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
+        ctx.response().addCookie(cookie(this.cookieName, incrementCookieValue(ctx)).setPath("/").setHttpOnly(true));
+        ctx.put(ResponseSessionCookieMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
         // delay before retry
-        ctx.vertx().setTimer(WAIT_BEFORE_RETRY_MS, v -> {
-            LOGGER.debug("Invalid sessionId cookie for state, delayed retry for '{}' ms", WAIT_BEFORE_RETRY_MS);
+        ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
+            LOGGER.debug("Invalid sessionId cookie for state, delayed retry for '{}' ms", this.waitBeforeRetryMs);
             redirectForRetry(ctx);
         });
     }
@@ -80,7 +92,7 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
     }
 
     private Optional<Cookie> getCookie(RoutingContext ctx) {
-        final Cookie cookie = ctx.request().getCookie(COOKIE_NAME);
+        final Cookie cookie = ctx.request().getCookie(this.cookieName);
         return cookie != null ? Optional.of(cookie) : Optional.empty();
     }
 
@@ -94,9 +106,9 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
 
     private void responseWithCookie(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
-            LOGGER.debug("Adding cookie '{}'", COOKIE_NAME);
+            LOGGER.debug("Adding cookie '{}'", this.cookieName);
             ctx.response().addCookie(
-                    cookie(COOKIE_NAME, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
+                    cookie(this.cookieName, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
         }
     }
 
@@ -108,11 +120,11 @@ public class ReplacedSessionCookieDetectionHandler implements Handler<RoutingCon
         if (isUserInSession(ctx)) {
             return false;
         }
-        final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx, SESSION_COOKIE_PREFIX);
+        final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx, this.sessionCookiePrefix);
         if (sessionCookie != null) {
             LOGGER.debug("For received session cookie value '{}'", sessionCookie.value());
         } else {
-            LOGGER.debug("No session cookie '{}' received", SESSION_COOKIE_PREFIX);
+            LOGGER.debug("No session cookie '{}' received", this.sessionCookiePrefix);
         }
         return true;
     }

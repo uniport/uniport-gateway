@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.log;
 
 import java.util.Base64;
 
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
  */
-public class RequestResponseLogger implements Handler<RoutingContext> {
+public class RequestResponseLogger implements Middleware {
 
     public static final String HTTP_HEADER_REQUEST_ID = "X-IPS-Trace-Id";
     public static final String CONTEXTUAL_DATA_REQUEST_ID = "traceId";

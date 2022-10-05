@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import io.vertx.core.http.CookieSameSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,27 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
 
+    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
+
+    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookie";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE = "cookie";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_PREFIX = "prefix";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTime";
+
+    public static final String MIDDLEWARE_SESSION = "session";
+    public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMin";
+
+    public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
+    public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
+    public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
+    public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
+    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "sessionIdMinLen";
+
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
+
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
@@ -117,7 +139,8 @@ public class DynamicConfiguration {
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
-            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE);
+            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
+            MIDDLEWARE_RESPONSE_SESSION_COOKIE, MIDDLEWARE_SESSION);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -193,14 +216,16 @@ public class DynamicConfiguration {
                 .allowAdditionalProperties(false);
         return serviceSchema;
     }
-    private static ObjectSchemaBuilder buildHttpSchema(ObjectSchemaBuilder routerSchema, ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema){
+
+    private static ObjectSchemaBuilder buildHttpSchema(ObjectSchemaBuilder routerSchema, ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema) {
         ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
                 .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
                 .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
                 .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
         return httpSchema;
     }
-    public static ObjectSchemaBuilder getBuildMiddlewareSchema(){
+
+    public static ObjectSchemaBuilder getBuildMiddlewareSchema() {
         return buildMiddlewareSchema();
     }
     public static JsonObject buildDefaultConfiguration() {
@@ -710,7 +735,7 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
-                case MIDDLEWARE_CONTROL_API:
+                case MIDDLEWARE_CONTROL_API: {
                     String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
                     if (action == null) {
                         return Future.failedFuture(
@@ -722,6 +747,78 @@ public class DynamicConfiguration {
                         return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
                     }
                     break;
+                }
+                case MIDDLEWARE_SESSION: {
+                    Integer sessionIdleTimeoutInMinutes = mwOptions.getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
+                    if (sessionIdleTimeoutInMinutes == null) {
+                        return Future.failedFuture(String.format("%s: No session idle timeout defined", mwType));
+                    } else {
+                        if (sessionIdleTimeoutInMinutes < 0) {
+                            return Future.failedFuture(String.format("%s: Session idle timeout is required to be positive number", mwType));
+                        }
+                    }
+                    Integer sessionIdMinLength = mwOptions.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
+                    if (sessionIdMinLength == null) {
+                        return Future.failedFuture(String.format("%s: No minimum length for the session id defined", mwType));
+                    }
+                    JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
+                    if (cookie == null) {
+                        return Future.failedFuture(String.format("%s: No cookie defined", mwType));
+                    } else {
+                        String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
+                        if (cookieName == null) {
+                            return Future.failedFuture(String.format("%s: No session cookie name defined", mwType));
+                        }
+                        Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
+                        if (cookieHttpOnly == null) {
+                            return Future.failedFuture(String.format("%s: No session cookie http only defined", mwType));
+                        }
+                        String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
+                        if (cookieSameSite == null) {
+                            return Future.failedFuture(String.format("%s: No session cookie same site defined", mwType));
+                        } else {
+                            try {
+                                CookieSameSite.valueOf(cookieSameSite);
+                            } catch (RuntimeException exception) {
+                                return Future.failedFuture(String.format("%s: invalid cookie same site value. Allowed values: %s", mwType, CookieSameSite.values()));
+                            }
+                        }
+                    }
+                    break;
+                }
+                case MIDDLEWARE_RESPONSE_SESSION_COOKIE: {
+                    String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME);
+                    if (name == null) {
+                        return Future.failedFuture(String.format("%s: No cookie name defined", mwType));
+                    }
+                    break;
+                }
+                case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
+                    Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+                    if (waitTimeRetryInMs == null) {
+                        return Future.failedFuture(String.format("%s: No wait time for retry defined", mwType));
+                    } else {
+                        if (waitTimeRetryInMs < 0) {
+                            return Future.failedFuture(String.format("%s: wait time for retry required to be a positive number", mwType));
+                        }
+                    }
+                    JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE);
+                    if (cookie == null) {
+                        return Future.failedFuture(String.format("%s: No cookie defined", mwType));
+                    } else {
+                        String name = cookie.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+                        if (name == null) {
+                            return Future.failedFuture(String.format("%s: No cookie name defined", mwType));
+                        }
+                        String cookiePrefix = cookie.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_PREFIX);
+                        if (cookiePrefix == null) {
+                            return Future.failedFuture(String.format("%s: No cookie prefix defined", mwType));
+                        }
+                    }
+                }
+                case MIDDLEWARE_REQUEST_RESPONSE_LOGGER:{
+                    break;
+                }
                 default: {
                     return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
                 }

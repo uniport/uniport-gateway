@@ -1,22 +1,22 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 /**
  * Remove the session cookie from the response, if the context holds a data for the key `REMOVE_SESSION_COOKIE_SIGNAL`.
  */
-public class ResponseSessionCookieHandler implements Handler<RoutingContext> {
+public class ResponseSessionCookieMiddleware implements Middleware {
 
     public static final String REMOVE_SESSION_COOKIE_SIGNAL = "REMOVE_SESSION_COOKIE_SIGNAL";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieMiddleware.class);
 
-    private String sessionCookieName;
+    private final String sessionCookieName;
 
-    public ResponseSessionCookieHandler(String sessionCookieName) {
+    public ResponseSessionCookieMiddleware(String sessionCookieName) {
         this.sessionCookieName = sessionCookieName;
     }
 
