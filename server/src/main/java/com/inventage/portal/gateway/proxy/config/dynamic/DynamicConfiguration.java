@@ -75,8 +75,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
 
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
-
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
+
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookie";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE = "cookie";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
@@ -85,13 +85,12 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_SESSION = "session";
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMin";
-
+    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "sessionIdMinLen";
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
     public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
     public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
-    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "sessionIdMinLen";
 
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
 
@@ -198,6 +197,11 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
+                .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE, Schemas.objectSchema())
+                .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
+                .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
+                .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
                 .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
