@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
-import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieMiddleware;
 
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;
@@ -77,34 +74,6 @@ public class Entrypoint {
             return router;
         }
         router = Router.router(vertx);
-        router.route().handler(new ResponseSessionCookieMiddleware(SESSION_COOKIE_NAME));
-
-        if (!this.sessionDisabled) {
-            LOGGER.info(
-                    "Session management is enabled with\n"
-                            + "idle timeout: '{}' (minutes)\n" + "session cookie name: '{}'\n"
-                            + "session cookie http only: '{}'\n" + "session cookie secure: '{}'\n"
-                            + "session cookie same site: '{}'\n" + "session cookie min length: '{}'",
-                    sessionIdleTimeout, SESSION_COOKIE_NAME, SESSION_COOKIE_HTTP_ONLY, SESSION_COOKIE_SECURE,
-                    SESSION_COOKIE_SAME_SITE,
-                    SESSION_COOKIE_MIN_LENGTH);
-            // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
-            router.route()
-                    .handler(SessionHandler.create(LocalSessionStore.create(vertx))
-                            .setSessionTimeout(sessionIdleTimeout * MINUTES_AS_MILLISECONDS)
-                            .setSessionCookieName(SESSION_COOKIE_NAME)
-                            .setCookieHttpOnlyFlag(SESSION_COOKIE_HTTP_ONLY)
-                            .setCookieSecureFlag(SESSION_COOKIE_SECURE)
-                            .setCookieSameSite(SESSION_COOKIE_SAME_SITE)
-                            .setMinLength(SESSION_COOKIE_MIN_LENGTH)
-                            .setNagHttps(true));
-        } else {
-            LOGGER.info("Session management is disabled");
-        }
-        router.route().handler(RequestResponseLogger.create());
-        if (!this.sessionDisabled) {
-            router.route().handler(ReplacedSessionCookieDetectionMiddleware.create());
-        }
         this.setupEntryMiddlewares(this.entryMiddlewares, router);
         return router;
     }

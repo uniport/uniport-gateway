@@ -42,13 +42,6 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
             this.waitBeforeRetryMs = waitBeforeRetryInMs;
     }
 
-    //TODO: Replace instantiation by factory
-    public static Handler<RoutingContext> create() {
-        return new ReplacedSessionCookieDetectionMiddleware(
-                COOKIE_NAME, SESSION_COOKIE_PREFIX, WAIT_BEFORE_RETRY_MS
-        );
-    }
-
     @Override
     public void handle(RoutingContext ctx) {
         // detect invalid cookie for an already authenticated client (because of session.regenerateId())

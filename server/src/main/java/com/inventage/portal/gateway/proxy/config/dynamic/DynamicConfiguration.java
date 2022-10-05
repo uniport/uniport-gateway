@@ -4,16 +4,8 @@ import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddle
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
 
 import io.vertx.core.http.CookieSameSite;
 import org.slf4j.Logger;
@@ -77,20 +69,21 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
 
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookie";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE = "cookie";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_PREFIX = "prefix";
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTime";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
 
     public static final String MIDDLEWARE_SESSION = "session";
-    public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMin";
+    public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "sessionIdMinLen";
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
     public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
     public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
+    public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
 
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
 
@@ -199,9 +192,11 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
                 .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME, Schemas.stringSchema())
                 .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE, Schemas.objectSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
                 .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
+                .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
                 .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
@@ -765,6 +760,10 @@ public class DynamicConfiguration {
                     if (sessionIdMinLength == null) {
                         return Future.failedFuture(String.format("%s: No minimum length for the session id defined", mwType));
                     }
+                    Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
+                    if (nagHttps == null) {
+                        return Future.failedFuture(String.format("%s: Log warning if the session handler is accessed over HTTP, not HTTPS is not defined", mwType));
+                    }
                     JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {
                         return Future.failedFuture(String.format("%s: No cookie defined", mwType));
@@ -784,7 +783,11 @@ public class DynamicConfiguration {
                             try {
                                 CookieSameSite.valueOf(cookieSameSite);
                             } catch (RuntimeException exception) {
-                                return Future.failedFuture(String.format("%s: invalid cookie same site value. Allowed values: %s", mwType, CookieSameSite.values()));
+                                List<String> allowedPolicies = new LinkedList<>();
+                                for (CookieSameSite value : CookieSameSite.values()) {
+                                    allowedPolicies.add(value.toString().toUpperCase());
+                                }
+                                return Future.failedFuture(String.format("%s: invalid cookie same site value. Allowed values: %s", mwType, allowedPolicies));
                             }
                         }
                     }

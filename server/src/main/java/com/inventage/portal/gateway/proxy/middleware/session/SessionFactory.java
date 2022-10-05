@@ -24,9 +24,11 @@ public class SessionFactory implements MiddlewareFactory {
         String cookieSameSite = cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
         long sessionIdleTimeoutInMinutes = middlewareConfig.getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
         int sessionIdMinLength = middlewareConfig.getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH);
+        boolean nagHttps = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS);
 
-        LOGGER.debug("Created '{}' middleware successfully",
+        LOGGER.info("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_SESSION);
-        return Future.succeededFuture(new SessionMiddleware(vertx, sessionIdleTimeoutInMinutes, cookieName, cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength));
+        return Future.succeededFuture(new SessionMiddleware(vertx, sessionIdleTimeoutInMinutes, cookieName,
+                cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength, nagHttps));
     }
 }

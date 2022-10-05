@@ -3,7 +3,47 @@
         {
             "name": "http20000",
             "port": 20000,
-            "sessionIdleTimeout": 15
+            "sessionIdleTimeout": 15,
+            "middlewares": [
+                {
+                    "name": "responseSessionCookie",
+                    "type": "responseSessionCookie",
+                    "options": {
+                        "name": "inventage-portal-gateway.session"
+                    }
+                },
+                {
+                    "name": "session",
+                    "type": "session",
+                    "options": {
+                        "idleTimeoutInMinute": 30,
+                        "sessionIdMinLen": 32,
+                        "nagHttps": true,
+                        "cookie": {
+                            "name": "inventage-portal-gateway.session",
+                            "httpOnly": true,
+                            "secure": false,
+                            "sameSite": "STRICT"
+                        }
+                    }
+                },
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {}
+                },
+                {
+                    "name": "replacedSessionCookieDetection",
+                    "type": "replacedSessionCookieDetection",
+                    "options": {
+                        "cookie": {
+                            "name": "ipg.state",
+                            "prefix": "="
+                        },
+                        "waitTimeInMillisecond": 50
+                    }
+                }
+            ]
         }
     ],
     "applications": [
