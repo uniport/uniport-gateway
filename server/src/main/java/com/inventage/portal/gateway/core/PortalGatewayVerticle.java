@@ -123,9 +123,6 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                         .map(entrypoint -> new Entrypoint(vertx,
                                 entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
                                 entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT),
-                                entrypoint.getBoolean(StaticConfiguration.ENTRYPOINT_SESSION_DISABLED, false),
-                                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_SESSION_IDLE_TIMEOUT,
-                                        Entrypoint.DEFAULT_SESSION_IDLE_TIMEOUT_MINUTES),
                                 entrypoint.getJsonArray(DynamicConfiguration.MIDDLEWARES)))
                         .forEach(entrypoints::add);
             }

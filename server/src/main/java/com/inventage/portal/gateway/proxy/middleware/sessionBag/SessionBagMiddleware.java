@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
@@ -43,9 +42,11 @@ public class SessionBagMiddleware implements Middleware {
     // This is required for some frontend logic to work properly
     // (e.g. for keycloak login logic of its admin console)
     private final JsonArray whitelistedCookies;
+    private final String sessionCookieName;
 
-    public SessionBagMiddleware(JsonArray whitelistedCookies) {
+    public SessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {
         this.whitelistedCookies = whitelistedCookies;
+        this.sessionCookieName = sessionCookieName;
     }
 
     @Override
@@ -194,7 +195,7 @@ public class SessionBagMiddleware implements Middleware {
             // use netty cookie until maxAge getter is implemented
             // https://github.com/eclipse-vertx/vert.x/issues/3906
             Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
-            if (decodedCookieToSet.name().equals(Entrypoint.SESSION_COOKIE_NAME)) {
+            if (decodedCookieToSet.name().equals(sessionCookieName)) {
                 continue;
             }
             if (isWhitelisted(decodedCookieToSet)) {

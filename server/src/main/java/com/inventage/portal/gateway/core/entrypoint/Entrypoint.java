@@ -21,42 +21,27 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.SessionHandler;
-import io.vertx.ext.web.sstore.LocalSessionStore;
 
 /**
  * Entry point for the portal gateway.
  */
 public class Entrypoint {
 
-    public static final String SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
-    public static final boolean SESSION_COOKIE_HTTP_ONLY = true;
-    public static final boolean SESSION_COOKIE_SECURE = false;
-    public static final CookieSameSite SESSION_COOKIE_SAME_SITE = CookieSameSite.STRICT;
-    public static final int SESSION_COOKIE_MIN_LENGTH = 32;
-    public static final int DEFAULT_SESSION_IDLE_TIMEOUT_MINUTES = 30;
-
     private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
-    private static long MINUTES_AS_MILLISECONDS = 60 * 1000;
-
     private final Vertx vertx;
     private final String name;
     private final int port;
-    private final boolean sessionDisabled;
     // sessionIdleTimeout is how many minutes an idle session is kept before deletion
-    private final int sessionIdleTimeout;
 
     private final JsonArray entryMiddlewares;
     private Router router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, boolean sessionDisabled, int sessionIdleTimeoutMinutes, JsonArray entryMiddlewares) {
+    public Entrypoint(Vertx vertx, String name, int port, JsonArray entryMiddlewares) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
-        this.sessionDisabled = sessionDisabled;
-        this.sessionIdleTimeout = sessionIdleTimeoutMinutes;
         this.enabled = true;
         this.entryMiddlewares = entryMiddlewares;
     }

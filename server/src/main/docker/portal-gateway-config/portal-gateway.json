@@ -3,7 +3,6 @@
         {
             "name": "http20000",
             "port": 20000,
-            "sessionIdleTimeout": 15,
             "middlewares": [
                 {
                     "name": "responseSessionCookie",
@@ -16,8 +15,8 @@
                     "name": "session",
                     "type": "session",
                     "options": {
-                        "idleTimeoutInMinute": 30,
-                        "sessionIdMinLen": 32,
+                        "idleTimeoutInMinute": 15,
+                        "idMinimumLength": 32,
                         "nagHttps": true,
                         "cookie": {
                             "name": "inventage-portal-gateway.session",

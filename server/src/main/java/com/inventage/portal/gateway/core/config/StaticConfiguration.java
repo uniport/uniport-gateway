@@ -30,9 +30,6 @@ public class StaticConfiguration {
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";
-    public static final String ENTRYPOINT_SESSION_DISABLED = "sessionDisabled";
-    public static final String ENTRYPOINT_SESSION_IDLE_TIMEOUT = "sessionIdleTimeout";
-
     public static final String APPLICATIONS = "applications";
     public static final String APPLICATION_NAME = "name";
     public static final String APPLICATION_ENTRYPOINT = "entrypoint";
@@ -66,9 +63,8 @@ public class StaticConfiguration {
         ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
                 .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
                 .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
-                .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
                 .property(DynamicConfiguration.MIDDLEWARES, Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
-                .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
+                .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
                 .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())

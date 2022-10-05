@@ -77,7 +77,7 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_SESSION = "session";
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
-    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "sessionIdMinLen";
+    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
@@ -115,6 +115,7 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
+    public static final String MIDDLEWARE_SESSION_BAG_COOKIE_NAME = "cookieName";
     /**
      * @deprecated This field should no longer be used as of version 4.3.0.
      * <p> Use {@link DynamicConfiguration#MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES } instead</p>
@@ -197,6 +198,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
                 .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
+                .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
                 .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()

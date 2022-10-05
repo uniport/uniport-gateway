@@ -1,6 +1,4 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
-
-import static com.inventage.portal.gateway.core.entrypoint.Entrypoint.SESSION_COOKIE_NAME;
 import static io.vertx.core.http.Cookie.cookie;
 
 import java.util.Optional;
@@ -28,10 +26,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
-    public static final String COOKIE_NAME = "ipg.state";
-    private static final String SESSION_COOKIE_PREFIX = SESSION_COOKIE_NAME + "=";
     // wait time in ms before retry is sent to the browser
-    private static final int WAIT_BEFORE_RETRY_MS = 50;
     private final String cookieName;
     private final String sessionCookiePrefix;
     private final int waitBeforeRetryMs;

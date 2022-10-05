@@ -88,7 +88,7 @@ public class EntryMiddlewareTest {
         JsonObject staticConfig = configuration.get("static");
         JsonObject middlewareConfig = configuration.get("middleware");
 
-        Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, true, 0, new JsonArray().add(middlewareConfig));
+        Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, new JsonArray().add(middlewareConfig));
         ProxyApplication proxyApplication = new ProxyApplication("proxy", entryPointIdentifier, staticConfig, vertx);
         entrypoint.mount(proxyApplication);
 
