@@ -16,9 +16,6 @@
 // https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/main/java/io/vertx/ext/web/impl/ForwardedParser.java
 package com.inventage.portal.gateway.proxy.middleware.proxy.request;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import io.netty.util.AsciiString;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.impl.logging.Logger;
@@ -27,8 +24,11 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.ext.web.AllowForwardHeaders;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 class ForwardedParser {
-    private static final Logger log = LoggerFactory.getLogger(ForwardedParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForwardedParser.class);
 
     private static final String HTTP_SCHEME = "http";
     private static final String HTTPS_SCHEME = "https";
@@ -59,34 +59,39 @@ class ForwardedParser {
     }
 
     public String scheme() {
-        if (!calculated)
+        if (!calculated) {
             calculate();
+        }
         return scheme;
     }
 
     String host() {
-        if (!calculated)
+        if (!calculated) {
             calculate();
+        }
         return host;
     }
 
     boolean isSSL() {
-        if (!calculated)
+        if (!calculated) {
             calculate();
+        }
 
         return scheme.equals(HTTPS_SCHEME);
     }
 
     String absoluteURI() {
-        if (!calculated)
+        if (!calculated) {
             calculate();
+        }
 
         return absoluteURI;
     }
 
     SocketAddress remoteAddress() {
-        if (!calculated)
+        if (!calculated) {
             calculate();
+        }
 
         return remoteAddress;
     }
@@ -117,7 +122,7 @@ class ForwardedParser {
         }
 
         if (((scheme.equalsIgnoreCase(HTTP_SCHEME) && port == 80)
-                || (scheme.equalsIgnoreCase(HTTPS_SCHEME) && port == 443))) {
+            || (scheme.equalsIgnoreCase(HTTPS_SCHEME) && port == 443))) {
             port = -1;
         }
 
@@ -126,9 +131,9 @@ class ForwardedParser {
     }
 
     private void calculateForward() {
-        String forwarded = delegate.getHeader(FORWARDED);
+        final String forwarded = delegate.getHeader(FORWARDED);
         if (forwarded != null) {
-            String forwardedToUse = forwarded.split(",")[0];
+            final String forwardedToUse = forwarded.split(",")[0];
             Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
             if (matcher.find()) {
                 scheme = (matcher.group(1).trim());
@@ -148,29 +153,30 @@ class ForwardedParser {
     }
 
     private void calculateXForward() {
-        String forwardedSsl = delegate.getHeader(X_FORWARDED_SSL);
-        boolean isForwardedSslOn = forwardedSsl != null && forwardedSsl.equalsIgnoreCase("on");
+        final String forwardedSsl = delegate.getHeader(X_FORWARDED_SSL);
+        final boolean isForwardedSslOn = forwardedSsl != null && forwardedSsl.equalsIgnoreCase("on");
 
-        String protocolHeader = delegate.getHeader(X_FORWARDED_PROTO);
+        final String protocolHeader = delegate.getHeader(X_FORWARDED_PROTO);
         if (protocolHeader != null) {
             scheme = protocolHeader.split(",")[0];
             port = -1;
-        } else if (isForwardedSslOn) {
+        }
+        else if (isForwardedSslOn) {
             scheme = HTTPS_SCHEME;
             port = -1;
         }
 
-        String hostHeader = delegate.getHeader(X_FORWARDED_HOST);
+        final String hostHeader = delegate.getHeader(X_FORWARDED_HOST);
         if (hostHeader != null) {
             setHostAndPort(hostHeader.split(",")[0], port);
         }
 
-        String portHeader = delegate.getHeader(X_FORWARDED_PORT);
+        final String portHeader = delegate.getHeader(X_FORWARDED_PORT);
         if (portHeader != null) {
             port = parsePort(portHeader.split(",")[0], port);
         }
 
-        String forHeader = delegate.getHeader(X_FORWARDED_FOR);
+        final String forHeader = delegate.getHeader(X_FORWARDED_FOR);
         if (forHeader != null) {
             remoteAddress = parseFor(forHeader.split(",")[0], remoteAddress.port());
         }
@@ -181,12 +187,14 @@ class ForwardedParser {
             // no header is provided
             host = null;
             port = -1;
-        } else {
-            int portSeparatorIdx = hostToParse.lastIndexOf(':');
+        }
+        else {
+            final int portSeparatorIdx = hostToParse.lastIndexOf(':');
             if (portSeparatorIdx > hostToParse.lastIndexOf(']')) {
                 host = hostToParse.substring(0, portSeparatorIdx);
                 port = parsePort(hostToParse.substring(portSeparatorIdx + 1), defaultPort);
-            } else {
+            }
+            else {
                 host = hostToParse;
                 port = -1;
             }
@@ -196,7 +204,7 @@ class ForwardedParser {
     private SocketAddress parseFor(String forToParse, int defaultPort) {
         String host = forToParse;
         int port = defaultPort;
-        int portSeparatorIdx = forToParse.lastIndexOf(':');
+        final int portSeparatorIdx = forToParse.lastIndexOf(':');
         if (portSeparatorIdx > forToParse.lastIndexOf(']')) {
             host = forToParse.substring(0, portSeparatorIdx);
             port = parsePort(forToParse.substring(portSeparatorIdx + 1), defaultPort);
@@ -208,8 +216,9 @@ class ForwardedParser {
     private int parsePort(String portToParse, int defaultPort) {
         try {
             return Integer.parseInt(portToParse);
-        } catch (NumberFormatException ignored) {
-            log.error("Failed to parse a port from \"forwarded\"-type headers.");
+        }
+        catch (NumberFormatException ignored) {
+            LOGGER.error("Failed to parse a port from \"forwarded\"-type headers.");
             return defaultPort;
         }
     }

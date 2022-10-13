@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="severity" value="warning"/>
+    <module name="TreeWalker">
+        <module name="SuppressWarningsHolder"/>
+        <module name="MemberName"/>
+        <module name="StaticVariableName"/>
+        <module name="ConstantName"/>
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+        <module name="CovariantEquals"/>
+        <module name="EqualsHashCode"/>
+        <module name="SuperClone"/>
+        <module name="TypeName"/>
+        <module name="MethodName"/>
+        <module name="ArrayTypeStyle"/>
+        <module name="EmptyBlock">
+            <property name="option" value="text"/>
+            <property name="tokens" value="LITERAL_CATCH,LITERAL_ELSE,LITERAL_IF"/>
+        </module>
+        <module name="EmptyBlock">
+            <property name="tokens" value="LITERAL_DO,LITERAL_FINALLY,LITERAL_FOR,LITERAL_TRY,LITERAL_WHILE,STATIC_INIT"/>
+        </module>
+        <module name="NeedBraces"/>
+        <module name="JavadocStyle">
+            <property name="scope" value="protected"/>
+            <property name="checkHtml" value="false"/>
+            <property name="checkFirstSentence" value="false"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="tokens" value="METHOD_DEF,ANNOTATION_FIELD_DEF"/>
+            <property name="allowMissingParamTags" value="true"/>
+            <property name="allowMissingReturnTag" value="true"/>
+        </module>
+        <module name="JavadocType">
+            <property name="scope" value="protected"/>
+            <property name="allowMissingParamTags" value="true" />
+        </module>
+        <module name="EmptyStatement"/>
+        <module name="HiddenField">
+            <property name="severity" value="ignore"/>
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+        </module>
+        <module name="MultipleStringLiterals">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="StringLiteralEquality"/>
+        <module name="HideUtilityClassConstructor"/>
+        <module name="AvoidStarImport"/>
+        <module name="UnusedImports"/>
+        <module name="SuperFinalize"/>
+        <module name="DescendantToken">
+            <property name="tokens" value="FOR_CONDITION"/>
+            <property name="limitedTokens" value="EXPR"/>
+            <property name="minimumNumber" value="1"/>
+            <property name="minimumMessage" value="Condition in for performs no check"/>
+        </module>
+        <module name="DefaultComesLast"/>
+        <module name="FallThrough"/>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean"/>
+        </module>
+        <module name="InnerAssignment"/>
+        <module name="MissingSwitchDefault"/>
+<!--        <module name="MissingJavadocMethodCheck">-->
+<!--            <property name="scope" value="protected" />-->
+<!--            <property name="allowMissingPropertyJavadoc" value="true"/>-->
+<!--        </module>-->
+        <module name="MultipleVariableDeclarations"/>
+        <module name="PackageDeclaration"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="FinalClass"/>
+        <module name="InterfaceIsType"/>
+        <module name="MutableException"/>
+        <module name="VisibilityModifier">
+            <property name="packageAllowed" value="true"/>
+        </module>
+        <module name="IllegalImport"/>
+        <module name="RedundantImport"/>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+        <module name="PackageName"/>
+        <module name="ParameterName"/>
+        <module name="RightCurly">
+            <property name="option" value="alone_or_singleline"/>
+        </module>
+        <module name="MethodParamPad"/>
+        <module name="ParenPad"/>
+        <module name="TypecastParenPad">
+            <property name="tokens" value="RPAREN,TYPECAST"/>
+        </module>
+        <module name="WhitespaceAfter"/>
+        <module name="WhitespaceAround">
+            <property name="tokens" value="ASSIGN,BAND,BAND_ASSIGN,BOR,BOR_ASSIGN,BSR,BSR_ASSIGN,BXOR,BXOR_ASSIGN,COLON,DIV,DIV_ASSIGN,EQUAL,GE,GT,LAND,LE,LITERAL_ASSERT,LITERAL_CATCH,LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_FOR,LITERAL_IF,LITERAL_RETURN,LITERAL_SYNCHRONIZED,LITERAL_TRY,LITERAL_WHILE,LOR,LT,MINUS,MINUS_ASSIGN,MOD,MOD_ASSIGN,NOT_EQUAL,PLUS,PLUS_ASSIGN,QUESTION,SL,SLIST,SL_ASSIGN,SR,SR_ASSIGN,STAR,STAR_ASSIGN,LITERAL_ASSERT"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="Indentation"/>
+        <module name="UpperEll"/>
+        <module name="MethodParamPad"/>
+        <module name="FinalLocalVariable"/>
+    </module>
+    <module name="LineLength">
+        <property name="max" value="180"/>
+        <property name="ignorePattern" value="^import"/>
+    </module>
+    <module name="NewlineAtEndOfFile">
+        <property name="fileExtensions" value="java"/>
+    </module>
+    <module name="SuppressWarningsFilter"/>
+    <module name="SuppressWithPlainTextCommentFilter">
+        <property name="offCommentFormat" value="CHECKSTYLE OFF"/>
+        <property name="onCommentFormat" value="CHECKSTYLE ON"/>
+    </module>
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+        <property name="fileExtensions" value="java,xml,html,php,properties,yaml"/>
+    </module>
+    <module name="SuppressionFilter">
+        <property name="file" value="build-tools/checkstyle/suppressions.xml"/>
+    </module>
+</module>

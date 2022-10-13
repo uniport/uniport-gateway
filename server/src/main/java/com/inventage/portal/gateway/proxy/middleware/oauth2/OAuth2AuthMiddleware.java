@@ -1,16 +1,14 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Middleware for handling parallel OAuth2 flows for a Vert.x session.
@@ -38,7 +36,6 @@ public class OAuth2AuthMiddleware implements Middleware {
     }
 
     /**
-     *
      * @param ctx
      */
     @Override
@@ -60,15 +57,17 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     /**
      * Update the RoutingContext with the user for the given sessionScope or clear the user if not available.
+     *
      * @param sessionScope an OAuth2 authentication is requested
      * @param ctx
      */
     private User setUserForScope(String sessionScope, RoutingContext ctx) {
-        String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
-        Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
+        final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+        final Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
         if (authPair != null) {
             ctx.setUser(authPair.getRight());
-        } else {
+        }
+        else {
             ctx.clearUser();
         }
         return ctx.user();
@@ -76,10 +75,10 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     /**
      * Create a promise if there is a "state" key in the session data.
+     *
      * @param ctx
      */
     private void startAndStorePendingAuth(RoutingContext ctx) {
-        final Object state = ctx.session().get(OIDC_PARAM_STATE);
         if (oAuth2FlowStarted(ctx)) {
             // create JSON object for authentication parameters and store in session at "state_<state>"
             final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
@@ -102,6 +101,7 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     /**
      * Remove the OAuth2 state JSON structure for a specific state from the session.
+     *
      * @param ctx
      * @param sessionScope
      */
@@ -123,17 +123,19 @@ public class OAuth2AuthMiddleware implements Middleware {
         if (requestState != null) {
             final Object authParameters = ctx.session().get(PREFIX_STATE + requestState);
             if (authParameters instanceof JsonObject) {
-                JsonObject oAuth2FlowState = (JsonObject) authParameters;
+                final JsonObject oAuth2FlowState = (JsonObject) authParameters;
                 ctx.session().put(OIDC_PARAM_STATE, oAuth2FlowState.getString(OIDC_PARAM_STATE));
                 ctx.session().put(OIDC_PARAM_REDIRECT_URI, oAuth2FlowState.getString(OIDC_PARAM_REDIRECT_URI));
                 ctx.session().put(OIDC_PARAM_PKCE, oAuth2FlowState.getString(OIDC_PARAM_PKCE));
 
                 LOGGER.debug("For state '{}' and scope '{}'", requestState, sessionScope);
-            } else {
-                LOGGER.warn("No OAuth2 state found in session for state '{}' and scope '{}'", requestState,
-                        sessionScope);
             }
-        } else {
+            else {
+                LOGGER.warn("No OAuth2 state found in session for state '{}' and scope '{}'", requestState,
+                    sessionScope);
+            }
+        }
+        else {
             LOGGER.warn("Not state found in request for scope '{}'", sessionScope);
         }
     }

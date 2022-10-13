@@ -2,9 +2,6 @@ package com.inventage.portal.gateway.core.config;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.CompositeFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -16,6 +13,8 @@ import io.vertx.json.schema.SchemaRouter;
 import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,39 +60,42 @@ public class StaticConfiguration {
 
     private static Schema schema;
 
+    private StaticConfiguration() {
+    }
+
     private static Schema buildSchema(Vertx vertx) {
-        ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
-                .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
-                .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
-                .property(DynamicConfiguration.MIDDLEWARES, Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
-                .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
-                .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
+        final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
+            .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
+            .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
+            .property(DynamicConfiguration.MIDDLEWARES, Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
+            .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
+            .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
-                .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
-                .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema())
-                .requiredProperty(APPLICATION_REQUEST_SELECTOR,
-                        Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
-                                Schemas.stringSchema()))
-                .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()).allowAdditionalProperties(false);
+        final ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
+            .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
+            .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema())
+            .requiredProperty(APPLICATION_REQUEST_SELECTOR,
+                Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
+                    Schemas.stringSchema()))
+            .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()).allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
-                .requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
-                .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
-                .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
-                .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
-                .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
-                .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
-                .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
-                .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
+        final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
+            .requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
+            .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
+            .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
+            .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
+            .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
+            .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
+            .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
+            .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
 
-        ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
-                .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
-                .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
-                .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
+        final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
+            .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
+            .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
+            .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
-        SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
-        SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
+        final SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
+        final SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
         return staticConfigBuilder.build(schemaParser);
     }
 
@@ -102,9 +104,9 @@ public class StaticConfiguration {
             schema = buildSchema(vertx);
         }
 
-        Promise<Void> validPromise = Promise.promise();
+        final Promise<Void> validPromise = Promise.promise();
         schema.validateAsync(json).onSuccess(f -> {
-            List<Future> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
+            final List<Future> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
             futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
 
             CompositeFuture.all(futures).onSuccess(cf -> {
@@ -119,11 +121,11 @@ public class StaticConfiguration {
     }
 
     private static List<Future> validateEntrypoints(JsonArray entrypoints) {
-        List<Future> middlewareFutures = new ArrayList<>();
+        final List<Future> middlewareFutures = new ArrayList<>();
         if (entrypoints != null) {
             for (int i = 0; i < entrypoints.size(); i++) {
-                JsonObject entrypointJson = entrypoints.getJsonObject(i);
-                JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                final JsonObject entrypointJson = entrypoints.getJsonObject(i);
+                final JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
                 middlewareFutures.add(validateEntryMiddlewareFuture(middlewares));
             }
         }
@@ -131,7 +133,7 @@ public class StaticConfiguration {
     }
 
     private static Future<Void> validateEntryMiddlewareFuture(JsonArray entryMiddleware) {
-        JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, entryMiddleware);
+        final JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, entryMiddleware);
         return DynamicConfiguration.validateMiddlewares(toValidate);
     }
 
@@ -143,17 +145,17 @@ public class StaticConfiguration {
         LOGGER.debug("Validating providers: '{}'", providers);
 
         for (int i = 0; i < providers.size(); i++) {
-            JsonObject provider = providers.getJsonObject(i);
-            String providerName = provider.getString(PROVIDER_NAME);
+            final JsonObject provider = providers.getJsonObject(i);
+            final String providerName = provider.getString(PROVIDER_NAME);
 
-            Boolean valid = true;
+            boolean valid = true;
             String errMsg = "";
             switch (providerName) {
                 case PROVIDER_FILE: {
-                    String filename = provider.getString(PROVIDER_FILE_FILENAME);
-                    String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
+                    final String filename = provider.getString(PROVIDER_FILE_FILENAME);
+                    final String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
                     if ((filename == null || filename.length() == 0)
-                            && (directory == null || directory.length() == 0)) {
+                        && (directory == null || directory.length() == 0)) {
                         errMsg = String.format("%s: either filename or directory has to be defined", providerName);
                         valid = false;
                     }

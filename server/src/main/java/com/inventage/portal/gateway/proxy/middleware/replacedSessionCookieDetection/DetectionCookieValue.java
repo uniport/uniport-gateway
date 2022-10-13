@@ -31,7 +31,8 @@ public class DetectionCookieValue {
             if (parts.length > 1) {
                 lastSessionAccess = Long.parseLong(parts[1]);
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             LOGGER.warn("The received cookie value '{}' couldn't be parsed", cookieValue);
         }
     }

@@ -26,7 +26,7 @@ public class RedirectRegexMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        String oldURI = ctx.request().uri();
+        final String oldURI = ctx.request().uri();
 
         // If the Regexp doesn't match, skip to the next handler.
         if (!this.pattern.matcher(oldURI).matches()) {
@@ -35,7 +35,7 @@ public class RedirectRegexMiddleware implements Middleware {
             return;
         }
 
-        String newURI = this.pattern.matcher(oldURI).replaceAll(this.replacement);
+        final String newURI = this.pattern.matcher(oldURI).replaceAll(this.replacement);
 
         LOGGER.debug("Redirecting from '{}' to '{}'", oldURI, newURI);
         ctx.redirect(newURI);

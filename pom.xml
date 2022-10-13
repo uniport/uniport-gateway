@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.inventage.portal.gateway</groupId>
@@ -340,6 +341,44 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <!--
+                For checkstyle reports
+                @see http://maven.apache.org/plugins/maven-checkstyle-plugin/index.html
+            -->
+                <plugin>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <!-- Keep same version as used by the IntelliJ plugin, see IntelliJ IDEA > Preferences > Tools > Checkstyle -->
+                            <version>8.45.1</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <consoleOutput>true</consoleOutput>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <configLocation>${maven.multiModuleProjectDirectory}/build-tools/checkstyle/config.xml
+                        </configLocation>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <suppressionsLocation>
+                            ${maven.multiModuleProjectDirectory}/build-tools/checkstyle/suppressions.xml
+                        </suppressionsLocation>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.7.0.0</version>
+                    <configuration>
+                        <failOnError>false</failOnError>
+                        <xmlOutput>true</xmlOutput>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/build-tools/spotbugs/exclude.xml
+                        </excludeFilterFile>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -16,19 +16,8 @@
 // https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/main/java/io/vertx/ext/web/impl/HttpServerRequestWrapper.java
 package com.inventage.portal.gateway.proxy.middleware.proxy.request;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.security.cert.X509Certificate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.response.ProxiedHttpServerResponse;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -51,13 +40,21 @@ import io.vertx.core.streams.WriteStream;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.ServerWebSocketWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Subclass of HttpServerRequest which can be manipulated by various middleware functions.
  */
 public class ProxiedHttpServerRequest implements HttpServerRequest {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ProxiedHttpServerRequest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxiedHttpServerRequest.class);
 
     private final RoutingContext ctx;
     private final HttpServerRequest delegate;
@@ -133,11 +130,11 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
 
     @Override
     public String uri() {
-        StringBuilder uri = new StringBuilder(delegate.uri());
-        List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
+        final StringBuilder uri = new StringBuilder(delegate.uri());
+        final List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
         if (modifiers != null) {
             if (modifiers.size() > 1) {
-                LOGGER.info("Multiple URI modifiers declared: %s (total %s)", modifiers, modifiers.size());
+                LOGGER.info("Multiple URI modifiers declared: %s (total %d)", modifiers, modifiers.size());
             }
             for (Handler<StringBuilder> modifier : modifiers) {
                 modifier.handle(uri);
@@ -280,8 +277,9 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
         delegate.toWebSocket(toWebSocket -> {
             if (toWebSocket.succeeded()) {
                 handler.handle(Future.succeededFuture(
-                        new ServerWebSocketWrapper(toWebSocket.result(), host(), scheme(), isSSL(), remoteAddress())));
-            } else {
+                    new ServerWebSocketWrapper(toWebSocket.result(), host(), scheme(), isSSL(), remoteAddress())));
+            }
+            else {
                 handler.handle(toWebSocket);
             }
         });
@@ -290,7 +288,7 @@ public class ProxiedHttpServerRequest implements HttpServerRequest {
     @Override
     public Future<ServerWebSocket> toWebSocket() {
         return delegate.toWebSocket()
-                .map(ws -> new ServerWebSocketWrapper(ws, host(), scheme(), isSSL(), remoteAddress()));
+            .map(ws -> new ServerWebSocketWrapper(ws, host(), scheme(), isSSL(), remoteAddress()));
     }
 
     @Override

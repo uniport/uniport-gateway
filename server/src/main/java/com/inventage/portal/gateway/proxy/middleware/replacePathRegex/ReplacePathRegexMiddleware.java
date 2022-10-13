@@ -27,7 +27,7 @@ public class ReplacePathRegexMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        Handler<StringBuilder> reqUriModifier = uri -> {
+        final Handler<StringBuilder> reqUriModifier = uri -> {
             uri.replace(0, uri.length(), apply(uri.toString()));
         };
         this.addModifier(ctx, reqUriModifier, Middleware.REQUEST_URI_MODIFIERS);
@@ -39,7 +39,7 @@ public class ReplacePathRegexMiddleware implements Middleware {
         if (!this.pattern.matcher(uri).matches()) {
             LOGGER.debug("Skipping path replacement of non matching URI '{}'", uri);
         }
-        String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
+        final String newURI = this.pattern.matcher(uri).replaceAll(this.replacement);
 
         LOGGER.debug("Replace path '{}' with '{}'", uri, newURI);
         return newURI;

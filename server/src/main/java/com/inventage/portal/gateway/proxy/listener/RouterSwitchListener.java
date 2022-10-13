@@ -1,13 +1,11 @@
 package com.inventage.portal.gateway.proxy.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builds and deploys the router structure after receiving a new/changed dynamic configuration.
@@ -28,12 +26,10 @@ public class RouterSwitchListener implements Listener {
 
     @Override
     public void listen(JsonObject config) {
-        Future<Router> routerCreation = routerFactory.createRouter(config);
-        routerCreation.onSuccess(router -> {
-            setSubRouter(router);
-        }).onFailure(err -> {
-            LOGGER.warn("Failed to create new router from config '{}': '{}'", config, err.getMessage());
-        });
+        final Future<Router> routerCreation = routerFactory.createRouter(config);
+        routerCreation.onSuccess(this::setSubRouter).onFailure(err ->
+            LOGGER.warn("Failed to create new router from config '{}': '{}'", config, err.getMessage())
+        );
 
     }
 

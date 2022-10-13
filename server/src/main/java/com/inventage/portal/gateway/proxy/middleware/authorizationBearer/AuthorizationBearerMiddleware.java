@@ -31,7 +31,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
 
-    public final static String BEARER = "Bearer ";
+    public static final String BEARER = "Bearer ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
@@ -52,8 +52,10 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
             ctx.request().headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
 
-            Handler<MultiMap> removeAuthorizationHeader = headers -> headers.remove(HttpHeaders.AUTHORIZATION);
-            addResponseHeaderModifier(ctx, removeAuthorizationHeader);
+            final Handler<MultiMap> respHeadersModifier = headers -> {
+                headers.remove(HttpHeaders.AUTHORIZATION);
+            };
+            this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
 
             ctx.next();
         }).onFailure(err -> {
@@ -63,7 +65,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
     }
 
     private Future<String> getAuthToken(Session session) {
-        Promise<String> promise = Promise.promise();
+        final Promise<String> promise = Promise.promise();
         this.getAuthToken(session, promise);
         return promise.future();
     }
@@ -82,36 +84,39 @@ public class AuthorizationBearerMiddleware implements Middleware {
                 authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
                 break;
             }
-        } else if (this.sessionScope != null && this.sessionScope.length() != 0) {
-            String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+        }
+        else if (this.sessionScope != null && this.sessionScope.length() != 0) {
+            final String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
             authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
-        } else {
+        }
+        else {
             LOGGER.debug("No token demanded");
             handler.handle(Future.succeededFuture());
             return;
         }
 
         if (authPair == null) {
-            String errMsg = "No user found";
+            final String errMsg = "No user found";
             LOGGER.debug("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
             return;
         }
 
-        Promise<Pair<OAuth2Auth, User>> preparedUser = Promise.promise();
-        OAuth2Auth authProvider = authPair.getLeft();
-        User user = authPair.getRight();
+        final Promise<Pair<OAuth2Auth, User>> preparedUser = Promise.promise();
+        final OAuth2Auth authProvider = authPair.getLeft();
+        final User user = authPair.getRight();
         if (user.expired(EXPIRATION_LEEWAY_SECONDS)) {
             LOGGER.info("Refreshing access token");
             authProvider.refresh(user).onSuccess(u -> {
-                Pair<OAuth2Auth, User> refreshedAuthPair = ImmutablePair.of(authProvider, u);
-                String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+                final Pair<OAuth2Auth, User> refreshedAuthPair = ImmutablePair.of(authProvider, u);
+                final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
                 session.put(key, refreshedAuthPair);
                 preparedUser.complete(refreshedAuthPair);
             }).onFailure(err -> {
                 handler.handle(Future.failedFuture(err));
             });
-        } else {
+        }
+        else {
             LOGGER.debug("Use existing access token");
             preparedUser.complete(authPair);
         }
@@ -119,8 +124,8 @@ public class AuthorizationBearerMiddleware implements Middleware {
         // fix: Local variable defined in an enclosing scope must be final or effectively final
         final boolean finalIdTokenDemanded = idTokenDemanded;
         preparedUser.future().onSuccess(ap -> {
-            User u = ap.getRight();
-            String token = this.buildAuthToken(u.principal(), finalIdTokenDemanded);
+            final JsonObject principal = ap.getRight().principal();
+            final String token = this.buildAuthToken(principal, finalIdTokenDemanded);
             handler.handle(Future.succeededFuture(token));
         }).onFailure(err -> {
             handler.handle(Future.failedFuture(err));
@@ -128,11 +133,12 @@ public class AuthorizationBearerMiddleware implements Middleware {
     }
 
     private String buildAuthToken(JsonObject principal, boolean idTokenDemanded) {
-        String rawToken;
+        final String rawToken;
         if (idTokenDemanded) {
             LOGGER.debug("Providing id token");
             rawToken = principal.getString("id_token");
-        } else {
+        }
+        else {
             LOGGER.debug("Providing access token for session scope: '{}'", this.sessionScope);
             rawToken = principal.getString("access_token");
         }

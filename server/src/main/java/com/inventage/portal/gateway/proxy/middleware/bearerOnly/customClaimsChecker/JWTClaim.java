@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.Validate;
 
 /**
- JWTClaim Model.
+ * JWTClaim Model.
  */
 public class JWTClaim {
 
@@ -15,7 +15,6 @@ public class JWTClaim {
 
 
     /**
-     *
      * @param claimObject json Object containing the entries of the claim.
      *                    path: In JsonPath syntax (https://github.com/json-path/JsonPath), which describes the path to the entry in the payload to be checked.
      *                    operator: The operator that defines the rule for the check.
@@ -28,14 +27,14 @@ public class JWTClaim {
         validateCheck();
     }
 
-    public JWTClaim(String path, JWTClaimOperator operator, Object value){
+    public JWTClaim(String path, JWTClaimOperator operator, Object value) {
         this.path = path;
         this.operator = operator;
         this.value = value;
         validateCheck();
     }
 
-    private void validateCheck(){
+    private void validateCheck() {
         Validate.notNull(path, "Path can not be null");
         Validate.notNull(operator, "Operator can not be null");
         Validate.notNull(value, "Value can not be null");

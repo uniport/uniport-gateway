@@ -1,27 +1,15 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
-
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
-
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
-import io.vertx.core.http.CookieSameSite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
-
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Schema;
@@ -30,6 +18,23 @@ import io.vertx.json.schema.SchemaRouter;
 import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * It defines the structure of the dynamic configuration.
@@ -132,10 +137,10 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CONTROL_API_ACTION = "action";
 
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
-            MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
-            MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
-            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
-            MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION);
+        MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
+        MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
+        MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
+        MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -152,7 +157,7 @@ public class DynamicConfiguration {
         ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
 
         ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
-                .allowAdditionalProperties(false);
+            .allowAdditionalProperties(false);
 
         SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
         SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
@@ -161,72 +166,72 @@ public class DynamicConfiguration {
 
     private static ObjectSchemaBuilder buildRouterSchema() {
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema().requiredProperty(ROUTER_NAME, Schemas.stringSchema())
-                .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-                .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema())
-                .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
+            .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema())
+            .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
         return routerSchema;
     }
 
     private static ObjectSchemaBuilder buildMiddlewareSchema() {
         ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
-                .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
-                .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
-                .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
-                .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
-                .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
-                .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_CLAIMS, Schemas.arraySchema())
-                .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
-                .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
-                .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
-                .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
-                .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
-                .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
-                .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema())
-                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema())
-                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
-                .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
-                .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
-                .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
-                .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
-                .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
-                .allowAdditionalProperties(false);
+            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
+            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
+            .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
+            .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
+            .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
+            .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, Schemas.stringSchema())
+            .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
+            .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
+            .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
+            .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
+            .property(MIDDLEWARE_BEARER_ONLY_CLAIMS, Schemas.arraySchema())
+            .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
+            .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
+            .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+            .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
+            .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
+            .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
+            .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema())
+            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema())
+            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
+            .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
+            .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
+            .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
+            .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
+            .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
+            .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
-                .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
+            .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
+            .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
+            .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
         return middlewareSchema;
     }
 
     private static ObjectSchemaBuilder buildServiceSchema() {
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
-                .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
-                .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
-                        .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
-                                .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
-                                .allowAdditionalProperties(false)))
-                .allowAdditionalProperties(false);
+            .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
+            .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
+                .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
+                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
+                    .allowAdditionalProperties(false)))
+            .allowAdditionalProperties(false);
         return serviceSchema;
     }
 
     private static ObjectSchemaBuilder buildHttpSchema(ObjectSchemaBuilder routerSchema, ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema) {
         ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
-                .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
-                .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
-                .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
+            .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
+            .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
+            .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
         return httpSchema;
     }
 
@@ -235,9 +240,9 @@ public class DynamicConfiguration {
     }
 
     public static JsonObject buildDefaultConfiguration() {
-        JsonObject config = new JsonObject();
+        final JsonObject config = new JsonObject();
 
-        JsonObject http = new JsonObject();
+        final JsonObject http = new JsonObject();
 
         http.put(DynamicConfiguration.ROUTERS, new JsonArray());
         http.put(DynamicConfiguration.MIDDLEWARES, new JsonArray());
@@ -253,47 +258,47 @@ public class DynamicConfiguration {
             return true;
         }
 
-        JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
+        final JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
         if (httpConfig == null) {
             return true;
         }
 
-        JsonArray httpRouters = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-        JsonArray httpMiddlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-        JsonArray httpServices = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+        final JsonArray httpRouters = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+        final JsonArray httpMiddlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+        final JsonArray httpServices = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
 
         return httpRouters == null && httpMiddlewares == null && httpServices == null;
     }
 
     public static JsonObject merge(Map<String, JsonObject> configurations) {
-        JsonObject mergedConfig = buildDefaultConfiguration();
+        final JsonObject mergedConfig = buildDefaultConfiguration();
         if (configurations == null) {
             return mergedConfig;
         }
 
-        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
+        final JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
         if (mergedHttpConfig == null) {
             return mergedConfig;
         }
 
-        Map<String, List<String>> routers = new HashMap<>();
-        Set<String> routersToDelete = new HashSet<>();
+        final Map<String, List<String>> routers = new HashMap<>();
+        final Set<String> routersToDelete = new HashSet<>();
 
-        Map<String, List<String>> middlewares = new HashMap<>();
-        Set<String> middlewaresToDelete = new HashSet<>();
+        final Map<String, List<String>> middlewares = new HashMap<>();
+        final Set<String> middlewaresToDelete = new HashSet<>();
 
-        Map<String, List<String>> services = new HashMap<>();
-        Set<String> servicesToDelete = new HashSet<>();
+        final Map<String, List<String>> services = new HashMap<>();
+        final Set<String> servicesToDelete = new HashSet<>();
 
         for (String key : configurations.keySet()) {
-            JsonObject conf = configurations.get(key);
-            JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
+            final JsonObject conf = configurations.get(key);
+            final JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
             if (httpConf != null) {
-                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS, new JsonArray());
+                final JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS, new JsonArray());
                 for (int i = 0; i < rts.size(); i++) {
-                    JsonObject rt = rts.getJsonObject(i);
-                    String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
+                    final JsonObject rt = rts.getJsonObject(i);
+                    final String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
                     if (!routers.containsKey(rtName)) {
                         routers.put(rtName, new ArrayList<>());
                     }
@@ -303,10 +308,10 @@ public class DynamicConfiguration {
                     }
                 }
 
-                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
+                final JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
                 for (int i = 0; i < mws.size(); i++) {
-                    JsonObject mw = mws.getJsonObject(i);
-                    String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+                    final JsonObject mw = mws.getJsonObject(i);
+                    final String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
                     if (!middlewares.containsKey(mwName)) {
                         middlewares.put(mwName, new ArrayList<>());
                     }
@@ -316,10 +321,10 @@ public class DynamicConfiguration {
                     }
                 }
 
-                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES, new JsonArray());
+                final JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES, new JsonArray());
                 for (int i = 0; i < svs.size(); i++) {
-                    JsonObject sv = svs.getJsonObject(i);
-                    String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
+                    final JsonObject sv = svs.getJsonObject(i);
+                    final String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
                     if (!services.containsKey(svName)) {
                         services.put(svName, new ArrayList<>());
                     }
@@ -333,19 +338,19 @@ public class DynamicConfiguration {
 
         for (String routerName : routersToDelete) {
             LOGGER.warn("Router defined multiple times with different configurations in '{}'",
-                    routers.get(routerName));
+                routers.get(routerName));
             mergedHttpConfig.remove(routerName);
         }
 
         for (String middlewareName : middlewaresToDelete) {
             LOGGER.warn("Middleware defined multiple times with different configurations in '{}'",
-                    routers.get(middlewareName));
+                routers.get(middlewareName));
             mergedConfig.remove(middlewareName);
         }
 
         for (String serviceName : servicesToDelete) {
             LOGGER.warn("Service defined multiple times with different configurations in '{}'",
-                    routers.get(serviceName));
+                routers.get(serviceName));
             mergedHttpConfig.remove(serviceName);
         }
 
@@ -356,12 +361,13 @@ public class DynamicConfiguration {
         if (jsonArr == null) {
             return null;
         }
-        int size = jsonArr.size();
+        final int size = jsonArr.size();
         for (int i = 0; i < size; i++) {
-            JsonObject obj;
+            final JsonObject obj;
             try {
                 obj = jsonArr.getJsonObject(i);
-            } catch (ClassCastException e) {
+            }
+            catch (ClassCastException e) {
                 return null;
             }
             if (obj == null) {
@@ -387,11 +393,11 @@ public class DynamicConfiguration {
             schema = buildSchema(vertx);
         }
 
-        Promise<Void> validPromise = Promise.promise();
+        final Promise<Void> validPromise = Promise.promise();
         schema.validateAsync(json).onSuccess(f -> {
-            JsonObject httpConfig = json.getJsonObject(HTTP);
-            List<Future> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
-                    validateMiddlewares(httpConfig), validateServices(httpConfig));
+            final JsonObject httpConfig = json.getJsonObject(HTTP);
+            final List<Future> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
+                validateMiddlewares(httpConfig), validateServices(httpConfig));
 
             CompositeFuture.all(validFutures).onSuccess(h -> {
                 validPromise.complete();
@@ -407,19 +413,19 @@ public class DynamicConfiguration {
     }
 
     private static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
-        JsonArray routers = httpConfig.getJsonArray(ROUTERS);
+        final JsonArray routers = httpConfig.getJsonArray(ROUTERS);
         if (routers == null || routers.size() == 0) {
             LOGGER.warn("No routers defined");
             return Future.succeededFuture();
         }
 
-        Set<String> routerNames = new HashSet<>();
+        final Set<String> routerNames = new HashSet<>();
         for (int i = 0; i < routers.size(); i++) {
-            JsonObject router = routers.getJsonObject(i);
-            String routerName = router.getString(ROUTER_NAME);
+            final JsonObject router = routers.getJsonObject(i);
+            final String routerName = router.getString(ROUTER_NAME);
             if (routerNames.contains(routerName)) {
-                String errMsg = String.format("validateRouters: duplicated router name '%s'. Should be unique.",
-                        routerName);
+                final String errMsg = String.format("validateRouters: duplicated router name '%s'. Should be unique.",
+                    routerName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -431,34 +437,34 @@ public class DynamicConfiguration {
         }
 
         // collect used middlewares and services
-        Set<String> routerMiddlewareNames = new HashSet<>();
-        Set<String> routerServiceNames = new HashSet<>();
+        final Set<String> routerMiddlewareNames = new HashSet<>();
+        final Set<String> routerServiceNames = new HashSet<>();
         for (int i = 0; i < routers.size(); i++) {
-            JsonObject router = routers.getJsonObject(i);
+            final JsonObject router = routers.getJsonObject(i);
 
-            JsonArray routerMwNames = router.getJsonArray(ROUTER_MIDDLEWARES);
+            final JsonArray routerMwNames = router.getJsonArray(ROUTER_MIDDLEWARES);
             if (routerMwNames != null) {
                 for (int j = 0; j < routerMwNames.size(); j++) {
-                    String routerMwName = routerMwNames.getString(j);
+                    final String routerMwName = routerMwNames.getString(j);
                     if (routerMwName != null) {
                         routerMiddlewareNames.add(routerMwName);
                     }
                 }
             }
 
-            String routerSvName = router.getString(ROUTER_SERVICE);
+            final String routerSvName = router.getString(ROUTER_SERVICE);
             if (routerSvName != null) {
                 routerServiceNames.add(routerSvName);
             }
         }
 
         // check whether alls used middlewares and services are defined
-        JsonArray middlewares = httpConfig.getJsonArray(MIDDLEWARES);
-        JsonArray services = httpConfig.getJsonArray(SERVICES);
+        final JsonArray middlewares = httpConfig.getJsonArray(MIDDLEWARES);
+        final JsonArray services = httpConfig.getJsonArray(SERVICES);
 
         for (String mwName : routerMiddlewareNames) {
             if (getObjByKeyWithValue(middlewares, MIDDLEWARE_NAME, mwName) == null) {
-                String errMsg = String.format("validateRouters: unknown middleware '%s' defined", mwName);
+                final String errMsg = String.format("validateRouters: unknown middleware '%s' defined", mwName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -466,7 +472,7 @@ public class DynamicConfiguration {
 
         for (String svName : routerServiceNames) {
             if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
-                String errMsg = String.format("validateRouters: unknown service '%s' defined", svName);
+                final String errMsg = String.format("validateRouters: unknown service '%s' defined", svName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -482,16 +488,16 @@ public class DynamicConfiguration {
             return Future.succeededFuture();
         }
 
-        Set<String> mwNames = new HashSet<>();
+        final Set<String> mwNames = new HashSet<>();
         for (int i = 0; i < mws.size(); i++) {
-            JsonObject mw = mws.getJsonObject(i);
-            String mwName = mw.getString(MIDDLEWARE_NAME);
-            String mwType = mw.getString(MIDDLEWARE_TYPE);
-            JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS);
+            final JsonObject mw = mws.getJsonObject(i);
+            final String mwName = mw.getString(MIDDLEWARE_NAME);
+            final String mwType = mw.getString(MIDDLEWARE_TYPE);
+            final JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS);
 
             if (mwNames.contains(mwName)) {
-                String errMsg = String.format("validateMiddlewares: duplicated middleware name '%s'. Should be unique.",
-                        mwName);
+                final String errMsg = String.format("validateMiddlewares: duplicated middleware name '%s'. Should be unique.",
+                    mwName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -499,26 +505,29 @@ public class DynamicConfiguration {
 
             switch (mwType) {
                 case MIDDLEWARE_AUTHORIZATION_BEARER: {
-                    String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+                    final String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
                         return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
                     break;
                 }
                 case MIDDLEWARE_BEARER_ONLY: {
-                    String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
+                    final String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
                     if (publicKey == null) {
                         return Future.failedFuture(String.format("%s: No public key defined", mwType));
-                    } else if (publicKey.length() == 0) {
+                    }
+                    else if (publicKey.length() == 0) {
                         return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
                     }
 
                     // the public key has to be either a valid URL to fetch it from or base64 encoded
-                    boolean isBase64 = false;
+                    boolean isBase64;
                     try {
                         Base64.getDecoder().decode(publicKey);
                         isBase64 = true;
-                    } catch (IllegalArgumentException e) {
+                    }
+                    catch (IllegalArgumentException e) {
+                        isBase64 = false;
                     }
 
                     boolean isURL = false;
@@ -526,27 +535,29 @@ public class DynamicConfiguration {
                         try {
                             new URL(publicKey).toURI();
                             isURL = true;
-                        } catch (MalformedURLException | URISyntaxException e) {
+                        }
+                        catch (MalformedURLException | URISyntaxException e) {
+                            isURL = false;
                         }
                     }
 
                     if (!isBase64 && !isURL) {
                         return Future.failedFuture(String
-                                .format("%s: Public key is required to either be base64 encoded or a valid URL",
-                                        mwType));
+                            .format("%s: Public key is required to either be base64 encoded or a valid URL",
+                                mwType));
                     }
 
-                    String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
+                    final String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
                     if (publicKeyAlgorithm.length() == 0) {
                         return Future.failedFuture(String.format("%s: Invalid public key algorithm", mwType));
                     }
 
-                    String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
+                    final String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
                     if (issuer != null && issuer.length() == 0) {
                         return Future.failedFuture(String.format("%s: Empty issuer defined", mwType));
                     }
 
-                    JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_AUDIENCE);
+                    final JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_AUDIENCE);
                     if (audience != null) {
                         if (audience.size() == 0) {
                             return Future.failedFuture(String.format("%s: Empty audience defined.", mwType));
@@ -554,11 +565,11 @@ public class DynamicConfiguration {
                         for (Object a : audience.getList()) {
                             if (!(a instanceof String)) {
                                 return Future.failedFuture(
-                                        String.format("%s: Audience is required to be a list of strings.", mwType));
+                                    String.format("%s: Audience is required to be a list of strings.", mwType));
                             }
                         }
                     }
-                    JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_CLAIMS);
+                    final JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_CLAIMS);
                     if (claims != null) {
                         if (claims.size() == 0) {
                             LOGGER.debug("Claims is empty");
@@ -570,116 +581,121 @@ public class DynamicConfiguration {
                             }
                             if (!(claim instanceof JsonObject)) {
                                 return Future.failedFuture("Claim is required to be a JsonObject");
-                            } else {
-                                JsonObject cObj = (JsonObject) claim;
+                            }
+                            else {
+                                final JsonObject cObj = (JsonObject) claim;
                                 if (cObj.size() != 3) {
                                     return Future.failedFuture(String.format(
-                                            "%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",
-                                            mwType));
+                                        "%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",
+                                        mwType));
                                 }
                                 if (!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH)
-                                        && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR)
-                                        && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))) {
+                                    && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR)
+                                    && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))) {
                                     return Future.failedFuture(String.format(
-                                            "%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
+                                        "%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
+                                        MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH,
+                                        MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
                                 }
 
                                 if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null) {
                                     return Future.failedFuture(
-                                            String.format("%s: %s value is required to be a String", mwType,
-                                                    MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
-                                } else {
-                                    String path = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
+                                        String.format("%s: %s value is required to be a String", mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
+                                }
+                                else {
+                                    final String path = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
                                     try {
-                                        Path p = PathCompiler.compile(path);
+                                        final Path p = PathCompiler.compile(path);
                                         LOGGER.debug(p.toString());
-                                    } catch (RuntimeException e) {
+                                    }
+                                    catch (RuntimeException e) {
                                         LOGGER.debug(String.format("Invalid claimpath %s", path));
                                         return Future
-                                                .failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
+                                            .failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
                                     }
                                 }
                                 if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null) {
                                     return Future.failedFuture(
-                                            String.format("%s: %s value is required to be a String", mwType,
-                                                    MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
-                                } else {
-                                    String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
+                                        String.format("%s: %s value is required to be a String", mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
+                                }
+                                else {
+                                    final String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
                                     if (!(operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS)
-                                            || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
+                                        || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
                                         return Future.failedFuture(String.format(
-                                                "%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s",
-                                                mwType,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, operator,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
+                                            "%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s",
+                                            mwType,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, operator,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS,
+                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
                                     }
                                 }
 
                             }
                         }
-                    } else {
+                    }
+                    else {
                         LOGGER.debug("No custom claims defined!");
                     }
 
                     break;
                 }
                 case MIDDLEWARE_HEADERS: {
-                    JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+                    final JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
                     if (requestHeaders != null) {
                         if (requestHeaders.isEmpty()) {
                             return Future.failedFuture(String.format("%s: Empty request headers defined", mwType));
                         }
 
                         for (Entry<String, Object> entry : requestHeaders) {
-                            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                            if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
                                 return Future.failedFuture(String
-                                        .format("%s: Request header and value can only be of type string", mwType));
+                                    .format("%s: Request header and value can only be of type string", mwType));
                             }
                         }
                     }
 
-                    JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+                    final JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
                     if (responseHeaders != null) {
                         if (responseHeaders.isEmpty()) {
                             return Future.failedFuture(String.format("%s: Empty response headers defined", mwType));
                         }
 
                         for (Entry<String, Object> entry : responseHeaders) {
-                            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                            if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
                                 return Future.failedFuture(String
-                                        .format("%s: Response header and value can only be of type string", mwType));
+                                    .format("%s: Response header and value can only be of type string", mwType));
                             }
                         }
                     }
 
                     if (requestHeaders == null && responseHeaders == null) {
                         return Future.failedFuture(
-                                String.format("%s: at least one response or request header has to be defined", mwType));
+                            String.format("%s: at least one response or request header has to be defined", mwType));
                     }
 
                     break;
                 }
                 case MIDDLEWARE_OAUTH2:
                 case MIDDLEWARE_OAUTH2_REGISTRATION: {
-                    String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+                    final String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
                     if (clientID == null || clientID.length() == 0) {
                         return Future.failedFuture(String.format("%s: No client ID defined", mwType));
                     }
 
-                    String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+                    final String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
                     if (clientSecret == null || clientSecret.length() == 0) {
                         return Future.failedFuture(String.format("%s: No client secret defined", mwType));
                     }
 
-                    String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+                    final String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
                     if (discoveryUrl == null || discoveryUrl.length() == 0) {
                         return Future.failedFuture(String.format("%s: No discovery URL defined", mwType));
                     }
 
-                    String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+                    final String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
                         return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
@@ -687,12 +703,12 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_REDIRECT_REGEX: {
-                    String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+                    final String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
                     if (regex == null || regex.length() == 0) {
                         return Future.failedFuture(String.format("%s: No regex defined", mwType));
                     }
 
-                    String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+                    final String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
                     if (replacement == null || replacement.length() == 0) {
                         return Future.failedFuture(String.format("%s: No replacement defined", mwType));
                     }
@@ -700,12 +716,12 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_REPLACE_PATH_REGEX: {
-                    String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+                    final String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
                     if (regex == null || regex.length() == 0) {
                         return Future.failedFuture(String.format("%s: No regex defined", mwType));
                     }
 
-                    String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+                    final String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
                     if (replacement == null || replacement.length() == 0) {
                         return Future.failedFuture(String.format("%s: No replacement defined", mwType));
                     }
@@ -725,31 +741,31 @@ public class DynamicConfiguration {
                         }
                     }
                     for (int j = 0; j < whitelistedCookies.size(); j++) {
-                        JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
+                        final JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
                         if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                                || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                                .isEmpty()) {
+                            || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
+                            .isEmpty()) {
                             return Future.failedFuture(
-                                    String.format("%s: whitelisted cookie name has to contain a value", mwType));
+                                String.format("%s: whitelisted cookie name has to contain a value", mwType));
                         }
                         if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                                || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                                .isEmpty()) {
+                            || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
+                            .isEmpty()) {
                             return Future.failedFuture(
-                                    String.format("%s: whithelisted cookie path has to contain a value", mwType));
+                                String.format("%s: whithelisted cookie path has to contain a value", mwType));
                         }
                     }
                     break;
                 }
                 case MIDDLEWARE_CONTROL_API: {
-                    String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
+                    final String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
                     if (action == null) {
                         return Future.failedFuture(
-                                String.format("%s: No control api action defined", mwType));
+                            String.format("%s: No control api action defined", mwType));
                     }
 
                     if (!Objects.equals(action, ControlApiMiddleware.SESSION_TERMINATE_ACTION) &&
-                            !Objects.equals(action, ControlApiMiddleware.SESSION_RESET_ACTION)) {
+                        !Objects.equals(action, ControlApiMiddleware.SESSION_RESET_ACTION)) {
                         return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
                     }
                     break;
@@ -758,7 +774,8 @@ public class DynamicConfiguration {
                     Integer sessionIdleTimeoutInMinutes = mwOptions.getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
                     if (sessionIdleTimeoutInMinutes == null) {
                         LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT));
-                    } else {
+                    }
+                    else {
                         if (sessionIdleTimeoutInMinutes <= 0) {
                             return Future.failedFuture(String.format("%s: Session idle timeout is required to be positive number", mwType));
                         }
@@ -766,7 +783,8 @@ public class DynamicConfiguration {
                     Integer sessionIdMinLength = mwOptions.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
                     if (sessionIdMinLength == null) {
                         LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_ID_MINIMUM_LENGTH_DEFAULT));
-                    } else {
+                    }
+                    else {
                         if (sessionIdMinLength <= 0) {
                             return Future.failedFuture(String.format("%s: Minimum session id length is required to be positive number", mwType));
                         }
@@ -778,7 +796,8 @@ public class DynamicConfiguration {
                     JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {
                         LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
-                    } else {
+                    }
+                    else {
                         String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
                         if (cookieName == null) {
                             LOGGER.debug(String.format("%s: No session cookie name specified to be removed. Use default value: %s", mwType, SessionMiddleware.COOKIE_NAME_DEFAULT));
@@ -790,10 +809,12 @@ public class DynamicConfiguration {
                         String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
                         if (cookieSameSite == null) {
                             LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s", mwType, SessionMiddleware.COOKIE_SAME_SITE_DEFAULT));
-                        } else {
+                        }
+                        else {
                             try {
                                 CookieSameSite.valueOf(cookieSameSite);
-                            } catch (RuntimeException exception) {
+                            }
+                            catch (RuntimeException exception) {
                                 List<String> allowedPolicies = new LinkedList<>();
                                 for (CookieSameSite value : CookieSameSite.values()) {
                                     allowedPolicies.add(value.toString().toUpperCase());
@@ -815,7 +836,8 @@ public class DynamicConfiguration {
                     Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
                     if (waitTimeRetryInMs == null) {
                         LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s", mwType, ReplacedSessionCookieDetectionMiddleware.DEFAULT_WAIT_BEFORE_RETRY_MS));
-                    } else {
+                    }
+                    else {
                         if (waitTimeRetryInMs <= 0) {
                             return Future.failedFuture(String.format("%s: wait time for retry required to be positive", mwType));
                         }
@@ -839,27 +861,27 @@ public class DynamicConfiguration {
     }
 
     private static Future<Void> validateServices(JsonObject httpConfig) {
-        JsonArray svs = httpConfig.getJsonArray(SERVICES);
+        final JsonArray svs = httpConfig.getJsonArray(SERVICES);
         if (svs == null || svs.size() == 0) {
             LOGGER.debug("No services defined");
             return Future.succeededFuture();
         }
 
-        Set<String> svNames = new HashSet<>();
+        final Set<String> svNames = new HashSet<>();
         for (int i = 0; i < svs.size(); i++) {
-            JsonObject sv = svs.getJsonObject(i);
-            String svName = sv.getString(SERVICE_NAME);
+            final JsonObject sv = svs.getJsonObject(i);
+            final String svName = sv.getString(SERVICE_NAME);
             if (svNames.contains(svName)) {
-                String errMsg = String.format("validateServices: duplicated service name '%s'. Should be unique.",
-                        svName);
+                final String errMsg = String.format("validateServices: duplicated service name '%s'. Should be unique.",
+                    svName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }
             svNames.add(svName);
 
-            JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
+            final JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
             if (servers == null || servers.size() == 0) {
-                String errMsg = "validateServices: no servers defined";
+                final String errMsg = "validateServices: no servers defined";
                 LOGGER.debug(errMsg);
                 return Future.failedFuture(errMsg);
             }
@@ -869,8 +891,8 @@ public class DynamicConfiguration {
     }
 
     private static Boolean addRouter(JsonObject httpConf, String routerName, JsonObject routerToAdd) {
-        JsonArray existingRouters = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-        JsonObject existingRouter = getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
+        final JsonArray existingRouters = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
+        final JsonObject existingRouter = getObjByKeyWithValue(existingRouters, DynamicConfiguration.ROUTER_NAME, routerName);
         if (existingRouter == null) {
             existingRouters.add(routerToAdd);
             return true;
@@ -880,29 +902,29 @@ public class DynamicConfiguration {
     }
 
     private static Boolean addService(JsonObject httpConf, String serviceName, JsonObject serviceToAdd) {
-        JsonArray existingServices = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-        JsonObject existingService = getObjByKeyWithValue(existingServices, DynamicConfiguration.SERVICE_NAME,
-                serviceName);
+        final JsonArray existingServices = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
+        final JsonObject existingService = getObjByKeyWithValue(existingServices, DynamicConfiguration.SERVICE_NAME,
+            serviceName);
         if (existingService == null) {
             existingServices.add(serviceToAdd);
             return true;
         }
 
-        Map<String, JsonObject> uniqueServers = new HashMap<>();
+        final Map<String, JsonObject> uniqueServers = new HashMap<>();
 
-        JsonArray existingServers = existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+        final JsonArray existingServers = existingService.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         for (int i = 0; i < existingServers.size(); i++) {
-            JsonObject server = existingServers.getJsonObject(i);
-            String url = createURL(server.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
-                    server.getString(DynamicConfiguration.SERVICE_SERVER_PORT));
+            final JsonObject server = existingServers.getJsonObject(i);
+            final String url = createURL(server.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
+                server.getString(DynamicConfiguration.SERVICE_SERVER_PORT));
             uniqueServers.put(url, server);
         }
 
-        JsonArray serversToAdd = serviceToAdd.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+        final JsonArray serversToAdd = serviceToAdd.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         for (int i = 0; i < serversToAdd.size(); i++) {
-            JsonObject serverToAdd = serversToAdd.getJsonObject(i);
-            String url = createURL(serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
-                    serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_PORT));
+            final JsonObject serverToAdd = serversToAdd.getJsonObject(i);
+            final String url = createURL(serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
+                serverToAdd.getString(DynamicConfiguration.SERVICE_SERVER_PORT));
             if (!uniqueServers.containsKey(url)) {
                 existingServers.add(serverToAdd);
             }
@@ -916,9 +938,9 @@ public class DynamicConfiguration {
     }
 
     private static Boolean addMiddleware(JsonObject httpConf, String middlewareName, JsonObject middlewareToAdd) {
-        JsonArray existingMiddlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-        JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares, DynamicConfiguration.MIDDLEWARE_NAME,
-                middlewareName);
+        final JsonArray existingMiddlewares = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+        final JsonObject existingMiddleware = getObjByKeyWithValue(existingMiddlewares, DynamicConfiguration.MIDDLEWARE_NAME,
+            middlewareName);
         if (existingMiddleware == null) {
             existingMiddlewares.add(middlewareToAdd);
             return true;

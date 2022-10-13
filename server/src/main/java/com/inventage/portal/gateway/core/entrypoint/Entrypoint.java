@@ -77,10 +77,11 @@ public class Entrypoint {
                 if (enabled()) {
                     router().mountSubRouter(application.rootPath(), applicationRouter);
                     LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
-                            application.rootPath(), name);
-                } else {
+                        application.rootPath(), name);
+                }
+                else {
                     LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
-                            application, application.rootPath());
+                        application, application.rootPath());
                 }
             }
         });
@@ -126,10 +127,10 @@ public class Entrypoint {
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
         final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
-                .findFirst().orElseThrow(() -> {
-                    throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
-                });
+            .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
+            .findFirst().orElseThrow(() -> {
+                throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
+            });
     }
 
     private void setupDefaultEntryMiddlewares(Vertx vertx) {
@@ -141,7 +142,7 @@ public class Entrypoint {
 
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
 
-        List<Future> entryMiddlewaresFuture = new ArrayList<>();
+        final List<Future> entryMiddlewaresFuture = new ArrayList<>();
         for (int i = 0; i < entryMiddlewares.size(); i++) {
             entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
         }
@@ -150,7 +151,7 @@ public class Entrypoint {
             entryMiddlewaresFuture.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(cfErr -> {
-            String errMsg = String.format("Failed to create EntryMiddlewares");
+            final String errMsg = String.format("Failed to create EntryMiddlewares");
             LOGGER.warn("{}", errMsg);
         });
     }
@@ -163,12 +164,12 @@ public class Entrypoint {
 
     private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
                                        Handler<AsyncResult<Middleware>> handler) {
-        String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-        JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+        final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
+        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
-        MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory == null) {
-            String errMsg = String.format("Unknown middleware '%s'", middlewareType);
+            final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.warn("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
             return;

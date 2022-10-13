@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
@@ -20,12 +19,20 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
  * stores them in the session and sets them again for follow-up requests.
  * It guarantees that no cookies except the session ID is sent to the client.
- *
+ * <p>
  * Divergences from RFC 6265:
  * - If the server omits the Path attribute, the middleware will use the "/" as the default value (instead of the request-uri path).
  * - The domain attribute is ignored i.e. all cookies are included in all requests
@@ -34,7 +41,7 @@ public class SessionBagMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
     // https://github.com/vert-x3/vertx-web/issues/1716
-    private static final String cookieDelimiter = "; "; // RFC 6265 4.2.1
+    private static final String COOKIE_DELIMITER = "; "; // RFC 6265 4.2.1
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
@@ -58,13 +65,13 @@ public class SessionBagMiddleware implements Middleware {
         }
 
         // on request: set cookie from session bag if present
-        String cookieHeaderValue = loadCookiesFromSessionBag(ctx);
+        final String cookieHeaderValue = loadCookiesFromSessionBag(ctx);
         if (cookieHeaderValue != null && !cookieHeaderValue.isEmpty()) {
             ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookieHeaderValue);
         }
 
         // on response: remove cookies if present and store them in session bag
-        Handler<MultiMap> respHeadersModifier = headers -> storeCookiesInSessionBag(ctx, headers);
+        final Handler<MultiMap> respHeadersModifier = headers -> storeCookiesInSessionBag(ctx, headers);
         this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
 
         ctx.next();
@@ -78,10 +85,10 @@ public class SessionBagMiddleware implements Middleware {
 
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         final Set<Cookie> requestCookies = CookieUtil
-                .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+            .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
-        Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
+        final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
         String cookieHeaderValue = encodeMatchingCookies(storedCookies, ctx);
 
         // check for conflicting request and stored cookies
@@ -91,21 +98,21 @@ public class SessionBagMiddleware implements Middleware {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.name());
                 continue;
             }
-            cookieHeaderValue = String.join(cookieDelimiter, cookieHeaderValue, requestCookie.toString());
+            cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, requestCookie.toString());
         }
 
         return cookieHeaderValue;
     }
 
     private String encodeMatchingCookies(Set<Cookie> storedCookies, RoutingContext ctx) {
-        List<String> encodedStoredCookies = new ArrayList<>();
+        final List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
                 LOGGER.debug("Add cookie '{}' to request", storedCookie.name());
                 encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
             }
         }
-        return String.join(cookieDelimiter, encodedStoredCookies);
+        return String.join(COOKIE_DELIMITER, encodedStoredCookies);
     }
 
     private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
@@ -113,7 +120,7 @@ public class SessionBagMiddleware implements Middleware {
             return true;
         }
         LOGGER.debug("Ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
-                matchesPath(cookie, path), matchesSSL(cookie, isSSL));
+            matchesPath(cookie, path), matchesSSL(cookie, isSSL));
         return false;
     }
 
@@ -154,10 +161,11 @@ public class SessionBagMiddleware implements Middleware {
     https://tools.ietf.org/html/rfc6265#section-5.1.4
     */
     private boolean matchesPath(Cookie cookie, String uriPath) {
-        String requestPath;
+        final String requestPath;
         if (!uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
             requestPath = "/";
-        } else {
+        }
+        else {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
@@ -165,19 +173,20 @@ public class SessionBagMiddleware implements Middleware {
             return false;
         }
 
-        String cookiePath;
+        final String cookiePath;
         if (cookie.path().isEmpty()) {
             cookiePath = "/";
-        } else {
-            cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
-                    : cookie.path();
         }
-        String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
+        else {
+            cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
+                : cookie.path();
+        }
+        final String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
         return Pattern.compile(regex).matcher(requestPath).matches();
     }
 
     private void storeCookiesInSessionBag(RoutingContext ctx, MultiMap headers) {
-        List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
+        final List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
         if (cookiesToSet == null || cookiesToSet.isEmpty()) {
             return;
         }
@@ -224,9 +233,9 @@ public class SessionBagMiddleware implements Middleware {
             newCookie.setPath("/");
         }
 
-        Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
+        final Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
         if (foundCookie != null) {
-            boolean expired = (foundCookie.maxAge() == 0L);
+            final boolean expired = (foundCookie.maxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
                 LOGGER.debug("Removing expired cookie '{}' from session bag", newCookie.name());
@@ -244,8 +253,8 @@ public class SessionBagMiddleware implements Middleware {
 
     private String escapeSpecialRegexChars(String regex) {
         return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
-                .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
-                .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
+            .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
+            .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
 
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
@@ -268,11 +277,11 @@ public class SessionBagMiddleware implements Middleware {
 
     private boolean isWhitelisted(Cookie cookie) {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
-            JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
-            String whitelistedCookieName = whitelistedCookie
-                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
-            String whitelistedCookiePath = whitelistedCookie
-                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
+            final JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
+            final String whitelistedCookieName = whitelistedCookie
+                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
+            final String whitelistedCookiePath = whitelistedCookie
+                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
             if (whitelistedCookieName.equals(cookie.name()) && whitelistedCookiePath.equals(cookie.path())) {
                 return true;
             }

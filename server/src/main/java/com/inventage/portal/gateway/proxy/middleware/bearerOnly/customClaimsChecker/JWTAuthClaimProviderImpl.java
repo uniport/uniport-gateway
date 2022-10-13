@@ -36,7 +36,11 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
@@ -70,7 +74,8 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 final KeyStore ks;
                 if (keyStore.getProvider() == null) {
                     ks = KeyStore.getInstance(keyStore.getType());
-                } else {
+                }
+                else {
                     ks = KeyStore.getInstance(keyStore.getType(), keyStore.getProvider());
                 }
 
@@ -105,7 +110,9 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 }
             }
 
-        } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException e) {
+        }
+        catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException |
+               NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
     }
@@ -120,19 +127,21 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
      */
     @Override
     public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
-        TokenCredentials authInfo;
-        JsonObject payload;
+        final TokenCredentials authInfo;
+        final JsonObject payload;
 
         try {
             authInfo = (TokenCredentials) credentials;
             authInfo.checkValid(null);
             //Decode throws a IllegalstateException if the jwt format is not correct and a RuntimeException if the signature verification fails.
             payload = jwt.decode(authInfo.getToken());
-        }catch(IllegalStateException e){
+        }
+        catch (IllegalStateException e) {
             LOGGER.debug(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(400, e)));
             return;
-        } catch(RuntimeException e){
+        }
+        catch (RuntimeException e) {
             LOGGER.debug(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(401, e)));
             return;
@@ -145,21 +154,22 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 for (JWTClaim otherClaim : otherClaims) {
                     //Claims are provided by the dynamic configuration file. We verify that each payload complies with the claims defined in the configuration
                     //Throws an exception if the path does not exist in the payload
-                    var payloadValue = JsonPath.read(payload.toString(), otherClaim.path);
+                    final var payloadValue = JsonPath.read(payload.toString(), otherClaim.path);
 
                     //Verify if the value stored in that path complies to the claim.
                     if (!verifyClaim(payloadValue, otherClaim.value, otherClaim.operator)) {
                         throw new IllegalStateException(String.format("%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
-                                ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
+                            ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
                     }
                 }
             }
 
             if (jwtOptions.getAudience() != null) {
-                JsonArray target;
+                final JsonArray target;
                 if (payload.getValue("aud") instanceof String) {
                     target = new JsonArray().add(payload.getValue("aud", ""));
-                } else {
+                }
+                else {
                     target = payload.getJsonArray("aud", EMPTY_ARRAY);
                 }
 
@@ -189,7 +199,8 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
             LOGGER.debug("Successful JWT verification");
             resultHandler.handle(Future.succeededFuture(user));
 
-        } catch (RuntimeException | JsonProcessingException e) {
+        }
+        catch (RuntimeException | JsonProcessingException e) {
             LOGGER.debug(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(403, e)));
         }
@@ -203,17 +214,21 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
         if (operator == JWTClaimOperator.EQUALS) {
             return verifyClaimEquals(payloadValue, claimValue);
-        } else if (operator == JWTClaimOperator.CONTAINS) {
+        }
+        else if (operator == JWTClaimOperator.CONTAINS) {
             return verifyClaimContains(payloadValue, claimValue);
-        } else if (operator == JWTClaimOperator.EQUALS_SUBSTRING_WHITESPACE) {
-            String[] array = payloadValue.toString().split(" ");
-            JsonArray payloadArray = new JsonArray(Arrays.asList(array));
+        }
+        else if (operator == JWTClaimOperator.EQUALS_SUBSTRING_WHITESPACE) {
+            final String[] array = payloadValue.toString().split(" ");
+            final JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimEquals(payloadArray, claimValue);
-        } else if (operator == JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE) {
-            String[] array = payloadValue.toString().split(" ");
-            JsonArray payloadArray = new JsonArray(Arrays.asList(array));
+        }
+        else if (operator == JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE) {
+            final String[] array = payloadValue.toString().split(" ");
+            final JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimContains(payloadArray, claimValue);
-        } else {
+        }
+        else {
             throw new IllegalStateException(String.format("%s. No support for the following operator: %s", ERROR_MESSAGE, operator));
         }
     }
@@ -221,24 +236,25 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
     private static boolean verifyClaimEquals(Object payloadValue, Object claimValue) throws JsonProcessingException {
 
         if ((claimValue instanceof String && payloadValue instanceof String)
-                || (claimValue instanceof Number && payloadValue instanceof Number)
-                || (claimValue instanceof Boolean && payloadValue instanceof Boolean)) {
+            || (claimValue instanceof Number && payloadValue instanceof Number)
+            || (claimValue instanceof Boolean && payloadValue instanceof Boolean)) {
             return claimValue.equals(payloadValue);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = new ObjectMapper();
         return mapper.readTree(payloadValue.toString()).equals(mapper.readTree(claimValue.toString()));
     }
 
     private static boolean verifyClaimContains(Object payloadValue, Object claimValue) throws JsonProcessingException {
         //By definition, we require that contains can only work with an array/list.
 
-        JsonArray claimArray = new JsonArray(claimValue.toString());
+        final JsonArray claimArray = new JsonArray(claimValue.toString());
 
         if (payloadValue instanceof JsonArray) {
-            JsonArray payloadArray = (JsonArray) payloadValue;
+            final JsonArray payloadArray = (JsonArray) payloadValue;
             return verifyClaimContainsArray(payloadArray, claimArray);
-        } else {
+        }
+        else {
             for (Object claimItem : claimArray) {
                 if (verifyClaimEquals(payloadValue, claimItem)) {
                     return true;
@@ -280,14 +296,14 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
     @Override
     public String generateToken(JsonObject claims, final JWTOptions options) {
-        final JsonObject _claims = claims.copy();
+        final JsonObject claimsCopy = claims.copy();
 
         // we do some "enhancement" of the claims to support roles and permissions
-        if (options.getPermissions() != null && !_claims.containsKey(permissionsClaimKey)) {
-            _claims.put(permissionsClaimKey, new JsonArray(options.getPermissions()));
+        if (options.getPermissions() != null && !claimsCopy.containsKey(permissionsClaimKey)) {
+            claimsCopy.put(permissionsClaimKey, new JsonArray(options.getPermissions()));
         }
 
-        return jwt.sign(_claims, options);
+        return jwt.sign(claimsCopy, options);
     }
 
     @Override
@@ -311,11 +327,11 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
      */
     @Deprecated
     private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
-        User result = User.fromToken(accessToken);
+        final User result = User.fromToken(accessToken);
 
         // update the attributes
         result.attributes()
-                .put("accessToken", jwtToken);
+            .put("accessToken", jwtToken);
 
         // copy the expiration check properties + sub to the attributes root
         copyProperties(jwtToken, result.attributes(), "exp", "iat", "nbf", "sub");
@@ -329,13 +345,13 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
         // root claim meta data for JWT AuthZ
         result.attributes()
-                .put("rootClaim", "accessToken");
+            .put("rootClaim", "accessToken");
 
-        JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
+        final JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
         if (jsonPermissions != null) {
             for (Object item : jsonPermissions) {
                 if (item instanceof String) {
-                    String permission = (String) item;
+                    final String permission = (String) item;
                     result.authorizations().add("jwt-authentication", PermissionBasedAuthorization.create(permission));
                 }
             }
@@ -354,16 +370,18 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
     }
 
     private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
-        String[] keys = permissionsClaimKey.split("/");
+        final String[] keys = permissionsClaimKey.split("/");
         JsonObject obj = null;
         for (int i = 0; i < keys.length; i++) {
             if (i == 0) {
                 obj = jwtToken.getJsonObject(keys[i]);
-            } else if (i == keys.length - 1) {
+            }
+            else if (i == keys.length - 1) {
                 if (obj != null) {
                     return obj.getJsonArray(keys[i]);
                 }
-            } else {
+            }
+            else {
                 if (obj != null) {
                     obj = obj.getJsonObject(keys[i]);
                 }

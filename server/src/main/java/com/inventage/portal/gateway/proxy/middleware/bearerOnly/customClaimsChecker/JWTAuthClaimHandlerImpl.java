@@ -16,8 +16,8 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 /**
- In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
- This class is a copy of its superclass, with the difference that we extend from our custom HTTPAuthHandler
+ * In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
+ * This class is a copy of its superclass, with the difference that we extend from our custom HTTPAuthHandler
  */
 public class JWTAuthClaimHandlerImpl extends HTTPAuthClaimHandler<JWTAuth> implements JWTAuthHandler {
 
@@ -39,9 +39,11 @@ public class JWTAuthClaimHandlerImpl extends HTTPAuthClaimHandler<JWTAuth> imple
         });
     }
 
-    //We override the post authentication because the handle method in the super class calls our authenticate method in the JWTAuthClaimProviderImpl only if the user is not null.    @Override
+    //We override the post authentication because the handle method in the
+    //super class calls our authenticate method in the JWTAuthClaimProviderImpl
+    // only if the user is not null.    @Override
     public void postAuthentication(RoutingContext ctx) {
-        HttpServerRequest request = ctx.request();
+        final HttpServerRequest request = ctx.request();
         final boolean parseEnded = request.isEnded();
         if (!parseEnded) {
             request.pause();
@@ -56,9 +58,9 @@ public class JWTAuthClaimHandlerImpl extends HTTPAuthClaimHandler<JWTAuth> imple
             // proceed to authN
             getAuthProvider(ctx).authenticate(res.result(), authN -> {
                 if (authN.succeeded()) {
-                    User authenticated = authN.result();
+                    final User authenticated = authN.result();
                     ctx.setUser(authenticated);
-                    Session session = ctx.session();
+                    final Session session = ctx.session();
                     if (session != null) {
                         // the user has upgraded from unauthenticated to authenticated
                         // session should be upgraded as recommended by owasp
@@ -67,20 +69,22 @@ public class JWTAuthClaimHandlerImpl extends HTTPAuthClaimHandler<JWTAuth> imple
                     // proceed with the router
                     resume(request, parseEnded);
                     super.postAuthentication(ctx);
-                } else {
-                    String header = authenticateHeader(ctx);
+                }
+                else {
+                    final String header = authenticateHeader(ctx);
                     if (header != null) {
                         ctx.response()
-                                .putHeader("WWW-Authenticate", header);
+                            .putHeader("WWW-Authenticate", header);
                     }
                     // to allow further processing if needed
                     resume(request, parseEnded);
-                    Throwable cause = authN.cause();
-                    processException(ctx, cause instanceof HttpStatusException ?cause:new HttpStatusException(401, cause));
+                    final Throwable cause = authN.cause();
+                    processException(ctx, cause instanceof HttpStatusException ? cause : new HttpStatusException(401, cause));
                 }
             });
         });
     }
+
     private void resume(HttpServerRequest request, boolean parseEnded) {
         // resume as the error handler may allow this request to become valid again
         if (!parseEnded && !request.headers().contains(HttpHeaders.UPGRADE, HttpHeaders.WEBSOCKET, true)) {

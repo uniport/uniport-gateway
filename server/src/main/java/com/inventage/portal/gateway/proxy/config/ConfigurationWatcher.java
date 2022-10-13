@@ -99,16 +99,16 @@ public class ConfigurationWatcher extends AbstractVerticle {
     // to finally end up in a throttler that sends it to listenConfigurations.
     private void listenProviders() {
         LOGGER.debug("Listening for new configuration...");
-        MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
+        final MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
 
         configConsumer.handler(message -> onConfigurationAnnounce(message));
     }
 
     // handler for address: configuration-announce-address
     private void onConfigurationAnnounce(Message<JsonObject> message) {
-        JsonObject nextConfig = message.body();
+        final JsonObject nextConfig = message.body();
 
-        String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
         LOGGER.debug("Received next configuration from '{}'", providerName);
 
         preloadConfiguration(nextConfig);
@@ -121,8 +121,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return;
         }
 
-        String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
 
         if (DynamicConfiguration.isEmptyConfiguration(providerConfig)) {
             LOGGER.info("Skipping empty configuration for provider '{}'", providerName);
@@ -146,17 +146,17 @@ public class ConfigurationWatcher extends AbstractVerticle {
     // Note that in the case it receives N new configs in the timeframe of the throttle duration
     // after publishing, it will publish the last of the newly received configurations.
     private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
-        Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
-        Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
+        final Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
+        final Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
-        MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
+        final MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
         consumer.handler(message -> onConfigReload(message, throttleMs, nextConfigRing, prevConfigRing));
     }
 
     // handler for address: <provider> (e.g. file)
     private void onConfigReload(Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
             Queue<JsonObject> prevConfigRing) {
-        JsonObject nextConfig = message.body();
+        final JsonObject nextConfig = message.body();
         if (prevConfigRing.isEmpty()) {
             LOGGER.debug("Publishing initial configuration immediately");
             prevConfigRing.add(nextConfig.copy());
@@ -179,7 +179,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     private void publishConfiguration(Queue<JsonObject> nextConfigRing) {
-        JsonObject nextConfig = nextConfigRing.poll();
+        final JsonObject nextConfig = nextConfigRing.poll();
         if (nextConfig == null) {
             return;
         }
@@ -189,7 +189,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     private void listenConfigurations() {
         LOGGER.debug("Listening for new configuration...");
-        MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
+        final MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
                 .consumer(CONFIG_VALIDATED_ADDRESS);
 
         validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
@@ -197,10 +197,10 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     // handler for address: CONFIG_VALIDATED_ADDRESS
     private void onValidConfiguration(Message<JsonObject> message) {
-        JsonObject nextConfig = message.body();
+        final JsonObject nextConfig = message.body();
 
-        String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
 
         if (providerConfig == null) {
             return;
@@ -208,7 +208,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
         this.currentConfigurations.put(providerName, providerConfig);
 
-        JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
+        final JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
         DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
@@ -223,17 +223,17 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
-        JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
+        final JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
 
         if (httpConfig == null) {
             return config;
         }
 
-        JsonArray rs = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+        final JsonArray rs = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
         for (int i = 0; i < rs.size(); i++) {
-            JsonObject r = rs.getJsonObject(i);
-            JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
-            String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
+            final JsonObject r = rs.getJsonObject(i);
+            final JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
+            final String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
             if (rEntrypoints == null || rEntrypoints.size() == 0) {
                 LOGGER.debug(
                         "No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
@@ -248,29 +248,29 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
         LOGGER.debug("Merge configurations");
-        JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
-        JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
+        final JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
+        final JsonObject mergedHttpConfig = mergedConfig.getJsonObject(DynamicConfiguration.HTTP);
 
         if (mergedHttpConfig == null) {
             return mergedConfig;
         }
 
-        Set<String> providerNames = configurations.keySet();
+        final Set<String> providerNames = configurations.keySet();
         for (String providerName : providerNames) {
-            JsonObject conf = configurations.get(providerName);
-            JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
+            final JsonObject conf = configurations.get(providerName);
+            final JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
             if (httpConf != null) {
-                JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
-                JsonArray mergedRts = mergedHttpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+                final JsonArray rts = httpConf.getJsonArray(DynamicConfiguration.ROUTERS);
+                final JsonArray mergedRts = mergedHttpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
                 mergeRouters(providerName, rts, mergedRts);
 
-                JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                JsonArray mergedMws = mergedHttpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                final JsonArray mws = httpConf.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                final JsonArray mergedMws = mergedHttpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
                 mergeMiddlewares(providerName, mws, mergedMws);
 
-                JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
-                JsonArray mergedSvs = mergedHttpConfig.getJsonArray(DynamicConfiguration.SERVICES);
+                final JsonArray svs = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
+                final JsonArray mergedSvs = mergedHttpConfig.getJsonArray(DynamicConfiguration.SERVICES);
                 mergeServices(providerName, svs, mergedSvs);
             }
         }
@@ -284,21 +284,21 @@ public class ConfigurationWatcher extends AbstractVerticle {
         }
 
         for (int i = 0; i < rts.size(); i++) {
-            JsonObject rt = rts.getJsonObject(i);
+            final JsonObject rt = rts.getJsonObject(i);
 
-            String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
+            final String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
             rt.put(DynamicConfiguration.ROUTER_NAME, getQualifiedName(providerName, rtName));
 
             // Service and middlewares may referecing to another provider namespace
             // The names are only patched if this is not the case.
-            String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
+            final String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
             rt.put(DynamicConfiguration.ROUTER_SERVICE, getQualifiedName(providerName, svName));
 
-            JsonArray mwNames = rt.getJsonArray(DynamicConfiguration.ROUTER_MIDDLEWARES);
+            final JsonArray mwNames = rt.getJsonArray(DynamicConfiguration.ROUTER_MIDDLEWARES);
             if (mwNames != null) {
-                JsonArray qualifiedMwNames = new JsonArray();
+                final JsonArray qualifiedMwNames = new JsonArray();
                 for (int j = 0; j < mwNames.size(); j++) {
-                    String mwName = mwNames.getString(j);
+                    final String mwName = mwNames.getString(j);
                     qualifiedMwNames.add(getQualifiedName(providerName, mwName));
                 }
                 rt.put(DynamicConfiguration.ROUTER_MIDDLEWARES, qualifiedMwNames);
@@ -316,8 +316,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
         }
 
         for (int i = 0; i < mws.size(); i++) {
-            JsonObject mw = mws.getJsonObject(i);
-            String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+            final JsonObject mw = mws.getJsonObject(i);
+            final String mwName = mw.getString(DynamicConfiguration.MIDDLEWARE_NAME);
 
             mw.put(DynamicConfiguration.MIDDLEWARE_NAME, getQualifiedName(providerName, mwName));
             mergedMws.add(mw);
@@ -331,8 +331,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
         }
 
         for (int i = 0; i < svs.size(); i++) {
-            JsonObject sv = svs.getJsonObject(i);
-            String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
+            final JsonObject sv = svs.getJsonObject(i);
+            final String svName = sv.getString(DynamicConfiguration.SERVICE_NAME);
 
             sv.put(DynamicConfiguration.SERVICE_NAME, getQualifiedName(providerName, svName));
             mergedSvs.add(sv);

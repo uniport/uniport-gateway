@@ -1,9 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy.response;
 
-import java.util.List;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -13,6 +10,8 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+
+import java.util.List;
 
 /**
  * Subclass of HttpServerResponse which reverses the manipulation applied by
@@ -90,7 +89,7 @@ public class ProxiedHttpServerResponse implements HttpServerResponse {
 
     @Override
     public MultiMap headers() {
-        List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
+        final List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
         if (modifiers != null) {
             for (Handler<MultiMap> modifier : modifiers) {
                 modifier.handle(delegate.headers());

@@ -1,17 +1,10 @@
 package com.inventage.portal.gateway.proxy.provider.file;
 
-import java.io.File;
-import java.nio.file.Path;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -20,6 +13,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Generates a complete dynamic configuration from a file.
@@ -44,7 +42,7 @@ public class FileConfigProvider extends Provider {
     private int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
-            Boolean watch, JsonObject env) {
+                              Boolean watch, JsonObject env) {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -70,18 +68,18 @@ public class FileConfigProvider extends Provider {
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
+        final ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig().onSuccess(config -> {
             this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
         }).onFailure(err -> {
-            String errMsg = String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
+            final String errMsg = String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
             LOGGER.warn(errMsg);
         });
 
         if (this.watch) {
             LOGGER.info("Listening to configuration changes");
             retriever.listen(ar -> {
-                JsonObject config = ar.getNewConfiguration();
+                final JsonObject config = ar.getNewConfiguration();
                 this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
             });
         }
@@ -93,25 +91,25 @@ public class FileConfigProvider extends Provider {
     }
 
     private ConfigRetrieverOptions getOptions() {
-        ConfigRetrieverOptions options = new ConfigRetrieverOptions();
+        final ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
             LOGGER.info("Setting scan period to '{}'", this.scanPeriodMs);
             options.setScanPeriod(this.scanPeriodMs);
         }
 
         if (this.filename != null) {
-            File file = this.getAbsoluteConfigPath(this.filename).toFile();
+            final File file = this.getAbsoluteConfigPath(this.filename).toFile();
             LOGGER.info("Reading file '{}'", file.getAbsolutePath());
 
-            ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
-                    .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
+            final ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
+                .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
             this.source = "file";
             return options.addStore(fileStore);
         }
 
         if (this.directory != null) {
-            Path path = this.getAbsoluteConfigPath(this.directory);
+            final Path path = this.getAbsoluteConfigPath(this.directory);
             if (path == null) {
                 LOGGER.warn("Failed to create absolute config path of '{}'", this.directory);
                 this.source = "undefined";
@@ -119,11 +117,12 @@ public class FileConfigProvider extends Provider {
             }
 
             LOGGER.info("Reading directory '{}'", path);
-            JsonArray fileSets = new JsonArray();
-            File[] children = path.toFile().listFiles();
+            final JsonArray fileSets = new JsonArray();
+            final File[] children = path.toFile().listFiles();
             if (children == null) {
                 throw new IllegalArgumentException("The `path` must be a directory");
-            } else {
+            }
+            else {
                 for (File file : children) {
                     // we only take files into account at depth 2 (like general/test.json)
                     if (file.isDirectory()) {
@@ -133,8 +132,8 @@ public class FileConfigProvider extends Provider {
                 }
             }
 
-            ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
-                    .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
+            final ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
+                .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
 
             this.source = "directory";
             return options.addStore(dirStore);
@@ -152,12 +151,12 @@ public class FileConfigProvider extends Provider {
         }
         if (this.staticConfigDir == null) {
             LOGGER.warn(
-                    "No static config dir defined. Cannot assemble absolute config path from '{}'",
-                    path);
+                "No static config dir defined. Cannot assemble absolute config path from '{}'",
+                path);
             return null;
         }
         LOGGER.debug("Using path relative to the static config file in '{}'",
-                this.staticConfigDir.toAbsolutePath());
+            this.staticConfigDir.toAbsolutePath());
         return this.staticConfigDir.resolve(path).normalize();
     }
 
@@ -173,28 +172,29 @@ public class FileConfigProvider extends Provider {
         if (!config.containsKey(DynamicConfiguration.HTTP)) {
             return config;
         }
-        JsonObject http = config.getJsonObject(DynamicConfiguration.HTTP);
+        final JsonObject http = config.getJsonObject(DynamicConfiguration.HTTP);
         if (!http.containsKey(DynamicConfiguration.SERVICES)) {
             return config;
         }
-        JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
+        final JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
         for (int i = 0; i < services.size(); i++) {
-            JsonObject service = services.getJsonObject(i);
+            final JsonObject service = services.getJsonObject(i);
             if (!service.containsKey(DynamicConfiguration.SERVICE_SERVERS)) {
                 continue;
             }
-            JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+            final JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
             for (int j = 0; j < servers.size(); j++) {
-                JsonObject server = servers.getJsonObject(j);
+                final JsonObject server = servers.getJsonObject(j);
                 if (!server.containsKey(DynamicConfiguration.SERVICE_SERVER_PORT)) {
                     continue;
                 }
-                String portStr = server.getString(DynamicConfiguration.SERVICE_SERVER_PORT);
-                int port;
+                final String portStr = server.getString(DynamicConfiguration.SERVICE_SERVER_PORT);
+                final int port;
 
                 try {
                     port = Integer.parseInt(portStr);
-                } catch (NumberFormatException e) {
+                }
+                catch (NumberFormatException e) {
                     LOGGER.warn("Failed to parse server port '{}'", portStr);
                     return config;
                 }
@@ -208,12 +208,12 @@ public class FileConfigProvider extends Provider {
     private void validateAndPublish(JsonObject config) {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
             this.eb.publish(this.configurationAddress,
-                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
-                            .put(Provider.PROVIDER_CONFIGURATION, config));
+                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                    .put(Provider.PROVIDER_CONFIGURATION, config));
             LOGGER.info("Configuration published from '{}'", this.source);
         }).onFailure(err -> {
             LOGGER.warn("Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
-                    this.source);
+                this.source);
         });
     }
 }

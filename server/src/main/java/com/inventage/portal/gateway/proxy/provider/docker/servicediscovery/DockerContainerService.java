@@ -14,22 +14,20 @@
 
 package com.inventage.portal.gateway.proxy.provider.docker.servicediscovery;
 
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ContainerNetwork;
+import com.github.dockerjava.api.model.ContainerPort;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.servicediscovery.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ContainerNetwork;
-import com.github.dockerjava.api.model.ContainerPort;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.Record;
 
 /**
  * Represent a Docker container.
@@ -50,7 +48,8 @@ public class DockerContainerService {
         containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
         if (!containerNames.isEmpty()) {
             name = containerNames.get(0);
-        } else {
+        }
+        else {
             name = containerId;
         }
 
@@ -70,28 +69,28 @@ public class DockerContainerService {
     }
 
     private Record createRecord(Container container) {
-        Record record = new Record().setName(name);
+        final Record record = new Record().setName(name);
 
-        Map<String, String> labels = container.getLabels();
+        final Map<String, String> labels = container.getLabels();
         if (labels != null) {
             for (Map.Entry<String, String> entry : labels.entrySet()) {
                 record.getMetadata().put(entry.getKey(), entry.getValue());
             }
         }
 
-        JsonArray names = new JsonArray();
+        final JsonArray names = new JsonArray();
         containerNames.forEach(names::add);
         record.getMetadata().put("docker.names", names);
         record.getMetadata().put("docker.name", name);
         record.getMetadata().put("docker.id", containerId);
 
-        JsonArray ports = new JsonArray();
+        final JsonArray ports = new JsonArray();
         for (ContainerPort port : container.getPorts()) {
             ports.add(port.getPrivatePort());
         }
         record.getMetadata().put("docker.ports", ports);
 
-        JsonObject hostPerNetwork = new JsonObject();
+        final JsonObject hostPerNetwork = new JsonObject();
         hostPerNetwork.put("defaultNetworkMode", container.getHostConfig().getNetworkMode());
         for (Entry<String, ContainerNetwork> entry : container.getNetworkSettings().getNetworks().entrySet()) {
             hostPerNetwork.put(entry.getKey(), entry.getValue().getIpAddress());

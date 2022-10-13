@@ -1,19 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -28,6 +20,12 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
@@ -41,22 +39,22 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Creating '{}' middleware", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
-        Promise<Middleware> bearerOnlyPromise = Promise.promise();
+        final Promise<Middleware> bearerOnlyPromise = Promise.promise();
 
-        String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
-        JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
-        JsonArray additionalClaims = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIMS);
+        final String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
+        final JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
+        final JsonArray additionalClaims = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIMS);
 
-        String publicKeyAlgorithm = middlewareConfig
-                .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
-        String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
-        boolean optional = Boolean.parseBoolean(optionalStr);
+        final String publicKeyAlgorithm = middlewareConfig
+            .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
+        final String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
+        final boolean optional = Boolean.parseBoolean(optionalStr);
 
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
-            String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
-                    "-----END PUBLIC KEY-----");
+            final String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
+                "-----END PUBLIC KEY-----");
 
-            JWTClaimOptions jwtOptions = new JWTClaimOptions();
+            final JWTClaimOptions jwtOptions = new JWTClaimOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
                 LOGGER.debug("With issuer '{}'", issuer);
@@ -71,18 +69,18 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 LOGGER.debug("With claims '{}'", additionalClaims);
             }
 
-            JWTAuthOptions authConfig = new JWTAuthOptions()
-                    .addPubSecKey(
-                            new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
-                    .setJWTOptions(jwtOptions);
+            final JWTAuthOptions authConfig = new JWTAuthOptions()
+                .addPubSecKey(
+                    new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
+                .setJWTOptions(jwtOptions);
 
-            JWTAuth authProvider = JWTAuthClaim.create(vertx, authConfig);
-            AuthenticationHandler authHandler = JWTAuthClaimHandler.create(authProvider);
+            final JWTAuth authProvider = JWTAuthClaim.create(vertx, authConfig);
+            final AuthenticationHandler authHandler = JWTAuthClaimHandler.create(authProvider);
 
             bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
         }).onFailure(err -> {
-            String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
+            final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
             LOGGER.info(errMsg);
             bearerOnlyPromise.handle(Future.failedFuture(errMsg));
         });
@@ -91,20 +89,22 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
     }
 
     private Future<String> fetchPublicKey(Vertx vertx, JsonObject middlewareConfig) {
-        Promise<String> promise = Promise.promise();
+        final Promise<String> promise = Promise.promise();
         this.fetchPublicKey(vertx, middlewareConfig, promise);
         return promise.future();
     }
 
     private void fetchPublicKey(Vertx vertx, JsonObject middlewareConfig, Handler<AsyncResult<String>> handler) {
         // the public key is either base64 encoded OR a valid URL to fetch it from
-        String publicKey = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
+        final String publicKey = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
 
         boolean isURL = false;
         try {
             new URL(publicKey).toURI();
             isURL = true;
-        } catch (MalformedURLException | URISyntaxException e) {
+        }
+        catch (MalformedURLException | URISyntaxException e) {
+            LOGGER.debug("URI is malformed: " + e.getMessage());
         }
 
         if (!isURL) {
@@ -118,22 +118,24 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
     }
 
     private void fetchPublicKeyFromURL(Vertx vertx, String rawUrl, Handler<AsyncResult<String>> handler) {
-        URL parsedURL;
+        final URL parsedURL;
         try {
             parsedURL = new URL(rawUrl);
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e) {
             LOGGER.info("Malformed URL '{}'", rawUrl);
             handler.handle(Future.failedFuture(e));
             return;
         }
 
-        String protocol = parsedURL.getProtocol();
-        String host = parsedURL.getHost();
+        final String protocol = parsedURL.getProtocol();
+        final String host = parsedURL.getHost();
         int port = parsedURL.getPort();
         if (port <= 0) {
             if (protocol.endsWith("s")) {
                 port = 443;
-            } else {
+            }
+            else {
                 port = 80;
             }
         }
@@ -146,11 +148,11 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         final String iamPath = path;
         LOGGER.debug("Reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
         WebClient.create(vertx).get(iamPort, host, iamPath).as(BodyCodec.jsonObject()).send().onSuccess(resp -> {
-            JsonObject json = resp.body();
+            final JsonObject json = resp.body();
 
-            String publicKey = json.getString("public_key");
+            final String publicKey = json.getString("public_key");
             if (publicKey == null || publicKey.length() == 0) {
-                String errMsg = "fetchPublicKeyFromURL: No public key found";
+                final String errMsg = "fetchPublicKeyFromURL: No public key found";
                 LOGGER.info(errMsg);
                 handler.handle(Future.failedFuture(errMsg));
             }

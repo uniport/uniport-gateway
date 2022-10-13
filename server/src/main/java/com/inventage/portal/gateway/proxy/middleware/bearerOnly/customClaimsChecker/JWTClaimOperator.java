@@ -10,7 +10,8 @@ public enum JWTClaimOperator {
 
 
     private final String name;
-    JWTClaimOperator(String name){
+
+    JWTClaimOperator(String name) {
         this.name = name;
     }
 

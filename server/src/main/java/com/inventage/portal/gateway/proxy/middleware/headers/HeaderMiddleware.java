@@ -45,7 +45,7 @@ public class HeaderMiddleware implements Middleware {
             }
         }
 
-        Handler<MultiMap> respHeadersModifier = headers -> {
+        final Handler<MultiMap> respHeadersModifier = headers -> {
             for (Entry<String, String> header : this.responseHeaders.entries()) {
                 switch (header.getValue()) {
                     case "": {
@@ -56,7 +56,7 @@ public class HeaderMiddleware implements Middleware {
                         break;
                     }
                     default: {
-                        List<String> hs = headers.getAll(header.getKey());
+                        final List<String> hs = headers.getAll(header.getKey());
                         if (hs == null || !hs.contains(header.getValue())) {
                             LOGGER.debug("Setting response header '{}:{}'", header.getKey(),
                                     header.getValue());

@@ -16,9 +16,9 @@ public class FileConfigProviderFactory implements ProviderFactory {
 
     @Override
     public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
-        String filename = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_FILENAME, "");
-        String directory = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_DIRECTORY, "");
-        Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, false);
+        final String filename = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_FILENAME, "");
+        final String directory = providerConfig.getString(StaticConfiguration.PROVIDER_FILE_DIRECTORY, "");
+        final Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, false);
         return new FileConfigProvider(vertx, configurationAddress, filename, directory, watch, env);
     }
 

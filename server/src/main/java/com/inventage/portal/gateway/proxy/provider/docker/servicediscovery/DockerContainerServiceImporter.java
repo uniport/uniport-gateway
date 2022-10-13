@@ -14,16 +14,6 @@
 
 package com.inventage.portal.gateway.proxy.provider.docker.servicediscovery;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -31,13 +21,21 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A discovery bridge collecting services from Docker, and importing them in the Vert.x discovery
@@ -45,7 +43,7 @@ import io.vertx.servicediscovery.spi.ServicePublisher;
  */
 public class DockerContainerServiceImporter implements ServiceImporter {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(DockerContainerServiceImporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerServiceImporter.class);
 
     private long timerId;
     private DockerClient client;
@@ -69,16 +67,16 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
         this.publisher = publisher;
         this.vertx = vertx;
-        DefaultDockerClientConfig.Builder builder = DefaultDockerClientConfig.createDefaultConfigBuilder();
-        String dockerCertPath = configuration.getString("docker-cert-path");
-        String dockerCfgPath = configuration.getString("docker-cfg-path");
-        String email = configuration.getString("docker-registry-email");
-        String password = configuration.getString("docker-registry-password");
-        String username = configuration.getString("docker-registry-username");
-        String host = configuration.getString("docker-host");
-        boolean tlsVerify = configuration.getBoolean("docker-tls-verify", true);
-        String registry = configuration.getString("docker-registry-url", "https://index.docker.io/v1/");
-        String version = configuration.getString("version");
+        final DefaultDockerClientConfig.Builder builder = DefaultDockerClientConfig.createDefaultConfigBuilder();
+        final String dockerCertPath = configuration.getString("docker-cert-path");
+        final String dockerCfgPath = configuration.getString("docker-cfg-path");
+        final String email = configuration.getString("docker-registry-email");
+        final String password = configuration.getString("docker-registry-password");
+        final String username = configuration.getString("docker-registry-username");
+        final String host = configuration.getString("docker-host");
+        final boolean tlsVerify = configuration.getBoolean("docker-tls-verify", true);
+        final String registry = configuration.getString("docker-registry-url", "https://index.docker.io/v1/");
+        final String version = configuration.getString("version");
 
         if (dockerCertPath != null) {
             builder.withDockerCertPath(dockerCertPath);
@@ -106,23 +104,25 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         }
         builder.withDockerTlsVerify(tlsVerify);
 
-        DockerClientConfig config = builder.build();
+        final DockerClientConfig config = builder.build();
         if (config.getDockerHost().getScheme().equalsIgnoreCase("unix")) {
             try {
                 this.host = InetAddress.getLocalHost().getHostAddress();
-            } catch (UnknownHostException e) {
+            }
+            catch (UnknownHostException e) {
                 completion.fail(e);
             }
-        } else {
+        }
+        else {
             this.host = config.getDockerHost().getHost();
         }
 
-        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
-                .sslConfig(config.getSSLConfig()).maxConnections(100).build();
+        final DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
+            .sslConfig(config.getSSLConfig()).maxConnections(100).build();
 
         client = DockerClientImpl.getInstance(config, httpClient);
 
-        long period = configuration.getLong("scan-period", 3000L);
+        final long period = configuration.getLong("scan-period", 3000L);
         if (period > 0) {
             this.timerId = vertx.setPeriodic(period, tId -> {
                 scan(null);
@@ -135,22 +135,24 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         vertx.<List<Container>>executeBlocking(future -> {
             try {
                 future.complete(
-                        client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
-            } catch (Exception e) {
+                    client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
+            }
+            catch (Exception e) {
                 future.fail(e);
             }
         }, ar -> {
             if (ar.failed()) {
                 if (completion != null) {
                     completion.fail(ar.cause());
-                } else {
+                }
+                else {
                     LOGGER.warn("Failed to import services from docker", ar.cause());
                 }
                 return;
             }
             started = true;
-            List<Container> running = ar.result();
-            List<DockerContainerService> toRemove = new ArrayList<>();
+            final List<Container> running = ar.result();
+            final List<DockerContainerService> toRemove = new ArrayList<>();
 
             // Detect lost containers
             services.stream().filter(service -> isNotRunning(service.id(), running)).forEach(service -> {
@@ -162,7 +164,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
             if (running != null) {
                 // Detect new containers
                 running.stream().filter(container -> !isKnown(container)).forEach(container -> {
-                    DockerContainerService service = new DockerContainerService(container);
+                    final DockerContainerService service = new DockerContainerService(container);
                     if (service.record() != null) {
                         services.add(service);
                         publish(service);
@@ -224,7 +226,8 @@ public class DockerContainerServiceImporter implements ServiceImporter {
             started = false;
             client.close();
             LOGGER.info("Successfully closed the service importer " + this);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOGGER.warn("A failure has been caught while stopping " + this, e);
         }
         if (completionHandler != null) {

@@ -42,7 +42,8 @@ public interface ApplicationFactory {
                     .findFirst();
             if (provider.isPresent()) {
                 return provider.get();
-            } else {
+            }
+            else {
                 throw new IllegalStateException(String.format("Application provider '%s' doesn't exist!", providerId));
             }
         }

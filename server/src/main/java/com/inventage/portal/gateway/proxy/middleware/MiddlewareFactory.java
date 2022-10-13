@@ -18,7 +18,7 @@ import io.vertx.ext.web.Router;
  */
 public interface MiddlewareFactory {
 
-    final Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
+    Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
     String provides();
 

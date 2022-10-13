@@ -1,17 +1,16 @@
 package com.inventage.portal.gateway.core.config;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * The Json file for the portal gateway configuration is taken from one of these places:
@@ -29,6 +28,9 @@ public class PortalGatewayConfigRetriever {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);
     private static ConfigRetrieverOptions options;
+
+    private PortalGatewayConfigRetriever() {
+    }
 
     /**
      * returns a ConfigRetriever.
@@ -63,7 +65,7 @@ public class PortalGatewayConfigRetriever {
         staticConfigFileName = String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
         if (existsAsFile(staticConfigFileName)) {
             LOGGER.info("Reading from default file within working directory '{}'",
-                    staticConfigFileName);
+                staticConfigFileName);
             return Optional.of(Path.of(staticConfigFileName));
         }
         LOGGER.warn("No portal-gateway.json file configured");
@@ -91,7 +93,7 @@ public class PortalGatewayConfigRetriever {
      * @return
      */
     private static Optional<ConfigStoreOptions> getPortalGatewayJson() {
-        Optional<Path> staticConfigPath = getStaticConfigPath();
+        final Optional<Path> staticConfigPath = getStaticConfigPath();
         if (staticConfigPath.isEmpty()) {
             return Optional.empty();
         }
@@ -101,8 +103,8 @@ public class PortalGatewayConfigRetriever {
 
     private static ConfigStoreOptions configStoreOptions(Path filePath) {
         return new ConfigStoreOptions().setType("file")
-                .setFormat(filePath.toString().endsWith("json") ? "json" : "properties")
-                .setConfig(new JsonObject().put("path", filePath.toAbsolutePath()).put("raw-data", true));
+            .setFormat(filePath.toString().endsWith("json") ? "json" : "properties")
+            .setConfig(new JsonObject().put("path", filePath.toAbsolutePath()).put("raw-data", true));
     }
 
     private static boolean existsAsFile(String fileName) {

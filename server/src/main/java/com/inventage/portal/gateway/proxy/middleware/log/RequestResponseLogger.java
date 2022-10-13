@@ -12,6 +12,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Base64;
 
 /**
  * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
@@ -43,17 +47,17 @@ public class RequestResponseLogger implements Middleware {
             // More logging when response is >= 400
             if (routingContext.response().getStatusCode() >= 400) {
                 LOGGER.debug("'Outgoing URI '{}' with status '{}' and message '{}' in '{}' ms",
-                        routingContext.request().uri(),
-                        routingContext.response().getStatusCode(),
-                        routingContext.response().getStatusMessage(),
-                        System.currentTimeMillis() - start);
+                    routingContext.request().uri(),
+                    routingContext.response().getStatusCode(),
+                    routingContext.response().getStatusMessage(),
+                    System.currentTimeMillis() - start);
                 return;
             }
 
             LOGGER.debug("Outgoing URI '{}' with status '{}' in '{}' ms",
-                    routingContext.request().uri(),
-                    routingContext.response().getStatusCode(),
-                    System.currentTimeMillis() - start);
+                routingContext.request().uri(),
+                routingContext.response().getStatusCode(),
+                System.currentTimeMillis() - start);
         });
         routingContext.next();
     }
@@ -62,19 +66,20 @@ public class RequestResponseLogger implements Middleware {
         if (u == null) {
             return "";
         }
-        JsonObject prinicipal = u.principal();
-        if (prinicipal == null) {
+        final JsonObject principal = u.principal();
+        if (principal == null) {
             return "";
         }
 
         String userId = "";
-        if (prinicipal.containsKey("id_token")) {
-            JsonObject idToken = decodeJWT(prinicipal.getString("id_token"));
+        if (principal.containsKey("id_token")) {
+            final JsonObject idToken = decodeJWT(principal.getString("id_token"));
             if (idToken.containsKey("preferred_username")) {
                 userId = idToken.getString("preferred_username");
             }
-        } else if (prinicipal.containsKey("access_token")) {
-            JsonObject accessToken = decodeJWT(prinicipal.getString("access_token"));
+        }
+        else if (principal.containsKey("access_token")) {
+            final JsonObject accessToken = decodeJWT(principal.getString("access_token"));
             if (accessToken.containsKey("preferred_username")) {
                 userId = accessToken.getString("preferred_username");
             }
@@ -83,9 +88,9 @@ public class RequestResponseLogger implements Middleware {
     }
 
     private JsonObject decodeJWT(String jwt) {
-        String[] chunks = jwt.split("\\.");
-        Base64.Decoder decoder = Base64.getDecoder();
-        String payload = new String(decoder.decode(chunks[1]));
+        final String[] chunks = jwt.split("\\.");
+        final Base64.Decoder decoder = Base64.getDecoder();
+        final String payload = new String(decoder.decode(chunks[1]));
         return new JsonObject(payload);
     }
 }

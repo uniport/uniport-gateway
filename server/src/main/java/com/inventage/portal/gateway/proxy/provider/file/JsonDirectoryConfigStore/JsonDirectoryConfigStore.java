@@ -1,11 +1,5 @@
 package com.inventage.portal.gateway.proxy.provider.file.JsonDirectoryConfigStore;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.FileSet;
 import io.vertx.core.CompositeFuture;
@@ -16,6 +10,12 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 // Mostly copied from DirectoryConfigStore
 // with a custom Json merge function
@@ -29,7 +29,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
 
     public JsonDirectoryConfigStore(Vertx vertx, JsonObject configuration) {
         this.vertx = (VertxInternal) vertx;
-        String thePath = configuration.getString("path");
+        final String thePath = configuration.getString("path");
         if (thePath == null) {
             throw new IllegalArgumentException("The `path` configuration is required.");
         }
@@ -38,14 +38,14 @@ public class JsonDirectoryConfigStore implements ConfigStore {
             throw new IllegalArgumentException("The `path` must not be a file");
         }
 
-        JsonArray files = configuration.getJsonArray("filesets");
+        final JsonArray files = configuration.getJsonArray("filesets");
         if (files == null) {
             throw new IllegalArgumentException("The `filesets` element is required.");
         }
 
         for (Object o : files) {
-            JsonObject json = (JsonObject) o;
-            FileSet set = new FileSet(vertx, this.path, json);
+            final JsonObject json = (JsonObject) o;
+            final FileSet set = new FileSet(vertx, this.path, json);
             this.filesets.add(set);
         }
     }
@@ -55,17 +55,19 @@ public class JsonDirectoryConfigStore implements ConfigStore {
         return vertx.<List<File>>executeBlocking(promise -> {
             try {
                 promise.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-            } catch (Throwable e) {
+            }
+            catch (Throwable e) {
                 promise.fail(e);
             }
         }).flatMap(files -> {
-            List<Future> futures = new ArrayList<>();
+            final List<Future> futures = new ArrayList<>();
             for (FileSet set : filesets) {
-                Promise<JsonObject> promise = vertx.promise();
+                final Promise<JsonObject> promise = vertx.promise();
                 set.buildConfiguration(files, json -> {
                     if (json.failed()) {
                         promise.fail(json.cause());
-                    } else {
+                    }
+                    else {
                         promise.complete(json.result());
                     }
                 });
@@ -73,7 +75,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
             }
             return CompositeFuture.all(futures);
         }).map(compositeFuture -> {
-            JsonObject json = new JsonObject();
+            final JsonObject json = new JsonObject();
             compositeFuture.<JsonObject>list().forEach(config -> this.merge(json, config));
             return json.toBuffer();
         });
@@ -81,13 +83,14 @@ public class JsonDirectoryConfigStore implements ConfigStore {
 
     // Mostly copied from vertx JsonObject
     // The difference is on how JsonArrays are merged. This implementation creates a deduplicated
-    // concatination of two arrays.
+    // concatenation of two arrays.
     // https://github.com/eclipse-vertx/vert.x/blob/master/src/main/java/io/vertx/core/json/JsonObject.java
     private JsonObject merge(JsonObject one, JsonObject other) {
         for (Map.Entry<String, Object> e : other.getMap().entrySet()) {
             if (e.getValue() == null) {
                 one.getMap().put(e.getKey(), null);
-            } else {
+            }
+            else {
                 one.getMap().merge(e.getKey(), e.getValue(), (oldVal, newVal) -> {
                     if (oldVal instanceof Map) {
                         oldVal = new JsonObject((Map) oldVal);
@@ -107,20 +110,20 @@ public class JsonDirectoryConfigStore implements ConfigStore {
                         newVal = new JsonArray((List) newVal);
                     }
                     if (oldVal instanceof JsonArray && newVal instanceof JsonArray) {
-                        for (int i = 0; i < ((JsonArray) oldVal).getList().size(); i++) {
-                            Object item = ((JsonArray) oldVal).getList().get(i);
-                            if (!((JsonArray) newVal).getList().contains(item)) {
-                                ((JsonArray) newVal).getList().add(item);
+                        final List newValues = ((JsonArray) newVal).getList();
+                        final List oldValues = ((JsonArray) oldVal).getList();
+                        for (int i = 0; i < oldValues.size(); i++) {
+                            final Object item = oldValues.get(i);
+                            if (!newValues.contains(item)) {
+                                newValues.add(item);
                             }
                         }
                         return newVal;
                     }
-
                     return newVal;
                 });
             }
         }
-
         return one;
     }
 
