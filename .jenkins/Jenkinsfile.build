@@ -1,65 +1,65 @@
 pipeline {
-  agent {
-    node {
-      label 'java11'
-    }
-  }
-
-  triggers {
-    // every sunday between midnight and 2am (https://www.jenkins.io/doc/book/pipeline/syntax/)
-    cron(env.BRANCH_NAME == 'master' ? 'H H(0-2) * * 7' : '')
-  }
-
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
-    timeout(time: 30, unit: 'MINUTES')
-    ansiColor('xterm')
-  }
-
-  parameters {
-    string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
-    booleanParam(defaultValue: true, description: 'Push docker images', name: 'PUSH_DOCKER_IMAGES')
-    booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
-  }
-
-  environment {
-    LINE_SEPARATOR = '================================================================================'
-    IQ_SERVER_CREDENTIALS_ID = 'portal-registry-creds'
-    NEXUS2_CREDS = credentials('inventage-ierp')
-    CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
-    CI_REGISTRY_CREDS = credentials('portal-registry-creds')
-    BUILD_STATUS_EMAIL_RECIPIENTS = 'inventage-portal-devops@inventage.com'
-    DEV_DEPLOYMENT_HOST = 'ips@ardbeg.inventage.com'
-    DEV_DEPLOYMENT_DIR = '/home/ips/docker/portal-gateway'
-    DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
-  }
-
-  tools {
-    maven 'maven-release-latest'
-    jdk 'Open-JDK-11'
-  }
-
-  stages {
-    stage('Initialize') {
-      steps {
-        sh 'echo Initialize'
-
-        step([$class: 'WsCleanup'])
-        checkout scm
-
-        // Change the snapshot version in all pom.xml files to a release candidate version
-        updateVersion()
-
-        // Set environment variables from pom.xml
-        setPackageEnvironmentVariables()
-
-        // Update build information in Jenkins
-        script {
-          currentBuild.displayName = "Build: #${env.BUILD_NUMBER}"
-          currentBuild.description = "Version: ${env.PACKAGE_VERSION}"
+    agent {
+        node {
+            label 'java11'
         }
-        // Display important environment variables
-        sh '''
+    }
+
+    triggers {
+        // every sunday between midnight and 2am (https://www.jenkins.io/doc/book/pipeline/syntax/)
+        cron(env.BRANCH_NAME == 'master' ? 'H H(0-2) * * 7' : '')
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+        timeout(time: 30, unit: 'MINUTES')
+        ansiColor('xterm')
+    }
+
+    parameters {
+        string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
+        booleanParam(defaultValue: true, description: 'Push docker images', name: 'PUSH_DOCKER_IMAGES')
+        booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
+    }
+
+    environment {
+        LINE_SEPARATOR = '================================================================================'
+        IQ_SERVER_CREDENTIALS_ID = 'portal-registry-creds'
+        NEXUS2_CREDS = credentials('inventage-ierp')
+        CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
+        CI_REGISTRY_CREDS = credentials('portal-registry-creds')
+        BUILD_STATUS_EMAIL_RECIPIENTS = 'inventage-portal-devops@inventage.com'
+        DEV_DEPLOYMENT_HOST = 'ips@ardbeg.inventage.com'
+        DEV_DEPLOYMENT_DIR = '/home/ips/docker/portal-gateway'
+        DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
+    }
+
+    tools {
+        maven 'maven-release-latest'
+        jdk 'Open-JDK-11'
+    }
+
+    stages {
+        stage('Initialize') {
+            steps {
+                sh 'echo Initialize'
+
+                step([$class: 'WsCleanup'])
+                checkout scm
+
+                // Change the snapshot version in all pom.xml files to a release candidate version
+                updateVersion()
+
+                // Set environment variables from pom.xml
+                setPackageEnvironmentVariables()
+
+                // Update build information in Jenkins
+                script {
+                    currentBuild.displayName = "Build: #${env.BUILD_NUMBER}"
+                    currentBuild.description = "Version: ${env.PACKAGE_VERSION}"
+                }
+                // Display important environment variables
+                sh '''
                     set +x
                     echo "Environment variables:"
 
@@ -73,61 +73,61 @@ pipeline {
                     echo "PROMOTION_REPO_NAME = $PROMOTION_REPO_NAME"
                     echo $LINE_SEPARATOR
                 '''
-      }
-    }
-    stage('Build') {
-      // Use the local docker host for building the container image
-      environment {
-        DOCKER_HOST = 'unix:///var/run/docker.sock'
-      }
-
-      steps {
-        sh 'echo Build'
-
-        sh 'mvn help:system'
-
-        mvn(
-          settings: '.jenkins/settings.xml',
-          profiles: '!local',
-          properties: [
-            'java.io.tmpdir': WORKSPACE,
-            'multiArchBuild': true
-          ],
-          'clean',
-          'deploy'
-        )
-
-        withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
-          script {
-            env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./target/nexus-staging/staging/2784e0aacf5060.properties')
-          }
+            }
         }
-      }
-    }
+        stage('Build') {
+            // Use the local docker host for building the container image
+            environment {
+                DOCKER_HOST = 'unix:///var/run/docker.sock'
+            }
 
-    stage('Analysis') {
-      steps {
-        parallel(
-          "Test Evaluation": {
-            junit testResults: '**/target/surefire-reports/TEST-*.xml'
-          },
-          "IQ Evaluation": {
-            iqEvaluation('inventage-portal-gateway', 'build', '**/target/quarkus-app/lib/**/')
-          },
-          "Code Quality": {
-            codeQualityEvaluation()
-          }
-        )
-      }
-    }
+            steps {
+                sh 'echo Build'
 
-    stage('Deployment-Docker') {
-      when {
-        branch 'master'
-        expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
-      }
-      steps {
-        sh '''
+                sh 'mvn help:system'
+
+                mvn(
+                    settings: '.jenkins/settings.xml',
+                    profiles: '!local',
+                    properties: [
+                        'java.io.tmpdir': WORKSPACE,
+                        'multiArchBuild': true
+                    ],
+                    'clean',
+                    'deploy'
+                )
+
+                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
+                    script {
+                        env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./target/nexus-staging/staging/2784e0aacf5060.properties')
+                    }
+                }
+            }
+        }
+
+        stage('Analysis') {
+            steps {
+                parallel(
+                    "Test Evaluation": {
+                        junit testResults: '**/target/surefire-reports/TEST-*.xml'
+                    },
+                    "IQ Evaluation": {
+                        iqEvaluation('inventage-portal-gateway', 'build', '**/target/quarkus-app/lib/**/')
+                    },
+                    "Code Quality": {
+                        codeQualityEvaluation()
+                    }
+                )
+            }
+        }
+
+        stage('Deployment-Docker') {
+            when {
+                branch 'master'
+                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
+            }
+            steps {
+                sh '''
                     set +x
 
                     echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
@@ -138,8 +138,8 @@ pipeline {
                     scp docker-compose/target/portal-gateway/portal-gateway.ardbeg.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
                     echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
                 '''
-        withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
-          sh '''
+                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
+                    sh '''
                         echo 'Download new container'
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml pull'"
 
@@ -150,18 +150,18 @@ pipeline {
                         echo 'Deploy new container…'
                         ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.override.yml up -d'"
                     '''
+                }
+            }
         }
-      }
-    }
 
-    stage('Deployment DEV') {
-      when {
-        branch params.BRANCH_FILTER
-        expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
-      }
-      steps {
-        withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-          sh '''
+        stage('Deployment DEV') {
+            when {
+                branch params.BRANCH_FILTER
+                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
+            }
+            steps {
+                withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    sh '''
                         set +x
 
                         echo "Downloading service.sh"
@@ -175,34 +175,34 @@ pipeline {
 
                         rm -f service.sh
                     '''
+                }
+            }
         }
-      }
+
+        stage('Tag Staging Repository') {
+            steps {
+                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
+                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG}"
+                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG}"
+            }
+        }
+
+        stage('Trigger Release Pipeline') {
+            steps {
+                build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', wait: false, parameters: [
+                    string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
+                    string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
+                ]
+            }
+        }
     }
 
-    stage('Tag Staging Repository') {
-      steps {
-        echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
-        createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG}"
-        associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG}"
-      }
+    post {
+        always {
+            deleteDir()
+            sendNotifications()
+        }
     }
-
-    stage('Trigger Release Pipeline') {
-      steps {
-        build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', wait: false, parameters: [
-          string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
-          string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
-        ]
-      }
-    }
-  }
-
-  post {
-    always {
-      deleteDir()
-      sendNotifications()
-    }
-  }
 }
 
 /**
@@ -211,49 +211,49 @@ pipeline {
  * @return
  */
 def getVersionSuffix() {
-  def separator = '-'
-  def now = sh(script: 'date -u +%Y%m%d%H%M', returnStdout: true).trim()
-  def gitCommitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+    def separator = '-'
+    def now = sh(script: 'date -u +%Y%m%d%H%M', returnStdout: true).trim()
+    def gitCommitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
 
-  return now + separator + "${env.BUILD_NUMBER}" + separator + gitCommitHash
+    return now + separator + "${env.BUILD_NUMBER}" + separator + gitCommitHash
 }
 
 /**
  * Sets the appropriate version in `pom.xml`.
  */
 void updateVersion() {
-  env.VERSION_SUFFIX = getVersionSuffix()
-  sh('mvn build-helper:parse-version versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.incrementalVersion}-${VERSION_SUFFIX} -DoldVersion=* -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false')
+    env.VERSION_SUFFIX = getVersionSuffix()
+    sh('mvn build-helper:parse-version versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.incrementalVersion}-${VERSION_SUFFIX} -DoldVersion=* -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false')
 }
 
 /**
  * Sets important values defined in reactor pom.xml as environment variables.
  */
 void setPackageEnvironmentVariables() {
-  // @see https://jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#readmavenpom-read-a-maven-project-file
-  // @see http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html
-  def pom = readMavenPom file: 'pom.xml'
+    // @see https://jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#readmavenpom-read-a-maven-project-file
+    // @see http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html
+    def pom = readMavenPom file: 'pom.xml'
 
-  env.PACKAGE_VERSION = pom.version
-  env.PACKAGE_GROUP_ID = pom.groupId
-  env.PACKAGE_ARTIFACT_ID = pom.artifactId
-  env.DOCKER_PULL_REGISTRY = pom.properties['docker.pull.registry']
-  env.DOCKER_PUSH_REGISTRY = pom.properties['docker.push.registry']
-  env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
-  env.PROMOTION_REPO_NAME = pom.properties['docker.promotion.repository.name']
+    env.PACKAGE_VERSION = pom.version
+    env.PACKAGE_GROUP_ID = pom.groupId
+    env.PACKAGE_ARTIFACT_ID = pom.artifactId
+    env.DOCKER_PULL_REGISTRY = pom.properties['docker.pull.registry']
+    env.DOCKER_PUSH_REGISTRY = pom.properties['docker.push.registry']
+    env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
+    env.PROMOTION_REPO_NAME = pom.properties['docker.promotion.repository.name']
 }
 
 def mvn(Map options = [:], CharSequence... goals) {
-  util.mvn(options, goals)
+    util.mvn(options, goals)
 }
 
 def iqEvaluation(application, stage, String... scanPatterns) {
-  def patterns = []
-  for (String scanPattern : scanPatterns) {
-    patterns.add([scanPattern: scanPattern])
-  }
+    def patterns = []
+    for (String scanPattern : scanPatterns) {
+        patterns.add([scanPattern: scanPattern])
+    }
 
-  nexusPolicyEvaluation failBuildOnNetworkError: false, iqApplication: application, iqScanPatterns: patterns, iqStage: stage, jobCredentialsId: "${env.IQ_SERVER_CREDENTIALS_ID}"
+    nexusPolicyEvaluation failBuildOnNetworkError: false, iqApplication: application, iqScanPatterns: patterns, iqStage: stage, jobCredentialsId: "${env.IQ_SERVER_CREDENTIALS_ID}"
 }
 
 /**
@@ -265,59 +265,59 @@ def iqEvaluation(application, stage, String... scanPatterns) {
  * @return
  */
 def codeQualityEvaluation() {
-  mvn(
-    settings: '.jenkins/settings.xml',
-    profiles: 'jenkins,!local',
-    properties: [
-      'java.io.tmpdir': WORKSPACE
-    ],
-    'checkstyle:check spotbugs:check'
-  )
+    mvn(
+        settings: '.jenkins/settings.xml',
+        profiles: 'jenkins,!local',
+        properties: [
+            'java.io.tmpdir': WORKSPACE
+        ],
+        'checkstyle:check spotbugs:check'
+    )
 
-  recordIssues(
-    sourceCodeEncoding: 'UTF-8',
-    tools: [
-      mavenConsole(reportEncoding: 'UTF-8')
-    ]
-  )
+    recordIssues(
+        sourceCodeEncoding: 'UTF-8',
+        tools: [
+            mavenConsole(reportEncoding: 'UTF-8')
+        ]
+    )
 
-  recordIssues(
-    healthy: 1,
-    unhealthy: 10,
-    qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-    sourceCodeEncoding: 'UTF-8',
-    tools: [
-      java(reportEncoding: 'UTF-8')
-    ]
-  )
+    recordIssues(
+        healthy: 1,
+        unhealthy: 10,
+        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
+        sourceCodeEncoding: 'UTF-8',
+        tools: [
+            java(reportEncoding: 'UTF-8')
+        ]
+    )
 
-  recordIssues(
-    healthy: 1,
-    unhealthy: 10,
-    qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-    sourceCodeEncoding: 'UTF-8',
-    tools: [
-      checkStyle(reportEncoding: 'UTF-8')
-    ]
-  )
+    recordIssues(
+        healthy: 1,
+        unhealthy: 10,
+        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
+        sourceCodeEncoding: 'UTF-8',
+        tools: [
+            checkStyle(reportEncoding: 'UTF-8')
+        ]
+    )
 
-  recordIssues(
-    qualityGates: [
-      [threshold: 1, type: 'TOTAL_NORMAL', unstable: true],
-      [threshold: 1, type: 'TOTAL_HIGH', unstable: true],
-    ],
-    sourceCodeEncoding: 'UTF-8',
-    tools: [
-      spotBugs(reportEncoding: 'UTF-8', useRankAsPriority: true)
-    ]
-  )
+    recordIssues(
+        qualityGates: [
+            [threshold: 1, type: 'TOTAL_NORMAL', unstable: true],
+            [threshold: 1, type: 'TOTAL_HIGH', unstable: true],
+        ],
+        sourceCodeEncoding: 'UTF-8',
+        tools: [
+            spotBugs(reportEncoding: 'UTF-8', useRankAsPriority: true)
+        ]
+    )
 
-  recordIssues(
-    sourceCodeEncoding: 'UTF-8',
-    tools: [
-      taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
-    ]
-  )
+    recordIssues(
+        sourceCodeEncoding: 'UTF-8',
+        tools: [
+            taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
+        ]
+    )
 }
 
 /**
@@ -326,5 +326,5 @@ def codeQualityEvaluation() {
  * @return
  */
 def sendNotifications() {
-  step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "${env.BUILD_STATUS_EMAIL_RECIPIENTS}", sendToIndividuals: false])
+    step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "${env.BUILD_STATUS_EMAIL_RECIPIENTS}", sendToIndividuals: false])
 }
