@@ -22,24 +22,28 @@ import io.vertx.ext.web.RoutingContext;
  * new session id.
  * See also Portal-Gateway.drawio for a visual explanation.
  */
-public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
+public class ReplacedSessionDetectionMiddleware implements Middleware {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionDetectionMiddleware.class);
+
+    private static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
+    private static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
+
     private final String detectionCookieKey;
     private final String sessionCookiePrefix;
     // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
 
-    public ReplacedSessionCookieDetectionMiddleware(String cookieName, int waitBeforeRetryInMs) {
+    public ReplacedSessionDetectionMiddleware(String cookieName, Integer waitBeforeRetryInMs) {
         this.detectionCookieKey = cookieName;
-        this.sessionCookiePrefix = this.detectionCookieKey + "=";
-        this.waitBeforeRetryMs = waitBeforeRetryInMs;
+        this.sessionCookiePrefix = (cookieName == null) ? DEFAULT_DETECTION_COOKIE_NAME + "=" : this.detectionCookieKey + "=";
+        this.waitBeforeRetryMs = (waitBeforeRetryInMs == null) ? DEFAULT_WAIT_BEFORE_RETRY_MS : waitBeforeRetryInMs;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        if (previouslyValidSessionId(ctx)) {
+        if (requestComingFromReplacedSessionId(ctx)) {
             retryWithNewSessionIdFromBrowser(ctx);
             return;
         }
@@ -49,22 +53,21 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     }
 
     /**
-     * <p>
+     * @return true, if an <strong>authenticated</strong> user's request is sent with the replaced session (but now invalid, due do session.regenerateId(),
+     * which has generated a new id for this session) <strong>session id</strong>. This special case is detected by checking (1) if the request contains
+     * our detection cookie (+ satisfies some conditions) ({@link #isDetectionCookieValueWithInLimit(RoutingContext)} and (2) if the user is not
+     * authenticated from the portal gateway's point of view (because the <strong>session id</strong> has changed) ({@link #noUserInSession(RoutingContext)}).
      *
-     * @return true, if an <strong>authenticated</strong> user's request is sent with a previously valid <strong>session id</strong>, but is now not valid anymore (due do session.regenerateId(), which has generated a new id for this session).
-     * This special case is detected by checking (1) if the request contains our detection cookie and if its value is still valid ({@link #isDetectionCookieValueWithInLimit(RoutingContext)}
-     * + (2) if the user is not authenticated from the portal gateway point of view (because the <strong>session id</strong> has changed) ({@link #noUserInSession(RoutingContext)}).
      * Detection-cookies are only handed to <strong>authenticated</strong> users on each new request (with {@link #responseWithDetectionCookie(RoutingContext)}).
-     * The detection-cookie therefore guarantees that the user making the request has been authenticated before.
-     * </p>
+     * Therefore the detection-cookie serves as proof that the user has been authenticated before.
      */
-    private boolean previouslyValidSessionId(RoutingContext ctx) {
+    private boolean requestComingFromReplacedSessionId(RoutingContext ctx) {
         return noUserInSession(ctx) && isDetectionCookieValueWithInLimit(ctx);
     }
 
     /**
      * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime. (Refer to Portal-Gateway.drawio for a visual explanation).
-     * Furthermore, we track with the detection-cookie how many requests have been made with the expired session id.
+     * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
         ctx.response().addCookie(cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
@@ -85,7 +88,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     }
 
     /**
-     * @return true if our cookie-entry exists and its value is still valid. Only authenticated user have this cookie-entry (see {@link #responseWithDetectionCookie(RoutingContext)})
+     * @return true if our cookie-entry exists and its value is still valid. Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
      */
     private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
         final Optional<Cookie> cookie = getDetectionCookie(ctx);

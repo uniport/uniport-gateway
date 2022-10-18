@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -69,10 +70,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
 
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE = "cookie";
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
+    public static final String MIDDLEWARE_REPLACED_SESSION_DETECTION = "replacedSessionDetection";
+    public static final String MIDDLEWARE_REPLACED_SESSION_DETECTION_COOKIE_NAME = "cookieName";
+    public static final String MIDDLEWARE_REPLACED_SESSION_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
 
     public static final String MIDDLEWARE_SESSION = "session";
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
@@ -131,7 +131,7 @@ public class DynamicConfiguration {
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
-            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
+            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_DETECTION,
             MIDDLEWARE_RESPONSE_SESSION_COOKIE, MIDDLEWARE_SESSION);
 
     public static final String SERVICES = "services";
@@ -164,6 +164,7 @@ public class DynamicConfiguration {
                 .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
         return routerSchema;
     }
+
     private static ObjectSchemaBuilder buildMiddlewareSchema() {
         ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
@@ -191,8 +192,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
                 .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME, Schemas.stringSchema())
-                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE, Schemas.objectSchema())
-                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_DETECTION_COOKIE_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
                 .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
@@ -206,6 +207,7 @@ public class DynamicConfiguration {
                 .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
         return middlewareSchema;
     }
+
     private static ObjectSchemaBuilder buildServiceSchema() {
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
@@ -228,6 +230,7 @@ public class DynamicConfiguration {
     public static ObjectSchemaBuilder getBuildMiddlewareSchema() {
         return buildMiddlewareSchema();
     }
+
     public static JsonObject buildDefaultConfiguration() {
         JsonObject config = new JsonObject();
 
@@ -801,26 +804,16 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
-                case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
-                    Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
-                    if (waitTimeRetryInMs == null) {
-                        return Future.failedFuture(String.format("%s: No wait time for retry defined", mwType));
-                    } else {
-                        if (waitTimeRetryInMs < 0) {
-                            return Future.failedFuture(String.format("%s: wait time for retry required to be a positive number", mwType));
+                case MIDDLEWARE_REPLACED_SESSION_DETECTION: {
+                    Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_DETECTION_WAIT_BEFORE_RETRY_MS);
+                    if (waitTimeRetryInMs != null) {
+                        if (waitTimeRetryInMs <= 0) {
+                            return Future.failedFuture(String.format("%s: wait time for retry required to be positive", mwType));
                         }
                     }
-                    JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE);
-                    if (cookie == null) {
-                        return Future.failedFuture(String.format("%s: No cookie defined", mwType));
-                    } else {
-                        String name = cookie.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
-                        if (name == null) {
-                            return Future.failedFuture(String.format("%s: No cookie name defined", mwType));
-                        }
-                    }
+                    break;
                 }
-                case MIDDLEWARE_REQUEST_RESPONSE_LOGGER:{
+                case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
                     break;
                 }
                 default: {
