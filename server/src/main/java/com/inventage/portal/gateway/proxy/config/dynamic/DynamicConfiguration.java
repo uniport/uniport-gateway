@@ -72,7 +72,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE = "cookie";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_PREFIX = "prefix";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
 
     public static final String MIDDLEWARE_SESSION = "session";
@@ -818,10 +817,6 @@ public class DynamicConfiguration {
                         String name = cookie.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
                         if (name == null) {
                             return Future.failedFuture(String.format("%s: No cookie name defined", mwType));
-                        }
-                        String cookiePrefix = cookie.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_PREFIX);
-                        if (cookiePrefix == null) {
-                            return Future.failedFuture(String.format("%s: No cookie prefix defined", mwType));
                         }
                     }
                 }

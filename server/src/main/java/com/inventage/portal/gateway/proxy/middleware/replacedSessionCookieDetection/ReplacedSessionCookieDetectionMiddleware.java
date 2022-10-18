@@ -1,4 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
+
 import static io.vertx.core.http.Cookie.cookie;
 
 import java.util.Optional;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 
-import io.vertx.core.Handler;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
@@ -26,35 +26,48 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
-    // wait time in ms before retry is sent to the browser
-    private final String cookieName;
+    private final String detectionCookieKey;
     private final String sessionCookiePrefix;
+    // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
 
-    public ReplacedSessionCookieDetectionMiddleware(String cookieName, String cookiePrefix, int waitBeforeRetryInMs){
-            this.cookieName = cookieName;
-            this.sessionCookiePrefix = this.cookieName + cookiePrefix;
-            this.waitBeforeRetryMs = waitBeforeRetryInMs;
+    public ReplacedSessionCookieDetectionMiddleware(String cookieName, int waitBeforeRetryInMs) {
+        this.detectionCookieKey = cookieName;
+        this.sessionCookiePrefix = this.detectionCookieKey + "=";
+        this.waitBeforeRetryMs = waitBeforeRetryInMs;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        // detect invalid cookie for an already authenticated client (because of session.regenerateId())
-        if (isReplacedSessionCookie(ctx)) {
-            retryWithCookieFromBrowser(ctx);
+        if (previouslyValidSessionId(ctx)) {
+            retryWithNewSessionIdFromBrowser(ctx);
             return;
         }
 
-        ctx.addHeadersEndHandler(v -> responseWithCookie(ctx));
+        ctx.addHeadersEndHandler(v -> responseWithDetectionCookie(ctx));
         ctx.next();
     }
 
-    private boolean isReplacedSessionCookie(RoutingContext ctx) {
-        return noUserInSession(ctx) && isCookieValueWithInLimit(ctx);
+    /**
+     * <p>
+     *
+     * @return true, if an <strong>authenticated</strong> user's request is sent with a previously valid <strong>session id</strong>, but is now not valid anymore (due do session.regenerateId(), which has generated a new id for this session).
+     * This special case is detected by checking (1) if the request contains our detection cookie and if its value is still valid ({@link #isDetectionCookieValueWithInLimit(RoutingContext)}
+     * + (2) if the user is not authenticated from the portal gateway point of view (because the <strong>session id</strong> has changed) ({@link #noUserInSession(RoutingContext)}).
+     * Detection-cookies are only handed to <strong>authenticated</strong> users on each new request (with {@link #responseWithDetectionCookie(RoutingContext)}).
+     * The detection-cookie therefore guarantees that the user making the request has been authenticated before.
+     * </p>
+     */
+    private boolean previouslyValidSessionId(RoutingContext ctx) {
+        return noUserInSession(ctx) && isDetectionCookieValueWithInLimit(ctx);
     }
 
-    private void retryWithCookieFromBrowser(RoutingContext ctx) {
-        ctx.response().addCookie(cookie(this.cookieName, incrementCookieValue(ctx)).setPath("/").setHttpOnly(true));
+    /**
+     * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime. (Refer to Portal-Gateway.drawio for a visual explanation).
+     * Furthermore, we track with the detection-cookie how many requests have been made with the expired session id.
+     */
+    private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
+        ctx.response().addCookie(cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
         ctx.put(ResponseSessionCookieMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
@@ -71,32 +84,35 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
                 .end("Redirecting for retry to " + ctx.request().uri() + ".");
     }
 
-    private boolean isCookieValueWithInLimit(RoutingContext ctx) {
-        final Optional<Cookie> cookie = getCookie(ctx);
+    /**
+     * @return true if our cookie-entry exists and its value is still valid. Only authenticated user have this cookie-entry (see {@link #responseWithDetectionCookie(RoutingContext)})
+     */
+    private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
+        final Optional<Cookie> cookie = getDetectionCookie(ctx);
         if (cookie.isPresent()) {
             return new DetectionCookieValue(cookie.get().getValue()).isWithInLimit();
         }
         return false;
     }
 
-    private Optional<Cookie> getCookie(RoutingContext ctx) {
-        final Cookie cookie = ctx.request().getCookie(this.cookieName);
+    private Optional<Cookie> getDetectionCookie(RoutingContext ctx) {
+        final Cookie cookie = ctx.request().getCookie(this.detectionCookieKey);
         return cookie != null ? Optional.of(cookie) : Optional.empty();
     }
 
-    private String incrementCookieValue(RoutingContext ctx) {
-        final Optional<Cookie> cookie = getCookie(ctx);
+    private String incrementDetectionCookieValue(RoutingContext ctx) {
+        final Optional<Cookie> cookie = getDetectionCookie(ctx);
         final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(cookie.get().getValue());
         final String newValue = detectionCookieValue.increment();
         LOGGER.debug("New value is '{}'", newValue);
         return String.valueOf(newValue);
     }
 
-    private void responseWithCookie(RoutingContext ctx) {
+    private void responseWithDetectionCookie(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
-            LOGGER.debug("Adding cookie '{}'", this.cookieName);
+            LOGGER.debug("Adding cookie '{}'", this.detectionCookieKey);
             ctx.response().addCookie(
-                    cookie(this.cookieName, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
+                    cookie(this.detectionCookieKey, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
         }
     }
 
@@ -104,6 +120,10 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         return ctx.user() != null;
     }
 
+    /**
+     * @param ctx
+     * @return true if no user is associated with this session: Either (a) the user has not been authenticated or (b) the session id has expired (due do session.regenerateId()).
+     */
     private boolean noUserInSession(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
             return false;
