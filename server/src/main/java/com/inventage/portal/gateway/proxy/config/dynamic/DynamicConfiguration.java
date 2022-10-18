@@ -70,9 +70,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
 
-    public static final String MIDDLEWARE_REPLACED_SESSION_DETECTION = "replacedSessionDetection";
-    public static final String MIDDLEWARE_REPLACED_SESSION_DETECTION_COOKIE_NAME = "cookieName";
-    public static final String MIDDLEWARE_REPLACED_SESSION_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionDetection";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "cookieName";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
 
     public static final String MIDDLEWARE_SESSION = "session";
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
@@ -131,7 +131,7 @@ public class DynamicConfiguration {
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
-            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_DETECTION,
+            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
             MIDDLEWARE_RESPONSE_SESSION_COOKIE, MIDDLEWARE_SESSION);
 
     public static final String SERVICES = "services";
@@ -192,8 +192,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
                 .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME, Schemas.stringSchema())
-                .property(MIDDLEWARE_REPLACED_SESSION_DETECTION_COOKIE_NAME, Schemas.stringSchema())
-                .property(MIDDLEWARE_REPLACED_SESSION_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
                 .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
@@ -804,8 +804,8 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
-                case MIDDLEWARE_REPLACED_SESSION_DETECTION: {
-                    Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_DETECTION_WAIT_BEFORE_RETRY_MS);
+                case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
+                    Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
                     if (waitTimeRetryInMs != null) {
                         if (waitTimeRetryInMs <= 0) {
                             return Future.failedFuture(String.format("%s: wait time for retry required to be positive", mwType));
