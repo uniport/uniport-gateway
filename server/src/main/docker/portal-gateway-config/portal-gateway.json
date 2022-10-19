@@ -6,25 +6,13 @@
             "middlewares": [
                 {
                     "name": "responseSessionCookie",
-                    "type": "responseSessionCookie",
-                    "options": {
-                        "name": "inventage-portal-gateway.session"
-                    }
+                    "type": "replacedSessionCookieDetection",
+                    "options": {}
                 },
                 {
                     "name": "session",
                     "type": "session",
-                    "options": {
-                        "idleTimeoutInMinute": 15,
-                        "idMinimumLength": 32,
-                        "nagHttps": true,
-                        "cookie": {
-                            "name": "inventage-portal-gateway.session",
-                            "httpOnly": true,
-                            "secure": false,
-                            "sameSite": "STRICT"
-                        }
-                    }
+                    "options": {}
                 },
                 {
                     "name": "requestResponseLogger",
@@ -34,13 +22,7 @@
                 {
                     "name": "replacedSessionCookieDetection",
                     "type": "replacedSessionCookieDetection",
-                    "options": {
-                        "cookie": {
-                            "name": "ipg.state",
-                            "prefix": "="
-                        },
-                        "waitTimeInMillisecond": 50
-                    }
+                    "options": {}
                 }
             ]
         }
