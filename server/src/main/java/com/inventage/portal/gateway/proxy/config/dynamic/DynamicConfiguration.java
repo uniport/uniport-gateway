@@ -759,7 +759,7 @@ public class DynamicConfiguration {
                     if (sessionIdleTimeoutInMinutes == null) {
                         LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT));
                     } else {
-                        if (sessionIdleTimeoutInMinutes < 0) {
+                        if (sessionIdleTimeoutInMinutes <= 0) {
                             return Future.failedFuture(String.format("%s: Session idle timeout is required to be positive number", mwType));
                         }
                     }
@@ -767,7 +767,9 @@ public class DynamicConfiguration {
                     if (sessionIdMinLength == null) {
                         LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_ID_MINIMUM_LENGTH_DEFAULT));
                     } else {
-                        return Future.failedFuture(String.format("%s: Minimum session id length is required to be positive number", mwType));
+                        if (sessionIdMinLength <= 0) {
+                            return Future.failedFuture(String.format("%s: Minimum session id length is required to be positive number", mwType));
+                        }
                     }
                     Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
                     if (nagHttps == null) {
@@ -819,7 +821,7 @@ public class DynamicConfiguration {
                         }
                     }
                     String detectionCookieName = mwOptions.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
-                    if (detectionCookieName == null){
+                    if (detectionCookieName == null) {
                         LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s", mwType, ReplacedSessionCookieDetectionMiddleware.DEFAULT_DETECTION_COOKIE_NAME));
                     }
                     break;
