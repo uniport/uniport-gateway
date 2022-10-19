@@ -70,7 +70,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
 
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionDetection";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "cookieName";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
 

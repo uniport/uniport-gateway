@@ -8,7 +8,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
-public class ReplacedSessionDetectionFactory implements MiddlewareFactory {
+public class ReplacedSessionCookieDetectionFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
@@ -22,6 +22,6 @@ public class ReplacedSessionDetectionFactory implements MiddlewareFactory {
 
         LOGGER.debug("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION);
-        return Future.succeededFuture(new ReplacedSessionDetectionMiddleware(cookieName, waitTimeRetryInMs));
+        return Future.succeededFuture(new ReplacedSessionCookieDetectionMiddleware(cookieName, waitTimeRetryInMs));
     }
 }

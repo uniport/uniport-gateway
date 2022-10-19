@@ -22,10 +22,10 @@ import io.vertx.ext.web.RoutingContext;
  * new session id.
  * See also Portal-Gateway.drawio for a visual explanation.
  */
-public class ReplacedSessionDetectionMiddleware implements Middleware {
+public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionDetectionMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
 
     private static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
     private static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
@@ -35,7 +35,7 @@ public class ReplacedSessionDetectionMiddleware implements Middleware {
     // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
 
-    public ReplacedSessionDetectionMiddleware(String cookieName, Integer waitBeforeRetryInMs) {
+    public ReplacedSessionCookieDetectionMiddleware(String cookieName, Integer waitBeforeRetryInMs) {
         this.detectionCookieKey = cookieName;
         this.sessionCookiePrefix = (cookieName == null) ? DEFAULT_DETECTION_COOKIE_NAME + "=" : this.detectionCookieKey + "=";
         this.waitBeforeRetryMs = (waitBeforeRetryInMs == null) ? DEFAULT_WAIT_BEFORE_RETRY_MS : waitBeforeRetryInMs;
