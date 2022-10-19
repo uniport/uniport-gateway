@@ -7,6 +7,10 @@ import java.util.Optional;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import io.vertx.core.*;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -15,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 
-import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -59,7 +62,13 @@ public class Entrypoint {
             return router;
         }
         router = Router.router(vertx);
-        this.setupEntryMiddlewares(this.entryMiddlewares, router);
+        if (this.entryMiddlewares == null) {
+            LOGGER.info("No custom EntryMiddlewares defined. Setup default EntryMiddlewares");
+            this.setupDefaultEntryMiddlewares();
+        } else {
+            LOGGER.info("No EntryMiddlewares defined");
+            this.setupEntryMiddlewares(this.entryMiddlewares, router);
+        }
         return router;
     }
 
@@ -125,11 +134,15 @@ public class Entrypoint {
                 });
     }
 
+    private void setupDefaultEntryMiddlewares() {
+        router.route().handler(new ResponseSessionCookieRemovalMiddleware(null));
+        router.route().handler(new SessionMiddleware(null, null, null, null, null, null, null, null));
+        router.route().handler(new RequestResponseLogger());
+        router.route().handler(new ReplacedSessionCookieDetectionMiddleware(null, null));
+    }
+
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
-        if (entryMiddlewares == null) {
-            LOGGER.info("No EntryMiddlewares defined");
-            return;
-        }
+
         List<Future> entryMiddlewaresFuture = new ArrayList<>();
         for (int i = 0; i < entryMiddlewares.size(); i++) {
             entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
