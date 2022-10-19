@@ -36,8 +36,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     private final int waitBeforeRetryMs;
 
     public ReplacedSessionCookieDetectionMiddleware(String cookieName, Integer waitBeforeRetryInMs) {
-        this.detectionCookieKey = cookieName;
-        this.sessionCookiePrefix = (cookieName == null) ? DEFAULT_DETECTION_COOKIE_NAME + "=" : this.detectionCookieKey + "=";
+        this.detectionCookieKey = (cookieName == null) ? DEFAULT_DETECTION_COOKIE_NAME : cookieName;
+        this.sessionCookiePrefix = this.detectionCookieKey + "=";
         this.waitBeforeRetryMs = (waitBeforeRetryInMs == null) ? DEFAULT_WAIT_BEFORE_RETRY_MS : waitBeforeRetryInMs;
     }
 

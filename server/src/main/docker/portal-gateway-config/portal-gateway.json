@@ -5,8 +5,8 @@
             "port": 20000,
             "middlewares": [
                 {
-                    "name": "responseSessionCookie",
-                    "type": "replacedSessionCookieDetection",
+                    "name": "responseSessionCookieRemoval",
+                    "type": "responseSessionCookieRemoval",
                     "options": {}
                 },
                 {
