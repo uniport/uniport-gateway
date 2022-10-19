@@ -12,11 +12,14 @@ public class SessionMiddleware implements Middleware {
 
     private final Handler sessionHandler;
 
+    private final String cookieName;
+
     public SessionMiddleware(Vertx vertx, long sessionIdleTimeoutInMinutes, String cookieName, boolean cookieHttpOnly, boolean cookieSecure,
                              String cookieSameSite, int sessionIdMinLength, boolean nagHttps){
+        this.cookieName = cookieName;
         sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
                 .setSessionTimeout(sessionIdleTimeoutInMinutes*60000)
-                .setSessionCookieName(cookieName)
+                .setSessionCookieName(this.cookieName)
                 .setCookieHttpOnlyFlag(cookieHttpOnly)
                 .setCookieSecureFlag(cookieSecure)
                 .setCookieSameSite(CookieSameSite.valueOf(cookieSameSite))

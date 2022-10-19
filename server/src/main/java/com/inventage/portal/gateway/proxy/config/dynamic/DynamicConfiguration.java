@@ -67,8 +67,8 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
 
-    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE = "responseSessionCookie";
-    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL = "responseSessionCookieRemoval";
+    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
 
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "cookieName";
@@ -132,7 +132,7 @@ public class DynamicConfiguration {
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
             MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
-            MIDDLEWARE_RESPONSE_SESSION_COOKIE, MIDDLEWARE_SESSION);
+            MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -191,7 +191,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
-                .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema())
                 .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema())
                 .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
@@ -797,8 +797,8 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
-                case MIDDLEWARE_RESPONSE_SESSION_COOKIE: {
-                    String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_NAME);
+                case MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL: {
+                    String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
                     if (name == null) {
                         return Future.failedFuture(String.format("%s: No cookie name defined", mwType));
                     }

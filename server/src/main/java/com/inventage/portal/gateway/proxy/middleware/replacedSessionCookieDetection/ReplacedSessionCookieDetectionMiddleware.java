@@ -5,7 +5,7 @@ import static io.vertx.core.http.Cookie.cookie;
 import java.util.Optional;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
         ctx.response().addCookie(cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
-        ctx.put(ResponseSessionCookieMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
+        ctx.put(ResponseSessionCookieRemovalMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
             LOGGER.debug("Invalid sessionId cookie for state, delayed retry for '{}' ms", this.waitBeforeRetryMs);
