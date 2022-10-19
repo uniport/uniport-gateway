@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,19 +22,15 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
 
     public static final String REMOVE_SESSION_COOKIE_SIGNAL = "REMOVE_SESSION_COOKIE_SIGNAL";
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieRemovalMiddleware.class);
-
-    private static final String DEFAULT_SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
-
     private final String sessionCookieName;
 
     public ResponseSessionCookieRemovalMiddleware(String sessionCookieName) {
-        this.sessionCookieName = (sessionCookieName == null) ? DEFAULT_SESSION_COOKIE_NAME : sessionCookieName;
+        this.sessionCookieName = (sessionCookieName == null) ? SessionMiddleware.COOKIE_NAME_DEFAULT : sessionCookieName;
     }
-
-    // endHandler execution order: headersEndHandler -> bodyEndHandler -> endHandler
 
     @Override
     public void handle(RoutingContext ctx) {
+        // endHandler execution order: headersEndHandler -> bodyEndHandler -> endHandler
         ctx.addHeadersEndHandler(v -> removeSessionCookie(ctx));
         ctx.next();
     }

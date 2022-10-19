@@ -27,8 +27,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
 
-    private static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
-    private static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
+    public static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
+    public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
 
     private final String detectionCookieKey;
     private final String sessionCookiePrefix;

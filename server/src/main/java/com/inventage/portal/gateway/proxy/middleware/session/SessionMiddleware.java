@@ -12,13 +12,13 @@ public class SessionMiddleware implements Middleware {
 
     private final Handler sessionHandler;
 
-    private static final String COOKIE_NAME_DEFAULT = "inventage-portal-gateway.session";
-    private static final boolean COOKIE_HTTP_ONLY_DEFAULT = true;
-    private static final boolean COOKIE_SECURE_DEFAULT = false;
-    private static final CookieSameSite COOKIE_SAME_SITE_DEFAULT = CookieSameSite.STRICT;
-    private static final int SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT = 15;
-    private static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
-    private static boolean NAG_HTTPS_DEFAULT = true;
+    public static final String COOKIE_NAME_DEFAULT = "inventage-portal-gateway.session";
+    public static final boolean COOKIE_HTTP_ONLY_DEFAULT = true;
+    public static final boolean COOKIE_SECURE_DEFAULT = false;
+    public static final CookieSameSite COOKIE_SAME_SITE_DEFAULT = CookieSameSite.STRICT;
+    public static final int SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT = 15;
+    public static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
+    public static boolean NAG_HTTPS_DEFAULT = true;
 
 
     public SessionMiddleware(Vertx vertx, Long sessionIdleTimeoutInMinutes, String cookieName, Boolean cookieHttpOnly, Boolean cookieSecure,

@@ -8,6 +8,9 @@ import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import io.vertx.core.http.CookieSameSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,18 +74,18 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
 
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
-    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "cookieName";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
 
     public static final String MIDDLEWARE_SESSION = "session";
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
+    public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
     public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
     public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
-    public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
 
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
 
@@ -754,7 +757,7 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_SESSION: {
                     Integer sessionIdleTimeoutInMinutes = mwOptions.getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
                     if (sessionIdleTimeoutInMinutes == null) {
-                        return Future.failedFuture(String.format("%s: No session idle timeout defined", mwType));
+                        LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT));
                     } else {
                         if (sessionIdleTimeoutInMinutes < 0) {
                             return Future.failedFuture(String.format("%s: Session idle timeout is required to be positive number", mwType));
@@ -762,27 +765,29 @@ public class DynamicConfiguration {
                     }
                     Integer sessionIdMinLength = mwOptions.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
                     if (sessionIdMinLength == null) {
-                        return Future.failedFuture(String.format("%s: No minimum length for the session id defined", mwType));
+                        LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_ID_MINIMUM_LENGTH_DEFAULT));
+                    } else {
+                        return Future.failedFuture(String.format("%s: Minimum session id length is required to be positive number", mwType));
                     }
                     Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
                     if (nagHttps == null) {
-                        return Future.failedFuture(String.format("%s: Log warning if the session handler is accessed over HTTP, not HTTPS is not defined", mwType));
+                        LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType, SessionMiddleware.NAG_HTTPS_DEFAULT));
                     }
                     JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {
-                        return Future.failedFuture(String.format("%s: No cookie defined", mwType));
+                        LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
                     } else {
                         String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
                         if (cookieName == null) {
-                            return Future.failedFuture(String.format("%s: No session cookie name defined", mwType));
+                            LOGGER.debug(String.format("%s: No session cookie name specified to be removed. Use default value: %s", mwType, SessionMiddleware.COOKIE_NAME_DEFAULT));
                         }
                         Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
                         if (cookieHttpOnly == null) {
-                            return Future.failedFuture(String.format("%s: No session cookie http only defined", mwType));
+                            LOGGER.debug(String.format("%s: Cookie HttpOnly not specified. Use default value: %s", mwType, SessionMiddleware.COOKIE_HTTP_ONLY_DEFAULT));
                         }
                         String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
                         if (cookieSameSite == null) {
-                            return Future.failedFuture(String.format("%s: No session cookie same site defined", mwType));
+                            LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s", mwType, SessionMiddleware.COOKIE_SAME_SITE_DEFAULT));
                         } else {
                             try {
                                 CookieSameSite.valueOf(cookieSameSite);
@@ -800,16 +805,22 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL: {
                     String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
                     if (name == null) {
-                        return Future.failedFuture(String.format("%s: No cookie name defined", mwType));
+                        LOGGER.debug(String.format("%s: No session cookie name specified to be removed. Use default value: %s", mwType, SessionMiddleware.COOKIE_NAME_DEFAULT));
                     }
                     break;
                 }
                 case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
                     Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
-                    if (waitTimeRetryInMs != null) {
+                    if (waitTimeRetryInMs == null) {
+                        LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s", mwType, ReplacedSessionCookieDetectionMiddleware.DEFAULT_WAIT_BEFORE_RETRY_MS));
+                    } else {
                         if (waitTimeRetryInMs <= 0) {
                             return Future.failedFuture(String.format("%s: wait time for retry required to be positive", mwType));
                         }
+                    }
+                    String detectionCookieName = mwOptions.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+                    if (detectionCookieName == null){
+                        LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s", mwType, ReplacedSessionCookieDetectionMiddleware.DEFAULT_DETECTION_COOKIE_NAME));
                     }
                     break;
                 }
