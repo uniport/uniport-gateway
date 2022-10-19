@@ -14,7 +14,7 @@ import io.vertx.ext.web.RoutingContext;
  * {@link com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware}
  *
  * {@link #sessionCookieName} specifies the name (can be configured) of the session cookie. Keep in mind that the name has to be same as
- * {@link com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware#cookieName}.
+ * the cookie name in the {@link com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware}
  *
  */
 public class ResponseSessionCookieRemovalMiddleware implements Middleware {

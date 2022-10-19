@@ -12,19 +12,25 @@ public class SessionMiddleware implements Middleware {
 
     private final Handler sessionHandler;
 
-    private final String cookieName;
+    private static final String COOKIE_NAME_DEFAULT = "inventage-portal-gateway.session";
+    private static final boolean COOKIE_HTTP_ONLY_DEFAULT = true;
+    private static final boolean COOKIE_SECURE_DEFAULT = false;
+    private static final CookieSameSite COOKIE_SAME_SITE_DEFAULT = CookieSameSite.STRICT;
+    private static final int SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT = 15;
+    private static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
+    private static boolean NAG_HTTPS_DEFAULT = true;
 
-    public SessionMiddleware(Vertx vertx, long sessionIdleTimeoutInMinutes, String cookieName, boolean cookieHttpOnly, boolean cookieSecure,
-                             String cookieSameSite, int sessionIdMinLength, boolean nagHttps){
-        this.cookieName = cookieName;
+
+    public SessionMiddleware(Vertx vertx, Long sessionIdleTimeoutInMinutes, String cookieName, Boolean cookieHttpOnly, Boolean cookieSecure,
+                             String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps){
         sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
-                .setSessionTimeout(sessionIdleTimeoutInMinutes*60000)
-                .setSessionCookieName(this.cookieName)
-                .setCookieHttpOnlyFlag(cookieHttpOnly)
-                .setCookieSecureFlag(cookieSecure)
-                .setCookieSameSite(CookieSameSite.valueOf(cookieSameSite))
-                .setMinLength(sessionIdMinLength)
-                .setNagHttps(nagHttps);
+                .setSessionTimeout(sessionIdleTimeoutInMinutes == null ? SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT*60000 : sessionIdleTimeoutInMinutes*60000)
+                .setSessionCookieName(cookieName == null ? COOKIE_NAME_DEFAULT : cookieName)
+                .setCookieHttpOnlyFlag(cookieHttpOnly == null ? COOKIE_HTTP_ONLY_DEFAULT : cookieHttpOnly)
+                .setCookieSecureFlag(cookieSecure == null ? COOKIE_SECURE_DEFAULT : cookieSecure)
+                .setCookieSameSite(cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
+                .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
+                .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
     }
 
     @Override
