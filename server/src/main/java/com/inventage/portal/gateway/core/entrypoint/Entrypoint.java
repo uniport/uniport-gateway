@@ -34,8 +34,6 @@ public class Entrypoint {
     private final Vertx vertx;
     private final String name;
     private final int port;
-    // sessionIdleTimeout is how many minutes an idle session is kept before deletion
-
     private final JsonArray entryMiddlewares;
     private Router router;
     private boolean enabled;
@@ -64,7 +62,7 @@ public class Entrypoint {
         router = Router.router(vertx);
         if (this.entryMiddlewares == null) {
             LOGGER.info("No custom EntryMiddlewares defined. Setup default EntryMiddlewares");
-            this.setupDefaultEntryMiddlewares();
+            this.setupDefaultEntryMiddlewares(vertx);
         } else {
             LOGGER.info("No EntryMiddlewares defined");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
@@ -134,9 +132,9 @@ public class Entrypoint {
                 });
     }
 
-    private void setupDefaultEntryMiddlewares() {
+    private void setupDefaultEntryMiddlewares(Vertx vertx) {
         router.route().handler(new ResponseSessionCookieRemovalMiddleware(null));
-        router.route().handler(new SessionMiddleware(null, null, null, null, null, null, null, null));
+        router.route().handler(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
         router.route().handler(new RequestResponseLogger());
         router.route().handler(new ReplacedSessionCookieDetectionMiddleware(null, null));
     }
