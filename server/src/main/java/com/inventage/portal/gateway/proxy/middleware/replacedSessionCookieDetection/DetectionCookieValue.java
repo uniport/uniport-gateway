@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.session;
+package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

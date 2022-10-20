@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,9 +123,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                         .map(entrypoint -> new Entrypoint(vertx,
                                 entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME),
                                 entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_PORT),
-                                entrypoint.getBoolean(StaticConfiguration.ENTRYPOINT_SESSION_DISABLED, false),
-                                entrypoint.getInteger(StaticConfiguration.ENTRYPOINT_SESSION_IDLE_TIMEOUT,
-                                        Entrypoint.DEFAULT_SESSION_IDLE_TIMEOUT_MINUTES)))
+                                entrypoint.getJsonArray(DynamicConfiguration.MIDDLEWARES)))
                         .forEach(entrypoints::add);
             }
             return entrypoints;

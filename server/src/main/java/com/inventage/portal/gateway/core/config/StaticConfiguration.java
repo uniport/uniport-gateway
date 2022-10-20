@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.core.config;
 
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import io.vertx.core.CompositeFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,9 @@ import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * It defines the structure of the static configuration.
  */
@@ -25,9 +30,6 @@ public class StaticConfiguration {
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";
-    public static final String ENTRYPOINT_SESSION_DISABLED = "sessionDisabled";
-    public static final String ENTRYPOINT_SESSION_IDLE_TIMEOUT = "sessionIdleTimeout";
-
     public static final String APPLICATIONS = "applications";
     public static final String APPLICATION_NAME = "name";
     public static final String APPLICATION_ENTRYPOINT = "entrypoint";
@@ -61,8 +63,8 @@ public class StaticConfiguration {
         ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
                 .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
                 .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
-                .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
-                .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
+                .property(DynamicConfiguration.MIDDLEWARES, Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
+                .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
                 .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
@@ -99,19 +101,41 @@ public class StaticConfiguration {
 
         Promise<Void> validPromise = Promise.promise();
         schema.validateAsync(json).onSuccess(f -> {
-            validateProviders(json.getJsonArray(PROVIDERS), validPromise);
+            List<Future> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
+            futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
+
+            CompositeFuture.all(futures).onSuccess(cf -> {
+                validPromise.complete();
+            }).onFailure(cfErr -> {
+                validPromise.fail(cfErr.getMessage());
+            });
         }).onFailure(err -> {
             validPromise.fail(err.getMessage());
         });
-
         return validPromise.future();
     }
 
-    private static void validateProviders(JsonArray providers, Promise<Void> validPromise) {
+    private static List<Future> validateEntrypoints(JsonArray entrypoints) {
+        List<Future> middlewareFutures = new ArrayList<>();
+        if (entrypoints != null) {
+            for (int i = 0; i < entrypoints.size(); i++) {
+                JsonObject entrypointJson = entrypoints.getJsonObject(i);
+                JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                middlewareFutures.add(validateEntryMiddlewareFuture(middlewares));
+            }
+        }
+        return middlewareFutures;
+    }
+
+    private static Future<Void> validateEntryMiddlewareFuture(JsonArray entryMiddleware) {
+        JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, entryMiddleware);
+        return DynamicConfiguration.validateMiddlewares(toValidate);
+    }
+
+    private static Future<Void> validateProviders(JsonArray providers) {
         if (providers == null || providers.size() == 0) {
             LOGGER.warn("No providers defined");
-            validPromise.complete();
-            return;
+            return Future.succeededFuture();
         }
         LOGGER.debug("Validating providers: '{}'", providers);
 
@@ -138,15 +162,13 @@ public class StaticConfiguration {
                 default: {
                     errMsg = "Unknown provider";
                     valid = false;
-                    break;
                 }
             }
 
             if (!valid) {
-                validPromise.fail(errMsg);
-                return;
+                return Future.failedFuture(errMsg);
             }
         }
-        validPromise.complete();
+        return Future.succeededFuture();
     }
 }

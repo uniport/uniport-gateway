@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import static com.inventage.portal.gateway.core.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
+import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
 
 import java.net.URI;
 
@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.inventage.portal.gateway.core.session.SessionAdapter;
+import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;

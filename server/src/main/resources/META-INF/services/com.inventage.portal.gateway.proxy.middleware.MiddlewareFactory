@@ -8,3 +8,7 @@ com.inventage.portal.gateway.proxy.middleware.debug.ShowSessionContentMiddleware
 com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalFactory
+com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionFactory
+com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerFactory
+com.inventage.portal.gateway.proxy.middleware.session.SessionFactory

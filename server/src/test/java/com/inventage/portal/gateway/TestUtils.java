@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
 
+import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 
 import io.vertx.core.Handler;
@@ -13,7 +14,7 @@ import io.vertx.core.json.JsonObject;
 public class TestUtils {
     /**
      * Returns a free port number on localhost.
-     *
+     * <p>
      * Heavily inspired from org.eclipse.jdt.launching.SocketUtil (to avoid a dependency to JDT just because of this).
      * Slightly improved with close() missing in JDT. And throws exception instead of returning -1.
      *
@@ -119,7 +120,7 @@ public class TestUtils {
     }
 
     public static Handler<JsonObject> withMiddleware(String middlewareName, String middlewareType,
-            Handler<JsonObject>... opts) {
+                                                     Handler<JsonObject>... opts) {
         return middleware -> {
             middleware.put(DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
             middleware.put(DynamicConfiguration.MIDDLEWARE_TYPE, middlewareType);
@@ -174,6 +175,81 @@ public class TestUtils {
             server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
             for (Handler<JsonObject> opt : opts) {
                 opt.handle(server);
+            }
+        };
+    }
+
+    // For static configuration
+    public static JsonObject buildStaticConfiguration(Handler<JsonObject>... staticConfiguration){
+        JsonObject conf = new JsonObject();
+        for(Handler<JsonObject> build: staticConfiguration){
+            build.handle(conf);
+        }
+        return conf;
+    }
+
+    public static Handler<JsonObject> withEntrypoints(Handler<JsonObject>... opts){
+        return conf -> {
+            JsonArray entrypoints = new JsonArray();
+            conf.put(StaticConfiguration.ENTRYPOINTS, entrypoints);
+            for (Handler<JsonObject> opt : opts) {
+                JsonObject entrypoint = new JsonObject();
+                opt.handle(entrypoint);
+                entrypoints.add(entrypoint);
+            }
+        };
+    }
+
+    public static Handler<JsonObject> withEntrypoint(String name, int port, Handler<JsonObject> entryMiddleware){
+        return conf -> {
+            conf.put(StaticConfiguration.ENTRYPOINT_NAME, name);
+            conf.put(StaticConfiguration.ENTRYPOINT_PORT, port);
+            entryMiddleware.handle(conf);
+        };
+    }
+
+    public static Handler<JsonObject> withEntrypoint(String name, int port){
+        return conf -> {
+            conf.put(StaticConfiguration.ENTRYPOINT_NAME, name);
+            conf.put(StaticConfiguration.ENTRYPOINT_PORT, port);
+        };
+    }
+
+    public static Handler<JsonObject> withApplications(Handler<JsonObject>... opts){
+        return conf -> {
+            JsonArray applications = new JsonArray();
+            conf.put(StaticConfiguration.APPLICATIONS, applications);
+            for (Handler<JsonObject> opt : opts) {
+                JsonObject application = new JsonObject();
+                opt.handle(application);
+                applications.add(application);
+            }
+        };
+    }
+
+    public static Handler<JsonObject> withApplication(String name, String entrypoint, String provider, Handler<JsonObject> requestSelector){
+        return application -> {
+            application.put(StaticConfiguration.APPLICATION_NAME, name);
+            application.put(StaticConfiguration.APPLICATION_ENTRYPOINT, entrypoint);
+            application.put(StaticConfiguration.APPLICATION_PROVIDER, provider);
+            requestSelector.handle(application);
+        };
+    }
+
+    public static Handler<JsonObject> withRequestSelector(String urlPrefix){
+        return application -> {
+            application.put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR_URL_PREFIX, urlPrefix);
+        };
+    }
+
+    public static Handler<JsonObject> withProviders(Handler<JsonObject>... opts){
+        return conf -> {
+            JsonArray providers = new JsonArray();
+            conf.put(StaticConfiguration.PROVIDERS, providers);
+            for (Handler<JsonObject> opt : opts) {
+                JsonObject provider = new JsonObject();
+                opt.handle(provider);
+                providers.add(provider);
             }
         };
     }

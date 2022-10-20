@@ -1,20 +1,17 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
 
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import io.vertx.core.http.CookieSameSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +70,25 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
 
+    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL = "responseSessionCookieRemoval";
+    public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
+
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
+
+    public static final String MIDDLEWARE_SESSION = "session";
+    public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
+    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
+    public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
+    public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
+    public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
+    public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
+    public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
+
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
+
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
@@ -101,6 +117,7 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
+    public static final String MIDDLEWARE_SESSION_BAG_COOKIE_NAME = "cookieName";
     /**
      * @deprecated This field should no longer be used as of version 4.3.0.
      * <p> Use {@link DynamicConfiguration#MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES } instead</p>
@@ -117,7 +134,8 @@ public class DynamicConfiguration {
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
-            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE);
+            MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
+            MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -128,12 +146,29 @@ public class DynamicConfiguration {
     private static Schema schema;
 
     private static Schema buildSchema(Vertx vertx) {
+        ObjectSchemaBuilder routerSchema = buildRouterSchema();
+        ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
+        ObjectSchemaBuilder serviceSchema = buildServiceSchema();
+        ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
+
+        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
+                .allowAdditionalProperties(false);
+
+        SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
+        SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
+        return dynamicConfigBuilder.build(schemaParser);
+    }
+
+    private static ObjectSchemaBuilder buildRouterSchema() {
         ObjectSchemaBuilder routerSchema = Schemas.objectSchema().requiredProperty(ROUTER_NAME, Schemas.stringSchema())
                 .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
                 .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema())
                 .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
+        return routerSchema;
+    }
 
+    private static ObjectSchemaBuilder buildMiddlewareSchema() {
         ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
@@ -159,13 +194,24 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
                 .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
+                .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
+                .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
+                .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
+                .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
+                .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
+                .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
                 .allowAdditionalProperties(false);
 
         ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
                 .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                 .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
                 .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
+        return middlewareSchema;
+    }
 
+    private static ObjectSchemaBuilder buildServiceSchema() {
         ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
                 .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
@@ -173,18 +219,19 @@ public class DynamicConfiguration {
                                 .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
                                 .allowAdditionalProperties(false)))
                 .allowAdditionalProperties(false);
+        return serviceSchema;
+    }
 
+    private static ObjectSchemaBuilder buildHttpSchema(ObjectSchemaBuilder routerSchema, ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema) {
         ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
                 .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
                 .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
                 .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
+        return httpSchema;
+    }
 
-        ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
-                .allowAdditionalProperties(false);
-
-        SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
-        SchemaParser schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
-        return dynamicConfigBuilder.build(schemaParser);
+    public static ObjectSchemaBuilder getBuildMiddlewareSchema() {
+        return buildMiddlewareSchema();
     }
 
     public static JsonObject buildDefaultConfiguration() {
@@ -428,7 +475,7 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    private static Future<Void> validateMiddlewares(JsonObject httpConfig) {
+    public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {
             LOGGER.debug("No middlewares defined");
@@ -515,7 +562,6 @@ public class DynamicConfiguration {
                     if (claims != null) {
                         if (claims.size() == 0) {
                             LOGGER.debug("Claims is empty");
-                            //return Future.failedFuture(String.format("%s: Empty claims defined.", mwType));
                         }
 
                         for (Object claim : claims.getList()) {
@@ -695,7 +741,7 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
-                case MIDDLEWARE_CONTROL_API:
+                case MIDDLEWARE_CONTROL_API: {
                     String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
                     if (action == null) {
                         return Future.failedFuture(
@@ -707,6 +753,82 @@ public class DynamicConfiguration {
                         return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
                     }
                     break;
+                }
+                case MIDDLEWARE_SESSION: {
+                    Integer sessionIdleTimeoutInMinutes = mwOptions.getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
+                    if (sessionIdleTimeoutInMinutes == null) {
+                        LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT));
+                    } else {
+                        if (sessionIdleTimeoutInMinutes <= 0) {
+                            return Future.failedFuture(String.format("%s: Session idle timeout is required to be positive number", mwType));
+                        }
+                    }
+                    Integer sessionIdMinLength = mwOptions.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
+                    if (sessionIdMinLength == null) {
+                        LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s", mwType, SessionMiddleware.SESSION_ID_MINIMUM_LENGTH_DEFAULT));
+                    } else {
+                        if (sessionIdMinLength <= 0) {
+                            return Future.failedFuture(String.format("%s: Minimum session id length is required to be positive number", mwType));
+                        }
+                    }
+                    Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
+                    if (nagHttps == null) {
+                        LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType, SessionMiddleware.NAG_HTTPS_DEFAULT));
+                    }
+                    JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
+                    if (cookie == null) {
+                        LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
+                    } else {
+                        String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
+                        if (cookieName == null) {
+                            LOGGER.debug(String.format("%s: No session cookie name specified to be removed. Use default value: %s", mwType, SessionMiddleware.COOKIE_NAME_DEFAULT));
+                        }
+                        Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
+                        if (cookieHttpOnly == null) {
+                            LOGGER.debug(String.format("%s: Cookie HttpOnly not specified. Use default value: %s", mwType, SessionMiddleware.COOKIE_HTTP_ONLY_DEFAULT));
+                        }
+                        String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
+                        if (cookieSameSite == null) {
+                            LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s", mwType, SessionMiddleware.COOKIE_SAME_SITE_DEFAULT));
+                        } else {
+                            try {
+                                CookieSameSite.valueOf(cookieSameSite);
+                            } catch (RuntimeException exception) {
+                                List<String> allowedPolicies = new LinkedList<>();
+                                for (CookieSameSite value : CookieSameSite.values()) {
+                                    allowedPolicies.add(value.toString().toUpperCase());
+                                }
+                                return Future.failedFuture(String.format("%s: invalid cookie same site value. Allowed values: %s", mwType, allowedPolicies));
+                            }
+                        }
+                    }
+                    break;
+                }
+                case MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL: {
+                    String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
+                    if (name == null) {
+                        LOGGER.debug(String.format("%s: No session cookie name specified to be removed. Use default value: %s", mwType, SessionMiddleware.COOKIE_NAME_DEFAULT));
+                    }
+                    break;
+                }
+                case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
+                    Integer waitTimeRetryInMs = mwOptions.getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+                    if (waitTimeRetryInMs == null) {
+                        LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s", mwType, ReplacedSessionCookieDetectionMiddleware.DEFAULT_WAIT_BEFORE_RETRY_MS));
+                    } else {
+                        if (waitTimeRetryInMs <= 0) {
+                            return Future.failedFuture(String.format("%s: wait time for retry required to be positive", mwType));
+                        }
+                    }
+                    String detectionCookieName = mwOptions.getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+                    if (detectionCookieName == null) {
+                        LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s", mwType, ReplacedSessionCookieDetectionMiddleware.DEFAULT_DETECTION_COOKIE_NAME));
+                    }
+                    break;
+                }
+                case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
+                    break;
+                }
                 default: {
                     return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
                 }

@@ -78,7 +78,11 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
-        return withMiddleware(new SessionBagMiddleware(whitelistedCookies));
+        return withMiddleware(new SessionBagMiddleware(whitelistedCookies, "inventage-portal-gateway.session"));
+    }
+
+    public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {
+        return withMiddleware(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
     }
 
     public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) {

@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import io.vertx.ext.web.Router;
 public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
+    private String DEFAULT_SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
 
     private static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
 
@@ -36,8 +38,13 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
         if (whitelistedCookies == null) {
             whitelistedCookies = middlewareOptions.getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY);
         }
+
+        String sessionCookieName = middlewareOptions.getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_COOKIE_NAME);
+        if(sessionCookieName == null){
+            sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
+        }
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
-        return Future.succeededFuture(new SessionBagMiddleware(whitelistedCookies));
+        return Future.succeededFuture(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
     }
 
 }
