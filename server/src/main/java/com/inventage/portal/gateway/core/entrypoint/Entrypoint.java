@@ -1,9 +1,7 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import com.inventage.portal.gateway.core.application.Application;
+import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
@@ -11,26 +9,31 @@ import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
-import io.vertx.core.*;
-import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.inventage.portal.gateway.core.application.Application;
-import com.inventage.portal.gateway.core.config.StaticConfiguration;
-
+import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Entry point for the portal gateway.
  */
 public class Entrypoint {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
     private final Vertx vertx;
     private final String name;
     private final int port;
@@ -63,7 +66,8 @@ public class Entrypoint {
         if (this.entryMiddlewares == null) {
             LOGGER.info("No custom EntryMiddlewares defined. Setup default EntryMiddlewares");
             this.setupDefaultEntryMiddlewares(vertx);
-        } else {
+        }
+        else {
             LOGGER.info("No EntryMiddlewares defined");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
         }
@@ -77,11 +81,11 @@ public class Entrypoint {
                 if (enabled()) {
                     router().mountSubRouter(application.rootPath(), applicationRouter);
                     LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
-                        application.rootPath(), name);
+                            application.rootPath(), name);
                 }
                 else {
                     LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
-                        application, application.rootPath());
+                            application, application.rootPath());
                 }
             }
         });
@@ -127,10 +131,10 @@ public class Entrypoint {
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
         final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-            .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
-            .findFirst().orElseThrow(() -> {
-                throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
-            });
+                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
+                .findFirst().orElseThrow(() -> {
+                    throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
+                });
     }
 
     private void setupDefaultEntryMiddlewares(Vertx vertx) {
@@ -157,7 +161,7 @@ public class Entrypoint {
     }
 
     private Future<Middleware> createEntryMiddleware(JsonObject middlewareConfig, Router router) {
-        Promise<Middleware> promise = Promise.promise();
+        final Promise<Middleware> promise = Promise.promise();
         createEntryMiddleware(middlewareConfig, router, promise);
         return promise.future();
     }

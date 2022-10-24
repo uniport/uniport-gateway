@@ -1,19 +1,11 @@
 package com.inventage.portal.gateway.core;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
@@ -69,7 +61,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
         LOGGER.debug("Number of applications '{}' and entrypoints {}'", applications.size(),
-            entrypoints.size());
+                entrypoints.size());
         applications.stream().forEach(application -> {
             application.deployOn(vertx).onSuccess(handler -> {
                 entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
@@ -98,16 +90,16 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
         if (entrypoint.port() > 0) {
             final HttpServerOptions options = new HttpServerOptions()
-                .setMaxHeaderSize(1024 * 20)
-                .setSsl(entrypoint.isTls())
-                .setKeyStoreOptions(entrypoint.jksOptions());
+                    .setMaxHeaderSize(1024 * 20)
+                    .setSsl(entrypoint.isTls())
+                    .setKeyStoreOptions(entrypoint.jksOptions());
             LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
             return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
         }
         else {
             entrypoint.disable();
             LOGGER.warn("Disabling endpoint '{}' because its port ('{}') must be great 0",
-                entrypoint.name(), entrypoint.port());
+                    entrypoint.name(), entrypoint.port());
             return Future.succeededFuture();
         }
     }
@@ -139,7 +131,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         }
         catch (Exception e) {
             throw new IllegalStateException(
-                String.format("Couldn't read '%s' configuration", StaticConfiguration.ENTRYPOINTS));
+                    String.format("Couldn't read '%s' configuration", StaticConfiguration.ENTRYPOINTS));
         }
     }
 
@@ -150,10 +142,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final JsonArray configs = config.getJsonArray(StaticConfiguration.APPLICATIONS);
             if (configs != null) {
                 configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                    .map(application -> ApplicationFactory.Loader
-                        .getProvider(application.getString(StaticConfiguration.APPLICATION_PROVIDER))
-                        .create(application, config, vertx))
-                    .forEach(applications::add);
+                        .map(application -> ApplicationFactory.Loader
+                                .getProvider(application.getString(StaticConfiguration.APPLICATION_PROVIDER))
+                                .create(application, config, vertx))
+                        .forEach(applications::add);
             }
             return applications;
         }
@@ -162,7 +154,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         }
         catch (Exception e) {
             throw new IllegalStateException(
-                String.format("Couldn't read '%s' configuration", StaticConfiguration.APPLICATIONS));
+                    String.format("Couldn't read '%s' configuration", StaticConfiguration.APPLICATIONS));
         }
     }
 

@@ -1,11 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import java.util.Base64;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.opentelemetry.api.trace.Span;
 import io.reactiverse.contextual.logging.ContextualData;
 import io.vertx.core.Handler;
@@ -47,17 +42,17 @@ public class RequestResponseLogger implements Middleware {
             // More logging when response is >= 400
             if (routingContext.response().getStatusCode() >= 400) {
                 LOGGER.debug("'Outgoing URI '{}' with status '{}' and message '{}' in '{}' ms",
-                    routingContext.request().uri(),
-                    routingContext.response().getStatusCode(),
-                    routingContext.response().getStatusMessage(),
-                    System.currentTimeMillis() - start);
+                        routingContext.request().uri(),
+                        routingContext.response().getStatusCode(),
+                        routingContext.response().getStatusMessage(),
+                        System.currentTimeMillis() - start);
                 return;
             }
 
             LOGGER.debug("Outgoing URI '{}' with status '{}' in '{}' ms",
-                routingContext.request().uri(),
-                routingContext.response().getStatusCode(),
-                System.currentTimeMillis() - start);
+                    routingContext.request().uri(),
+                    routingContext.response().getStatusCode(),
+                    System.currentTimeMillis() - start);
         });
         routingContext.next();
     }

@@ -1,21 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
-
-import java.net.URI;
-
-import io.vertx.ext.web.handler.BodyHandler;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.reactiverse.contextual.logging.ContextualData;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -37,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
-import static com.inventage.portal.gateway.core.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
+import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
 
 /**
  * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
@@ -62,10 +51,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         final Route callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
 
         final OAuth2Options oauth2Options = new OAuth2Options()
-            .setClientID(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
-            .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
-            .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
-            .setValidateIssuer(false);
+                .setClientID(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
+                .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
+                .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
+                .setValidateIssuer(false);
 
         final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oauth2Options);
 
@@ -75,15 +64,15 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             callback.handler(ctx -> {
                 LOGGER.debug("Processing request for state '{}' and code '{}...'", ctx.request().getParam("state"),
-                    ctx.request().getParam("code").substring(0, 5));
+                        ctx.request().getParam("code").substring(0, 5));
                 OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope);
                 ctx.addEndHandler(event -> {
                     if (event.succeeded()) {
                         if (ctx.user() != null) {
                             LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'", sessionScope,
-                                SessionAdapter.displaySessionId(ctx.session()));
+                                    SessionAdapter.displaySessionId(ctx.session()));
                             ContextualData.put(CONTEXTUAL_DATA_SESSION_ID,
-                                SessionAdapter.displaySessionId(ctx.session()));
+                                    SessionAdapter.displaySessionId(ctx.session()));
                             // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User objects together.
                             // However, it is marked as deprecated, and therefore we use our own glue.
                             final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(authProvider, ctx.user());
@@ -101,7 +90,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             });
             callback.failureHandler(ctx -> {
                 LOGGER.debug("Processing failed for state '{}' caused by '{}'", ctx.request().getParam("state"),
-                    ctx.failure() == null ? "unknown error" : ctx.failure().getMessage());
+                        ctx.failure() == null ? "unknown error" : ctx.failure().getMessage());
             });
 
             final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
@@ -126,18 +115,18 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             responseModeParam.put("response_mode", "form_post");
 
             final OAuth2AuthHandler authHandler = OAuth2AuthHandler.create(vertx, authProvider, callbackURL)
-                .setupCallback(callback)
-                .pkceVerifierLength(64)
-                .extraParams(responseModeParam)
-                // add the sessionScope as a OIDC scope for "aud" in JWT
-                // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
-                .withScope(OIDC_SCOPE + " " + sessionScope);
+                    .setupCallback(callback)
+                    .pkceVerifierLength(64)
+                    .extraParams(responseModeParam)
+                    // add the sessionScope as a OIDC scope for "aud" in JWT
+                    // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
+                    .withScope(OIDC_SCOPE + " " + sessionScope);
 
             oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
         }).onFailure(err -> {
             LOGGER.warn("Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
-                err.getMessage());
+                    err.getMessage());
             oauth2Promise.fail("Failed to create OAuth2 Middleware '" + err.getMessage() + "'");
         });
 

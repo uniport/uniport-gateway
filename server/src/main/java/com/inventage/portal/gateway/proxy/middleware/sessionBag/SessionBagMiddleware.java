@@ -1,14 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
@@ -85,7 +76,7 @@ public class SessionBagMiddleware implements Middleware {
 
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         final Set<Cookie> requestCookies = CookieUtil
-            .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+                .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
@@ -120,7 +111,7 @@ public class SessionBagMiddleware implements Middleware {
             return true;
         }
         LOGGER.debug("Ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
-            matchesPath(cookie, path), matchesSSL(cookie, isSSL));
+                matchesPath(cookie, path), matchesSSL(cookie, isSSL));
         return false;
     }
 
@@ -179,7 +170,7 @@ public class SessionBagMiddleware implements Middleware {
         }
         else {
             cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
-                : cookie.path();
+                    : cookie.path();
         }
         final String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
         return Pattern.compile(regex).matcher(requestPath).matches();
@@ -202,7 +193,7 @@ public class SessionBagMiddleware implements Middleware {
         for (String cookieToSet : cookiesToSet) {
             // use netty cookie until maxAge getter is implemented
             // https://github.com/eclipse-vertx/vert.x/issues/3906
-            Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
+            final Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
             if (decodedCookieToSet.name().equals(sessionCookieName)) {
                 continue;
             }
@@ -253,8 +244,8 @@ public class SessionBagMiddleware implements Middleware {
 
     private String escapeSpecialRegexChars(String regex) {
         return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
-            .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
-            .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
+                .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
+                .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
 
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
@@ -279,9 +270,9 @@ public class SessionBagMiddleware implements Middleware {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
             final JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
             final String whitelistedCookieName = whitelistedCookie
-                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
+                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
             final String whitelistedCookiePath = whitelistedCookie
-                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
+                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
             if (whitelistedCookieName.equals(cookie.name()) && whitelistedCookiePath.equals(cookie.path())) {
                 return true;
             }

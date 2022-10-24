@@ -17,8 +17,8 @@ public class ReplacedSessionCookieDetectionFactory implements MiddlewareFactory 
 
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-        String cookieName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
-        Integer waitTimeRetryInMs = middlewareConfig.getInteger(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+        final String cookieName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+        final Integer waitTimeRetryInMs = middlewareConfig.getInteger(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
 
         LOGGER.debug("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION);

@@ -1,23 +1,20 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
-    private String DEFAULT_SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
+    private static final String DEFAULT_SESSION_COOKIE_NAME = "inventage-portal-gateway.session";
 
     private static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
 
@@ -40,7 +37,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
         }
 
         String sessionCookieName = middlewareOptions.getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_COOKIE_NAME);
-        if(sessionCookieName == null){
+        if (sessionCookieName == null) {
             sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
         }
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);

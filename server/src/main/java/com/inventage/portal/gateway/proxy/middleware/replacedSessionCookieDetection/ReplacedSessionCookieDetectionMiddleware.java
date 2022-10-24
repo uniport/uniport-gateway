@@ -1,19 +1,17 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
-import static io.vertx.core.http.Cookie.cookie;
-
-import java.util.Optional;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
-
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+
+import static io.vertx.core.http.Cookie.cookie;
 
 /**
  * Handle situations, where the browser has sent requests during the session id regeneration.
@@ -57,7 +55,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      * which has generated a new id for this session) <strong>session id</strong>. This special case is detected by checking (1) if the request contains
      * our detection cookie (+ satisfies some conditions) ({@link #isDetectionCookieValueWithInLimit(RoutingContext)} and (2) if the user is not
      * authenticated from the portal gateway's point of view (because the <strong>session id</strong> has changed) ({@link #noUserInSession(RoutingContext)}).
-     *
+     * <p>
      * Detection-cookies are only handed to <strong>authenticated</strong> users on each new request (with {@link #responseWithDetectionCookie(RoutingContext)}).
      * Therefore the detection-cookie serves as proof that the user has been authenticated before.
      */
@@ -66,7 +64,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     }
 
     /**
-     * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime. (Refer to Portal-Gateway.drawio for a visual explanation).
+     * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime.
+     * (Refer to Portal-Gateway.drawio for a visual explanation).
      * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
@@ -88,7 +87,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     }
 
     /**
-     * @return true if our cookie-entry exists and its value is still valid. Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
+     * @return true if our cookie-entry exists and its value is still valid.
+     * Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
      */
     private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
         final Optional<Cookie> cookie = getDetectionCookie(ctx);
@@ -134,7 +134,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx, this.sessionCookiePrefix);
         if (sessionCookie != null) {
             LOGGER.debug("For received session cookie value '{}'", sessionCookie.value());
-        } else {
+        }
+        else {
             LOGGER.debug("No session cookie '{}' received", this.sessionCookiePrefix);
         }
         return true;
@@ -143,7 +144,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     private boolean cookieReceived(RoutingContext ctx, String cookieName) {
         if (ctx.request().getCookie(cookieName) != null) {
             return true;
-        } else {
+        }
+        else {
             return getCookieFromHeader(ctx, cookieName) != null;
         }
     }
