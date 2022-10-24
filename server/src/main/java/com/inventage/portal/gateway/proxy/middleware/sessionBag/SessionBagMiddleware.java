@@ -51,9 +51,8 @@ public class SessionBagMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-
         if (ctx.session() == null) {
-            LOGGER.warn("No session initialized. Skipping session bag middleware");
+            LOGGER.debug("No session initialized. Skipping session bag middleware");
             ctx.next();
             return;
         }
