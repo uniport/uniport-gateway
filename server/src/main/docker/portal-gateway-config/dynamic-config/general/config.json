@@ -3,21 +3,39 @@
         "routers": [
             {
                 "name": "root",
-                "middlewares": ["rootRedirectregex"],
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
                 "rule": "Path('/')",
                 "service": "dashboard-proxy"
             },
             {
                 "name": "login",
-                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
+                "middlewares": [
+                    "dashboardOauth2",
+                    "loginRedirectRegex"
+                ],
                 "rule": "PathPrefix('/login')",
                 "service": "base-proxy"
             },
             {
                 "name": "logout",
-                "middlewares": ["logoutRedirectRegex"],
+                "middlewares": [
+                    "logoutRedirectRegex"
+                ],
                 "rule": "PathPrefix('/logout')",
                 "service": "base-proxy"
+            },
+            {
+                "name": "conversation-proxy",
+                "middlewares": [
+                    "conversationRedirectRegex",
+                    "conversationOauth2",
+                    "conversationAuthBearer",
+                    "conversationReplacePath"
+                ],
+                "rule": "PathPrefix('/conversation')",
+                "service": "conversation-proxy"
             },
             {
                 "name": "dashboard-proxy",
@@ -157,6 +175,22 @@
                 "type": "replacePathRegex",
                 "options": {
                     "regex": "/base/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "conversationRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/conversation)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "conversationReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/conversation/(.*)",
                     "replacement": "/$1"
                 }
             },
@@ -305,6 +339,15 @@
             }
         ],
         "services": [
+            {
+                "name": "conversation-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_CONVERSATION_HOST}",
+                        "port": "${PORTAL_GATEWAY_CONVERSATION_PORT}"
+                    }
+                ]
+            },
             {
                 "name": "dashboard-proxy",
                 "servers": [
