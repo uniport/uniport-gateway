@@ -103,12 +103,18 @@ containers:
         # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
       - name: "PORTAL_GATEWAY_CONTENT_PORT"
         value: "20110"
-      # PORTAL_GATEWAY_CONVERSATION_HOST is the hostname for accessing Conversation microservice via HTTP
+        # PORTAL_GATEWAY_CONVERSATION_HOST is the hostname for accessing Conversation microservice via HTTP
       - name: "PORTAL_GATEWAY_CONVERSATION_HOST"
         value: "conversation"
-      # PORTAL_GATEWAY_CONVERSATOPM_PORT is the port for accessing Conversation microservice via HTTP
+        # PORTAL_GATEWAY_CONVERSATION_PORT is the port for accessing Conversation microservice via HTTP
       - name: "PORTAL_GATEWAY_CONVERSATION_PORT"
         value: "20120"
+        # PORTAL_GATEWAY_NOTIFICATION_HOST is the hostname for accessing Notification microservice via HTTP
+      - name: "PORTAL_GATEWAY_NOTIFICATION_HOST"
+        value: "notification"
+        # PORTAL_GATEWAY_NOTIFICATION_PORT is the port for accessing Notification microservice via HTTP
+      - name: "PORTAL_GATEWAY_NOTIFICATION_PORT"
+        value: "20060"
         # PORTAL_GATEWAY_PORTAL_KOWL_HOST is the hostname for accessing Portal-Kowl via HTTP
       - name: PORTAL_GATEWAY_PORTAL_KOWL_HOST
         value: "portal-kowl"
