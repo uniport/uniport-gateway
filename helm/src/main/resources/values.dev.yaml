@@ -10,30 +10,29 @@ ingress:
   tls:
     enabled: true
 
-service:
-  ports:
-    - name: http
-      port: 20000
-    - name: http-debug
-      port: 20099
+services:
+  portal-gateway:
+    ports:
+      http-debug:
+        port: 20099
 
 containers:
   portal-gateway:
-    envOverride:
+    env:
       # HTTP protocol for external access
-      - name: "PORTAL_GATEWAY_PUBLIC_PROTOCOL"
+      PORTAL_GATEWAY_PUBLIC_PROTOCOL:
         value: "https"
         # HTTP host name for external access
-      - name: "PORTAL_GATEWAY_PUBLIC_HOSTNAME"
+      PORTAL_GATEWAY_PUBLIC_HOSTNAME:
         value: "ips.inventage.dev"
         # HTTP port for external access, must be the same as the exposed port
-      - name: "PORTAL_GATEWAY_PUBLIC_PORT"
+      PORTAL_GATEWAY_PUBLIC_PORT:
         value: "443"
-      - name: PORTAL_GATEWAY_BEARER_TOKEN_ISSUER
+      PORTAL_GATEWAY_BEARER_TOKEN_ISSUER:
         value: "https://ips.inventage.dev/auth/realms/portal"
-      - name: OTEL_TRACES_EXPORTER
+      OTEL_TRACES_EXPORTER:
         value: "otlp"
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      OTEL_EXPORTER_OTLP_ENDPOINT:
         value: "http://portal-monitoring-open-telemetry-collector.monitoring:4317"
-      - name: PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED
+      PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED:
         value: "true"
