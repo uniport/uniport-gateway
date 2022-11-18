@@ -111,7 +111,7 @@ containers:
         value: "20120"
         # PORTAL_GATEWAY_NOTIFICATION_HOST is the hostname for accessing Notification microservice via HTTP
       - name: "PORTAL_GATEWAY_NOTIFICATION_HOST"
-        value: "notification"
+        value: "notification-server"
         # PORTAL_GATEWAY_NOTIFICATION_PORT is the port for accessing Notification microservice via HTTP
       - name: "PORTAL_GATEWAY_NOTIFICATION_PORT"
         value: "20060"
