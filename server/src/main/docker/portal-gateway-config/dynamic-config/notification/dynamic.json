@@ -1,63 +1,63 @@
 {
-  "http": {
-  "routers": [
-    {
-    "name": "notification",
-    "middlewares": [
-      "notificationRedirectRegex",
-      "notificationOauth2",
-      "notificationAuthBearer",
-      "notificationReplacePath"
-    ],
-    "rule": "PathPrefix('/notification')",
-    "service": "notification-proxy"
+    "http": {
+        "routers": [
+            {
+                "name": "notification",
+                "middlewares": [
+                    "notificationRedirectRegex",
+                    "notificationOauth2",
+                    "notificationAuthBearer",
+                    "notificationReplacePath"
+                ],
+                "rule": "PathPrefix('/notification')",
+                "service": "notification-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "notificationRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/notification)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "notificationReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/notification/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "notificationAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "notification"
+                }
+            },
+            {
+                "name": "notificationOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "notification"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "notification-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_NOTIFICATION_HOST}",
+                        "port": "${PORTAL_GATEWAY_NOTIFICATION_PORT}"
+                    }
+                ]
+            }
+        ]
     }
-  ],
-  "middlewares": [
-    {
-    "name": "notificationRedirectRegex",
-    "type": "redirectRegex",
-    "options": {
-      "regex": "^(/notification)$",
-      "replacement": "$1/"
-    }
-    },
-    {
-    "name": "notificationReplacePath",
-    "type": "replacePathRegex",
-    "options": {
-      "regex": "/notification/(.*)",
-      "replacement": "/$1"
-    }
-    },
-    {
-    "name": "notificationAuthBearer",
-    "type": "authorizationBearer",
-    "options": {
-      "sessionScope": "notification"
-    }
-    },
-    {
-    "name": "notificationOauth2",
-    "type": "oauth2",
-    "options": {
-      "clientId": "Portal-Gateway",
-      "clientSecret": "Portal-Gateway!",
-      "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
-      "sessionScope": "notification"
-    }
-    }
-  ],
-  "services": [
-    {
-    "name": "notification-proxy",
-    "servers": [
-      {
-      "host": "${PORTAL_GATEWAY_NOTIFICATION_HOST}",
-      "port": "${PORTAL_GATEWAY_NOTIFICATION_PORT}"
-      }
-    ]
-    }
-  ]
-  }
 }
