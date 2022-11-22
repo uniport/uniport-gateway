@@ -37,7 +37,7 @@ containers:
       name: portal-gateway
       tag: ${project.version}
       pullPolicy: IfNotPresent
-    containerSecurityContext:
+    securityContext:
       enabled: false
     ports:
       http:
