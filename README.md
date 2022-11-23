@@ -98,4 +98,3 @@ PORTAL_GATEWAY_DOCUMENT_PROXY_HOST=local-portal-document-proxy
 ### Konzept des Sessionbags
 
 ![Session Bag](.docs/SessionBag.png)
-
