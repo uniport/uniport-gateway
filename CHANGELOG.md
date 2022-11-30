@@ -33,9 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed unused `PROXY_BEARER_TOKEN_ISSUER` variable from Helm values we provide.
 
-## [4.3.0]-202208121035-483-5b7b069
+## [4.3.0]-202208121035-483-5b7b069 - 2022-08-12
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17574)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17574) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~4.3.0-202208121035-483-5b7b069~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.3.0-202208121035-483-5b7b069)
 
 ### Changed
@@ -284,7 +284,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
 [Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F4.3.0
-[4.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.2.0&sourceBranch=refs%2Ftags%2F4.3.0
+[4.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.2.0&sourceBranch=refs%2Ftags%2F4.3.0
 [4.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.1.0&sourceBranch=refs%2Ftags%2F4.2.0
 [4.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.0.0&sourceBranch=refs%2Ftags%2F4.1.0
 [4.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F3.3.0&sourceBranch=refs%2Ftags%2F4.0.0
