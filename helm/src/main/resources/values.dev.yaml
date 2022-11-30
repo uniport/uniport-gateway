@@ -36,5 +36,5 @@ containers:
         value: "http://portal-monitoring-open-telemetry-collector.monitoring:4317"
       PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED:
         value: "true"
-      - name: "PORTAL_GATEWAY_LOG_LEVEL"
+      PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
