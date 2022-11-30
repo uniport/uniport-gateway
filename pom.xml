@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.inventage.portal.gateway</groupId>
     <artifactId>reactor</artifactId>
-    <version>4.4.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -25,7 +24,7 @@
 
         <jib.goal>build</jib.goal>
 
-        <portal-helm-chart-library.version>3.1.0-202203052336-102-e1a61e9</portal-helm-chart-library.version>
+        <portal-helm-chart-library.version>4.0.0-202211291537-145-e9a01d0</portal-helm-chart-library.version>
     </properties>
 
     <modules>
