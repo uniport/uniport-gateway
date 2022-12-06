@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+- EntryMiddlewares need to be declared explicitly ([PORTAL-1109](https://issue.inventage.com/browse/PORTAL-1109)).
+
 ## [5.0.0]-202212060911-525-5e0cfa8 - 2022-12-06
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17668) -

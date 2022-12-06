@@ -63,12 +63,8 @@ public class Entrypoint {
             return router;
         }
         router = Router.router(vertx);
-        if (this.entryMiddlewares == null) {
-            LOGGER.info("No custom EntryMiddlewares defined. Setup default EntryMiddlewares");
-            this.setupDefaultEntryMiddlewares(vertx);
-        }
-        else {
-            LOGGER.info("No EntryMiddlewares defined");
+        if (this.entryMiddlewares != null ){
+            LOGGER.info("Setup EntryMiddlewares");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
         }
         return router;
