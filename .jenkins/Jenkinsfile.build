@@ -266,7 +266,7 @@ def iqEvaluation(application, stage, String... scanPatterns) {
 def codeQualityEvaluation() {
     mvn(
         settings: '.jenkins/settings.xml',
-        profiles: 'jenkins,!local',
+        profiles: '!local',
         properties: [
             'java.io.tmpdir': WORKSPACE
         ],
