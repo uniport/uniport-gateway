@@ -14,11 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.0.0]-202212060911-525-5e0cfa8 - 2022-12-06
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
-
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17668) -
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~5.0.0-202212060911-525-5e0cfa8~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D5.0.0-202212060911-525-5e0cfa8)
 
 ### Added
 
