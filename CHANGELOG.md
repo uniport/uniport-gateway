@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [5.0.0]- - 2022-12-06
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+### Added
+
 - Middlewares can be attached to each entrypoint, which are first traversed before a request is forwarded to the route-specific middlewares. ([PORTAL-895](https://issue.inventage.com/browse/PORTAL-895)).
 - Setup IQ Evaluation and Checkstyle ([PORTAL-967](https://issue.inventage.com/browse/PORTAL-967)).
 - Keycloak Mockserver + OAuth2Auth Middleware tests for PORTAL-512 and PORTAL-513
