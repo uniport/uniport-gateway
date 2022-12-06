@@ -13,7 +13,6 @@
 
     <properties>
         <docker.image.name>${project.groupId}.portal-gateway:${project.version}-native</docker.image.name>
-        <docker.context>${project.build.directory}/docker-context</docker.context>
     </properties>
 
     <build>
@@ -35,7 +34,7 @@
                                     <artifactId>server</artifactId>
                                     <version>${project.version}</version>
                                     <classifier>fat</classifier>
-                                    <outputDirectory>${docker.context}</outputDirectory>
+                                    <outputDirectory>${docker.contextDir}</outputDirectory>
                                     <destFileName>${project.artifactId}-${project.version}-fat.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
@@ -54,7 +53,7 @@
                                     <artifactId>server</artifactId>
                                     <version>${project.version}</version>
                                     <classifier>configuration</classifier>
-                                    <outputDirectory>${docker.context}/portal-gateway</outputDirectory>
+                                    <outputDirectory>${docker.contextDir}/portal-gateway</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -64,7 +63,7 @@
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
-                    <outputDirectory>${docker.context}</outputDirectory>
+                    <outputDirectory>${docker.contextDir}</outputDirectory>
                     <resources>
                         <resource>
                             <directory>src/main/resources</directory>
