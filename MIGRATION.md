@@ -40,7 +40,7 @@ the `portal-gateway.json` configuration file. The following changes need to be m
         ...
     ],
 ```
-With this change, portal-gateway performs session handling identical to that in version 4.*.*.
+With this change, portal-gateway performs session handling identical to that in version `4.*.*`
 
 
 
