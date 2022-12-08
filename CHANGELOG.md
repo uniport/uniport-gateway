@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING** Session handling middlewares (if required) need to be explicitly declared in portal-gateway.json (see migration [guide](/MIGRATION.md)) 
+- **BREAKING** Session handling middlewares (if required) need to be explicitly declared in portal-gateway.json (see [migration guide](/MIGRATION.md)) 
 - **BREAKING** Upgraded `portal-helm-chart-library` to `4.0.0` (see migration guide in [portal-helm-chart-library](https://git.inventage.com/projects/PORTAL/repos/portal-helm-chart-library/browse/CHANGELOG.md)).
 - Do not log unhandled (ignored) URLs in `ShowSessionContentMiddleware`. This should reduce noise for cases we are not interested in.
 
