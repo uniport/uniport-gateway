@@ -87,12 +87,6 @@ containers:
         # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
       PORTAL_GATEWAY_ORGANISATION_PORT:
         value: "20030"
-        # PORTAL_GATEWAY_DOCUMENT_HOST is the hostname for accessing Document microservice via HTTP
-      PORTAL_GATEWAY_DOCUMENT_HOST:
-        value: "document"
-        # PORTAL_GATEWAY_DOCUMENT_PORT is the port for accessing Document microservice via HTTP
-      PORTAL_GATEWAY_DOCUMENT_PORT:
-        value: "20050"
         # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
       PORTAL_GATEWAY_FILESTORAGE_HOST:
         value: "filestorage"

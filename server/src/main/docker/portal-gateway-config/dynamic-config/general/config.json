@@ -72,17 +72,6 @@
                 "service": "organisation-proxy"
             },
             {
-                "name": "document-proxy",
-                "middlewares": [
-                    "documentRedirectRegex",
-                    "documentOauth2",
-                    "documentAuthBearer",
-                    "documentReplacePath"
-                ],
-                "rule": "PathPrefix('/document')",
-                "service": "document-proxy"
-            },
-            {
                 "name": "filestorage-proxy",
                 "middlewares": [
                     "filestorageRedirectRegex",
@@ -227,22 +216,6 @@
                 }
             },
             {
-                "name": "documentRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/document)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "documentReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/document/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
                 "name": "filestorageRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
@@ -372,15 +345,6 @@
                     {
                         "host": "${PORTAL_GATEWAY_ORGANISATION_HOST}",
                         "port": "${PORTAL_GATEWAY_ORGANISATION_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "document-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_DOCUMENT_HOST}",
-                        "port": "${PORTAL_GATEWAY_DOCUMENT_PORT}"
                     }
                 ]
             },

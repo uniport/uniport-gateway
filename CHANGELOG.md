@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
-### Added
+### Removed
+
+- Removed all configuration variables for Document microservice.
 
 ## [5.1.0]-202212061653-531-6945ffd 2022-12-06
 

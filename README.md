@@ -86,7 +86,6 @@ PORTAL_GATEWAY_PORTAL_IAM_PORT=8080
 PORTAL_GATEWAY_BASE_PROXY_HOST=local-portal-base-proxy
 PORTAL_GATEWAY_DASHBOARD_PROXY_HOST=local-portal-dashboard-proxy
 PORTAL_GATEWAY_ORGANISATION_PROXY_HOST=local-portal-organisation-proxy
-PORTAL_GATEWAY_DOCUMENT_PROXY_HOST=local-portal-document-proxy
 ```
 
 ## Visulisierungen
