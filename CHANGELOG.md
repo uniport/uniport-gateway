@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING** Session handling middlewares (if required) need to be explicitly declared in portal-gateway.json (see [migration guide](/MIGRATION.md)) 
+- **BREAKING** Session handling middlewares (if required) need to be explicitly declared in portal-gateway.json (see [migration guide](/MIGRATION.md))
 - **BREAKING** Upgraded `portal-helm-chart-library` to `4.0.0` (see migration guide in [portal-helm-chart-library](https://git.inventage.com/projects/PORTAL/repos/portal-helm-chart-library/browse/CHANGELOG.md)).
 - Do not log unhandled (ignored) URLs in `ShowSessionContentMiddleware`. This should reduce noise for cases we are not interested in.
 
@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--  Typo in variable name. Backward compatibility for configuration files that contain the typo is still provided. From `whithelistedCookies` to `whitelistedCookies` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
+- Typo in variable name. Backward compatibility for configuration files that contain the typo is still provided. From `whithelistedCookies` to `whitelistedCookies` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
 
 ### Added
 
@@ -100,9 +100,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add custom claim check for prefix urls `/ips/portal-database`and `/ips/portal-messaging`. Only JWT with valid claims can access those urls.
-([PORTAL-626](https://issue.inventage.com/browse/PORTAL-626))
+  ([PORTAL-626](https://issue.inventage.com/browse/PORTAL-626))
 - Extend the claim verification in the bearer only middleware. It should be possible to verify arbitrary claims.
-([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
+  ([PORTAL-654](https://issue.inventage.com/browse/PORTAL-654))
 - OpenTelemetry: traces and spans are created using OpenTelemetry SDK and extension of Vert.x. The configuration of the OpenTelemetry logic occurs using [OpenTelemetry SDK Autoconfigure](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) ([PORTAL-642](https://issue.inventage.com/browse/PORTAL-642)).
 - HTTP header `X-Forwarded-Port` is set for outgoing requests to services ([PORTAL-713](https://issue.inventage.com/browse/PORTAL-713)).
 - Add route to portal-monitoring UI ([PORTAL-695](https://issue.inventage.com/browse/PORTAL-695))
@@ -173,7 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added memory limits to the services defined in Docker Compose files using `mem_limit`. This also means using [Docker Compose files version `2.4`](https://docs.docker.com/compose/compose-file/compose-versioning/#version-24) which has support for this feature.
 - Use PKCE for OIDC ([PORTAL-512](https://issue.inventage.com/browse/PORTAL-512))
-- Prevent access to various /auth* URLs
+- Prevent access to various /auth\* URLs
 
 ### Changed
 
@@ -184,6 +184,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.6.0-202111100757-232-3f0c716~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.6.0-202111100757-232-3f0c716)
 
 ### Removed
+
 - OpenShift deployment removed
 
 ## [2.5.0]-202110181145-223-2a0ba2a
@@ -302,7 +303,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[Unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F5.1.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F5.1.0
 [5.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F5.0.0&sourceBranch=refs%2Ftags%2F5.1.0
 [5.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.3.0&sourceBranch=refs%2Ftags%2F5.0.0
 [4.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.2.0&sourceBranch=refs%2Ftags%2F4.3.0
