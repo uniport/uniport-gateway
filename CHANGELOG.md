@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed all configuration variables for Document microservice.
 
+### Fixed
+
+- Changed log statements from `debug` to `warn` for JWT verification failures ([PORTAL-1130](https://issue.inventage.com/browse/PORTAL-1130)).
+
 ## [5.1.0]-202212061653-531-6945ffd 2022-12-06
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17778) -

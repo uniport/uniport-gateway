@@ -133,16 +133,16 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         try {
             authInfo = (TokenCredentials) credentials;
             authInfo.checkValid(null);
-            //Decode throws a IllegalstateException if the jwt format is not correct and a RuntimeException if the signature verification fails.
+            //Decode throws a IllegalStateException if the jwt format is not correct and a RuntimeException if the signature verification fails.
             payload = jwt.decode(authInfo.getToken());
         }
         catch (IllegalStateException e) {
-            LOGGER.debug(e.getMessage());
+            LOGGER.warn(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(400, e)));
             return;
         }
         catch (RuntimeException e) {
-            LOGGER.debug(e.getMessage());
+            LOGGER.warn(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(401, e)));
             return;
         }
@@ -198,10 +198,9 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
             LOGGER.debug("Successful JWT verification");
             resultHandler.handle(Future.succeededFuture(user));
-
         }
         catch (RuntimeException | JsonProcessingException e) {
-            LOGGER.debug(e.getMessage());
+            LOGGER.warn(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(403, e)));
         }
     }
