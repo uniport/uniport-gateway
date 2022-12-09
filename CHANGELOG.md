@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Enabling versions with `helm ls` in uniport projects ([PORTAL-1128](https://issue.inventage.com/browse/PORTAL-1128)).
+
 ### Removed
 
 - Removed all configuration variables for Document microservice.
