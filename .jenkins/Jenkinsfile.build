@@ -325,10 +325,17 @@ def codeQualityEvaluation() {
  * @return
  */
 def sendNotifications() {
-    step([
-        $class                  : 'Mailer',
-        notifyEveryUnstableBuild: true,
-        recipients              : emailextrecipients([culprits(), requestor()])
-    ])
+    configFileProvider([configFile(fileId: 'default-email-recipients', variable: 'DEFAULT_EMAIL_RECIPIENTS')]) {
+        def recipient = sh(script: "git show -s --format='%ae'", returnStdout: true, encoding: 'UTF-8').trim()
+        if (!recipient) {
+            recipient = "${DEFAULT_EMAIL_RECIPIENTS}"
+        }
+
+        step([
+            $class                  : 'Mailer',
+            notifyEveryUnstableBuild: true,
+            recipients              : recipient
+        ])
+    }
 }
 
