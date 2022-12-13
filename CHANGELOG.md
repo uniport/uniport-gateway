@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## 5.2.0-[Unreleased] - ???
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Changed log statements from `debug` to `warn` for JWT verification failures ([PORTAL-1130](https://issue.inventage.com/browse/PORTAL-1130)).
+- Upgrade org.apache.commons:commons-text version to 1.10.0 ([PORTAL-1110](https://issue.inventage.com/browse/PORTAL-1110)).
 
 ## [5.1.0]-202212061653-531-6945ffd 2022-12-06
 
