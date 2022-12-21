@@ -15,7 +15,7 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
  * This class is a copy of its superclass, except that its constructor is public.
  * <p>
  * HTTPAuthorizationHandler's constructor is not public, hence we copy the class and make our version's constructor public.
- * Required for our custom JWTClaimHandlerImpl implementation
+ * Required for our custom JWTAuthClaimHandlerImpl implementation
  */
 public abstract class HTTPAuthClaimHandler<T extends AuthenticationProvider> extends AuthenticationHandlerImpl<T> {
 
@@ -73,15 +73,14 @@ public abstract class HTTPAuthClaimHandler<T extends AuthenticationProvider> ext
             if (optional) {
                 // this is allowed
                 handler.handle(Future.succeededFuture());
-            }
-            else {
+            } else {
                 handler.handle(Future.failedFuture(UNAUTHORIZED));
             }
             return;
         }
 
         try {
-            final int idx = authorization.indexOf(' ');
+            int idx = authorization.indexOf(' ');
 
             if (idx <= 0) {
                 handler.handle(Future.failedFuture(BAD_REQUEST));
@@ -94,8 +93,7 @@ public abstract class HTTPAuthClaimHandler<T extends AuthenticationProvider> ext
             }
 
             handler.handle(Future.succeededFuture(authorization.substring(idx + 1)));
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             handler.handle(Future.failedFuture(e));
         }
     }
@@ -103,7 +101,7 @@ public abstract class HTTPAuthClaimHandler<T extends AuthenticationProvider> ext
     @Override
     public String authenticateHeader(RoutingContext context) {
         if (realm != null && realm.length() > 0) {
-            return type + " realm=\"" + realm + "\"";
+            return type + " realm=\"" +realm + "\"";
         }
         return null;
     }
