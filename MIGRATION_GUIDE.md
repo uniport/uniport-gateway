@@ -1,6 +1,6 @@
 # Migration Guide
 
-## `4.*.*` → `5.1.0`
+## `4.*.*` → `5.*.*`
 
 Session handling is not enabled per default. Needs to be explicitly configured in `portal-gateway.json`.
 
