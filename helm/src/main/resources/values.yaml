@@ -177,3 +177,8 @@ containers:
       periodSeconds: 20
       failureThreshold: 6
       successThreshold: 1
+
+serviceAccount:
+  imagePullSecrets:
+    inventage-nexus:
+      name: inventage-nexus-registry

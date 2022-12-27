@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enabling versions with `helm ls` in uniport projects ([PORTAL-1128](https://issue.inventage.com/browse/PORTAL-1128)).
 
+### Changed
+
+- Use image pull secrets from service account ([PORTAL-847](https://issue.inventage.com/browse/PORTAL-847)).
+
 ### Removed
 
 - Removed all configuration variables for Document microservice.
