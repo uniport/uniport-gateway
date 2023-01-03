@@ -138,6 +138,12 @@ containers:
       # PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL dictates if the proxy should expect (and therefore verify) an access token
       PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL:
         value: "false"
+      # PORTAL_GATEWAY_METRICS_PORT is the port of the metrics endpoint
+      PORTAL_GATEWAY_METRICS_PORT:
+        value: "9090"
+      # PORTAL_GATEWAY_METRICS_PATH is the path of the metrics endpoint
+      PORTAL_GATEWAY_METRICS_PATH:
+        value: "/metrics"
       # OTEL_SERVICE_NAME is the name of the service
       OTEL_SERVICE_NAME:
         value: "portal-gateway"

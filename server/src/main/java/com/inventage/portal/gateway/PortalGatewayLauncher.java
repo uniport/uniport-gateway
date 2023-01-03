@@ -1,19 +1,29 @@
 package com.inventage.portal.gateway;
 
-import ch.qos.logback.classic.util.ContextInitializer;
-import com.inventage.portal.gateway.core.PortalGatewayVerticle;
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
-import io.vertx.core.Launcher;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.logging.SLF4JLogDelegateFactory;
-import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.core.PortalGatewayVerticle;
+
+import ch.qos.logback.classic.util.ContextInitializer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
+import io.vertx.core.Launcher;
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
+import io.vertx.micrometer.backends.BackendRegistries;
+import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
 
 /**
  * Custom Vert.x Launcher for the portal gateway.
@@ -23,6 +33,11 @@ public class PortalGatewayLauncher extends Launcher {
     private static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
     private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/portal-gateway";
     private static final String DEFAULT_LOGGING_CONFIG_FILE_NAME = "logback.xml";
+
+    private static final String METRICS_PORT_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PORT";
+    private static final int DEFAULT_METRICS_PORT = 9090;
+    private static final String METRICS_PATH_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PATH";
+    private static final String DEFAULT_METRICS_PATH = "/metrics";
 
     private static Logger logger;
 
@@ -49,8 +64,7 @@ public class PortalGatewayLauncher extends Launcher {
 
         if (loggingConfigPath.isPresent()) {
             logger.info("Using logback configuration file from '{}'", loggingConfigPath.get());
-        }
-        else {
+        } else {
             logger.info("No custom logback configuration file found");
         }
 
@@ -66,8 +80,8 @@ public class PortalGatewayLauncher extends Launcher {
             // thread blocking warnings
             System.setProperty("vertx.options.maxEventLoopExecuteTime", "600000000000");
         }
-        final String[] arguments = new String[]{"run", PortalGatewayVerticle.class.getName(), "--instances",
-            Runtime.numberOfVerticleInstances()};
+        final String[] arguments = new String[] { "run", PortalGatewayVerticle.class.getName(), "--instances",
+                Runtime.numberOfVerticleInstances() };
         new PortalGatewayLauncher().dispatch(arguments);
         logger.info("PortalGatewayLauncher started.");
     }
@@ -93,7 +107,7 @@ public class PortalGatewayLauncher extends Launcher {
 
         // take path from the default path
         loggingConfigFileName = String.format("%s/%s", DEFAULT_LOGGING_CONFIG_FILE_PATH,
-            DEFAULT_LOGGING_CONFIG_FILE_NAME);
+                DEFAULT_LOGGING_CONFIG_FILE_NAME);
         if (existsAsFile(loggingConfigFileName)) {
             return Optional.of(Path.of(loggingConfigFileName));
         }
@@ -109,9 +123,44 @@ public class PortalGatewayLauncher extends Launcher {
     public void beforeStartingVertx(VertxOptions options) {
         logger.info("Before starting Vertx");
         options.setTracingOptions(new OpenTelemetryOptions(configureOpenTelemetry()));
+        options.setMetricsOptions(new MicrometerMetricsOptions()
+                .setPrometheusOptions(configurePrometheus())
+                .setEnabled(true));
     }
 
-    public OpenTelemetry configureOpenTelemetry() {
+    @Override
+    public void afterStartingVertx(Vertx vertx) {
+        logger.info("After starting Vertx");
+        bindJVMMetrics();
+    }
+
+    private OpenTelemetry configureOpenTelemetry() {
         return OpenTelemetrySdkAutoConfiguration.initialize();
+    }
+
+    private VertxPrometheusOptions configurePrometheus() {
+        int metricsPort = DEFAULT_METRICS_PORT;
+        String metricsPortStr = System.getenv(METRICS_PORT_CONFIG_PROPERTY);
+        if (metricsPortStr != null) {
+            try {
+                metricsPort = Integer.parseInt(metricsPortStr);
+            } catch (NumberFormatException e) {
+            }
+        }
+
+        String metricsPath = System.getenv().getOrDefault(METRICS_PATH_CONFIG_PROPERTY, DEFAULT_METRICS_PATH);
+
+        logger.info("Configuring prometheus endpoint on port '{}' on path '{}'", metricsPort, metricsPath);
+        return new VertxPrometheusOptions()
+                .setEnabled(true)
+                .setStartEmbeddedServer(true)
+                .setEmbeddedServerOptions(new HttpServerOptions().setPort(metricsPort))
+                .setEmbeddedServerEndpoint(metricsPath);
+    }
+
+    private void bindJVMMetrics() {
+        MeterRegistry registry = BackendRegistries.getDefaultNow();
+        new JvmMemoryMetrics().bindTo(registry);
+        new ProcessorMetrics().bindTo(registry);
     }
 }
