@@ -20,6 +20,7 @@
         <docker.push.registry>docker-registry.inventage.com:10095</docker.push.registry>
         <docker.verbose>true</docker.verbose>
 
+        <docker-java.version>3.2.8</docker-java.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
         <opentelemetry.version>1.7.0</opentelemetry.version>
 
@@ -96,6 +97,11 @@
                 <version>1.10.0</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>4.4</version>
+            </dependency>
+            <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
                 <version>${junit-jupiter.version}</version>
@@ -148,6 +154,16 @@
                 <artifactId>smallrye-jwt-build</artifactId>
                 <scope>test</scope>
                 <version>3.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.docker-java</groupId>
+                <artifactId>docker-java-core</artifactId>
+                <version>${docker-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.docker-java</groupId>
+                <artifactId>docker-java-transport-httpclient5</artifactId>
+                <version>${docker-java.version}</version>
             </dependency>
             <!-- for using Eclipse MicroProfile Config (https://github.com/eclipse/microprofile-config/) -->
             <dependency>
