@@ -72,8 +72,7 @@ public class RequestResponseLogger implements Middleware {
             if (idToken.containsKey("preferred_username")) {
                 userId = idToken.getString("preferred_username");
             }
-        }
-        else if (principal.containsKey("access_token")) {
+        } else if (principal.containsKey("access_token")) {
             final JsonObject accessToken = decodeJWT(principal.getString("access_token"));
             if (accessToken.containsKey("preferred_username")) {
                 userId = accessToken.getString("preferred_username");

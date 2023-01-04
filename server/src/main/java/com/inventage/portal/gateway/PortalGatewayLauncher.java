@@ -14,7 +14,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.sdk.autoconfigure.OpenTelemetrySdkAutoConfiguration;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.vertx.core.Launcher;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -135,7 +135,8 @@ public class PortalGatewayLauncher extends Launcher {
     }
 
     private OpenTelemetry configureOpenTelemetry() {
-        return OpenTelemetrySdkAutoConfiguration.initialize();
+        // https://opentelemetry.io/docs/instrumentation/java/manual/#auto-configuration
+        return AutoConfiguredOpenTelemetrySdk.initialize().getOpenTelemetrySdk();
     }
 
     private VertxPrometheusOptions configurePrometheus() {
