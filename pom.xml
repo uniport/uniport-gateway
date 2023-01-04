@@ -46,6 +46,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-http-proxy</artifactId>
+                <version>4.3.7</version>
+            </dependency>
             <!-- logging facade -->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -84,12 +89,6 @@
                 <groupId>io.reactiverse</groupId>
                 <artifactId>reactiverse-contextual-logging</artifactId>
                 <version>1.1.2</version>
-            </dependency>
-            <!-- data pump for proxying -->
-            <dependency>
-                <groupId>com.inventage.vertx</groupId>
-                <artifactId>vertx-http-proxy</artifactId>
-                <version>1.0.0-202104101824-19-e161403</version>
             </dependency>
             <!-- for substituting variables in config via StringSubstitutor.replace -->
             <dependency>
@@ -443,12 +442,6 @@
 
     <!-- must be added as a server to ~/.m2/settings.xml -->
     <repositories>
-        <repository>
-            <!-- for accessing com.inventage.vertx.vertx-http-proxy -->
-            <id>inventage-projectware</id>
-            <name>Inventage Projectware</name>
-            <url>https://nexus.inventage.com/content/groups/projectware/</url>
-        </repository>
         <repository>
             <id>inventage-portal-group</id>
             <name>Inventage Portal Solution</name>

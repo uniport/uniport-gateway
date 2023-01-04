@@ -29,8 +29,8 @@ public class ProxyMiddleware implements Middleware {
     private int serverPort;
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
-        this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());
-        this.httpProxy.target(serverPort, serverHost);
+        this.httpProxy = HttpProxy.reverseProxy(vertx.createHttpClient());
+        this.httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
     }
