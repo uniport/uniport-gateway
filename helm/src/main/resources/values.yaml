@@ -25,7 +25,7 @@ pod:
 
 initContainers:
   init-portal-iam:
-    image: ${docker.registry}/busybox:1.35
+    image: ${docker.pull.registry}/busybox:1.35
     command:
       - "sh"
       - "-c"
