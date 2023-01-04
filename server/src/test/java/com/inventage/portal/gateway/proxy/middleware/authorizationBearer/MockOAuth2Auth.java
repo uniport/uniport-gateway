@@ -5,11 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
-import io.vertx.ext.auth.oauth2.OAuth2RBAC;
-import io.vertx.ext.auth.oauth2.impl.AccessTokenImpl;
 
 public class MockOAuth2Auth implements OAuth2Auth {
 
@@ -23,14 +19,13 @@ public class MockOAuth2Auth implements OAuth2Auth {
 
     @Override
     public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-        User user = this.createUser(this.principal);
+        User user = createUser(this.principal);
         resultHandler.handle(Future.succeededFuture(user));
     }
 
     @Override
-    public OAuth2Auth jWKSet(Handler<AsyncResult<Void>> handler) {
-        handler.handle(Future.succeededFuture());
-        return this;
+    public Future<Void> jWKSet() {
+        return Future.succeededFuture();
     }
 
     @Override
@@ -44,54 +39,26 @@ public class MockOAuth2Auth implements OAuth2Auth {
     }
 
     @Override
-    public OAuth2Auth refresh(User user, Handler<AsyncResult<User>> handler) {
+    public Future<User> refresh(User user) {
         this.principal.put("expires_in", refreshedExpiresIn);
-        User newUser = this.createUser(this.principal);
-        handler.handle(Future.succeededFuture(newUser));
-
-        return this;
+        User newUser = createUser(this.principal);
+        return Future.succeededFuture(newUser);
     }
 
     @Override
-    public OAuth2Auth revoke(User user, String tokenType, Handler<AsyncResult<Void>> handler) {
-        handler.handle(Future.succeededFuture());
-        return this;
+    public Future<Void> revoke(User user, String tokenType) {
+        return Future.succeededFuture();
     }
 
     @Override
-    public OAuth2Auth userInfo(User user, Handler<AsyncResult<JsonObject>> handler) {
+    public Future<JsonObject> userInfo(User user) {
         JsonObject userInfo = new JsonObject();
-        handler.handle(Future.succeededFuture(userInfo));
-        return this;
+        return Future.succeededFuture(userInfo);
     }
 
     @Override
     public String endSessionURL(User user, JsonObject params) {
         return "";
-    }
-
-    @Override
-    public OAuth2Auth decodeToken(String token, Handler<AsyncResult<AccessToken>> handler) {
-        AccessToken accessToken = new AccessTokenImpl();
-        handler.handle(Future.succeededFuture(accessToken));
-        return this;
-    }
-
-    @Override
-    public OAuth2Auth introspectToken(String token, String tokenType, Handler<AsyncResult<AccessToken>> handler) {
-        AccessToken accessToken = new AccessTokenImpl();
-        handler.handle(Future.succeededFuture(accessToken));
-        return this;
-    }
-
-    @Override
-    public OAuth2FlowType getFlowType() {
-        return OAuth2FlowType.CLIENT;
-    }
-
-    @Override
-    public OAuth2Auth rbacHandler(OAuth2RBAC rbac) {
-        return this;
     }
 
     public static User createUser(JsonObject json) {
@@ -123,5 +90,10 @@ public class MockOAuth2Auth implements OAuth2Auth {
         }
 
         return user;
+    }
+
+    @Override
+    public void close() {
+        return;
     }
 }

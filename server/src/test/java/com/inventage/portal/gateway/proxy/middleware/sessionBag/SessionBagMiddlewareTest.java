@@ -260,7 +260,8 @@ public class SessionBagMiddlewareTest {
 
             // setup proxy
             SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(sessionCookieName);
-            SessionBagMiddleware sessionBag = new SessionBagMiddleware(whitelistedCookies, "inventage-portal-gateway.session");
+            SessionBagMiddleware sessionBag = new SessionBagMiddleware(whitelistedCookies,
+                    "inventage-portal-gateway.session");
             ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
             Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);
@@ -357,7 +358,7 @@ public class SessionBagMiddlewareTest {
                 assertNotNull(actualSessionBagCookies, "Expected session bag to be present");
                 List<String> actualSessionBagCookiesStr = new ArrayList<String>();
                 for (io.netty.handler.codec.http.cookie.Cookie nettyCookie : actualSessionBagCookies) {
-                    Cookie c = new CookieImpl(nettyCookie);
+                    Cookie c = new CookieImpl(nettyCookie.name(), nettyCookie.value());
                     actualSessionBagCookiesStr.add(c.encode());
                 }
                 for (Cookie cookie : expectedSessionBagCookies) {
