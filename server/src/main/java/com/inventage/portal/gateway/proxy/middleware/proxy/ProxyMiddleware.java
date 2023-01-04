@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -35,14 +36,18 @@ public class ProxyMiddleware implements Middleware {
     private String serverHost;
     private int serverPort;
 
+    private List<Handler<StringBuilder>> incomingRequestURIModifiers;
+    private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
+
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
-        this.httpProxy = HttpProxy.reverseProxy(vertx.createHttpClient());
-        this.httpProxy.origin(serverPort, serverHost);
+        httpProxy = HttpProxy.reverseProxy(vertx.createHttpClient());
+        httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
 
-        addIncomingRequestInterceptor(this.httpProxy);
-        addOutgoingResponseInterceptor(this.httpProxy);
+        incomingRequestURIModifiers = new ArrayList<>();
+        outgoingResponseHeadersModifiers = new ArrayList<>();
+        applyModifiers(httpProxy);
     }
 
     @Override
@@ -50,56 +55,64 @@ public class ProxyMiddleware implements Middleware {
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
-                portFromHostValue(ctx.request().headers().get(X_FORWARDED_HOST),
+                portFromHostValue(
+                        ctx.request().headers().get(X_FORWARDED_HOST),
                         portFromHostValue(ctx.request().host(), -1))),
                 ctx.request().headers());
 
-        LOGGER.debug("Sending to '{}:{}{}'", this.serverHost, this.serverPort, ctx.request().uri());
+        captureModifiers(ctx);
+
+        LOGGER.debug("Sending to '{}:{}{}'", serverHost, serverPort, ctx.request().uri());
         httpProxy.handle(ctx.request());
     }
 
-    protected void addIncomingRequestInterceptor(HttpProxy proxy) {
+    // capture the modifiers set by previous middlewares for use by the proxy interceptors
+    protected void captureModifiers(RoutingContext ctx) {
+        final List<Handler<StringBuilder>> requestURImodifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
+        if (requestURImodifiers != null) {
+            incomingRequestURIModifiers.addAll(requestURImodifiers);
+        }
+
+        final List<Handler<MultiMap>> responseHeadersModifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
+        if (responseHeadersModifiers != null) {
+            outgoingResponseHeadersModifiers.addAll(responseHeadersModifiers);
+        }
+    }
+
+    protected void applyModifiers(HttpProxy proxy) {
         proxy.addInterceptor(new ProxyInterceptor() {
             @Override
             public Future<ProxyResponse> handleProxyRequest(ProxyContext ctx) {
                 ProxyRequest incomingRequest = ctx.request();
 
-                // TODO add request modifiers
-
-                // Does not work because the RoutingContext is different from the ProxyContext
-                // final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
-                // final List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS, List.class);
-                // if (modifiers != null) {
-                //     if (modifiers.size() > 1) {
-                //         LOGGER.info("Multiple URI modifiers declared: %s (total %d)", modifiers, modifiers.size());
-                //     }
-                //     for (Handler<StringBuilder> modifier : modifiers) {
-                //         modifier.handle(uri);
-                //     }
-                // }
-                // incomingRequest.setURI(uri.toString());
+                // modify URI
+                final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
+                final List<Handler<StringBuilder>> modifiers = incomingRequestURIModifiers;
+                if (modifiers != null) {
+                    if (modifiers.size() > 1) {
+                        LOGGER.info("Multiple URI modifiers declared: %s (total %d)", modifiers, modifiers.size());
+                    }
+                    for (Handler<StringBuilder> modifier : modifiers) {
+                        modifier.handle(uri);
+                    }
+                }
+                incomingRequest.setURI(uri.toString());
 
                 // Continue the interception chain
                 return ctx.sendRequest();
             }
-        });
-    }
 
-    protected void addOutgoingResponseInterceptor(HttpProxy proxy) {
-        proxy.addInterceptor(new ProxyInterceptor() {
             @Override
             public Future<Void> handleProxyResponse(ProxyContext ctx) {
                 ProxyResponse outgoingResponse = ctx.response();
 
-                // TODO add response modifers
-
-                // Does not work because the RoutingContext is different from the ProxyContext
-                // final List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS, List.class);
-                // if (modifiers != null) {
-                //     for (Handler<MultiMap> modifier : modifiers) {
-                //         modifier.handle(outgoingResponse.headers());
-                //     }
-                // }
+                // modify headers
+                final List<Handler<MultiMap>> modifiers = outgoingResponseHeadersModifiers;
+                if (modifiers != null) {
+                    for (Handler<MultiMap> modifier : modifiers) {
+                        modifier.handle(outgoingResponse.headers());
+                    }
+                }
 
                 // Continue the interception chain
                 return ctx.sendResponse();
