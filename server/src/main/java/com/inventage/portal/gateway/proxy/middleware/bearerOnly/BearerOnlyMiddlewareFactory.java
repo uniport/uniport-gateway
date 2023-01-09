@@ -43,16 +43,18 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
         final String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
         final JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
-        final JsonArray additionalClaims = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIMS);
+        final JsonArray additionalClaims = middlewareConfig
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIMS);
 
         final String publicKeyAlgorithm = middlewareConfig
-            .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
-        final String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL, "false");
+                .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256");
+        final String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL,
+                "false");
         final boolean optional = Boolean.parseBoolean(optionalStr);
 
         this.fetchPublicKey(vertx, middlewareConfig).onSuccess(publicKey -> {
             final String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
-                "-----END PUBLIC KEY-----");
+                    "-----END PUBLIC KEY-----");
 
             final JWTClaimOptions jwtOptions = new JWTClaimOptions();
             if (issuer != null) {
@@ -70,9 +72,9 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             }
 
             final JWTAuthOptions authConfig = new JWTAuthOptions()
-                .addPubSecKey(
-                    new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
-                .setJWTOptions(jwtOptions);
+                    .addPubSecKey(
+                            new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
+                    .setJWTOptions(jwtOptions);
 
             final JWTAuth authProvider = JWTAuthClaim.create(vertx, authConfig);
             final AuthenticationHandler authHandler = JWTAuthClaimHandler.create(authProvider);
@@ -102,8 +104,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         try {
             new URL(publicKey).toURI();
             isURL = true;
-        }
-        catch (MalformedURLException | URISyntaxException e) {
+        } catch (MalformedURLException | URISyntaxException e) {
             LOGGER.debug("URI is malformed: " + e.getMessage());
         }
 
@@ -121,8 +122,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         final URL parsedURL;
         try {
             parsedURL = new URL(rawUrl);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOGGER.info("Malformed URL '{}'", rawUrl);
             handler.handle(Future.failedFuture(e));
             return;
@@ -134,8 +134,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
         if (port <= 0) {
             if (protocol.endsWith("s")) {
                 port = 443;
-            }
-            else {
+            } else {
                 port = 80;
             }
         }

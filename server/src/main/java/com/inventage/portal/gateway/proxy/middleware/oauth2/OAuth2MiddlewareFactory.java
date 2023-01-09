@@ -48,7 +48,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         final String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-        final Route callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
+        final Route callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase())
+                .handler(BodyHandler.create());
 
         final OAuth2Options oauth2Options = new OAuth2Options()
                 .setClientID(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
@@ -103,8 +104,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
                 final String newAuthorizationPath = authorizationPath(publicUrl, uri);
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.warn("Failed to patch authorization path");
             }
 

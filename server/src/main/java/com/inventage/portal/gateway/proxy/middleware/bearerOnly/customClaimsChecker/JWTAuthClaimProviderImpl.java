@@ -74,8 +74,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 final KeyStore ks;
                 if (keyStore.getProvider() == null) {
                     ks = KeyStore.getInstance(keyStore.getType());
-                }
-                else {
+                } else {
                     ks = KeyStore.getInstance(keyStore.getType(), keyStore.getProvider());
                 }
 
@@ -110,9 +109,8 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 }
             }
 
-        }
-        catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException |
-               NoSuchProviderException e) {
+        } catch (KeyStoreException | IOException | FileSystemException | CertificateException | NoSuchAlgorithmException
+                | NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
     }
@@ -135,13 +133,11 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
             authInfo.checkValid(null);
             //Decode throws a IllegalStateException if the jwt format is not correct and a RuntimeException if the signature verification fails.
             payload = jwt.decode(authInfo.getToken());
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             LOGGER.warn(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(400, e)));
             return;
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             LOGGER.warn(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(401, e)));
             return;
@@ -158,8 +154,9 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
                     //Verify if the value stored in that path complies to the claim.
                     if (!verifyClaim(payloadValue, otherClaim.value, otherClaim.operator)) {
-                        throw new IllegalStateException(String.format("%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
-                            ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
+                        throw new IllegalStateException(String.format(
+                                "%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
+                                ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
                     }
                 }
             }
@@ -168,13 +165,13 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 final JsonArray target;
                 if (payload.getValue("aud") instanceof String) {
                     target = new JsonArray().add(payload.getValue("aud", ""));
-                }
-                else {
+                } else {
                     target = payload.getJsonArray("aud", EMPTY_ARRAY);
                 }
 
                 if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-                    throw new IllegalStateException("Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
+                    throw new IllegalStateException(
+                            "Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
                 }
             }
 
@@ -198,45 +195,41 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
             LOGGER.debug("Successful JWT verification");
             resultHandler.handle(Future.succeededFuture(user));
-        }
-        catch (RuntimeException | JsonProcessingException e) {
+        } catch (RuntimeException | JsonProcessingException e) {
             LOGGER.warn(e.getMessage());
             resultHandler.handle(Future.failedFuture(new HttpStatusException(403, e)));
         }
     }
 
-    private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator) throws JsonProcessingException {
+    private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator)
+            throws JsonProcessingException {
 
         //We need to convert the dynamic type of the payload to ensure compatibility when using method calls from external libraries.
         payloadValue = convertPayloadType(payloadValue);
 
-
         if (operator == JWTClaimOperator.EQUALS) {
             return verifyClaimEquals(payloadValue, claimValue);
-        }
-        else if (operator == JWTClaimOperator.CONTAINS) {
+        } else if (operator == JWTClaimOperator.CONTAINS) {
             return verifyClaimContains(payloadValue, claimValue);
-        }
-        else if (operator == JWTClaimOperator.EQUALS_SUBSTRING_WHITESPACE) {
+        } else if (operator == JWTClaimOperator.EQUALS_SUBSTRING_WHITESPACE) {
             final String[] array = payloadValue.toString().split(" ");
             final JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimEquals(payloadArray, claimValue);
-        }
-        else if (operator == JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE) {
+        } else if (operator == JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE) {
             final String[] array = payloadValue.toString().split(" ");
             final JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimContains(payloadArray, claimValue);
-        }
-        else {
-            throw new IllegalStateException(String.format("%s. No support for the following operator: %s", ERROR_MESSAGE, operator));
+        } else {
+            throw new IllegalStateException(
+                    String.format("%s. No support for the following operator: %s", ERROR_MESSAGE, operator));
         }
     }
 
     private static boolean verifyClaimEquals(Object payloadValue, Object claimValue) throws JsonProcessingException {
 
         if ((claimValue instanceof String && payloadValue instanceof String)
-            || (claimValue instanceof Number && payloadValue instanceof Number)
-            || (claimValue instanceof Boolean && payloadValue instanceof Boolean)) {
+                || (claimValue instanceof Number && payloadValue instanceof Number)
+                || (claimValue instanceof Boolean && payloadValue instanceof Boolean)) {
             return claimValue.equals(payloadValue);
         }
 
@@ -252,8 +245,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         if (payloadValue instanceof JsonArray) {
             final JsonArray payloadArray = (JsonArray) payloadValue;
             return verifyClaimContainsArray(payloadArray, claimArray);
-        }
-        else {
+        } else {
             for (Object claimItem : claimArray) {
                 if (verifyClaimEquals(payloadValue, claimItem)) {
                     return true;
@@ -263,7 +255,8 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         }
     }
 
-    private static boolean verifyClaimContainsArray(JsonArray payloadArray, JsonArray claimArray) throws JsonProcessingException {
+    private static boolean verifyClaimContainsArray(JsonArray payloadArray, JsonArray claimArray)
+            throws JsonProcessingException {
         //Every entry in the payload array must be contained in the claimed array
         boolean found = false;
         for (Object payloadItem : payloadArray) {
@@ -288,7 +281,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         if (payloadValue instanceof JSONArray) {
             payloadValue = new JsonArray(payloadValue.toString());
         }
-
 
         return payloadValue;
     }
@@ -330,7 +322,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
         // update the attributes
         result.attributes()
-            .put("accessToken", jwtToken);
+                .put("accessToken", jwtToken);
 
         // copy the expiration check properties + sub to the attributes root
         copyProperties(jwtToken, result.attributes(), "exp", "iat", "nbf", "sub");
@@ -344,7 +336,7 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
         // root claim meta data for JWT AuthZ
         result.attributes()
-            .put("rootClaim", "accessToken");
+                .put("rootClaim", "accessToken");
 
         final JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
         if (jsonPermissions != null) {
@@ -374,13 +366,11 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         for (int i = 0; i < keys.length; i++) {
             if (i == 0) {
                 obj = jwtToken.getJsonObject(keys[i]);
-            }
-            else if (i == keys.length - 1) {
+            } else if (i == keys.length - 1) {
                 if (obj != null) {
                     return obj.getJsonArray(keys[i]);
                 }
-            }
-            else {
+            } else {
                 if (obj != null) {
                     obj = obj.getJsonObject(keys[i]);
                 }

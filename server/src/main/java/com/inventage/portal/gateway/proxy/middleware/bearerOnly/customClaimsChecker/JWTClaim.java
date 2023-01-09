@@ -13,7 +13,6 @@ public class JWTClaim {
     final JWTClaimOperator operator;
     final Object value;
 
-
     /**
      * @param claimObject json Object containing the entries of the claim.
      *                    path: In JsonPath syntax (https://github.com/json-path/JsonPath), which describes the path to the entry in the payload to be checked.
@@ -22,7 +21,8 @@ public class JWTClaim {
      */
     public JWTClaim(JsonObject claimObject) {
         this.path = claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
-        this.operator = JWTClaimOperator.valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
+        this.operator = JWTClaimOperator
+                .valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
         this.value = claimObject.getValue(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE);
         validateCheck();
     }
@@ -39,6 +39,5 @@ public class JWTClaim {
         Validate.notNull(operator, "Operator can not be null");
         Validate.notNull(value, "Value can not be null");
     }
-
 
 }

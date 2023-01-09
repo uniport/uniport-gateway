@@ -49,7 +49,8 @@ public class MiddlewareServerBuilder {
         router = Router.router(vertx);
 
         final SessionStore sessionStore = LocalSessionStore.create(vertx);
-        final SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(SESSION_COOKIE_NAME);
+        final SessionHandler sessionHandler = SessionHandler.create(sessionStore)
+                .setSessionCookieName(SESSION_COOKIE_NAME);
         router.route().handler(sessionHandler);
     }
 
@@ -89,7 +90,7 @@ public class MiddlewareServerBuilder {
         OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         Future<Middleware> middlewareFuture = factory.create(vertx, router, oAuth2AuthConfig);
         int atMost = 20;
-        while(!middlewareFuture.isComplete() && atMost > 0){
+        while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
                 atMost--;
@@ -97,7 +98,7 @@ public class MiddlewareServerBuilder {
                 throw new RuntimeException(e);
             }
         }
-        if(middlewareFuture.failed()){
+        if (middlewareFuture.failed()) {
             throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
         }
         return withMiddleware(middlewareFuture.result());
@@ -115,7 +116,8 @@ public class MiddlewareServerBuilder {
             ctx.response().end();
         });
 
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(port).onComplete(testContext.succeedingThenComplete());
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
+                .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
@@ -124,13 +126,15 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler) throws InterruptedException {
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler)
+            throws InterruptedException {
         VertxTestContext testContext = new VertxTestContext();
         Router serviceRouter = Router.router(vertx);
 
         serviceRouter.route().handler(handler);
 
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(port).onComplete(testContext.succeedingThenComplete());
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
+                .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
@@ -155,9 +159,9 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withCustomSessionState(Map<String, Object> sessionEntries){
+    public MiddlewareServerBuilder withCustomSessionState(Map<String, Object> sessionEntries) {
         Handler<RoutingContext> handler = ctx -> {
-            sessionEntries.forEach((key, value) -> ctx.session().put(key,value));
+            sessionEntries.forEach((key, value) -> ctx.session().put(key, value));
             ctx.next();
         };
         router.route().handler(handler);

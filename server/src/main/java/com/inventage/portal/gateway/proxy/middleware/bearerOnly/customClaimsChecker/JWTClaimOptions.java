@@ -36,5 +36,3 @@ public class JWTClaimOptions extends JWTOptions {
         return claimList;
     }
 }
-
-
