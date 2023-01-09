@@ -1,9 +1,24 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
@@ -13,18 +28,6 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
 public class BearerOnlyMiddlewareTest {
@@ -106,7 +109,7 @@ public class BearerOnlyMiddlewareTest {
                 .incomingRequest(testCtx,
                         new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
                             // then
-                            assertEquals(403, resp.statusCode(), "unexpected status code");
+                            assertEquals(401, resp.statusCode(), "unexpected status code");
                             testCtx.completeNow();
                         });
     }
@@ -129,7 +132,7 @@ public class BearerOnlyMiddlewareTest {
                 .incomingRequest(testCtx,
                         new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
                             // then
-                            assertEquals(403, resp.statusCode(), "unexpected status code");
+                            assertEquals(401, resp.statusCode(), "unexpected status code");
                             testCtx.completeNow();
                         });
     }

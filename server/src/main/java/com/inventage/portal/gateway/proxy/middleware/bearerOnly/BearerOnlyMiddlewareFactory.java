@@ -1,11 +1,18 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -20,12 +27,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 
 public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
@@ -67,7 +69,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             }
 
             if (additionalClaims != null) {
-                jwtOptions.setOtherClaims(additionalClaims);
+                jwtOptions.setAdditionalClaims(additionalClaims);
                 LOGGER.debug("With claims '{}'", additionalClaims);
             }
 
@@ -77,7 +79,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                     .setJWTOptions(jwtOptions);
 
             final JWTAuth authProvider = JWTAuthClaim.create(vertx, authConfig);
-            final AuthenticationHandler authHandler = JWTAuthClaimHandler.create(authProvider);
+            final AuthenticationHandler authHandler = JWTAuthHandler.create(authProvider);
 
             bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);

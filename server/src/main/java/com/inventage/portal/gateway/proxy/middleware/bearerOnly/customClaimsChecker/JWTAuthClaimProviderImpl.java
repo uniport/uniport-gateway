@@ -1,33 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.file.FileSystemException;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.KeyStoreOptions;
-import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.authentication.Credentials;
-import io.vertx.ext.auth.authentication.TokenCredentials;
-import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.impl.jose.JWK;
-import io.vertx.ext.auth.impl.jose.JWT;
-import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
-import net.minidev.json.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,30 +9,59 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * In order for our custom jwt claim check to be invoked, we copied and modified some classes of the vertx library.
- * This class is a copy of its superclass, with the difference that in the create method we return our customized implementation for the jwt verification
- * We extend the built-in JWTAuth verifier to support further claims checks.
- */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.FileSystemException;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.authentication.TokenCredentials;
+import io.vertx.ext.auth.impl.jose.JWK;
+import io.vertx.ext.auth.impl.jose.JWT;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.HttpException;
+import net.minidev.json.JSONArray;
+
+/*
+ * In order for our custom jwt claim check to work, some classes of the vertx library are copied and modified.
+ * This class contains some copy-pastes of its superclass. The reason being is that we need to have access to the jwt field to parse the signed token.
+ * Unfortunately this field is private in the superclass. Hence the constructor is mostly copied to init a local JWT instance.
+ * https://github.com/vert-x3/vertx-auth/blob/4.3.7/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java
+ */
 public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthClaimProviderImpl.class);
 
     private final JWT jwt = new JWT();
 
-    private final JWTOptions jwtOptions;
-    private static final JsonArray EMPTY_ARRAY = new JsonArray();
     private final String permissionsClaimKey;
+    private final JWTOptions jwtOptions;
+
+    private final List<JWTClaim> additionalJWTClaims;
+
     private static final String ERROR_MESSAGE = "Invalid JWT token: Payload does not comply to claims.";
 
     public JWTAuthClaimProviderImpl(Vertx vertx, JWTAuthOptions config) {
         super(vertx, config);
+
+        // NOTE: the following is exactly the same as the super.constructor() but we need access to private the super.jwt field
         this.permissionsClaimKey = config.getPermissionsClaimKey();
         this.jwtOptions = config.getJWTOptions();
         // set the nonce algorithm
@@ -80,10 +81,15 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
                 // synchronize on the class to avoid the case where multiple file accesses will overlap
                 synchronized (JWTAuthProviderImpl.class) {
-                    final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getPath());
+                    String path = keyStore.getPath();
+                    if (path != null) {
+                        final Buffer keystore = vertx.fileSystem().readFileBlocking(keyStore.getPath());
 
-                    try (InputStream in = new ByteArrayInputStream(keystore.getBytes())) {
-                        ks.load(in, keyStore.getPassword().toCharArray());
+                        try (InputStream in = new ByteArrayInputStream(keystore.getBytes())) {
+                            ks.load(in, keyStore.getPassword().toCharArray());
+                        }
+                    } else {
+                        ks.load(null, keyStore.getPassword().toCharArray());
                     }
                 }
                 // load all available keys in the keystore
@@ -105,7 +111,11 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
 
             if (jwks != null) {
                 for (JsonObject jwk : jwks) {
-                    this.jwt.addJWK(new JWK(jwk));
+                    try {
+                        jwt.addJWK(new JWK(jwk));
+                    } catch (Exception e) {
+                        LOGGER.warn("Unsupported JWK", e);
+                    }
                 }
             }
 
@@ -113,92 +123,64 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
                 | NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
-    }
 
-    @Override
-    public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
-        authenticate(new TokenCredentials(authInfo.getString("token")), resultHandler);
+        // initialize additional claims
+        if (config.getJWTOptions() != null && config.getJWTOptions() instanceof JWTClaimOptions) {
+            additionalJWTClaims = ((JWTClaimOptions) config.getJWTOptions()).getClaims();
+        } else {
+            additionalJWTClaims = List.of();
+        }
     }
 
     /**
      * This method conducts checks if the payload complies to the custom claims.
      */
     @Override
-    public void authenticate(Credentials credentials, Handler<AsyncResult<User>> resultHandler) {
+    public Future<User> authenticate(Credentials credentials) {
+        Future<User> user = super.authenticate(credentials);
+
+        if (user.failed()) {
+            return user;
+        }
+
         final TokenCredentials authInfo;
-        final JsonObject payload;
-
         try {
+            // cast
             authInfo = (TokenCredentials) credentials;
+            // check
             authInfo.checkValid(null);
-            //Decode throws a IllegalStateException if the jwt format is not correct and a RuntimeException if the signature verification fails.
-            payload = jwt.decode(authInfo.getToken());
-        } catch (IllegalStateException e) {
-            LOGGER.warn(e.getMessage());
-            resultHandler.handle(Future.failedFuture(new HttpStatusException(400, e)));
-            return;
         } catch (RuntimeException e) {
-            LOGGER.warn(e.getMessage());
-            resultHandler.handle(Future.failedFuture(new HttpStatusException(401, e)));
-            return;
+            return Future.failedFuture(e);
         }
 
+        final JsonObject payload;
         try {
-            if (this.jwtOptions instanceof JWTClaimOptions) {
-                final List<JWTClaim> otherClaims = ((JWTClaimOptions) this.jwtOptions).getClaims();
-
-                for (JWTClaim otherClaim : otherClaims) {
-                    //Claims are provided by the dynamic configuration file. We verify that each payload complies with the claims defined in the configuration
-                    //Throws an exception if the path does not exist in the payload
-                    final var payloadValue = JsonPath.read(payload.toString(), otherClaim.path);
-
-                    //Verify if the value stored in that path complies to the claim.
-                    if (!verifyClaim(payloadValue, otherClaim.value, otherClaim.operator)) {
-                        throw new IllegalStateException(String.format(
-                                "%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
-                                ERROR_MESSAGE, otherClaim.path, otherClaim.operator, otherClaim.value, payloadValue));
-                    }
-                }
-            }
-
-            if (jwtOptions.getAudience() != null) {
-                final JsonArray target;
-                if (payload.getValue("aud") instanceof String) {
-                    target = new JsonArray().add(payload.getValue("aud", ""));
-                } else {
-                    target = payload.getJsonArray("aud", EMPTY_ARRAY);
-                }
-
-                if (Collections.disjoint(jwtOptions.getAudience(), target.getList())) {
-                    throw new IllegalStateException(
-                            "Invalid JWT audience. expected: " + Json.encode(jwtOptions.getAudience()));
-                }
-            }
-
-            if (jwtOptions.getIssuer() != null) {
-                if (!jwtOptions.getIssuer().equals(payload.getString("iss"))) {
-                    throw new IllegalStateException("Invalid JWT issuer. expected: " + jwtOptions.getIssuer());
-                }
-            }
-
-            if (!jwt.isScopeGranted(payload, jwtOptions)) {
-                throw new IllegalStateException("Invalid JWT token: missing required scopes");
-            }
-
-            final User user = createUser(authInfo.getToken(), payload, permissionsClaimKey);
-
-            if (user.expired(jwtOptions.getLeeway())) {
-                if (!jwtOptions.isIgnoreExpiration()) {
-                    throw new IllegalStateException("Invalid JWT token: token expired.");
-                }
-            }
-
-            LOGGER.debug("Successful JWT verification");
-            resultHandler.handle(Future.succeededFuture(user));
-        } catch (RuntimeException | JsonProcessingException e) {
-            LOGGER.warn(e.getMessage());
-            resultHandler.handle(Future.failedFuture(new HttpStatusException(403, e)));
+            payload = jwt.decode(authInfo.getToken());
+        } catch (RuntimeException e) {
+            return Future.failedFuture(e);
         }
+
+        // Check that all required additional claims are present
+        try {
+            for (JWTClaim additionalClaim : additionalJWTClaims) {
+                // Claims are provided by the dynamic configuration file.
+                // We verify that each payload complies with the claims defined in the configuration
+                // Throws an exception if the path does not exist in the payload
+                final var payloadValue = JsonPath.read(payload.toString(), additionalClaim.path);
+
+                // Verify if the value stored in that path complies to the claim.
+                if (!verifyClaim(payloadValue, additionalClaim.value, additionalClaim.operator)) {
+                    throw new IllegalStateException(String.format(
+                            "%s Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
+                            ERROR_MESSAGE, additionalClaim.path, additionalClaim.operator, additionalClaim.value,
+                            payloadValue));
+                }
+            }
+        } catch (RuntimeException | JsonProcessingException e) {
+            return Future.failedFuture(e);
+        }
+
+        return user;
     }
 
     private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator)
@@ -226,7 +208,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
     }
 
     private static boolean verifyClaimEquals(Object payloadValue, Object claimValue) throws JsonProcessingException {
-
         if ((claimValue instanceof String && payloadValue instanceof String)
                 || (claimValue instanceof Number && payloadValue instanceof Number)
                 || (claimValue instanceof Boolean && payloadValue instanceof Boolean)) {
@@ -283,100 +264,6 @@ public class JWTAuthClaimProviderImpl extends JWTAuthProviderImpl {
         }
 
         return payloadValue;
-    }
-
-    @Override
-    public String generateToken(JsonObject claims, final JWTOptions options) {
-        final JsonObject claimsCopy = claims.copy();
-
-        // we do some "enhancement" of the claims to support roles and permissions
-        if (options.getPermissions() != null && !claimsCopy.containsKey(permissionsClaimKey)) {
-            claimsCopy.put(permissionsClaimKey, new JsonArray(options.getPermissions()));
-        }
-
-        return jwt.sign(claimsCopy, options);
-    }
-
-    @Override
-    public String generateToken(JsonObject claims) {
-        return generateToken(claims, jwtOptions);
-    }
-
-    private static JsonArray getJsonPermissions(JsonObject jwtToken, String permissionsClaimKey) {
-        if (permissionsClaimKey.contains("/")) {
-            return getNestedJsonValue(jwtToken, permissionsClaimKey);
-        }
-        return jwtToken.getJsonArray(permissionsClaimKey, null);
-    }
-
-    private static final Collection<String> SPECIAL_KEYS = Arrays.asList("access_token", "exp", "iat", "nbf");
-
-    /**
-     * @deprecated This method is deprecated as it introduces an exception to the internal representation of {@link User}
-     * object data.
-     * In the future a simple call to User.create() should be used
-     */
-    @Deprecated
-    private User createUser(String accessToken, JsonObject jwtToken, String permissionsClaimKey) {
-        final User result = User.fromToken(accessToken);
-
-        // update the attributes
-        result.attributes()
-                .put("accessToken", jwtToken);
-
-        // copy the expiration check properties + sub to the attributes root
-        copyProperties(jwtToken, result.attributes(), "exp", "iat", "nbf", "sub");
-        // as the token is immutable, the decoded values will be added to the principal
-        // with the exception of the above ones
-        for (String key : jwtToken.fieldNames()) {
-            if (!SPECIAL_KEYS.contains(key)) {
-                result.principal().put(key, jwtToken.getValue(key));
-            }
-        }
-
-        // root claim meta data for JWT AuthZ
-        result.attributes()
-                .put("rootClaim", "accessToken");
-
-        final JsonArray jsonPermissions = getJsonPermissions(jwtToken, permissionsClaimKey);
-        if (jsonPermissions != null) {
-            for (Object item : jsonPermissions) {
-                if (item instanceof String) {
-                    final String permission = (String) item;
-                    result.authorizations().add("jwt-authentication", PermissionBasedAuthorization.create(permission));
-                }
-            }
-        }
-        return result;
-    }
-
-    private static void copyProperties(JsonObject source, JsonObject target, String... keys) {
-        if (source != null && target != null) {
-            for (String key : keys) {
-                if (source.containsKey(key) && !target.containsKey(key)) {
-                    target.put(key, source.getValue(key));
-                }
-            }
-        }
-    }
-
-    private static JsonArray getNestedJsonValue(JsonObject jwtToken, String permissionsClaimKey) {
-        final String[] keys = permissionsClaimKey.split("/");
-        JsonObject obj = null;
-        for (int i = 0; i < keys.length; i++) {
-            if (i == 0) {
-                obj = jwtToken.getJsonObject(keys[i]);
-            } else if (i == keys.length - 1) {
-                if (obj != null) {
-                    return obj.getJsonArray(keys[i]);
-                }
-            } else {
-                if (obj != null) {
-                    obj = obj.getJsonObject(keys[i]);
-                }
-            }
-        }
-        return null;
     }
 
 }

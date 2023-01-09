@@ -1,13 +1,20 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -25,12 +32,6 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 import io.vertx.junit5.VertxTestContext;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MiddlewareServerBuilder {
 
@@ -67,7 +68,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider, boolean optional) {
-        return withMiddleware(new BearerOnlyMiddleware(JWTAuthClaimHandler.create(authProvider), optional));
+        return withMiddleware(new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {

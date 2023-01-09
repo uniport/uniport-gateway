@@ -11,28 +11,29 @@ import java.util.List;
 /**
  * The JWTOptions are part of the authentication configuration. By default, JWTOptions does not support custom claims.
  * We extend the JWTOptions by adding a list of our custom claims.
+ * https://github.com/vert-x3/vertx-auth/blob/4.0.3/vertx-auth-common/src/main/java/io/vertx/ext/auth/JWTOptions.java
  */
 public class JWTClaimOptions extends JWTOptions {
 
-    private final List<JWTClaim> claimList = new ArrayList<>();
+    private final List<JWTClaim> additionalClaims = new ArrayList<>();
 
-    public JWTClaimOptions setOtherClaims(JsonArray claims) {
+    public JWTClaimOptions setAdditionalClaims(JsonArray claims) {
         Validate.notNull(claims, "Claims can not be null");
         if (claims != null) {
             for (Object claim : claims) {
-                claimList.add(new JWTClaim((JsonObject) claim));
+                additionalClaims.add(new JWTClaim((JsonObject) claim));
             }
         }
         return this;
     }
 
-    public JWTClaimOptions setOtherClaims(List<JWTClaim> claims) {
+    public JWTClaimOptions setAdditionalClaims(List<JWTClaim> claims) {
         Validate.notNull(claims, "Claims can not be null");
-        this.claimList.addAll(claims);
+        this.additionalClaims.addAll(claims);
         return this;
     }
 
     public List<JWTClaim> getClaims() {
-        return claimList;
+        return additionalClaims;
     }
 }

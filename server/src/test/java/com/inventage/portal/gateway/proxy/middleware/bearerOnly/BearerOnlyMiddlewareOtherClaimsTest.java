@@ -1,5 +1,19 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
@@ -7,6 +21,7 @@ import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChec
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
@@ -15,18 +30,6 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * A series of tests to check that the implementation of custom claims behaves correctly.
@@ -90,7 +93,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']",
                                 JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
                                 Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
-                final List<JWTClaim> claims = List.of(claimContainRole, claimEqualString, claimEqualObject,
+                final List<JWTClaim> expectedClaims = List.of(claimContainRole, claimEqualString, claimEqualObject,
                                 claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
 
                 final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
@@ -99,7 +102,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
 
                 portalGateway(vertx, host, port)
                                 .withBearerOnlyMiddlewareOtherClaims(
-                                                jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
+                                                jwtAuth(vertx, expectedIssuer, expectedAudience, expectedClaims), false)
                                 .build()
                                 //when
                                 .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
@@ -161,7 +164,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                                 .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                                                 bearer(invalidStringToken)), (resp) -> {
                                                         // then
-                                                        assertEquals(403, resp.statusCode(), "unexpected status code");
+                                                        assertEquals(401, resp.statusCode(), "unexpected status code");
                                                         testCtx.completeNow();
                                                 });
         }
@@ -171,7 +174,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 //given
                 final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS,
                                 Boolean.FALSE);
-                final List<JWTClaim> claims = List.of(claimEqualBoolean);
+                final List<JWTClaim> expectedClaims = List.of(claimEqualBoolean);
 
                 JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate).add("email-verified",
                                 true).build();
@@ -183,13 +186,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
 
                 portalGateway(vertx, host, port)
                                 .withBearerOnlyMiddlewareOtherClaims(
-                                                jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
+                                                jwtAuth(vertx, expectedIssuer, expectedAudience, expectedClaims), false)
                                 .build()
                                 //when
                                 .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                                                 bearer(invalidToken)), (resp) -> {
                                                         // then
-                                                        assertEquals(403, resp.statusCode(), "unexpected status code");
+                                                        assertEquals(401, resp.statusCode(), "unexpected status code");
                                                         testCtx.completeNow();
                                                 });
         }
@@ -201,7 +204,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                                 JWTClaimOperator.CONTAINS,
                                 Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
                                                 .build());
-                final List<JWTClaim> claims = List.of(claimContainRole);
+                final List<JWTClaim> expectedClaims = List.of(claimContainRole);
 
                 JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate)
                                 .add("resource_access", Json.createObjectBuilder()
@@ -217,13 +220,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
 
                 portalGateway(vertx, host, port)
                                 .withBearerOnlyMiddlewareOtherClaims(
-                                                jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
+                                                jwtAuth(vertx, expectedIssuer, expectedAudience, expectedClaims), false)
                                 .build()
                                 //when
                                 .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                                                 bearer(invalidToken)), (resp) -> {
                                                         // then
-                                                        assertEquals(403, resp.statusCode(), "unexpected status code");
+                                                        assertEquals(401, resp.statusCode(), "unexpected status code");
                                                         testCtx.completeNow();
                                                 });
         }
@@ -240,7 +243,8 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 return JWTAuthClaim.create(vertx, new JWTAuthOptions()
                                 .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm)
                                                 .setBuffer(publicKeyRS256))
-                                .setJWTOptions(new JWTClaimOptions().setOtherClaims(claims).setIssuer(expectedIssuer)
+                                .setJWTOptions(new JWTClaimOptions().setAdditionalClaims(claims)
+                                                .setIssuer(expectedIssuer)
                                                 .setAudience(expectedAudience)));
         }
 
