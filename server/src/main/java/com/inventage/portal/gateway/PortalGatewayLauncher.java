@@ -68,10 +68,6 @@ public class PortalGatewayLauncher extends Launcher {
             logger.info("No custom logback configuration file found");
         }
 
-        // enable metrics
-        System.setProperty("vertx.metrics.options.enabled", "true");
-        // name of the metrics registry
-        System.setProperty("vertx.metrics.options.registryName", "PortalGatewayMetrics");
         // increase timeout for worker execution to 2 min
         System.setProperty("vertx.options.maxWorkerExecuteTime", "240000000000");
 
@@ -146,6 +142,7 @@ public class PortalGatewayLauncher extends Launcher {
             try {
                 metricsPort = Integer.parseInt(metricsPortStr);
             } catch (NumberFormatException e) {
+                // default is applied
             }
         }
 
@@ -153,10 +150,10 @@ public class PortalGatewayLauncher extends Launcher {
 
         logger.info("Configuring prometheus endpoint on port '{}' on path '{}'", metricsPort, metricsPath);
         return new VertxPrometheusOptions()
-                .setEnabled(true)
                 .setStartEmbeddedServer(true)
                 .setEmbeddedServerOptions(new HttpServerOptions().setPort(metricsPort))
-                .setEmbeddedServerEndpoint(metricsPath);
+                .setEmbeddedServerEndpoint(metricsPath)
+                .setEnabled(true);
     }
 
     private void bindJVMMetrics() {

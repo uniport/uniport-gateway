@@ -23,7 +23,7 @@
         <docker-java.version>3.2.8</docker-java.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
         <opentelemetry.version>1.21.0</opentelemetry.version>
-        <micrometer.version>1.10.2</micrometer.version>
+        <micrometer.version>1.9.5</micrometer.version>        <!-- should be in sync with vertx-micrometer-metrics micrometer version -->
 
         <jib.goal>build</jib.goal>
 
