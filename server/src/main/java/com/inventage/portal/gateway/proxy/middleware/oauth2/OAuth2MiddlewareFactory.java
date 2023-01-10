@@ -52,7 +52,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .handler(BodyHandler.create());
 
         final OAuth2Options oauth2Options = new OAuth2Options()
-                .setClientID(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
+                .setClientId(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
                 .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
                 .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
                 .setValidateIssuer(false);

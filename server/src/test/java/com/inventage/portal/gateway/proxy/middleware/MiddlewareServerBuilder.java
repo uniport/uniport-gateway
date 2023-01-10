@@ -94,16 +94,14 @@ public class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) {
         OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         Future<Middleware> middlewareFuture = factory.create(vertx, router, oAuth2AuthConfig);
-        int atMost = 20;
-        while (!middlewareFuture.isComplete() && atMost > 0) {
+        while (!middlewareFuture.isComplete()) { // eventually aborted by the test context
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
-                atMost--;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        if (middlewareFuture.failed()) {
+        if (!middlewareFuture.isComplete() || middlewareFuture.failed()) {
             throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
         }
         return withMiddleware(middlewareFuture.result());

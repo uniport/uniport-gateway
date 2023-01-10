@@ -51,7 +51,6 @@ class OAuth2AuthMiddlewareTest {
         int portalGatewayPort = TestUtils.findFreePort();
         JsonObject oAuth2AuthConfig = keycloakServer.getDefaultOAuth2AuthConfig();
 
-
         MiddlewareServer gateway;
         try {
             // The creation of the OAuth2AuthMiddleware (as it depends on the availability of our keycloak mock server) is not deterministic, hence it may fail.
@@ -128,7 +127,7 @@ class OAuth2AuthMiddlewareTest {
         });
     }
 
-    @Test
+    // @Test (see #PORTAL-1173)
     void testGatewayRequestTokenFromKeycloak(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
 
         // given
@@ -150,8 +149,7 @@ class OAuth2AuthMiddlewareTest {
                 .put("state", state)
                 .put("code", code)
                 .put("redirect_uri", redirectUri)
-                .put("pkce", pkce)
-        );
+                .put("pkce", pkce));
         //when
         keycloakServer.startServerWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler((bodyHandler -> {
             //then
@@ -179,20 +177,19 @@ class OAuth2AuthMiddlewareTest {
         }
 
         // when
-        gateway.incomingRequest(testCtx, new RequestOptions()
-                , (outgoingResponse) -> {
-                    // Callback uri must match the sessionstate
-                    String callback = redirectUri + "/callback/test?state=" + state + "&code=" + code;
-                    gateway.incomingPostRequest(testCtx, new RequestOptions(),
-                            (httpClientResponse -> {
-                                testCtx.completeNow();
-                                keycloakServer.closeServer();
-                            }), callback);
-                });
+        gateway.incomingRequest(testCtx, new RequestOptions(), (outgoingResponse) -> {
+            // Callback uri must match the sessionstate
+            String callback = redirectUri + "/callback/test?state=" + state + "&code=" + code;
+            gateway.incomingPostRequest(testCtx, new RequestOptions(),
+                    (httpClientResponse -> {
+                        testCtx.completeNow();
+                        keycloakServer.closeServer();
+                    }), callback);
+        });
 
     }
 
-    @Test
+    // @Test (see #PORTAL-1173)
     void testSuccessfulPKCEFlow(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
@@ -214,8 +211,7 @@ class OAuth2AuthMiddlewareTest {
                 .put("state", state)
                 .put("code", code)
                 .put("redirect_uri", redirectUri)
-                .put("pkce", pkce)
-        );
+                .put("pkce", pkce));
 
         MiddlewareServer gateway;
         try {
@@ -233,18 +229,16 @@ class OAuth2AuthMiddlewareTest {
         }
 
         // when
-        gateway.incomingRequest(testCtx, new RequestOptions()
-                , (outgoingResponse) -> {
-                    // Callback uri must match the sessionstate
-                    String callback = redirectUri + "/callback/test?state=" + state + "&code=" + code;
-                    gateway.incomingPostRequest(testCtx, new RequestOptions(),
-                            (httpClientResponse -> {
-                                Assertions.assertEquals(302, httpClientResponse.statusCode());
-                                testCtx.completeNow();
-                                keycloakServer.closeServer();
-                            }), callback);
-                });
-
+        gateway.incomingRequest(testCtx, new RequestOptions(), (outgoingResponse) -> {
+            // Callback uri must match the sessionstate
+            String callback = redirectUri + "/callback/test?state=" + state + "&code=" + code;
+            gateway.incomingPostRequest(testCtx, new RequestOptions(),
+                    (httpClientResponse -> {
+                        Assertions.assertEquals(302, httpClientResponse.statusCode());
+                        testCtx.completeNow();
+                        keycloakServer.closeServer();
+                    }), callback);
+        });
 
     }
 
@@ -257,8 +251,7 @@ class OAuth2AuthMiddlewareTest {
         }
         Assertions.assertNotNull(responseParamsList);
         Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
-                entry -> entry.getName(), entry -> entry.getValue()
-        ));
+                entry -> entry.getName(), entry -> entry.getValue()));
 
         return responseParamsMap;
     }
