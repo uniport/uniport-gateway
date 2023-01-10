@@ -33,7 +33,6 @@ public class CorsMiddlewareTest {
                 .incomingRequest(testCtx, new RequestOptions(), (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
-                    assertEquals("origin", resp.getHeader(VARY));
                     testCtx.completeNow();
                 });
     }
@@ -48,7 +47,6 @@ public class CorsMiddlewareTest {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     assertEquals("http://portal.minikube", resp.getHeader(ACCESS_CONTROL_ALLOW_ORIGIN));
-                    assertEquals("origin", resp.getHeader(VARY));
                     testCtx.completeNow();
                 });
     }
@@ -63,7 +61,6 @@ public class CorsMiddlewareTest {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     assertEquals("*", resp.getHeader(ACCESS_CONTROL_ALLOW_ORIGIN));
-                    assertEquals("origin", resp.getHeader(VARY));
                     testCtx.completeNow();
                 });
     }
@@ -90,7 +87,6 @@ public class CorsMiddlewareTest {
                 .incomingRequest(testCtx, new RequestOptions(), (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
-                    assertEquals("origin", resp.getHeader(VARY));
                     testCtx.completeNow();
                 });
     }

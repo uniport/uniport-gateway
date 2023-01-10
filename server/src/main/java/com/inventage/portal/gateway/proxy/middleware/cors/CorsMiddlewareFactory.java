@@ -23,6 +23,6 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         //LOGGER.debug("'{}' middleware", DynamicConfiguration.MIDDLEWARE_CORS);
-        return Future.succeededFuture(new CorsMiddleware(router, "http://localhost"));
+        return Future.succeededFuture(new CorsMiddleware("http://localhost"));
     }
 }

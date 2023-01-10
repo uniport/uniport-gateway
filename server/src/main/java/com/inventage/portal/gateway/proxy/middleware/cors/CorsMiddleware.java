@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import io.vertx.ext.web.Router;
+
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
 
@@ -12,12 +12,14 @@ import io.vertx.ext.web.handler.CorsHandler;
  */
 public class CorsMiddleware implements Middleware {
 
-    public CorsMiddleware(Router router, String allowedOrigin) {
-        router.route().handler(CorsHandler.create(allowedOrigin));
+    private CorsHandler corsHandler;
+
+    public CorsMiddleware(String allowedOrigin) {
+        this.corsHandler = CorsHandler.create().addOrigin(allowedOrigin);
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        routingContext.next();
+        corsHandler.handle(routingContext);
     }
 }

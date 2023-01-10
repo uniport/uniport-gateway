@@ -60,7 +60,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
-        return withMiddleware(new CorsMiddleware(router, allowedOrigin));
+        return withMiddleware(new CorsMiddleware(allowedOrigin));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) {
