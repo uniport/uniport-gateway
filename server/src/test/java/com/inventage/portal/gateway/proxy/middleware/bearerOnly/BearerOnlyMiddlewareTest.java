@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 
 import io.vertx.core.Vertx;
@@ -165,7 +164,7 @@ public class BearerOnlyMiddlewareTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return JWTAuthClaim.create(vertx,
+        return JWTAuth.create(vertx,
                 new JWTAuthOptions()
                         .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
                         .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));

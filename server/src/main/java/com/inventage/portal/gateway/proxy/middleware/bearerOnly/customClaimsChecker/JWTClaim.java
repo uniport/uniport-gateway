@@ -22,11 +22,11 @@ public class JWTClaim {
      *                    value: The claim value, that is compared to the payload entry
      */
     public JWTClaim(JsonObject claimObject) {
-        this.path = claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
-        this.operator = JWTClaimOperator
-                .valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
-        this.value = claimObject.getValue(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE);
-        validateCheck();
+        this(
+                claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_PATH),
+                JWTClaimOperator
+                        .valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR)),
+                claimObject.getValue(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
     }
 
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {

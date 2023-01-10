@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaim;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTClaimOptions;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -20,6 +20,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -27,7 +28,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
-import io.vertx.ext.web.handler.JWTAuthHandler;
 
 public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
 
@@ -58,7 +58,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             final String publicKeyInPEMFormat = String.join("\n", "-----BEGIN PUBLIC KEY-----", publicKey,
                     "-----END PUBLIC KEY-----");
 
-            final JWTClaimOptions jwtOptions = new JWTClaimOptions();
+            final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
                 LOGGER.debug("With issuer '{}'", issuer);
@@ -68,18 +68,21 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
                 LOGGER.debug("With audience '{}'", audience);
             }
 
-            if (additionalClaims != null) {
-                jwtOptions.setAdditionalClaims(additionalClaims);
-                LOGGER.debug("With claims '{}'", additionalClaims);
-            }
-
             final JWTAuthOptions authConfig = new JWTAuthOptions()
                     .addPubSecKey(
                             new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyInPEMFormat))
                     .setJWTOptions(jwtOptions);
 
-            final JWTAuth authProvider = JWTAuthClaim.create(vertx, authConfig);
-            final AuthenticationHandler authHandler = JWTAuthHandler.create(authProvider);
+            final JWTAuthAdditionalClaimsOptions additionalClaimsOptions = new JWTAuthAdditionalClaimsOptions();
+
+            if (additionalClaims != null) {
+                additionalClaimsOptions.setAdditionalClaims(additionalClaims);
+                LOGGER.debug("With claims '{}'", additionalClaims);
+            }
+
+            final JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
+            final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider,
+                    additionalClaimsOptions);
 
             bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);

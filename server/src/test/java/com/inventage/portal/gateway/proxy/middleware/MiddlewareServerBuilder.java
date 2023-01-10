@@ -8,6 +8,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
+import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
@@ -67,8 +69,10 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional));
     }
 
-    public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider, boolean optional) {
-        return withMiddleware(new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional));
+    public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider,
+            JWTAuthAdditionalClaimsOptions options, boolean optional) {
+        return withMiddleware(
+                new BearerOnlyMiddleware(JWTAuthAdditionalClaimsHandler.create(authProvider, options), optional));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
