@@ -58,8 +58,6 @@ public class RouterFactory {
     }
 
     private void createRouter(JsonObject dynamicConfig, Handler<AsyncResult<Router>> handler) {
-        final Router router = Router.router(this.vertx);
-
         final JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
 
         final JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
@@ -77,14 +75,14 @@ public class RouterFactory {
             subRouterFutures.add(createSubRouter(routerConfig, middlewares, services, sessionBagOptions));
         }
 
+        final Router router = Router.router(this.vertx);
         // Handlers will get called if and only if
         // - all futures are completed
         CompositeFuture.join(subRouterFutures).onComplete(ar -> {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
-                    router.mountSubRouter("/", (Router) srf.result());
-                }
-                else {
+                    router.route("/*").setName("router").subRouter((Router) srf.result());
+                } else {
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
             });
@@ -95,14 +93,14 @@ public class RouterFactory {
     }
 
     private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-                                           JsonObject sessionBagOptions) {
+            JsonObject sessionBagOptions) {
         final Promise<Router> promise = Promise.promise();
         createSubRouter(routerConfig, middlewares, services, sessionBagOptions, promise);
         return promise.future();
     }
 
     private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-                                 JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
+            JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
         final Router router = Router.router(this.vertx);
         final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -121,26 +119,27 @@ public class RouterFactory {
         // TODO maybe move out of the for loop by introducing middlewares per entrypoint
         // required to be the first middleware to guarantee every request is processed
         final Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
-            sessionBagOptions);
+                sessionBagOptions);
         middlewareFutures.add(sessionBagMiddlewareFuture);
 
         final JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
         for (int j = 0; j < middlewareNames.size(); j++) {
             final String middlewareName = middlewareNames.getString(j);
             final JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
-                DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+                    DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
             middlewareFutures.add(createMiddleware(middlewareConfig, router));
         }
 
         final String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
         final JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
-            DynamicConfiguration.SERVICE_NAME, serviceName);
+                DynamicConfiguration.SERVICE_NAME, serviceName);
         final JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         // TODO support multiple servers
         final JsonObject serverConfig = serverConfigs.getJsonObject(0);
 
         // required to be the last middleware
-        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router, serverConfig);
+        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
+                serverConfig);
         middlewareFutures.add(proxyMiddlewareFuture);
 
         // Handlers will get called if and only if
@@ -164,13 +163,13 @@ public class RouterFactory {
     }
 
     private void createMiddleware(JsonObject middlewareConfig, Router router,
-                                  Handler<AsyncResult<Middleware>> handler) {
+            Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
         // needed to ensure authenticating requests are routed through this application
         if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)
-            || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
+                || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
             middlewareOptions.put(PUBLIC_URL, this.publicUrl);
         }
 
@@ -204,11 +203,10 @@ public class RouterFactory {
         final int statusCode;
         if (isHealthy) {
             statusCode = HttpResponseStatus.OK.code();
-        }
-        else {
+        } else {
             statusCode = HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
         }
-        router.route("/health").handler(ctx -> {
+        router.route("/health").setName("health").handler(ctx -> {
             ctx.response().setStatusCode(statusCode).end();
         });
     }
@@ -225,13 +223,13 @@ public class RouterFactory {
     private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
         if (middlewares == null) {
             return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
-                new JsonArray());
+                    new JsonArray());
         }
         final List<JsonObject> sessionBagMiddlewares = new ArrayList<>();
         for (int i = 0; i < middlewares.size(); i++) {
             final JsonObject middleware = middlewares.getJsonObject(i);
             if (middleware.getString(DynamicConfiguration.MIDDLEWARE_TYPE)
-                .equals(DynamicConfiguration.MIDDLEWARE_SESSION_BAG)) {
+                    .equals(DynamicConfiguration.MIDDLEWARE_SESSION_BAG)) {
                 sessionBagMiddlewares.add(middleware);
             }
         }
@@ -240,7 +238,7 @@ public class RouterFactory {
         }
         if (sessionBagMiddlewares.isEmpty()) {
             return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
-                new JsonArray());
+                    new JsonArray());
         }
         if (sessionBagMiddlewares.size() > 1) {
             LOGGER.warn("More than one session bag configurations found. Using first one.");
@@ -281,28 +279,28 @@ public class RouterFactory {
     private RoutingRule path(String path) {
         return router -> {
             LOGGER.debug("Create route with exact path '{}'", path);
-            return router.route(path);
+            return router.route(path).setName(String.format("path matcher: %s", path));
         };
     }
 
     private RoutingRule pathPrefix(String pathPrefix) {
         return router -> {
             LOGGER.debug("Create route with path prefix '{}'", pathPrefix);
-            return router.route(pathPrefix);
+            return router.route(pathPrefix).setName(String.format("path prefix matcher: %s", pathPrefix));
         };
     }
 
     private RoutingRule host(String host) {
         return router -> {
             LOGGER.debug("Create route with host '{}'", host);
-            return router.route().virtualHost(host);
+            return router.route().virtualHost(host).setName(String.format("host matcher: %s", host));
         };
     }
 
     // only rules like Path("/foo"), PathPrefix('/bar') and Host('example.com') are supported
     protected RoutingRule parseRule(String rule) {
         final Pattern rulePattern = Pattern
-            .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");
+                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");
         final Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {

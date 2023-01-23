@@ -1,5 +1,12 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
@@ -9,6 +16,7 @@ import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -21,12 +29,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Entry point for the portal gateway.
@@ -63,7 +65,7 @@ public class Entrypoint {
             return router;
         }
         router = Router.router(vertx);
-        if (this.entryMiddlewares != null ){
+        if (this.entryMiddlewares != null) {
             LOGGER.info("Setup EntryMiddlewares");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
         }
@@ -75,11 +77,10 @@ public class Entrypoint {
         optionApplicationRouter.ifPresent(applicationRouter -> {
             if (name.equals(application.entrypoint())) {
                 if (enabled()) {
-                    router().mountSubRouter(application.rootPath(), applicationRouter);
+                    router.route(application.rootPath() + "*").subRouter(applicationRouter);
                     LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
                             application.rootPath(), name);
-                }
-                else {
+                } else {
                     LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
                             application, application.rootPath());
                 }
@@ -134,10 +135,12 @@ public class Entrypoint {
     }
 
     private void setupDefaultEntryMiddlewares(Vertx vertx) {
-        router.route().handler(new ResponseSessionCookieRemovalMiddleware(null));
-        router.route().handler(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
-        router.route().handler(new RequestResponseLogger());
-        router.route().handler(new ReplacedSessionCookieDetectionMiddleware(null, null));
+        router.route().setName("remove session cookie").handler(new ResponseSessionCookieRemovalMiddleware(null));
+        router.route().setName("session")
+                .handler(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
+        router.route().setName("logger").handler(new RequestResponseLogger());
+        router.route().setName("replace session cookie")
+                .handler(new ReplacedSessionCookieDetectionMiddleware(null, null));
     }
 
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
@@ -148,7 +151,9 @@ public class Entrypoint {
         }
 
         CompositeFuture.all(entryMiddlewaresFuture).onSuccess(cf -> {
-            entryMiddlewaresFuture.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
+            entryMiddlewaresFuture
+                    .forEach(mf -> router.route().setName("entry middleware")
+                            .handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(cfErr -> {
             final String errMsg = String.format("Failed to create EntryMiddlewares");
@@ -163,7 +168,7 @@ public class Entrypoint {
     }
 
     private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
-                                       Handler<AsyncResult<Middleware>> handler) {
+            Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
 
@@ -177,6 +182,5 @@ public class Entrypoint {
 
         middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(handler);
     }
-
 
 }
