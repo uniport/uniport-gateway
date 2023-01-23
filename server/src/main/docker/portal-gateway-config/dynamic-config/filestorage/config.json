@@ -1,0 +1,52 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "filestorage-proxy",
+                "middlewares": [
+                    "filestorageRedirectRegex",
+                    "filestorageAuthBearer",
+                    "filestorageReplacePath"
+                ],
+                "rule": "PathPrefix('/filestorage')",
+                "service": "filestorage-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "filestorageRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/filestorage)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "filestorageAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "id"
+                }
+            },
+            {
+                "name": "filestorageReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/filestorage/(.*)",
+                    "replacement": "/$1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "filestorage-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_FILESTORAGE_HOST}",
+                        "port": "${PORTAL_GATEWAY_FILESTORAGE_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

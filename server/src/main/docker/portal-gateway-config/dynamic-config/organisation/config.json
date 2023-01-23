@@ -1,0 +1,64 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "organisation-proxy",
+                "middlewares": [
+                    "organisationRedirectRegex",
+                    "ShowSessionContentMiddleware",
+                    "organisationOauth2",
+                    "organisationAuthBearer",
+                    "organisationReplacePath"
+                ],
+                "rule": "PathPrefix('/organisation')",
+                "service": "organisation-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "organisationRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/organisation)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "organisationOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Organisation"
+                }
+            },
+            {
+                "name": "organisationAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Organisation"
+                }
+            },
+            {
+                "name": "organisationReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/organisation/(.*)",
+                    "replacement": "/$1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "organisation-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_ORGANISATION_HOST}",
+                        "port": "${PORTAL_GATEWAY_ORGANISATION_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

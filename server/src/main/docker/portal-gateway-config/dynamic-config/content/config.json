@@ -1,0 +1,50 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "content-proxy",
+                "middlewares": [
+                    "contentRedirectRegex",
+                    "ShowSessionContentMiddleware",
+                    "contentReplacePath"
+                ],
+                "rule": "PathPrefix('/content')",
+                "service": "content-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "contentRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/content)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "ShowSessionContentMiddleware",
+                "type": "_session_",
+                "options": {}
+            },
+            {
+                "name": "contentReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/content/(.*)",
+                    "replacement": "/$1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "content-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_CONTENT_HOST}",
+                        "port": "${PORTAL_GATEWAY_CONTENT_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "base-proxy",
+                "middlewares": [
+                    "baseRedirectRegex",
+                    "baseAuthBearer",
+                    "baseReplacePath",
+                    "sessionTerminate",
+                    "sessionReset"
+                ],
+                "rule": "PathPrefix('/base')",
+                "service": "base-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "baseRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/base)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "baseAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "id"
+                }
+            },
+            {
+                "name": "baseReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/base/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "sessionTerminate",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_TERMINATE"
+                }
+            },
+            {
+                "name": "sessionReset",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_RESET"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "base-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_BASE_HOST}",
+                        "port": "${PORTAL_GATEWAY_BASE_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

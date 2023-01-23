@@ -1,0 +1,63 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "conversation-proxy",
+                "middlewares": [
+                    "conversationRedirectRegex",
+                    "conversationOauth2",
+                    "conversationAuthBearer",
+                    "conversationReplacePath"
+                ],
+                "rule": "PathPrefix('/conversation')",
+                "service": "conversation-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "conversationRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/conversation)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "conversationOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Conversation"
+                }
+            },
+            {
+                "name": "conversationAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Conversation"
+                }
+            },
+            {
+                "name": "conversationReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/conversation/(.*)",
+                    "replacement": "/$1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "conversation-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_CONVERSATION_HOST}",
+                        "port": "${PORTAL_GATEWAY_CONVERSATION_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}
