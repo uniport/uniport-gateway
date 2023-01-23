@@ -90,13 +90,15 @@ public class ProxyMiddleware implements Middleware {
                 final List<Handler<StringBuilder>> modifiers = incomingRequestURIModifiers;
                 if (modifiers != null) {
                     if (modifiers.size() > 1) {
-                        LOGGER.info("Multiple URI modifiers declared: %s (total %d)", modifiers, modifiers.size());
+                        LOGGER.info("Multiple URI modifiers declared: {} (total {})", modifiers, modifiers.size());
                     }
                     for (Handler<StringBuilder> modifier : modifiers) {
                         modifier.handle(uri);
                     }
                 }
                 incomingRequest.setURI(uri.toString());
+
+                incomingRequestURIModifiers = new ArrayList<>(); // reset
 
                 // Continue the interception chain
                 return ctx.sendRequest();
@@ -113,6 +115,8 @@ public class ProxyMiddleware implements Middleware {
                         modifier.handle(outgoingResponse.headers());
                     }
                 }
+
+                outgoingResponseHeadersModifiers = new ArrayList<>(); // reset
 
                 // Continue the interception chain
                 return ctx.sendResponse();
