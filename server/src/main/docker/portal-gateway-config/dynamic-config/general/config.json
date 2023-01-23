@@ -3,127 +3,9 @@
         "routers": [
             {
                 "name": "root",
-                "middlewares": [
-                    "rootRedirectregex"
-                ],
+                "middlewares": ["rootRedirectregex"],
                 "rule": "Path('/')",
                 "service": "dashboard-proxy"
-            },
-            {
-                "name": "login",
-                "middlewares": [
-                    "dashboardOauth2",
-                    "loginRedirectRegex"
-                ],
-                "rule": "PathPrefix('/login')",
-                "service": "base-proxy"
-            },
-            {
-                "name": "logout",
-                "middlewares": [
-                    "logoutRedirectRegex"
-                ],
-                "rule": "PathPrefix('/logout')",
-                "service": "base-proxy"
-            },
-            {
-                "name": "conversation-proxy",
-                "middlewares": [
-                    "conversationRedirectRegex",
-                    "conversationOauth2",
-                    "conversationAuthBearer",
-                    "conversationReplacePath"
-                ],
-                "rule": "PathPrefix('/conversation')",
-                "service": "conversation-proxy"
-            },
-            {
-                "name": "dashboard-proxy",
-                "middlewares": [
-                    "dashboardRedirectRegex",
-                    "dashboardAuthBearer",
-                    "dashboardReplacePath"
-                ],
-                "rule": "PathPrefix('/dashboard')",
-                "service": "dashboard-proxy"
-            },
-            {
-                "name": "base-proxy",
-                "middlewares": [
-                    "baseRedirectRegex",
-                    "baseAuthBearer",
-                    "baseReplacePath",
-                    "sessionTerminate",
-                    "sessionReset"
-                ],
-                "rule": "PathPrefix('/base')",
-                "service": "base-proxy"
-            },
-            {
-                "name": "organisation-proxy",
-                "middlewares": [
-                    "organisationRedirectRegex",
-                    "ShowSessionContentMiddleware",
-                    "organisationOauth2",
-                    "organisationAuthBearer",
-                    "organisationReplacePath"
-                ],
-                "rule": "PathPrefix('/organisation')",
-                "service": "organisation-proxy"
-            },
-            {
-                "name": "filestorage-proxy",
-                "middlewares": [
-                    "filestorageRedirectRegex",
-                    "filestorageAuthBearer",
-                    "filestorageReplacePath"
-                ],
-                "rule": "PathPrefix('/filestorage')",
-                "service": "filestorage-proxy"
-            },
-            {
-                "name": "content-proxy",
-                "middlewares": [
-                    "contentRedirectRegex",
-                    "ShowSessionContentMiddleware",
-                    "contentReplacePath"
-                ],
-                "rule": "PathPrefix('/content')",
-                "service": "content-proxy"
-            },
-            {
-                "name": "portal-kowl-proxy",
-                "middlewares": [
-                    "portalKowlRedirectRegex",
-                    "portalKowlReplacePath",
-                    "portalKowlOauth2",
-                    "portalKowlAuthBearer",
-                    "portalKowlBearerOnly"
-                ],
-                "rule": "PathPrefix('/ips/portal-messaging')",
-                "service": "portal-kowl-proxy"
-            },
-            {
-                "name": "portal-pgadmin-proxy",
-                "middlewares": [
-                    "portalPgadminRedirectRegex",
-                    "portalPgadminOauth2",
-                    "portalPgadminAuthBearer",
-                    "portalPgadminBearerOnly"
-                ],
-                "rule": "PathPrefix('/ips/portal-database')",
-                "service": "portal-pgadmin-proxy"
-            },
-            {
-                "name": "portal-grafana-proxy",
-                "middlewares": [
-                    "portalGrafanaOauth2",
-                    "portalGrafanaAuthBearer",
-                    "portalGrafanaBearerOnly",
-                    "portalGrafanaHeaders"
-                ],
-                "rule": "PathPrefix('/ips/portal-monitoring')",
-                "service": "portal-grafana-proxy"
             }
         ],
         "middlewares": [
@@ -136,263 +18,34 @@
                 }
             },
             {
-                "name": "loginRedirectRegex",
-                "type": "redirectRegex",
+                "name": "whitelistedCookiesInSessionBag",
+                "type": "sessionBag",
                 "options": {
-                    "regex": "^/login$",
-                    "replacement": "/base/service/redirect"
+                    "whitelistedCookies": [
+                        {
+                            "name": "KEYCLOAK_SESSION",
+                            "path": "/auth/realms/master/"
+                        },
+                        {
+                            "name": "KEYCLOAK_SESSION_LEGACY",
+                            "path": "/auth/realms/master/"
+                        },
+                        {
+                            "name": "KEYCLOAK_SESSION",
+                            "path": "/auth/realms/portal/"
+                        },
+                        {
+                            "name": "KEYCLOAK_SESSION_LEGACY",
+                            "path": "/auth/realms/portal/"
+                        },
+                        {
+                            "name": "ips.language",
+                            "path": "/"
+                        }
+                    ]
                 }
-            },
-            {
-                "name": "logoutRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^/logout(.*)$",
-                    "replacement": "/base/service/logout$1"
-                }
-            },
-            {
-                "name": "baseRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/base)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "baseReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/base/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "conversationRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/conversation)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "conversationReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/conversation/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "dashboardRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/dashboard)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "dashboardReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/dashboard/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "organisationRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/organisation)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "organisationReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/organisation/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "filestorageRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/filestorage)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "filestorageReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/filestorage/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "contentRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/content)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "contentReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/content/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "portalKowlRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/ips/portal-messaging)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "portalKowlReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/ips/portal-messaging/(.*)",
-                    "replacement": "/$1"
-                }
-            },
-            {
-                "name": "portalPgadminRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/ips/portal-database)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "portalGrafanaRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^(/ips/portal-monitoring)$",
-                    "replacement": "$1/"
-                }
-            },
-            {
-                "name": "portalGrafanaHeaders",
-                "type": "headers",
-                "options": {
-                    "customRequestHeaders": {
-                        "Authorization": ""
-                    },
-                    "customResponseHeaders": {
-                        "Authorization": ""
-                    }
-                }
-            },
-            {
-                "name": "sessionTerminate",
-                "type": "controlApi",
-                "options": {
-                    "action": "SESSION_TERMINATE"
-                }
-            },
-            {
-                "name": "sessionReset",
-                "type": "controlApi",
-                "options": {
-                    "action": "SESSION_RESET"
-                }
-            },
-            {
-                "name": "languageCookie",
-                "type": "languageCookie",
-                "options": {}
             }
         ],
-        "services": [
-            {
-                "name": "conversation-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_CONVERSATION_HOST}",
-                        "port": "${PORTAL_GATEWAY_CONVERSATION_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "dashboard-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_DASHBOARD_HOST}",
-                        "port": "${PORTAL_GATEWAY_DASHBOARD_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "base-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_BASE_HOST}",
-                        "port": "${PORTAL_GATEWAY_BASE_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "organisation-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_ORGANISATION_HOST}",
-                        "port": "${PORTAL_GATEWAY_ORGANISATION_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "filestorage-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_FILESTORAGE_HOST}",
-                        "port": "${PORTAL_GATEWAY_FILESTORAGE_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "content-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_CONTENT_HOST}",
-                        "port": "${PORTAL_GATEWAY_CONTENT_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "portal-kowl-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_PORTAL_KOWL_HOST}",
-                        "port": "${PORTAL_GATEWAY_PORTAL_KOWL_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "portal-pgadmin-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_PORTAL_PGADMIN_HOST}",
-                        "port": "${PORTAL_GATEWAY_PORTAL_PGADMIN_PORT}"
-                    }
-                ]
-            },
-            {
-                "name": "portal-grafana-proxy",
-                "servers": [
-                    {
-                        "host": "${PORTAL_GATEWAY_PORTAL_GRAFANA_HOST}",
-                        "port": "${PORTAL_GATEWAY_PORTAL_GRAFANA_PORT}"
-                    }
-                ]
-            }
-        ]
+        "services": []
     }
 }

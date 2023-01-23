@@ -1,0 +1,52 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "dashboard-proxy",
+                "middlewares": [
+                    "dashboardRedirectRegex",
+                    "dashboardAuthBearer",
+                    "dashboardReplacePath"
+                ],
+                "rule": "PathPrefix('/dashboard')",
+                "service": "dashboard-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "dashboardRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/dashboard)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "dashboardAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "id"
+                }
+            },
+            {
+                "name": "dashboardReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/dashboard/(.*)",
+                    "replacement": "/$1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "dashboard-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_DASHBOARD_HOST}",
+                        "port": "${PORTAL_GATEWAY_DASHBOARD_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

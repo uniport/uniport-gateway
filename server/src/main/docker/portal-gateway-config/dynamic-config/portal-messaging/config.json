@@ -1,0 +1,82 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "portal-kowl-proxy",
+                "middlewares": [
+                    "portalKowlRedirectRegex",
+                    "portalKowlReplacePath",
+                    "portalKowlOauth2",
+                    "portalKowlAuthBearer",
+                    "portalKowlBearerOnly"
+                ],
+                "rule": "PathPrefix('/ips/portal-messaging')",
+                "service": "portal-kowl-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "portalKowlRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/portal-messaging)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "portalKowlReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/ips/portal-messaging/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "portalKowlOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "Portal-Gateway",
+                    "clientSecret": "Portal-Gateway!",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Portal-Messaging"
+                }
+            },
+            {
+                "name": "portalKowlAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Portal-Messaging"
+                }
+            },
+            {
+                "name": "portalKowlBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
+                    "publicKeyAlgorithm": "RS256",
+                    "audience": ["Portal-Messaging"],
+                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Portal-Messaging']['roles']",
+                            "operator": "CONTAINS",
+                            "value": ["ADMIN"]
+                        }
+                    ]
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "portal-kowl-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_PORTAL_KOWL_HOST}",
+                        "port": "${PORTAL_GATEWAY_PORTAL_KOWL_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}
