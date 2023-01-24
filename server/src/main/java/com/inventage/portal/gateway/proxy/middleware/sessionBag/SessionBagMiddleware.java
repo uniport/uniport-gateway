@@ -1,7 +1,17 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
@@ -10,14 +20,7 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
+import io.vertx.ext.web.handler.PlatformHandler;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
@@ -28,7 +31,7 @@ import java.util.regex.Pattern;
  * - If the server omits the Path attribute, the middleware will use the "/" as the default value (instead of the request-uri path).
  * - The domain attribute is ignored i.e. all cookies are included in all requests
  */
-public class SessionBagMiddleware implements Middleware {
+public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
     // https://github.com/vert-x3/vertx-web/issues/1716
@@ -155,8 +158,7 @@ public class SessionBagMiddleware implements Middleware {
         final String requestPath;
         if (!uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
             requestPath = "/";
-        }
-        else {
+        } else {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
@@ -167,8 +169,7 @@ public class SessionBagMiddleware implements Middleware {
         final String cookiePath;
         if (cookie.path().isEmpty()) {
             cookiePath = "/";
-        }
-        else {
+        } else {
             cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
                     : cookie.path();
         }
