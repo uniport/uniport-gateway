@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import io.vertx.core.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +21,20 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class ResponseSessionCookieRemovalMiddleware implements Middleware {
 
-    public static final String REMOVE_SESSION_COOKIE_SIGNAL = "REMOVE_SESSION_COOKIE_SIGNAL";
+    private static final String REMOVE_SESSION_COOKIE_SIGNAL = "REMOVE_SESSION_COOKIE_SIGNAL";
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieRemovalMiddleware.class);
     private final String sessionCookieName;
 
     public ResponseSessionCookieRemovalMiddleware(String sessionCookieName) {
         this.sessionCookieName = (sessionCookieName == null) ? SessionMiddleware.COOKIE_NAME_DEFAULT : sessionCookieName;
+    }
+
+    /**
+     *
+     * @param ctx
+     */
+    public static void addSignal(RoutingContext ctx) {
+        ctx.put(ResponseSessionCookieRemovalMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
     }
 
     @Override
@@ -37,7 +46,10 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
 
     protected void removeSessionCookie(RoutingContext ctx) {
         if (ctx.get(REMOVE_SESSION_COOKIE_SIGNAL) != null) {
-            LOGGER.debug("With value '{}'", ctx.getCookie(sessionCookieName).getValue());
+            final Cookie sessionCookie = ctx.getCookie(sessionCookieName);
+            if (sessionCookie != null) {
+                LOGGER.debug("with value '{}'", ctx.getCookie(sessionCookieName).getValue());
+            }
             // invalidate=false: session cookie should only be removed from response, not unset in client
             ctx.removeCookie(sessionCookieName, false);
         }

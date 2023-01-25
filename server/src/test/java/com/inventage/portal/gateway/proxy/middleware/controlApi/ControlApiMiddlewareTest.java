@@ -15,29 +15,28 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.*;
+import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.CONTROL_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.SESSION_RESET_ACTION;
+import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.SESSION_TERMINATE_ACTION;
 import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
+import static io.vertx.core.http.HttpMethod.GET;
 
 @ExtendWith(VertxExtension.class)
 public class ControlApiMiddlewareTest {
 
     private static final String host = "localhost";
-
-    private int port;
-
-    @BeforeEach
-    public void setup() {
-        port = TestUtils.findFreePort();
-    }
 
     @Test
     void sessionTerminationTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
@@ -52,16 +51,17 @@ public class ControlApiMiddlewareTest {
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, sessionTerminateCookie));
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host)
                 .withRoutingContextHolder(routingContext)
+                .withSessionMiddleware()
                 .withMockOAuth2Middleware()
                 .withSessionBagMiddleware(new JsonArray())
                 .withControlApiMiddleware("SESSION_TERMINATE")
                 .withProxyMiddleware(backendPort)
                 .withBackend(vertx, backendPort, cookieInsertionHandler)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), (outgoingResponse) -> {
+                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
                     // then
                     assertSessionTermination(outgoingResponse, routingContext.get());
                     responseReceived.flag();
@@ -94,16 +94,17 @@ public class ControlApiMiddlewareTest {
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, keycloakTestCookie, sessionResetCookie));
 
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host)
                 .withRoutingContextHolder(routingContext)
+                .withSessionMiddleware()
                 .withMockOAuth2Middleware()
                 .withSessionBagMiddleware(new JsonArray())
                 .withControlApiMiddleware("SESSION_RESET")
                 .withBackend(vertx, backendPort, cookieInsertionHandler)
                 .withProxyMiddleware(backendPort)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), (outgoingResponse) -> {
+                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
                     // then
                     assertSessionReset(outgoingResponse, routingContext.get(), keycloakTestCookie);
                     responseReceived.flag();

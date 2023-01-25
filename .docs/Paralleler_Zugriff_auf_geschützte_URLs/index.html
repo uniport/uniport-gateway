@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html data-build-version="n/a">
+  <head><base href="/report/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portal Report</title><link crossorigin="use-credentials" rel="icon" href="/base/assets/favicon/favicon.ico" sizes="any"/>
+    <link crossorigin="use-credentials" rel="icon" href="/base/assets/favicon/favicon.svg" type="image/svg+xml"/>
+    <link crossorigin="use-credentials" rel="apple-touch-icon" href="/base/assets/favicon/apple-touch-icon.png" sizes="180x180"/>
+    <link crossorigin="use-credentials" rel="mask-icon" href="/base/assets/favicon/safari-pinned-tab.svg" color="#285078"/>
+    <link crossorigin="use-credentials" rel="manifest" href="/base/assets/site.webmanifest"/>
+    <meta name="theme-color" content="#285078"/>
+    <meta name="msapplication-square310x310logo" content="/base/assets/favicon/mstile-310x310.png"/>
+    <meta name="msapplication-TileColor" content="#285078"/>
+  </head>
+  <body>
+    <portal-navigation current-application="report" internal-routing="" anchor="body" logo-url="/" sticky="">
+      <language-switcher slot="left"></language-switcher>
+      <mandate-switcher slot="left"></mandate-switcher>
+      <total-assets slot="current"></total-assets>
+      <mandate-switcher slot="header-mobile"></mandate-switcher>
+      <language-switcher slot="tree-bottom" mobile-variant=""></language-switcher>
+    </portal-navigation>
+    <app-shell></app-shell>
+    <unread-articles-updater></unread-articles-updater>
+    <script>
+      const baseHref = document.querySelector("base").getAttribute("href");
+      const path = window.location.pathname;
+      if (! path.includes(baseHref)) {
+        window.location = baseHref;
+      }
+      // "holzhammer" method for language switching — reload page / entire application when language changes…
+      document.addEventListener("portal-language-changed", ({detail: language}) => { // Only change language if it differs from what we already have
+        if (window.__PORTAL_LANGUAGE === language) {
+          return;
+        }
+        window.__PORTAL_LANGUAGE = language;
+        // If we're coming from an explicit reload or report is not initialized yet, bail here…
+        if (window.sessionStorage.getItem("report-restart") === "1" || !window.__REPORT_INITIALIZED) {
+          window.sessionStorage.removeItem("report-restart");
+          return;
+        }
+        // Otherwise, trigger reload
+        window.sessionStorage.setItem("report-restart", "1");
+        console.info(`Switching to ${language} and reloading…`);
+        window.location.reload();
+      });
+    </script>
+    <script type="module" crossorigin="use-credentials" src="/base/portal-navigation.js"></script>
+    <script type="module" crossorigin="use-credentials" src="/research/components/latest-articles.js"></script>
+    <script type="module" crossorigin="use-credentials" src="/research/components/unread-articles-updater.js"></script>
+    <script type="module" src="./mandate-switcher.66d058a6.js" crossorigin="use-credentials"></script>
+    <script type="module" src="./language-switcher.a4aadc9e.js" crossorigin="use-credentials"></script>
+    <script type="module" src="./total-assets.acefbdf3.js" crossorigin="use-credentials"></script>
+    <script type="module" src="./main.a476cc99.js" crossorigin="use-credentials"></script>
+  </body>
+</html>

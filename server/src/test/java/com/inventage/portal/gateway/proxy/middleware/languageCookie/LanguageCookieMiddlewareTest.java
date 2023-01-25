@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
-import com.inventage.portal.gateway.TestUtils;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -9,7 +8,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -17,18 +15,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.IPS_LANGUAGE_COOKIE_NAME;
+import static io.vertx.core.http.HttpMethod.GET;
 
 @ExtendWith(VertxExtension.class)
 public class LanguageCookieMiddlewareTest {
 
     private static final String host = "localhost";
-
-    private int port;
-
-    @BeforeEach
-    public void setup() {
-        port = TestUtils.findFreePort();
-    }
 
     @Test
     public void removeCookieInRequestsTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
@@ -37,12 +29,12 @@ public class LanguageCookieMiddlewareTest {
         headers.add(HttpHeaders.COOKIE, IPS_LANGUAGE_COOKIE_NAME + "=de");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host)
                 .withRoutingContextHolder(routingContext)
                 .withLanguageCookieMiddleware()
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx, new RequestOptions().setHeaders(headers), (incomingResponse) -> {
+                .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
                     // then
                     Assertions.assertTrue(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
                             "request should contain accept language");
@@ -59,12 +51,12 @@ public class LanguageCookieMiddlewareTest {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host)
                 .withRoutingContextHolder(routingContext)
                 .withLanguageCookieMiddleware()
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx, new RequestOptions(), (incomingResponse) -> {
+                .incomingRequest(GET, "/", testCtx, (incomingResponse) -> {
                     // then
                     Assertions.assertFalse(routingContext.get().request().headers().contains(IPS_LANGUAGE_COOKIE_NAME),
                             "response should not contain IPS language cookie.");

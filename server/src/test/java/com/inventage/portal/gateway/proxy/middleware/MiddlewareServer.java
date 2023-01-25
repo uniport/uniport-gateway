@@ -1,40 +1,97 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import com.inventage.portal.gateway.TestUtils;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.*;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.junit5.VertxTestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MiddlewareServer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareServer.class);
 
     private final Vertx vertx;
     private final HttpServer httpServer;
     private final int port;
-    private final String host;
+    private String host;
 
-    public MiddlewareServer(Vertx vertx, HttpServer httpServer, int port, String host) {
-        this.port = port;
+    public MiddlewareServer(Vertx vertx, HttpServer httpServer, String host) {
+        this.port = TestUtils.findFreePort();
         this.httpServer = httpServer;
         this.vertx = vertx;
         this.host = host;
     }
 
-    public void incomingRequest(VertxTestContext testCtx, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler) {
-        reqOpts.setHost(host).setPort(port).setURI("/").setMethod(HttpMethod.GET);
-        httpServer.listen(port, host).onComplete(testCtx.succeeding(p -> {
-            createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
-        }));
+    public MiddlewareServer start() {
+        Future<HttpServer> httpServerFuture = httpServer.listen(port, host);
+        try {
+            awaitComplete(httpServerFuture);
+        }
+        catch (Throwable e) {
+            throw new RuntimeException("MiddlewareServer.start failed.", e);
+        }
+        return this;
     }
 
-    public void incomingPostRequest(VertxTestContext testCtx, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler, String URI) {
-        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(HttpMethod.POST);
+    public void incomingRequest(HttpMethod method, String URI, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
+        incomingRequest(method, URI, new RequestOptions(), testCtx, responseHandler);
+    }
+
+    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method);
         createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
     }
 
     private void createHttpClientWithRequestOptionsAndResponseHandler(VertxTestContext testCtx, RequestOptions reqOpts,
                                                                       Handler<HttpClientResponse> responseHandler) {
+        LOGGER.info("requesting '{}'", reqOpts.getURI());
         vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(resp -> {
             responseHandler.handle(resp);
         }));
     }
+
+    // wait until Vert.x is listening to prevent test failures because of not open ports
+    private <T> T awaitComplete(Future<T> f) throws Throwable {
+        final Object lock = new Object();
+        final AtomicReference<AsyncResult<T>> resultRef = new AtomicReference<>(null);
+        synchronized (lock) {
+            // We *must* be locked before registering a callback.
+            // If result is ready, the callback is called immediately!
+            f.onComplete((AsyncResult<T> result) -> {
+                resultRef.set(result);
+                synchronized (lock) {
+                    lock.notify();
+                }
+            });
+
+            do {
+                // Nested sync on lock is fine.  If we get a spurious wake-up before resultRef is set, we need to
+                // reacquire the lock, then wait again.
+                // Ref: https://stackoverflow.com/a/249907/257299
+                synchronized (lock) {
+                    // @Blocking
+                    lock.wait();
+                }
+            }
+            while (null == resultRef.get());
+        }
+        final AsyncResult<T> result = resultRef.get();
+        final Throwable t = result.cause();
+        if (null != t) {
+            throw t;
+        }
+        final T x = result.result();
+        return x;
+    }
+
 }
