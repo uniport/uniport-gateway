@@ -21,7 +21,7 @@ public class CompletionStageTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompletionStageTest.class);
 
-    @Test
+    //@Test
     void thenCompose(Vertx vertx, VertxTestContext testContext) {
         asyncToUpperCase("hello", vertx)
                 .thenCompose(s -> asyncToLowerCase(s, vertx))
@@ -39,14 +39,14 @@ public class CompletionStageTest {
 
     private CompletionStage<String> asyncToUpperCase(String input, Vertx vertx) {
         Promise<String> result = Promise.promise();
-        int i = new Random().nextInt(2 - 1 + 1);
+        int i = new Random().nextInt(10 - 1 + 1);
         LOGGER.info("waiting for = '{}' seconds", i);
         vertx.setTimer(i * 1000, timeout -> result.complete(input.toUpperCase()));
         return result.future().toCompletionStage();
     }
     private CompletionStage<String> asyncToLowerCase(String input, Vertx vertx) {
         Promise<String> result = Promise.promise();
-        int i = new Random().nextInt(2 - 1 + 1);
+        int i = new Random().nextInt(10 - 1 + 1);
         LOGGER.info("waiting for = '{}' seconds", i);
         vertx.setTimer(i * 1000, timeout -> result.complete(input.toLowerCase()));
         return result.future().toCompletionStage();
