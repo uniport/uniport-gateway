@@ -6,14 +6,23 @@ import io.vertx.ext.web.RoutingContext;
 
 public class HttpResponder {
 
-    public static void respondWithRedirectWithoutSetCookie(RoutingContext ctx) {
+    public static void respondWithRedirectForRetryWithoutSetCookie(RoutingContext ctx) {
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         respondWithRedirectForRetry(ctx);
     }
+
+    public static void respondWithRedirectWithoutSetCookie(String uri, RoutingContext ctx) {
+        ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
+        respondWithRedirectForRetry(uri, ctx);
+    }
     public static void respondWithRedirectForRetry(RoutingContext ctx) {
+        respondWithRedirectForRetry(ctx.request().uri(), ctx);
+    }
+
+    public static void respondWithRedirectForRetry(String uri, RoutingContext ctx) {
         ctx.response()
                 .setStatusCode(307) // redirect by using the same HTTP method (307)
-                .putHeader(HttpHeaders.LOCATION, ctx.request().uri())
+                .putHeader(HttpHeaders.LOCATION, uri)
                 .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain; charset=utf-8")
                 .end("Redirecting for retry to " + ctx.request().uri() + ".");
     }

@@ -13,7 +13,7 @@ public class BufferAssert extends AbstractAssert<BufferAssert, Buffer> {
     final Map<String, String> body;
 
     protected BufferAssert(Buffer actual) {
-        super(actual, Buffer.class);
+        super(actual, BufferAssert.class);
         body = extractParametersFromBody(actual.toString());
     }
 

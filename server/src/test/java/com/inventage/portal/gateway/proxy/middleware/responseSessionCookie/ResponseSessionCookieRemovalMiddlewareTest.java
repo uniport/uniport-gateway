@@ -18,7 +18,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
 
     @Test
     public void shouldRemoveSessionCookieInResponse(Vertx vertx, VertxTestContext testCtx) {
-        MiddlewareServer gateway = portalGateway(vertx)
+        MiddlewareServer gateway = portalGateway(vertx, testCtx)
                 .withResponseSessionCookieRemovalMiddleware()
                 .withSessionMiddleware()
                 .withMiddleware(addingSignal())
@@ -36,7 +36,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
 
     @Test
     public void shouldContainSessionCookieInResponse(Vertx vertx, VertxTestContext testCtx) {
-        MiddlewareServer gateway = portalGateway(vertx)
+        MiddlewareServer gateway = portalGateway(vertx, testCtx)
                 .withResponseSessionCookieRemovalMiddleware()
                 .withSessionMiddleware()
                 .build().start();

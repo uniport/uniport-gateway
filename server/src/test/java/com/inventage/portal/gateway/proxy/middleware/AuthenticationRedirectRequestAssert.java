@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import io.netty.handler.codec.http.HttpHeaders;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.ext.web.handler.impl.StateWithUri;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.assertj.core.api.AbstractAssert;
@@ -38,7 +39,7 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
 
 
     public AuthenticationRedirectRequestAssert isRedirectTo(String expectedLocation) {
-        Assertions.assertTrue(String.valueOf(actual.statusCode()).startsWith("3"));
+        Assertions.assertTrue(String.valueOf(actual.statusCode()).startsWith("3"), "Redirect status code expected, but was: " +actual.statusCode());
         String location = actual.getHeader("location");
         Assertions.assertEquals(expectedLocation, location);
         return this;
@@ -121,6 +122,18 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
     public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader, String expectedValue) {
         String value = actual.getHeader(expectedHeader);
         Assertions.assertEquals(expectedValue, value);
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasStateWithUri(String expectedUriInStateParameter) {
+        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader("location"));
+        Assertions.assertEquals(expectedUriInStateParameter, new StateWithUri(locationParameters.get("state")).uri().orElse(null));
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetCookieForSessionDifferentThan(String sessionCookie) {
+        String set_cookie = actual.getHeader(HttpHeaders.Names.SET_COOKIE);
+        Assertions.assertNotEquals(sessionCookie, set_cookie);
         return this;
     }
 }

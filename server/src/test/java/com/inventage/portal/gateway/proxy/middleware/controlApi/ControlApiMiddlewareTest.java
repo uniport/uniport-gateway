@@ -51,7 +51,7 @@ public class ControlApiMiddlewareTest {
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, sessionTerminateCookie));
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withRoutingContextHolder(routingContext)
                 .withSessionMiddleware()
                 .withMockOAuth2Middleware()
@@ -94,7 +94,7 @@ public class ControlApiMiddlewareTest {
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, keycloakTestCookie, sessionResetCookie));
 
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withRoutingContextHolder(routingContext)
                 .withSessionMiddleware()
                 .withMockOAuth2Middleware()

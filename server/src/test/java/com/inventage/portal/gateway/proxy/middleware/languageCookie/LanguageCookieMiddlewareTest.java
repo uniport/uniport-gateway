@@ -29,7 +29,7 @@ public class LanguageCookieMiddlewareTest {
         headers.add(HttpHeaders.COOKIE, IPS_LANGUAGE_COOKIE_NAME + "=de");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withRoutingContextHolder(routingContext)
                 .withLanguageCookieMiddleware()
                 .build().start()
@@ -51,7 +51,7 @@ public class LanguageCookieMiddlewareTest {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withRoutingContextHolder(routingContext)
                 .withLanguageCookieMiddleware()
                 .build().start()

@@ -23,7 +23,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_no_origin(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final MiddlewareServer portalGateway = portalGateway(vertx, host)
+        final MiddlewareServer portalGateway = portalGateway(vertx, host, testCtx)
                 .withCorsMiddleware("http://portal.minikube").build().start();
         // when
         portalGateway.incomingRequest(HttpMethod.GET, "/", testCtx, (resp) -> {
@@ -38,7 +38,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_origin_allowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
             .withCorsMiddleware("http://portal.minikube").build().start()
             // when
             .incomingRequest(HttpMethod.GET, "/", new RequestOptions().addHeader(ORIGIN, "http://portal.minikube"), testCtx, (resp) -> {
@@ -54,7 +54,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_all_allowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withCorsMiddleware("*").build().start()
                 // when
                 .incomingRequest(HttpMethod.GET, "/", new RequestOptions().addHeader(ORIGIN, "http://other.com"), testCtx, (resp) -> {
@@ -70,7 +70,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_GET_origin_not_allowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withCorsMiddleware("http://portal.minikube").build().start()
                 // when
                 .incomingRequest(HttpMethod.GET, "/", new RequestOptions().addHeader(ORIGIN, "http://bad.com"), testCtx, (resp) -> {
@@ -84,7 +84,7 @@ public class CorsMiddlewareTest {
     @Test
     public void test_OPTIONS_no_origin2(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withCorsMiddleware("http://portal.minikube").build().start()
                 // when
                 .incomingRequest(HttpMethod.GET, "/", testCtx, (resp) -> {

@@ -87,7 +87,7 @@ public class KeycloakServer {
         return this;
     }
 
-    public void startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler) throws InterruptedException {
+    public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler) throws InterruptedException {
         JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
@@ -105,6 +105,7 @@ public class KeycloakServer {
                                 .send(tokenResponse.encode());
                     }
                 });
+        return this;
     }
 
     public JsonObject getDefaultOAuth2AuthConfig() {

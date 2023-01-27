@@ -24,12 +24,14 @@ public class MiddlewareServer {
     private final HttpServer httpServer;
     private final int port;
     private String host;
+    private VertxTestContext testCtx;
 
-    public MiddlewareServer(Vertx vertx, HttpServer httpServer, String host) {
+    public MiddlewareServer(Vertx vertx, HttpServer httpServer, String host, VertxTestContext testCtx) {
         this.port = TestUtils.findFreePort();
-        this.httpServer = httpServer;
         this.vertx = vertx;
+        this.httpServer = httpServer;
         this.host = host;
+        this.testCtx = testCtx;
     }
 
     public MiddlewareServer start() {
@@ -41,6 +43,18 @@ public class MiddlewareServer {
             throw new RuntimeException("MiddlewareServer.start failed.", e);
         }
         return this;
+    }
+
+    public BrowserConnected connectBrowser() {
+        return new BrowserConnected(this);
+    }
+
+    public void incomingRequest(HttpMethod method, String URI, Handler<HttpClientResponse> responseHandler) {
+        incomingRequest(method, URI, new RequestOptions(), testCtx, responseHandler);
+    }
+
+    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler) {
+        incomingRequest(method, URI, reqOpts, testCtx, responseHandler);
     }
 
     public void incomingRequest(HttpMethod method, String URI, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {

@@ -38,34 +38,25 @@ public class MiddlewareServerBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareServerBuilder.class);
 
     private static final int TIMEOUT_SERVER_START_SECONDS = 5;
-    private static VertxTestContext testCtx;
 
     private final String host;
     private final Vertx vertx;
+    private VertxTestContext testCtx;
     private final Router router;
 
-    private MiddlewareServerBuilder(Vertx vertx, String host) {
-        this.vertx = vertx;
-        this.host = host;
-        router = Router.router(vertx);
+    public static MiddlewareServerBuilder portalGateway(Vertx vertx, VertxTestContext testCtx) {
+        return portalGateway(vertx, "localhost", testCtx);
     }
 
     public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, VertxTestContext testCtx) {
-        MiddlewareServerBuilder.testCtx = testCtx;
-        return portalGateway(vertx, host);
+        return new MiddlewareServerBuilder(vertx, host, testCtx);
     }
 
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx, VertxTestContext testCtx) {
-        MiddlewareServerBuilder.testCtx = testCtx;
-        return portalGateway(vertx);
-    }
-
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx) {
-        return portalGateway(vertx, "localhost");
-    }
-
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host) {
-        return new MiddlewareServerBuilder(vertx, host);
+    private MiddlewareServerBuilder(Vertx vertx, String host, VertxTestContext testCtx) {
+        this.vertx = vertx;
+        this.host = host;
+        this.testCtx = testCtx;
+        router = Router.router(vertx);
     }
 
     public MiddlewareServerBuilder withSessionMiddleware() {
@@ -236,7 +227,7 @@ public class MiddlewareServerBuilder {
     public MiddlewareServer build() {
         router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
         HttpServer httpServer = vertx.createHttpServer().requestHandler(router::handle);
-        return new MiddlewareServer(vertx, httpServer, host);
+        return new MiddlewareServer(vertx, httpServer, host, testCtx);
     }
 
 }

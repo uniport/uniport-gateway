@@ -92,7 +92,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
                 .build().start()
                 //when
@@ -114,7 +114,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
                 .build().start()
                 //when
@@ -141,7 +141,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
                 .build().start()
                 //when
@@ -167,7 +167,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
                 .build().start()
                 //when
@@ -201,7 +201,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddlewareOtherClaims(jwtAuth(vertx, expectedIssuer, expectedAudience, claims), false)
                 .build().start()
                 //when

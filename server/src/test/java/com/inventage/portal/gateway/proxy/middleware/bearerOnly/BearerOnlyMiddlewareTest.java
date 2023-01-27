@@ -47,7 +47,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
                 .build().start()
                 // when
@@ -66,7 +66,7 @@ public class BearerOnlyMiddlewareTest {
 
         final String invalidSignatureToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJCZWFyZXIiLCJleHAiOjE4OTM0NTI0MDAsImlhdCI6MTYyNzA1Mzc0NywiaXNzIjoiaHR0cDovL3Rlc3QuaXNzdWVyOjEyMzQvYXV0aC9yZWFsbXMvdGVzdCIsImF6cCI6InRlc3QtYXV0aG9yaXplZC1wYXJ0aWVzIiwiYXVkIjoidGVzdC1hdWRpZW5jZSIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUgVGVzdCJ9.blub";
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
                 .build().start()
                 // when
@@ -90,7 +90,7 @@ public class BearerOnlyMiddlewareTest {
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
                 .build().start()
                 // when
@@ -113,7 +113,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
                 .build().start()
                 // when
@@ -132,7 +132,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, host)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
                 .build().start()
                 // when
