@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed log statements from `debug` to `warn` for JWT verification failures ([PORTAL-1130](https://issue.inventage.com/browse/PORTAL-1130)).
 - Upgrade org.apache.commons:commons-text version to 1.10.0 ([PORTAL-1110](https://issue.inventage.com/browse/PORTAL-1110)).
-- Parallel authentication flows are synchronised ([PORTAL-1184](https://issue.inventage.com/browse/PORTAL-1184)).
+- Initial URI added to `state` parameter of authentication flow ([PORTAL-1184](https://issue.inventage.com/browse/PORTAL-1184)).
 
 ## [5.1.0]-202212061653-531-6945ffd 2022-12-06
 
