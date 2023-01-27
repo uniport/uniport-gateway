@@ -16,11 +16,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.CODE_CHALLENGE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.CODE_CHALLENGE_METHOD;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_PLAIN;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_S256;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_FORM_POST;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.COOKIE_NAME_DEFAULT;
+import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
 /**
  * Custom assertion class for authentication redirect request of a relying party (RP).
@@ -28,6 +32,7 @@ import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddl
  * see also https://assertj.github.io/doc/#assertj-core-custom-assertions-creation
  */
 public class AuthenticationRedirectRequestAssert extends AbstractAssert<AuthenticationRedirectRequestAssert, HttpClientResponse> {
+
 
     public AuthenticationRedirectRequestAssert(HttpClientResponse actual) {
         super(actual, AuthenticationRedirectRequestAssert.class);
@@ -40,7 +45,7 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
 
     public AuthenticationRedirectRequestAssert isRedirectTo(String expectedLocation) {
         Assertions.assertTrue(String.valueOf(actual.statusCode()).startsWith("3"), "Redirect status code expected, but was: " +actual.statusCode());
-        String location = actual.getHeader("location");
+        String location = actual.getHeader(LOCATION);
         Assertions.assertEquals(expectedLocation, location);
         return this;
     }
@@ -49,8 +54,8 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
         return isValidAuthenticationRequest(null);
     }
     public AuthenticationRedirectRequestAssert isValidAuthenticationRequest(Map<String, String> expectedLocationParameters) {
-        String set_cookie = actual.getHeader("set-cookie");
-        String location = actual.getHeader("location");
+        String set_cookie = actual.getHeader(HttpHeaders.Names.SET_COOKIE);
+        String location = actual.getHeader(LOCATION);
         Assertions.assertNotNull(location, "No 'location' header found in response");
         Map<String, String> locationParameters = extractParametersFromHeader(location);
         Assertions.assertNotNull(locationParameters);
@@ -61,13 +66,13 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
     }
 
     public AuthenticationRedirectRequestAssert isUsingFormPost() {
-        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader("location"));
-        Assertions.assertEquals(locationParameters.get("response_mode"), "form_post");
+        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
+        Assertions.assertEquals(locationParameters.get(OIDC_RESPONSE_MODE), OIDC_RESPONSE_MODE_FORM_POST);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasPKCE() {
-        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader("location"));
+        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
 
         Assertions.assertNotNull(locationParameters.get(CODE_CHALLENGE));
         Assertions.assertNotNull(locationParameters.get(CODE_CHALLENGE_METHOD));
@@ -126,8 +131,8 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
     }
 
     public AuthenticationRedirectRequestAssert hasStateWithUri(String expectedUriInStateParameter) {
-        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader("location"));
-        Assertions.assertEquals(expectedUriInStateParameter, new StateWithUri(locationParameters.get("state")).uri().orElse(null));
+        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
+        Assertions.assertEquals(expectedUriInStateParameter, new StateWithUri(locationParameters.get(OIDC_PARAM_STATE)).uri().orElse(null));
         return this;
     }
 

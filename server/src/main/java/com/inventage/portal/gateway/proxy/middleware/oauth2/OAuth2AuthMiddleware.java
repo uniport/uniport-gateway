@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Middleware for handling parallel OAuth2 flows for a Vert.x session.
- * The authentication can be required for the same scope (scope = "OIDC client id") of for different scopes.
+ * The authentication can be required for the same scope (scope = "OIDC client id") or for different scopes.
  * Redirects the user if not authenticated.
  */
 public class OAuth2AuthMiddleware implements Middleware {
@@ -115,10 +115,11 @@ public class OAuth2AuthMiddleware implements Middleware {
     /**
      * Put the OAuth2 flow parameters back into the session for the state parameter from the request.
      *
-     * @param ctx
+     * @param ctx context of the callback request
      * @param sessionScope
+     * @return true if the session was updated successfully otherwise false
      */
-    public static void restoreStateParameterFromRequest(RoutingContext ctx, String sessionScope) {
+    public static boolean restoreStateParameterFromRequest(RoutingContext ctx, String sessionScope) {
         final String requestState = ctx.request().getParam(OIDC_PARAM_STATE);
         if (requestState != null) {
             final Object authParameters = ctx.session().get(PREFIX_STATE + requestState);
@@ -128,15 +129,18 @@ public class OAuth2AuthMiddleware implements Middleware {
                 ctx.session().put(OIDC_PARAM_REDIRECT_URI, oAuth2FlowState.getString(OIDC_PARAM_REDIRECT_URI));
                 ctx.session().put(OIDC_PARAM_PKCE, oAuth2FlowState.getString(OIDC_PARAM_PKCE));
 
-                LOGGER.debug("For state '{}' and scope '{}'", requestState, sessionScope);
+                LOGGER.debug("For state parameter '{}' and scope '{}'", requestState, sessionScope);
+                return true;
             }
             else {
-                LOGGER.warn("No OAuth2 state found in session for state '{}' and scope '{}'", requestState,
+                LOGGER.warn("No OAuth2 state found in session for state parameter '{}' and scope '{}'", requestState,
                     sessionScope);
+                return false;
             }
         }
         else {
-            LOGGER.warn("Not state found in request for scope '{}'", sessionScope);
+            LOGGER.warn("Not state parameter found in request for scope '{}'", sessionScope);
+            return false;
         }
     }
 

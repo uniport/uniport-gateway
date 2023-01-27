@@ -43,9 +43,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class is copied from:
+ * @see OAuth2AuthHandlerImpl
+ *
+ * The following changes were made:
+ * - rename class from OAuth2AuthHandlerImpl to ReplyingPartyHandler
+ * - method parseCredentials in line 143: wrap state parameter with StateWithUri
+ *
  * @author <a href="http://pmlopes@gmail.com">Paulo Lopes</a>
  */
-public class OAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2Auth> implements OAuth2AuthHandler {
+public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> implements OAuth2AuthHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuth2AuthHandlerImpl.class);
 
@@ -63,7 +70,7 @@ public class OAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2Auth> 
     // explicit signal that tokens are handled as bearer only (meaning, no backend server known)
     private boolean bearerOnly = true;
 
-    public OAuth2AuthHandlerImpl(Vertx vertx, OAuth2Auth authProvider, String callbackURL) {
+    public RelyingPartyHandler(Vertx vertx, OAuth2Auth authProvider, String callbackURL) {
         super(authProvider, Type.BEARER);
         // get a reference to the prng
         this.prng = VertxContextPRNG.current(vertx);
@@ -134,7 +141,8 @@ public class OAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2Auth> 
                                 .put("redirect_uri", context.request().uri());
 
                         // create a state value to mitigate replay attacks
-                        state = prng.nextString(6);
+                        state = new StateWithUri(prng.nextString(6), context.request().uri())
+                                .toStateParameter();
                         // store the state in the session
                         context.session()
                                 .put("state", state);
