@@ -22,7 +22,7 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMid
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_PLAIN;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_S256;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE;
-import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_FORM_POST;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.COOKIE_NAME_DEFAULT;
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
@@ -67,7 +67,7 @@ public class AuthenticationRedirectRequestAssert extends AbstractAssert<Authenti
 
     public AuthenticationRedirectRequestAssert isUsingFormPost() {
         Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
-        Assertions.assertEquals(locationParameters.get(OIDC_RESPONSE_MODE), OIDC_RESPONSE_MODE_FORM_POST);
+        Assertions.assertEquals(locationParameters.get(OIDC_RESPONSE_MODE), OIDC_RESPONSE_MODE_DEFAULT);
         return this;
     }
 

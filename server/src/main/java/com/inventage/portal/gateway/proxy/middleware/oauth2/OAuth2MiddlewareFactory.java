@@ -49,7 +49,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     private static final String OIDC_SCOPE = "openid";
 
     public static final String OIDC_RESPONSE_MODE = "response_mode";
-    public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
+    public static final String OIDC_RESPONSE_MODE_DEFAULT = "form_post";
 
     private static final String OIDC_CODE = "code";
 
@@ -62,7 +62,18 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
         final Promise<Middleware> result = Promise.promise();
         final String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-        final Route callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
+        // PORTAL-1196: value for "response_mode" must be configurable
+        final String responseMode = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_RESPONSE_MODE);
+        final JsonObject oidcParams = new JsonObject();
+        oidcParams.put(OIDC_RESPONSE_MODE, responseMode == null ? OIDC_RESPONSE_MODE_DEFAULT : responseMode);
+        final Route callback;
+        if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
+            // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
+            callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
+        }
+        else {
+            callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
+        }
 
         final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig));
         keycloakDiscoveryFuture.onSuccess(authProvider -> {
@@ -93,15 +104,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
             final String callbackURL = String.format("%s%s", publicUrl, callback.getPath());
 
-            //PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
-            final JsonObject responseModeParam = new JsonObject();
-            responseModeParam.put(OIDC_RESPONSE_MODE, OIDC_RESPONSE_MODE_FORM_POST);
-
             // PORTAL-1184 we are using a patched OAuth2AuthHandlerImpl class as OAuth2AuthHandler implementation.
             final OAuth2AuthHandler authHandler = new RelyingPartyHandler(vertx, authProvider, callbackURL)
                     .setupCallback(callback)
                     .pkceVerifierLength(64)
-                    .extraParams(responseModeParam)
+                    .extraParams(oidcParams)
                     // add the sessionScope as a OIDC scope for "aud" in JWT
                     // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
                     .withScope(OIDC_SCOPE + " " + sessionScope);
@@ -115,6 +122,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         });
 
         return result.future();
+    }
+
+    private boolean isFormPost(String aResponseMode) {
+        return OIDC_RESPONSE_MODE_DEFAULT.equals(aResponseMode);
     }
 
     protected String authorizationPath(String publicUrl, URI keycloakAuthorizationEndpoint) {

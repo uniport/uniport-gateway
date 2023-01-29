@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Enabling versions with `helm ls` in uniport projects ([PORTAL-1128](https://issue.inventage.com/browse/PORTAL-1128)).
+- Value for OIDC response mode is now configurable in `oauth2` middleware ([PORTAL-1196](https://issue.inventage.com/browse/PORTAL-1196)).
 
 ### Changed
 
