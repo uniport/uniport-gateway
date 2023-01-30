@@ -1,11 +1,23 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
+import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
+
+import java.net.URI;
+import java.util.Optional;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactiverse.contextual.logging.ContextualData;
 import io.vertx.core.AsyncResult;
@@ -25,16 +37,6 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 import io.vertx.ext.web.handler.impl.RelyingPartyHandler;
 import io.vertx.ext.web.handler.impl.StateWithUri;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.util.Optional;
-
-import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
-import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
 
 /**
  * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
@@ -70,12 +72,12 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
             // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
             callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
-        }
-        else {
+        } else {
             callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
         }
 
-        final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig));
+        final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx,
+                oAuth2Options(middlewareConfig));
         keycloakDiscoveryFuture.onSuccess(authProvider -> {
             LOGGER.debug("Successfully completed Keycloak discovery");
 
@@ -97,8 +99,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
                 final String newAuthorizationPath = authorizationPath(publicUrl, uri);
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.warn("Failed to patch authorization path");
             }
 
@@ -142,15 +143,15 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     // this method is called when the IAM finishs the authentication flow and sends a redirect (callback) with the code
-    protected void whenAuthenticationResponseReceived(RoutingContext ctx, String sessionScope, OAuth2Auth authProvider) {
+    protected void whenAuthenticationResponseReceived(RoutingContext ctx, String sessionScope,
+            OAuth2Auth authProvider) {
         String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
         String code = ctx.request().getParam(OIDC_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
             LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code.substring(0, 5));
             ctx.addEndHandler(asyncResult -> whenTokenForCodeReceived(asyncResult, ctx, authProvider, sessionScope));
             ctx.next(); // io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl.setupCallback#route.handler(ctx -> {...})
-        }
-        else {
+        } else {
             LOGGER.info("failed because state '{}' wasn't found in session", stateParameter);
             sendResponseFor(stateParameter, ctx);
         }
@@ -161,13 +162,13 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         Optional<String> uri = new StateWithUri(stateParameter).uri();
         if (uri.isPresent()) {
             HttpResponder.respondWithRedirectWithoutSetCookie(uri.get(), ctx);
-        }
-        else {
+        } else {
             HttpResponder.respondWithStatusCode(HttpResponseStatus.GONE.code(), ctx);
         }
     }
 
-    protected void whenTokenForCodeReceived(AsyncResult<Void> asyncResult, RoutingContext ctx, OAuth2Auth authProvider, String sessionScope) {
+    protected void whenTokenForCodeReceived(AsyncResult<Void> asyncResult, RoutingContext ctx, OAuth2Auth authProvider,
+            String sessionScope) {
         if (asyncResult.succeeded()) {
             if (ctx.user() != null) {
                 LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'", sessionScope,

@@ -1,5 +1,14 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
@@ -10,6 +19,7 @@ import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -24,14 +34,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MiddlewareServerBuilder {
 
@@ -91,7 +93,6 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
     }
 
-
     public MiddlewareServerBuilder withResponseSessionCookieRemovalMiddleware() {
         return withMiddleware(new ResponseSessionCookieRemovalMiddleware(null));
     }
@@ -105,8 +106,7 @@ public class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withOAuth2AuthMiddlewareForScope(KeycloakServer mockKeycloakServer, String scope) {
         try {
             withOAuth2AuthMiddleware(mockKeycloakServer.getOAuth2AuthConfig(scope), scope);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
             }
@@ -125,7 +125,7 @@ public class MiddlewareServerBuilder {
         OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         Future<Middleware> middlewareFuture = factory.create(vertx, router, oAuth2AuthConfig);
         int atMost = 20;
-        while(!middlewareFuture.isComplete() && atMost > 0){
+        while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
                 atMost--;
@@ -133,14 +133,13 @@ public class MiddlewareServerBuilder {
                 throw new RuntimeException(e);
             }
         }
-        if(middlewareFuture.failed()){
+        if (middlewareFuture.failed()) {
             throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
         }
         if (scope == null) {
             return withMiddleware(middlewareFuture.result());
-        }
-        else {
-            return withMiddlewareOnPath(middlewareFuture.result(), "/" +scope+ "/*");
+        } else {
+            return withMiddlewareOnPath(middlewareFuture.result(), "/" + scope + "/*");
         }
     }
 
@@ -156,7 +155,8 @@ public class MiddlewareServerBuilder {
             ctx.response().end();
         });
 
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(port).onComplete(testContext.succeedingThenComplete());
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
+                .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
@@ -165,13 +165,15 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler) throws InterruptedException {
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler)
+            throws InterruptedException {
         VertxTestContext testContext = new VertxTestContext();
         Router serviceRouter = Router.router(vertx);
 
         serviceRouter.route().handler(handler);
 
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(port).onComplete(testContext.succeedingThenComplete());
+        vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
+                .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
@@ -196,9 +198,9 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withCustomSessionState(Map<String, String> sessionEntries){
+    public MiddlewareServerBuilder withCustomSessionState(Map<String, String> sessionEntries) {
         Handler<RoutingContext> handler = ctx -> {
-            sessionEntries.forEach((key, value) -> ctx.session().put(key,value));
+            sessionEntries.forEach((key, value) -> ctx.session().put(key, value));
             ctx.next();
         };
         router.route().handler(handler);
@@ -219,6 +221,7 @@ public class MiddlewareServerBuilder {
         router.route().handler(middleware);
         return this;
     }
+
     public MiddlewareServerBuilder withMiddlewareOnPath(Handler<RoutingContext> middleware, String path) {
         router.route().path(path).handler(middleware);
         return this;
