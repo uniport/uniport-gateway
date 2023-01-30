@@ -1,7 +1,9 @@
-package io.vertx.ext.web.handler.impl;
+package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 
 public class StateWithUriTest {
 
@@ -15,8 +17,11 @@ public class StateWithUriTest {
         // then
         Assertions.assertEquals(state, stateWithUri.state());
         Assertions.assertEquals(uri, stateWithUri.uri().orElse(null));
-        Assertions.assertEquals("QWJDZDEyOi9zZWdtZW50L3N1YnNlZ21lbnQvc3Vic3Vic2VnbWVudD9wYXJhbTE9dmFsdWUxJnBhcmFtMj12YWx1ZTIjZnJhZ21lbnQx", stateWithUri.toStateParameter());
+        Assertions.assertEquals(
+                "QWJDZDEyOi9zZWdtZW50L3N1YnNlZ21lbnQvc3Vic3Vic2VnbWVudD9wYXJhbTE9dmFsdWUxJnBhcmFtMj12YWx1ZTIjZnJhZ21lbnQx",
+                stateWithUri.toStateParameter());
     }
+
     @Test
     public void fromValuesWithoutUri() {
         // given
@@ -29,6 +34,7 @@ public class StateWithUriTest {
         Assertions.assertNull(stateWithUri.uri().orElse(null));
         Assertions.assertEquals("QWJDZDEy", stateWithUri.toStateParameter());
     }
+
     @Test
     public void fromValuesNull() {
         // given
@@ -36,8 +42,7 @@ public class StateWithUriTest {
         try {
             StateWithUri stateWithUri = new StateWithUri(null, null);
             Assertions.fail("IllegalArgumentException expected");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // then
             Assertions.assertEquals("Null is not a valid state value!", e.getMessage());
         }
@@ -51,9 +56,11 @@ public class StateWithUriTest {
         StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
-        Assertions.assertEquals("/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1", stateWithUri.uri().orElse(null));
+        Assertions.assertEquals("/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1",
+                stateWithUri.uri().orElse(null));
         Assertions.assertEquals(stateParameterBase64Encoded, stateWithUri.toStateParameter());
     }
+
     @Test
     public void fromEncodedWithoutUri() {
         // given
@@ -65,6 +72,7 @@ public class StateWithUriTest {
         Assertions.assertNull(stateWithUri.uri().orElse(null));
         Assertions.assertEquals(stateParameterBase64Encoded, stateWithUri.toStateParameter());
     }
+
     @Test
     public void fromInvalidEncoded() {
         // given
@@ -76,6 +84,7 @@ public class StateWithUriTest {
         Assertions.assertNull(stateWithUri.uri().orElse(null));
         Assertions.assertEquals(stateParameter, stateWithUri.toStateParameter());
     }
+
     @Test
     public void fromEncodedNull() {
         // given
@@ -83,8 +92,7 @@ public class StateWithUriTest {
         try {
             StateWithUri stateWithUri = new StateWithUri(null);
             Assertions.fail("IllegalArgumentException expected");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // then
             Assertions.assertEquals("Null is not a valid state parameter value!", e.getMessage());
         }
