@@ -323,8 +323,8 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
             }
 
             if (user.principal().containsKey("scope")) {
-                final String scopes = user.principal().getString("scope");
-                if (scopes != null) {
+                final String handlerScopes = user.principal().getString("scope");
+                if (handlerScopes != null) {
                     // user principal contains scope, a basic assertion is required to ensure that
                     // the scopes present match the required ones
                     for (String scope : this.scopes) {
@@ -333,12 +333,12 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
                             continue;
                         }
 
-                        int idx = scopes.indexOf(scope);
+                        int idx = handlerScopes.indexOf(scope);
                         if (idx != -1) {
                             // match, but is it valid?
-                            if ((idx != 0 && scopes.charAt(idx - 1) != ' ') ||
-                                    (idx + scope.length() != scopes.length()
-                                            && scopes.charAt(idx + scope.length()) != ' ')) {
+                            if ((idx != 0 && handlerScopes.charAt(idx - 1) != ' ') ||
+                                    (idx + scope.length() != handlerScopes.length()
+                                            && handlerScopes.charAt(idx + scope.length()) != ' ')) {
                                 // invalid scope assignment
                                 ctx.fail(403, new IllegalStateException("principal scope != handler scopes"));
                                 return;

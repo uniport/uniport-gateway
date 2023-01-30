@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.oauth2;
 import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
 
 import java.net.URI;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -121,7 +122,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                     .pkceVerifierLength(64)
                     // add the sessionScope as a OIDC scope for "aud" in JWT
                     // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
-                    .withScope(OIDC_SCOPE + " " + sessionScope)
+                    .withScopes(List.of(OIDC_SCOPE, sessionScope))
                     .extraParams(responseModeParam);
 
             oauth2Promise.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
