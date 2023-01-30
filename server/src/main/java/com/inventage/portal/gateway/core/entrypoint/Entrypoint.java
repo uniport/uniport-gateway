@@ -77,7 +77,7 @@ public class Entrypoint {
         optionApplicationRouter.ifPresent(applicationRouter -> {
             if (name.equals(application.entrypoint())) {
                 if (enabled()) {
-                    router.route(application.rootPath() + "*").subRouter(applicationRouter);
+                    router().route(application.rootPath() + "*").subRouter(applicationRouter);
                     LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
                             application.rootPath(), name);
                 } else {
