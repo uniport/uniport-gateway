@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
@@ -15,6 +17,8 @@ import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 
 import io.vertx.core.Future;
@@ -30,35 +34,36 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.handler.JWTAuthHandler;
-import io.vertx.ext.web.handler.SessionHandler;
-import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.sstore.SessionStore;
 import io.vertx.junit5.VertxTestContext;
 
 public class MiddlewareServerBuilder {
 
-    private static final String SESSION_COOKIE_NAME = "test.session.cookie";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareServerBuilder.class);
+
     private static final int TIMEOUT_SERVER_START_SECONDS = 5;
 
     private final String host;
     private final Vertx vertx;
-    private final int port;
+    private VertxTestContext testCtx;
     private final Router router;
 
-    private MiddlewareServerBuilder(Vertx vertx, String host, int port) {
-        this.vertx = vertx;
-        this.port = port;
-        this.host = host;
-        router = Router.router(vertx);
-
-        final SessionStore sessionStore = LocalSessionStore.create(vertx);
-        final SessionHandler sessionHandler = SessionHandler.create(sessionStore)
-                .setSessionCookieName(SESSION_COOKIE_NAME);
-        router.route().handler(sessionHandler);
+    public static MiddlewareServerBuilder portalGateway(Vertx vertx, VertxTestContext testCtx) {
+        return portalGateway(vertx, "localhost", testCtx);
     }
 
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, int port) {
-        return new MiddlewareServerBuilder(vertx, host, port);
+    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, VertxTestContext testCtx) {
+        return new MiddlewareServerBuilder(vertx, host, testCtx);
+    }
+
+    private MiddlewareServerBuilder(Vertx vertx, String host, VertxTestContext testCtx) {
+        this.vertx = vertx;
+        this.host = host;
+        this.testCtx = testCtx;
+        router = Router.router(vertx);
+    }
+
+    public MiddlewareServerBuilder withSessionMiddleware() {
+        return withMiddleware(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -91,20 +96,53 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
     }
 
+    public MiddlewareServerBuilder withResponseSessionCookieRemovalMiddleware() {
+        return withMiddleware(new ResponseSessionCookieRemovalMiddleware(null));
+    }
+
+    /**
+     *
+     * @param mockKeycloakServer
+     * @param scope will be used as the path prefix of incoming requests (e.g. /scope/*)
+     * @return this
+     */
+    public MiddlewareServerBuilder withOAuth2AuthMiddlewareForScope(KeycloakServer mockKeycloakServer, String scope) {
+        try {
+            withOAuth2AuthMiddleware(mockKeycloakServer.getOAuth2AuthConfig(scope), scope);
+        } catch (Throwable t) {
+            if (mockKeycloakServer != null) {
+                mockKeycloakServer.closeServer();
+            }
+            if (testCtx != null) {
+                testCtx.completeNow();
+            }
+        }
+        return this;
+    }
+
     public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) {
+        return withOAuth2AuthMiddleware(oAuth2AuthConfig, null);
+    }
+
+    private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) {
         OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         Future<Middleware> middlewareFuture = factory.create(vertx, router, oAuth2AuthConfig);
-        while (!middlewareFuture.isComplete()) { // eventually aborted by the test context
+        int atMost = 20;
+        while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        if (!middlewareFuture.isComplete() || middlewareFuture.failed()) {
+        if (middlewareFuture.failed()) {
             throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
         }
-        return withMiddleware(middlewareFuture.result());
+        if (scope == null) {
+            return withMiddleware(middlewareFuture.result());
+        } else {
+            return withMiddlewareOnPath(middlewareFuture.result(), "/" + scope + "/*");
+        }
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(int port) {
@@ -162,7 +200,7 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withCustomSessionState(Map<String, Object> sessionEntries) {
+    public MiddlewareServerBuilder withCustomSessionState(Map<String, String> sessionEntries) {
         Handler<RoutingContext> handler = ctx -> {
             sessionEntries.forEach((key, value) -> ctx.session().put(key, value));
             ctx.next();
@@ -186,11 +224,15 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
+    public MiddlewareServerBuilder withMiddlewareOnPath(Handler<RoutingContext> middleware, String path) {
+        router.route().path(path).handler(middleware);
+        return this;
+    }
+
     public MiddlewareServer build() {
         router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
-
         HttpServer httpServer = vertx.createHttpServer().requestHandler(router::handle);
-
-        return new MiddlewareServer(vertx, httpServer, port, host);
+        return new MiddlewareServer(vertx, httpServer, host, testCtx);
     }
+
 }

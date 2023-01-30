@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -30,6 +31,13 @@ public class KeycloakServer {
     private final static String RANDOM_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ";
 
 
+    public KeycloakServer(Vertx vertx) {
+        this(vertx, "localhost", TestUtils.findFreePort());
+    }
+    public KeycloakServer(Vertx vertx, String host) {
+        this(vertx, host, TestUtils.findFreePort());
+    }
+
     public KeycloakServer(Vertx vertx, String host, int port) {
         this.vertx = vertx;
         this.host = host;
@@ -49,6 +57,9 @@ public class KeycloakServer {
         latch.await();
     }
 
+    public int port() {
+        return port;
+    }
 
     public final void closeServer() {
         if (this.server != null) {
@@ -56,7 +67,7 @@ public class KeycloakServer {
         }
     }
 
-    public void startServerWithDefaultDiscoveryHandler() throws InterruptedException {
+    public KeycloakServer startWithDefaultDiscoveryHandler() throws InterruptedException {
         JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
@@ -73,9 +84,10 @@ public class KeycloakServer {
                                 .send(tokenResponse.encode());
                     }
                 });
+        return this;
     }
 
-    public void startServerWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler) throws InterruptedException {
+    public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler) throws InterruptedException {
         JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
@@ -93,11 +105,22 @@ public class KeycloakServer {
                                 .send(tokenResponse.encode());
                     }
                 });
+        return this;
     }
 
     public JsonObject getDefaultOAuth2AuthConfig() {
         JsonObject config = new JsonObject();
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, SESSION_SCOPE);
+        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
+        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
+        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
+        config.put(PUBLIC_URL_KEY, this.getDefaultPublicUrl());
+        return config;
+    }
+
+    public JsonObject getOAuth2AuthConfig(String scope) {
+        JsonObject config = new JsonObject();
+        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, scope);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());

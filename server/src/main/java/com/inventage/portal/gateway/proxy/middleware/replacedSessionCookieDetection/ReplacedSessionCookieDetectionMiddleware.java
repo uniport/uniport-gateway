@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
+import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
@@ -70,20 +71,12 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
         ctx.response().addCookie(cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
-        ctx.put(ResponseSessionCookieRemovalMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
+        ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
-            LOGGER.debug("Invalid sessionId cookie for state, delayed retry for '{}' ms", this.waitBeforeRetryMs);
-            redirectForRetry(ctx);
+            LOGGER.info("Invalid sessionId cookie for state, delayed retry for '{}' ms", this.waitBeforeRetryMs);
+            HttpResponder.respondWithRedirectForRetry(ctx);
         });
-    }
-
-    private void redirectForRetry(RoutingContext ctx) {
-        ctx.response()
-                .setStatusCode(307) // redirect by using the same HTTP method (307)
-                .putHeader(HttpHeaders.LOCATION, ctx.request().uri())
-                .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain; charset=utf-8")
-                .end("Redirecting for retry to " + ctx.request().uri() + ".");
     }
 
     /**

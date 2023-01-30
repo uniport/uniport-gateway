@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.oauth2;
+package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,12 +34,19 @@ import io.vertx.ext.web.handler.impl.ScopedAuthentication;
 import io.vertx.ext.web.impl.Origin;
 
 /**
- * Copied from https://github.com/vert-x3/vertx-web/blob/4.3.7/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
+ * This class is copied from:
+ * https://github.com/vert-x3/vertx-web/blob/4.3.7/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
+ *
+ * The following changes were made:
+ * - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
+ * - wrap oauth2 state parameter with StateWithUri
+ * - dont implement OrderListener interface (mount callback immediately)
+ * - fix private constructor bugs (see https://github.com/vert-x3/vertx-web/pull/2337)
  */
-public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2Auth>
+public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
         implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CustomOAuth2AuthHandlerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RelyingPartyHandler.class);
 
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
@@ -56,11 +63,11 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
     private int order = -1;
     private Route callback;
 
-    public CustomOAuth2AuthHandlerImpl(Vertx vertx, OAuth2Auth authProvider, String callbackURL) {
+    public RelyingPartyHandler(Vertx vertx, OAuth2Auth authProvider, String callbackURL) {
         this(vertx, authProvider, callbackURL, null);
     }
 
-    public CustomOAuth2AuthHandlerImpl(Vertx vertx, OAuth2Auth authProvider, String callbackURL, String realm) {
+    public RelyingPartyHandler(Vertx vertx, OAuth2Auth authProvider, String callbackURL, String realm) {
         super(authProvider, Type.BEARER, realm);
         // get a reference to the prng
         this.prng = VertxContextPRNG.current(vertx);
@@ -81,7 +88,7 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
         this.openId = false;
     }
 
-    private CustomOAuth2AuthHandlerImpl(CustomOAuth2AuthHandlerImpl base, List<String> scopes) {
+    private RelyingPartyHandler(RelyingPartyHandler base, List<String> scopes) {
         super(base.authProvider, Type.BEARER, base.realm);
         this.prng = base.prng;
         this.callbackURL = base.callbackURL;
@@ -159,20 +166,17 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
                         }
                     } else {
                         // there's a session we can make this request comply to the Oauth2 spec and add an opaque state
-                        session
-                                .put("redirect_uri", context.request().uri());
+                        session.put("redirect_uri", context.request().uri());
 
                         // create a state value to mitigate replay attacks
-                        state = prng.nextString(6);
+                        state = new StateWithUri(prng.nextString(6), context.request().uri()).toStateParameter();
                         // store the state in the session
-                        session
-                                .put("state", state);
+                        session.put("state", state);
 
                         if (pkce > 0) {
                             codeVerifier = prng.nextString(pkce);
                             // store the code verifier in the session
-                            session
-                                    .put("pkce", codeVerifier);
+                            session.put("pkce", codeVerifier);
                         }
                     }
                     handler.handle(
@@ -201,8 +205,7 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
             config.mergeIn(extraParams);
         }
 
-        config
-                .put("state", state != null ? state : redirectURL);
+        config.put("state", state != null ? state : redirectURL);
 
         if (callbackURL != null) {
             config.put("redirect_uri", callbackURL.href());
@@ -238,12 +241,12 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
     public OAuth2AuthHandler withScope(String scope) {
         List<String> updatedScopes = new ArrayList<>(this.scopes);
         updatedScopes.add(scope);
-        return new CustomOAuth2AuthHandlerImpl(this, updatedScopes);
+        return new RelyingPartyHandler(this, updatedScopes);
     }
 
     @Override
     public OAuth2AuthHandler withScopes(List<String> scopes) {
-        return new CustomOAuth2AuthHandlerImpl(this, scopes);
+        return new RelyingPartyHandler(this, scopes);
     }
 
     @Override
@@ -373,7 +376,7 @@ public class CustomOAuth2AuthHandlerImpl extends HTTPAuthorizationHandler<OAuth2
 
     private void mountCallback() {
 
-        callback.method(HttpMethod.GET);
+        callback.method(HttpMethod.GET); // TODO needed?
 
         callback.handler(ctx -> {
             // Some IdP's (e.g.: AWS Cognito) returns errors as query arguments

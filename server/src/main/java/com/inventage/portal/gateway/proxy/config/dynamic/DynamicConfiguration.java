@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.jayway.jsonpath.internal.Path;
@@ -118,6 +119,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
 
+    public static final String MIDDLEWARE_OAUTH2_RESPONSE_MODE = "responseMode";
+
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
 
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
@@ -135,6 +138,8 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_CONTROL_API = "controlApi";
     public static final String MIDDLEWARE_CONTROL_API_ACTION = "action";
+
+    public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
 
     public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(MIDDLEWARE_REPLACE_PATH_REGEX,
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
@@ -190,10 +195,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
-                .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_OAUTH2_RESPONSE_MODE, Schemas.stringSchema())
                 .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
                 .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
                 .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
@@ -698,6 +700,14 @@ public class DynamicConfiguration {
                     final String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
                     if (sessionScope == null || sessionScope.length() == 0) {
                         return Future.failedFuture(String.format("%s: No session scope defined", mwType));
+                    }
+
+                    final String responseMode = mwOptions.getString(MIDDLEWARE_OAUTH2_RESPONSE_MODE);
+                    if (responseMode == null) {
+                        LOGGER.debug(String.format("%s: value not specified. Use default value: %s", MIDDLEWARE_OAUTH2_RESPONSE_MODE, OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
+                    }
+                    else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
+                        return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s", MIDDLEWARE_OAUTH2_RESPONSE_MODE, responseMode, OIDC_RESPONSE_MODES));
                     }
 
                     break;

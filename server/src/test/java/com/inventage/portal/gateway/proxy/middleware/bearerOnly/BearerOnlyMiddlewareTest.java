@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -10,12 +11,10 @@ import java.util.List;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.google.common.io.Resources;
-import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 
 import io.vertx.core.Vertx;
@@ -44,24 +43,17 @@ public class BearerOnlyMiddlewareTest {
             .add("scope", "openid email profile Test")
             .build();
 
-    private int port;
-
-    @BeforeEach
-    public void setup() {
-        port = TestUtils.findFreePort();
-    }
-
     @Test
     public void noBearer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx, new RequestOptions(), (resp) -> {
+                .incomingRequest(GET, "/", testCtx, (resp) -> {
                     // then
                     assertEquals(401, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -76,13 +68,13 @@ public class BearerOnlyMiddlewareTest {
 
         final String invalidSignatureToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJCZWFyZXIiLCJleHAiOjE4OTM0NTI0MDAsImlhdCI6MTYyNzA1Mzc0NywiaXNzIjoiaHR0cDovL3Rlc3QuaXNzdWVyOjEyMzQvYXV0aC9yZWFsbXMvdGVzdCIsImF6cCI6InRlc3QtYXV0aG9yaXplZC1wYXJ0aWVzIiwiYXVkIjoidGVzdC1hdWRpZW5jZSIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUgVGVzdCJ9.blub";
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx,
+                .incomingRequest(GET, "/",
                         new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidSignatureToken)),
-                        (resp) -> {
+                        testCtx, (resp) -> {
                             // then
                             assertEquals(401, resp.statusCode(), "unexpected status code");
                             testCtx.completeNow();
@@ -101,12 +93,13 @@ public class BearerOnlyMiddlewareTest {
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx,
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
+                .incomingRequest(GET, "/",
+                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                        (resp) -> {
                             // then
                             assertEquals(401, resp.statusCode(), "unexpected status code");
                             testCtx.completeNow();
@@ -124,12 +117,13 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx,
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), (resp) -> {
+                .incomingRequest(GET, "/",
+                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                        (resp) -> {
                             // then
                             assertEquals(401, resp.statusCode(), "unexpected status code");
                             testCtx.completeNow();
@@ -144,11 +138,12 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, host, port)
+        portalGateway(vertx, host, testCtx)
                 .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build()
+                .build().start()
                 // when
-                .incomingRequest(testCtx, new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)),
+                .incomingRequest(GET, "/",
+                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
                         (resp) -> {
                             // then
                             assertEquals(200, resp.statusCode(), "unexpected status code");

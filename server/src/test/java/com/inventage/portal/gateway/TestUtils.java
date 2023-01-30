@@ -2,7 +2,13 @@ package com.inventage.portal.gateway;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
@@ -10,6 +16,9 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
+import org.junit.jupiter.api.Assertions;
 
 public class TestUtils {
     /**
@@ -254,4 +263,18 @@ public class TestUtils {
         };
     }
 
+    public static Map<String, String> extractParametersFromHeader(String header) {
+        List<NameValuePair> responseParamsList = null;
+        try {
+            responseParamsList = URLEncodedUtils.parse(new URI(header), Charset.forName("UTF-8"));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        Assertions.assertNotNull(responseParamsList);
+        Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
+                entry -> entry.getName(), entry -> entry.getValue()
+        ));
+
+        return responseParamsMap;
+    }
 }
