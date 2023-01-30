@@ -375,9 +375,6 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     }
 
     private void mountCallback() {
-
-        callback.method(HttpMethod.GET); // TODO needed?
-
         callback.handler(ctx -> {
             // Some IdP's (e.g.: AWS Cognito) returns errors as query arguments
             String error = ctx.request().getParam("error");
