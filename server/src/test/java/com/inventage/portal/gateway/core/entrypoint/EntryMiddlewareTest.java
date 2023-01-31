@@ -93,7 +93,7 @@ public class EntryMiddlewareTest {
         entrypoint.mount(proxyApplication);
 
         routerFactory.createRouter(dynamicConfig).onComplete(testCtx.succeeding(router -> {
-            entrypoint.router().mountSubRouter("/", router);
+            entrypoint.router().route("/*").subRouter(router);
             proxyRouter = entrypoint.router();
 
             RequestOptions optA = new RequestOptions().setURI("/pathA");
