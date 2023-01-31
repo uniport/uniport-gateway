@@ -41,13 +41,15 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         final User user = ctx.user();
         if (user == null) {
             // bad state
+            LOGGER.debug("no user in context");
             ctx.fail(403, new IllegalStateException("no user in the context"));
             return;
         }
 
         final JsonObject jwt = user.get("accessToken");
         if (jwt == null) {
-            ctx.fail(403, new IllegalStateException("Invalid JWT: null"));
+            LOGGER.debug("invalid JWT: malformed or audience, issuer or signature is invalid");
+            ctx.fail(403, new IllegalStateException("Invalid JWT: malformed or audience, issuer or signature is invalid"));
             return;
         }
 
