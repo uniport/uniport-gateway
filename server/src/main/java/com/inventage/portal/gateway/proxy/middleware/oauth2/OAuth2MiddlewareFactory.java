@@ -68,9 +68,18 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             final String publicUrl = middlewareConfig.getString(RouterFactory.PUBLIC_URL);
             try {
                 final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
-                final URI uri = new URI(keycloakOAuth2Options.getAuthorizationPath());
-                final String newAuthorizationPath = authorizationPath(publicUrl, uri);
+
+                // path issuer
+                final URI issuerPath = new URI(keycloakOAuth2Options.getJWTOptions().getIssuer());
+                final String newIssuerPath = patchPath(publicUrl, issuerPath);
+                keycloakOAuth2Options.getJWTOptions().setIssuer(newIssuerPath);
+                LOGGER.debug("patched issuer: {} -> {}", issuerPath, newIssuerPath);
+
+                // patch authorization_endpoint
+                final URI authorizationPath = new URI(keycloakOAuth2Options.getAuthorizationPath());
+                final String newAuthorizationPath = patchPath(publicUrl, authorizationPath);
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
+                LOGGER.debug("patched authorization endpoint: {} -> {}", authorizationPath, newAuthorizationPath);
             } catch (Exception e) {
                 LOGGER.warn("Failed to patch authorization path");
             }
@@ -119,7 +128,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         return oauth2Options;
     }
 
-    private String authorizationPath(String publicUrl, URI keycloakAuthorizationEndpoint) {
-        return String.format("%s%s", publicUrl, keycloakAuthorizationEndpoint.getPath());
+    private String patchPath(String publicUrl, URI keycloakUrl) {
+        return String.format("%s%s", publicUrl, keycloakUrl.getPath());
     }
 }
