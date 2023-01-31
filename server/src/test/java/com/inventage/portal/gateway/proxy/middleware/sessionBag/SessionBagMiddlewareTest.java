@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,12 +12,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
@@ -83,9 +84,9 @@ public class SessionBagMiddlewareTest {
                 isFirstReq.set(false);
             } else {
                 testCtx.verify(() -> {
-                    assertTrue(ctx.request().cookieMap().containsKey(cookie.getName()),
+                    assertFalse(ctx.request().cookies(cookie.getName()).isEmpty(),
                             String.format("%s: Expected cookies to be included in follow up requests but was '%s'",
-                                    errMsg, ctx.request().cookieMap()));
+                                    errMsg, ctx.request().cookies()));
                 });
             }
             ctx.response().end();
@@ -170,11 +171,7 @@ public class SessionBagMiddlewareTest {
         testHarness(vertx, testCtx, sessionStore, whitelistedCookies, ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(masterRealmCookie);
-                // vert.x uses a cookie name as its unique identifier
-                // but it should be the tuple (name, domain, path)
-                // https://github.com/eclipse-vertx/vert.x/issues/3916
-                // TODO set once this issue is closed
-                // ctx.response().addCookie(portalRealmCookie);
+                ctx.response().addCookie(portalRealmCookie);
                 isFirstReq.set(false);
             }
             ctx.response().end();
@@ -218,9 +215,9 @@ public class SessionBagMiddlewareTest {
                 isFirstReq.set(false);
             } else {
                 testCtx.verify(() -> {
-                    for (String cookieName : ctx.request().cookieMap().keySet()) {
-                        if (cookieName.equals("blub")) {
-                            String cookieVal = ctx.request().cookieMap().get(cookieName).getValue();
+                    for (Cookie cookie : ctx.request().cookies()) {
+                        if (cookie.getName().equals("blub")) {
+                            String cookieVal = cookie.getValue();
                             assertTrue(cookieVal.equals("foo"), String.format(
                                     "%s: Expected cookie value to be '%s' but was '%s'", errMsg, "foo", cookieVal));
                         }
@@ -344,7 +341,7 @@ public class SessionBagMiddlewareTest {
             }
 
             // extract session ID to inspect session content i.e. session bag
-            if (sessionId == null || sessionId.get() == null || sessionId.get().isEmpty()) {
+            if (sessionId.get() == null || sessionId.get().isEmpty()) {
                 assertNotNull(sessionCookie, String.format("%s: No session cookie returned.", errMsg));
                 sessionId.set(sessionCookie.value());
                 assertEquals(sessionCookieName, sessionCookie.name(), String.format("%s: Wrong cookie name", errMsg));
