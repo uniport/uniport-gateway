@@ -108,20 +108,8 @@ public class Entrypoint {
     }
 
     class Tls {
-
         public JksOptions jksOptions() {
             return null;
-            // final String keyStorePath = config.getString(CONFIG_PREFIX +
-            // CONFIG_HTTPS_KEY_STORE_PATH);
-            // if (keyStorePath == null || keyStorePath.isEmpty()) {
-            // throw new IllegalStateException("When using https the path to the key store must be
-            // configured by variable: '" +
-            // CONFIG_PREFIX + "https-key-store-path'. To disable the https port configuration use
-            // '-1' as port.");
-            // }
-            // return new JksOptions()
-            // .setPath(keyStorePath)
-            // .setPassword(config.getString(CONFIG_PREFIX + CONFIG_HTTPS_KEY_STORE_PASSWORD));
         }
     }
 

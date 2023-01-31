@@ -73,7 +73,7 @@ public class ShowSessionContentMiddleware implements Middleware {
 
             final String rawAccessToken = user.principal().getString("access_token");
             html.append("\n\n").append(key).append(":\n").append(decodeJWT(rawAccessToken)).append("\n")
-                .append(rawAccessToken);
+                    .append(rawAccessToken);
         }
 
         return html.toString();
@@ -82,7 +82,7 @@ public class ShowSessionContentMiddleware implements Middleware {
     private String decodeJWT(String jwt) {
         final String[] chunks = jwt.split("\\.");
         final Base64.Decoder decoder = Base64.getDecoder();
-        final String header = new String(decoder.decode(chunks[0]));
+        // header: chunks[0], signature: chunks[2]
         final String payload = new String(decoder.decode(chunks[1]));
         return new JsonObject(payload).encodePrettily();
     }

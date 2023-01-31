@@ -26,7 +26,8 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
     private final String sessionCookieName;
 
     public ResponseSessionCookieRemovalMiddleware(String sessionCookieName) {
-        this.sessionCookieName = (sessionCookieName == null) ? SessionMiddleware.COOKIE_NAME_DEFAULT : sessionCookieName;
+        this.sessionCookieName = (sessionCookieName == null) ? SessionMiddleware.COOKIE_NAME_DEFAULT
+                : sessionCookieName;
     }
 
     /**
@@ -46,12 +47,13 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
 
     protected void removeSessionCookie(RoutingContext ctx) {
         if (ctx.get(REMOVE_SESSION_COOKIE_SIGNAL) != null) {
-            final Cookie sessionCookie = ctx.getCookie(sessionCookieName);
+            final Cookie sessionCookie = ctx.request().getCookie(sessionCookieName);
             if (sessionCookie != null) {
-                LOGGER.debug("with value '{}'", ctx.getCookie(sessionCookieName).getValue());
+                LOGGER.debug("with value '{}'", sessionCookie.getValue());
             }
-            // invalidate=false: session cookie should only be removed from response, not unset in client
-            ctx.removeCookie(sessionCookieName, false);
+            // session cookie should only be removed from response, not unset in client
+            boolean invalidate = false;
+            ctx.request().response().removeCookie(sessionCookieName, invalidate);
         }
     }
 }

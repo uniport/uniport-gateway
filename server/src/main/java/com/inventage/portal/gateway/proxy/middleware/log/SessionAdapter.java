@@ -4,12 +4,6 @@ import io.vertx.ext.web.Session;
 
 public class SessionAdapter {
 
-    private Session session;
-
-    public SessionAdapter(Session session) {
-        this.session = session;
-    }
-
     public static String displaySessionId(Session session) {
         if (session == null) {
             return "";

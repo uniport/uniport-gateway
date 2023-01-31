@@ -23,7 +23,6 @@ import static io.vertx.core.http.Cookie.cookie;
  */
 public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
 
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
@@ -70,7 +69,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
-        ctx.response().addCookie(cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
+        ctx.response().addCookie(
+                cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
@@ -108,7 +108,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         if (isUserInSession(ctx)) {
             LOGGER.debug("Adding cookie '{}'", this.detectionCookieKey);
             ctx.response().addCookie(
-                    cookie(this.detectionCookieKey, new DetectionCookieValue().toString()).setPath("/").setHttpOnly(true));
+                    cookie(this.detectionCookieKey, new DetectionCookieValue().toString()).setPath("/")
+                            .setHttpOnly(true));
         }
     }
 
@@ -124,23 +125,14 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         if (isUserInSession(ctx)) {
             return false;
         }
-        final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx, this.sessionCookiePrefix);
+        final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx,
+                this.sessionCookiePrefix);
         if (sessionCookie != null) {
             LOGGER.debug("For received session cookie value '{}'", sessionCookie.value());
-        }
-        else {
+        } else {
             LOGGER.debug("No session cookie '{}' received", this.sessionCookiePrefix);
         }
         return true;
-    }
-
-    private boolean cookieReceived(RoutingContext ctx, String cookieName) {
-        if (ctx.request().getCookie(cookieName) != null) {
-            return true;
-        }
-        else {
-            return getCookieFromHeader(ctx, cookieName) != null;
-        }
     }
 
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
