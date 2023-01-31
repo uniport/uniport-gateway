@@ -24,7 +24,7 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
@@ -340,13 +340,13 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     private String cookieFrom(HttpClientResponse response) {
-        String set_cookie = response.getHeader(HttpHeaders.Names.SET_COOKIE);
+        String set_cookie = response.getHeader(HttpHeaderNames.SET_COOKIE);
         return Arrays.stream(set_cookie.split(";")).filter(element -> element.startsWith(COOKIE_NAME_DEFAULT))
                 .findFirst().orElse(null);
     }
 
     private RequestOptions withCookie(String cookieHeaderValue) {
-        return new RequestOptions().putHeader(HttpHeaders.Names.COOKIE, cookieHeaderValue);
+        return new RequestOptions().putHeader(HttpHeaderNames.COOKIE, cookieHeaderValue);
     }
 
 }

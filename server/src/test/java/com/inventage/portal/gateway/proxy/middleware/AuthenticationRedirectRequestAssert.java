@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Assertions;
 
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.http.HttpClientResponse;
 
 /**
@@ -58,7 +58,8 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert isValidAuthenticationRequest(
             Map<String, String> expectedLocationParameters) {
-        String set_cookie = actual.getHeader(HttpHeaders.Names.SET_COOKIE);
+        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
+        // Assertions.assertNull(set_cookie);
         String location = actual.getHeader(LOCATION);
         Assertions.assertNotNull(location, "No 'location' header found in response");
         Map<String, String> locationParameters = extractParametersFromHeader(location);
@@ -104,7 +105,7 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookieForSession(String withValue) {
-        String set_cookie = actual.getHeader(HttpHeaders.Names.SET_COOKIE);
+        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
         Assertions.assertNotNull(set_cookie);
         String sessionCookie = valueFromSetCookie(set_cookie);
         Assertions.assertNotNull(sessionCookie);
@@ -115,7 +116,7 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasNotSetCookieForSession() {
-        String set_cookie = actual.getHeader(HttpHeaders.Names.SET_COOKIE);
+        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
         Assertions.assertNull(set_cookie);
         return this;
     }
@@ -144,7 +145,7 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookieForSessionDifferentThan(String sessionCookie) {
-        String set_cookie = actual.getHeader(HttpHeaders.Names.SET_COOKIE);
+        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
         Assertions.assertNotEquals(sessionCookie, set_cookie);
         return this;
     }
