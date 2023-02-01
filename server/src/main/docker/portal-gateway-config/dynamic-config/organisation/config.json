@@ -8,7 +8,8 @@
                     "ShowSessionContentMiddleware",
                     "organisationOauth2",
                     "organisationAuthBearer",
-                    "organisationReplacePath"
+                    "organisationReplacePath",
+                    "organisationCheckRoute"
                 ],
                 "rule": "PathPrefix('/organisation')",
                 "service": "organisation-proxy"
@@ -47,6 +48,11 @@
                     "regex": "/organisation/(.*)",
                     "replacement": "/$1"
                 }
+            },
+            {
+                "name": "organisationCheckRoute",
+                "type": "checkRoute",
+                "options": {}
             }
         ],
         "services": [

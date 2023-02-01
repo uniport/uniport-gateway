@@ -7,7 +7,8 @@
                     "notificationRedirectRegex",
                     "notificationOauth2",
                     "notificationAuthBearer",
-                    "notificationReplacePath"
+                    "notificationReplacePath",
+                    "notificationCheckRoute"
                 ],
                 "rule": "PathPrefix('/notification')",
                 "service": "notification-proxy"
@@ -46,7 +47,13 @@
                     "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Notification"
                 }
+            },
+            {
+                "name": "notificationCheckRoute",
+                "type": "checkRoute",
+                "options": {}
             }
+
         ],
         "services": [
             {

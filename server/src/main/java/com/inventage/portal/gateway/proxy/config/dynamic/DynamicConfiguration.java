@@ -123,6 +123,9 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
 
+    public static final String MIDDLEWARE_CHECK_ROUTE = "checkRoute";
+    public static final String MIDDLEWARE_CHECK_ROUTE_PATH = "_check-route_";
+
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
     public static final String MIDDLEWARE_SESSION_BAG_COOKIE_NAME = "cookieName";
@@ -145,7 +148,7 @@ public class DynamicConfiguration {
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
             MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER, MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
-            MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION);
+            MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -874,6 +877,9 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
+                    break;
+                }
+                case MIDDLEWARE_CHECK_ROUTE: {
                     break;
                 }
                 default: {

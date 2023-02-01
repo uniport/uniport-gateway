@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthClaimHandler;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
@@ -95,6 +96,10 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withResponseSessionCookieRemovalMiddleware() {
         return withMiddleware(new ResponseSessionCookieRemovalMiddleware(null));
+    }
+
+    public MiddlewareServerBuilder withAuthenticationTriggerMiddleware() {
+        return withMiddleware(new CheckRouteMiddleware());
     }
 
     /**

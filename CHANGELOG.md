@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enabling versions with `helm ls` in uniport projects ([PORTAL-1128](https://issue.inventage.com/browse/PORTAL-1128)).
 - Value for OIDC response mode is now configurable in `oauth2` middleware ([PORTAL-1196](https://issue.inventage.com/browse/PORTAL-1196)).
+- Middleware `checkRoute` for triggering authentication for a specific route ([PORTAL-1198](https://issue.inventage.com/browse/PORTAL-1198)).
 
 ### Changed
 
