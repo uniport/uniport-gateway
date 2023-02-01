@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use image pull secrets from service account ([PORTAL-847](https://issue.inventage.com/browse/PORTAL-847)).
 - Pull busybox image over nexus.
+- **BREAKING**: `sessionBag`-middleware needs to be declared as `entry-middleware` in `portal-gateway.json` (see [migration guide](./MIGRATION_GUIDE.md)). ([PORTAL-988](https://issue.inventage.com/browse/PORTAL-988)).
 
 ### Removed
 
