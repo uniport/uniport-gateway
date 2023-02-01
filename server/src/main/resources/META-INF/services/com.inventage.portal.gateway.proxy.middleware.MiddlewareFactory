@@ -13,3 +13,4 @@ com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.Rep
 com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerFactory
 com.inventage.portal.gateway.proxy.middleware.session.SessionFactory
 com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory
