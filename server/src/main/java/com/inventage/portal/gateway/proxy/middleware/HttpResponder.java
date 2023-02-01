@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 
@@ -30,6 +31,13 @@ public class HttpResponder {
     public static void respondWithStatusCode(int statusCode, RoutingContext ctx) {
         ctx.response()
                 .setStatusCode(statusCode)
+                .end();
+    }
+
+    public static void respondWithStatusCode(HttpResponseStatus status, RoutingContext ctx) {
+        ctx.response()
+                .setStatusCode(status.code())
+                .setStatusMessage(status.toString())
                 .end();
     }
 

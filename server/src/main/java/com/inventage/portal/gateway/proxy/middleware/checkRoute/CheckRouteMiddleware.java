@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.checkRoute;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +17,13 @@ public class CheckRouteMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckRouteMiddleware.class);
 
-    private static final int STATUS_CODE = 202; // Accepted
+    private static final HttpResponseStatus RESPONSE_STATUS_CODE = HttpResponseStatus.ACCEPTED; // 202
 
     @Override
     public void handle(RoutingContext ctx) {
         if (isCheckRoute(ctx)) {
-            LOGGER.info("done for URL '{}' with status code '{}'", ctx.request().absoluteURI(), STATUS_CODE);
-            HttpResponder.respondWithStatusCode(STATUS_CODE, ctx);
+            LOGGER.info("done for URL '{}' with status code '{}'", ctx.request().absoluteURI(), RESPONSE_STATUS_CODE.code());
+            HttpResponder.respondWithStatusCode(RESPONSE_STATUS_CODE, ctx);
         }
         else {
             ctx.next();
