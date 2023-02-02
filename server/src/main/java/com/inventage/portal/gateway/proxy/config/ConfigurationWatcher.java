@@ -289,7 +289,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             final String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
             rt.put(DynamicConfiguration.ROUTER_NAME, getQualifiedName(providerName, rtName));
 
-            // Service and middlewares may referecing to another provider namespace
+            // Service and middlewares may referencing to another provider namespace
             // The names are only patched if this is not the case.
             final String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
             rt.put(DynamicConfiguration.ROUTER_SERVICE, getQualifiedName(providerName, svName));

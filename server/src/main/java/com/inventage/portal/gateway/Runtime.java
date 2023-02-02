@@ -41,7 +41,7 @@ public class Runtime {
             return String.valueOf(envValue);
         }
         catch (Exception e) {
-            //
+            // Noop…
         }
         try {
             final int propvalue = toInt(System.getProperty(VERTICLE_INSTANCES_KEY));
@@ -49,7 +49,7 @@ public class Runtime {
             return String.valueOf(propvalue);
         }
         catch (Exception e) {
-            //
+            // Noop…
         }
         final int defaultNumber = 1;
         LOGGER.warn("Number of verticles from default is '{}'", defaultNumber);

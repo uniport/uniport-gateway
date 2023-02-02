@@ -65,9 +65,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         applications.stream().forEach(application -> {
             application.deployOn(vertx).onSuccess(handler -> {
                 entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
-            }).onFailure(err -> {
-                shutdownOnStartupFailure(err);
-            });
+            }).onFailure(this::shutdownOnStartupFailure);
         });
     }
 

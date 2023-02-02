@@ -124,7 +124,7 @@ public class DockerContainerProvider extends Provider {
             }
             return null;
         }
-        else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKOWN
+        else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKNOWN
             LOGGER.warn("Ignoring unknown status '{}'", status);
             return null;
         }
