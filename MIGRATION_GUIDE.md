@@ -6,7 +6,7 @@ Breaking change if `sessionBag`-middleware is configured in your portal-gateway 
 
 Concretely: Copy your `sessionBag` configuration from your dynamic configuration file and paste it in your `portal-gateway.json` file as the LAST entrymiddleware.
 
-For example:
+As example:
 ```json
 {
     "entrypoints": [
