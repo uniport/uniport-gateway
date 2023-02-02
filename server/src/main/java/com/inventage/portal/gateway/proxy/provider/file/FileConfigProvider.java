@@ -39,7 +39,7 @@ public class FileConfigProvider extends Provider {
     private final JsonObject env;
     private String source;
 
-    private int scanPeriodMs = 5000;
+    private final int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
                               Boolean watch, JsonObject env) {

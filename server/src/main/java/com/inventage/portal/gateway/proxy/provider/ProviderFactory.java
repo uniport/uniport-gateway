@@ -30,10 +30,7 @@ public interface ProviderFactory {
             final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class).stream()
                 .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
                 .findFirst();
-            if (provider.isPresent()) {
-                return provider.get();
-            }
-            return null;
+            return provider.orElse(null);
         }
     }
 }
