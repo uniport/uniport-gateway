@@ -23,10 +23,10 @@ public class ProxyMiddleware implements Middleware {
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
-    private HttpProxy httpProxy;
+    private final HttpProxy httpProxy;
 
-    private String serverHost;
-    private int serverPort;
+    private final String serverHost;
+    private final int serverPort;
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
         this.httpProxy = HttpProxy.reverseProxy2(vertx.createHttpClient());

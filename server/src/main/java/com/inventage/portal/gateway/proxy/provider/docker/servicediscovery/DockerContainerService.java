@@ -37,11 +37,11 @@ public class DockerContainerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerService.class.getName());
 
     private final String name;
-    private String containerId;
+    private final String containerId;
 
-    private List<String> containerNames;
+    private final List<String> containerNames;
 
-    private Record record;
+    private final Record record;
 
     public DockerContainerService(Container container) {
         containerId = container.getId();

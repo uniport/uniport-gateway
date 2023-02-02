@@ -21,8 +21,8 @@ public class HeaderMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMiddleware.class);
 
-    private MultiMap requestHeaders;
-    private MultiMap responseHeaders;
+    private final MultiMap requestHeaders;
+    private final MultiMap responseHeaders;
 
     public HeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
         this.requestHeaders = requestHeaders;

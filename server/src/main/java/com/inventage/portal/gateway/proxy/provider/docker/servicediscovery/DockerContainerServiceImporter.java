@@ -48,7 +48,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     private long timerId;
     private DockerClient client;
 
-    private List<DockerContainerService> services = new ArrayList<>();
+    private final List<DockerContainerService> services = new ArrayList<>();
     private ServicePublisher publisher;
     private Vertx vertx;
     private String host;

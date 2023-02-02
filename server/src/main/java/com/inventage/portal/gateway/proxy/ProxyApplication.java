@@ -51,27 +51,27 @@ public class ProxyApplication implements Application {
     /**
      * the port of the entrypoint this application should be mounted on
      */
-    private String entrypointPort;
+    private final String entrypointPort;
 
     /**
      * the selection criteria for delegating incoming requests to this application
      */
-    private String rootPath = "/";
+    private final String rootPath = "/";
 
     /**
      * the router on which the routes for this application will be added
      */
-    private Router router;
+    private final Router router;
 
     /**
-     * the providers that should be launched for this applicaiton to retrieve the dynamic
+     * the providers that should be launched for this application to retrieve the dynamic
      * configuration
      */
-    private JsonArray providers;
+    private final JsonArray providers;
 
-    private JsonObject env;
+    private final JsonObject env;
 
-    private int providersThrottleDuration;
+    private final int providersThrottleDuration;
 
     public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
         this.name = name;

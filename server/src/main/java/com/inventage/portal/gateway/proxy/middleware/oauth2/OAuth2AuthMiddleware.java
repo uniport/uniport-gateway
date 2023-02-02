@@ -26,8 +26,8 @@ public class OAuth2AuthMiddleware implements Middleware {
     private static final String PREFIX_STATE = "oauth2_state_";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
 
-    private AuthenticationHandler authHandler;
-    private String sessionScope;
+    private final AuthenticationHandler authHandler;
+    private final String sessionScope;
 
     public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope) {
         LOGGER.debug("For session scope '{}'", sessionScope);

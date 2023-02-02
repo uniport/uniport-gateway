@@ -4,7 +4,7 @@ import io.vertx.ext.web.Session;
 
 public class SessionAdapter {
 
-    private Session session;
+    private final Session session;
 
     public SessionAdapter(Session session) {
         this.session = session;

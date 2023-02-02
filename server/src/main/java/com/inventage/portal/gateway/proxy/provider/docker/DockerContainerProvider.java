@@ -35,21 +35,21 @@ public class DockerContainerProvider extends Provider {
     private static final String EXTRA_CONFIG_ENABLE = "enable";
     private static final String EXTRA_CONFIG_NETWORK = "network";
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
-    private EventBus eb;
-    private String configurationAddress;
+    private final EventBus eb;
+    private final String configurationAddress;
 
-    private ServiceImporter serviceImporter;
+    private final ServiceImporter serviceImporter;
     private ServiceDiscovery dockerDiscovery;
-    private JsonObject serviceImporterConfiguration;
+    private final JsonObject serviceImporterConfiguration;
 
-    private Boolean exposedByDefault;
-    private String network;
-    private String defaultRule;
-    private Boolean watch;
+    private final Boolean exposedByDefault;
+    private final String network;
+    private final String defaultRule;
+    private final Boolean watch;
 
-    private Map<String, JsonObject> configurations = new HashMap<String, JsonObject>();
+    private final Map<String, JsonObject> configurations = new HashMap<>();
 
     public DockerContainerProvider(Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
                                    JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,

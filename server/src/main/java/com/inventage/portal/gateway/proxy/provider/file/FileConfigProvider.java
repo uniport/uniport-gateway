@@ -26,17 +26,17 @@ public class FileConfigProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
-    private EventBus eb;
-    private String configurationAddress;
+    private final EventBus eb;
+    private final String configurationAddress;
     private Path staticConfigDir;
 
     private Path filename;
     private Path directory;
-    private Boolean watch;
+    private final Boolean watch;
 
-    private JsonObject env;
+    private final JsonObject env;
     private String source;
 
     private int scanPeriodMs = 5000;
