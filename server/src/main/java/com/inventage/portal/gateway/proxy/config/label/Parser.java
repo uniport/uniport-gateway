@@ -63,7 +63,7 @@ public class Parser {
             return decodedConf;
         }
         catch (IllegalArgumentException e) {
-            LOGGER.warn("Decoding to JSON failed: '{}'", e.getMessage(),
+            LOGGER.warn("Decoding to JSON failed: '{}' '{}'", e.getMessage(),
                 labels.toString());
         }
         return null;
