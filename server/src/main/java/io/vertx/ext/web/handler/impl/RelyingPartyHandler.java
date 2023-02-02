@@ -44,13 +44,13 @@ import java.util.List;
 
 /**
  * This class is copied from:
- * @see OAuth2AuthHandlerImpl
  *
+ * @author <a href="http://pmlopes@gmail.com">Paulo Lopes</a>
+ * @see OAuth2AuthHandlerImpl
+ * <p>
  * The following changes were made:
  * - rename class from OAuth2AuthHandlerImpl to ReplyingPartyHandler
  * - method parseCredentials in line 143: wrap state parameter with StateWithUri
- *
- * @author <a href="http://pmlopes@gmail.com">Paulo Lopes</a>
  */
 public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> implements OAuth2AuthHandler {
 
@@ -77,7 +77,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         // get a reference to the sha-256 digest
         try {
             sha256 = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Cannot get instance of SHA-256 MessageDigest", e);
         }
         // process callback
@@ -85,7 +86,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             final Origin origin = Origin.parse(callbackURL);
             this.host = origin.toString();
             this.callbackPath = origin.resource();
-        } else {
+        }
+        else {
             this.host = null;
             this.callbackPath = null;
         }
@@ -116,7 +118,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                 if (context.request().method() == HttpMethod.GET && context.normalizedPath().equals(callback.getPath())) {
                     LOG.warn("The callback route is shaded by the OAuth2AuthHandler, ensure the callback route is added BEFORE the OAuth2AuthHandler route!");
                     handler.handle(Future.failedFuture(new HttpStatusException(500, "Infinite redirect loop [oauth2 callback]")));
-                } else {
+                }
+                else {
                     if (context.request().method() != HttpMethod.GET) {
                         // we can only redirect GET requests
                         LOG.error("OAuth2 redirect attempt to non GET resource");
@@ -125,7 +128,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                     }
 
                     // the redirect is processed as a failure to abort the chain
-                    String redirectUri = context.request().uri();
+                    final String redirectUri = context.request().uri();
                     String state = null;
                     String codeVerifier = null;
 
@@ -135,7 +138,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                             context.fail(500, new IllegalStateException("OAuth2 PKCE requires a session to be present"));
                             return;
                         }
-                    } else {
+                    }
+                    else {
                         // there's a session we can make this request comply to the Oauth2 spec and add an opaque state
                         context.session()
                                 .put("redirect_uri", context.request().uri());
@@ -156,7 +160,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                     }
                     handler.handle(Future.failedFuture(new HttpStatusException(302, authURI(redirectUri, state, codeVerifier))));
                 }
-            } else {
+            }
+            else {
                 // continue
                 handler.handle(Future.succeededFuture(new TokenCredentials(token).setScopes(scopes)));
             }
@@ -242,10 +247,10 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
         route.handler(ctx -> {
             // Some IdP's (e.g.: AWS Cognito) returns errors as query arguments
-            String error = ctx.request().getParam("error");
+            final String error = ctx.request().getParam("error");
 
             if (error != null) {
-                int errorCode;
+                final int errorCode;
                 // standard error's from the Oauth2 RFC
                 switch (error) {
                     case "invalid_token":
@@ -260,10 +265,11 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                         break;
                 }
 
-                String errorDescription = ctx.request().getParam("error_description");
+                final String errorDescription = ctx.request().getParam("error_description");
                 if (errorDescription != null) {
                     ctx.fail(errorCode, new IllegalStateException(error + ": " + errorDescription));
-                } else {
+                }
+                else {
                     ctx.fail(errorCode, new IllegalStateException(error));
                 }
                 return;
@@ -299,7 +305,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             if (ctx.session() != null) {
                 // validate the state. Here we are a bit lenient, if there is no session
                 // we always assume valid, however if there is session it must match
-                String ctxState = ctx.session().remove("state");
+                final String ctxState = ctx.session().remove("state");
                 // if there's a state in the context they must match
                 if (!state.equals(ctxState)) {
                     // forbidden, the state is not valid (this is a replay attack)
@@ -309,17 +315,18 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
                 // remove the code verifier, from the session as it will be trade for the
                 // token during the final leg of the oauth2 handshake
-                String codeVerifier = ctx.session().remove("pkce");
+                final String codeVerifier = ctx.session().remove("pkce");
                 if (codeVerifier != null) {
                     // if there are already extras by the end user
                     // we make a copy to avoid leaking the verifier
-                    JsonObject extras = credentials.getExtra();
+                    final JsonObject extras = credentials.getExtra();
                     if (extras != null) {
                         credentials
                                 .setExtra(new JsonObject()
                                         .mergeIn(extras)
                                         .put("code_verifier", codeVerifier));
-                    } else {
+                    }
+                    else {
                         credentials
                                 .setExtra(new JsonObject()
                                         .put("code_verifier", codeVerifier));
@@ -327,7 +334,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                 }
                 // state is valid, extract the redirectUri from the session
                 resource = ctx.session().get("redirect_uri");
-            } else {
+            }
+            else {
                 resource = state;
             }
 
@@ -337,7 +345,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Cannot compute: 'redirect_uri' variable. OAuth2AuthHandler was created without a origin/callback URL.");
                 }
-            } else {
+            }
+            else {
                 // The valid callback URL set in your IdP application settings.
                 // This must exactly match the redirect_uri passed to the authorization URL in the previous step.
                 credentials.setRedirectUri(host + route.getPath());
@@ -346,15 +355,17 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             authProvider.authenticate(credentials, res -> {
                 if (res.failed()) {
                     ctx.fail(res.cause());
-                } else {
+                }
+                else {
                     ctx.setUser(res.result());
-                    Session session = ctx.session();
-                    String location = resource != null ? resource : "/";
+                    final Session session = ctx.session();
+                    final String location = resource != null ? resource : "/";
                     if (session != null) {
                         // the user has upgraded from unauthenticated to authenticated
                         // session should be upgraded as recommended by owasp
                         session.regenerateId();
-                    } else {
+                    }
+                    else {
                         // there is no session object so we cannot keep state.
                         // if there is no session and the resource is relative
                         // we will reroute to "location"

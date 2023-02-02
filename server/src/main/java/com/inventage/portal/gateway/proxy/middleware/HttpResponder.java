@@ -16,6 +16,7 @@ public class HttpResponder {
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         respondWithRedirectForRetry(uri, ctx);
     }
+
     public static void respondWithRedirectForRetry(RoutingContext ctx) {
         respondWithRedirectForRetry(ctx.request().uri(), ctx);
     }

@@ -63,7 +63,7 @@ public class Entrypoint {
             return router;
         }
         router = Router.router(vertx);
-        if (this.entryMiddlewares != null ){
+        if (this.entryMiddlewares != null) {
             LOGGER.info("Setup EntryMiddlewares");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
         }
@@ -106,7 +106,7 @@ public class Entrypoint {
         enabled = false;
     }
 
-    class Tls {
+    static class Tls {
 
         public JksOptions jksOptions() {
             return null;
@@ -151,7 +151,7 @@ public class Entrypoint {
             entryMiddlewaresFuture.forEach(mf -> router.route().handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(cfErr -> {
-            final String errMsg = String.format("Failed to create EntryMiddlewares");
+            final String errMsg = "Failed to create EntryMiddlewares";
             LOGGER.warn("{}", errMsg);
         });
     }
