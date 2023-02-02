@@ -51,7 +51,6 @@ public class Parser {
             for (String filter : filters) {
                 if (key.startsWith(filter)) {
                     filteredKeys.add(key);
-                    continue;
                 }
             }
         }
