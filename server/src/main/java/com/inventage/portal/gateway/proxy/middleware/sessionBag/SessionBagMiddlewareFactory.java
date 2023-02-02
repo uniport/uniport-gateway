@@ -40,7 +40,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
         if (sessionCookieName == null) {
             sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
         }
-        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
+        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
         return Future.succeededFuture(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
     }
 
