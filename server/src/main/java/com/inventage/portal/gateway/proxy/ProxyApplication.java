@@ -39,9 +39,19 @@ public class ProxyApplication implements Application {
     private final String name;
 
     /**
-     * the public url as it is seen from outside (e.g. by a browser)
+     * the public protocol as it is seen from outside (e.g. by a browser)
      */
-    private final String publicUrl;
+    private final String publicProtocol;
+
+    /**
+     * the public hostname as it is seen from outside (e.g. by a browser)
+     */
+    private final String publicHostname;
+
+    /**
+     * the public port as it is seen from outside (e.g. by a browser)
+     */
+    private final String publicPort;
 
     /**
      * the name of the entrypoint this application should be mounted on
@@ -80,24 +90,23 @@ public class ProxyApplication implements Application {
 
         this.providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
         this.providersThrottleDuration = staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS,
-            2000);
+                2000);
 
         this.env = staticConfig.copy();
         this.env.remove(StaticConfiguration.ENTRYPOINTS);
         this.env.remove(StaticConfiguration.APPLICATIONS);
         this.env.remove(StaticConfiguration.PROVIDERS);
 
-        final String publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL, PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
-        final String publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
-        final String publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT);
-
         this.entrypointPort = DynamicConfiguration
-            .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
-                StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
-            .getString(StaticConfiguration.ENTRYPOINT_PORT);
+                .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
+                        StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
+                .getString(StaticConfiguration.ENTRYPOINT_PORT);
 
-        this.publicUrl = String.format("%s://%s:%s", publicProtocol, publicHostname,
-            publicPort != null ? publicPort : entrypointPort);
+        this.publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL,
+                PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+        this.publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
+                PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        this.publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT, entrypointPort);
     }
 
     public String toString() {
@@ -126,9 +135,9 @@ public class ProxyApplication implements Application {
         final ProviderAggregator aggregator = new ProviderAggregator(vertx, configurationAddress, providers, this.env);
 
         final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, configurationAddress,
-            this.providersThrottleDuration, Arrays.asList(this.entrypoint));
+                this.providersThrottleDuration, Arrays.asList(this.entrypoint));
 
-        final RouterFactory routerFactory = new RouterFactory(vertx, publicUrl);
+        final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort);
 
         watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
 

@@ -40,15 +40,22 @@ import java.util.regex.Pattern;
  */
 public class RouterFactory {
 
-    public static final String PUBLIC_URL = "publicUrl";
+    public static final String PUBLIC_PROTOCOL_KEY = "publicProtocol";
+    public static final String PUBLIC_HOSTNAME_KEY = "publicHostname";
+    public static final String PUBLIC_PORT_KEY = "publicPort";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
     private final Vertx vertx;
-    private final String publicUrl;
+    private final String publicProtocol;
+    private final String publicHostname;
+    private final String publicPort;
 
-    public RouterFactory(Vertx vertx, String publicUrl) {
+    public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort) {
         this.vertx = vertx;
-        this.publicUrl = publicUrl;
+        this.publicProtocol = publicProtocol;
+        this.publicHostname = publicHostname;
+        this.publicPort = publicPort;
     }
 
     public Future<Router> createRouter(JsonObject dynamicConfig) {
@@ -170,7 +177,9 @@ public class RouterFactory {
         // needed to ensure authenticating requests are routed through this application
         if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)
                 || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
-            middlewareOptions.put(PUBLIC_URL, this.publicUrl);
+            middlewareOptions.put(PUBLIC_PROTOCOL_KEY, this.publicProtocol);
+            middlewareOptions.put(PUBLIC_HOSTNAME_KEY, this.publicHostname);
+            middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);
         }
 
         final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);

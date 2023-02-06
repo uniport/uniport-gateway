@@ -2,6 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.router.RouterFactory;
+
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -24,16 +26,15 @@ public class KeycloakServer {
     private final static String EMPTY_STRING = "";
     private final static String AUTHORIZATION_ENDPOINT_KEY = "authorization_endpoint";
     private final static String TOKEN_ENDPOINT_KEY = "token_endpoint";
-    private final static String PUBLIC_URL_KEY = "publicUrl";
     private final static String OPENID_DISCOVERY_PATH = "/.well-known/openid-configuration";
     private final static String TOKEN_ENDPOINT_PATH = "/auth/realms/test/protocol/openid-connect/token";
     private final static String ACCESS_TOKEN_KEY = "access_token";
     private final static String RANDOM_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ";
 
-
     public KeycloakServer(Vertx vertx) {
         this(vertx, "localhost", TestUtils.findFreePort());
     }
+
     public KeycloakServer(Vertx vertx, String host) {
         this(vertx, host, TestUtils.findFreePort());
     }
@@ -87,7 +88,8 @@ public class KeycloakServer {
         return this;
     }
 
-    public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler) throws InterruptedException {
+    public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler)
+            throws InterruptedException {
         JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
@@ -114,7 +116,9 @@ public class KeycloakServer {
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
-        config.put(PUBLIC_URL_KEY, this.getDefaultPublicUrl());
+        config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
+        config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
+        config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
         return config;
     }
 
@@ -124,16 +128,14 @@ public class KeycloakServer {
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
-        config.put(PUBLIC_URL_KEY, this.getDefaultPublicUrl());
+        config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
+        config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
+        config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
         return config;
     }
 
     private String getDefaultDiscoveryUrl() {
         return formatURL(this.host) + ":" + this.port;
-    }
-
-    private String getDefaultPublicUrl() {
-        return formatURL(this.host);
     }
 
     private JsonObject getDefaultDiscoveryResponse() {

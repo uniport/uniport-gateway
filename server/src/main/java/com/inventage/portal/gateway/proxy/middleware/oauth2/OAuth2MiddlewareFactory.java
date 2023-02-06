@@ -65,11 +65,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             // the protocol, hostname or port can be different from what the portal-gateway knows, therefore
             // in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
             // configuration
-            final String publicUrl = middlewareConfig.getString(RouterFactory.PUBLIC_URL);
+            final String publicUrl = getPublicURL(middlewareConfig);
             try {
                 final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-                // path issuer
+                // patch issuer
                 final URI issuerPath = new URI(keycloakOAuth2Options.getJWTOptions().getIssuer());
                 final String newIssuerPath = patchPath(publicUrl, issuerPath);
                 keycloakOAuth2Options.getJWTOptions().setIssuer(newIssuerPath);
@@ -80,8 +80,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 final String newAuthorizationPath = patchPath(publicUrl, authorizationPath);
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
                 LOGGER.debug("patched authorization endpoint: {} -> {}", authorizationPath, newAuthorizationPath);
-            } catch (Exception e) {
-                LOGGER.warn("Failed to patch authorization path");
+            } catch (Exception err) {
+                LOGGER.warn("Failed to create OAuth2 Middleware due to failed authorization path patching: '{}'",
+                        err.getMessage());
+                result.fail("Failed to patch authorization path: '" + err.getMessage() + "'");
+                return;
             }
 
             OAuth2AuthMiddleware.registerCallbackHandlers(callback, sessionScope, authProvider);
@@ -99,7 +102,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             result.complete(new OAuth2AuthMiddleware(authHandler, sessionScope));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
         }).onFailure(err -> {
-            LOGGER.warn("Failed to create OAuth2 Middleware to due failing Keycloak discovery '{}'",
+            LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'",
                     err.getMessage());
             result.fail("Failed to create OAuth2 Middleware '" + err.getMessage() + "'");
         });
@@ -126,6 +129,27 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
                 .setValidateIssuer(false);
         return oauth2Options;
+    }
+
+    private String getPublicURL(JsonObject middlewareConfig) {
+        String publicUrl = String.format("%s://%s",
+                getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PROTOCOL_KEY),
+                getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_HOSTNAME_KEY));
+
+        // only include port if its not already fixed by the protocol
+        final String publicPort = getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PORT_KEY);
+        if (publicPort != "80" && publicPort != "443") {
+            publicUrl = String.format("%s:%s", publicUrl, publicPort);
+        }
+        return publicUrl;
+    }
+
+    private String getValueByKeyOrFail(JsonObject config, String key) {
+        String value = config.getString(key);
+        if (value == null) {
+            throw new IllegalArgumentException("missing key in config: '" + key + "'");
+        }
+        return value;
     }
 
     private String patchPath(String publicUrl, URI keycloakUrl) {

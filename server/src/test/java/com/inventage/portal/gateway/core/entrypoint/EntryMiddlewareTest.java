@@ -61,7 +61,7 @@ public class EntryMiddlewareTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, String.format("http://%s", host));
+        routerFactory = new RouterFactory(vertx, "http", host, String.format("%d", proxyPort));
     }
 
     @AfterEach

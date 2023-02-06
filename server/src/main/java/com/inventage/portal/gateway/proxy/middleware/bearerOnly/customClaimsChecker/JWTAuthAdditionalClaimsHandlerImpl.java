@@ -49,7 +49,8 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         final JsonObject jwt = user.get("accessToken");
         if (jwt == null) {
             LOGGER.debug("invalid JWT: malformed or audience, issuer or signature is invalid");
-            ctx.fail(403, new IllegalStateException("Invalid JWT: malformed or audience, issuer or signature is invalid"));
+            ctx.fail(403,
+                    new IllegalStateException("Invalid JWT: malformed or audience, issuer or signature is invalid"));
             return;
         }
 

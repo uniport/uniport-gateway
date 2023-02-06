@@ -50,16 +50,17 @@ public class RouterFactoryTest {
         });
 
         serverPort = TestUtils.findFreePort();
-        server = vertx.createHttpServer().requestHandler(req -> req.response().setStatusCode(200).end("ok")).listen(serverPort, ready -> {
-            if (ready.failed()) {
-                throw new RuntimeException(ready.cause());
-            }
-            latch.countDown();
-        });
+        server = vertx.createHttpServer().requestHandler(req -> req.response().setStatusCode(200).end("ok"))
+                .listen(serverPort, ready -> {
+                    if (ready.failed()) {
+                        throw new RuntimeException(ready.cause());
+                    }
+                    latch.countDown();
+                });
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, String.format("http://%s", host));
+        routerFactory = new RouterFactory(vertx, "http", host, String.format("%d", proxyPort));
     }
 
     @AfterEach
@@ -283,7 +284,7 @@ public class RouterFactoryTest {
         JsonObject config = TestUtils
                 .buildConfiguration(
                         TestUtils.withRouters(TestUtils.withRouter("shortPath", TestUtils.withRouterService("bar"),
-                                        TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100)),
+                                TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100)),
                                 TestUtils
                                         .withRouter("longPath", TestUtils.withRouterService("noServer"),
                                                 TestUtils.withRouterRule("PathPrefix('/path/long')"))),
@@ -323,13 +324,15 @@ public class RouterFactoryTest {
     @ParameterizedTest
     @MethodSource("provideStringsForValidParseRule")
     public void testValidParseRule(String input) {
-        assertNotNull(routerFactory.parseRule(input), String.format("%s should be parseable into a routing rule", input));
+        assertNotNull(routerFactory.parseRule(input),
+                String.format("%s should be parseable into a routing rule", input));
     }
 
     @ParameterizedTest
     @MethodSource("provideStringsForInvalidParseRule")
     public void testInvalidParseRule(String input) {
-        assertNull(routerFactory.parseRule(input), String.format("%s should not be parseable into a routing rule", input));
+        assertNull(routerFactory.parseRule(input),
+                String.format("%s should not be parseable into a routing rule", input));
     }
 
     private static Stream<String> provideStringsForValidParseRule() {
@@ -347,8 +350,7 @@ public class RouterFactoryTest {
                 "Host('/foo')",
                 "Host('/foo/bar')",
                 "Host('/.bar')",
-                "Host('/.foo-bar/baz')"
-        );
+                "Host('/.foo-bar/baz')");
     }
 
     private static Stream<String> provideStringsForInvalidParseRule() {
@@ -356,18 +358,18 @@ public class RouterFactoryTest {
                 "Path(\"/foo\")",
                 "PathPrefix(\"/foo\")",
                 "Host(\"/foo\")",
-                "Foo('/foo')"
-        );
+                "Foo('/foo')");
     }
 
     private void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
         CountDownLatch latch = new CountDownLatch(1);
 
         reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
-        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
-            assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
-            latch.countDown();
-        })));
+        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send)
+                .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
+                    assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
+                    latch.countDown();
+                })));
 
         try {
             latch.await();
