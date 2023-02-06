@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Added a custom implementation of the relying party (based on vertx's implementation) ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+
+### Changed
+
+- Updated the Vert.x stack to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Updated usage of `io.vertx.json.schema` to newest concepts ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Use `io.vertx.vertx-http-proxy` instead of our own fork ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Use `proxyInterceptor` hooks in `proxy` middleware to apply custom logic on the request and responses instead of patching them directly ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Patched issuer URL of JWT returned by the OIDC flow to the publicly facing URL ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Inherit from public class `JWTAuthHandler` (and its ecosystem) to apply custom claim checks instead of copying the whole Vert.x JWT ecosystem ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+
+### Removed
+
+- Code Hygiene: Removed dead code ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+
+### Fixed
+
+- Code: Hygiene: Usage of various deprecated functionalities ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+
 ## [6.0.0]-202302060855-584-ac9bd6a - 2023-02-06
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~6.0.0-202302060855-584-ac9bd6a~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D6.0.0-202302060855-584-ac9bd6a)
