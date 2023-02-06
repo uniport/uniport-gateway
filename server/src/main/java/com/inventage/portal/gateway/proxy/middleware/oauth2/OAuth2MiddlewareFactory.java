@@ -136,7 +136,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
         // only include port if its not already fixed by the protocol
         final String publicPort = getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PORT_KEY);
-        if (publicPort != "80" && publicPort != "443") {
+        if (!publicPort.equals("80") && !publicPort.equals("443")) {
             publicUrl = String.format("%s:%s", publicUrl, publicPort);
         }
         return publicUrl;
