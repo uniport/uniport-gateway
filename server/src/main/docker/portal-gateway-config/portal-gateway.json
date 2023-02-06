@@ -23,6 +23,34 @@
                     "name": "replacedSessionCookieDetection",
                     "type": "replacedSessionCookieDetection",
                     "options": {}
+                },
+                {
+                    "name": "whitelistedCookiesInSessionBag",
+                    "type": "sessionBag",
+                    "options": {
+                        "whitelistedCookies": [
+                            {
+                                "name": "KEYCLOAK_SESSION",
+                                "path": "/auth/realms/master/"
+                            },
+                            {
+                                "name": "KEYCLOAK_SESSION_LEGACY",
+                                "path": "/auth/realms/master/"
+                            },
+                            {
+                                "name": "KEYCLOAK_SESSION",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "KEYCLOAK_SESSION_LEGACY",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "ips.language",
+                                "path": "/"
+                            }
+                        ]
+                    }
                 }
             ]
         }

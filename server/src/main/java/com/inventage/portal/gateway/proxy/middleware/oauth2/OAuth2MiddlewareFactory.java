@@ -11,7 +11,6 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -123,12 +122,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     private OAuth2Options oAuth2Options(JsonObject middlewareConfig) {
-        final OAuth2Options oauth2Options = new OAuth2Options()
+        return new OAuth2Options()
                 .setClientId(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
                 .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
                 .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
                 .setValidateIssuer(false);
-        return oauth2Options;
     }
 
     private String getPublicURL(JsonObject middlewareConfig) {

@@ -3,7 +3,9 @@ package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -30,12 +32,12 @@ public class StateWithUri {
         if (stateParameterBase64Encoded == null) {
             throw new IllegalArgumentException("Null is not a valid state parameter value!");
         }
-        Optional<String> optionalBase64Decoded = base64Decode(stateParameterBase64Encoded);
+        final Optional<String> optionalBase64Decoded = base64Decode(stateParameterBase64Encoded);
         if (optionalBase64Decoded.isPresent()) {
-            String[] strings = optionalBase64Decoded.get().split(SPLITTER, 2);
+            final String[] strings = optionalBase64Decoded.get().split(SPLITTER, 2);
             this.state = strings[0];
             if (strings.length == 2) {
-                this.uri = Optional.of(strings[1]);
+                this.uri = Optional.of(ensureRelativeUri(strings[1]));
             } else {
                 this.uri = Optional.empty();
             }
@@ -80,7 +82,7 @@ public class StateWithUri {
     }
 
     private String encode() {
-        StringBuffer stateParameter = new StringBuffer();
+        final StringBuilder stateParameter = new StringBuilder();
         stateParameter.append(state());
         if (uri().isPresent()) {
             stateParameter.append(SPLITTER);
@@ -93,21 +95,28 @@ public class StateWithUri {
         if (value == null) {
             return null;
         }
-        try {
-            return Base64.getEncoder().encodeToString(value.toString().getBytes("utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            return value;
-        }
+        return Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
     }
 
     private Optional<String> base64Decode(String stateParameter) {
         try {
-            byte[] bytes = Base64.getDecoder().decode(stateParameter);
+            final byte[] bytes = Base64.getDecoder().decode(stateParameter);
             return Optional.of(new String(bytes));
         } catch (IllegalArgumentException e) {
             LOGGER.warn("failed with '{}'", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    private String ensureRelativeUri(String anUri) {
+        try {
+            URI uri = new URI(anUri);
+            URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
+            return relativeURI.toString();
+        } catch (URISyntaxException e) {
+            LOGGER.warn("URI '{}' couldn't be parsed ('{}'), using '/'", anUri, e.getMessage());
+            return "/";
+        }
     }
 
 }

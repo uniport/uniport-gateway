@@ -119,19 +119,19 @@ public class OAuth2AuthMiddlewareTest {
         final String[] sessionCookie = new String[1];
         String initialUri1 = "http://localhost:8080/protected/one";
         gateway.incomingRequest(GET, initialUri1, testCtx, (outgoingResponse1) -> {
-            assertThat(outgoingResponse1).isValidAuthenticationRequest().hasStateWithUri(initialUri1).isUsingFormPost()
+            assertThat(outgoingResponse1).isValidAuthenticationRequest().hasStateWithUri("/protected/one").isUsingFormPost()
                     .hasPKCE();
             sessionCookie[0] = cookieFrom(outgoingResponse1);
             String initialUri2 = "http://localhost:8080/protected/two";
             gateway.incomingRequest(GET, initialUri2, withCookie(sessionCookie[0]), testCtx, (outgoingResponse2) -> {
                 // then
-                assertThat(outgoingResponse2).isValidAuthenticationRequest().hasStateWithUri(initialUri2)
+                assertThat(outgoingResponse2).isValidAuthenticationRequest().hasStateWithUri("/protected/two")
                         .isUsingFormPost().hasPKCE();
             });
             String initialUri3 = "http://localhost:8080/protected/three";
             gateway.incomingRequest(GET, initialUri3, withCookie(sessionCookie[0]), testCtx, (outgoingResponse3) -> {
                 // then
-                assertThat(outgoingResponse3).isValidAuthenticationRequest().hasStateWithUri(initialUri3)
+                assertThat(outgoingResponse3).isValidAuthenticationRequest().hasStateWithUri("/protected/three")
                         .isUsingFormPost().hasPKCE();
                 testCtx.completeNow();
                 keycloakServer.closeServer();
@@ -194,7 +194,7 @@ public class OAuth2AuthMiddlewareTest {
                 "/callback/test?state=" + oidcSessionState.get(OIDC_PARAM_STATE) + "&code=ghijklmnop",
                 httpClientResponse -> {
                     // then
-                    assertThat(httpClientResponse).isRedirectTo(oidcSessionState.get(OIDC_PARAM_REDIRECT_URI));
+                    assertThat(httpClientResponse).isRedirectTo("/a/b/c?p1=v1&p2=v2#fragment1");
                     testCtx.completeNow();
                     keycloakServer.closeServer();
                 });
@@ -261,7 +261,7 @@ public class OAuth2AuthMiddlewareTest {
                     "/callback/test?state=" + oidcSessionState.get(OIDC_PARAM_STATE) + "&code=ghijklmnop",
                     httpClientResponse -> {
                         // then
-                        assertThat(httpClientResponse).isRedirectTo(oidcSessionState.get(OIDC_PARAM_REDIRECT_URI));
+                        assertThat(httpClientResponse).isRedirectTo("");
                         testCtx.completeNow();
                         keycloakServer.closeServer();
                     });
@@ -291,22 +291,22 @@ public class OAuth2AuthMiddlewareTest {
         gateway.incomingRequest(POST,
                 "/callback/protected1?state=" + oidcSessionState.get(OIDC_PARAM_STATE) + "&code=THE-CODE",
                 response1 -> {
-                    assertThat(response1).isRedirectTo(oidcSessionState.get(OIDC_PARAM_REDIRECT_URI));
+                    assertThat(response1).isRedirectTo("/protected1/one");
                     sessionCookies[0] = cookieFrom(response1);
                     // 2: protected resource -> auth flow 1 startet
                     gateway.incomingRequest(GET, protectedResource2, withCookie(sessionCookies[0]), (response2) -> {
-                        assertThat(response2).isValidAuthenticationRequest().hasStateWithUri(protectedResource2);
+                        assertThat(response2).isValidAuthenticationRequest().hasStateWithUri("/protected2/two");
                         final String state2 = TestUtils.extractParametersFromHeader(response2.getHeader("location"))
                                 .get("state");
                         // 3: protected resource -> auth flow 2 startet
                         gateway.incomingRequest(GET, protectedResource3, withCookie(sessionCookies[0]), (response3) -> {
-                            assertThat(response3).isValidAuthenticationRequest().hasStateWithUri(protectedResource3);
+                            assertThat(response3).isValidAuthenticationRequest().hasStateWithUri("/protected2/three");
                             final String state3 = TestUtils.extractParametersFromHeader(response3.getHeader("location"))
                                     .get("state");
                             // 4: callback for auth flow 2 -> code-to-token -> session with regenerated id
                             gateway.incomingRequest(POST, "/callback/protected2?state=" + state2 + "&code=THE-CODE",
                                     withCookie(sessionCookies[0]), (response4) -> {
-                                        assertThat(response4).isRedirectTo(protectedResource2)
+                                        assertThat(response4).isRedirectTo("http://localhost:8080/protected2/two")
                                                 .hasSetCookieForSessionDifferentThan(sessionCookies[0]);
                                         // when
                                         // 5:
@@ -315,7 +315,7 @@ public class OAuth2AuthMiddlewareTest {
                                                 withCookie(sessionCookies[0]), (response5) -> {
                                                     // then
                                                     assertThat(response5)
-                                                            .isRedirectTo(protectedResource3)
+                                                            .isRedirectTo("/protected2/three")
                                                             .hasSetCookieForSessionDifferentThan(sessionCookies[0]);
                                                     testCtx.completeNow();
                                                     keycloakServer.closeServer();

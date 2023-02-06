@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -71,15 +70,13 @@ public class RouterFactory {
         final JsonArray middlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
         final JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
 
-        final JsonObject sessionBagOptions = retrieveSessionBagOptions(middlewares);
-
         sortByRuleLength(routers);
 
         LOGGER.debug("Creating router from config");
         final List<Future> subRouterFutures = new ArrayList<>();
         for (int i = 0; i < routers.size(); i++) {
             final JsonObject routerConfig = routers.getJsonObject(i);
-            subRouterFutures.add(createSubRouter(routerConfig, middlewares, services, sessionBagOptions));
+            subRouterFutures.add(createSubRouter(routerConfig, middlewares, services));
         }
 
         final Router router = Router.router(this.vertx);
@@ -99,15 +96,14 @@ public class RouterFactory {
         });
     }
 
-    private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-            JsonObject sessionBagOptions) {
+    private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services) {
         final Promise<Router> promise = Promise.promise();
-        createSubRouter(routerConfig, middlewares, services, sessionBagOptions, promise);
+        createSubRouter(routerConfig, middlewares, services, promise);
         return promise.future();
     }
 
     private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-            JsonObject sessionBagOptions, Handler<AsyncResult<Router>> handler) {
+            Handler<AsyncResult<Router>> handler) {
         final Router router = Router.router(this.vertx);
         final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -122,12 +118,6 @@ public class RouterFactory {
         final Route route = routingRule.apply(router);
 
         final List<Future> middlewareFutures = new ArrayList<>();
-
-        // TODO maybe move out of the for loop by introducing middlewares per entrypoint
-        // required to be the first middleware to guarantee every request is processed
-        final Future<Middleware> sessionBagMiddlewareFuture = (new SessionBagMiddlewareFactory()).create(vertx,
-                sessionBagOptions);
-        middlewareFutures.add(sessionBagMiddlewareFuture);
 
         final JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
         for (int j = 0; j < middlewareNames.size(); j++) {
@@ -218,41 +208,6 @@ public class RouterFactory {
         router.route("/health").setName("health").handler(ctx -> {
             ctx.response().setStatusCode(statusCode).end();
         });
-    }
-
-    /**
-     * Retrieves the session bag options from the configured middlewares.
-     * If there are more than one configuration, only the first one is considered.
-     * As a side effect of these methods all session bag configurations are removed
-     * from the configured middlewares.
-     *
-     * @param middlewares all configured middlewares
-     * @return session bag options
-     */
-    private JsonObject retrieveSessionBagOptions(JsonArray middlewares) {
-        if (middlewares == null) {
-            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
-                    new JsonArray());
-        }
-        final List<JsonObject> sessionBagMiddlewares = new ArrayList<>();
-        for (int i = 0; i < middlewares.size(); i++) {
-            final JsonObject middleware = middlewares.getJsonObject(i);
-            if (middleware.getString(DynamicConfiguration.MIDDLEWARE_TYPE)
-                    .equals(DynamicConfiguration.MIDDLEWARE_SESSION_BAG)) {
-                sessionBagMiddlewares.add(middleware);
-            }
-        }
-        for (JsonObject sessionBagMiddleware : sessionBagMiddlewares) {
-            middlewares.remove(sessionBagMiddleware);
-        }
-        if (sessionBagMiddlewares.isEmpty()) {
-            return new JsonObject().put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
-                    new JsonArray());
-        }
-        if (sessionBagMiddlewares.size() > 1) {
-            LOGGER.warn("More than one session bag configurations found. Using first one.");
-        }
-        return sessionBagMiddlewares.get(0).getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
     }
 
     /**

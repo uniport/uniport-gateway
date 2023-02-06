@@ -41,8 +41,8 @@ public class OAuth2AuthMiddleware implements Middleware {
     private static final String PREFIX_STATE = "oauth2_state_";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
 
-    private AuthenticationHandler authHandler;
-    private String sessionScope;
+    private final AuthenticationHandler authHandler;
+    private final String sessionScope;
 
     public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope) {
         LOGGER.debug("For session scope '{}'", sessionScope);
@@ -97,6 +97,7 @@ public class OAuth2AuthMiddleware implements Middleware {
             // create JSON object for authentication parameters and store in session at "state_<state>"
             final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
             ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
+            ctx.session().remove(OIDC_PARAM_STATE);
             LOGGER.debug("For scope '{}'", sessionScope);
         }
     }

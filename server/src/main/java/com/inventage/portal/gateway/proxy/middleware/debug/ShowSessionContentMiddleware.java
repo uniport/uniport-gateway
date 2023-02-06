@@ -67,23 +67,29 @@ public class ShowSessionContentMiddleware implements Middleware {
             final User user = authPair.getRight();
             if (!idTokenDisplayed) {
                 final String rawIdToken = user.principal().getString("id_token");
-                html.append("id token:\n").append(decodeJWT(rawIdToken)).append("\n").append(rawIdToken);
+                html.append("id token:\n").append(getFormattedPayloadFromJWT(rawIdToken)).append("\n")
+                        .append(rawIdToken);
                 idTokenDisplayed = true;
             }
 
             final String rawAccessToken = user.principal().getString("access_token");
-            html.append("\n\n").append(key).append(":\n").append(decodeJWT(rawAccessToken)).append("\n")
+            html.append("\n\n")
+                    .append(key)
+                    .append(":\n")
+                    .append(getFormattedPayloadFromJWT(rawAccessToken))
+                    .append("\n")
                     .append(rawAccessToken);
         }
 
         return html.toString();
     }
 
-    private String decodeJWT(String jwt) {
+    private String getFormattedPayloadFromJWT(String jwt) {
         final String[] chunks = jwt.split("\\.");
         final Base64.Decoder decoder = Base64.getDecoder();
         // header: chunks[0], signature: chunks[2]
         final String payload = new String(decoder.decode(chunks[1]));
+
         return new JsonObject(payload).encodePrettily();
     }
 }

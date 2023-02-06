@@ -22,10 +22,10 @@ public class KubernetesServiceProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceProvider.class);
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
     private EventBus eb;
-    private String configurationAddress;
+    private final String configurationAddress;
 
     private ServiceDiscovery kubernetesDiscovery;
 

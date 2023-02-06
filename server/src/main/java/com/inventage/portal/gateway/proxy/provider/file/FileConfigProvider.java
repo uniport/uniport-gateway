@@ -26,20 +26,20 @@ public class FileConfigProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
-    private EventBus eb;
-    private String configurationAddress;
+    private final EventBus eb;
+    private final String configurationAddress;
     private Path staticConfigDir;
 
     private Path filename;
     private Path directory;
-    private Boolean watch;
+    private final Boolean watch;
 
-    private JsonObject env;
+    private final JsonObject env;
     private String source;
 
-    private int scanPeriodMs = 5000;
+    private final int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
                               Boolean watch, JsonObject env) {
@@ -161,7 +161,7 @@ public class FileConfigProvider extends Provider {
     }
 
     private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
-        // TODO parse parsable values like boolean and integers (rhen rm parseServerPorts and optionalStr)
+        // TODO parse parsable values like boolean and integers (then rm parseServerPorts and optionalStr)
         return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
     }
 

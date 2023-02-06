@@ -5,20 +5,26 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 5.2.0-[Unreleased] - ???
+## 6.1.0-[Unreleased] - ???
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+## [6.0.0]-202302060855-584-ac9bd6a - 2023-02-06
+
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~6.0.0-202302060855-584-ac9bd6a~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D6.0.0-202302060855-584-ac9bd6a)
 
 ### Added
 
 - Enabling versions with `helm ls` in uniport projects ([PORTAL-1128](https://issue.inventage.com/browse/PORTAL-1128)).
 - Value for OIDC response mode is now configurable in `oauth2` middleware ([PORTAL-1196](https://issue.inventage.com/browse/PORTAL-1196)).
+- Middleware `checkRoute` for triggering authentication for a specific route ([PORTAL-1198](https://issue.inventage.com/browse/PORTAL-1198)).
 
 ### Changed
 
 - Use image pull secrets from service account ([PORTAL-847](https://issue.inventage.com/browse/PORTAL-847)).
 - Pull busybox image over nexus.
+- **BREAKING**: `sessionBag`-middleware needs to be declared as `entry-middleware` in `portal-gateway.json` (see [migration guide](./MIGRATION_GUIDE.md)). ([PORTAL-988](https://issue.inventage.com/browse/PORTAL-988)).
+- Helm-Chart-Library version upgraded to 4.1.0-202302011108-163-b4dc038.
 
 ### Removed
 
@@ -319,7 +325,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F5.1.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F6.0.0
+[6.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F5.1.0&sourceBranch=refs%2Ftags%2F6.0.0
 [5.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F5.0.0&sourceBranch=refs%2Ftags%2F5.1.0
 [5.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.3.0&sourceBranch=refs%2Ftags%2F5.0.0
 [4.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F4.2.0&sourceBranch=refs%2Ftags%2F4.3.0

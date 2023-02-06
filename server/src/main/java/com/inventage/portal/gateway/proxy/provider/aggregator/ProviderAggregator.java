@@ -24,11 +24,11 @@ public class ProviderAggregator extends Provider {
 
     private static final String NAME = "providerAggregator";
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
-    private String configurationAddress;
-    private JsonArray providers;
-    private JsonObject env;
+    private final String configurationAddress;
+    private final JsonArray providers;
+    private final JsonObject env;
 
     public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers, JsonObject env) {
         this.vertx = vertx;

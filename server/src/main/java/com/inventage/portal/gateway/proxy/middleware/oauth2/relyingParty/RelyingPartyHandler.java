@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
+
 package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 
 import java.nio.charset.StandardCharsets;
@@ -37,6 +53,9 @@ import io.vertx.ext.web.impl.Origin;
  * This class is copied from:
  * https://github.com/vert-x3/vertx-web/blob/4.3.7/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
  *
+ * @author <a href="http://pmlopes@gmail.com">Paulo Lopes</a>
+ * @see OAuth2AuthHandlerImpl
+ * <p>
  * The following changes were made:
  * - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
  * - wrap oauth2 state parameter with StateWithUri
@@ -151,7 +170,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                     }
 
                     // the redirect is processed as a failure to abort the chain
-                    String redirectUri = context.request().uri();
+                    final String redirectUri = context.request().uri();
                     String state = null;
                     String codeVerifier = null;
 
@@ -377,10 +396,10 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     private void mountCallback() {
         callback.handler(ctx -> {
             // Some IdP's (e.g.: AWS Cognito) returns errors as query arguments
-            String error = ctx.request().getParam("error");
+            final String error = ctx.request().getParam("error");
 
             if (error != null) {
-                int errorCode;
+                final int errorCode;
                 // standard error's from the Oauth2 RFC
                 switch (error) {
                     case "invalid_token":
@@ -395,7 +414,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                         break;
                 }
 
-                String errorDescription = ctx.request().getParam("error_description");
+                final String errorDescription = ctx.request().getParam("error_description");
                 if (errorDescription != null) {
                     ctx.fail(errorCode, new IllegalStateException(error + ": " + errorDescription));
                 } else {

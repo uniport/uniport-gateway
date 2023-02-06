@@ -36,25 +36,25 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     private static final String CONFIG_VALIDATED_ADDRESS = "configuration-watcher-config-validated";
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
-    private EventBus eventBus;
+    private final EventBus eventBus;
 
     private long timerId;
 
-    private Provider provider;
+    private final Provider provider;
 
-    private String configurationAddress;
+    private final String configurationAddress;
 
-    private Map<String, JsonObject> currentConfigurations;
+    private final Map<String, JsonObject> currentConfigurations;
 
-    private int providersThrottleIntervalMs;
+    private final int providersThrottleIntervalMs;
 
     private List<Listener> configurationListeners;
 
-    private List<String> defaultEntrypoints;
+    private final List<String> defaultEntrypoints;
 
-    private Set<String> providerConfigReloadThrottler;
+    private final Set<String> providerConfigReloadThrottler;
 
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
             int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
@@ -289,7 +289,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             final String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
             rt.put(DynamicConfiguration.ROUTER_NAME, getQualifiedName(providerName, rtName));
 
-            // Service and middlewares may referecing to another provider namespace
+            // Service and middlewares may referencing to another provider namespace
             // The names are only patched if this is not the case.
             final String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
             rt.put(DynamicConfiguration.ROUTER_SERVICE, getQualifiedName(providerName, svName));

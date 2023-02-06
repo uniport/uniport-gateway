@@ -7,7 +7,8 @@
                     "conversationRedirectRegex",
                     "conversationOauth2",
                     "conversationAuthBearer",
-                    "conversationReplacePath"
+                    "conversationReplacePath",
+                    "conversationCheckRoute"
                 ],
                 "rule": "PathPrefix('/conversation')",
                 "service": "conversation-proxy"
@@ -46,6 +47,11 @@
                     "regex": "/conversation/(.*)",
                     "replacement": "/$1"
                 }
+            },
+            {
+                "name": "conversationCheckRoute",
+                "type": "checkRoute",
+                "options": {}
             }
         ],
         "services": [

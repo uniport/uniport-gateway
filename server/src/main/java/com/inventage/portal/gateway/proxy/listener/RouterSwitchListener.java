@@ -17,8 +17,8 @@ public class RouterSwitchListener implements Listener {
 
     private static final String NAME = "RouterSwitchListener";
 
-    private Router router;
-    private RouterFactory routerFactory;
+    private final Router router;
+    private final RouterFactory routerFactory;
 
     public RouterSwitchListener(Router router, RouterFactory routerFactory) {
         this.router = router;

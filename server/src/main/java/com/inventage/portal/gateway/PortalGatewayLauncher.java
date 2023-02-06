@@ -1,15 +1,7 @@
 package com.inventage.portal.gateway;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.inventage.portal.gateway.core.PortalGatewayVerticle;
-
 import ch.qos.logback.classic.util.ContextInitializer;
+import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
@@ -24,6 +16,12 @@ import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * Custom Vert.x Launcher for the portal gateway.
@@ -52,9 +50,8 @@ public class PortalGatewayLauncher extends Launcher {
     public static void main(String[] args) {
         // https://logback.qos.ch/manual/configuration.html#configFileProperty
         final Optional<Path> loggingConfigPath = getLoggingConfigPath();
-        if (loggingConfigPath.isPresent()) {
-            System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, loggingConfigPath.get().toString());
-        }
+        loggingConfigPath
+                .ifPresent(path -> System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, path.toString()));
 
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
@@ -137,7 +134,7 @@ public class PortalGatewayLauncher extends Launcher {
 
     private VertxPrometheusOptions configurePrometheus() {
         int metricsPort = DEFAULT_METRICS_PORT;
-        String metricsPortStr = System.getenv(METRICS_PORT_CONFIG_PROPERTY);
+        final String metricsPortStr = System.getenv(METRICS_PORT_CONFIG_PROPERTY);
         if (metricsPortStr != null) {
             try {
                 metricsPort = Integer.parseInt(metricsPortStr);
@@ -146,7 +143,7 @@ public class PortalGatewayLauncher extends Launcher {
             }
         }
 
-        String metricsPath = System.getenv().getOrDefault(METRICS_PATH_CONFIG_PROPERTY, DEFAULT_METRICS_PATH);
+        final String metricsPath = System.getenv().getOrDefault(METRICS_PATH_CONFIG_PROPERTY, DEFAULT_METRICS_PATH);
 
         logger.info("Configuring prometheus endpoint on port '{}' on path '{}'", metricsPort, metricsPath);
         return new VertxPrometheusOptions()
@@ -157,7 +154,7 @@ public class PortalGatewayLauncher extends Launcher {
     }
 
     private void bindJVMMetrics() {
-        MeterRegistry registry = BackendRegistries.getDefaultNow();
+        final MeterRegistry registry = BackendRegistries.getDefaultNow();
         new JvmMemoryMetrics().bindTo(registry);
         new ProcessorMetrics().bindTo(registry);
     }

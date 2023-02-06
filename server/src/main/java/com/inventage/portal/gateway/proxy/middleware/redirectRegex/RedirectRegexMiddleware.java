@@ -30,7 +30,7 @@ public class RedirectRegexMiddleware implements Middleware {
 
         // If the Regexp doesn't match, skip to the next handler.
         if (!this.pattern.matcher(oldURI).matches()) {
-            LOGGER.debug("Skipping redirect of non maching URI '{}'", oldURI);
+            LOGGER.debug("Skipping redirect of non matching URI '{}'", oldURI);
             ctx.next();
             return;
         }

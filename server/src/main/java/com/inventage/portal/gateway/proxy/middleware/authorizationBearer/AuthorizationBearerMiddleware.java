@@ -35,7 +35,7 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
-    private String sessionScope;
+    private final String sessionScope;
 
     public AuthorizationBearerMiddleware(String sessionScope) {
         this.sessionScope = sessionScope;

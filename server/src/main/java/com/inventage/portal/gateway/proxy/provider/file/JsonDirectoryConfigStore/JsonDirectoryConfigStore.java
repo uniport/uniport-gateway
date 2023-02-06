@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 // https://github.com/vert-x3/vertx-config/blob/master/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java
 public class JsonDirectoryConfigStore implements ConfigStore {
 
-    private VertxInternal vertx;
+    private final VertxInternal vertx;
 
-    private File path;
+    private final File path;
     private final List<FileSet> filesets = new ArrayList<>();
 
     public JsonDirectoryConfigStore(Vertx vertx, JsonObject configuration) {
