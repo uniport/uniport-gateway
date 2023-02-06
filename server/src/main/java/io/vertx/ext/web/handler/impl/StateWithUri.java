@@ -3,6 +3,8 @@ package io.vertx.ext.web.handler.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
@@ -35,7 +37,7 @@ public class StateWithUri {
             final String[] strings = optionalBase64Decoded.get().split(SPLITTER, 2);
             this.state = strings[0];
             if (strings.length == 2) {
-                this.uri = Optional.of(strings[1]);
+                this.uri = Optional.of(ensureRelativeUri(strings[1]));
             }
             else {
                 this.uri = Optional.empty();
@@ -107,6 +109,18 @@ public class StateWithUri {
             LOGGER.warn("failed with '{}'", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    private String ensureRelativeUri(String anUri) {
+        try {
+            URI uri = new URI(anUri);
+            URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
+            return relativeURI.toString();
+        }
+        catch (URISyntaxException e) {
+            LOGGER.warn("URI '{}' couldn't be parsed ('{}'), using '/'", anUri, e.getMessage());
+            return "/";
+        }
     }
 
 }

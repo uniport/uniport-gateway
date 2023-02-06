@@ -3,6 +3,9 @@ package io.vertx.ext.web.handler.impl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class StateWithUriTest {
 
     @Test
@@ -57,12 +60,23 @@ public class StateWithUriTest {
     @Test
     public void fromEncodedWithoutUri() {
         // given
-        final String stateParameterBase64Encoded = "QWJDZDEy"; // state=AbCd12; uri=/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1
+        final String stateParameterBase64Encoded = "QWJDZDEy"; // state=AbCd12
         // when
         StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertNull(stateWithUri.uri().orElse(null));
+        Assertions.assertEquals(stateParameterBase64Encoded, stateWithUri.toStateParameter());
+    }
+    @Test
+    public void fromEncodedWithEmptyUri() {
+        // given
+        final String stateParameterBase64Encoded = "QWJDZDEyOg=="; // state=AbCd12
+        // when
+        StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
+        // then
+        Assertions.assertEquals("AbCd12", stateWithUri.state());
+        Assertions.assertEquals("", stateWithUri.uri().get());
         Assertions.assertEquals(stateParameterBase64Encoded, stateWithUri.toStateParameter());
     }
     @Test
@@ -88,6 +102,43 @@ public class StateWithUriTest {
             // then
             Assertions.assertEquals("Null is not a valid state parameter value!", e.getMessage());
         }
+    }
+
+    @Test
+    public void learningURI() throws URISyntaxException {
+        // given
+        String aURI = "/";
+        // when
+        URI uri = new URI(aURI);
+        // then
+        Assertions.assertNotNull(uri);
+        Assertions.assertEquals(aURI, uri.getPath());
+
+        // given
+         aURI = "";
+        // when
+         uri = new URI(aURI);
+        // then
+        Assertions.assertNotNull(uri);
+        Assertions.assertEquals(aURI, uri.getPath());
+
+        // given
+        aURI = "";
+        uri = new URI(aURI);
+        // when
+        URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
+        // then
+        Assertions.assertNotNull(relativeURI);
+        Assertions.assertEquals("", relativeURI.toString());
+
+        // given
+        aURI = "https://issue.inventage.com/secure/RapidBoard.jspa?projectKey=PORTAL&rapidView=105#fragment";
+        uri = new URI(aURI);
+        // when
+        relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
+        // then
+        Assertions.assertNotNull(relativeURI);
+        Assertions.assertEquals("/secure/RapidBoard.jspa?projectKey=PORTAL&rapidView=105#fragment", relativeURI.toString());
     }
 
 }

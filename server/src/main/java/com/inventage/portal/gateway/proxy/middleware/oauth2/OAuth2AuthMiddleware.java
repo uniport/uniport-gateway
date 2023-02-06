@@ -83,6 +83,7 @@ public class OAuth2AuthMiddleware implements Middleware {
             // create JSON object for authentication parameters and store in session at "state_<state>"
             final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
             ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
+            ctx.session().remove(OIDC_PARAM_STATE);
             LOGGER.debug("For scope '{}'", sessionScope);
         }
     }

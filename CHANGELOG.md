@@ -5,12 +5,6 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## *.*.*-[Unreleased] - ???
-
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
-
-
 ## 6.0.0-[Unreleased] - ???
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) -
@@ -27,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use image pull secrets from service account ([PORTAL-847](https://issue.inventage.com/browse/PORTAL-847)).
 - Pull busybox image over nexus.
 - **BREAKING**: `sessionBag`-middleware needs to be declared as `entry-middleware` in `portal-gateway.json` (see [migration guide](./MIGRATION_GUIDE.md)). ([PORTAL-988](https://issue.inventage.com/browse/PORTAL-988)).
+- Helm-Chart-Library version upgraded to 4.1.0-202302011108-163-b4dc038.
 
 ### Removed
 
