@@ -76,6 +76,13 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
 
+    public static final String MIDDLEWARE_CSP = "csp";
+    public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
+    public static final String MIDDLEWARE_CSP_DIRECTIVES = "directives";
+    public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "name";
+    public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
+
+
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
 
@@ -153,8 +160,8 @@ public class DynamicConfiguration {
             MIDDLEWARE_REDIRECT_REGEX, MIDDLEWARE_HEADERS, MIDDLEWARE_AUTHORIZATION_BEARER, MIDDLEWARE_BEARER_ONLY,
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
             MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER,
-            MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
-            MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL, MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE);
+            MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION, MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL,
+            MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE, MIDDLEWARE_CSP);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -220,6 +227,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
                 .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
+                .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
                 .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
@@ -884,6 +893,27 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s",
                                 mwType,
                                 ReplacedSessionCookieDetectionMiddleware.DEFAULT_DETECTION_COOKIE_NAME));
+                    }
+                    break;
+                }
+                case MIDDLEWARE_CSP: {
+                    final JsonArray directives = mwOptions.getJsonArray(MIDDLEWARE_CSP_DIRECTIVES);
+                    if (directives == null) {
+                        return Future.failedFuture(String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
+                    }
+                    else {
+                        for (Object directive : directives) {
+                            if (directive instanceof JsonObject) {
+                                final String directive_name = ((JsonObject) directive).getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
+                                if (directive_name == null) {
+                                    return Future.failedFuture(String.format("Directive name is not defined, middleware: '%s'", mwType));
+                                }
+                                final JsonArray directive_values = ((JsonObject) directive).getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
+                                if (directive_values == null) {
+                                    return Future.failedFuture(String.format("Directive values is not defined, middleware: '%s'", mwType));
+                                }
+                            }
+                        }
                     }
                     break;
                 }

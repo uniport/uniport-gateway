@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -79,6 +80,12 @@ public class MiddlewareServerBuilder {
             JWTAuthAdditionalClaimsOptions options, boolean optional) {
         return withMiddleware(
                 new BearerOnlyMiddleware(JWTAuthAdditionalClaimsHandler.create(authProvider, options), optional));
+    }
+
+    public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly){
+        return withMiddleware(
+                new CSPMiddleware(directives, reportOnly)
+        );
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
