@@ -6,7 +6,8 @@
                 "middlewares": [
                     "dashboardRedirectRegex",
                     "dashboardAuthBearer",
-                    "dashboardReplacePath"
+                    "dashboardReplacePath",
+                    "dashboardCheckRoute"
                 ],
                 "rule": "PathPrefix('/dashboard')",
                 "service": "dashboard-proxy"
@@ -35,6 +36,11 @@
                     "regex": "/dashboard/(.*)",
                     "replacement": "/$1"
                 }
+            },
+            {
+                "name": "dashboardCheckRoute",
+                "type": "checkRoute",
+                "options": {}
             }
         ],
         "services": [
