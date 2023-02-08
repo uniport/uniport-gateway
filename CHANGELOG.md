@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added a custom implementation of the relying party (based on vertx's implementation) ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Add a CSP middleware ([PORTAL-665](https://issue.inventage.com/browse/PORTAL-665)).
 
 ### Changed
 

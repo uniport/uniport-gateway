@@ -51,6 +51,38 @@
                             }
                         ]
                     }
+                },
+                {
+                    "name": "csp",
+                    "type": "csp",
+                    "options": {
+                        "directives": [
+                            {
+                                "name": "default-src",
+                                "values": ["self"]
+                            },
+                            {
+                                "name": "style-src",
+                                "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self", "unsafe-inline"]
+                            },
+                            {
+                                "name": "font-src",
+                                "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self"]
+                            },
+                            {
+                                "name": "script-src",
+                                "values": ["self", "blob:", "unsafe-inline"]
+                            },
+                            {
+                                "name": "img-src",
+                                "values": ["self", "data: https:"]
+                            },
+                            {
+                                "name": "img-src",
+                                "values": ["self", "data: https:"]
+                            }
+                        ]
+                    }
                 }
             ]
         }
