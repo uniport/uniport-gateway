@@ -67,7 +67,7 @@
                             },
                             {
                                 "name": "font-src",
-                                "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self"]
+                                "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self", "data"]
                             },
                             {
                                 "name": "script-src",
