@@ -71,7 +71,7 @@
                             },
                             {
                                 "name": "script-src",
-                                "values": ["self", "blob:", "unsafe-inline"]
+                                "values": ["self", "blob:", "unsafe-inline", "unsafe-eval"]
                             },
                             {
                                 "name": "img-src",
