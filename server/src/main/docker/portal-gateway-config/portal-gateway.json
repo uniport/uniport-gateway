@@ -78,6 +78,10 @@
                                 "values": ["self", "data: https:"]
                             },
                             {
+                                "name": "connect-src",
+                                "values": ["self", "https://grafana.com"]
+                            },
+                            {
                                 "name": "img-src",
                                 "values": ["self", "data: https:"]
                             }
