@@ -2,11 +2,11 @@ package com.inventage.portal.gateway.proxy.middleware.csp;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
-import io.vertx.ext.web.handler.impl.CSPHandlerImpl;
 
 public class CSPMiddleware implements Middleware {
 
@@ -17,7 +17,7 @@ public class CSPMiddleware implements Middleware {
     private final CSPHandler handler;
 
     public CSPMiddleware(JsonArray cspDirectives, Boolean reportOnly) {
-        this.handler = new CSPHandlerImpl();
+        this.handler = CSPHandler.create();
 
         this.removeBuiltinDirective(this.handler);
         this.handler.setReportOnly((reportOnly == null) ? DEFAULT_REPORT_ONLY : reportOnly);
@@ -46,7 +46,7 @@ public class CSPMiddleware implements Middleware {
 
             // io.vertx.ext.web.handler.impl.CSPHandlerImpl.handl in vertx-web:4.3.7 only supports report-uri, which is deprecated.
             // it is suggested to support report-to as well. We enable report-to support by adding this directive to report-uri as well.
-            if(name.equals(REPORT_TO)){
+            if (name.equals(REPORT_TO)) {
                 cspHandler.addDirective(REPORT_URI, (String) value);
             }
         });
