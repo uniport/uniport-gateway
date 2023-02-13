@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -21,8 +22,6 @@ class CspMiddlewareTest {
 
     private static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
     private static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_VALUES = "values";
 
     @Test
     void checkForCspInHTTPHeader(Vertx vertx, VertxTestContext testCtx) {
@@ -40,12 +39,13 @@ class CspMiddlewareTest {
             final MultiMap headers = httpClientResponse.headers();
             final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values, String.format("'%s' is NOT contained in http response header!", CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values.contains(default_src) && csp_values.contains(default_src_value), " Csp directive and value NOT contained in http response header!");
+            assertNotNull(csp_values,
+                    String.format("'%s' is NOT contained in http response header!", CONTENT_SECURITY_POLICY));
+            assertTrue(csp_values.contains(default_src) && csp_values.contains(default_src_value),
+                    " Csp directive and value NOT contained in http response header!");
             testCtx.completeNow();
         }));
     }
-
 
     @Test
     void checkReportOnlyInHTTPHeader(Vertx vertx, VertxTestContext testCtx) {
@@ -68,17 +68,21 @@ class CspMiddlewareTest {
             final String csp_values_report_only = headers.get(CONTENT_SECURITY_POLICY_REPORT_ONLY);
             final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values_report_only, String.format("'%s' is NOT contained in http response header!", CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values_report_only.contains(default_src) && csp_values_report_only.contains(default_src_value)
-                    && csp_values_report_only.contains(report_to_value), String.format("Csp report only directives should be contained in the header entry: %s!", CONTENT_SECURITY_POLICY_REPORT_ONLY));
+            assertNotNull(csp_values_report_only,
+                    String.format("'%s' is NOT contained in http response header!", CONTENT_SECURITY_POLICY));
+            assertTrue(
+                    csp_values_report_only.contains(default_src) && csp_values_report_only.contains(default_src_value)
+                            && csp_values_report_only.contains(report_to_value),
+                    String.format("Csp report only directives should be contained in the header entry: %s!",
+                            CONTENT_SECURITY_POLICY_REPORT_ONLY));
             assertNull(csp_values, " CSP header should not be set");
 
             testCtx.completeNow();
         }));
     }
 
-
-    private JsonObject createDirective(String name, String... values) {
-        return JsonObject.of(KEY_NAME, name, KEY_VALUES, JsonArray.of(values));
+    private JsonObject createDirective(String directive, String... values) {
+        return JsonObject.of(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME, directive,
+                DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of(values));
     }
 }
