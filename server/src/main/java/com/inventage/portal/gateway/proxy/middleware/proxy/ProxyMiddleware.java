@@ -35,15 +35,17 @@ public class ProxyMiddleware implements Middleware {
 
     private final String serverHost;
     private final int serverPort;
+    private final String name;
 
     private List<Handler<StringBuilder>> incomingRequestURIModifiers;
     private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
 
-    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
+    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort, String name) {
         httpProxy = HttpProxy.reverseProxy(vertx.createHttpClient());
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
+        this.name = name;
 
         incomingRequestURIModifiers = new ArrayList<>();
         outgoingResponseHeadersModifiers = new ArrayList<>();
@@ -62,7 +64,7 @@ public class ProxyMiddleware implements Middleware {
 
         captureModifiers(ctx);
 
-        LOGGER.debug("Sending to '{}:{}{}'", serverHost, serverPort, ctx.request().uri());
+        LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
         httpProxy.handle(ctx.request());
     }
 

@@ -23,10 +23,10 @@ public class JWTClaim {
      */
     public JWTClaim(JsonObject claimObject) {
         this(
-                claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_PATH),
+                claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
                 JWTClaimOperator
-                        .valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR)),
-                claimObject.getValue(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
+                        .valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
+                claimObject.getValue(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
     }
 
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {

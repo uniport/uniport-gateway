@@ -42,6 +42,7 @@ public class RouterFactory {
     public static final String PUBLIC_PROTOCOL_KEY = "publicProtocol";
     public static final String PUBLIC_HOSTNAME_KEY = "publicHostname";
     public static final String PUBLIC_PORT_KEY = "publicPort";
+    public static final String MIDDLEWARE_INSTANCE_NAME = "middlewareInstanceName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
@@ -133,6 +134,7 @@ public class RouterFactory {
         final JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         // TODO support multiple servers
         final JsonObject serverConfig = serverConfigs.getJsonObject(0);
+        serverConfig.put(DynamicConfiguration.SERVICE_NAME, serviceName);
 
         // required to be the last middleware
         final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
@@ -172,6 +174,7 @@ public class RouterFactory {
             middlewareOptions.put(PUBLIC_HOSTNAME_KEY, this.publicHostname);
             middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);
         }
+        middlewareOptions.put(MIDDLEWARE_INSTANCE_NAME, middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME));
 
         final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory == null) {

@@ -18,10 +18,12 @@ public class RedirectRegexMiddleware implements Middleware {
 
     private final Pattern pattern;
     private final String replacement;
+    private final String name;
 
-    public RedirectRegexMiddleware(String regex, String replacement) {
+    public RedirectRegexMiddleware(String regex, String replacement, String name) {
         this.pattern = Pattern.compile(regex);
         this.replacement = replacement;
+        this.name = name;
     }
 
     @Override
@@ -30,14 +32,14 @@ public class RedirectRegexMiddleware implements Middleware {
 
         // If the Regexp doesn't match, skip to the next handler.
         if (!this.pattern.matcher(oldURI).matches()) {
-            LOGGER.debug("Skipping redirect of non matching URI '{}'", oldURI);
+            LOGGER.debug("'{}' is skipping redirect of non matching URI '{}'", name, oldURI);
             ctx.next();
             return;
         }
 
         final String newURI = this.pattern.matcher(oldURI).replaceAll(this.replacement);
 
-        LOGGER.debug("Redirecting from '{}' to '{}'", oldURI, newURI);
+        LOGGER.debug("'{}' is redirecting from '{}' to '{}'", name, oldURI, newURI);
         ctx.redirect(newURI);
     }
 }

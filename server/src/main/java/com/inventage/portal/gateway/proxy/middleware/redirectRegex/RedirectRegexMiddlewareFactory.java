@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
+import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
         LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
         return Future.succeededFuture(new RedirectRegexMiddleware(
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT),
+                middlewareConfig.getString(RouterFactory.MIDDLEWARE_INSTANCE_NAME)));
     }
 }

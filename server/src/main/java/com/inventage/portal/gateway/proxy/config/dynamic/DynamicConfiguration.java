@@ -94,7 +94,24 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
 
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
-    public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
+
+    public static final String MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE = "sessionScope";
+
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER = "issuer";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE = "audience";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL = "optional";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS = "claims";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH = "claimPath";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE = "value";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR = "operator";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS = "EQUALS";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS = "CONTAINS";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
+
+    public static final String MIDDLEWARE_PASS_AUTHORIZATION = "passAuthorization";
 
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
 
@@ -118,20 +135,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
 
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
-    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
-    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
-    public static final String MIDDLEWARE_BEARER_ONLY_ISSUER = "issuer";
-    public static final String MIDDLEWARE_BEARER_ONLY_AUDIENCE = "audience";
-    public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIMS = "claims";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR = "operator";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS = "EQUALS";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS = "CONTAINS";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
-
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_PATH = "claimPath";
-    public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE = "value";
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
@@ -171,7 +174,7 @@ public class DynamicConfiguration {
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
             MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER,
             MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION, MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL,
-            MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE, MIDDLEWARE_CSP, MIDDLEWARE_CSRF);
+            MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE, MIDDLEWARE_CSP, MIDDLEWARE_CSRF, MIDDLEWARE_PASS_AUTHORIZATION);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -212,13 +215,13 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
                 .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
                 .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
-                .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
-                .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_CLAIMS, Schemas.arraySchema())
+                .property(MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema())
+                .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
+                .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema())
+                .property(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
+                .property(MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL, Schemas.stringSchema())
+                .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
@@ -548,133 +551,17 @@ public class DynamicConfiguration {
 
             switch (mwType) {
                 case MIDDLEWARE_AUTHORIZATION_BEARER: {
-                    final String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
-                    if (sessionScope == null || sessionScope.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
+                    Future<Void> validationResult = validateWithAuthToken(mwType, mwOptions);
+                    if (validationResult != null) {
+                        return validationResult;
                     }
                     break;
                 }
                 case MIDDLEWARE_BEARER_ONLY: {
-                    final String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
-                    if (publicKey == null) {
-                        return Future.failedFuture(String.format("%s: No public key defined", mwType));
-                    } else if (publicKey.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
+                    Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                    if (validationResult != null) {
+                        return validationResult;
                     }
-
-                    // the public key has to be either a valid URL to fetch it from or base64 encoded
-                    boolean isBase64;
-                    try {
-                        Base64.getDecoder().decode(publicKey);
-                        isBase64 = true;
-                    } catch (IllegalArgumentException e) {
-                        isBase64 = false;
-                    }
-
-                    boolean isURL = false;
-                    if (!isBase64) {
-                        try {
-                            new URL(publicKey).toURI();
-                            isURL = true;
-                        } catch (MalformedURLException | URISyntaxException e) {
-                            isURL = false;
-                        }
-                    }
-
-                    if (!isBase64 && !isURL) {
-                        return Future.failedFuture(String
-                                .format("%s: Public key is required to either be base64 encoded or a valid URL",
-                                        mwType));
-                    }
-
-                    final String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
-                    if (publicKeyAlgorithm.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Invalid public key algorithm", mwType));
-                    }
-
-                    final String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
-                    if (issuer != null && issuer.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Empty issuer defined", mwType));
-                    }
-
-                    final JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_AUDIENCE);
-                    if (audience != null) {
-                        if (audience.size() == 0) {
-                            return Future.failedFuture(String.format("%s: Empty audience defined.", mwType));
-                        }
-                        for (Object a : audience.getList()) {
-                            if (!(a instanceof String)) {
-                                return Future.failedFuture(
-                                        String.format("%s: Audience is required to be a list of strings.", mwType));
-                            }
-                        }
-                    }
-                    final JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_CLAIMS);
-                    if (claims != null) {
-                        if (claims.size() == 0) {
-                            LOGGER.debug("Claims is empty");
-                        }
-
-                        for (Object claim : claims.getList()) {
-                            if (claim instanceof Map) {
-                                claim = new JsonObject((Map<String, Object>) claim);
-                            }
-                            if (!(claim instanceof JsonObject)) {
-                                return Future.failedFuture("Claim is required to be a JsonObject");
-                            } else {
-                                final JsonObject cObj = (JsonObject) claim;
-                                if (cObj.size() != 3) {
-                                    return Future.failedFuture(String.format(
-                                            "%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",
-                                            mwType));
-                                }
-                                if (!(cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH)
-                                        && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR)
-                                        && cObj.containsKey(MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE))) {
-                                    return Future.failedFuture(String.format(
-                                            "%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, MIDDLEWARE_BEARER_ONLY_CLAIM_PATH,
-                                            MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE));
-                                }
-
-                                if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH) == null) {
-                                    return Future.failedFuture(
-                                            String.format("%s: %s value is required to be a String", mwType,
-                                                    MIDDLEWARE_BEARER_ONLY_CLAIM_PATH));
-                                } else {
-                                    final String path = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_PATH);
-                                    try {
-                                        final Path p = PathCompiler.compile(path);
-                                        LOGGER.debug(p.toString());
-                                    } catch (RuntimeException e) {
-                                        LOGGER.debug(String.format("Invalid claimpath %s", path));
-                                        return Future
-                                                .failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
-                                    }
-                                }
-                                if (cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR) == null) {
-                                    return Future.failedFuture(
-                                            String.format("%s: %s value is required to be a String", mwType,
-                                                    MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR));
-                                } else {
-                                    final String operator = cObj.getString(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR);
-                                    if (!(operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS)
-                                            || operator.equals(MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS))) {
-                                        return Future.failedFuture(String.format(
-                                                "%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s",
-                                                mwType,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR, operator,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS,
-                                                MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS));
-                                    }
-                                }
-
-                            }
-                        }
-                    } else {
-                        LOGGER.debug("No custom claims defined!");
-                    }
-
                     break;
                 }
                 case MIDDLEWARE_HEADERS: {
@@ -999,6 +886,18 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
+                case MIDDLEWARE_PASS_AUTHORIZATION: {
+                    Future<Void> validationResult = validateWithAuthToken(mwType, mwOptions);
+                    if (validationResult != null) {
+                        return validationResult;
+                    }
+
+                    validationResult = validateWithAuthHandler(mwType, mwOptions);
+                    if (validationResult != null) {
+                        return validationResult;
+                    }
+                    break;
+                }
                 case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
                     break;
                 }
@@ -1042,6 +941,137 @@ public class DynamicConfiguration {
         }
 
         return Future.succeededFuture();
+    }
+
+    public static Future<Void> validateWithAuthHandler(String mwType, JsonObject mwOptions) {
+        final String publicKey = mwOptions.getString(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
+        if (publicKey == null) {
+            return Future.failedFuture(String.format("%s: No public key defined", mwType));
+        } else if (publicKey.length() == 0) {
+            return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
+        }
+
+        // the public key has to be either a valid URL to fetch it from or base64 encoded
+        boolean isBase64;
+        try {
+            Base64.getDecoder().decode(publicKey);
+            isBase64 = true;
+        } catch (IllegalArgumentException e) {
+            isBase64 = false;
+        }
+
+        boolean isURL = false;
+        if (!isBase64) {
+            try {
+                new URL(publicKey).toURI();
+                isURL = true;
+            } catch (MalformedURLException | URISyntaxException e) {
+                isURL = false;
+            }
+        }
+
+        if (!isBase64 && !isURL) {
+            return Future.failedFuture(String
+                    .format("%s: Public key is required to either be base64 encoded or a valid URL",
+                            mwType));
+        }
+
+        final String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM);
+        if (publicKeyAlgorithm.length() == 0) {
+            return Future.failedFuture(String.format("%s: Invalid public key algorithm", mwType));
+        }
+
+        final String issuer = mwOptions.getString(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER);
+        if (issuer != null && issuer.length() == 0) {
+            return Future.failedFuture(String.format("%s: Empty issuer defined", mwType));
+        }
+
+        final JsonArray audience = mwOptions.getJsonArray(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
+        if (audience != null) {
+            if (audience.size() == 0) {
+                return Future.failedFuture(String.format("%s: Empty audience defined.", mwType));
+            }
+            for (Object a : audience.getList()) {
+                if (!(a instanceof String)) {
+                    return Future.failedFuture(
+                            String.format("%s: Audience is required to be a list of strings.", mwType));
+                }
+            }
+        }
+        final JsonArray claims = mwOptions.getJsonArray(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
+        if (claims != null) {
+            if (claims.size() == 0) {
+                LOGGER.debug("Claims is empty");
+            }
+
+            for (Object claim : claims.getList()) {
+                if (claim instanceof Map) {
+                    claim = new JsonObject((Map<String, Object>) claim);
+                }
+                if (!(claim instanceof JsonObject)) {
+                    return Future.failedFuture("Claim is required to be a JsonObject");
+                } else {
+                    final JsonObject cObj = (JsonObject) claim;
+                    if (cObj.size() != 3) {
+                        return Future.failedFuture(String.format(
+                                "%s: Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value",
+                                mwType));
+                    }
+                    if (!(cObj.containsKey(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH)
+                            && cObj.containsKey(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)
+                            && cObj.containsKey(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE))) {
+                        return Future.failedFuture(String.format(
+                                "%s: Claim is missing at least 1 key. Required keys: %s, %s, %s", mwType,
+                                MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR, MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH,
+                                MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
+                    }
+
+                    if (cObj.getString(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH) == null) {
+                        return Future.failedFuture(
+                                String.format("%s: %s value is required to be a String", mwType,
+                                        MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH));
+                    } else {
+                        final String path = cObj.getString(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH);
+                        try {
+                            final Path p = PathCompiler.compile(path);
+                            LOGGER.debug(p.toString());
+                        } catch (RuntimeException e) {
+                            LOGGER.debug(String.format("Invalid claimpath %s", path));
+                            return Future
+                                    .failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
+                        }
+                    }
+                    if (cObj.getString(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR) == null) {
+                        return Future.failedFuture(
+                                String.format("%s: %s value is required to be a String", mwType,
+                                        MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR));
+                    } else {
+                        final String operator = cObj.getString(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR);
+                        if (!(operator.equals(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS)
+                                || operator.equals(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS))) {
+                            return Future.failedFuture(String.format(
+                                    "%s: %s value is illegal. Actual operator: %s .Allowed operators: %s, %s",
+                                    mwType,
+                                    MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR, operator,
+                                    MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS,
+                                    MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS));
+                        }
+                    }
+
+                }
+            }
+        } else {
+            LOGGER.debug("No custom claims defined!");
+        }
+        return null;
+    }
+
+    private static Future<Void> validateWithAuthToken(String mwType, JsonObject mwOptions) {
+        final String sessionScope = mwOptions.getString(MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE);
+        if (sessionScope == null || sessionScope.length() == 0) {
+            return Future.failedFuture(String.format("%s: No session scope defined", mwType));
+        }
+        return null;
     }
 
     private static Boolean addRouter(JsonObject httpConf, String routerName, JsonObject routerToAdd) {

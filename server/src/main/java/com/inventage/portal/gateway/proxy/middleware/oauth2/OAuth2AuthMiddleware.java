@@ -43,11 +43,13 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     private final AuthenticationHandler authHandler;
     private final String sessionScope;
+    private final String name;
 
-    public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope) {
+    public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope, String name) {
         LOGGER.debug("For session scope '{}'", sessionScope);
         this.authHandler = authHandler;
         this.sessionScope = sessionScope;
+        this.name = name;
     }
 
     /**
@@ -55,7 +57,7 @@ public class OAuth2AuthMiddleware implements Middleware {
      */
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("Handling URI '{}'", ctx.request().uri());
+        LOGGER.debug("'{}' is handling URI '{}'", name, ctx.request().uri());
         final User user = ctx.user();
         final User userForScope = setUserForScope(this.sessionScope, ctx);
 

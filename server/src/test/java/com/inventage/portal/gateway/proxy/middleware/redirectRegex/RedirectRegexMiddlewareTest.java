@@ -55,7 +55,7 @@ public class RedirectRegexMiddlewareTest {
         Checkpoint requestsServed = testCtx.checkpoint();
         Checkpoint responsesReceived = testCtx.checkpoint();
 
-        RedirectRegexMiddleware redirect = new RedirectRegexMiddleware(regex, replacement);
+        RedirectRegexMiddleware redirect = new RedirectRegexMiddleware(regex, replacement, "redirectRegexMiddleware");
 
         int port = TestUtils.findFreePort();
         Router router = Router.router(vertx);

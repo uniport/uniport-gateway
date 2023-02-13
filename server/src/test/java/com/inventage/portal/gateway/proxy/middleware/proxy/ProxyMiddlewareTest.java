@@ -30,7 +30,7 @@ public class ProxyMiddlewareTest {
         String proxyResponse = "proxy";
         String serverResponse = "server";
 
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, serverPort);
+        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, serverPort, "someName");
 
         Checkpoint proxyStarted = testCtx.checkpoint();
         Checkpoint serverStarted = testCtx.checkpoint();

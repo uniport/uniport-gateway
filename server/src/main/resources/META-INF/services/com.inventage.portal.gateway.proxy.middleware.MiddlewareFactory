@@ -16,3 +16,4 @@ com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddlewareFac
 com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.passAuthorization.PassAuthorizationMiddlewareFactory

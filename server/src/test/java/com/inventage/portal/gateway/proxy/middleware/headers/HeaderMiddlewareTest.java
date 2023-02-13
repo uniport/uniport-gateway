@@ -116,7 +116,7 @@ public class HeaderMiddlewareTest {
         vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort).onComplete(testCtx.succeeding(s -> {
             serviceStarted.flag();
 
-            ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort);
+            ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort, "someName");
 
             Router router = Router.router(vertx);
             router.route().handler(header).handler(proxy);

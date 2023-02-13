@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.passAuthorization.PassAuthorizationMiddleware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -95,6 +96,10 @@ public class MiddlewareServerBuilder {
         );
     }
 
+    public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
+        return withMiddleware(new PassAuthorizationMiddleware(sessionScope, JWTAuthHandler.create(authProvider)));
+    }
+
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
         return withMiddleware(new LanguageCookieMiddleware());
     }
@@ -165,7 +170,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(int port) {
-        return withMiddleware(new ProxyMiddleware(vertx, host, port));
+        return withMiddleware(new ProxyMiddleware(vertx, host, port, "someName"));
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
@@ -202,10 +207,12 @@ public class MiddlewareServerBuilder {
 
         return this;
     }
+    public MiddlewareServerBuilder withMockOAuth2Middleware(){
+        return withMockOAuth2Middleware("mayIAccessThisRessource");
+    }
 
-    public MiddlewareServerBuilder withMockOAuth2Middleware() {
+    public MiddlewareServerBuilder withMockOAuth2Middleware(String rawAccessToken) {
         final String sessionScope = "testScope";
-        final String rawAccessToken = "mayIAccessThisRessource";
         final User user = User.create(new JsonObject().put("access_token", rawAccessToken));
         final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(null, user);
 
