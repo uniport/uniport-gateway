@@ -121,8 +121,7 @@ public class DynamicConfigurationTest {
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                         new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX)
-                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+                                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX))));
 
         JsonObject directRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
@@ -136,14 +135,12 @@ public class DynamicConfigurationTest {
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                         new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX)
-                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+                                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX))));
 
         JsonObject headersHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                         new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_HEADERS)
-                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_HEADERS))));
 
         JsonObject headersHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
@@ -157,8 +154,7 @@ public class DynamicConfigurationTest {
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                         new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER))));
 
         JsonObject authBearerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
@@ -214,8 +210,7 @@ public class DynamicConfigurationTest {
         JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                         new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_OAUTH2)
-                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_OAUTH2))));
 
         JsonObject oauth2PathHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
@@ -230,8 +225,8 @@ public class DynamicConfigurationTest {
         JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                         new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
-                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()))));
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                                        DynamicConfiguration.MIDDLEWARE_SESSION_BAG))));
 
         JsonObject sessionBagHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
@@ -433,8 +428,7 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                                         DynamicConfiguration.MIDDLEWARE_CONTROL_API)
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                                        .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_TERMINATE")
-                                )))
+                                        .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_TERMINATE"))))
                         .put(DynamicConfiguration.SERVICES,
                                 new JsonArray()
                                         .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "serviceFoo").put(
@@ -454,8 +448,7 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                                         DynamicConfiguration.MIDDLEWARE_CONTROL_API)
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                                        .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_RESET")
-                                )))
+                                        .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_RESET"))))
                         .put(DynamicConfiguration.SERVICES,
                                 new JsonArray()
                                         .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "serviceFoo").put(
@@ -541,8 +534,10 @@ public class DynamicConfigurationTest {
                         expectedFalse),
 
                 // controlapi middleware
-                Arguments.of("accept control api with 'SESSION_TERMINATE' action middleware", controlApiMiddlewareWithSessionTermination, complete, expectedTrue),
-                Arguments.of("accept control api with 'SESSION_RESET' action middleware", controlApiMiddlewareWithSessionReset, complete, expectedTrue),
+                Arguments.of("accept control api with 'SESSION_TERMINATE' action middleware",
+                        controlApiMiddlewareWithSessionTermination, complete, expectedTrue),
+                Arguments.of("accept control api with 'SESSION_RESET' action middleware",
+                        controlApiMiddlewareWithSessionReset, complete, expectedTrue),
 
                 // services
                 Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),
@@ -572,7 +567,6 @@ public class DynamicConfigurationTest {
                         httpRouterWithMissingMiddleware, complete, expectedFalse),
                 Arguments.of("accept http config with router referencing missing service", httpRouterWithMissingService,
                         complete, expectedFalse));
-
 
     }
 

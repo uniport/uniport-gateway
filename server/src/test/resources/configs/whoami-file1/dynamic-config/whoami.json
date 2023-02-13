@@ -111,8 +111,7 @@
 
             {
                 "name": "ShowSessionContentMiddleware",
-                "type": "_session_",
-                "options": {}
+                "type": "_session_"
             }
         ],
 

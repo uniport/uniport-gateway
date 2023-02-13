@@ -158,7 +158,8 @@ public class Entrypoint {
     private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
             Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                new JsonObject());
 
         final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory == null) {

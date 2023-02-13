@@ -162,7 +162,8 @@ public class RouterFactory {
     private void createMiddleware(JsonObject middlewareConfig, Router router,
             Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
+        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                new JsonObject());
 
         // needed to ensure authenticating requests are routed through this application
         if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)

@@ -82,7 +82,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "name";
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
 
-
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
 
@@ -234,7 +233,7 @@ public class DynamicConfiguration {
         final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
                 .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                 .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
-                .requiredProperty(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
+                .property(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
         return middlewareSchema;
     }
 
@@ -520,7 +519,7 @@ public class DynamicConfiguration {
             final JsonObject mw = mws.getJsonObject(i);
             final String mwName = mw.getString(MIDDLEWARE_NAME);
             final String mwType = mw.getString(MIDDLEWARE_TYPE);
-            final JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS);
+            final JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS, new JsonObject());
 
             if (mwNames.contains(mwName)) {
                 final String errMsg = String.format(
@@ -899,18 +898,22 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_CSP: {
                     final JsonArray directives = mwOptions.getJsonArray(MIDDLEWARE_CSP_DIRECTIVES);
                     if (directives == null) {
-                        return Future.failedFuture(String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
-                    }
-                    else {
+                        return Future.failedFuture(
+                                String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
+                    } else {
                         for (Object directive : directives) {
                             if (directive instanceof JsonObject) {
-                                final String directive_name = ((JsonObject) directive).getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
+                                final String directive_name = ((JsonObject) directive)
+                                        .getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
                                 if (directive_name == null) {
-                                    return Future.failedFuture(String.format("Directive name is not defined, middleware: '%s'", mwType));
+                                    return Future.failedFuture(
+                                            String.format("Directive name is not defined, middleware: '%s'", mwType));
                                 }
-                                final JsonArray directive_values = ((JsonObject) directive).getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
+                                final JsonArray directive_values = ((JsonObject) directive)
+                                        .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
                                 if (directive_values == null) {
-                                    return Future.failedFuture(String.format("Directive values is not defined, middleware: '%s'", mwType));
+                                    return Future.failedFuture(
+                                            String.format("Directive values is not defined, middleware: '%s'", mwType));
                                 }
                             }
                         }

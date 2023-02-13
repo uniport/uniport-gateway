@@ -31,8 +31,7 @@
             },
             {
                 "name": "languageCookie",
-                "type": "languageCookie",
-                "options": {}
+                "type": "languageCookie"
             },
             {
                 "name": "dashboardOauth2",

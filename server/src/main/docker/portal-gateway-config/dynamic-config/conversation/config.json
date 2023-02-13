@@ -50,8 +50,7 @@
             },
             {
                 "name": "conversationCheckRoute",
-                "type": "checkRoute",
-                "options": {}
+                "type": "checkRoute"
             }
         ],
         "services": [

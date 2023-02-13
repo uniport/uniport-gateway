@@ -51,8 +51,7 @@
             },
             {
                 "name": "organisationCheckRoute",
-                "type": "checkRoute",
-                "options": {}
+                "type": "checkRoute"
             }
         ],
         "services": [

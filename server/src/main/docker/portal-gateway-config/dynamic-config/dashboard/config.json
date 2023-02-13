@@ -39,8 +39,7 @@
             },
             {
                 "name": "dashboardCheckRoute",
-                "type": "checkRoute",
-                "options": {}
+                "type": "checkRoute"
             }
         ],
         "services": [

@@ -50,10 +50,8 @@
             },
             {
                 "name": "notificationCheckRoute",
-                "type": "checkRoute",
-                "options": {}
+                "type": "checkRoute"
             }
-
         ],
         "services": [
             {

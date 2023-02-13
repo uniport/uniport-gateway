@@ -6,23 +6,19 @@
             "middlewares": [
                 {
                     "name": "responseSessionCookieRemoval",
-                    "type": "responseSessionCookieRemoval",
-                    "options": {}
+                    "type": "responseSessionCookieRemoval"
                 },
                 {
                     "name": "session",
-                    "type": "session",
-                    "options": {}
+                    "type": "session"
                 },
                 {
                     "name": "requestResponseLogger",
-                    "type": "requestResponseLogger",
-                    "options": {}
+                    "type": "requestResponseLogger"
                 },
                 {
                     "name": "replacedSessionCookieDetection",
-                    "type": "replacedSessionCookieDetection",
-                    "options": {}
+                    "type": "replacedSessionCookieDetection"
                 },
                 {
                     "name": "whitelistedCookiesInSessionBag",
@@ -63,15 +59,30 @@
                             },
                             {
                                 "name": "style-src",
-                                "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self", "unsafe-inline"]
+                                "values": [
+                                    "https://fonts.googleapis.com",
+                                    "https://fonts.gstatic.com",
+                                    "self",
+                                    "unsafe-inline"
+                                ]
                             },
                             {
                                 "name": "font-src",
-                                "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self", "data"]
+                                "values": [
+                                    "https://fonts.googleapis.com",
+                                    "https://fonts.gstatic.com",
+                                    "self",
+                                    "data"
+                                ]
                             },
                             {
                                 "name": "script-src",
-                                "values": ["self", "blob:", "unsafe-inline", "unsafe-eval"]
+                                "values": [
+                                    "self",
+                                    "blob:",
+                                    "unsafe-inline",
+                                    "unsafe-eval"
+                                ]
                             },
                             {
                                 "name": "img-src",
