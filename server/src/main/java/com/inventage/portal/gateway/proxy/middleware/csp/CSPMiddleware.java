@@ -32,8 +32,9 @@ public class CSPMiddleware implements Middleware {
     }
 
     private void removeBuiltinDirective(CSPHandler cspHandler) {
-        //io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web:4.3.7, adds per default ("default-src": "self")
-        //can lead to conflict if multiple default-src are set (https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#multiple_content_security_policies), as all policies will be enforced
+        // io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web:4.3.7, adds per default ("default-src": "self")
+        // can lead to conflict if multiple default-src are set, as all policies will be enforced
+        // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#multiple_content_security_policies
         cspHandler.setDirective(DEFAULT_SRC_KEY, null);
     }
 
@@ -44,6 +45,7 @@ public class CSPMiddleware implements Middleware {
         values.forEach(value -> {
             cspHandler.addDirective(name, (String) value);
 
+            // TODO (fbuetler) remove, once this issue is fixed: https://github.com/vert-x3/vertx-web/issues/2359
             // io.vertx.ext.web.handler.impl.CSPHandlerImpl.handl in vertx-web:4.3.7 only supports report-uri, which is deprecated.
             // it is suggested to support report-to as well. We enable report-to support by adding this directive to report-uri as well.
             if (name.equals(REPORT_TO)) {

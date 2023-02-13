@@ -915,6 +915,14 @@ public class DynamicConfiguration {
                                     return Future.failedFuture(
                                             String.format("Directive values is not defined, middleware: '%s'", mwType));
                                 }
+                                for (Object a : directive_values.getList()) {
+                                    if (!(a instanceof String)) {
+                                        return Future.failedFuture(
+                                                String.format(
+                                                        "%s: Directive values is required to be a list of strings.",
+                                                        mwType));
+                                    }
+                                }
                             }
                         }
                     }

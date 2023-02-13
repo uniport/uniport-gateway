@@ -457,6 +457,27 @@ public class DynamicConfigurationTest {
                                                         .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
                                                         .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
 
+        JsonObject cspMiddlewareWithDefaultSrcSelf = TestUtils
+                .buildConfiguration(TestUtils
+                        .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_CSP,
+                                TestUtils.withMiddlewareOpts(new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVES, new JsonArray().add(
+                                                new JsonObject()
+                                                        .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME,
+                                                                "default-src")
+                                                        .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES,
+                                                                new JsonArray().add("self"))))))));
+
+        JsonObject cspMiddlewareWithInvalidValues = TestUtils
+                .buildConfiguration(TestUtils
+                        .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_CSP,
+                                TestUtils.withMiddlewareOpts(new JsonObject().put(
+                                        DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVES,
+                                        new JsonArray().add(new JsonObject()
+                                                .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME, "foo")
+                                                .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES,
+                                                        new JsonArray().add("valid").add(123).add(true))))))));
+
         // the sole purpose of the following variable are to improve readability
         boolean expectedTrue = true;
         boolean expectedFalse = false;
@@ -538,6 +559,12 @@ public class DynamicConfigurationTest {
                         controlApiMiddlewareWithSessionTermination, complete, expectedTrue),
                 Arguments.of("accept control api with 'SESSION_RESET' action middleware",
                         controlApiMiddlewareWithSessionReset, complete, expectedTrue),
+
+                // content security policy middleware
+                Arguments.of("accept csp middleware with default-src=[self]", cspMiddlewareWithDefaultSrcSelf,
+                        complete, expectedTrue),
+                Arguments.of("reject csp middleware with invalid values", cspMiddlewareWithInvalidValues, complete,
+                        expectedFalse),
 
                 // services
                 Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),
