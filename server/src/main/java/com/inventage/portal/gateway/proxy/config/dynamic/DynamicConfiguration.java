@@ -78,8 +78,8 @@ public class DynamicConfiguration {
 
     public static final String MIDDLEWARE_CSP = "csp";
     public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
-    public static final String MIDDLEWARE_CSP_DIRECTIVES = "directives";
-    public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "name";
+    public static final String MIDDLEWARE_CSP_DIRECTIVES = "policyDirectives";
+    public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "directive";
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
 
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";

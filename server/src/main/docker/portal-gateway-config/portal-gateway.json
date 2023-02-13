@@ -52,13 +52,13 @@
                     "name": "csp",
                     "type": "csp",
                     "options": {
-                        "directives": [
+                        "policyDirectives": [
                             {
-                                "name": "default-src",
+                                "directive": "default-src",
                                 "values": ["self"]
                             },
                             {
-                                "name": "style-src",
+                                "directive": "style-src",
                                 "values": [
                                     "https://fonts.googleapis.com",
                                     "https://fonts.gstatic.com",
@@ -67,7 +67,7 @@
                                 ]
                             },
                             {
-                                "name": "font-src",
+                                "directive": "font-src",
                                 "values": [
                                     "https://fonts.googleapis.com",
                                     "https://fonts.gstatic.com",
@@ -76,7 +76,7 @@
                                 ]
                             },
                             {
-                                "name": "script-src",
+                                "directive": "script-src",
                                 "values": [
                                     "self",
                                     "blob:",
@@ -85,15 +85,15 @@
                                 ]
                             },
                             {
-                                "name": "img-src",
+                                "directive": "img-src",
                                 "values": ["self", "data: https:"]
                             },
                             {
-                                "name": "connect-src",
+                                "directive": "connect-src",
                                 "values": ["self", "https://grafana.com"]
                             },
                             {
-                                "name": "img-src",
+                                "directive": "img-src",
                                 "values": ["self", "data: https:"]
                             }
                         ]
