@@ -27,7 +27,7 @@ pom.xml.versionsBackup
 release.properties
 
 # env file for a specific environment
-/server/src/config/portal-gateway.specific.env
+/server/src/main/config/portal-gateway.specific.env
 /docker-compose/src/main/resources/portal-gateway.specific.env
 /docker-compose/src/main/resources/secrets.env
 
