@@ -33,7 +33,6 @@
     <modules>
         <module>server</module>
         <!--<module>native</module>-->
-        <module>docker-compose</module>
         <module>helm</module>
     </modules>
 

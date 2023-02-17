@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 6.1.0-[Unreleased] - ???
+## 7.0.0-[Unreleased] - ???
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING**: docker-compose artefact is no longer provided ([PORTAL-1251](https://issue.inventage.com/browse/PORTAL-1251)).
 - Updated the Vert.x stack to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Updated usage of `io.vertx.json.schema` to newest concepts ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `io.vertx.vertx-http-proxy` instead of our own fork ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).

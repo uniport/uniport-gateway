@@ -29,9 +29,6 @@ pipeline {
         NEXUS2_CREDS = credentials('inventage-ierp')
         CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
-        DEV_DEPLOYMENT_HOST = 'ips@ardbeg.inventage.com'
-        DEV_DEPLOYMENT_DIR = '/home/ips/docker/portal-gateway'
-        DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
     }
 
     tools {
@@ -119,39 +116,6 @@ pipeline {
                         codeQualityEvaluation()
                     }
                 )
-            }
-        }
-
-        stage('Deployment-Docker') {
-            when {
-                branch 'master'
-                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
-            }
-            steps {
-                sh '''
-                    set +x
-
-                    echo "Copy deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR..."
-                    ssh $DEV_DEPLOYMENT_HOST mkdir -p $DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/portal-gateway/docker-compose.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/portal-gateway/docker-compose.override.yml $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/portal-gateway/portal-gateway.common.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR
-                    scp docker-compose/target/portal-gateway/portal-gateway.ardbeg.env $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR/portal-gateway.specific.env
-                    echo "Finished copying deployment files to $DEV_DEPLOYMENT_HOST:$DEV_DEPLOYMENT_DIR…"
-                '''
-                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
-                    sh '''
-                        echo 'Download new container'
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml pull'"
-
-                        echo 'Clean old container…'
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml down'"
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml rm -f'"
-
-                        echo 'Deploy new container…'
-                        ssh $DEV_DEPLOYMENT_HOST "bash -l -c 'docker-compose -f $DEV_DEPLOYMENT_DIR/docker-compose.yml -f $DEV_DEPLOYMENT_DIR/docker-compose.override.yml up -d'"
-                    '''
-                }
             }
         }
 

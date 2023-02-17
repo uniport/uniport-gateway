@@ -19,9 +19,9 @@
       <option name="IS_IGNORE_MISSING_FILES" value="false" />
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
-        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
-        <ENTRY IS_ENABLED="true" PARSER="env" PATH="docker-compose/src/main/resources/portal-gateway.common.env" />
-        <ENTRY IS_ENABLED="true" PARSER="env" PATH="docker-compose/src/main/resources/portal-gateway.specific.env" />
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/main/config/portal-gateway.common.env" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/main/config/portal-gateway.specific.env" />
       </ENTRIES>
     </extension>
     <method v="2">

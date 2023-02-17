@@ -358,6 +358,23 @@
                     </transformers>
                 </configuration>
             </plugin>
+            <!-- for creating the common.env and the secrets.env file needed in docker-compose.yml -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <target>
+                                <touch file="src/main/config/portal-gateway.specific.env"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
