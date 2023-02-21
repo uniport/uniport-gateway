@@ -8,6 +8,12 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.vertx.core.MultiMap;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.HttpVersion;
+import io.vertx.core.net.SocketAddress;
 
 import java.util.Base64;
 
@@ -31,42 +37,170 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
+        final long start = System.currentTimeMillis();
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
+
+        if (LOGGER.isTraceEnabled()) {
+            logRequestTrace(ctx);
+        }
+        else if (LOGGER.isDebugEnabled()) {
+            logRequestDebug(ctx);
+        }
+        else if (LOGGER.isInfoEnabled()) {
+            logRequestInfo(ctx);
+        }
 
         ContextualData.put(CONTEXTUAL_DATA_USER_ID, getUserId(ctx.user()));
         final String traceId = Span.current().getSpanContext().getTraceId();
         ContextualData.put(CONTEXTUAL_DATA_REQUEST_ID, traceId);
         ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
 
-        final long start = System.currentTimeMillis();
-        logRequest(ctx);
-        // add the ips-request-id to the HTTP header, if it is not yet set
-        ctx.addHeadersEndHandler(v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
+        ctx.addHeadersEndHandler(
+                v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
         ctx.addBodyEndHandler(v -> {
-            logResponse(ctx, start);
+            if (LOGGER.isTraceEnabled()) {
+                logResponseTrace(ctx, start);
+            }
+            else if (LOGGER.isDebugEnabled()) {
+                logResponseDebug(ctx, start);
+            }
+            else if (LOGGER.isInfoEnabled()) {
+                logResponseInfo(ctx, start);
+            }
         });
         ctx.next();
     }
 
-    private void logRequest(RoutingContext routingContext) {
-        LOGGER.debug("Incoming URI '{}'", routingContext.request().uri());
+    private String getClientAddress(SocketAddress inetSocketAddress) {
+        if (inetSocketAddress == null) {
+            return null;
+        }
+        return inetSocketAddress.host();
     }
 
-    private void logResponse(RoutingContext routingContext, long start) {
-        if (routingContext.response().getStatusCode() >= 400) {
-            // More logging when response is >= 400
-            LOGGER.debug("'Outgoing URI '{}' with status '{}' and message '{}' in '{}' ms",
-                    routingContext.request().uri(),
-                    routingContext.response().getStatusCode(),
-                    routingContext.response().getStatusMessage(),
-                    System.currentTimeMillis() - start);
+    private void logRequestInfo(RoutingContext context) {
+        final String infoLog = generateHttpRequestLogMessage(context);
+        LOGGER.info("{}: Incoming Request '{}'", name, infoLog);
+    }
+
+    private void logRequestDebug(RoutingContext context) {
+        final String infoLog = generateHttpRequestLogMessage(context);
+        final String headersLog = generateHttpHeaderLogMessage(context.request().headers());
+        LOGGER.debug("{}: Incoming Request '{}'\nHeaders '{}'", name, infoLog, headersLog);
+    }
+
+    private void logRequestTrace(RoutingContext context) {
+        final String infoLog = generateHttpRequestLogMessage(context);
+        final String headersLog = generateHttpHeaderLogMessage(context.request().headers());
+        final var request = context.request();
+        final String contentType = request.getHeader("Content-Type");
+        if (contentType != null && (contentType.startsWith("text/plain") || contentType.startsWith("application/json"))) {
+            request.body().onSuccess(body -> {
+                if (body != null) {
+                    final String bodyContent = body.toString();
+                    LOGGER.trace("{}: Incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, bodyContent);
+                }
+            }).onFailure(error -> {
+                LOGGER.trace("{}: Incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, error.getMessage());
+            });
         }
         else {
-            LOGGER.debug("Outgoing URI '{}' with status '{}' in '{}' ms",
-                    routingContext.request().uri(),
-                    routingContext.response().getStatusCode(),
-                    System.currentTimeMillis() - start);
+            LOGGER.trace("{}: Incoming Request '{}'\n Headers '{}'\n Content-type '{}'", name, infoLog, headersLog, contentType);
         }
+    }
+
+    private void logResponseDebug(RoutingContext context, long start) {
+        final String infoLog = generateHttpResponseLogMessage(context, start);
+        final String headerLog = generateHttpHeaderLogMessage(context.response().headers());
+        LOGGER.debug("{}: Outgoing Response '{}' \nHeaders '{}'", name, infoLog, headerLog);
+    }
+
+    private void logResponseInfo(RoutingContext context, long start) {
+        final String infoLog = generateHttpResponseLogMessage(context, start);
+        LOGGER.info("{}: Outgoing Response '{}'", name, infoLog);
+    }
+
+    private void logResponseTrace(RoutingContext context, long start) {
+        final String infoLog = generateHttpResponseLogMessage(context, start);
+        final String headerLog = generateHttpHeaderLogMessage(context.response().headers());
+        LOGGER.trace("{}: Outgoing Response '{}' \nHeaders '{}'", name, infoLog, headerLog);
+    }
+
+    private String generateHttpResponseLogMessage(RoutingContext routingContext, long start) {
+        final long timestamp = System.currentTimeMillis();
+        final HttpServerResponse response = routingContext.response();
+        final int statusCode = response.getStatusCode();
+        final String statusMessage = response.getStatusMessage();
+        final String uri = routingContext.request().uri();
+        final HttpMethod method = routingContext.request().method();
+
+        return String.format("\"%s %s \" %d %s %d \" in %d ms \"",
+                method,
+                uri,
+                statusCode,
+                statusMessage,
+                System.currentTimeMillis() - start,
+                timestamp - start);
+    }
+
+    private String generateHttpRequestLogMessage(RoutingContext routingContext) {
+        final long timestamp = System.currentTimeMillis();
+        final String remoteClient = getClientAddress(routingContext.request().remoteAddress());
+        final HttpMethod method = routingContext.request().method();
+        final String uri = routingContext.request().uri();
+        final HttpVersion version = routingContext.request().version();
+
+        final HttpServerRequest request = routingContext.request();
+        long contentLength = 0;
+        final Object obj = request.headers().get("content-length");
+        if (obj != null) {
+            try {
+                contentLength = Long.parseLong(obj.toString());
+            }
+            catch (NumberFormatException e) {
+                // ignore it and continue
+            }
+        }
+
+        String versionFormatted = "-";
+        switch (version) {
+            case HTTP_1_0:
+                versionFormatted = "HTTP/1.0";
+                break;
+            case HTTP_1_1:
+                versionFormatted = "HTTP/1.1";
+                break;
+            case HTTP_2:
+                versionFormatted = "HTTP/2.0";
+                break;
+        }
+
+        final MultiMap headers = request.headers();
+
+        // as per RFC1945 the header is referer but it is not mandatory some implementations use referrer
+        String referrer = headers.contains("referrer") ? headers.get("referrer") : headers.get("referer");
+        String userAgent = request.headers().get("user-agent");
+        referrer = referrer == null ? "-" : referrer;
+        userAgent = userAgent == null ? "-" : userAgent;
+
+        return String.format("\"%s %s %s\" %d \"%s\" \"%s\" - %dms %s",
+                method,
+                uri,
+                versionFormatted,
+                contentLength,
+                referrer,
+                userAgent,
+                (System.currentTimeMillis() - timestamp),
+                remoteClient);
+    }
+
+    private String generateHttpHeaderLogMessage(MultiMap headers) {
+        final StringBuilder headerBuilder = new StringBuilder();
+        for (String headerName : headers.names()) {
+            headerBuilder.append(headerName).append(": ").append(headers.get(headerName)).append(" - ");
+        }
+        return headerBuilder.toString();
     }
 
     private String getUserId(User u) {

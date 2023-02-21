@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a CSRF middleware ([PORTAL-666](https://issue.inventage.com/browse/PORTAL-666)).
 - Support for HTTPS for backend connections ([PORTAL-1292](https://issue.inventage.com/browse/PORTAL-1292)).
 - SessionMiddleware can return session lifetime information ([PORTAL-1174](https://issue.inventage.com/browse/PORTAL-1174)).
+- Logging incoming request and outgoing response. Logging more or less depending on log level defined in logback.xml ([PORTAL-1133](https://issue.inventage.com/browse/PORTAL-1133)).
 
 ### Changed
 
