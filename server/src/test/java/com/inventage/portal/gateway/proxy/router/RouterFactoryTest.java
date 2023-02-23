@@ -246,10 +246,7 @@ public class RouterFactoryTest {
                 TestUtils.withServices(
                         TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
-            proxyRouter = router;
-            RequestOptions reqOpts = new RequestOptions().setURI("/");
-            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.NOT_FOUND.code());
+        routerFactory.createRouter(config).onComplete(testCtx.failing(router -> {
             testCtx.completeNow();
         }));
     }
@@ -313,10 +310,8 @@ public class RouterFactoryTest {
                 TestUtils.withServices(
                         TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
-            proxyRouter = router;
-            RequestOptions reqOpts = new RequestOptions().setURI("/path");
-            doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.NOT_FOUND.code());
+
+        routerFactory.createRouter(config).onComplete(testCtx.failing(router -> {
             testCtx.completeNow();
         }));
     }

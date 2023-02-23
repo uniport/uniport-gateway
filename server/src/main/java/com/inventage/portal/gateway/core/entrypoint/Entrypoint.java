@@ -137,7 +137,6 @@ public class Entrypoint {
         for (int i = 0; i < entryMiddlewares.size(); i++) {
             entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
         }
-
         CompositeFuture.all(entryMiddlewaresFuture).onSuccess(cf -> {
             entryMiddlewaresFuture
                     .forEach(mf -> router.route().setName("entry middleware")
@@ -145,7 +144,7 @@ public class Entrypoint {
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(cfErr -> {
             final String errMsg = "Failed to create EntryMiddlewares";
-            LOGGER.warn("{}", errMsg);
+            throw new RuntimeException(String.format("Failed to create EntryMiddlewares. Cause: {}", errMsg));
         });
     }
 

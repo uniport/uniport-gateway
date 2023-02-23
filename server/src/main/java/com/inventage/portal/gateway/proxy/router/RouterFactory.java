@@ -87,7 +87,9 @@ public class RouterFactory {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
                     router.route("/*").setName("router").subRouter((Router) srf.result());
-                } else {
+                }
+                else {
+                    handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
             });
