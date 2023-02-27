@@ -107,8 +107,10 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
 
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
+    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEYS = "publicKeys"; // TODO should we do this in a backwards compatible way or not?
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
+    public static final String MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_DISCOVERY_URLS = "publicKeysDiscoveryUrls";
     public static final String MIDDLEWARE_BEARER_ONLY_ISSUER = "issuer";
     public static final String MIDDLEWARE_BEARER_ONLY_AUDIENCE = "audience";
     public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
@@ -118,7 +120,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS = "CONTAINS";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
-
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_PATH = "claimPath";
     public static final String MIDDLEWARE_BEARER_ONLY_CLAIM_VALUE = "value";
 
@@ -129,7 +130,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
-
     public static final String MIDDLEWARE_OAUTH2_RESPONSE_MODE = "responseMode";
 
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
@@ -202,8 +202,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
                 .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
                 .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, Schemas.stringSchema())
-                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEYS, Schemas.arraySchema())
                 .property(MIDDLEWARE_BEARER_ONLY_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_BEARER_ONLY_AUDIENCE, Schemas.arraySchema())
                 .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
@@ -539,41 +538,56 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_BEARER_ONLY: {
-                    final String publicKey = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
-                    if (publicKey == null) {
-                        return Future.failedFuture(String.format("%s: No public key defined", mwType));
-                    } else if (publicKey.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
+                    final JsonArray publicKeys = mwOptions.getJsonArray(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEYS);
+                    if (publicKeys == null || publicKeys.size() == 0) {
+                        return Future.failedFuture(String.format("%s: No public keys defined", mwType));
                     }
 
-                    // the public key has to be either a valid URL to fetch it from or base64 encoded
-                    boolean isBase64;
-                    try {
-                        Base64.getDecoder().decode(publicKey);
-                        isBase64 = true;
-                    } catch (IllegalArgumentException e) {
-                        isBase64 = false;
-                    }
-
-                    boolean isURL = false;
-                    if (!isBase64) {
+                    for (int j = 0; j < publicKeys.size(); j++) {
+                        final JsonObject pk;
                         try {
-                            new URL(publicKey).toURI();
-                            isURL = true;
-                        } catch (MalformedURLException | URISyntaxException e) {
-                            isURL = false;
+                            pk = publicKeys.getJsonObject(j);
+                        } catch (ClassCastException e) {
+                            return Future.failedFuture(String.format("%s: Invalid publickeys format"));
                         }
-                    }
 
-                    if (!isBase64 && !isURL) {
-                        return Future.failedFuture(String
-                                .format("%s: Public key is required to either be base64 encoded or a valid URL",
-                                        mwType));
-                    }
+                        final String publicKey = pk.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
+                        if (publicKey == null) {
+                            return Future.failedFuture(String.format("%s: No public key defined", mwType));
+                        } else if (publicKey.length() == 0) {
+                            return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
+                        }
 
-                    final String publicKeyAlgorithm = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
-                    if (publicKeyAlgorithm.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Invalid public key algorithm", mwType));
+                        // the public key has to be either a valid URL to fetch it from or base64 encoded
+                        boolean isBase64;
+                        try {
+                            Base64.getDecoder().decode(publicKey);
+                            isBase64 = true;
+                        } catch (IllegalArgumentException e) {
+                            isBase64 = false;
+                        }
+
+                        boolean isURL = false;
+                        if (!isBase64) {
+                            try {
+                                new URL(publicKey).toURI();
+                                isURL = true;
+                            } catch (MalformedURLException | URISyntaxException e) {
+                                isURL = false;
+                            }
+                        }
+
+                        if (!isBase64 && !isURL) {
+                            return Future.failedFuture(String
+                                    .format("%s: Public key is required to either be base64 encoded or a valid URL",
+                                            mwType));
+                        }
+
+                        final String publicKeyAlgorithm = pk.getString(MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
+                        if (isBase64 && publicKeyAlgorithm.length() == 0) {
+                            // only needed when the public key is given directly
+                            return Future.failedFuture(String.format("%s: Invalid public key algorithm", mwType));
+                        }
                     }
 
                     final String issuer = mwOptions.getString(MIDDLEWARE_BEARER_ONLY_ISSUER);
