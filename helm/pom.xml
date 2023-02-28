@@ -47,6 +47,27 @@
                             </resources>
                         </configuration>
                     </execution>
+                    
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <id>copy-server-config</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources/app-config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../server/src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>logback.xml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
             <plugin>

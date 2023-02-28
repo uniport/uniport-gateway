@@ -64,7 +64,7 @@ containers:
         value: "INFO"
         # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
       PORTAL_GATEWAY_LOGGING_CONFIG:
-        value: "/etc/portal-gateway/logback.xml"
+        value: "/etc/portal-gateway/app-config/logback.xml"
         # PORTAL_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
       PORTAL_GATEWAY_PORTAL_IAM_HOST:
         value: "portal-iam"
@@ -185,8 +185,21 @@ containers:
       periodSeconds: 20
       failureThreshold: 6
       successThreshold: 1
+    storages:
+      app-config:
+        type: configMap
+        configMapName: app-config
+        # There are existing files in /etc/portal-gateway, hence the additional path `app-config`
+        mountPath: /etc/portal-gateway/app-config
 
 serviceAccount:
   imagePullSecrets:
     inventage-nexus:
       name: inventage-nexus-registry
+
+configMaps:
+  app-config:
+    enabled: true
+    data:
+      logback.xml:
+        valueFromFile: app-config/logback.xml
