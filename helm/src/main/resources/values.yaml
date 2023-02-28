@@ -119,11 +119,11 @@ containers:
         # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
       PORTAL_GATEWAY_PORTAL_KOWL_PORT:
         value: "8080"
-        # PORTAL_GATEWAY_PORTAL_PGADMIN_HOST is the hostname for accessing PgAdmin via HTTP
-      PORTAL_GATEWAY_PORTAL_PGADMIN_HOST:
-        value: portal-pgadmin
-        # PORTAL_GATEWAY_PORTAL_PGADMIN_PORT is the port for accessing PgAdmin via HTTP
-      PORTAL_GATEWAY_PORTAL_PGADMIN_PORT:
+        # PORTAL_GATEWAY_PORTAL_PGWEB_HOST is the hostname for accessing the pgweb web gui via HTTP
+      PORTAL_GATEWAY_PORTAL_PGWEB_HOST:
+        value: pgweb
+        # PORTAL_GATEWAY_PORTAL_PGWEB_PORT is the port for accessing the pgweb web gui via HTTP
+      PORTAL_GATEWAY_PORTAL_PGWEB_PORT:
         value: "80"
         # PORTAL_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
       PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
