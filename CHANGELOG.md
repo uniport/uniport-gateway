@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **BREAKING**: docker-compose artefact is no longer provided ([PORTAL-1251](https://issue.inventage.com/browse/PORTAL-1251)).
 - Updated the Vert.x stack to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Updated the Vert.x stack to `4.3.8` ([PORTAL-1236](https://issue.inventage.com/browse/PORTAL-1236)).
 - Updated usage of `io.vertx.json.schema` to newest concepts ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `io.vertx.vertx-http-proxy` instead of our own fork ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `proxyInterceptor` hooks in `proxy` middleware to apply custom logic on the request and responses instead of patching them directly ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
