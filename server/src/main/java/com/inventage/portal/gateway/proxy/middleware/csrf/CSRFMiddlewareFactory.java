@@ -30,7 +30,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         final String origin = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CSRF_ORIGIN);
         final Boolean nagHttps = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_CSRF_NAG_HTTPS);
 
-        LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CSRF);
+        LOGGER.info("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CSRF);
         return Future.succeededFuture(new CSRFMiddleware(vertx, secret, cookieName, cookiePath,
                 cookieSecure, headerName, timeoutInMinute, origin, nagHttps));
     }
