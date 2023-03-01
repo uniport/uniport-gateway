@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -85,6 +86,12 @@ public class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly){
         return withMiddleware(
                 new CSPMiddleware(directives, reportOnly)
+        );
+    }
+
+    public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
+        return withMiddleware(
+                new CSRFMiddleware(this.vertx, secret, cookieName, null, null, headerName, null, null, null)
         );
     }
 

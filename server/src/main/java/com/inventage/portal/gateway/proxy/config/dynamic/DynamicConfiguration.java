@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +77,16 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
 
+    public static final String MIDDLEWARE_CSRF = "csrf";
+    public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
+    public static final String MIDDLEWARE_CSRF_COOKIE_NAME = "name";
+    public static final String MIDDLEWARE_CSRF_COOKIE_PATH = "path";
+    public static final String MIDDLEWARE_CSRF_COOKIE_SECURE = "secure";
+
+    public static final String MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES = "timeoutInMinute";
+    public static final String MIDDLEWARE_CSRF_ORIGIN = "origin";
+    public static final String MIDDLEWARE_CSRF_NAG_HTTPS = "nagHttps";
+    public static final String MIDDLEWARE_CSRF_HEADER_NAME = "headerName";
     public static final String MIDDLEWARE_CSP = "csp";
     public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
     public static final String MIDDLEWARE_CSP_DIRECTIVES = "policyDirectives";
@@ -160,7 +171,7 @@ public class DynamicConfiguration {
             MIDDLEWARE_OAUTH2, MIDDLEWARE_OAUTH2_REGISTRATION, MIDDLEWARE_SHOW_SESSION_CONTENT, MIDDLEWARE_SESSION_BAG,
             MIDDLEWARE_CONTROL_API, MIDDLEWARE_LANGUAGE_COOKIE, MIDDLEWARE_REQUEST_RESPONSE_LOGGER,
             MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION, MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL,
-            MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE, MIDDLEWARE_CSP);
+            MIDDLEWARE_SESSION, MIDDLEWARE_CHECK_ROUTE, MIDDLEWARE_CSP, MIDDLEWARE_CSRF);
 
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
@@ -228,6 +239,11 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
                 .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
                 .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
+                .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema())
+                .property(MIDDLEWARE_CSRF_ORIGIN, Schemas.stringSchema())
+                .property(MIDDLEWARE_CSRF_HEADER_NAME, Schemas.stringSchema())
+                .property(MIDDLEWARE_CSRF_NAG_HTTPS, Schemas.booleanSchema())
+                .property(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema())
                 .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
@@ -924,6 +940,61 @@ public class DynamicConfiguration {
                                     }
                                 }
                             }
+                        }
+                    }
+                    break;
+                }
+                case MIDDLEWARE_CSRF: {
+                    final Integer timeoutInMinutes = mwOptions
+                            .getInteger(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES);
+                    if (timeoutInMinutes == null) {
+                        LOGGER.debug(String.format("%s: csrf token timeout not specified. Use default value: %s",
+                                mwType,
+                                CSRFMiddleware.DEFAULT_TIMEOUT_IN_MINUTES));
+                    }
+                    else {
+                        if (timeoutInMinutes <= 0) {
+                            return Future.failedFuture(String
+                                    .format("%s: csrf token timeout is required to be a positive number", mwType));
+                        }
+                    }
+                    final String origin = mwOptions.getString(MIDDLEWARE_CSRF_ORIGIN);
+                    if (origin != null && (origin.isEmpty() || origin.isBlank())) {
+                        return Future.failedFuture(String.format("%s: if origin is defined it should not be empty or blank!",
+                                mwType));
+                    }
+                    final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_CSRF_NAG_HTTPS);
+                    if (nagHttps == null) {
+                        LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
+                                CSRFMiddleware.DEFAULT_NAG_HTTPS));
+                    }
+                    final String headerName = mwOptions.getString(MIDDLEWARE_CSRF_HEADER_NAME);
+                    if (headerName == null) {
+                        LOGGER.debug(String.format("%s: header name not specified. Use default value: %s", mwType,
+                                CSRFMiddleware.DEFAULT_HEADER_NAME));
+                    }
+                    final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_CSRF_COOKIE);
+                    if (cookie == null) {
+                        LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
+                    }
+                    else {
+                        final String cookieName = cookie.getString(MIDDLEWARE_CSRF_COOKIE_NAME);
+                        if (cookieName == null) {
+                            LOGGER.debug(String.format(
+                                    "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
+                                    SessionMiddleware.COOKIE_NAME_DEFAULT));
+                        }
+                        final String cookiePath = cookie.getString(MIDDLEWARE_CSRF_COOKIE_PATH);
+                        if (cookiePath == null) {
+                            LOGGER.debug(String.format(
+                                    "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
+                                    CSRFMiddleware.DEFAULT_COOKIE_NAME));
+                        }
+                        final Boolean cookieSecure = cookie.getBoolean(MIDDLEWARE_CSRF_COOKIE_SECURE);
+                        if (cookieSecure == null) {
+                            LOGGER.debug(String.format(
+                                    "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
+                                    CSRFMiddleware.DEFAULT_COOKIE_SECURE));
                         }
                     }
                     break;
