@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -10,8 +13,6 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 
 public class SessionMiddleware implements Middleware {
 
-    private final Handler<RoutingContext> sessionHandler;
-
     public static final String COOKIE_NAME_DEFAULT = "inventage-portal-gateway.session";
     public static final boolean COOKIE_HTTP_ONLY_DEFAULT = true;
     public static final boolean COOKIE_SECURE_DEFAULT = false;
@@ -20,8 +21,15 @@ public class SessionMiddleware implements Middleware {
     public static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
     public static final boolean NAG_HTTPS_DEFAULT = true;
 
-    public SessionMiddleware(Vertx vertx, Long sessionIdleTimeoutInMinutes, String cookieName, Boolean cookieHttpOnly,
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
+
+    private final String name;
+    private final Handler<RoutingContext> sessionHandler;
+
+    public SessionMiddleware(Vertx vertx, String name, Long sessionIdleTimeoutInMinutes, String cookieName,
+            Boolean cookieHttpOnly,
             Boolean cookieSecure, String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps) {
+        this.name = name;
         sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
                 .setSessionTimeout(sessionIdleTimeoutInMinutes == null ? SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT * 60000
                         : sessionIdleTimeoutInMinutes * 60000)
@@ -35,7 +43,8 @@ public class SessionMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext event) {
-        this.sessionHandler.handle(event);
+    public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+        this.sessionHandler.handle(ctx);
     }
 }

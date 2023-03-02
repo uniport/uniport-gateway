@@ -63,7 +63,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware() {
-        return withMiddleware(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
+        return withMiddleware(new SessionMiddleware(vertx, "session", null, null, null, null, null, null, null));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {

@@ -40,7 +40,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
         LOGGER.info("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_SESSION);
-        return Future.succeededFuture(new SessionMiddleware(vertx, sessionIdleTimeoutInMinutes, cookieName,
+        return Future.succeededFuture(new SessionMiddleware(vertx, name, sessionIdleTimeoutInMinutes, cookieName,
                 cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength, nagHttps));
     }
 }
