@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
-class CsrfMiddlewareTest {
+class CSRFMiddlewareTest {
 
     @Test
     void receiveCsrfCookieOnGetRequest(Vertx vertx, VertxTestContext testCtx) {
