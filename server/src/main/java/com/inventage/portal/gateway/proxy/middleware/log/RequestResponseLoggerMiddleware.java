@@ -1,17 +1,15 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import java.util.Base64;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.opentelemetry.api.trace.Span;
 import io.reactiverse.contextual.logging.ContextualData;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Base64;
 
 /**
  * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
@@ -62,7 +60,8 @@ public class RequestResponseLoggerMiddleware implements Middleware {
                     routingContext.response().getStatusCode(),
                     routingContext.response().getStatusMessage(),
                     System.currentTimeMillis() - start);
-        } else {
+        }
+        else {
             LOGGER.debug("Outgoing URI '{}' with status '{}' in '{}' ms",
                     routingContext.request().uri(),
                     routingContext.response().getStatusCode(),
@@ -85,7 +84,8 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             if (idToken.containsKey("preferred_username")) {
                 userId = idToken.getString("preferred_username");
             }
-        } else if (principal.containsKey("access_token")) {
+        }
+        else if (principal.containsKey("access_token")) {
             final JsonObject accessToken = decodeJWT(principal.getString("access_token"));
             if (accessToken.containsKey("preferred_username")) {
                 userId = accessToken.getString("preferred_username");

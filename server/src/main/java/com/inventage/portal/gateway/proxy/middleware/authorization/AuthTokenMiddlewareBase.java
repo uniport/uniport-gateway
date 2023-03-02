@@ -1,14 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -17,6 +11,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Session;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AuthTokenMiddlewareBase implements Middleware {
 
@@ -37,7 +35,8 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
             final Promise<String> promise = Promise.promise();
             this.getAuthToken(session, promise);
             return promise.future();
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             LOGGER.error("error in getAuthToken", t);
             return Future.failedFuture(t);
         }
@@ -57,10 +56,12 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
                 authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
                 break;
             }
-        } else if (this.sessionScope != null && this.sessionScope.length() != 0) {
+        }
+        else if (this.sessionScope != null && this.sessionScope.length() != 0) {
             final String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
             authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
-        } else {
+        }
+        else {
             LOGGER.debug("No token demanded");
             handler.handle(Future.succeededFuture());
             return;
@@ -86,7 +87,8 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
             }).onFailure(err -> {
                 handler.handle(Future.failedFuture(err));
             });
-        } else {
+        }
+        else {
             LOGGER.debug("Use existing access token");
             preparedUser.complete(authPair);
         }
@@ -107,7 +109,8 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
         if (idTokenDemanded) {
             LOGGER.debug("Providing id token");
             rawToken = principal.getString("id_token");
-        } else {
+        }
+        else {
             LOGGER.debug("Providing access token for session scope: '{}'", this.sessionScope);
             rawToken = principal.getString("access_token");
         }

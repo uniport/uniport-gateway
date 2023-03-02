@@ -1,18 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -28,6 +20,12 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
@@ -90,7 +88,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
     /**
      * Creates the actual middleware.
-     * @param authHandler The {@link AuthenticationHandler} to use in the middleware
+     *
+     * @param authHandler      The {@link AuthenticationHandler} to use in the middleware
      * @param middlewareConfig The config for the middleware
      * @return Your {@link Middleware}
      */
@@ -111,7 +110,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         try {
             new URL(publicKey).toURI();
             isURL = true;
-        } catch (MalformedURLException | URISyntaxException e) {
+        }
+        catch (MalformedURLException | URISyntaxException e) {
             LOGGER.debug("URI is malformed: " + e.getMessage());
         }
 
@@ -129,7 +129,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final URL parsedURL;
         try {
             parsedURL = new URL(rawUrl);
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e) {
             LOGGER.info("Malformed URL '{}'", rawUrl);
             handler.handle(Future.failedFuture(e));
             return;
@@ -141,7 +142,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         if (port <= 0) {
             if (protocol.endsWith("s")) {
                 port = 443;
-            } else {
+            }
+            else {
                 port = 80;
             }
         }

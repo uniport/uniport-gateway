@@ -77,9 +77,9 @@ public class ProxyMiddleware implements Middleware {
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
-                portFromHostValue(
-                        ctx.request().headers().get(X_FORWARDED_HOST),
-                        portFromHostValue(ctx.request().host(), -1))),
+                        portFromHostValue(
+                                ctx.request().headers().get(X_FORWARDED_HOST),
+                                portFromHostValue(ctx.request().host(), -1))),
                 ctx.request().headers());
         ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
         captureModifiers(ctx);
@@ -156,7 +156,8 @@ public class ProxyMiddleware implements Middleware {
     protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // use
             LOGGER.debug("Using provided header '{}' with '{}'", headerName, headers.get(headerName));
-        } else { // set
+        }
+        else { // set
             headers.add(headerName, headerValue);
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
@@ -167,7 +168,8 @@ public class ProxyMiddleware implements Middleware {
             final String existingHeader = headers.get(headerName);
             headers.set(headerName, existingHeader + ", " + headerValue);
             LOGGER.debug("Appended to header '{}' to '{}' ", headerName, headers.get(headerName));
-        } else { // set
+        }
+        else { // set
             headers.add(headerName, headerValue);
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
@@ -176,11 +178,13 @@ public class ProxyMiddleware implements Middleware {
     private int portFromHostValue(String hostToParse, int defaultPort) {
         if (hostToParse == null) {
             return -1;
-        } else {
+        }
+        else {
             final int portSeparatorIdx = hostToParse.lastIndexOf(':');
             if (portSeparatorIdx > hostToParse.lastIndexOf(']')) {
                 return parsePort(hostToParse.substring(portSeparatorIdx + 1), defaultPort);
-            } else {
+            }
+            else {
                 return -1;
             }
         }
@@ -189,7 +193,8 @@ public class ProxyMiddleware implements Middleware {
     private int parsePort(String portToParse, int defaultPort) {
         try {
             return Integer.parseInt(portToParse);
-        } catch (NumberFormatException ignored) {
+        }
+        catch (NumberFormatException ignored) {
             LOGGER.debug("Failed to parse a port from '{}'", portToParse);
             return defaultPort;
         }

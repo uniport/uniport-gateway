@@ -1,13 +1,6 @@
 package com.inventage.portal.gateway.core.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -23,6 +16,11 @@ import io.vertx.json.schema.ValidationException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * It defines the structure of the static configuration.
@@ -117,7 +115,8 @@ public class StaticConfiguration {
             if (!result.getValid()) {
                 throw result.toException(json);
             }
-        } catch (SchemaException | ValidationException e) {
+        }
+        catch (SchemaException | ValidationException e) {
             validPromise.fail(e);
             return validPromise.future();
         }

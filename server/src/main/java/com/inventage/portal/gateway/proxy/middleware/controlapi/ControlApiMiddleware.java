@@ -1,7 +1,16 @@
 package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
-import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.WebClient;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,19 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.WebClient;
+import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie.
@@ -116,7 +114,8 @@ public class ControlApiMiddleware implements Middleware {
                 .map(obj -> {
                     if ((obj instanceof Pair) && (((Pair<?, ?>) obj).getLeft() instanceof OAuth2Auth)) {
                         return (OAuth2Auth) ((Pair<?, ?>) obj).getLeft();
-                    } else {
+                    }
+                    else {
                         return null;
                     }
                 })

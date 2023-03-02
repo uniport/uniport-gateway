@@ -1,11 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import java.net.URI;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
@@ -23,6 +17,11 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.util.List;
 
 /**
  * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
@@ -52,7 +51,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
             // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
             callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
-        } else {
+        }
+        else {
             callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
         }
 
@@ -80,7 +80,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 final String newAuthorizationPath = patchPath(publicUrl, authorizationPath);
                 keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
                 LOGGER.debug("patched authorization endpoint: {} -> {}", authorizationPath, newAuthorizationPath);
-            } catch (Exception err) {
+            }
+            catch (Exception err) {
                 LOGGER.warn("Failed to create OAuth2 Middleware due to failed authorization path patching: '{}'",
                         err.getMessage());
                 result.fail("Failed to patch authorization path: '" + err.getMessage() + "'");

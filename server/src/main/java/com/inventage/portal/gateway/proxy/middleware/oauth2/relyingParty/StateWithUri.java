@@ -38,11 +38,13 @@ public class StateWithUri {
             this.state = strings[0];
             if (strings.length == 2) {
                 this.uri = Optional.of(ensureRelativeUri(strings[1]));
-            } else {
+            }
+            else {
                 this.uri = Optional.empty();
             }
             this.encoded = encode();
-        } else {
+        }
+        else {
             this.state = stateParameterBase64Encoded;
             this.uri = Optional.empty();
             this.encoded = stateParameterBase64Encoded;
@@ -102,7 +104,8 @@ public class StateWithUri {
         try {
             final byte[] bytes = Base64.getDecoder().decode(stateParameter);
             return Optional.of(new String(bytes));
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e) {
             LOGGER.warn("failed with '{}'", e.getMessage());
         }
         return Optional.empty();
@@ -113,7 +116,8 @@ public class StateWithUri {
             URI uri = new URI(anUri);
             URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
             return relativeURI.toString();
-        } catch (URISyntaxException e) {
+        }
+        catch (URISyntaxException e) {
             LOGGER.warn("URI '{}' couldn't be parsed ('{}'), using '/'", anUri, e.getMessage());
             return "/";
         }

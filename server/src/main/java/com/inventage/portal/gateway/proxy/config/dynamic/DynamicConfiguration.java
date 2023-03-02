@@ -1,31 +1,12 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-
-import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
-
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -42,6 +23,23 @@ import io.vertx.json.schema.ValidationException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * It defines the structure of the dynamic configuration.
@@ -274,7 +272,7 @@ public class DynamicConfiguration {
     }
 
     private static ObjectSchemaBuilder buildHttpSchema(ObjectSchemaBuilder routerSchema,
-            ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema) {
+                                                       ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema) {
         final ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
                 .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
                 .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
@@ -413,7 +411,8 @@ public class DynamicConfiguration {
             final JsonObject obj;
             try {
                 obj = jsonArr.getJsonObject(i);
-            } catch (ClassCastException e) {
+            }
+            catch (ClassCastException e) {
                 return null;
             }
             if (obj == null) {
@@ -445,7 +444,8 @@ public class DynamicConfiguration {
             if (!result.getValid()) {
                 throw result.toException(json);
             }
-        } catch (SchemaException | ValidationException e) {
+        }
+        catch (SchemaException | ValidationException e) {
             validPromise.fail(e);
             return validPromise.future();
         }
@@ -632,7 +632,8 @@ public class DynamicConfiguration {
                     if (responseMode == null) {
                         LOGGER.debug(String.format("%s: value not specified. Use default value: %s",
                                 MIDDLEWARE_OAUTH2_RESPONSE_MODE, OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
-                    } else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
+                    }
+                    else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
                         return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
                                 MIDDLEWARE_OAUTH2_RESPONSE_MODE, responseMode, OIDC_RESPONSE_MODES));
                     }
@@ -681,13 +682,13 @@ public class DynamicConfiguration {
                         final JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
                         if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
                                 || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                                        .isEmpty()) {
+                                .isEmpty()) {
                             return Future.failedFuture(
                                     String.format("%s: whitelisted cookie name has to contain a value", mwType));
                         }
                         if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
                                 || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                                        .isEmpty()) {
+                                .isEmpty()) {
                             return Future.failedFuture(
                                     String.format("%s: whitelisted cookie path has to contain a value", mwType));
                         }
@@ -715,7 +716,8 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s",
                                 mwType,
                                 SessionMiddleware.SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT));
-                    } else {
+                    }
+                    else {
                         if (sessionIdleTimeoutInMinutes <= 0) {
                             return Future.failedFuture(String
                                     .format("%s: Session idle timeout is required to be positive number", mwType));
@@ -726,7 +728,8 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s",
                                 mwType,
                                 SessionMiddleware.SESSION_ID_MINIMUM_LENGTH_DEFAULT));
-                    } else {
+                    }
+                    else {
                         if (sessionIdMinLength <= 0) {
                             return Future.failedFuture(String
                                     .format("%s: Minimum session id length is required to be positive number", mwType));
@@ -740,7 +743,8 @@ public class DynamicConfiguration {
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {
                         LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
-                    } else {
+                    }
+                    else {
                         final String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
                         if (cookieName == null) {
                             LOGGER.debug(String.format(
@@ -756,10 +760,12 @@ public class DynamicConfiguration {
                         if (cookieSameSite == null) {
                             LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s",
                                     mwType, SessionMiddleware.COOKIE_SAME_SITE_DEFAULT));
-                        } else {
+                        }
+                        else {
                             try {
                                 CookieSameSite.valueOf(cookieSameSite);
-                            } catch (RuntimeException exception) {
+                            }
+                            catch (RuntimeException exception) {
                                 final List<String> allowedPolicies = new LinkedList<>();
                                 for (CookieSameSite value : CookieSameSite.values()) {
                                     allowedPolicies.add(value.toString().toUpperCase());
@@ -789,7 +795,8 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s",
                                 mwType,
                                 ReplacedSessionCookieDetectionMiddleware.DEFAULT_WAIT_BEFORE_RETRY_MS));
-                    } else {
+                    }
+                    else {
                         if (waitTimeRetryInMs <= 0) {
                             return Future.failedFuture(
                                     String.format("%s: wait time for retry required to be positive", mwType));
@@ -809,7 +816,8 @@ public class DynamicConfiguration {
                     if (directives == null) {
                         return Future.failedFuture(
                                 String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
-                    } else {
+                    }
+                    else {
                         for (Object directive : directives) {
                             if (directive instanceof JsonObject) {
                                 final String directive_name = ((JsonObject) directive)
@@ -844,7 +852,8 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: csrf token timeout not specified. Use default value: %s",
                                 mwType,
                                 CSRFMiddleware.DEFAULT_TIMEOUT_IN_MINUTES));
-                    } else {
+                    }
+                    else {
                         if (timeoutInMinutes <= 0) {
                             return Future.failedFuture(String
                                     .format("%s: csrf token timeout is required to be a positive number", mwType));
@@ -869,7 +878,8 @@ public class DynamicConfiguration {
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_CSRF_COOKIE);
                     if (cookie == null) {
                         LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
-                    } else {
+                    }
+                    else {
                         final String cookieName = cookie.getString(MIDDLEWARE_CSRF_COOKIE_NAME);
                         if (cookieName == null) {
                             LOGGER.debug(String.format(
@@ -952,7 +962,8 @@ public class DynamicConfiguration {
         final String publicKey = mwOptions.getString(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
         if (publicKey == null) {
             return Future.failedFuture(String.format("%s: No public key defined", mwType));
-        } else if (publicKey.length() == 0) {
+        }
+        else if (publicKey.length() == 0) {
             return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
         }
 
@@ -961,7 +972,8 @@ public class DynamicConfiguration {
         try {
             Base64.getDecoder().decode(publicKey);
             isBase64 = true;
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e) {
             isBase64 = false;
         }
 
@@ -970,7 +982,8 @@ public class DynamicConfiguration {
             try {
                 new URL(publicKey).toURI();
                 isURL = true;
-            } catch (MalformedURLException | URISyntaxException e) {
+            }
+            catch (MalformedURLException | URISyntaxException e) {
                 isURL = false;
             }
         }
@@ -1015,7 +1028,8 @@ public class DynamicConfiguration {
                 }
                 if (!(claim instanceof JsonObject)) {
                     return Future.failedFuture("Claim is required to be a JsonObject");
-                } else {
+                }
+                else {
                     final JsonObject cObj = (JsonObject) claim;
                     if (cObj.size() != 3) {
                         return Future.failedFuture(String.format(
@@ -1035,12 +1049,14 @@ public class DynamicConfiguration {
                         return Future.failedFuture(
                                 String.format("%s: %s value is required to be a String", mwType,
                                         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH));
-                    } else {
+                    }
+                    else {
                         final String path = cObj.getString(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH);
                         try {
                             final Path p = PathCompiler.compile(path);
                             LOGGER.debug(p.toString());
-                        } catch (RuntimeException e) {
+                        }
+                        catch (RuntimeException e) {
                             LOGGER.debug(String.format("Invalid claimpath %s", path));
                             return Future
                                     .failedFuture(String.format("%s: Invalid claimpath %s", mwType, path));
@@ -1050,7 +1066,8 @@ public class DynamicConfiguration {
                         return Future.failedFuture(
                                 String.format("%s: %s value is required to be a String", mwType,
                                         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR));
-                    } else {
+                    }
+                    else {
                         final String operator = cObj.getString(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR);
                         if (!(operator.equals(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS)
                                 || operator.equals(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS))) {
@@ -1065,7 +1082,8 @@ public class DynamicConfiguration {
 
                 }
             }
-        } else {
+        }
+        else {
             LOGGER.debug("No custom claims defined!");
         }
         return null;
