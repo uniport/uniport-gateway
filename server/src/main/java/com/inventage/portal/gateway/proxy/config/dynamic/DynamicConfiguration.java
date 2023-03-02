@@ -77,6 +77,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
 
+    public static final String MIDDLEWARE_CORS = "cors";
+
     public static final String MIDDLEWARE_CSRF = "csrf";
     public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
     public static final String MIDDLEWARE_CSRF_COOKIE_NAME = "name";
@@ -87,6 +89,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSRF_ORIGIN = "origin";
     public static final String MIDDLEWARE_CSRF_NAG_HTTPS = "nagHttps";
     public static final String MIDDLEWARE_CSRF_HEADER_NAME = "headerName";
+
     public static final String MIDDLEWARE_CSP = "csp";
     public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
     public static final String MIDDLEWARE_CSP_DIRECTIVES = "policyDirectives";
@@ -841,8 +844,7 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: csrf token timeout not specified. Use default value: %s",
                                 mwType,
                                 CSRFMiddleware.DEFAULT_TIMEOUT_IN_MINUTES));
-                    }
-                    else {
+                    } else {
                         if (timeoutInMinutes <= 0) {
                             return Future.failedFuture(String
                                     .format("%s: csrf token timeout is required to be a positive number", mwType));
@@ -850,8 +852,9 @@ public class DynamicConfiguration {
                     }
                     final String origin = mwOptions.getString(MIDDLEWARE_CSRF_ORIGIN);
                     if (origin != null && (origin.isEmpty() || origin.isBlank())) {
-                        return Future.failedFuture(String.format("%s: if origin is defined it should not be empty or blank!",
-                                mwType));
+                        return Future
+                                .failedFuture(String.format("%s: if origin is defined it should not be empty or blank!",
+                                        mwType));
                     }
                     final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_CSRF_NAG_HTTPS);
                     if (nagHttps == null) {
@@ -866,8 +869,7 @@ public class DynamicConfiguration {
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_CSRF_COOKIE);
                     if (cookie == null) {
                         LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
-                    }
-                    else {
+                    } else {
                         final String cookieName = cookie.getString(MIDDLEWARE_CSRF_COOKIE_NAME);
                         if (cookieName == null) {
                             LOGGER.debug(String.format(

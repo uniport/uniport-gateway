@@ -24,16 +24,17 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareOptions) {
-        return this.create(vertx, middlewareOptions);
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareOptions) {
+        return this.create(vertx, name, middlewareOptions);
     }
 
-    public Future<Middleware> create(Vertx vertx, JsonObject middlewareOptions) {
+    public Future<Middleware> create(Vertx vertx, String name, JsonObject middlewareOptions) {
         JsonArray whitelistedCookies = middlewareOptions
                 .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
         // PORTAL-620: Typo in variable name. Backward compatibility for configuration files that contain the typo is still provided.
         if (whitelistedCookies == null) {
-            whitelistedCookies = middlewareOptions.getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY);
+            whitelistedCookies = middlewareOptions
+                    .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY);
         }
 
         String sessionCookieName = middlewareOptions.getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_COOKIE_NAME);
@@ -41,7 +42,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
             sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
         }
         LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_SESSION_BAG);
-        return Future.succeededFuture(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
+        return Future.succeededFuture(new SessionBagMiddleware(name, whitelistedCookies, sessionCookieName));
     }
 
 }

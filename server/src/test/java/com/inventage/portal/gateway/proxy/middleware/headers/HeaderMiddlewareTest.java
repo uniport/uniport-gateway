@@ -1,7 +1,21 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
+import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -10,18 +24,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
-
-import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
 public class HeaderMiddlewareTest {
@@ -54,7 +56,7 @@ public class HeaderMiddlewareTest {
         Checkpoint requestServed = testCtx.checkpoint();
         Checkpoint responseReceived = testCtx.checkpoint();
 
-        HeaderMiddleware header = new HeaderMiddleware(reqHeaders, new HeadersMultiMap());
+        HeaderMiddleware header = new HeaderMiddleware("header", reqHeaders, new HeadersMultiMap());
 
         Router router = Router.router(vertx);
         router.route().handler(header).handler(ctx -> ctx.response().end("ok"));
@@ -106,7 +108,7 @@ public class HeaderMiddlewareTest {
         Checkpoint requestServed = testCtx.checkpoint();
         Checkpoint responseReceived = testCtx.checkpoint();
 
-        HeaderMiddleware header = new HeaderMiddleware(new HeadersMultiMap(), respHeaders);
+        HeaderMiddleware header = new HeaderMiddleware("header", new HeadersMultiMap(), respHeaders);
 
         Router serviceRouter = Router.router(vertx);
         serviceRouter.route().handler(ctx -> {
@@ -116,7 +118,7 @@ public class HeaderMiddlewareTest {
         vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort).onComplete(testCtx.succeeding(s -> {
             serviceStarted.flag();
 
-            ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort, "someName");
+            ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, servicePort);
 
             Router router = Router.router(vertx);
             router.route().handler(header).handler(proxy);

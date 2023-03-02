@@ -8,14 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -74,7 +74,7 @@ public class AuthorizationBearerMiddlewareTest {
             ctx.next();
         };
 
-        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(
+        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware("authBearer",
                 DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
@@ -125,7 +125,7 @@ public class AuthorizationBearerMiddlewareTest {
             ctx.next();
         };
 
-        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
+        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware("authBearer", sessionScope);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
 
@@ -192,7 +192,7 @@ public class AuthorizationBearerMiddlewareTest {
             ctx.next();
         };
 
-        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
+        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware("authBearer", sessionScope);
 
         Handler<RoutingContext> endHandler = ctx -> {
             testCtx.verify(() -> {
@@ -253,7 +253,7 @@ public class AuthorizationBearerMiddlewareTest {
             ctx.next();
         };
 
-        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware(sessionScope);
+        AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware("authBearer", sessionScope);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
         ;

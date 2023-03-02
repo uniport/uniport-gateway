@@ -257,9 +257,9 @@ public class SessionBagMiddlewareTest {
 
             // setup proxy
             SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(sessionCookieName);
-            SessionBagMiddleware sessionBag = new SessionBagMiddleware(whitelistedCookies,
+            SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies,
                     "inventage-portal-gateway.session");
-            ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, servicePort, "someName");
+            ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, servicePort);
             Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);
 

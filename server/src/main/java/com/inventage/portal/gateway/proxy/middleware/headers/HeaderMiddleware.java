@@ -21,16 +21,20 @@ public class HeaderMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMiddleware.class);
 
+    private final String name;
     private final MultiMap requestHeaders;
     private final MultiMap responseHeaders;
 
-    public HeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
+    public HeaderMiddleware(String name, MultiMap requestHeaders, MultiMap responseHeaders) {
+        this.name = name;
         this.requestHeaders = requestHeaders;
         this.responseHeaders = responseHeaders;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         for (Entry<String, String> header : this.requestHeaders.entries()) {
             switch (header.getValue()) {
                 case "": {

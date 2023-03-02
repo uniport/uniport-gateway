@@ -22,7 +22,7 @@ public interface MiddlewareFactory {
 
     String provides();
 
-    Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig);
+    Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
 
     class Loader {
         public static MiddlewareFactory getFactory(String middlewareName) {

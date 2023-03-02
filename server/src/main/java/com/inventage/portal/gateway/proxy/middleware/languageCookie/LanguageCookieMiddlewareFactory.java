@@ -22,9 +22,9 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE);
-        return Future.succeededFuture(new LanguageCookieMiddleware());
+        return Future.succeededFuture(new LanguageCookieMiddleware(name));
     }
 }

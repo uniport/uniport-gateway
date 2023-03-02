@@ -25,10 +25,12 @@ public class BearerOnlyMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddleware.class);
 
+    private final String name;
     private final AuthenticationHandler authHandler;
     private final boolean optional;
 
-    public BearerOnlyMiddleware(AuthenticationHandler authHandler, boolean optional) {
+    public BearerOnlyMiddleware(String name, AuthenticationHandler authHandler, boolean optional) {
+        this.name = name;
         this.authHandler = authHandler;
 
         this.optional = optional;
@@ -39,13 +41,12 @@ public class BearerOnlyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("Handling '{}'", ctx.request().absoluteURI());
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization != null) {
             LOGGER.debug("Authentication by '{}'", authorization);
-        }
-        else if (optional) {
+        } else if (optional) {
             LOGGER.debug("Letting through request with no authorization header");
             ctx.next();
             return;

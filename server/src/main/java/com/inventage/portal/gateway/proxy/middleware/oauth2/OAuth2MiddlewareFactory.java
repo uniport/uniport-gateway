@@ -44,11 +44,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final Route callback;
         final JsonObject oidcParams = oidcParams(middlewareConfig);
         final String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-        final String name = middlewareConfig.getString(RouterFactory.MIDDLEWARE_INSTANCE_NAME);
 
         if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
             // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
@@ -100,7 +99,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                     .withScopes(List.of(OIDC_SCOPE, sessionScope))
                     .extraParams(oidcParams);
 
-            result.complete(new OAuth2AuthMiddleware(authHandler, sessionScope, name));
+            result.complete(new OAuth2AuthMiddleware(name, authHandler, sessionScope));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
         }).onFailure(err -> {
             LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'",

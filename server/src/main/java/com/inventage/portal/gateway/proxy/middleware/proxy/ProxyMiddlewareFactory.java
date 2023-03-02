@@ -24,13 +24,13 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject serviceConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject serviceConfig) {
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_PROXY);
         return Future.succeededFuture(
                 new ProxyMiddleware(vertx,
+                        name,
                         serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_PROTOCOL),
                         serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
-                        serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT),
-                        serviceConfig.getString(DynamicConfiguration.SERVICE_NAME)));
+                        serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT)));
     }
 }

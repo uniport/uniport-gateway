@@ -22,9 +22,11 @@ public abstract class MiddlewareWithAuthToken implements Middleware {
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
 
+    protected final String name;
     private final String sessionScope;
 
-    protected MiddlewareWithAuthToken(String sessionScope) {
+    protected MiddlewareWithAuthToken(String name, String sessionScope) {
+        this.name = name;
         this.sessionScope = sessionScope;
     }
 
@@ -33,8 +35,7 @@ public abstract class MiddlewareWithAuthToken implements Middleware {
             final Promise<String> promise = Promise.promise();
             this.getAuthToken(session, promise);
             return promise.future();
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             LOGGER.error("error in getAuthToken", t);
             return Future.failedFuture(t);
         }
@@ -54,12 +55,10 @@ public abstract class MiddlewareWithAuthToken implements Middleware {
                 authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
                 break;
             }
-        }
-        else if (this.sessionScope != null && this.sessionScope.length() != 0) {
+        } else if (this.sessionScope != null && this.sessionScope.length() != 0) {
             final String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
             authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
-        }
-        else {
+        } else {
             LOGGER.debug("No token demanded");
             handler.handle(Future.succeededFuture());
             return;
@@ -85,8 +84,7 @@ public abstract class MiddlewareWithAuthToken implements Middleware {
             }).onFailure(err -> {
                 handler.handle(Future.failedFuture(err));
             });
-        }
-        else {
+        } else {
             LOGGER.debug("Use existing access token");
             preparedUser.complete(authPair);
         }
@@ -107,8 +105,7 @@ public abstract class MiddlewareWithAuthToken implements Middleware {
         if (idTokenDemanded) {
             LOGGER.debug("Providing id token");
             rawToken = principal.getString("id_token");
-        }
-        else {
+        } else {
             LOGGER.debug("Providing access token for session scope: '{}'", this.sessionScope);
             rawToken = principal.getString("access_token");
         }

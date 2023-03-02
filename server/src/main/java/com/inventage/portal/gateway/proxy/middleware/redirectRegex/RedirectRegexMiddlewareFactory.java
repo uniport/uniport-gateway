@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
-import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +22,11 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
         return Future.succeededFuture(new RedirectRegexMiddleware(
+                name,
                 middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT),
-                middlewareConfig.getString(RouterFactory.MIDDLEWARE_INSTANCE_NAME)));
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
     }
 }

@@ -16,18 +16,20 @@ public class RedirectRegexMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddleware.class);
 
+    private final String name;
     private final Pattern pattern;
     private final String replacement;
-    private final String name;
 
-    public RedirectRegexMiddleware(String regex, String replacement, String name) {
+    public RedirectRegexMiddleware(String name, String regex, String replacement) {
+        this.name = name;
         this.pattern = Pattern.compile(regex);
         this.replacement = replacement;
-        this.name = name;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         final String oldURI = ctx.request().uri();
 
         // If the Regexp doesn't match, skip to the next handler.

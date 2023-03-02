@@ -34,23 +34,24 @@ public class ProxyMiddleware implements Middleware {
 
     private final HttpProxy httpProxy;
 
+    private final String name;
     private final String serverHost;
     private final int serverPort;
-    private final String name;
 
     private List<Handler<StringBuilder>> incomingRequestURIModifiers;
     private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
 
-    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort, String name) {
-        this(vertx, "http", serverHost, serverPort, name);
+    public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
+        this(vertx, name, "http", serverHost, serverPort);
     }
 
-    public ProxyMiddleware(Vertx vertx, String serverProtocol, String serverHost, int serverPort, String name) {
+    public ProxyMiddleware(Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort) {
+        this.name = name;
+
         httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, serverPort, vertx));
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
-        this.name = name;
 
         incomingRequestURIModifiers = new ArrayList<>();
         outgoingResponseHeadersModifiers = new ArrayList<>();
@@ -71,6 +72,8 @@ public class ProxyMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(

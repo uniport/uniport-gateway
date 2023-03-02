@@ -16,16 +16,23 @@ import org.slf4j.LoggerFactory;
 public class CheckRouteMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckRouteMiddleware.class);
-
     private static final HttpResponseStatus RESPONSE_STATUS_CODE = HttpResponseStatus.ACCEPTED; // 202
+
+    private final String name;
+
+    public CheckRouteMiddleware(String name) {
+        this.name = name;
+    }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         if (isCheckRoute(ctx)) {
-            LOGGER.info("done for URL '{}' with status code '{}'", ctx.request().absoluteURI(), RESPONSE_STATUS_CODE.code());
+            LOGGER.info("done for URL '{}' with status code '{}'", ctx.request().absoluteURI(),
+                    RESPONSE_STATUS_CODE.code());
             HttpResponder.respondWithStatusCode(RESPONSE_STATUS_CODE, ctx);
-        }
-        else {
+        } else {
             ctx.next();
         }
     }

@@ -1,18 +1,20 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
+import static io.vertx.core.http.Cookie.cookie;
+
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
+
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-
-import static io.vertx.core.http.Cookie.cookie;
 
 /**
  * Handle situations, where the browser has sent requests during the session id regeneration.
@@ -28,12 +30,14 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
 
+    private final String name;
     private final String detectionCookieKey;
     private final String sessionCookiePrefix;
     // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
 
-    public ReplacedSessionCookieDetectionMiddleware(String cookieName, Integer waitBeforeRetryInMs) {
+    public ReplacedSessionCookieDetectionMiddleware(String name, String cookieName, Integer waitBeforeRetryInMs) {
+        this.name = name;
         this.detectionCookieKey = (cookieName == null) ? DEFAULT_DETECTION_COOKIE_NAME : cookieName;
         this.sessionCookiePrefix = this.detectionCookieKey + "=";
         this.waitBeforeRetryMs = (waitBeforeRetryInMs == null) ? DEFAULT_WAIT_BEFORE_RETRY_MS : waitBeforeRetryInMs;
@@ -41,6 +45,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         if (requestComingFromReplacedSessionId(ctx)) {
             retryWithNewSessionIdFromBrowser(ctx);
             return;

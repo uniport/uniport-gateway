@@ -3,25 +3,25 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.inventage.portal.gateway.TestUtils;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.ext.web.RoutingContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 @ExtendWith(VertxExtension.class)
 public class ProxyMiddlewareTest {
@@ -39,7 +39,8 @@ public class ProxyMiddlewareTest {
                 .build().start();
         // when
         gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
-            Assertions.assertEquals("test.host.com", routingContext.get().request().headers().get(HttpHeaderNames.HOST));
+            Assertions.assertEquals("test.host.com",
+                    routingContext.get().request().headers().get(HttpHeaderNames.HOST));
             testCtx.completeNow();
         });
         // then
@@ -53,7 +54,7 @@ public class ProxyMiddlewareTest {
         String proxyResponse = "proxy";
         String serverResponse = "server";
 
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, serverPort, "someName");
+        ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, serverPort);
 
         Checkpoint proxyStarted = testCtx.checkpoint();
         Checkpoint serverStarted = testCtx.checkpoint();
@@ -77,13 +78,15 @@ public class ProxyMiddlewareTest {
             }).listen(serverPort).onComplete(testCtx.succeeding(p -> {
                 serverStarted.flag();
 
-                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(HttpClientRequest::send)
+                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
+                        .compose(HttpClientRequest::send)
                         .onComplete(testCtx.succeeding(resp -> {
                             testCtx.verify(() -> {
                                 assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
                                 responseReceived.flag();
                             });
-                            resp.body().onComplete(testCtx.succeeding(body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
+                            resp.body().onComplete(testCtx.succeeding(
+                                    body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
                         }));
             }));
         }));

@@ -4,22 +4,20 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.passAuthorization.PassAuthorizationMiddleware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
+import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.passAuthorization.PassAuthorizationMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
@@ -41,8 +39,6 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
 
 public class MiddlewareServerBuilder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareServerBuilder.class);
 
     private static final int TIMEOUT_SERVER_START_SECONDS = 5;
 
@@ -71,57 +67,58 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
-        return withMiddleware(new CorsMiddleware(allowedOrigin));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigin));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) {
-        return withMiddleware(new BearerOnlyMiddleware(JWTAuthHandler.create(authProvider), optional));
+        return withMiddleware(new BearerOnlyMiddleware("bearerOnly", JWTAuthHandler.create(authProvider), optional));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider,
             JWTAuthAdditionalClaimsOptions options, boolean optional) {
         return withMiddleware(
-                new BearerOnlyMiddleware(JWTAuthAdditionalClaimsHandler.create(authProvider, options), optional));
+                new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
+                        optional));
     }
 
-    public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly){
+    public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly) {
         return withMiddleware(
-                new CSPMiddleware(directives, reportOnly)
-        );
+                new CSPMiddleware("csp", directives, reportOnly));
     }
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
-                new CSRFMiddleware(this.vertx, secret, cookieName, null, null, headerName, null, null, null)
-        );
+                new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, null, headerName, null, null, null));
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
-        return withMiddleware(new PassAuthorizationMiddleware(sessionScope, JWTAuthHandler.create(authProvider)));
+        return withMiddleware(new PassAuthorizationMiddleware("passAutherization", sessionScope,
+                JWTAuthHandler.create(authProvider)));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
-        return withMiddleware(new LanguageCookieMiddleware());
+        return withMiddleware(new LanguageCookieMiddleware("languageCookie"));
     }
 
     public MiddlewareServerBuilder withControlApiMiddleware(String action) {
-        return withMiddleware(new ControlApiMiddleware(action, WebClient.create(vertx)));
+        return withMiddleware(new ControlApiMiddleware("controlAPI", action, WebClient.create(vertx)));
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
-        return withMiddleware(new SessionBagMiddleware(whitelistedCookies, "inventage-portal-gateway.session"));
+        return withMiddleware(
+                new SessionBagMiddleware("sessionBag", whitelistedCookies, "inventage-portal-gateway.session"));
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {
-        return withMiddleware(new SessionBagMiddleware(whitelistedCookies, sessionCookieName));
+        return withMiddleware(new SessionBagMiddleware("sessionBag", whitelistedCookies, sessionCookieName));
     }
 
     public MiddlewareServerBuilder withResponseSessionCookieRemovalMiddleware() {
-        return withMiddleware(new ResponseSessionCookieRemovalMiddleware(null));
+        return withMiddleware(new ResponseSessionCookieRemovalMiddleware("responseSessionCookieRemoval", null));
     }
 
     public MiddlewareServerBuilder withAuthenticationTriggerMiddleware() {
-        return withMiddleware(new CheckRouteMiddleware());
+        return withMiddleware(new CheckRouteMiddleware("checkRoute"));
     }
 
     /**
@@ -150,7 +147,7 @@ public class MiddlewareServerBuilder {
 
     private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) {
         OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
-        Future<Middleware> middlewareFuture = factory.create(vertx, router, oAuth2AuthConfig);
+        Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
         int atMost = 20;
         while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
@@ -174,7 +171,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port) {
-        return withMiddleware(new ProxyMiddleware(vertx, host, port, "withProxyMiddleware"));
+        return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port));
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
@@ -211,7 +208,8 @@ public class MiddlewareServerBuilder {
 
         return this;
     }
-    public MiddlewareServerBuilder withMockOAuth2Middleware(){
+
+    public MiddlewareServerBuilder withMockOAuth2Middleware() {
         return withMockOAuth2Middleware("mayIAccessThisRessource");
     }
 

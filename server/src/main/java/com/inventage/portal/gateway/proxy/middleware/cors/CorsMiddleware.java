@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
 import io.vertx.ext.web.RoutingContext;
@@ -12,14 +15,19 @@ import io.vertx.ext.web.handler.CorsHandler;
  */
 public class CorsMiddleware implements Middleware {
 
-    private CorsHandler corsHandler;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CorsMiddleware.class);
 
-    public CorsMiddleware(String allowedOrigin) {
+    private final String name;
+    private final CorsHandler corsHandler;
+
+    public CorsMiddleware(String name, String allowedOrigin) {
+        this.name = name;
         this.corsHandler = CorsHandler.create().addOrigin(allowedOrigin);
     }
 
     @Override
-    public void handle(RoutingContext routingContext) {
-        corsHandler.handle(routingContext);
+    public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+        corsHandler.handle(ctx);
     }
 }

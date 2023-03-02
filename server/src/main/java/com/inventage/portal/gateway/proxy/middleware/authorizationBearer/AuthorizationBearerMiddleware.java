@@ -1,10 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 
-import com.inventage.portal.gateway.proxy.middleware.withAuthToken.MiddlewareWithAuthToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.withAuthToken.MiddlewareWithAuthToken;
 
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -23,8 +23,8 @@ public class AuthorizationBearerMiddleware extends MiddlewareWithAuthToken {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
-    public AuthorizationBearerMiddleware(String sessionScope) {
-        super(sessionScope);
+    public AuthorizationBearerMiddleware(String name, String sessionScope) {
+        super(name, sessionScope);
     }
 
     @Override

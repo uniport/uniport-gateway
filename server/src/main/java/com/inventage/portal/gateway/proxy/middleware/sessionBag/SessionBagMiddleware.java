@@ -33,25 +33,29 @@ import io.vertx.ext.web.handler.PlatformHandler;
  */
 public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
+    public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddleware.class);
     // https://github.com/vert-x3/vertx-web/issues/1716
     private static final String COOKIE_DELIMITER = "; "; // RFC 6265 4.2.1
 
-    public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
-
+    private final String name;
     // These cookies are allowed to be passed back to the user agent.
     // This is required for some frontend logic to work properly
     // (e.g. for keycloak login logic of its admin console)
     private final JsonArray whitelistedCookies;
     private final String sessionCookieName;
 
-    public SessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {
+    public SessionBagMiddleware(String name, JsonArray whitelistedCookies, String sessionCookieName) {
+        this.name = name;
         this.whitelistedCookies = whitelistedCookies;
         this.sessionCookieName = sessionCookieName;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         if (ctx.session() == null) {
             LOGGER.debug("No session initialized. Skipping session bag middleware");
             ctx.next();

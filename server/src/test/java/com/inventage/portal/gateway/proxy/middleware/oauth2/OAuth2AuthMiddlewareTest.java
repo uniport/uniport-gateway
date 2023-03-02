@@ -14,8 +14,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
@@ -34,8 +32,6 @@ import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class OAuth2AuthMiddlewareTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddlewareTest.class);
     public static final String PKCE_METHOD_PLAIN = "plain";
     public static final String PKCE_METHOD_S256 = "S256";
     public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";

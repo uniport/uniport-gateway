@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 
@@ -10,25 +13,30 @@ import io.vertx.ext.web.handler.CSPHandler;
 
 public class CSPMiddleware implements Middleware {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddleware.class);
     private static final String DEFAULT_SRC_KEY = "default-src";
     private static final String REPORT_URI = "report-uri";
     private static final String REPORT_TO = "report-to";
     private static final boolean DEFAULT_REPORT_ONLY = false;
-    private final CSPHandler handler;
 
-    public CSPMiddleware(JsonArray cspDirectives, Boolean reportOnly) {
-        this.handler = CSPHandler.create();
+    private final String name;
+    private final CSPHandler cspHandler;
 
-        this.removeBuiltinDirective(this.handler);
-        this.handler.setReportOnly((reportOnly == null) ? DEFAULT_REPORT_ONLY : reportOnly);
+    public CSPMiddleware(String name, JsonArray cspDirectives, Boolean reportOnly) {
+        this.name = name;
+        this.cspHandler = CSPHandler.create();
+
+        this.removeBuiltinDirective(this.cspHandler);
+        this.cspHandler.setReportOnly((reportOnly == null) ? DEFAULT_REPORT_ONLY : reportOnly);
         cspDirectives.forEach((directive -> {
-            this.addDirective(this.handler, (JsonObject) directive);
+            this.addDirective(this.cspHandler, (JsonObject) directive);
         }));
     }
 
     @Override
-    public void handle(RoutingContext routingContext) {
-        this.handler.handle(routingContext);
+    public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+        this.cspHandler.handle(ctx);
     }
 
     private void removeBuiltinDirective(CSPHandler cspHandler) {

@@ -17,14 +17,20 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class LanguageCookieMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddleware.class);
     public static final String IPS_LANGUAGE_COOKIE_NAME = "ips.language";
 
-    public LanguageCookieMiddleware() {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddleware.class);
+
+    private final String name;
+
+    public LanguageCookieMiddleware(String name) {
+        this.name = name;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         final Cookie cookie = ctx.request().getCookie(IPS_LANGUAGE_COOKIE_NAME);
 
         if (cookie != null) {

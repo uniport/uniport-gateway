@@ -1,47 +1,53 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import io.opentelemetry.api.trace.Span;
-import io.reactiverse.contextual.logging.ContextualData;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.web.RoutingContext;
+import java.util.Base64;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+
+import io.opentelemetry.api.trace.Span;
+import io.reactiverse.contextual.logging.ContextualData;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.web.RoutingContext;
 
 /**
  * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
  */
-public class RequestResponseLogger implements Middleware {
+public class RequestResponseLoggerMiddleware implements Middleware {
 
     public static final String HTTP_HEADER_REQUEST_ID = "X-IPS-Trace-Id";
     public static final String CONTEXTUAL_DATA_REQUEST_ID = "traceId";
     public static final String CONTEXTUAL_DATA_SESSION_ID = "sessionId";
     public static final String CONTEXTUAL_DATA_USER_ID = "userId";
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLogger.class);
 
-    public static Handler<RoutingContext> create() {
-        return new RequestResponseLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggerMiddleware.class);
+
+    private final String name;
+
+    public RequestResponseLoggerMiddleware(String name) {
+        this.name = name;
     }
 
     @Override
-    public void handle(RoutingContext routingContext) {
-        ContextualData.put(CONTEXTUAL_DATA_USER_ID, getUserId(routingContext.user()));
+    public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
+        ContextualData.put(CONTEXTUAL_DATA_USER_ID, getUserId(ctx.user()));
         final String traceId = Span.current().getSpanContext().getTraceId();
         ContextualData.put(CONTEXTUAL_DATA_REQUEST_ID, traceId);
-        ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(routingContext.session()));
+        ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
 
         final long start = System.currentTimeMillis();
-        logRequest(routingContext);
+        logRequest(ctx);
         // add the ips-request-id to the HTTP header, if it is not yet set
-        routingContext.addHeadersEndHandler(v -> routingContext.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
-        routingContext.addBodyEndHandler(v -> {
-            logResponse(routingContext, start);
+        ctx.addHeadersEndHandler(v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
+        ctx.addBodyEndHandler(v -> {
+            logResponse(ctx, start);
         });
-        routingContext.next();
+        ctx.next();
     }
 
     private void logRequest(RoutingContext routingContext) {
@@ -56,8 +62,7 @@ public class RequestResponseLogger implements Middleware {
                     routingContext.response().getStatusCode(),
                     routingContext.response().getStatusMessage(),
                     System.currentTimeMillis() - start);
-        }
-        else {
+        } else {
             LOGGER.debug("Outgoing URI '{}' with status '{}' in '{}' ms",
                     routingContext.request().uri(),
                     routingContext.response().getStatusCode(),

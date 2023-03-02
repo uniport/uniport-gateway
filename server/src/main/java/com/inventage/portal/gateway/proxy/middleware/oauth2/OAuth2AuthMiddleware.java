@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger.CONTEXTUAL_DATA_SESSION_ID;
+import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware.CONTEXTUAL_DATA_SESSION_ID;
 
 import java.util.Optional;
 
@@ -41,15 +41,15 @@ public class OAuth2AuthMiddleware implements Middleware {
     private static final String PREFIX_STATE = "oauth2_state_";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
 
+    private final String name;
     private final AuthenticationHandler authHandler;
     private final String sessionScope;
-    private final String name;
 
-    public OAuth2AuthMiddleware(AuthenticationHandler authHandler, String sessionScope, String name) {
+    public OAuth2AuthMiddleware(String name, AuthenticationHandler authHandler, String sessionScope) {
         LOGGER.debug("For session scope '{}'", sessionScope);
+        this.name = name;
         this.authHandler = authHandler;
         this.sessionScope = sessionScope;
-        this.name = name;
     }
 
     /**
@@ -57,7 +57,8 @@ public class OAuth2AuthMiddleware implements Middleware {
      */
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("'{}' is handling URI '{}'", name, ctx.request().uri());
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         final User user = ctx.user();
         final User userForScope = setUserForScope(this.sessionScope, ctx);
 

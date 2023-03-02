@@ -19,13 +19,15 @@ public class PassAuthorizationMiddleware extends MiddlewareWithAuthToken {
 
     private final AuthenticationHandler authHandler;
 
-    public PassAuthorizationMiddleware(String sessionScope, AuthenticationHandler authHandler) {
-        super(sessionScope);
+    public PassAuthorizationMiddleware(String name, String sessionScope, AuthenticationHandler authHandler) {
+        super(name, sessionScope);
         this.authHandler = authHandler;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         this.getAuthToken(ctx.session()).onSuccess(token -> {
             LOGGER.debug("authToken: " + token);
 
@@ -56,6 +58,5 @@ public class PassAuthorizationMiddleware extends MiddlewareWithAuthToken {
 
         return originalHeader;
     }
-
 
 }

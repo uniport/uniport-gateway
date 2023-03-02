@@ -42,7 +42,6 @@ public class RouterFactory {
     public static final String PUBLIC_PROTOCOL_KEY = "publicProtocol";
     public static final String PUBLIC_HOSTNAME_KEY = "publicHostname";
     public static final String PUBLIC_PORT_KEY = "publicPort";
-    public static final String MIDDLEWARE_INSTANCE_NAME = "middlewareInstanceName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
@@ -87,8 +86,7 @@ public class RouterFactory {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
                     router.route("/*").setName("router").subRouter((Router) srf.result());
-                }
-                else {
+                } else {
                     handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
@@ -139,7 +137,7 @@ public class RouterFactory {
         serverConfig.put(DynamicConfiguration.SERVICE_NAME, serviceName);
 
         // required to be the last middleware
-        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
+        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, "proxy", router,
                 serverConfig);
         middlewareFutures.add(proxyMiddlewareFuture);
 
@@ -176,7 +174,6 @@ public class RouterFactory {
             middlewareOptions.put(PUBLIC_HOSTNAME_KEY, this.publicHostname);
             middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);
         }
-        middlewareOptions.put(MIDDLEWARE_INSTANCE_NAME, middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME));
 
         final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory == null) {
@@ -186,7 +183,8 @@ public class RouterFactory {
             return;
         }
 
-        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(handler);
+        String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 
     /**
