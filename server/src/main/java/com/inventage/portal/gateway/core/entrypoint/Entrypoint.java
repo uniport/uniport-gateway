@@ -122,29 +122,21 @@ public class Entrypoint {
                 });
     }
 
-    private void setupDefaultEntryMiddlewares(Vertx vertx) {
-        router.route().setName("remove session cookie").handler(new ResponseSessionCookieRemovalMiddleware(null));
-        router.route().setName("session")
-                .handler(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
-        router.route().setName("logger").handler(new RequestResponseLogger());
-        router.route().setName("replace session cookie")
-                .handler(new ReplacedSessionCookieDetectionMiddleware(null, null));
-    }
-
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
 
         final List<Future> entryMiddlewaresFuture = new ArrayList<>();
         for (int i = 0; i < entryMiddlewares.size(); i++) {
             entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
         }
+
         CompositeFuture.all(entryMiddlewaresFuture).onSuccess(cf -> {
             entryMiddlewaresFuture
                     .forEach(mf -> router.route().setName("entry middleware")
                             .handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
-        }).onFailure(cfErr -> {
-            final String errMsg = "Failed to create EntryMiddlewares";
-            throw new RuntimeException(String.format("Failed to create EntryMiddlewares. Cause: {}", errMsg));
+        }).onFailure(err -> {
+            throw new RuntimeException(
+                    String.format("Failed to create EntryMiddlewares. Cause: {}", err.getMessage()));
         });
     }
 
