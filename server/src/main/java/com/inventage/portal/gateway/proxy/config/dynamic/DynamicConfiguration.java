@@ -179,6 +179,7 @@ public class DynamicConfiguration {
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
+    public static final String SERVICE_SERVER_PROTOCOL = "protocol";
     public static final String SERVICE_SERVER_HOST = "host";
     public static final String SERVICE_SERVER_PORT = "port";
 
@@ -260,7 +261,9 @@ public class DynamicConfiguration {
         final ObjectSchemaBuilder serviceSchema = Schemas.objectSchema()
                 .requiredProperty(SERVICE_NAME, Schemas.stringSchema())
                 .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
-                        .items(Schemas.objectSchema().requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
+                        .items(Schemas.objectSchema()
+                                .optionalProperty(SERVICE_SERVER_PROTOCOL, Schemas.stringSchema())
+                                .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                                 .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
                                 .allowAdditionalProperties(false)))
                 .allowAdditionalProperties(false);

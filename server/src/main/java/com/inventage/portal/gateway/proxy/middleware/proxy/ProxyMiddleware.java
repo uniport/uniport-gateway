@@ -1,23 +1,23 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Proxies requests and set the FORWARDED headers.
@@ -41,7 +41,11 @@ public class ProxyMiddleware implements Middleware {
     private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
 
     public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort, String name) {
-        httpProxy = HttpProxy.reverseProxy(vertx.createHttpClient());
+        this(vertx, "http", serverHost, serverPort, name);
+    }
+
+    public ProxyMiddleware(Vertx vertx, String serverProtocol, String serverHost, int serverPort, String name) {
+        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, serverPort, vertx));
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
@@ -50,6 +54,17 @@ public class ProxyMiddleware implements Middleware {
         incomingRequestURIModifiers = new ArrayList<>();
         outgoingResponseHeadersModifiers = new ArrayList<>();
         applyModifiers(httpProxy);
+    }
+
+    protected HttpClient createHttpClient(String serverProtocol, String serverHost, int serverPort, Vertx vertx) {
+        HttpClientOptions options = new HttpClientOptions();
+        if ("https".equalsIgnoreCase(serverProtocol)) {
+            options.setSsl(true);
+            options.setTrustAll(true);
+            options.setVerifyHost(false);
+            LOGGER.info("using HTTPS for host '{}'", serverHost);
+        }
+        return vertx.createHttpClient(options);
     }
 
     @Override
