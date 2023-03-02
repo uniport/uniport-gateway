@@ -218,23 +218,31 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.5.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.11.0</version>
                     <configuration>
                         <release>11</release>
                     </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.4</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -244,7 +252,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.6</version>
+                    <version>0.8.8</version>
                     <executions>
                         <execution>
                             <id>default-prepare-agent</id>
@@ -267,17 +275,17 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.3.1</version>
                     <executions>
                         <execution>
                             <phase>install</phase>
@@ -301,7 +309,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.40.2</version>
+                    <version>0.42.0</version>
                     <configuration>
                         <images>
                             <image>
@@ -372,7 +380,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.7.0.0</version>
+                    <version>4.7.3.2</version>
                     <configuration>
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
@@ -384,19 +392,24 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <!-- for staging with Nexus2 -->
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.5</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <!-- auch im Jenkins Config File "settings.xml" referenziert -->
-                    <serverId>inventage-portal-staging</serverId>
-                    <nexusUrl>https://nexus.inventage.com</nexusUrl>
-                    <!-- inventage-portal staging -->
-                    <stagingProfileId>2784e0aacf5060</stagingProfileId>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.3.9</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -413,6 +426,28 @@
                 <docker.push.registry>${docker.pull.registry}</docker.push.registry>
                 <jib.goal>dockerBuild</jib.goal>
             </properties>
+        </profile>
+        <profile>
+            <id>jenkins</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                            <version>1.6.8</version>
+                            <extensions>true</extensions>
+                            <configuration>
+                                <!-- auch im Jenkins Config File "settings.xml" referenziert -->
+                                <serverId>inventage-portal-staging</serverId>
+                                <nexusUrl>https://nexus.inventage.com</nexusUrl>
+                                <!-- inventage-portal staging -->
+                                <stagingProfileId>2784e0aacf5060</stagingProfileId>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
         </profile>
     </profiles>
 
