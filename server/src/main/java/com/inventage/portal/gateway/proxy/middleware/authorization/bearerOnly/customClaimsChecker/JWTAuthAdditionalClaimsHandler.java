@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker;
+package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.handler.AuthenticationHandler;

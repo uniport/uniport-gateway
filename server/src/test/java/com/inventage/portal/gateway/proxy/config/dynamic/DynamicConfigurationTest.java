@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.inventage.portal.gateway.TestUtils;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import com.inventage.portal.gateway.TestUtils;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -161,50 +161,56 @@ public class DynamicConfigurationTest {
                 new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                         .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+                                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub")))));
 
         JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils
                 .buildConfiguration(TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
                         DynamicConfiguration.MIDDLEWARE_BEARER_ONLY, TestUtils.withMiddlewareOpts(
-                                new JsonObject().put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "blub")))));
+                                new JsonObject().put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
+                                        "blub")))));
 
         JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
                 TestUtils.withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                         TestUtils.withMiddlewareOpts(new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "notbase64*oraurl")
-                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
-                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
-                                .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "notbase64*oraurl")
+                                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
+                                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
                                         new JsonArray().add("blub"))))));
 
         JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils
                 .buildConfiguration(TestUtils
                         .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                                 TestUtils.withMiddlewareOpts(new JsonObject()
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "Ymx1Ygo=")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
                                                 new JsonArray().add("blub"))))));
 
         JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils
                 .buildConfiguration(TestUtils
                         .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                                 TestUtils.withMiddlewareOpts(new JsonObject()
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "Ymx1Ygo=")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
+                                                "RS256")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
                                                 new JsonArray().add("valid").add(123).add(true))))));
 
         JsonObject bearerOnlyHttpMiddleware = TestUtils
                 .buildConfiguration(TestUtils
                         .withMiddlewares(TestUtils.withMiddleware("foo", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                                 TestUtils.withMiddlewareOpts(new JsonObject()
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY, "Ymx1Ygo=")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM, "RS256")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER, "bar")
-                                        .put(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE,
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS,
+                                                new JsonArray().add(new JsonObject()
+                                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY,
+                                                                "Ymx1Ygo=")
+                                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
+                                                                "RS256")))
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
                                                 new JsonArray().add("blub"))))));
 
         JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
@@ -245,7 +251,7 @@ public class DynamicConfigurationTest {
                 new JsonArray().add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                         .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))
+                                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub"))
                         .put("blub", true))));
 
         JsonObject doubleHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
@@ -259,12 +265,12 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                                         DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
-                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+                                        DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub")))));
 
         JsonObject duplicatedMiddleware = new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                 .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"));
+                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub"));
         JsonObject duplicatedHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES, new JsonArray().add(duplicatedMiddleware).add(duplicatedMiddleware)));
 
@@ -274,7 +280,7 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                                         DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
-                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))
+                                        DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub")))
                         .add(new JsonObject())));
 
         // http services
@@ -381,7 +387,7 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                                         DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
-                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))))
+                                        DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub"))))
                         .put(DynamicConfiguration.SERVICES,
                                 new JsonArray()
                                         .add(new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "serviceFoo").put(
@@ -415,7 +421,7 @@ public class DynamicConfigurationTest {
                                 .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                                         DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
                                 .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject().put(
-                                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+                                        DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, "blub")))));
 
         JsonObject controlApiMiddlewareWithSessionTermination = new JsonObject().put(DynamicConfiguration.HTTP,
                 new JsonObject()

@@ -1,23 +1,24 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Proxies requests and set the FORWARDED headers.
@@ -33,14 +34,21 @@ public class ProxyMiddleware implements Middleware {
 
     private final HttpProxy httpProxy;
 
+    private final String name;
     private final String serverHost;
     private final int serverPort;
 
     private List<Handler<StringBuilder>> incomingRequestURIModifiers;
     private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
 
-    public ProxyMiddleware(Vertx vertx, String serverHost, int serverPort) {
-        httpProxy = HttpProxy.reverseProxy(vertx.createHttpClient());
+    public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
+        this(vertx, name, "http", serverHost, serverPort);
+    }
+
+    public ProxyMiddleware(Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort) {
+        this.name = name;
+
+        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, serverPort, vertx));
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
@@ -50,8 +58,22 @@ public class ProxyMiddleware implements Middleware {
         applyModifiers(httpProxy);
     }
 
+    protected HttpClient createHttpClient(String serverProtocol, String serverHost, int serverPort, Vertx vertx) {
+        HttpClientOptions options = new HttpClientOptions();
+        if ("https".equalsIgnoreCase(serverProtocol)) {
+            options.setSsl(true);
+            options.setTrustAll(true);
+            options.setVerifyHost(false);
+            options.setLogActivity(LOGGER.isDebugEnabled());
+            LOGGER.info("using HTTPS for host '{}'", serverHost);
+        }
+        return vertx.createHttpClient(options);
+    }
+
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
@@ -59,10 +81,10 @@ public class ProxyMiddleware implements Middleware {
                         ctx.request().headers().get(X_FORWARDED_HOST),
                         portFromHostValue(ctx.request().host(), -1))),
                 ctx.request().headers());
-
+        ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
         captureModifiers(ctx);
 
-        LOGGER.debug("Sending to '{}:{}{}'", serverHost, serverPort, ctx.request().uri());
+        LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
         httpProxy.handle(ctx.request());
     }
 

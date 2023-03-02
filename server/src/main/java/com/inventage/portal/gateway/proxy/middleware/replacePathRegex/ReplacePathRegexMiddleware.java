@@ -17,16 +17,20 @@ public class ReplacePathRegexMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacePathRegexMiddleware.class);
 
+    private final String name;
     private final Pattern pattern;
     private final String replacement;
 
-    public ReplacePathRegexMiddleware(String regex, String replacement) {
+    public ReplacePathRegexMiddleware(String name, String regex, String replacement) {
+        this.name = name;
         this.pattern = Pattern.compile(regex);
         this.replacement = replacement;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         final Handler<StringBuilder> reqUriModifier = uri -> {
             uri.replace(0, uri.length(), apply(uri.toString()));
         };

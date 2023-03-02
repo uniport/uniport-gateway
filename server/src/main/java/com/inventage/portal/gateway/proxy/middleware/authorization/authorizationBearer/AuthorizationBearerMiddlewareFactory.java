@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
+package com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +22,12 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
         return Future.succeededFuture(new AuthorizationBearerMiddleware(
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
+                name,
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE)));
     }
 
 }

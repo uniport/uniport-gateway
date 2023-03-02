@@ -13,18 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a custom implementation of the relying party (based on vertx's implementation) ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Add a CSP middleware ([PORTAL-665](https://issue.inventage.com/browse/PORTAL-665)).
+- Add a CSRF middleware ([PORTAL-666](https://issue.inventage.com/browse/PORTAL-666)).
+- Support for HTTPS for backend connections ([PORTAL-1292](https://issue.inventage.com/browse/PORTAL-1292)).
 
 ### Changed
 
 - **BREAKING**: docker-compose artefact is no longer provided ([PORTAL-1251](https://issue.inventage.com/browse/PORTAL-1251)).
 - Updated the Vert.x stack to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Updated the Vert.x stack to `4.3.8` ([PORTAL-1236](https://issue.inventage.com/browse/PORTAL-1236)).
 - Updated usage of `io.vertx.json.schema` to newest concepts ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `io.vertx.vertx-http-proxy` instead of our own fork ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `proxyInterceptor` hooks in `proxy` middleware to apply custom logic on the request and responses instead of patching them directly ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Patched issuer URL of JWT returned by the OIDC flow to the publicly facing URL ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Inherit from public class `JWTAuthHandler` (and its ecosystem) to apply custom claim checks instead of copying the whole Vert.x JWT ecosystem ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
-- `options` in middlware configurations should be optional, if no options are needed ([PORTAL-1240](https://issue.inventage.com/browse/PORTAL-1240)).
-
+- `options` in middleware configurations should be optional, if no options are needed ([PORTAL-1240](https://issue.inventage.com/browse/PORTAL-1240)).
+- Fast failing if any middleware creation fails ([PORTAL-1106](https://issue.inventage.com/browse/PORTAL-1106)).
 ### Removed
 
 - Code Hygiene: Removed dead code ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).

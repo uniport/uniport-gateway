@@ -87,6 +87,7 @@ public class RouterFactory {
                 if (srf.succeeded()) {
                     router.route("/*").setName("router").subRouter((Router) srf.result());
                 } else {
+                    handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
             });
@@ -133,9 +134,10 @@ public class RouterFactory {
         final JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         // TODO support multiple servers
         final JsonObject serverConfig = serverConfigs.getJsonObject(0);
+        serverConfig.put(DynamicConfiguration.SERVICE_NAME, serviceName);
 
         // required to be the last middleware
-        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, router,
+        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, "proxy", router,
                 serverConfig);
         middlewareFutures.add(proxyMiddlewareFuture);
 
@@ -181,7 +183,8 @@ public class RouterFactory {
             return;
         }
 
-        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(handler);
+        String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 
     /**

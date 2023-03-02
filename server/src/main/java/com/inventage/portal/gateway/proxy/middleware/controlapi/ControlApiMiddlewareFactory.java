@@ -26,7 +26,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CONTROL_API);
 
         if (webClient == null) {
@@ -34,7 +34,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
         }
 
         final String action = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION);
-        return Future.succeededFuture(new ControlApiMiddleware(action, webClient));
+        return Future.succeededFuture(new ControlApiMiddleware(name, action, webClient));
     }
 
 }

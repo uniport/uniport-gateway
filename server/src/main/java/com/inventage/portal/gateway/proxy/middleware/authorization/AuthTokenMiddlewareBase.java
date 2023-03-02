@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
+package com.inventage.portal.gateway.proxy.middleware.authorization;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,62 +12,35 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFact
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
-/**
- * Manages the authentication bearer. If the user is authenticated it provides either an ID token or
- * an access token as defined in the sessionScope. Access tokens are only provided if the
- * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
- * token is sent to the Client.
- */
-public class AuthorizationBearerMiddleware implements Middleware {
+public abstract class AuthTokenMiddlewareBase implements Middleware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthTokenMiddlewareBase.class);
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
 
-    public static final String BEARER = "Bearer ";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
-
+    protected final String name;
     private final String sessionScope;
 
-    public AuthorizationBearerMiddleware(String sessionScope) {
+    protected AuthTokenMiddlewareBase(String name, String sessionScope) {
+        this.name = name;
         this.sessionScope = sessionScope;
     }
 
-    @Override
-    public void handle(RoutingContext ctx) {
-        this.getAuthToken(ctx.session()).onSuccess(token -> {
-            if (token == null || token.length() == 0) {
-                LOGGER.debug("Skipping empty token");
-                ctx.next();
-                return;
-            }
-
-            ctx.request().headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
-
-            final Handler<MultiMap> respHeadersModifier = headers -> {
-                headers.remove(HttpHeaders.AUTHORIZATION);
-            };
-            this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
-
-            ctx.next();
-        }).onFailure(err -> {
-            LOGGER.debug("Providing no token '{}'", err.getMessage());
-            ctx.next();
-        });
-    }
-
-    private Future<String> getAuthToken(Session session) {
-        final Promise<String> promise = Promise.promise();
-        this.getAuthToken(session, promise);
-        return promise.future();
+    protected Future<String> getAuthToken(Session session) {
+        try {
+            final Promise<String> promise = Promise.promise();
+            this.getAuthToken(session, promise);
+            return promise.future();
+        } catch (Throwable t) {
+            LOGGER.error("error in getAuthToken", t);
+            return Future.failedFuture(t);
+        }
     }
 
     private void getAuthToken(Session session, Handler<AsyncResult<String>> handler) {
@@ -146,5 +119,4 @@ public class AuthorizationBearerMiddleware implements Middleware {
 
         return rawToken;
     }
-
 }

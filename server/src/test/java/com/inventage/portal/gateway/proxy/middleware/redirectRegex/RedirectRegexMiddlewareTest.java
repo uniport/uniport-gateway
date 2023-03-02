@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.stream.Stream;
 
-import com.inventage.portal.gateway.TestUtils;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import com.inventage.portal.gateway.TestUtils;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -28,19 +28,25 @@ public class RedirectRegexMiddlewareTest {
         return Stream.of(
                 Arguments.of("simple redirection", "^(/dashboard)$", "$1/", "/dashboard",
                         HttpResponseStatus.FOUND.code(), "/dashboard/"),
-                Arguments.of("Don't allow admin or master realm", "^/auth(/|/admin.*|/realms/master.*)?$", "/login", "/auth/admin",
+                Arguments.of("Don't allow admin or master realm", "^/auth(/|/admin.*|/realms/master.*)?$", "/login",
+                        "/auth/admin",
                         HttpResponseStatus.FOUND.code(), "/login"),
                 Arguments.of("URL doesn't match regex", "^/blub/(.*)$", "/$1", "/wont/match",
                         HttpResponseStatus.OK.code(), null),
-                Arguments.of("only /auth/realms/portal* or /auth/resources*", "^/(?!auth/realms/portal|auth/resources).*", "", "/auth/realms/portal/protocol/",
+                Arguments.of("only /auth/realms/portal* or /auth/resources*",
+                        "^/(?!auth/realms/portal|auth/resources).*", "", "/auth/realms/portal/protocol/",
                         HttpResponseStatus.OK.code(), null),
-                Arguments.of("only /auth/realms/portal* or /auth/resources*", "^/(?!auth/realms/portal|auth/resources).*", "", "/auth/resources/",
+                Arguments.of("only /auth/realms/portal* or /auth/resources*",
+                        "^/(?!auth/realms/portal|auth/resources).*", "", "/auth/resources/",
                         HttpResponseStatus.OK.code(), null),
-                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*", "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth/realms/master/protocol/",
+                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*",
+                        "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth/realms/master/protocol/",
                         HttpResponseStatus.FOUND.code(), "/login"),
-                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*", "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth/admin",
+                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*",
+                        "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth/admin",
                         HttpResponseStatus.FOUND.code(), "/login"),
-                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*", "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth",
+                Arguments.of("only /auth/realms/portal* or /auth/realms/resources*",
+                        "^/(?!auth/realms/portal|auth/resources).*", "/login", "/auth",
                         HttpResponseStatus.FOUND.code(), "/login"));
     }
 
@@ -55,7 +61,7 @@ public class RedirectRegexMiddlewareTest {
         Checkpoint requestsServed = testCtx.checkpoint();
         Checkpoint responsesReceived = testCtx.checkpoint();
 
-        RedirectRegexMiddleware redirect = new RedirectRegexMiddleware(regex, replacement);
+        RedirectRegexMiddleware redirect = new RedirectRegexMiddleware("redirectRegex", regex, replacement);
 
         int port = TestUtils.findFreePort();
         Router router = Router.router(vertx);

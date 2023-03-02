@@ -1,17 +1,24 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.inventage.portal.gateway.TestUtils;
+import java.util.concurrent.atomic.AtomicReference;
 
-import io.vertx.core.http.HttpClientRequest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -23,6 +30,23 @@ public class ProxyMiddlewareTest {
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
 
     @Test
+    void correctHostHeader(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+                .withRoutingContextHolder(routingContext)
+                .withProxyMiddleware("test.host.com", 8000)
+                .build().start();
+        // when
+        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+            Assertions.assertEquals("test.host.com",
+                    routingContext.get().request().headers().get(HttpHeaderNames.HOST));
+            testCtx.completeNow();
+        });
+        // then
+    }
+
+    @Test
     void proxyTest(Vertx vertx, VertxTestContext testCtx) {
         String host = "localhost";
         int proxyPort = TestUtils.findFreePort();
@@ -30,7 +54,7 @@ public class ProxyMiddlewareTest {
         String proxyResponse = "proxy";
         String serverResponse = "server";
 
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, host, serverPort);
+        ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, serverPort);
 
         Checkpoint proxyStarted = testCtx.checkpoint();
         Checkpoint serverStarted = testCtx.checkpoint();
@@ -54,13 +78,15 @@ public class ProxyMiddlewareTest {
             }).listen(serverPort).onComplete(testCtx.succeeding(p -> {
                 serverStarted.flag();
 
-                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub").compose(HttpClientRequest::send)
+                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
+                        .compose(HttpClientRequest::send)
                         .onComplete(testCtx.succeeding(resp -> {
                             testCtx.verify(() -> {
                                 assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
                                 responseReceived.flag();
                             });
-                            resp.body().onComplete(testCtx.succeeding(body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
+                            resp.body().onComplete(testCtx.succeeding(
+                                    body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
                         }));
             }));
         }));

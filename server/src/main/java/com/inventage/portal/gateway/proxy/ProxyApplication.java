@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
@@ -7,16 +10,12 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Application for the proxy feature of the portal gateway. The routers will be read from the
@@ -30,8 +29,6 @@ public class ProxyApplication implements Application {
     public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME = "PORTAL_GATEWAY_PUBLIC_HOSTNAME";
     public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
     public static final String PORTAL_GATEWAY_PUBLIC_PORT = "PORTAL_GATEWAY_PUBLIC_PORT";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
     /**
      * the name of this instance

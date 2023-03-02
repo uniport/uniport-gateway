@@ -1,16 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.WebClient;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,8 +9,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.WebClient;
 
 /**
  * Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie.
@@ -35,17 +37,20 @@ public class ControlApiMiddleware implements Middleware {
     public static final String CONTROL_COOKIE_NAME = "IPS_GW_CONTROL";
     public static final String SESSION_TERMINATE_ACTION = "SESSION_TERMINATE";
     public static final String SESSION_RESET_ACTION = "SESSION_RESET";
+
+    private final String name;
     private final String action;
     private final WebClient webClient;
 
-    public ControlApiMiddleware(final String action, final WebClient webClient) {
+    public ControlApiMiddleware(String name, final String action, final WebClient webClient) {
+        this.name = name;
         this.action = action;
         this.webClient = webClient;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-        LOGGER.debug("entering control api middleware");
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (ctx.session() == null) {
             LOGGER.warn("No session initialized. Skipping session termination");
@@ -59,9 +64,9 @@ public class ControlApiMiddleware implements Middleware {
             if (isNotEmpty(storedCookies)) {
                 // find the first control api cookie with an action equals to the configured one
                 final List<Cookie> actionCookies = storedCookies.stream()
-                    .filter(cookie -> Objects.equals(cookie.name(), CONTROL_COOKIE_NAME))
-                    .filter(cookie -> Objects.equals(cookie.value(), action))
-                    .collect(Collectors.toList());
+                        .filter(cookie -> Objects.equals(cookie.name(), CONTROL_COOKIE_NAME))
+                        .filter(cookie -> Objects.equals(cookie.value(), action))
+                        .collect(Collectors.toList());
 
                 final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
                 if (controlApiActionToExecute.isPresent()) {
@@ -105,24 +110,24 @@ public class ControlApiMiddleware implements Middleware {
         // 4. call the url
         // 5. destroy the vertx session
         ctx.session().data().keySet().stream()
-            .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
-            .findFirst()
-            .map(key -> ctx.session().data().get(key))
-            .map(obj -> {
-                if ((obj instanceof Pair) && (((Pair<?, ?>) obj).getLeft() instanceof OAuth2Auth)) {
-                    return (OAuth2Auth) ((Pair<?, ?>) obj).getLeft();
-                }
-                else {
-                    return null;
-                }
-            })
-            .map(auth -> auth.endSessionURL(ctx.user()))
-            .ifPresent(endSessionURL -> {
-                LOGGER.debug("endSessionURL {}", endSessionURL);
-                webClient.getAbs(endSessionURL).send()
-                    .onSuccess(response -> LOGGER.info("end_session_endpoint call succeeded"))
-                    .onFailure(throwable -> LOGGER.warn("end_session_endpoint call failed: {}", throwable.getMessage()));
-            });
+                .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
+                .findFirst()
+                .map(key -> ctx.session().data().get(key))
+                .map(obj -> {
+                    if ((obj instanceof Pair) && (((Pair<?, ?>) obj).getLeft() instanceof OAuth2Auth)) {
+                        return (OAuth2Auth) ((Pair<?, ?>) obj).getLeft();
+                    } else {
+                        return null;
+                    }
+                })
+                .map(auth -> auth.endSessionURL(ctx.user()))
+                .ifPresent(endSessionURL -> {
+                    LOGGER.debug("endSessionURL {}", endSessionURL);
+                    webClient.getAbs(endSessionURL).send()
+                            .onSuccess(response -> LOGGER.info("end_session_endpoint call succeeded"))
+                            .onFailure(throwable -> LOGGER.warn("end_session_endpoint call failed: {}",
+                                    throwable.getMessage()));
+                });
 
         // destroy gateway session anyway
         LOGGER.info("vertx session destroyed");
@@ -138,8 +143,8 @@ public class ControlApiMiddleware implements Middleware {
 
     private void removeAllSessionScopesFrom(RoutingContext ctx) {
         final List<String> toDeleteSessionScopes = ctx.session().data().keySet().stream()
-            .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
-            .collect(Collectors.toList());
+                .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
+                .collect(Collectors.toList());
 
         for (String sessionScope : toDeleteSessionScopes) {
             LOGGER.debug("removing following session scope: '{}'", sessionScope);
@@ -159,7 +164,7 @@ public class ControlApiMiddleware implements Middleware {
 
     private Set<Cookie> getKeycloakCookiesFrom(Set<Cookie> cookiesInSessionBag) {
         return cookiesInSessionBag.stream()
-            .filter(cookie -> cookie.name().startsWith("KEYCLOAK_"))
-            .collect(Collectors.toSet());
+                .filter(cookie -> cookie.name().startsWith("KEYCLOAK_"))
+                .collect(Collectors.toSet());
     }
 }

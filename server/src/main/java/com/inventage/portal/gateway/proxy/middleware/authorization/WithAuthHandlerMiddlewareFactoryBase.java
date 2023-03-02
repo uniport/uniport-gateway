@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
+package com.inventage.portal.gateway.proxy.middleware.authorization;
 
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -40,9 +40,9 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 
-public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
+public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
 
     private static final String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
 
@@ -58,21 +58,18 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
     private static final String JWK_USE_SIGNING = "sig";
 
     @Override
-    public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_BEARER_ONLY;
-    }
+    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+        LOGGER.debug("Creating '{}' middleware", provides());
+        final Promise<Middleware> middlewarePromise = Promise.promise();
 
-    @Override
-    public Future<Middleware> create(Vertx vertx, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Creating '{}' middleware", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
-        final Promise<Middleware> bearerOnlyPromise = Promise.promise();
-
-        final String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_ISSUER);
-        final JsonArray audience = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_AUDIENCE);
+        final String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER);
+        final JsonArray audience = middlewareConfig
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
         final JsonArray additionalClaims = middlewareConfig
-                .getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_CLAIMS);
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
 
-        final String optionalStr = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL,
+        final String optionalStr = middlewareConfig.getString(
+                DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL,
                 "false");
         final boolean optional = Boolean.parseBoolean(optionalStr);
 
@@ -103,16 +100,24 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider,
                     additionalClaimsOptions);
 
-            bearerOnlyPromise.handle(Future.succeededFuture(new BearerOnlyMiddleware(authHandler, optional)));
-            LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BEARER_ONLY);
+            middlewarePromise.handle(Future.succeededFuture(create(name, authHandler, middlewareConfig)));
+            LOGGER.debug("Created middleware successfully");
         }).onFailure(err -> {
             final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
             LOGGER.info(errMsg);
-            bearerOnlyPromise.handle(Future.failedFuture(errMsg));
+            middlewarePromise.handle(Future.failedFuture(errMsg));
         });
 
-        return bearerOnlyPromise.future();
+        return middlewarePromise.future();
     }
+
+    /**
+     * Creates the actual middleware.
+     * @param authHandler The {@link AuthenticationHandler} to use in the middleware
+     * @param middlewareConfig The config for the middleware
+     * @return Your {@link Middleware}
+     */
+    protected abstract Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig);
 
     // TODO do we still need a future here?
     private Future<List<PubSecKeyOptions>> fetchPublicKeys(Vertx vertx, JsonObject middlewareConfig) {
@@ -125,11 +130,11 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
 
         final List<JsonObject> publicKeys = middlewareConfig
-                .getJsonArray(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEYS).getList();
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS).getList();
 
         final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
         publicKeys.forEach(pk -> {
-            String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY);
+            String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
 
             boolean isURL = false;
             try {
@@ -142,7 +147,7 @@ public class BearerOnlyMiddlewareFactory implements MiddlewareFactory {
             if (!isURL) {
                 // then the public key is provided directly
                 final String publicKeyAlgorithm = pk
-                        .getString(DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_PUBLIC_KEY_ALGORITHM);
+                        .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM);
 
                 publicKeyOpts.add(
                         new PubSecKeyOptions()

@@ -25,7 +25,7 @@
                 "name": "authRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/resources|auth/js).*",
+                    "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/realms/master|auth/resources|auth/js|auth/admin).*",
                     "replacement": "/login"
                 }
             },

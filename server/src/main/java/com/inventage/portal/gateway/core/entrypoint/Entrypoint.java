@@ -12,10 +12,6 @@ import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLogger;
-import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -122,15 +118,6 @@ public class Entrypoint {
                 });
     }
 
-    private void setupDefaultEntryMiddlewares(Vertx vertx) {
-        router.route().setName("remove session cookie").handler(new ResponseSessionCookieRemovalMiddleware(null));
-        router.route().setName("session")
-                .handler(new SessionMiddleware(vertx, null, null, null, null, null, null, null));
-        router.route().setName("logger").handler(new RequestResponseLogger());
-        router.route().setName("replace session cookie")
-                .handler(new ReplacedSessionCookieDetectionMiddleware(null, null));
-    }
-
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
 
         final List<Future> entryMiddlewaresFuture = new ArrayList<>();
@@ -143,9 +130,9 @@ public class Entrypoint {
                     .forEach(mf -> router.route().setName("entry middleware")
                             .handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
-        }).onFailure(cfErr -> {
-            final String errMsg = "Failed to create EntryMiddlewares";
-            LOGGER.warn("{}", errMsg);
+        }).onFailure(err -> {
+            throw new RuntimeException(
+                    String.format("Failed to create EntryMiddlewares. Cause: {}", err.getMessage()));
         });
     }
 
@@ -169,7 +156,8 @@ public class Entrypoint {
             return;
         }
 
-        middlewareFactory.create(this.vertx, router, middlewareOptions).onComplete(handler);
+        String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 
 }
