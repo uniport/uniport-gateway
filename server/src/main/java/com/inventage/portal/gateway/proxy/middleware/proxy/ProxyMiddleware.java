@@ -62,6 +62,7 @@ public class ProxyMiddleware implements Middleware {
             options.setSsl(true);
             options.setTrustAll(true);
             options.setVerifyHost(false);
+            options.setLogActivity(LOGGER.isDebugEnabled());
             LOGGER.info("using HTTPS for host '{}'", serverHost);
         }
         return vertx.createHttpClient(options);
