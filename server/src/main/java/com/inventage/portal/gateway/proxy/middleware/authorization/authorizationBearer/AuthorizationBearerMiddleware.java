@@ -1,10 +1,10 @@
-package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
+package com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.withAuthToken.MiddlewareWithAuthToken;
+import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
 
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -17,7 +17,7 @@ import io.vertx.ext.web.RoutingContext;
  * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
  * token is sent to the Client.
  */
-public class AuthorizationBearerMiddleware extends MiddlewareWithAuthToken {
+public class AuthorizationBearerMiddleware extends AuthTokenMiddlewareBase {
 
     public static final String BEARER = "Bearer ";
 

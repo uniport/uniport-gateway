@@ -1,16 +1,16 @@
-package com.inventage.portal.gateway.proxy.middleware.passAuthorization;
+package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.withAuthHandler.MiddlewareWithAuthHandlerFactory;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 
-public class PassAuthorizationMiddlewareFactory extends MiddlewareWithAuthHandlerFactory {
+public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PassAuthorizationMiddlewareFactory.class);
 

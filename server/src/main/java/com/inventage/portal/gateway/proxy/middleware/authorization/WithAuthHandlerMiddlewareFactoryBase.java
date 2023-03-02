@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.withAuthHandler;
+package com.inventage.portal.gateway.proxy.middleware.authorization;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
-import com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -29,9 +29,9 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 
-public abstract class MiddlewareWithAuthHandlerFactory implements MiddlewareFactory {
+public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareWithAuthHandlerFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {

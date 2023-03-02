@@ -1,8 +1,14 @@
-package com.inventage.portal.gateway.proxy.middleware.withAuthToken;
+package com.inventage.portal.gateway.proxy.middleware.authorization;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -11,21 +17,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Session;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class MiddlewareWithAuthToken implements Middleware {
+public abstract class AuthTokenMiddlewareBase implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareWithAuthToken.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthTokenMiddlewareBase.class);
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
 
     protected final String name;
     private final String sessionScope;
 
-    protected MiddlewareWithAuthToken(String name, String sessionScope) {
+    protected AuthTokenMiddlewareBase(String name, String sessionScope) {
         this.name = name;
         this.sessionScope = sessionScope;
     }

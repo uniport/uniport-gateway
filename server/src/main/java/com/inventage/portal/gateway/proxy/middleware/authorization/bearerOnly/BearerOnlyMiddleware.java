@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
+package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,17 +1,19 @@
-package com.inventage.portal.gateway.proxy.middleware.passAuthorization;
+package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization;
 
-import com.inventage.portal.gateway.proxy.middleware.withAuthToken.MiddlewareWithAuthToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
+
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Checks the internal token to make sure the user is allowed to access the backend.
  * It then adds the token that came with the original request to the backend.
  */
-public class PassAuthorizationMiddleware extends MiddlewareWithAuthToken {
+public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
 
     public static final String BEARER = "Bearer ";
 

@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.bearerOnly.customClaimsChecker;
+package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
 import org.apache.commons.lang3.Validate;
 
@@ -25,7 +25,8 @@ public class JWTClaim {
         this(
                 claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
                 JWTClaimOperator
-                        .valueOf(claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
+                        .valueOf(claimObject
+                                .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
                 claimObject.getValue(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
     }
 
