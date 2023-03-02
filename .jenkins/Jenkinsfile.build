@@ -86,7 +86,7 @@ pipeline {
 
                 mvn(
                     settings: '.jenkins/settings.xml',
-                    profiles: '!local,jenkins',
+                    profiles: '!local',
                     properties: [
                         'java.io.tmpdir': WORKSPACE,
                         'multiArchBuild': true
