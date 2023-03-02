@@ -16,7 +16,7 @@ public class ProxyApplicationFactory implements ApplicationFactory {
 
     @Override
     public String provides() {
-        return "proxy";
+        return ProxyApplication.class.getSimpleName();
     }
 
     @Override
