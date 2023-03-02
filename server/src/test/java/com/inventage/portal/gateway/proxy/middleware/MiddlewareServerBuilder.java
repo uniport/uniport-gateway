@@ -170,7 +170,11 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(int port) {
-        return withMiddleware(new ProxyMiddleware(vertx, host, port, "someName"));
+        return withProxyMiddleware(host, port);
+    }
+
+    public MiddlewareServerBuilder withProxyMiddleware(String host, int port) {
+        return withMiddleware(new ProxyMiddleware(vertx, host, port, "withProxyMiddleware"));
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {

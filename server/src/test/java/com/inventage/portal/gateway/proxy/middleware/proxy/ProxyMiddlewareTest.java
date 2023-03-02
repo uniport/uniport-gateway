@@ -1,10 +1,15 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
 
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.ext.web.RoutingContext;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,11 +21,29 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 @ExtendWith(VertxExtension.class)
 public class ProxyMiddlewareTest {
 
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+
+    @Test
+    void correctHostHeader(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+                .withRoutingContextHolder(routingContext)
+                .withProxyMiddleware("test.host.com", 8000)
+                .build().start();
+        // when
+        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+            Assertions.assertEquals("test.host.com", routingContext.get().request().headers().get(HttpHeaderNames.HOST));
+            testCtx.completeNow();
+        });
+        // then
+    }
 
     @Test
     void proxyTest(Vertx vertx, VertxTestContext testCtx) {

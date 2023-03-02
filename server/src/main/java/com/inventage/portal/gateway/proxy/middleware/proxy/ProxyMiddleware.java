@@ -78,7 +78,7 @@ public class ProxyMiddleware implements Middleware {
                         ctx.request().headers().get(X_FORWARDED_HOST),
                         portFromHostValue(ctx.request().host(), -1))),
                 ctx.request().headers());
-        ctx.request().headers().remove(HttpHeaderNames.HOST);
+        ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
         captureModifiers(ctx);
 
         LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
