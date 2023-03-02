@@ -59,7 +59,7 @@ public class ProxyMiddleware implements Middleware {
     }
 
     protected HttpClient createHttpClient(String serverProtocol, String serverHost, int serverPort, Vertx vertx) {
-        HttpClientOptions options = new HttpClientOptions();
+        final HttpClientOptions options = new HttpClientOptions();
         if ("https".equalsIgnoreCase(serverProtocol)) {
             options.setSsl(true);
             options.setTrustAll(true);
@@ -105,7 +105,7 @@ public class ProxyMiddleware implements Middleware {
         proxy.addInterceptor(new ProxyInterceptor() {
             @Override
             public Future<ProxyResponse> handleProxyRequest(ProxyContext ctx) {
-                ProxyRequest incomingRequest = ctx.request();
+                final ProxyRequest incomingRequest = ctx.request();
 
                 // modify URI
                 final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
@@ -128,7 +128,7 @@ public class ProxyMiddleware implements Middleware {
 
             @Override
             public Future<Void> handleProxyResponse(ProxyContext ctx) {
-                ProxyResponse outgoingResponse = ctx.response();
+                final ProxyResponse outgoingResponse = ctx.response();
 
                 // modify headers
                 final List<Handler<MultiMap>> modifiers = outgoingResponseHeadersModifiers;

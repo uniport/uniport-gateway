@@ -113,8 +113,8 @@ public class StateWithUri {
 
     private String ensureRelativeUri(String anUri) {
         try {
-            URI uri = new URI(anUri);
-            URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
+            final URI uri = new URI(anUri);
+            final URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
             return relativeURI.toString();
         }
         catch (URISyntaxException e) {

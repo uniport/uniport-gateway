@@ -195,9 +195,9 @@ public class DynamicConfiguration {
         final ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
                 .allowAdditionalProperties(false);
 
-        JsonSchema schema = JsonSchema.of(dynamicConfigBuilder.toJson());
-        JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
-                .setBaseUri("http://inventage.com/portal-gateway/dynamic-configuration");
+        final JsonSchema schema = JsonSchema.of(dynamicConfigBuilder.toJson());
+        final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
+                .setBaseUri("https://inventage.com/portal-gateway/dynamic-configuration");
         return Validator.create(schema, options);
     }
 
@@ -440,7 +440,7 @@ public class DynamicConfiguration {
 
         final Promise<Void> validPromise = Promise.promise();
         try {
-            OutputUnit result = validator.validate(json);
+            final OutputUnit result = validator.validate(json);
             if (!result.getValid()) {
                 throw result.toException(json);
             }
@@ -557,14 +557,14 @@ public class DynamicConfiguration {
 
             switch (mwType) {
                 case MIDDLEWARE_AUTHORIZATION_BEARER: {
-                    Future<Void> validationResult = validateWithAuthToken(mwType, mwOptions);
+                    final Future<Void> validationResult = validateWithAuthToken(mwType, mwOptions);
                     if (validationResult != null) {
                         return validationResult;
                     }
                     break;
                 }
                 case MIDDLEWARE_BEARER_ONLY: {
-                    Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                    final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
                     if (validationResult != null) {
                         return validationResult;
                     }
@@ -820,19 +820,19 @@ public class DynamicConfiguration {
                     else {
                         for (Object directive : directives) {
                             if (directive instanceof JsonObject) {
-                                final String directive_name = ((JsonObject) directive)
+                                final String directiveName = ((JsonObject) directive)
                                         .getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
-                                if (directive_name == null) {
+                                if (directiveName == null) {
                                     return Future.failedFuture(
                                             String.format("Directive name is not defined, middleware: '%s'", mwType));
                                 }
-                                final JsonArray directive_values = ((JsonObject) directive)
+                                final JsonArray directiveValues = ((JsonObject) directive)
                                         .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
-                                if (directive_values == null) {
+                                if (directiveValues == null) {
                                     return Future.failedFuture(
                                             String.format("Directive values is not defined, middleware: '%s'", mwType));
                                 }
-                                for (Object a : directive_values.getList()) {
+                                for (Object a : directiveValues.getList()) {
                                     if (!(a instanceof String)) {
                                         return Future.failedFuture(
                                                 String.format(

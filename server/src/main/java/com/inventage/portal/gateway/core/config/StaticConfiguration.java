@@ -98,9 +98,9 @@ public class StaticConfiguration {
                 .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
                 .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
-        JsonSchema schema = JsonSchema.of(staticConfigBuilder.toJson());
-        JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
-                .setBaseUri("http://inventage.com/portal-gateway/static-configuration");
+        final JsonSchema schema = JsonSchema.of(staticConfigBuilder.toJson());
+        final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
+                .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
         return Validator.create(schema, options);
     }
 
@@ -111,7 +111,7 @@ public class StaticConfiguration {
 
         final Promise<Void> validPromise = Promise.promise();
         try {
-            OutputUnit result = validator.validate(json);
+            final OutputUnit result = validator.validate(json);
             if (!result.getValid()) {
                 throw result.toException(json);
             }

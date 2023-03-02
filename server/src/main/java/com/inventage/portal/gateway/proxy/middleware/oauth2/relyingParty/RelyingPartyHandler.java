@@ -265,7 +265,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
     @Override
     public OAuth2AuthHandler withScope(String scope) {
-        List<String> updatedScopes = new ArrayList<>(this.scopes);
+        final List<String> updatedScopes = new ArrayList<>(this.scopes);
         updatedScopes.add(scope);
         return new RelyingPartyHandler(this, updatedScopes);
     }
@@ -362,7 +362,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                             continue;
                         }
 
-                        int idx = handlerScopes.indexOf(scope);
+                        final int idx = handlerScopes.indexOf(scope);
                         if (idx != -1) {
                             // match, but is it valid?
                             if ((idx != 0 && handlerScopes.charAt(idx - 1) != ' ') ||
@@ -464,7 +464,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
             if (session != null) {
                 // validate the state. Here we are a bit lenient, if there is no session
                 // we always assume valid, however if there is session it must match
-                String ctxState = session.remove("state");
+                final String ctxState = session.remove("state");
                 // if there's a state in the context they must match
                 if (!state.equals(ctxState)) {
                     // forbidden, the state is not valid (this is a replay attack)
@@ -474,7 +474,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
                 // remove the code verifier, from the session as it will be trade for the
                 // token during the final leg of the oauth2 handshake
-                String codeVerifier = session.remove("pkce");
+                final String codeVerifier = session.remove("pkce");
                 credentials.setCodeVerifier(codeVerifier);
                 // state is valid, extract the redirectUri from the session
                 resource = session.get("redirect_uri");
@@ -493,7 +493,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                 }
                 else {
                     ctx.setUser(res.result());
-                    String location = resource != null ? resource : "/";
+                    final String location = resource != null ? resource : "/";
                     if (session != null) {
                         // the user has upgraded from unauthenticated to authenticated
                         // session should be upgraded as recommended by owasp

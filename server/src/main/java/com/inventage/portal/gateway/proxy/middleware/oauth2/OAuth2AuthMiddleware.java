@@ -175,8 +175,8 @@ public class OAuth2AuthMiddleware implements Middleware {
     // this method is called when the IAM finishs the authentication flow and sends a redirect (callback) with the code
     private static void whenAuthenticationResponseReceived(RoutingContext ctx, String sessionScope,
                                                            OAuth2Auth authProvider) {
-        String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
-        String code = ctx.request().getParam(OIDC_PARAM_CODE);
+        final String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
+        final String code = ctx.request().getParam(OIDC_PARAM_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
             LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code.substring(0, 5));
             ctx.addEndHandler(asyncResult -> whenTokenForCodeReceived(asyncResult, ctx, authProvider, sessionScope));
@@ -190,7 +190,7 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     // if the enhanced state parameter contains an uri, we send a redirect to it, otherwise a status code 410 (GONE)
     private static void sendResponseFor(String stateParameter, RoutingContext ctx) {
-        Optional<String> uri = new StateWithUri(stateParameter).uri();
+        final Optional<String> uri = new StateWithUri(stateParameter).uri();
         if (uri.isPresent()) {
             HttpResponder.respondWithRedirectWithoutSetCookie(uri.get(), ctx);
         }

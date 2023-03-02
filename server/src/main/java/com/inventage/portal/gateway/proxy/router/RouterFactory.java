@@ -184,7 +184,7 @@ public class RouterFactory {
             return;
         }
 
-        String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
         middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 

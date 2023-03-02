@@ -145,7 +145,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     private String getValueByKeyOrFail(JsonObject config, String key) {
-        String value = config.getString(key);
+        final String value = config.getString(key);
         if (value == null) {
             throw new IllegalArgumentException("missing key in config: '" + key + "'");
         }
