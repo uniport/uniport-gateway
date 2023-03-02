@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -77,7 +78,7 @@ public class ProxyMiddleware implements Middleware {
                         ctx.request().headers().get(X_FORWARDED_HOST),
                         portFromHostValue(ctx.request().host(), -1))),
                 ctx.request().headers());
-
+        ctx.request().headers().remove(HttpHeaderNames.HOST);
         captureModifiers(ctx);
 
         LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
