@@ -127,6 +127,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
     public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
+    public static final String MIDDLEWARE_SESSION_LIFETIME_HEADER = "lifetimeHeader";
+    public static final String MIDDLEWARE_SESSION_LIFETIME_COOKIE = "lifetimeCookie";
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
@@ -241,6 +243,8 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
                 .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
                 .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
+                .property(MIDDLEWARE_SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
+                .property(MIDDLEWARE_SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
                 .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
                 .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
                 .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
@@ -739,6 +743,16 @@ public class DynamicConfiguration {
                     if (nagHttps == null) {
                         LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
                                 SessionMiddleware.NAG_HTTPS_DEFAULT));
+                    }
+                    final Boolean lifetimeHeader = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_HEADER);
+                    if (lifetimeHeader == null) {
+                        LOGGER.debug(String.format("%s: LifetimeHeader not specified. Use default value: %s", mwType,
+                                SessionMiddleware.SESSION_LIFETIME_HEADER_DEFAULT));
+                    }
+                    final Boolean lifetimeCookie = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_COOKIE);
+                    if (lifetimeCookie == null) {
+                        LOGGER.debug(String.format("%s: LifetimeCookie not specified. Use default value: %s", mwType,
+                                SessionMiddleware.SESSION_LIFETIME_COOKIE_DEFAULT));
                     }
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {

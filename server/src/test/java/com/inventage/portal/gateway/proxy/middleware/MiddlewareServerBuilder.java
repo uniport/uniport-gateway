@@ -63,7 +63,11 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware() {
-        return withMiddleware(new SessionMiddleware(vertx, "session", null, null, null, null, null, null, null));
+        return withSessionMiddleware(false, false);
+    }
+
+    public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
+        return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie, null, null, null, null, null, null));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {

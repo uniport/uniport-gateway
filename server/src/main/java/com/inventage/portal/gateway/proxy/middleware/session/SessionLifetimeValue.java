@@ -1,0 +1,19 @@
+package com.inventage.portal.gateway.proxy.middleware.session;
+
+/**
+ * Calculates the session lifetime based on the given session idle timeout.
+ */
+public class SessionLifetimeValue {
+
+    private final long sessionLifeTime;
+
+    public SessionLifetimeValue(Long sessionIdleTimeoutInMilliSeconds) {
+        sessionLifeTime = System.currentTimeMillis() / 1000 + sessionIdleTimeoutInMilliSeconds / 1000;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s", sessionLifeTime);
+    }
+
+}

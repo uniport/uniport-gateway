@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a CSP middleware ([PORTAL-665](https://issue.inventage.com/browse/PORTAL-665)).
 - Add a CSRF middleware ([PORTAL-666](https://issue.inventage.com/browse/PORTAL-666)).
 - Support for HTTPS for backend connections ([PORTAL-1292](https://issue.inventage.com/browse/PORTAL-1292)).
+- SessionMiddleware can return session lifetime information ([PORTAL-1174](https://issue.inventage.com/browse/PORTAL-1174)).
 
 ### Changed
 
@@ -28,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Inherit from public class `JWTAuthHandler` (and its ecosystem) to apply custom claim checks instead of copying the whole Vert.x JWT ecosystem ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - `options` in middleware configurations should be optional, if no options are needed ([PORTAL-1240](https://issue.inventage.com/browse/PORTAL-1240)).
 - Fast failing if any middleware creation fails ([PORTAL-1106](https://issue.inventage.com/browse/PORTAL-1106)).
+
 ### Removed
 
 - Code Hygiene: Removed dead code ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
@@ -35,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Code: Hygiene: Usage of various deprecated functionalities ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- HTTP `HOST` header in backend request is now set to configured services.servers.host value ([PORTAL-1295](https://issue.inventage.com/browse/PORTAL-1295)).
 
 ## [6.0.0]-202302060855-584-ac9bd6a - 2023-02-06
 
