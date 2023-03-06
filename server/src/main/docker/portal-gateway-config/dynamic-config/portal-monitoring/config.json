@@ -55,8 +55,11 @@
                 "name": "portalGrafanaBearerOnly",
                 "type": "bearerOnly",
                 "options": {
-                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
-                    "publicKeyAlgorithm": "RS256",
+                    "publicKeys": [
+                        {
+                            "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
+                    ],
                     "audience": ["Portal-Monitoring"],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
                     "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",

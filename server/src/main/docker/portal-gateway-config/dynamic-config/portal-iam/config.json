@@ -46,20 +46,19 @@
                 "type": "passAuthorization",
                 "options": {
                     "sessionScope": "Portal-IAM",
-                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
-                    "publicKeyAlgorithm": "RS256",
-                    "audience": [
-                        "Portal-IAM"
+                    "publicKeys": [
+                        {
+                            "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
                     ],
+                    "audience": ["Portal-IAM"],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
                     "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Portal-IAM']['roles']",
                             "operator": "CONTAINS",
-                            "value": [
-                                "ADMIN"
-                            ]
+                            "value": ["ADMIN"]
                         }
                     ]
                 }
