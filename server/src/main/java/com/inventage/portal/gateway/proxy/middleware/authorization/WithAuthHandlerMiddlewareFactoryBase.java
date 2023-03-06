@@ -73,28 +73,28 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
         final String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER);
         final JsonArray audience = middlewareConfig
-            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
         final JsonArray additionalClaims = middlewareConfig
-            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
         final JsonArray publicKeys = middlewareConfig
-            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
 
         this.fetchPublicKeys(vertx, publicKeys)
-            .onSuccess(setupMiddleware(vertx, name,
-                issuer, audience, additionalClaims,
-                middlewareConfig, middlewarePromise))
-            .onFailure(err -> {
-                final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
-                LOGGER.warn(errMsg);
-                middlewarePromise.handle(Future.failedFuture(errMsg));
-            });
+                .onSuccess(setupMiddleware(vertx, name,
+                        issuer, audience, additionalClaims,
+                        middlewareConfig, middlewarePromise))
+                .onFailure(err -> {
+                    final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
+                    LOGGER.warn(errMsg);
+                    middlewarePromise.handle(Future.failedFuture(errMsg));
+                });
 
         return middlewarePromise.future();
     }
 
     private Handler<List<PubSecKeyOptions>> setupMiddleware(Vertx vertx, String name, String issuer, JsonArray audience,
-                                                            JsonArray additionalClaims, JsonObject middlewareConfig,
-                                                            Handler<AsyncResult<Middleware>> handler) {
+            JsonArray additionalClaims, JsonObject middlewareConfig,
+            Handler<AsyncResult<Middleware>> handler) {
         return publicKeys -> {
             final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
@@ -120,7 +120,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
             final JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
             final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider,
-                additionalClaimsOptions);
+                    additionalClaimsOptions);
 
             handler.handle(Future.succeededFuture(create(name, authHandler, middlewareConfig)));
             LOGGER.debug("Created middleware successfully");
@@ -134,7 +134,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
-                                 Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
+            Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
 
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
         final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
@@ -154,17 +154,17 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 LOGGER.info("Public key provided by URL. Fetching...");
 
                 this.fetchPublicKeysFromDiscoveryURL(vertx, publicKey)
-                    .onSuccess(publicKeyOpts::addAll)
-                    .onFailure(err -> handler.handle(Future.failedFuture(err)));
+                        .onSuccess(publicKeyOpts::addAll)
+                        .onFailure(err -> handler.handle(Future.failedFuture(err)));
             } else {
                 LOGGER.info("Public key provided directly");
 
                 final String publicKeyAlgorithm = pk
-                    .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM);
+                        .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256");
                 publicKeyOpts.add(
-                    new PubSecKeyOptions()
-                        .setAlgorithm(publicKeyAlgorithm)
-                        .setBuffer(publickeyToPEM(publicKey)));
+                        new PubSecKeyOptions()
+                                .setAlgorithm(publicKeyAlgorithm)
+                                .setBuffer(publickeyToPEM(publicKey)));
             }
         });
 
@@ -178,7 +178,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private void fetchPublicKeysFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL,
-                                                 Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
+            Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
         final URL parsedRealmBaseURL;
         try {
             parsedRealmBaseURL = new URL(rawRealmBaseURL);
@@ -220,16 +220,16 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final String iamDiscoveryPath = path;
         LOGGER.debug("Fetching jwks_uri from URL '{}://{}:{}{}'", iamProtocol, iamHost, iamPort, iamDiscoveryPath);
         WebClient.create(vertx).get(iamPort, iamHost, iamDiscoveryPath).as(BodyCodec.jsonObject()).send()
-            .onSuccess(fetchPublicKeysFromJWKsURL(vertx, iamHost, iamPort, handler))
-            .onFailure(err -> {
-                LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}'",
-                    iamProtocol, iamHost, iamPort, iamDiscoveryPath);
-                handler.handle(Future.failedFuture(err));
-            });
+                .onSuccess(fetchPublicKeysFromJWKsURL(vertx, iamHost, iamPort, handler))
+                .onFailure(err -> {
+                    LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}'",
+                            iamProtocol, iamHost, iamPort, iamDiscoveryPath);
+                    handler.handle(Future.failedFuture(err));
+                });
     }
 
     private Handler<HttpResponse<JsonObject>> fetchPublicKeysFromJWKsURL(Vertx vertx, String iamHost,
-                                                                         int iamPort, Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
+            int iamPort, Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
         return discoveryResp -> {
             final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
             if (rawJWKsURI == null || rawJWKsURI.length() == 0) {
@@ -258,16 +258,16 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
             LOGGER.debug("Fetching public key from URL '{}'", rawJWKsURI);
             WebClient.create(vertx).get(iamPort, iamHost, iamJWKsPath).as(BodyCodec.jsonObject()).send()
-                .onSuccess(parsePublicKeysFromJWKs(handler))
-                .onFailure(err -> {
-                    LOGGER.info("Failed to complete load JWK from URL '{}'", rawJWKsURI);
-                    handler.handle(Future.failedFuture(err));
-                });
+                    .onSuccess(parsePublicKeysFromJWKs(handler))
+                    .onFailure(err -> {
+                        LOGGER.info("Failed to complete load JWK from URL '{}'", rawJWKsURI);
+                        handler.handle(Future.failedFuture(err));
+                    });
         };
     }
 
     private Handler<HttpResponse<JsonObject>> parsePublicKeysFromJWKs(
-        Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
+            Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
         return JWKsResp -> {
             LOGGER.debug("Received public keys");
             final JsonArray keys = JWKsResp.body().getJsonArray(JWK_KEYS_KEY);
@@ -288,7 +288,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 String eValue = params.getString(JWK_EXPONENT_KEY);
 
                 PubSecKeyOptions publicKeyOpt = assemblePublicKeyOptions(ktyValue, nValue, eValue,
-                    useValue);
+                        useValue);
                 if (publicKeyOpt != null) {
                     System.out.println(publicKeyOpt.getAlgorithm());
                     publicKeyOpts.add(publicKeyOpt);
@@ -303,7 +303,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     // for reference see RFC 7517: JSON Web Key (JWK) - https://datatracker.ietf.org/doc/html/rfc7517
     private PubSecKeyOptions assemblePublicKeyOptions(String ktyValue, String nValue, String eValue, String useValue) {
         LOGGER.debug("Inspecting public key: key type '{}', modulus '{}', public exponent '{}', use: '{}'",
-            ktyValue, nValue, eValue, useValue);
+                ktyValue, nValue, eValue, useValue);
 
         // only consider keys used for signing
         if (!useValue.equals(JWK_USE_SIGNING)) {
@@ -324,8 +324,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         }
 
         return new PubSecKeyOptions()
-            .setAlgorithm(publicKey.getAlgorithm())
-            .setBuffer(publickeyToPEM(new String(publicKey.getEncoded(), StandardCharsets.UTF_8)));
+                .setAlgorithm(publicKey.getAlgorithm())
+                .setBuffer(publickeyToPEM(new String(publicKey.getEncoded(), StandardCharsets.UTF_8)));
     }
 
     private PublicKey publicKeyParamsToPublicKey(String keyType, BigInteger modulus, BigInteger publicExponent) {
@@ -351,9 +351,9 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
     private String publickeyToPEM(String publicKey) {
         return String.join(
-            "\n",
-            "-----BEGIN PUBLIC KEY-----",
-            publicKey,
-            "-----END PUBLIC KEY-----");
+                "\n",
+                "-----BEGIN PUBLIC KEY-----",
+                publicKey,
+                "-----END PUBLIC KEY-----");
     }
 }
