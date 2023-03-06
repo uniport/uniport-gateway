@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,7 @@ public class DockerContainerProvider extends Provider {
 
         LOGGER.debug("Build configuration for docker container: '{}'", containerName);
 
-        final List<String> filters = Arrays.asList(String.format("%s.http", Parser.DEFAULT_ROOT_NAME));
+        final List<String> filters = Collections.singletonList(String.format("%s.http", Parser.DEFAULT_ROOT_NAME));
         final JsonObject confFromLabels = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME, filters);
         if (confFromLabels == null) {
             LOGGER.warn("Failed to decode labels to json for docker container '{}'", containerName);
@@ -147,8 +148,7 @@ public class DockerContainerProvider extends Provider {
 
         final JsonObject httpConfFromLabels = confFromLabels.getJsonObject(DynamicConfiguration.HTTP);
         final JsonArray ports = labels.getJsonArray("docker.ports");
-        final String serviceName = containerName;
-        final int port = getPort(httpConfFromLabels, ports, serviceName, containerName);
+        final int port = getPort(httpConfFromLabels, ports, containerName);
         if (port < 0) {
             LOGGER.warn("Failed to determine port for container '{}'", containerName);
             return null;
@@ -158,15 +158,15 @@ public class DockerContainerProvider extends Provider {
         final String host = getHost(labels, extraConfig, containerName);
         LOGGER.debug("Using host '{}' of '{}'", host, containerName);
 
-        final JsonArray serviceConfig = this.buildServiceConfiguration(httpConfFromLabels, serviceName, host, port);
+        final JsonArray serviceConfig = this.buildServiceConfiguration(httpConfFromLabels, containerName, host, port);
         if (serviceConfig == null) {
             LOGGER.warn("Failed to build configuration for docker container '{}'", containerName);
             return null;
         }
 
-        final Map<String, String> model = new HashMap<String, String>();
-        model.put("name", serviceName);
-        final List<String> filteredKeys = Parser.filterKeys(labels.getMap(), Arrays.asList(Parser.DEFAULT_ROOT_NAME));
+        final Map<String, String> model = new HashMap<>();
+        model.put("name", containerName);
+        final List<String> filteredKeys = Parser.filterKeys(labels.getMap(), List.of(Parser.DEFAULT_ROOT_NAME));
         for (String filteredKey : filteredKeys) {
             model.put(filteredKey, (String) labels.getMap().get(filteredKey));
         }
@@ -180,11 +180,9 @@ public class DockerContainerProvider extends Provider {
         DynamicConfiguration.validate(vertx, confFromLabels, false).onSuccess(handler -> {
             LOGGER.debug("Configuration from labels '{}'", confFromLabels);
             this.configurations.put(containerId, confFromLabels);
-        }).onFailure(err -> {
-            LOGGER.warn(
-                    "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
-                    err.getMessage(), containerName, confFromLabels);
-        });
+        }).onFailure(err -> LOGGER.warn(
+                "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
+                err.getMessage(), containerName, confFromLabels));
 
         return DynamicConfiguration.merge(this.configurations);
     }
@@ -270,8 +268,7 @@ public class DockerContainerProvider extends Provider {
         return host;
     }
 
-    // side effect: serviceName might be changed
-    private int getPort(JsonObject httpConfFromLabels, JsonArray ports, String serviceName, String containerName) {
+    private int getPort(JsonObject httpConfFromLabels, JsonArray ports, String containerName) {
         final int port;
         if (ports.size() < 1) {
             LOGGER.warn("Ignoring container with no exposed ports '{}'", containerName);
@@ -291,7 +288,6 @@ public class DockerContainerProvider extends Provider {
                 return -1;
             }
             final JsonObject service = services.getJsonObject(0);
-            serviceName = service.getString(DynamicConfiguration.SERVICE_NAME);
 
             final JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
             if (servers == null || servers.size() == 0) {
@@ -415,9 +411,7 @@ public class DockerContainerProvider extends Provider {
             this.eb.publish(this.configurationAddress,
                     new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
                             .put(Provider.PROVIDER_CONFIGURATION, config));
-        }).onFailure(err -> {
-            LOGGER.warn("Unable to publish invalid configuration '{}': '{}'", config,
-                    err.getMessage());
-        });
+        }).onFailure(err -> LOGGER.warn("Unable to publish invalid configuration '{}': '{}'", config,
+                err.getMessage()));
     }
 }

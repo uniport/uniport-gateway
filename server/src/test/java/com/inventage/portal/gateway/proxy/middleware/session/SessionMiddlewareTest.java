@@ -17,6 +17,37 @@ import static io.vertx.core.http.HttpMethod.POST;
 public class SessionMiddlewareTest {
 
     @Test
+    public void sessionLifetimeCookie(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        BrowserConnected browser = portalGateway(vertx, testCtx)
+                .withSessionMiddleware(false, true)
+                .build().start().connectBrowser();
+        // when
+        browser.request(GET, "/").whenComplete((response, error) -> {
+            // then
+            assertThat(response)
+                    .hasSetCookie(SessionMiddleware.SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+            testCtx.completeNow();
+        });
+    }
+
+    @Test
+    public void sessionLifetimeHeader(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        BrowserConnected browser = portalGateway(vertx, testCtx)
+                .withSessionMiddleware(true, false)
+                .build().start().connectBrowser();
+        // when
+        browser.request(GET, "/").whenComplete((response, error) -> {
+            // then
+            assertThat(response)
+                    .hasHeader(SessionMiddleware.SESSION_LIFETIME_HEADER_NAME_DEFAULT)
+                    .hasNotSetCookie(SessionMiddleware.SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+            testCtx.completeNow();
+        });
+    }
+
+    @Test
     public void newSessionIsCreated(Vertx vertx, VertxTestContext testCtx) {
         // given
         MiddlewareServer gateway = portalGateway(vertx, testCtx)

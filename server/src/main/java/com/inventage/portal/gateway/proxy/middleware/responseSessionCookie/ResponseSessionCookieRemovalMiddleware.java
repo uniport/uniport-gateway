@@ -58,7 +58,7 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
                 LOGGER.debug("with value '{}'", sessionCookie.getValue());
             }
             // session cookie should only be removed from response, not unset in client
-            boolean invalidate = false;
+            final boolean invalidate = false;
             ctx.request().response().removeCookie(sessionCookieName, invalidate);
         }
     }

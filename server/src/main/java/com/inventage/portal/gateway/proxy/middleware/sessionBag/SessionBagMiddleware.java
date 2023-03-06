@@ -1,17 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
@@ -21,6 +11,14 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.PlatformHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
@@ -162,7 +160,8 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         final String requestPath;
         if (!uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
             requestPath = "/";
-        } else {
+        }
+        else {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
@@ -173,7 +172,8 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         final String cookiePath;
         if (cookie.path().isEmpty()) {
             cookiePath = "/";
-        } else {
+        }
+        else {
             cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
                     : cookie.path();
         }

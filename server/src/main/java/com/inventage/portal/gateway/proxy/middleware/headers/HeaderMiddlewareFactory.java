@@ -30,9 +30,11 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST).forEach(entry -> {
                 if (entry.getValue() instanceof String) {
                     requestHeaders.set(entry.getKey(), (String) entry.getValue());
-                } else if (entry.getValue() instanceof Iterable) {
+                }
+                else if (entry.getValue() instanceof Iterable) {
                     requestHeaders.set(entry.getKey(), (Iterable<String>) entry.getValue());
-                } else {
+                }
+                else {
                     LOGGER.warn("Invalid header value type: '{}'", entry.getValue());
                 }
             });
@@ -42,9 +44,11 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_HEADERS_RESPONSE).forEach(entry -> {
                 if (entry.getValue() instanceof String) {
                     responseHeaders.set(entry.getKey(), (String) entry.getValue());
-                } else if (entry.getValue() instanceof Iterable) {
+                }
+                else if (entry.getValue() instanceof Iterable) {
                     responseHeaders.set(entry.getKey(), (Iterable<String>) entry.getValue());
-                } else {
+                }
+                else {
                     LOGGER.warn("Invalid header value type: '{}'", entry.getValue());
                 }
             });

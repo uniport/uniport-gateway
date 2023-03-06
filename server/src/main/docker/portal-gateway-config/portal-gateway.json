@@ -10,7 +10,10 @@
                 },
                 {
                     "name": "session",
-                    "type": "session"
+                    "type": "session",
+                    "options": {
+                        "lifetimeCookie": true
+                    }
                 },
                 {
                     "name": "requestResponseLogger",

@@ -61,7 +61,8 @@ public class PortalGatewayLauncher extends Launcher {
 
         if (loggingConfigPath.isPresent()) {
             logger.info("Using logback configuration file from '{}'", loggingConfigPath.get());
-        } else {
+        }
+        else {
             logger.info("No custom logback configuration file found");
         }
 
@@ -73,8 +74,8 @@ public class PortalGatewayLauncher extends Launcher {
             // thread blocking warnings
             System.setProperty("vertx.options.maxEventLoopExecuteTime", "600000000000");
         }
-        final String[] arguments = new String[] { "run", PortalGatewayVerticle.class.getName(), "--instances",
-                Runtime.numberOfVerticleInstances() };
+        final String[] arguments = new String[]{"run", PortalGatewayVerticle.class.getName(), "--instances",
+                Runtime.numberOfVerticleInstances()};
         new PortalGatewayLauncher().dispatch(arguments);
         logger.info("PortalGatewayLauncher started.");
     }
@@ -138,7 +139,8 @@ public class PortalGatewayLauncher extends Launcher {
         if (metricsPortStr != null) {
             try {
                 metricsPort = Integer.parseInt(metricsPortStr);
-            } catch (NumberFormatException e) {
+            }
+            catch (NumberFormatException e) {
                 // default is applied
             }
         }

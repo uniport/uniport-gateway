@@ -1,16 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -18,6 +10,12 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.impl.JWTAuthHandlerImpl;
 import net.minidev.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl implements JWTAuthAdditionalClaimsHandler {
 
@@ -31,7 +29,8 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         // initialize additional claims
         if (options != null) {
             additionalJWTClaims = options.getAdditionalClaims();
-        } else {
+        }
+        else {
             additionalJWTClaims = List.of();
         }
     }
@@ -74,7 +73,8 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
                             payloadValue));
                 }
             }
-        } catch (RuntimeException | JsonProcessingException e) {
+        }
+        catch (RuntimeException | JsonProcessingException e) {
             LOGGER.warn(e.getMessage());
             ctx.fail(403, e);
         }
@@ -90,17 +90,21 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
 
         if (operator == JWTClaimOperator.EQUALS) {
             return verifyClaimEquals(payloadValue, claimValue);
-        } else if (operator == JWTClaimOperator.CONTAINS) {
+        }
+        else if (operator == JWTClaimOperator.CONTAINS) {
             return verifyClaimContains(payloadValue, claimValue);
-        } else if (operator == JWTClaimOperator.EQUALS_SUBSTRING_WHITESPACE) {
+        }
+        else if (operator == JWTClaimOperator.EQUALS_SUBSTRING_WHITESPACE) {
             final String[] array = payloadValue.toString().split(" ");
             final JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimEquals(payloadArray, claimValue);
-        } else if (operator == JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE) {
+        }
+        else if (operator == JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE) {
             final String[] array = payloadValue.toString().split(" ");
             final JsonArray payloadArray = new JsonArray(Arrays.asList(array));
             return verifyClaimContains(payloadArray, claimValue);
-        } else {
+        }
+        else {
             throw new IllegalStateException(
                     String.format("No support for the following operator: %s", operator));
         }
@@ -125,7 +129,8 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         if (payloadValue instanceof JsonArray) {
             final JsonArray payloadArray = (JsonArray) payloadValue;
             return verifyClaimContainsArray(payloadArray, claimArray);
-        } else {
+        }
+        else {
             for (Object claimItem : claimArray) {
                 if (verifyClaimEquals(payloadValue, claimItem)) {
                     return true;

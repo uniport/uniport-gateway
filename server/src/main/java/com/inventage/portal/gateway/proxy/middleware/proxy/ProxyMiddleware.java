@@ -59,7 +59,7 @@ public class ProxyMiddleware implements Middleware {
     }
 
     protected HttpClient createHttpClient(String serverProtocol, String serverHost, int serverPort, Vertx vertx) {
-        HttpClientOptions options = new HttpClientOptions();
+        final HttpClientOptions options = new HttpClientOptions();
         if ("https".equalsIgnoreCase(serverProtocol)) {
             options.setSsl(true);
             options.setTrustAll(true);
@@ -77,9 +77,9 @@ public class ProxyMiddleware implements Middleware {
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
-                portFromHostValue(
-                        ctx.request().headers().get(X_FORWARDED_HOST),
-                        portFromHostValue(ctx.request().host(), -1))),
+                        portFromHostValue(
+                                ctx.request().headers().get(X_FORWARDED_HOST),
+                                portFromHostValue(ctx.request().host(), -1))),
                 ctx.request().headers());
         ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
         captureModifiers(ctx);
@@ -105,7 +105,7 @@ public class ProxyMiddleware implements Middleware {
         proxy.addInterceptor(new ProxyInterceptor() {
             @Override
             public Future<ProxyResponse> handleProxyRequest(ProxyContext ctx) {
-                ProxyRequest incomingRequest = ctx.request();
+                final ProxyRequest incomingRequest = ctx.request();
 
                 // modify URI
                 final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
@@ -128,7 +128,7 @@ public class ProxyMiddleware implements Middleware {
 
             @Override
             public Future<Void> handleProxyResponse(ProxyContext ctx) {
-                ProxyResponse outgoingResponse = ctx.response();
+                final ProxyResponse outgoingResponse = ctx.response();
 
                 // modify headers
                 final List<Handler<MultiMap>> modifiers = outgoingResponseHeadersModifiers;
@@ -156,7 +156,8 @@ public class ProxyMiddleware implements Middleware {
     protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // use
             LOGGER.debug("Using provided header '{}' with '{}'", headerName, headers.get(headerName));
-        } else { // set
+        }
+        else { // set
             headers.add(headerName, headerValue);
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
@@ -167,7 +168,8 @@ public class ProxyMiddleware implements Middleware {
             final String existingHeader = headers.get(headerName);
             headers.set(headerName, existingHeader + ", " + headerValue);
             LOGGER.debug("Appended to header '{}' to '{}' ", headerName, headers.get(headerName));
-        } else { // set
+        }
+        else { // set
             headers.add(headerName, headerValue);
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
@@ -176,11 +178,13 @@ public class ProxyMiddleware implements Middleware {
     private int portFromHostValue(String hostToParse, int defaultPort) {
         if (hostToParse == null) {
             return -1;
-        } else {
+        }
+        else {
             final int portSeparatorIdx = hostToParse.lastIndexOf(':');
             if (portSeparatorIdx > hostToParse.lastIndexOf(']')) {
                 return parsePort(hostToParse.substring(portSeparatorIdx + 1), defaultPort);
-            } else {
+            }
+            else {
                 return -1;
             }
         }
@@ -189,7 +193,8 @@ public class ProxyMiddleware implements Middleware {
     private int parsePort(String portToParse, int defaultPort) {
         try {
             return Integer.parseInt(portToParse);
-        } catch (NumberFormatException ignored) {
+        }
+        catch (NumberFormatException ignored) {
             LOGGER.debug("Failed to parse a port from '{}'", portToParse);
             return defaultPort;
         }

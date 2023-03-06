@@ -17,6 +17,10 @@
     <suppress checks="HideUtilityClassConstructor" files=".*/MiddlewareFactory.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*/Parser.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*/PortalGatewayConfigRetriever.java"/>
+    <suppress checks="HideUtilityClassConstructor" files="com/inventage/portal/gateway/proxy/middleware/log/SessionAdapter.java"/>
+    <suppress checks="HideUtilityClassConstructor" files="com/inventage/portal/gateway/proxy/middleware/HttpResponder.java"/>
+
+    <suppress checks="NestedIfDepth" files="com/inventage/portal/gateway/proxy/middleware/oauth2/relyingParty/RelyingPartyHandler.java"/>
 
     <suppress checks="LineLength" files=".*/KubernetesServiceProvider.java"/>
 

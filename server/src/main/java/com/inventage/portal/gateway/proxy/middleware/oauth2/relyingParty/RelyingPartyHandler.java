@@ -16,14 +16,6 @@
 
 package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -48,6 +40,14 @@ import io.vertx.ext.web.handler.OAuth2AuthHandler;
 import io.vertx.ext.web.handler.impl.HTTPAuthorizationHandler;
 import io.vertx.ext.web.handler.impl.ScopedAuthentication;
 import io.vertx.ext.web.impl.Origin;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class is copied from:
@@ -93,13 +93,15 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
         // get a reference to the sha-256 digest
         try {
             sha256 = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Cannot get instance of SHA-256 MessageDigest", e);
         }
         // process callback
         if (callbackURL != null) {
             this.callbackURL = Origin.parse(callbackURL);
-        } else {
+        }
+        else {
             this.callbackURL = null;
         }
         // scopes are empty by default
@@ -118,7 +120,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
         // get a new reference to the sha-256 digest
         try {
             sha256 = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Cannot get instance of SHA-256 MessageDigest", e);
         }
         // state copy
@@ -161,7 +164,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                             "The callback route is shaded by the OAuth2AuthHandler, ensure the callback route is added BEFORE the OAuth2AuthHandler route!");
                     handler.handle(
                             Future.failedFuture(new HttpException(500, "Infinite redirect loop [oauth2 callback]")));
-                } else {
+                }
+                else {
                     if (context.request().method() != HttpMethod.GET) {
                         // we can only redirect GET requests
                         LOG.error("OAuth2 redirect attempt to non GET resource");
@@ -183,7 +187,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                                     new IllegalStateException("OAuth2 PKCE requires a session to be present"));
                             return;
                         }
-                    } else {
+                    }
+                    else {
                         // there's a session we can make this request comply to the Oauth2 spec and add an opaque state
                         session.put("redirect_uri", context.request().uri());
 
@@ -201,7 +206,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                     handler.handle(
                             Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier))));
                 }
-            } else {
+            }
+            else {
                 // continue
                 final Credentials credentials = scopes.size() > 0 ? new TokenCredentials(token).setScopes(scopes)
                         : new TokenCredentials(token);
@@ -209,7 +215,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                 authProvider.authenticate(credentials, authn -> {
                     if (authn.failed()) {
                         handler.handle(Future.failedFuture(new HttpException(401, authn.cause())));
-                    } else {
+                    }
+                    else {
                         handler.handle(authn);
                     }
                 });
@@ -258,7 +265,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
     @Override
     public OAuth2AuthHandler withScope(String scope) {
-        List<String> updatedScopes = new ArrayList<>(this.scopes);
+        final List<String> updatedScopes = new ArrayList<>(this.scopes);
         updatedScopes.add(scope);
         return new RelyingPartyHandler(this, updatedScopes);
     }
@@ -355,7 +362,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                             continue;
                         }
 
-                        int idx = handlerScopes.indexOf(scope);
+                        final int idx = handlerScopes.indexOf(scope);
                         if (idx != -1) {
                             // match, but is it valid?
                             if ((idx != 0 && handlerScopes.charAt(idx - 1) != ' ') ||
@@ -365,7 +372,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                                 ctx.fail(403, new IllegalStateException("principal scope != handler scopes"));
                                 return;
                             }
-                        } else {
+                        }
+                        else {
                             // invalid scope assignment
                             ctx.fail(403, new IllegalStateException("principal scope != handler scopes"));
                             return;
@@ -385,7 +393,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
             // we know that a redirect is definitely possible
             // as the callback handler has been created
             return true;
-        } else {
+        }
+        else {
             // the callback hasn't been mounted so we need to assume
             // that if no callbackURL is provided, then there isn't
             // a redirect happening in this application
@@ -417,7 +426,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                 final String errorDescription = ctx.request().getParam("error_description");
                 if (errorDescription != null) {
                     ctx.fail(errorCode, new IllegalStateException(error + ": " + errorDescription));
-                } else {
+                }
+                else {
                     ctx.fail(errorCode, new IllegalStateException(error));
                 }
                 return;
@@ -454,7 +464,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
             if (session != null) {
                 // validate the state. Here we are a bit lenient, if there is no session
                 // we always assume valid, however if there is session it must match
-                String ctxState = session.remove("state");
+                final String ctxState = session.remove("state");
                 // if there's a state in the context they must match
                 if (!state.equals(ctxState)) {
                     // forbidden, the state is not valid (this is a replay attack)
@@ -464,11 +474,12 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
                 // remove the code verifier, from the session as it will be trade for the
                 // token during the final leg of the oauth2 handshake
-                String codeVerifier = session.remove("pkce");
+                final String codeVerifier = session.remove("pkce");
                 credentials.setCodeVerifier(codeVerifier);
                 // state is valid, extract the redirectUri from the session
                 resource = session.get("redirect_uri");
-            } else {
+            }
+            else {
                 resource = state;
             }
 
@@ -479,14 +490,16 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
             authProvider.authenticate(credentials, res -> {
                 if (res.failed()) {
                     ctx.fail(res.cause());
-                } else {
+                }
+                else {
                     ctx.setUser(res.result());
-                    String location = resource != null ? resource : "/";
+                    final String location = resource != null ? resource : "/";
                     if (session != null) {
                         // the user has upgraded from unauthenticated to authenticated
                         // session should be upgraded as recommended by owasp
                         session.regenerateId();
-                    } else {
+                    }
+                    else {
                         // there is no session object so we cannot keep state.
                         // if there is no session and the resource is relative
                         // we will reroute to "location"

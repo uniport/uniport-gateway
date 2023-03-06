@@ -21,7 +21,7 @@ public interface ProviderFactory {
 
     Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env);
 
-    class Loader {
+    final class Loader {
         private Loader() {
         }
 

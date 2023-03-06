@@ -1,20 +1,18 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
-import static io.vertx.core.http.Cookie.cookie;
-
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
-
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+
+import static io.vertx.core.http.Cookie.cookie;
 
 /**
  * Handle situations, where the browser has sent requests during the session id regeneration.
@@ -135,7 +133,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
                 this.sessionCookiePrefix);
         if (sessionCookie != null) {
             LOGGER.debug("For received session cookie value '{}'", sessionCookie.value());
-        } else {
+        }
+        else {
             LOGGER.debug("No session cookie '{}' received", this.sessionCookiePrefix);
         }
         return true;

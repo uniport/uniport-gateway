@@ -25,7 +25,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final JsonObject cookie = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE);
         final String cookieName = (cookie == null) ? null
-                : cookie.getString(DynamicConfiguration.MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
+                : cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME);
         final Boolean cookieHttpOnly = (cookie == null) ? null
                 : cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
         final Boolean cookieSecure = (cookie == null) ? null
@@ -37,10 +37,12 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         final Integer sessionIdMinLength = middlewareConfig
                 .getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH);
         final Boolean nagHttps = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS);
+        final Boolean lifetimeHeader = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_HEADER);
+        final Boolean lifetimeCookie = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_COOKIE);
 
         LOGGER.info("Created '{}' middleware successfully",
                 DynamicConfiguration.MIDDLEWARE_SESSION);
-        return Future.succeededFuture(new SessionMiddleware(vertx, name, sessionIdleTimeoutInMinutes, cookieName,
+        return Future.succeededFuture(new SessionMiddleware(vertx, name, sessionIdleTimeoutInMinutes, lifetimeHeader, lifetimeCookie, cookieName,
                 cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength, nagHttps));
     }
 }

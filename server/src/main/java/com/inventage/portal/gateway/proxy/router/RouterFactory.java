@@ -86,7 +86,8 @@ public class RouterFactory {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
                     router.route("/*").setName("router").subRouter((Router) srf.result());
-                } else {
+                }
+                else {
                     handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
@@ -104,7 +105,7 @@ public class RouterFactory {
     }
 
     private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-            Handler<AsyncResult<Router>> handler) {
+                                 Handler<AsyncResult<Router>> handler) {
         final Router router = Router.router(this.vertx);
         final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -162,7 +163,7 @@ public class RouterFactory {
     }
 
     private void createMiddleware(JsonObject middlewareConfig, Router router,
-            Handler<AsyncResult<Middleware>> handler) {
+                                  Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
                 new JsonObject());
@@ -183,7 +184,7 @@ public class RouterFactory {
             return;
         }
 
-        String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
         middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 
@@ -206,7 +207,8 @@ public class RouterFactory {
         final int statusCode;
         if (isHealthy) {
             statusCode = HttpResponseStatus.OK.code();
-        } else {
+        }
+        else {
             statusCode = HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
         }
         router.route("/health").setName("health").handler(ctx -> {

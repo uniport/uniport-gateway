@@ -1,18 +1,10 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -25,6 +17,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Entry point for the portal gateway.
@@ -76,7 +74,8 @@ public class Entrypoint {
                     router().route(application.rootPath() + "*").subRouter(applicationRouter);
                     LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
                             application.rootPath(), name);
-                } else {
+                }
+                else {
                     LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
                             application, application.rootPath());
                 }
@@ -143,7 +142,7 @@ public class Entrypoint {
     }
 
     private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
-            Handler<AsyncResult<Middleware>> handler) {
+                                       Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
                 new JsonObject());
@@ -156,7 +155,7 @@ public class Entrypoint {
             return;
         }
 
-        String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
         middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 

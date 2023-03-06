@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.vertx.core.MultiMap;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.assertj.core.api.AbstractAssert;
@@ -126,8 +127,19 @@ public class AuthenticationRedirectRequestAssert
                 .findFirst().orElse(null);
     }
 
+    private String valueFromSetCookie(String aSetCookieHeader, String cookieName) {
+        return Arrays.stream(aSetCookieHeader.split(";")).filter(element -> element.equalsIgnoreCase(cookieName))
+                .findFirst().orElse(null);
+    }
+
     public AuthenticationRedirectRequestAssert hasStatusCode(int expectedStatusCode) {
         Assertions.assertEquals(expectedStatusCode, actual.statusCode());
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader) {
+        String value = actual.getHeader(expectedHeader);
+        Assertions.assertNotNull(value);
         return this;
     }
 
@@ -147,6 +159,18 @@ public class AuthenticationRedirectRequestAssert
     public AuthenticationRedirectRequestAssert hasSetCookieForSessionDifferentThan(String sessionCookie) {
         String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
         Assertions.assertNotEquals(sessionCookie, set_cookie);
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName) {
+        List<String> cookies = actual.cookies();
+        Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(cookieName+"=")).findAny().isPresent());
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasNotSetCookie(String cookieName) {
+        List<String> cookies = actual.cookies();
+        Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(cookieName+"=")).findAny().isPresent());
         return this;
     }
 }
