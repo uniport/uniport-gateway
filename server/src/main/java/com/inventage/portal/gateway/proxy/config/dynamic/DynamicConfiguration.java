@@ -96,16 +96,11 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "directive";
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
 
-    public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
-
-    public static final String MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE = "sessionScope";
-
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER = "issuer";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE = "audience";
-    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL = "optional";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS = "claims";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH = "claimPath";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE = "value";
@@ -115,7 +110,11 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
 
+    public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
+    public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
+
     public static final String MIDDLEWARE_PASS_AUTHORIZATION = "passAuthorization";
+    public static final String MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE = "sessionScope";
 
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
 
@@ -139,6 +138,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
 
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
+    public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
 
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
@@ -219,12 +219,13 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
                 .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
                 .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
-                .property(MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE, Schemas.stringSchema())
                 .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema())
                 .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema())
                 .property(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
-                .property(MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL, Schemas.stringSchema())
                 .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema())
+                .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema())
+                .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
                 .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
@@ -556,9 +557,9 @@ public class DynamicConfiguration {
 
             switch (mwType) {
                 case MIDDLEWARE_AUTHORIZATION_BEARER: {
-                    Future<Void> validationResult = validateWithAuthToken(mwType, mwOptions);
-                    if (validationResult != null) {
-                        return validationResult;
+                    final String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+                    if (sessionScope == null || sessionScope.length() == 0) {
+                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
                     break;
                 }
@@ -891,12 +892,12 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_PASS_AUTHORIZATION: {
-                    Future<Void> validationResult = validateWithAuthToken(mwType, mwOptions);
-                    if (validationResult != null) {
-                        return validationResult;
+                    final String sessionScope = mwOptions.getString(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE);
+                    if (sessionScope == null || sessionScope.length() == 0) {
+                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
 
-                    validationResult = validateWithAuthHandler(mwType, mwOptions);
+                    Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
                     if (validationResult != null) {
                         return validationResult;
                     }
@@ -947,7 +948,7 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    public static Future<Void> validateWithAuthHandler(String mwType, JsonObject mwOptions) {
+    private static Future<Void> validateWithAuthHandler(String mwType, JsonObject mwOptions) {
         final JsonArray publicKeys = mwOptions.getJsonArray(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
         if (publicKeys == null || publicKeys.size() == 0) {
             return Future.failedFuture(String.format("%s: No public keys defined", mwType));
@@ -1083,14 +1084,6 @@ public class DynamicConfiguration {
             LOGGER.debug("No custom claims defined!");
         }
 
-        return null;
-    }
-
-    private static Future<Void> validateWithAuthToken(String mwType, JsonObject mwOptions) {
-        final String sessionScope = mwOptions.getString(MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE);
-        if (sessionScope == null || sessionScope.length() == 0) {
-            return Future.failedFuture(String.format("%s: No session scope defined", mwType));
-        }
         return null;
     }
 

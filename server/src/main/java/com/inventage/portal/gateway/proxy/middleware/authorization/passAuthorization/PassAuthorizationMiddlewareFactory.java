@@ -22,7 +22,7 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     @Override
     protected Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig) {
         final String sessionScope = middlewareConfig
-                .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE);
+                .getString(DynamicConfiguration.MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE);
 
         final Middleware passAuthorizationMiddleware = new PassAuthorizationMiddleware(name, sessionScope, authHandler);
         LOGGER.debug("Created '{}' middleware", DynamicConfiguration.MIDDLEWARE_PASS_AUTHORIZATION);

@@ -22,7 +22,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     @Override
     protected Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig) {
         final String optionalStr = middlewareConfig.getString(
-                DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL,
+                DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL,
                 "false");
         final boolean optional = Boolean.parseBoolean(optionalStr);
 

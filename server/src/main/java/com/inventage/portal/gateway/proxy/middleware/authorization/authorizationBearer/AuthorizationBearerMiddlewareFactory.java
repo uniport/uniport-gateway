@@ -27,7 +27,7 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
                 DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
         return Future.succeededFuture(new AuthorizationBearerMiddleware(
                 name,
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_TOKEN_SESSION_SCOPE)));
+                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
     }
 
 }
