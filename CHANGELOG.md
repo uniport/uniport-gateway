@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: docker-compose artefact is no longer provided ([PORTAL-1251](https://issue.inventage.com/browse/PORTAL-1251)).
+- **BREAKING**: the `bearerOnly` middleware expects now a key with `publicKeys` with an array containing multiple objects, each with a public key ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092)).
 - Updated the Vert.x stack to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Updated the Vert.x stack to `4.3.8` ([PORTAL-1236](https://issue.inventage.com/browse/PORTAL-1236)).
 - Updated usage of `io.vertx.json.schema` to newest concepts ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
