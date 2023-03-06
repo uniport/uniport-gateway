@@ -36,6 +36,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
@@ -50,12 +51,19 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
     private static final String JWK_KEYS_KEY = "keys";
     private static final String JWK_KTY_KEY = "kty";
-    private static final String JWK_ALG_KEY = "alg";
     private static final String JWK_USE_KEY = "use";
     private static final String JWK_MODULUS_KEY = "n";
     private static final String JWK_EXPONENT_KEY = "e";
 
     private static final String JWK_USE_SIGNING = "sig";
+
+    /**
+     * Creates the actual middleware.
+     * @param authHandler The {@link AuthenticationHandler} to use in the middleware
+     * @param middlewareConfig The config for the middleware
+     * @return Your {@link Middleware}
+     */
+    protected abstract Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig);
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
@@ -67,13 +75,26 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
         final JsonArray additionalClaims = middlewareConfig
                 .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
+        final JsonArray publicKeys = middlewareConfig
+                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
 
-        final String optionalStr = middlewareConfig.getString(
-                DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_OPTIONAL,
-                "false");
-        final boolean optional = Boolean.parseBoolean(optionalStr);
+        this.fetchPublicKeys(vertx, publicKeys)
+                .onSuccess(setupMiddleware(vertx, name,
+                        issuer, audience, additionalClaims,
+                        middlewareConfig, middlewarePromise))
+                .onFailure(err -> {
+                    final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
+                    LOGGER.warn(errMsg);
+                    middlewarePromise.handle(Future.failedFuture(errMsg));
+                });
 
-        this.fetchPublicKeys(vertx, middlewareConfig).onSuccess(publicKeys -> {
+        return middlewarePromise.future();
+    }
+
+    private Handler<List<PubSecKeyOptions>> setupMiddleware(Vertx vertx, String name, String issuer, JsonArray audience,
+            JsonArray additionalClaims, JsonObject middlewareConfig,
+            Handler<AsyncResult<Middleware>> handler) {
+        return publicKeys -> {
             final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
                 jwtOptions.setIssuer(issuer);
@@ -100,38 +121,21 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider,
                     additionalClaimsOptions);
 
-            middlewarePromise.handle(Future.succeededFuture(create(name, authHandler, middlewareConfig)));
+            handler.handle(Future.succeededFuture(create(name, authHandler, middlewareConfig)));
             LOGGER.debug("Created middleware successfully");
-        }).onFailure(err -> {
-            final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
-            LOGGER.info(errMsg);
-            middlewarePromise.handle(Future.failedFuture(errMsg));
-        });
-
-        return middlewarePromise.future();
+        };
     }
 
-    /**
-     * Creates the actual middleware.
-     * @param authHandler The {@link AuthenticationHandler} to use in the middleware
-     * @param middlewareConfig The config for the middleware
-     * @return Your {@link Middleware}
-     */
-    protected abstract Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig);
-
-    // TODO do we still need a future here?
-    private Future<List<PubSecKeyOptions>> fetchPublicKeys(Vertx vertx, JsonObject middlewareConfig) {
+    private Future<List<PubSecKeyOptions>> fetchPublicKeys(Vertx vertx, JsonArray publicKeys) {
         final Promise<List<PubSecKeyOptions>> promise = Promise.promise();
-        this.fetchPublicKeys(vertx, middlewareConfig, promise);
+        this.fetchPublicKeys(vertx, publicKeys, promise);
         return promise.future();
     }
 
-    private void fetchPublicKeys(Vertx vertx, JsonObject middlewareConfig,
+    private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
             Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
 
-        final List<JsonObject> publicKeys = middlewareConfig
-                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS).getList();
-
+        final List<JsonObject> publicKeys = rawPublicKeys.getList();
         final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
         publicKeys.forEach(pk -> {
             String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
@@ -141,60 +145,60 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 new URL(publicKey).toURI();
                 isURL = true;
             } catch (MalformedURLException | URISyntaxException e) {
-                LOGGER.debug("URI is malformed: " + e.getMessage());
+                // intended case
+                LOGGER.debug("URI is malformed, hence it is has to be a raw public key.");
             }
 
-            if (!isURL) {
-                // then the public key is provided directly
+            if (isURL) {
+                LOGGER.info("Public key provided by URL. Fetching...");
+
+                this.fetchPublicKeysFromDiscoveryURL(vertx, publicKey)
+                        .onSuccess(publicKeyOpts::addAll)
+                        .onFailure(err -> handler.handle(Future.failedFuture(err)));
+            } else {
+                LOGGER.info("Public key provided directly");
+
                 final String publicKeyAlgorithm = pk
                         .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM);
-
                 publicKeyOpts.add(
                         new PubSecKeyOptions()
                                 .setAlgorithm(publicKeyAlgorithm)
                                 .setBuffer(publickeyToPEM(publicKey)));
-
-                LOGGER.info("Public key provided directly");
-            } else {
-                LOGGER.info("Public key provided by URL");
-
-                this.fetchPublicKeysFromURL(vertx, publicKey)
-                        .onSuccess(publicKeyOpts::addAll)
-                        .onFailure(null);
             }
         });
 
         handler.handle(Future.succeededFuture(publicKeyOpts));
     }
 
-    private Future<List<PubSecKeyOptions>> fetchPublicKeysFromURL(Vertx vertx, String rawUrl) {
+    private Future<List<PubSecKeyOptions>> fetchPublicKeysFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL) {
         final Promise<List<PubSecKeyOptions>> promise = Promise.promise();
-        this.fetchPublicKeysFromURL(vertx, rawUrl, promise);
+        this.fetchPublicKeysFromDiscoveryURL(vertx, rawRealmBaseURL, promise);
         return promise.future();
     }
 
-    private void fetchPublicKeysFromURL(Vertx vertx, String rawUrl,
+    private void fetchPublicKeysFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL,
             Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
-        final URL parsedURL;
+        final URL parsedRealmBaseURL;
         try {
-            parsedURL = new URL(rawUrl);
+            parsedRealmBaseURL = new URL(rawRealmBaseURL);
         } catch (MalformedURLException e) {
-            LOGGER.info("Malformed URL '{}'", rawUrl);
+            LOGGER.warn("Malformed discovery URL '{}'", rawRealmBaseURL);
             handler.handle(Future.failedFuture(e));
             return;
         }
 
-        final String protocol = parsedURL.getProtocol();
-        final String host = parsedURL.getHost();
-        int port = parsedURL.getPort();
+        final String iamProtocol = parsedRealmBaseURL.getProtocol();
+        final String iamHost = parsedRealmBaseURL.getHost();
+        int port = parsedRealmBaseURL.getPort();
         if (port <= 0) {
-            if (protocol.endsWith("s")) {
+            if (iamProtocol.endsWith("s")) {
                 port = 443;
             } else {
                 port = 80;
             }
         }
-        String path = parsedURL.getPath();
+
+        String path = parsedRealmBaseURL.getPath();
         if (path == null) {
             path = "/";
         }
@@ -203,93 +207,135 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             path = path.substring(0, path.length() - 1);
         }
 
+        // allow both to avoid confusion:
+        // * url with OIDC discovery path already included
+        // * url with OIDC discovery path not yet included
+        if (!path.endsWith(OIDC_DISCOVERY_PATH)) {
+            path = path + OIDC_DISCOVERY_PATH;
+        }
+
         // discover jwks_uri
-        path = path + OIDC_DISCOVERY_PATH;
-
         final int iamPort = port;
-        final String iamPath = path;
-        LOGGER.debug("Reading public key from URL '{}://{}:{}{}'", protocol, host, iamPort, iamPath);
-
-        // TODO split up
-        WebClient webclient = WebClient.create(vertx);
-        webclient.get(iamPort, host, iamPath).as(BodyCodec.jsonObject()).send()
-                .onSuccess(discoveryResp -> {
-                    final String JWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
-                    if (JWKsURI == null || JWKsURI.length() == 0) {
-                        final String errMsg = "No JWK URI found";
-                        LOGGER.info(errMsg);
-                        handler.handle(Future.failedFuture(errMsg));
-                    }
-
-                    webclient.get(JWKsURI).as(BodyCodec.jsonObject()).send()
-                            .onSuccess(JWKsResp -> {
-                                final JsonArray keys = JWKsResp.body().getJsonArray(JWK_KEYS_KEY);
-
-                                if (keys == null || keys.size() == 0) {
-                                    final String errMsg = "No public key found";
-                                    LOGGER.warn(errMsg);
-                                    handler.handle(Future.failedFuture(errMsg));
-                                    return;
-                                }
-
-                                final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
-                                for (int i = 0; i < keys.size(); i++) {
-                                    JsonObject params = keys.getJsonObject(i);
-
-                                    String ktyValue = params.getString(JWK_KTY_KEY);
-                                    // String algValue = params.getString(JWK_ALG_KEY); // TODO see assemblePublicKeyOptions
-                                    String useValue = params.getString(JWK_USE_KEY);
-                                    String nValue = params.getString(JWK_MODULUS_KEY);
-                                    String eValue = params.getString(JWK_EXPONENT_KEY);
-
-                                    publicKeyOpts.add(assemblePublicKeyOptions(ktyValue, nValue, eValue, useValue));
-                                }
-
-                                LOGGER.debug("Successfully retrieved public keys from URL");
-                                handler.handle(Future.succeededFuture(publicKeyOpts));
-                            })
-                            .onFailure(err -> {
-                                LOGGER.info("Failed to complete load JWK from URL '{}'", JWKsURI);
-                                handler.handle(Future.failedFuture(err));
-                            });
-                })
+        final String iamDiscoveryPath = path;
+        LOGGER.debug("Fetching jwks_uri from URL '{}://{}:{}{}'", iamProtocol, iamHost, iamPort, iamDiscoveryPath);
+        WebClient.create(vertx).get(iamPort, iamHost, iamDiscoveryPath).as(BodyCodec.jsonObject()).send()
+                .onSuccess(fetchPublicKeysFromJWKsURL(vertx, iamHost, iamPort, handler))
                 .onFailure(err -> {
-                    LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}'", protocol, host, iamPort,
-                            iamPath);
+                    LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}'",
+                            iamProtocol, iamHost, iamPort, iamDiscoveryPath);
                     handler.handle(Future.failedFuture(err));
                 });
     }
 
+    private Handler<HttpResponse<JsonObject>> fetchPublicKeysFromJWKsURL(Vertx vertx, String iamHost,
+            int iamPort, Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
+        return discoveryResp -> {
+            final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
+            if (rawJWKsURI == null || rawJWKsURI.length() == 0) {
+                final String errMsg = "No JWK URI found";
+                LOGGER.warn(errMsg);
+                handler.handle(Future.failedFuture(errMsg));
+                return;
+            }
+
+            final URL parsedJWKsURL;
+            try {
+                parsedJWKsURL = new URL(rawJWKsURI);
+            } catch (MalformedURLException e) {
+                LOGGER.warn("Malformed JWKs URL '{}'", rawJWKsURI);
+                handler.handle(Future.failedFuture(e));
+                return;
+            }
+
+            final String iamJWKsPath = parsedJWKsURL.getPath();
+            if (iamJWKsPath == null) {
+                final String errMsg = "Failed to discover JWKs URI";
+                LOGGER.warn(errMsg);
+                handler.handle(Future.failedFuture(errMsg));
+                return;
+            }
+
+            LOGGER.debug("Fetching public key from URL '{}'", rawJWKsURI);
+            WebClient.create(vertx).get(iamPort, iamHost, iamJWKsPath).as(BodyCodec.jsonObject()).send()
+                    .onSuccess(parsePublicKeysFromJWKs(handler))
+                    .onFailure(err -> {
+                        LOGGER.info("Failed to complete load JWK from URL '{}'", rawJWKsURI);
+                        handler.handle(Future.failedFuture(err));
+                    });
+        };
+    }
+
+    private Handler<HttpResponse<JsonObject>> parsePublicKeysFromJWKs(
+            Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
+        return JWKsResp -> {
+            LOGGER.debug("Received public keys");
+            final JsonArray keys = JWKsResp.body().getJsonArray(JWK_KEYS_KEY);
+            if (keys == null || keys.size() == 0) {
+                final String errMsg = "No public key found";
+                LOGGER.warn(errMsg);
+                handler.handle(Future.failedFuture(errMsg));
+                return;
+            }
+
+            final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
+            for (int i = 0; i < keys.size(); i++) {
+                JsonObject params = keys.getJsonObject(i);
+
+                String ktyValue = params.getString(JWK_KTY_KEY);
+                String useValue = params.getString(JWK_USE_KEY);
+                String nValue = params.getString(JWK_MODULUS_KEY);
+                String eValue = params.getString(JWK_EXPONENT_KEY);
+
+                PubSecKeyOptions publicKeyOpt = assemblePublicKeyOptions(ktyValue, nValue, eValue,
+                        useValue);
+                if (publicKeyOpt != null) {
+                    System.out.println(publicKeyOpt.getAlgorithm());
+                    publicKeyOpts.add(publicKeyOpt);
+                }
+            }
+
+            LOGGER.debug("Successfully fetched {} public keys from URL", publicKeyOpts.size());
+            handler.handle(Future.succeededFuture(publicKeyOpts));
+        };
+    }
+
     // for reference see RFC 7517: JSON Web Key (JWK) - https://datatracker.ietf.org/doc/html/rfc7517
     private PubSecKeyOptions assemblePublicKeyOptions(String ktyValue, String nValue, String eValue, String useValue) {
+        LOGGER.debug("Inspecting public key: key type '{}', modulus '{}', public exponent '{}', use: '{}'",
+                ktyValue, nValue, eValue, useValue);
+
         // only consider keys used for signing
-        if (useValue != JWK_USE_SIGNING) {
+        if (!useValue.equals(JWK_USE_SIGNING)) {
+            LOGGER.debug("Ignoring public key as is is not used for signing");
             return null;
         }
 
-        // the modulus and the public exponent are base64url encoded and are big-endian (luckly BigInteger expects big-endian)
-        final BigInteger n = new BigInteger(Base64.getUrlDecoder().decode(nValue));
-        final BigInteger e = new BigInteger(Base64.getUrlDecoder().decode(eValue));
+        // the modulus and the public exponent
+        // * are base64url encoded
+        // * are big-endian (luckly BigInteger expects big-endian)
+        // * and have to be positive (hence the signum of 1)
+        final BigInteger modulus = new BigInteger(1, Base64.getUrlDecoder().decode(nValue));
+        final BigInteger publicExponent = new BigInteger(1, Base64.getUrlDecoder().decode(eValue));
 
-        final PublicKey publicKey = publicKeyParamsToPublicKey(ktyValue, n, e);
+        final PublicKey publicKey = publicKeyParamsToPublicKey(ktyValue, modulus, publicExponent);
         if (publicKey == null) {
             return null;
         }
 
         return new PubSecKeyOptions()
-                .setAlgorithm(publicKey.getAlgorithm()) // TODO do we have to set this or is it detected?
+                .setAlgorithm(publicKey.getAlgorithm())
                 .setBuffer(publickeyToPEM(new String(publicKey.getEncoded(), StandardCharsets.UTF_8)));
     }
 
-    private PublicKey publicKeyParamsToPublicKey(String keyType, BigInteger n, BigInteger e) {
+    private PublicKey publicKeyParamsToPublicKey(String keyType, BigInteger modulus, BigInteger publicExponent) {
         final KeySpec keyspec;
         switch (keyType) {
             case "RSA":
-                keyspec = new RSAPublicKeySpec(n, e);
+                keyspec = new RSAPublicKeySpec(modulus, publicExponent);
                 break;
             default:
-                keyspec = new RSAPublicKeySpec(n, e);
-                return null;
+                keyspec = new RSAPublicKeySpec(modulus, publicExponent);
+                break;
         }
 
         final PublicKey publicKey;
