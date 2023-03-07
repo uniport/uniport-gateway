@@ -67,6 +67,25 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <id>copy-server-config-template</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/portal-gateway-template/app-config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../server/src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>logback.xml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
 
                 </executions>
             </plugin>
