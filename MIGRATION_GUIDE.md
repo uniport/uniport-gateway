@@ -53,20 +53,20 @@ As example:
 {
     "entrypoints": [
         {
-            "name": ...,
-            "port": ...,
+            "name": "...",
+            "port": "...",
             "middlewares": [
-                ...,
+                "...",
                 {
-                    "name": ...,
+                    "name": "...",
                     "type": "sessionBag",
                     "options": {
-                        "whitelistedCookies": ...
+                        "whitelistedCookies": "..."
                     }
                 }
             ]
         },
-        ...
+        "..."
     ]
 }
 ```
@@ -84,8 +84,8 @@ the `portal-gateway.json` configuration file. The following changes need to be m
 {
     "entrypoints": [
         {
-            "name": ...,
-            "port": ...,
+            "name": "...",
+            "port": "...",
             "middlewares": [
                 {
                     "name": "responseSessionCookieRemoval",
@@ -109,7 +109,7 @@ the `portal-gateway.json` configuration file. The following changes need to be m
                 }
             ]
         },
-        ...
+        "..."
     ]
 }
 ```
