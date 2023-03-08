@@ -38,8 +38,12 @@ public class RequestResponseLoggerMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         final long start = System.currentTimeMillis();
-        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+        ContextualData.put(CONTEXTUAL_DATA_USER_ID, getUserId(ctx.user()));
+        final String traceId = Span.current().getSpanContext().getTraceId();
+        ContextualData.put(CONTEXTUAL_DATA_REQUEST_ID, traceId);
+        ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
 
+        LOGGER.debug("{} for '{}'", name, ctx.request().absoluteURI());
 
         if (LOGGER.isTraceEnabled()) {
             logRequestTrace(ctx);
@@ -50,11 +54,6 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         else if (LOGGER.isInfoEnabled()) {
             logRequestInfo(ctx);
         }
-
-        ContextualData.put(CONTEXTUAL_DATA_USER_ID, getUserId(ctx.user()));
-        final String traceId = Span.current().getSpanContext().getTraceId();
-        ContextualData.put(CONTEXTUAL_DATA_REQUEST_ID, traceId);
-        ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
 
         ctx.addHeadersEndHandler(
                 v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
@@ -81,13 +80,13 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
     private void logRequestInfo(RoutingContext context) {
         final String infoLog = generateHttpRequestLogMessage(context);
-        LOGGER.info("{}: Incoming Request '{}'", name, infoLog);
+        LOGGER.info("{} incoming Request '{}'", name, infoLog);
     }
 
     private void logRequestDebug(RoutingContext context) {
         final String infoLog = generateHttpRequestLogMessage(context);
         final String headersLog = generateHttpHeaderLogMessage(context.request().headers());
-        LOGGER.debug("{}: Incoming Request '{}'\nHeaders '{}'", name, infoLog, headersLog);
+        LOGGER.debug("{} incoming Request '{}'\nHeaders '{}'", name, infoLog, headersLog);
     }
 
     private void logRequestTrace(RoutingContext context) {
@@ -99,32 +98,32 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             request.body().onSuccess(body -> {
                 if (body != null) {
                     final String bodyContent = body.toString();
-                    LOGGER.trace("{}: Incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, bodyContent);
+                    LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, bodyContent);
                 }
             }).onFailure(error -> {
-                LOGGER.trace("{}: Incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, error.getMessage());
+                LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, error.getMessage());
             });
         }
         else {
-            LOGGER.trace("{}: Incoming Request '{}'\n Headers '{}'\n Content-type '{}'", name, infoLog, headersLog, contentType);
+            LOGGER.trace("{} incoming Request '{}'\n Headers '{}'\n Content-type '{}'", name, infoLog, headersLog, contentType);
         }
     }
 
     private void logResponseDebug(RoutingContext context, long start) {
         final String infoLog = generateHttpResponseLogMessage(context, start);
         final String headerLog = generateHttpHeaderLogMessage(context.response().headers());
-        LOGGER.debug("{}: Outgoing Response '{}' \nHeaders '{}'", name, infoLog, headerLog);
+        LOGGER.debug("{} outgoing Response '{}' \nHeaders '{}'", name, infoLog, headerLog);
     }
 
     private void logResponseInfo(RoutingContext context, long start) {
         final String infoLog = generateHttpResponseLogMessage(context, start);
-        LOGGER.info("{}: Outgoing Response '{}'", name, infoLog);
+        LOGGER.info("{} outgoing Response '{}'", name, infoLog);
     }
 
     private void logResponseTrace(RoutingContext context, long start) {
         final String infoLog = generateHttpResponseLogMessage(context, start);
         final String headerLog = generateHttpHeaderLogMessage(context.response().headers());
-        LOGGER.trace("{}: Outgoing Response '{}' \nHeaders '{}'", name, infoLog, headerLog);
+        LOGGER.trace("{} outgoing Response '{}' \nHeaders '{}'", name, infoLog, headerLog);
     }
 
     private String generateHttpResponseLogMessage(RoutingContext routingContext, long start) {
