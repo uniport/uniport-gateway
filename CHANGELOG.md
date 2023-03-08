@@ -11,9 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 7.0.0-[202303080728-648-fe6be73] - 2023-03-08
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17863) - 
-
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.0-202303080728-648-fe6be73~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D7.0.0-202303080728-648-fe6be73)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17863) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.0-202303080728-648-fe6be73~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D7.0.0-202303080728-648-fe6be73)
 
 ### Added
 
