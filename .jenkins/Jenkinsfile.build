@@ -290,10 +290,10 @@ def codeQualityEvaluation() {
  * @return
  */
 def sendNotifications() {
-    configFileProvider([configFile(fileId: 'default-email-recipients', variable: 'DEFAULT_EMAIL_RECIPIENTS')]) {
+    configFileProvider([configFile(fileId: 'default-email-recipients', variable: 'DEFAULT_EMAIL_RECIPIENTS_FILE')]) {
         def recipient = sh(script: "git show -s --format='%ae'", returnStdout: true, encoding: 'UTF-8').trim()
         if (!recipient) {
-            recipient = "${DEFAULT_EMAIL_RECIPIENTS}"
+            recipient = sh(script: "cat '${env.DEFAULT_EMAIL_RECIPIENTS_FILE}'", returnStdout: true, encoding: 'UTF-8').trim()
         }
 
         step([
