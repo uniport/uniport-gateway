@@ -13,6 +13,7 @@ Old:
     "type": "bearerOnly",
     "options": {
         "publicKey": "http://portal-iam:8080/auth/realms/portal",
+        "publicKeyAlgorithm": "RS256",
         "audience": ["..."],
         "issuer": "...",
         "optional": "...",
@@ -29,7 +30,8 @@ New:
     "options": {
         "publicKeys": [
             {
-                "publicKey": "http://portal-iam:8080/auth/realms/porta"
+                "publicKey": "http://portal-iam:8080/auth/realms/portal",
+                "publicKeyAlgorithm": "RS256"
             }
         ],
         "audience": ["..."],
