@@ -120,7 +120,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             Handler<AsyncResult<JWTAuthOptions>> handler) {
 
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
-        LOGGER.debug("Fetchpublickeys length: " + publicKeys.size());
 
         final JWTAuthOptions authOpts = new JWTAuthOptions();
         final List<Future> futures = new LinkedList<>();
@@ -145,6 +144,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                                     jwks.forEach(jwk -> authOpts.addJwk(jwk));
                                 })
                                 .onFailure(err -> handler.handle(Future.failedFuture(err))));
+
+                LOGGER.info("Successfully fetching JWKs");
             } else {
                 LOGGER.info("Public key provided directly");
 
