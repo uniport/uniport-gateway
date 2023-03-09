@@ -13,8 +13,10 @@ import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedList;
 import java.util.List;
 
+import io.vertx.core.CompositeFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +95,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private Handler<List<PubSecKeyOptions>> setupMiddleware(Vertx vertx, String name, String issuer, JsonArray audience,
-            JsonArray additionalClaims, JsonObject middlewareConfig,
-            Handler<AsyncResult<Middleware>> handler) {
+                                                            JsonArray additionalClaims, JsonObject middlewareConfig,
+                                                            Handler<AsyncResult<Middleware>> handler) {
         return publicKeys -> {
             final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
@@ -107,7 +109,11 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             }
 
             final JWTAuthOptions authConfig = new JWTAuthOptions().setJWTOptions(jwtOptions);
+            LOGGER.debug("Public key size: " + publicKeys.size());
             publicKeys.forEach(publicKey -> {
+                LOGGER.debug("Add publickey with algorithm:");
+                LOGGER.debug(publicKey.getAlgorithm());
+
                 authConfig.addPubSecKey(publicKey);
             });
 
@@ -137,15 +143,20 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
 
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
-        final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
-        publicKeys.forEach(pk -> {
-            String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
+        LOGGER.debug("Fetchpublickeys length: " + publicKeys.size());
 
+        final List<PubSecKeyOptions> publicKeyOpts = new ArrayList<>();
+        final List<Future> pubSecKeyFutures = new LinkedList<>();
+
+        publicKeys.forEach(pk -> {
+            final String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
+            LOGGER.debug("Publickeys for each, current pk :" + publicKey);
             boolean isURL = false;
             try {
                 new URL(publicKey).toURI();
                 isURL = true;
-            } catch (MalformedURLException | URISyntaxException e) {
+            }
+            catch (MalformedURLException | URISyntaxException e) {
                 // intended case
                 LOGGER.debug("URI is malformed, hence it is has to be a raw public key.");
             }
@@ -153,10 +164,11 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             if (isURL) {
                 LOGGER.info("Public key provided by URL. Fetching...");
 
-                this.fetchPublicKeysFromDiscoveryURL(vertx, publicKey)
+                pubSecKeyFutures.add(this.fetchPublicKeysFromDiscoveryURL(vertx, publicKey)
                         .onSuccess(publicKeyOpts::addAll)
-                        .onFailure(err -> handler.handle(Future.failedFuture(err)));
-            } else {
+                        .onFailure(err -> handler.handle(Future.failedFuture(err))));
+            }
+            else {
                 LOGGER.info("Public key provided directly");
 
                 final String publicKeyAlgorithm = pk
@@ -167,8 +179,13 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                                 .setBuffer(publickeyToPEM(publicKey)));
             }
         });
+        CompositeFuture.all(pubSecKeyFutures).onSuccess(psk -> {
+            handler.handle(Future.succeededFuture(publicKeyOpts));
+        }).onFailure(err -> {
+            LOGGER.error(err.getMessage());
+            handler.handle(Future.failedFuture(err));
+        });
 
-        handler.handle(Future.succeededFuture(publicKeyOpts));
     }
 
     private Future<List<PubSecKeyOptions>> fetchPublicKeysFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL) {
@@ -231,6 +248,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     private Handler<HttpResponse<JsonObject>> fetchPublicKeysFromJWKsURL(Vertx vertx, String iamHost,
             int iamPort, Handler<AsyncResult<List<PubSecKeyOptions>>> handler) {
         return discoveryResp -> {
+            LOGGER.debug("Keycloak discover response: " + discoveryResp.bodyAsString());
             final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
             if (rawJWKsURI == null || rawJWKsURI.length() == 0) {
                 final String errMsg = "No JWK URI found";
@@ -342,7 +360,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final PublicKey publicKey;
         try {
             publicKey = KeyFactory.getInstance(keyType).generatePublic(keyspec);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
+        }
+        catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
             LOGGER.warn("Failed to generate public key from components: '{}'", ex.getMessage());
             return null;
         }
