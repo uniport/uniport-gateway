@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+## 7.0.1-[202303091216-1-ee2c2a1] - 2023-03-09
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.1-202303091216-1-ee2c2a1~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)
+
+### Fixed
+
+- "Unknown algorithm RSA" bug fixed. ([PORTAL-1092] (https://issue.inventage.com/browse/PORTAL-1092))
+
 ## [7.0.0]-202303080728-648-fe6be73 - 2023-03-08
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17863) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.0-202303080728-648-fe6be73~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D7.0.0-202303080728-648-fe6be73)
@@ -361,7 +369,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F7.0.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F7.0.1
+  [7.0.1]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F7.0.0&sourceBranch=refs%2Ftags%2F7.0.1
 [7.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F6.0.0&sourceBranch=refs%2Ftags%2F7.0.0
 [6.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F5.1.0&sourceBranch=refs%2Ftags%2F6.0.0
 [5.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F5.0.0&sourceBranch=refs%2Ftags%2F5.1.0
