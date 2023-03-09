@@ -27,16 +27,17 @@ public class KeycloakServer {
     private final static String HTTP_PREFIX = "http://";
     private final static String EMPTY_STRING = "";
     private final static String OPENID_DISCOVERY_PATH = "/.well-known/openid-configuration";
+    private final static String TEST_REALM_PATH = "/auth/realms/test";
 
     private final static String AUTHORIZATION_ENDPOINT_KEY = "authorization_endpoint";
 
     private final static String TOKEN_ENDPOINT_KEY = "token_endpoint";
-    private final static String TOKEN_ENDPOINT_PATH = "/auth/realms/test/protocol/openid-connect/token";
+    private final static String TOKEN_ENDPOINT_PATH = "/protocol/openid-connect/token";
     private final static String ACCESS_TOKEN_KEY = "access_token";
     private final static String RANDOM_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ";
 
     private final static String JWKs_URI_KEY = "jwks_uri";
-    private final static String JWKS_URIS_PATH = "/auth/realms/test/protocol/openid-connect/certs";
+    private final static String JWKS_URIS_PATH = "/protocol/openid-connect/certs";
     private final static String JWKS_KEYS_KEY = "keys";
     private final static String JWK_KID_KEY = "kid";
     private final static String JWK_KTY_KEY = "kty";
@@ -93,12 +94,12 @@ public class KeycloakServer {
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
                 req -> {
-                    if (req.path().equals(OPENID_DISCOVERY_PATH)) {
+                    if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
                                 .send(discoveryResponse.encode());
-                    } else if (req.path().equals(TOKEN_ENDPOINT_PATH)) {
+                    } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
@@ -114,12 +115,12 @@ public class KeycloakServer {
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
                 req -> {
-                    if (req.path().equals(OPENID_DISCOVERY_PATH)) {
+                    if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
                                 .send(discoveryResponse.encode());
-                    } else if (req.path().equals(TOKEN_ENDPOINT_PATH)) {
+                    } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
                         req.bodyHandler(bodyHandler);
                         req.response()
                                 .putHeader("content-type", "application/json")
@@ -135,12 +136,12 @@ public class KeycloakServer {
         JsonObject jwksURIResponse = getDefaultJWKsURIResponse();
         startServerWithCustomHandler(
                 req -> {
-                    if (req.path().equals(OPENID_DISCOVERY_PATH)) {
+                    if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
                                 .send(discoveryResponse.encode());
-                    } else if (req.path().equals(JWKS_URIS_PATH)) {
+                    } else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
@@ -186,7 +187,7 @@ public class KeycloakServer {
     }
 
     private String getDefaultDiscoveryUrl() {
-        return formatURL(this.host) + ":" + this.port;
+        return formatURL(this.host) + ":" + this.port + TEST_REALM_PATH;
     }
 
     private JsonObject getDefaultDiscoveryResponse() {
