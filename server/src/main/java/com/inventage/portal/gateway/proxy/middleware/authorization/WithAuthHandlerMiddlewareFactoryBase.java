@@ -116,6 +116,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return promise.future();
     }
 
+    // TODO test
     private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
             Handler<AsyncResult<JWTAuthOptions>> handler) {
 

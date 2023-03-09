@@ -15,11 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.google.common.io.Resources;
+import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -148,6 +150,34 @@ public class BearerOnlyMiddlewareTest {
                             // then
                             assertEquals(200, resp.statusCode(), "unexpected status code");
                             testCtx.completeNow();
+                        });
+    }
+
+    @Test
+    void fetchPublicKeysFromOIDCProvider(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
+
+        final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
+        final List<String> expectedAudience = List.of("test-audience");
+
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, "localhost")
+                .startWithDefaultDiscoveryHandlerAndDefaultJWKsURIHandler();
+
+        final JsonArray publicKeys = new JsonArray(
+                "[{\"publicKey\": \"localhost" + keycloakServer.port() + "/auth/realms/test\"}]");
+
+        portalGateway(vertx, testCtx)
+                .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
+                .build().start()
+                // when
+                .incomingRequest(GET, "/",
+                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                        (resp) -> {
+                            // then
+                            assertEquals(200, resp.statusCode(), "unexpected status code");
+                            testCtx.completeNow();
+                            keycloakServer.closeServer();
                         });
     }
 

@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
@@ -67,7 +69,8 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie, null, null, null, null, null, null));
+        return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie,
+                null, null, null, null, null, null));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -83,6 +86,44 @@ public class MiddlewareServerBuilder {
         return withMiddleware(
                 new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
                         optional));
+    }
+
+    /**
+     *
+     * @param mockKeycloakServer
+     * @param scope will be used as the path prefix of incoming requests (e.g. /scope/*)
+     * @return this
+     */
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(KeycloakServer mockKeycloakServer,
+            String issuer, List<String> audience, JsonArray publicKeys) {
+        try {
+            withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys));
+        } catch (Throwable t) {
+            if (mockKeycloakServer != null) {
+                mockKeycloakServer.closeServer();
+            }
+            if (testCtx != null) {
+                testCtx.completeNow();
+            }
+        }
+        return this;
+    }
+
+    private MiddlewareServerBuilder withBearerOnlyMiddleware(JsonObject bearerOnlyConfig) {
+        BearerOnlyMiddlewareFactory factory = new BearerOnlyMiddlewareFactory();
+        Future<Middleware> middlewareFuture = factory.create(vertx, "bearerOnly", router, bearerOnlyConfig);
+        int atMost = 20;
+        while (!middlewareFuture.isComplete() && atMost > 0) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (middlewareFuture.failed()) {
+            throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
+        }
+        return withMiddleware(middlewareFuture.result());
     }
 
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly) {
