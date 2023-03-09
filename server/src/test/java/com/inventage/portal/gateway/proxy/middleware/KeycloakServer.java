@@ -47,9 +47,9 @@ public class KeycloakServer {
     private final static String JWK_PUBLIC_EXPONENT_KEY = "e";
     private final static String RANDOM_JWK_KID = "-xQUHcerDnrhFl6deB8Vw0f4GKPsY6BZMDyHTIbOnL4";
     private final static String RSA_JWK_KTY = "RSA";
-    private final static String RSA256_JWK_ALG = "RSA256";
+    private final static String RS256_JWK_ALG = "RS256";
     private final static String SIGNING_JWK_USE = "sig";
-    private final static String RANDOM_JWK_MODULUS = "xiuRv-X8jt5nKmq0CFv2YZjBfr5MZsdFIBA_MScN2JHxul8kB_zKdgJJ23U-K4vlAsBLVSc0JgInqUHl8un4Nk6_L0Fip9qRJ0TDt7gpDCEVH-FyvXgnlNo7tV94ALuByPt-dO94eqIlnoG_BLWe6u4sdJop7q1GsZ7S0NIlW-X9V1GSH-V0bTfX-9a6VvzAuKy3Yl6WlT6PD7T5waY--oZnnQocI2x9wDpI7lDrP5uZlAiJORoJdlKWNlQnENMTHtRu8wFo71fePynxxhr2ScMjgbER87U0b5mMXH2RBI25EMuYwNdLQB5rEQs5uE99bY3NYRe3Z7mRhE_KYS3qlw";
+    private final static String RANDOM_JWK_MODULUS = "uFJ0A754CTB9-mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH-u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm-rOwytUPflAnYIgqinmiFpqyQ8vwj_L82F5kN5hnB-G2heMXSep4uoq--2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ_YySMmE3F-TxXOVbhZqAuH4A2-9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQ";
     private final static String RANDOM_JWK_PUBLIC_EXPONENT = "AQAB";
 
     public KeycloakServer(Vertx vertx) {
@@ -131,8 +131,8 @@ public class KeycloakServer {
         return this;
     }
 
-    public KeycloakServer startWithDefaultDiscoveryHandlerAndDefaultJWKsURIHandler() throws InterruptedException {
-        JsonObject discoveryResponse = getDefaultDiscoveryResponse();
+    public KeycloakServer startDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler() throws InterruptedException {
+        JsonObject discoveryResponse = getDiscoveryResponseWithJWKsURI();
         JsonObject jwksURIResponse = getDefaultJWKsURIResponse();
         startServerWithCustomHandler(
                 req -> {
@@ -194,6 +194,13 @@ public class KeycloakServer {
         JsonObject discoveryResponse = new JsonObject();
         discoveryResponse.put(AUTHORIZATION_ENDPOINT_KEY, this.getDefaultDiscoveryUrl());
         discoveryResponse.put(TOKEN_ENDPOINT_KEY, this.getDefaultDiscoveryUrl() + TOKEN_ENDPOINT_PATH);
+        return discoveryResponse;
+    }
+
+    private JsonObject getDiscoveryResponseWithJWKsURI() {
+        JsonObject discoveryResponse = new JsonObject();
+        discoveryResponse.put(AUTHORIZATION_ENDPOINT_KEY, this.getDefaultDiscoveryUrl());
+        discoveryResponse.put(TOKEN_ENDPOINT_KEY, this.getDefaultDiscoveryUrl() + TOKEN_ENDPOINT_PATH);
         discoveryResponse.put(JWKs_URI_KEY, this.getDefaultDiscoveryUrl() + JWKS_URIS_PATH);
         return discoveryResponse;
     }
@@ -209,7 +216,7 @@ public class KeycloakServer {
         JsonObject JWK = new JsonObject()
                 .put(JWK_KID_KEY, RANDOM_JWK_KID)
                 .put(JWK_KTY_KEY, RSA_JWK_KTY)
-                .put(JWK_ALG_KEY, RSA256_JWK_ALG)
+                .put(JWK_ALG_KEY, RS256_JWK_ALG)
                 .put(JWK_USE_KEY, SIGNING_JWK_USE)
                 .put(JWK_MODULUS_KEY, RANDOM_JWK_MODULUS)
                 .put(JWK_PUBLIC_EXPONENT_KEY, RANDOM_JWK_PUBLIC_EXPONENT);

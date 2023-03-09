@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.google.common.io.Resources;
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 
@@ -162,10 +163,12 @@ public class BearerOnlyMiddlewareTest {
         final List<String> expectedAudience = List.of("test-audience");
 
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, "localhost")
-                .startWithDefaultDiscoveryHandlerAndDefaultJWKsURIHandler();
+                .startDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
 
-        final JsonArray publicKeys = new JsonArray(
-                "[{\"publicKey\": \"localhost" + keycloakServer.port() + "/auth/realms/test\"}]");
+        final JsonArray publicKeys = new JsonArray()
+                .add(
+                        new io.vertx.core.json.JsonObject()
+                                .put("publicKey", "http://localhost:" + keycloakServer.port() + "/auth/realms/test"));
 
         portalGateway(vertx, testCtx)
                 .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
@@ -179,6 +182,37 @@ public class BearerOnlyMiddlewareTest {
                             testCtx.completeNow();
                             keycloakServer.closeServer();
                         });
+    }
+
+    @Test
+    void loadPublicKeyFromConfig(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
+
+        final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
+        final List<String> expectedAudience = List.of("test-audience");
+        final JsonArray publicKeys = new JsonArray()
+                .add(new io.vertx.core.json.JsonObject()
+                        .put("publicKey",
+                                "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5hnB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQIDAQAB"));
+
+        final io.vertx.core.json.JsonObject bearerOnlyConfig = new io.vertx.core.json.JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys)
+                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, expectedIssuer)
+                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(expectedAudience));
+
+        portalGateway(vertx, testCtx)
+                .withBearerOnlyMiddleware(bearerOnlyConfig)
+                .build().start()
+                // when
+                .incomingRequest(GET, "/",
+                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                        (resp) -> {
+                            // then
+                            assertEquals(200, resp.statusCode(), "unexpected status code");
+                            testCtx.completeNow();
+                        });
+
     }
 
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience) {

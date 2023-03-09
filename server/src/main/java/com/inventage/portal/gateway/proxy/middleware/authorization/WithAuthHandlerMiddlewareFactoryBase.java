@@ -116,7 +116,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return promise.future();
     }
 
-    // TODO test
     private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
             Handler<AsyncResult<JWTAuthOptions>> handler) {
 
@@ -133,7 +132,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 isURL = true;
             } catch (MalformedURLException | URISyntaxException e) {
                 // intended case
-                LOGGER.debug("URI is malformed, hence it is has to be a raw public key.");
+                LOGGER.debug("URI is malformed, hence it is has to be a raw public key: '{}'", e.getMessage());
             }
 
             if (isURL) {
@@ -146,7 +145,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                                 })
                                 .onFailure(err -> handler.handle(Future.failedFuture(err))));
 
-                LOGGER.info("Successfully fetching JWKs");
             } else {
                 LOGGER.info("Public key provided directly");
 
@@ -161,6 +159,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
         CompositeFuture.join(futures)
                 .onSuccess(psk -> {
+                    LOGGER.info("Successfully fetched JWKs");
                     handler.handle(Future.succeededFuture(authOpts));
                 }).onFailure(err -> {
                     LOGGER.error(err.getMessage());
@@ -277,8 +276,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
             final List<JsonObject> jwks = new ArrayList<JsonObject>();
             for (int i = 0; i < keys.size(); i++) {
-                JsonObject jwk = keys.getJsonObject(i);
-                jwks.add(jwk);
+                jwks.add(keys.getJsonObject(i));
             }
 
             LOGGER.debug("Successfully fetched {} JWKS from URL", keys.size());

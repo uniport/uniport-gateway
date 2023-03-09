@@ -103,13 +103,13 @@ public class MiddlewareServerBuilder {
                 mockKeycloakServer.closeServer();
             }
             if (testCtx != null) {
-                testCtx.completeNow();
+                testCtx.failNow(t);
             }
         }
         return this;
     }
 
-    private MiddlewareServerBuilder withBearerOnlyMiddleware(JsonObject bearerOnlyConfig) {
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(JsonObject bearerOnlyConfig) {
         BearerOnlyMiddlewareFactory factory = new BearerOnlyMiddlewareFactory();
         Future<Middleware> middlewareFuture = factory.create(vertx, "bearerOnly", router, bearerOnlyConfig);
         int atMost = 20;
@@ -121,7 +121,7 @@ public class MiddlewareServerBuilder {
             }
         }
         if (middlewareFuture.failed()) {
-            throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
+            throw new IllegalStateException("BearerOnly Middleware could not be instantiated");
         }
         return withMiddleware(middlewareFuture.result());
     }
