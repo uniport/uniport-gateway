@@ -612,19 +612,19 @@ public class DynamicConfiguration {
                     } else {
                         for (Object directive : directives) {
                             if (directive instanceof JsonObject) {
-                                final String directive_name = ((JsonObject) directive)
+                                final String directiveName = ((JsonObject) directive)
                                     .getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
-                                if (directive_name == null) {
+                                if (directiveName == null) {
                                     return Future.failedFuture(
                                         String.format("Directive name is not defined, middleware: '%s'", mwType));
                                 }
-                                final JsonArray directive_values = ((JsonObject) directive)
+                                final JsonArray directiveValues = ((JsonObject) directive)
                                     .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
-                                if (directive_values == null) {
+                                if (directiveValues == null) {
                                     return Future.failedFuture(
                                         String.format("Directive values is not defined, middleware: '%s'", mwType));
                                 }
-                                for (Object a : directive_values.getList()) {
+                                for (Object a : directiveValues.getList()) {
                                     if (!(a instanceof String)) {
                                         return Future.failedFuture(
                                             String.format(
@@ -769,7 +769,7 @@ public class DynamicConfiguration {
                         return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                     }
 
-                    Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                    final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
                     if (validationResult != null) {
                         return validationResult;
                     }
