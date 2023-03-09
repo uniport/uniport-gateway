@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
-## 7.0.1-[202303091216-1-ee2c2a1] - 2023-03-09
+## [7.0.1]-202303091216-1-ee2c2a1 - 2023-03-09
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.1-202303091216-1-ee2c2a1~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)
 
 ### Fixed
 
-- "Unknown algorithm RSA" bug fixed. ([PORTAL-1092] (https://issue.inventage.com/browse/PORTAL-1092))
+- "Unknown algorithm RSA" bug fixed. ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092))
 
 ## [7.0.0]-202303080728-648-fe6be73 - 2023-03-08
 
