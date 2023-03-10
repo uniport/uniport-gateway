@@ -173,6 +173,9 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             case HTTP_2:
                 versionFormatted = "HTTP/2.0";
                 break;
+            default:
+                versionFormatted = "UNKNOWN_HTTP_VERSION";
+                break;
         }
 
         final MultiMap headers = request.headers();
