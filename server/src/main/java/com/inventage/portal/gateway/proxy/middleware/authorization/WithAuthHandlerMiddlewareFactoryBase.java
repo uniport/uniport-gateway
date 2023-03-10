@@ -1,21 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -33,6 +22,15 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
@@ -79,8 +77,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private Handler<JWTAuthOptions> setupMiddleware(Vertx vertx, String name, String issuer, JsonArray audience,
-            JsonArray additionalClaims, JsonObject middlewareConfig,
-            Handler<AsyncResult<Middleware>> handler) {
+                                                    JsonArray additionalClaims, JsonObject middlewareConfig,
+                                                    Handler<AsyncResult<Middleware>> handler) {
         return authOpts -> {
             final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
@@ -117,7 +115,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
-            Handler<AsyncResult<JWTAuthOptions>> handler) {
+                                 Handler<AsyncResult<JWTAuthOptions>> handler) {
 
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
 
@@ -130,7 +128,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             try {
                 new URL(publicKey).toURI();
                 isURL = true;
-            } catch (MalformedURLException | URISyntaxException e) {
+            }
+            catch (MalformedURLException | URISyntaxException e) {
                 // intended case
                 LOGGER.debug("URI is malformed, hence it is has to be a raw public key: '{}'", e.getMessage());
             }
@@ -145,7 +144,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                                 })
                                 .onFailure(err -> handler.handle(Future.failedFuture(err))));
 
-            } else {
+            }
+            else {
                 LOGGER.info("Public key provided directly");
 
                 final String publicKeyAlgorithm = pk
@@ -174,11 +174,12 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private void fetchJWKsFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL,
-            Handler<AsyncResult<List<JsonObject>>> handler) {
+                                           Handler<AsyncResult<List<JsonObject>>> handler) {
         final URL parsedRealmBaseURL;
         try {
             parsedRealmBaseURL = new URL(rawRealmBaseURL);
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e) {
             LOGGER.warn("Malformed discovery URL '{}'", rawRealmBaseURL);
             handler.handle(Future.failedFuture(e));
             return;
@@ -190,7 +191,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         if (port <= 0) {
             if (iamProtocol.endsWith("s")) {
                 port = 443;
-            } else {
+            }
+            else {
                 port = 80;
             }
         }
@@ -225,7 +227,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private Handler<HttpResponse<JsonObject>> fetchJWKsFromJWKsURL(Vertx vertx, String iamHost,
-            int iamPort, Handler<AsyncResult<List<JsonObject>>> handler) {
+                                                                   int iamPort, Handler<AsyncResult<List<JsonObject>>> handler) {
         return discoveryResp -> {
             final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
             if (rawJWKsURI == null || rawJWKsURI.length() == 0) {
@@ -238,7 +240,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             final URL parsedJWKsURL;
             try {
                 parsedJWKsURL = new URL(rawJWKsURI);
-            } catch (MalformedURLException e) {
+            }
+            catch (MalformedURLException e) {
                 LOGGER.warn("Malformed JWKs URL '{}'", rawJWKsURI);
                 handler.handle(Future.failedFuture(e));
                 return;

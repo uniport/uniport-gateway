@@ -1,8 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -10,6 +7,8 @@ import io.vertx.core.http.CookieSameSite;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.vertx.core.http.Cookie.cookie;
 
@@ -43,8 +42,8 @@ public class SessionMiddleware implements Middleware {
     private final Handler<RoutingContext> sessionHandler;
 
     public SessionMiddleware(Vertx vertx, String name, Long sessionIdleTimeoutInMinutes, Boolean withLifetimeHeader, Boolean withLifetimeCookie, String cookieName,
-            Boolean cookieHttpOnly,
-            Boolean cookieSecure, String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps) {
+                             Boolean cookieHttpOnly,
+                             Boolean cookieSecure, String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps) {
         this.name = name;
         this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes == null ?
                 SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT * MILLIS : sessionIdleTimeoutInMinutes * MILLIS;

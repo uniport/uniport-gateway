@@ -1,16 +1,19 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.Validate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JWTAuthAdditionalClaimsOptions {
 
     private final List<JWTClaim> additionalClaims = new ArrayList<>();
+
+    public List<JWTClaim> getAdditionalClaims() {
+        return new ArrayList<>(additionalClaims);
+    }
 
     public JWTAuthAdditionalClaimsOptions setAdditionalClaims(JsonArray claims) {
         Validate.notNull(claims, "Claims can not be null");
@@ -26,9 +29,5 @@ public class JWTAuthAdditionalClaimsOptions {
         Validate.notNull(claims, "Claims can not be null");
         this.additionalClaims.addAll(claims);
         return this;
-    }
-
-    public List<JWTClaim> getAdditionalClaims() {
-        return new ArrayList<>(additionalClaims);
     }
 }

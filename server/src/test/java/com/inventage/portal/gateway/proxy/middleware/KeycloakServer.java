@@ -1,12 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -15,27 +11,21 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
 public class KeycloakServer {
-
-    private final Vertx vertx;
-    private final String host;
-    private final int port;
-
-    private HttpServer server;
 
     private final static String SESSION_SCOPE = "test";
     private final static String HTTP_PREFIX = "http://";
     private final static String EMPTY_STRING = "";
     private final static String OPENID_DISCOVERY_PATH = "/.well-known/openid-configuration";
     private final static String TEST_REALM_PATH = "/auth/realms/test";
-
     private final static String AUTHORIZATION_ENDPOINT_KEY = "authorization_endpoint";
-
     private final static String TOKEN_ENDPOINT_KEY = "token_endpoint";
     private final static String TOKEN_ENDPOINT_PATH = "/protocol/openid-connect/token";
     private final static String ACCESS_TOKEN_KEY = "access_token";
     private final static String RANDOM_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ";
-
     private final static String JWKs_URI_KEY = "jwks_uri";
     private final static String JWKS_URIS_PATH = "/protocol/openid-connect/certs";
     private final static String JWKS_KEYS_KEY = "keys";
@@ -51,6 +41,10 @@ public class KeycloakServer {
     private final static String SIGNING_JWK_USE = "sig";
     private final static String RANDOM_JWK_MODULUS = "uFJ0A754CTB9-mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH-u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm-rOwytUPflAnYIgqinmiFpqyQ8vwj_L82F5kN5hnB-G2heMXSep4uoq--2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ_YySMmE3F-TxXOVbhZqAuH4A2-9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQ";
     private final static String RANDOM_JWK_PUBLIC_EXPONENT = "AQAB";
+    private final Vertx vertx;
+    private final String host;
+    private final int port;
+    private HttpServer server;
 
     public KeycloakServer(Vertx vertx) {
         this(vertx, "localhost", TestUtils.findFreePort());
@@ -99,7 +93,8 @@ public class KeycloakServer {
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
                                 .send(discoveryResponse.encode());
-                    } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
+                    }
+                    else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
@@ -120,7 +115,8 @@ public class KeycloakServer {
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
                                 .send(discoveryResponse.encode());
-                    } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
+                    }
+                    else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
                         req.bodyHandler(bodyHandler);
                         req.response()
                                 .putHeader("content-type", "application/json")
@@ -141,7 +137,8 @@ public class KeycloakServer {
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)
                                 .send(discoveryResponse.encode());
-                    } else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
+                    }
+                    else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
                         req.response()
                                 .putHeader("content-type", "application/json")
                                 .setStatusCode(200)

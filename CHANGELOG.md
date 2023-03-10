@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- "Unknown algorithm RSA" bug fixed. ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092))
+- "Unknown algorithm RSA" bug fixed ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092)).
 
 ## [7.0.0]-202303080728-648-fe6be73 - 2023-03-08
 

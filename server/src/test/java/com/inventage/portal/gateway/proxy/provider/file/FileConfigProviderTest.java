@@ -1,15 +1,15 @@
 package com.inventage.portal.gateway.proxy.provider.file;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.io.File;
-import java.util.stream.Stream;
-
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -18,16 +18,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Checkpoint;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import java.io.File;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(VertxExtension.class)
 public class FileConfigProviderTest {
+
+    static Stream<Arguments> provideWithoutWatchTestData() {
+        // port as int/no variables
+        return Stream.of(Arguments.of("simple file", "fileConfigProvider/simple_file_01.json", 3, 6),
+                Arguments.of("simple directory", "fileConfigProvider/simple_dir_01", 2, 3),
+                Arguments.of("merge directories", "fileConfigProvider/merge_dir_01", 3, 3),
+                Arguments.of("merge directories with arbitrary folder names", "fileConfigProvider/merge_dir_02", 3, 3));
+
+    }
 
     @Test
     @DisplayName("no config published when empty/invalid")
@@ -125,19 +132,10 @@ public class FileConfigProviderTest {
         }));
     }
 
-    static Stream<Arguments> provideWithoutWatchTestData() {
-        // port as int/no variables
-        return Stream.of(Arguments.of("simple file", "fileConfigProvider/simple_file_01.json", 3, 6),
-                Arguments.of("simple directory", "fileConfigProvider/simple_dir_01", 2, 3),
-                Arguments.of("merge directories", "fileConfigProvider/merge_dir_01", 3, 3),
-                Arguments.of("merge directories with arbitrary folder names", "fileConfigProvider/merge_dir_02", 3, 3));
-
-    }
-
     @ParameterizedTest
     @MethodSource("provideWithoutWatchTestData")
     void provideWithoutWatchTest(String name, String path, int expectedNumRouter, int expectedNumService, Vertx vertx,
-            VertxTestContext testCtx) {
+                                 VertxTestContext testCtx) {
         String errMsg = String.format("'%s' failed", name);
 
         Checkpoint fileProviderStarted = testCtx.checkpoint();
@@ -179,17 +177,20 @@ public class FileConfigProviderTest {
     }
 
     private FileConfigProvider createProvider(Vertx vertx, String path, String configurationAddress, boolean watch,
-            JsonObject env) {
+                                              JsonObject env) {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(path).getFile());
 
         if (!file.exists()) {
             return null;
-        } else if (file.isFile()) {
+        }
+        else if (file.isFile()) {
             return new FileConfigProvider(vertx, configurationAddress, file.getAbsolutePath(), "", watch, env);
-        } else if (file.isDirectory()) {
+        }
+        else if (file.isDirectory()) {
             return new FileConfigProvider(vertx, configurationAddress, "", file.getAbsolutePath(), watch, env);
-        } else {
+        }
+        else {
             return null;
         }
     }

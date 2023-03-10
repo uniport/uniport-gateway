@@ -1,14 +1,12 @@
 package com.inventage.portal.gateway.proxy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProxyApplicationFactory implements ApplicationFactory {
 

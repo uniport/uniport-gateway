@@ -156,7 +156,8 @@ public class ConfigurationWatcherTest {
             public void listen(JsonObject actual) {
                 if (isFirst.get()) {
                     testCtx.verify(() -> assertNotNull(actual, errMsg));
-                } else {
+                }
+                else {
                     testCtx.failNow("The same configuration was published but it should not");
                 }
                 isFirst.set(false);

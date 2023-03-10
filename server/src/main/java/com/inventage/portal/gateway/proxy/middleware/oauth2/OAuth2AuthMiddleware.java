@@ -51,72 +51,6 @@ public class OAuth2AuthMiddleware implements Middleware {
     }
 
     /**
-     * @param ctx
-     */
-    @Override
-    public void handle(RoutingContext ctx) {
-        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
-
-        final User user = ctx.user();
-        final User userForScope = setUserForScope(this.sessionScope, ctx);
-
-        // synchronized: to prevent conflicts in writing the "state" value into the session data
-        synchronized (ctx.session()) {
-            authHandler.handle(ctx);
-            if (userForScope == null) {
-                ctx.setUser(user);
-            }
-            startAndStorePendingAuth(ctx);
-            LOGGER.debug("Handled URI '{}'", ctx.request().uri());
-        }
-    }
-
-    /**
-     * Update the RoutingContext with the user for the given sessionScope or clear the user if not available.
-     *
-     * @param sessionScope an OAuth2 authentication is requested
-     * @param ctx
-     */
-    private User setUserForScope(String sessionScope, RoutingContext ctx) {
-        final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
-        final Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
-        if (authPair != null) {
-            ctx.setUser(authPair.getRight());
-        }
-        else {
-            ctx.clearUser();
-        }
-        return ctx.user();
-    }
-
-    /**
-     * Create a promise if there is a "state" key in the session data.
-     *
-     * @param ctx
-     */
-    private void startAndStorePendingAuth(RoutingContext ctx) {
-        if (oAuth2FlowStarted(ctx)) {
-            // create JSON object for authentication parameters and store in session at "state_<state>"
-            final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
-            ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
-            ctx.session().remove(OIDC_PARAM_STATE);
-            LOGGER.debug("For scope '{}'", sessionScope);
-        }
-    }
-
-    private boolean oAuth2FlowStarted(RoutingContext ctx) {
-        return ctx.session().get(OIDC_PARAM_STATE) != null;
-    }
-
-    private JsonObject oAuth2FlowState(RoutingContext ctx) {
-        final JsonObject oAuth2FlowState = new JsonObject();
-        oAuth2FlowState.put(OIDC_PARAM_STATE, ctx.session().get(OIDC_PARAM_STATE));
-        oAuth2FlowState.put(OIDC_PARAM_REDIRECT_URI, ctx.session().get(OIDC_PARAM_REDIRECT_URI));
-        oAuth2FlowState.put(OIDC_PARAM_PKCE, ctx.session().get(OIDC_PARAM_PKCE));
-        return oAuth2FlowState;
-    }
-
-    /**
      * Remove the OAuth2 state JSON structure for a specific state from the session.
      *
      * @param ctx
@@ -219,6 +153,72 @@ public class OAuth2AuthMiddleware implements Middleware {
             LOGGER.warn("End handler failed '{}'", asyncResult.cause());
         }
         OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
+    }
+
+    /**
+     * @param ctx
+     */
+    @Override
+    public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
+        final User user = ctx.user();
+        final User userForScope = setUserForScope(this.sessionScope, ctx);
+
+        // synchronized: to prevent conflicts in writing the "state" value into the session data
+        synchronized (ctx.session()) {
+            authHandler.handle(ctx);
+            if (userForScope == null) {
+                ctx.setUser(user);
+            }
+            startAndStorePendingAuth(ctx);
+            LOGGER.debug("Handled URI '{}'", ctx.request().uri());
+        }
+    }
+
+    /**
+     * Update the RoutingContext with the user for the given sessionScope or clear the user if not available.
+     *
+     * @param sessionScope an OAuth2 authentication is requested
+     * @param ctx
+     */
+    private User setUserForScope(String sessionScope, RoutingContext ctx) {
+        final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+        final Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
+        if (authPair != null) {
+            ctx.setUser(authPair.getRight());
+        }
+        else {
+            ctx.clearUser();
+        }
+        return ctx.user();
+    }
+
+    /**
+     * Create a promise if there is a "state" key in the session data.
+     *
+     * @param ctx
+     */
+    private void startAndStorePendingAuth(RoutingContext ctx) {
+        if (oAuth2FlowStarted(ctx)) {
+            // create JSON object for authentication parameters and store in session at "state_<state>"
+            final JsonObject oAuth2FlowState = oAuth2FlowState(ctx);
+            ctx.session().put(PREFIX_STATE + oAuth2FlowState.getString(OIDC_PARAM_STATE), oAuth2FlowState);
+            ctx.session().remove(OIDC_PARAM_STATE);
+            LOGGER.debug("For scope '{}'", sessionScope);
+        }
+    }
+
+    private boolean oAuth2FlowStarted(RoutingContext ctx) {
+        return ctx.session().get(OIDC_PARAM_STATE) != null;
+    }
+
+    private JsonObject oAuth2FlowState(RoutingContext ctx) {
+        final JsonObject oAuth2FlowState = new JsonObject();
+        oAuth2FlowState.put(OIDC_PARAM_STATE, ctx.session().get(OIDC_PARAM_STATE));
+        oAuth2FlowState.put(OIDC_PARAM_REDIRECT_URI, ctx.session().get(OIDC_PARAM_REDIRECT_URI));
+        oAuth2FlowState.put(OIDC_PARAM_PKCE, ctx.session().get(OIDC_PARAM_PKCE));
+        return oAuth2FlowState;
     }
 
 }

@@ -1,12 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class StateWithUriTest {
 
@@ -45,7 +44,8 @@ public class StateWithUriTest {
         try {
             StateWithUri stateWithUri = new StateWithUri(null, null);
             Assertions.fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e) {
             // then
             Assertions.assertEquals("Null is not a valid state value!", e.getMessage());
         }
@@ -107,7 +107,8 @@ public class StateWithUriTest {
         try {
             StateWithUri stateWithUri = new StateWithUri(null);
             Assertions.fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e) {
             // then
             Assertions.assertEquals("Null is not a valid state parameter value!", e.getMessage());
         }

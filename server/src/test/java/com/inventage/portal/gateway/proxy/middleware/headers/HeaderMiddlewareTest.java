@@ -1,21 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
-import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
-
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -24,6 +10,18 @@ import io.vertx.ext.web.Router;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
+import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
 public class HeaderMiddlewareTest {
@@ -44,10 +42,25 @@ public class HeaderMiddlewareTest {
                         (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "test")))));
     }
 
+    static Stream<Arguments> responseHeaderTestData() {
+        return Stream.of(//
+                Arguments.of("Test Simple Response",
+                        (new HeadersMultiMap())
+                                .setAll(Map.ofEntries(entry("Testing", "foo"), entry("Testing2", "bar"))),
+                        (new HeadersMultiMap()).setAll(
+                                Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo"), entry("Testing2", "bar")))),
+                Arguments.of("empty Custom Header",
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo"), entry("Testing2", ""))),
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo")))),
+                Arguments.of("Deleting Custom Header",
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo"), entry("Foo", ""))),
+                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo")))));
+    }
+
     @ParameterizedTest
     @MethodSource("requestHeaderTestData")
     void requestHeaderTest(String name, MultiMap reqHeaders, MultiMap expectedReqHeaders, Vertx vertx,
-            VertxTestContext testCtx) {
+                           VertxTestContext testCtx) {
         int port = TestUtils.findFreePort();
 
         String errMsgFormat = "Failure of '%s' test case: %s";
@@ -78,25 +91,10 @@ public class HeaderMiddlewareTest {
         }));
     }
 
-    static Stream<Arguments> responseHeaderTestData() {
-        return Stream.of(//
-                Arguments.of("Test Simple Response",
-                        (new HeadersMultiMap())
-                                .setAll(Map.ofEntries(entry("Testing", "foo"), entry("Testing2", "bar"))),
-                        (new HeadersMultiMap()).setAll(
-                                Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo"), entry("Testing2", "bar")))),
-                Arguments.of("empty Custom Header",
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo"), entry("Testing2", ""))),
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Foo", "bar"), entry("Testing", "foo")))),
-                Arguments.of("Deleting Custom Header",
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo"), entry("Foo", ""))),
-                        (new HeadersMultiMap()).setAll(Map.ofEntries(entry("Testing", "foo")))));
-    }
-
     @ParameterizedTest
     @MethodSource("responseHeaderTestData")
     void responseHeaderTest(String name, MultiMap respHeaders, MultiMap expectedRespHeaders, Vertx vertx,
-            VertxTestContext testCtx) {
+                            VertxTestContext testCtx) {
         // given
         int port = TestUtils.findFreePort();
         int servicePort = TestUtils.findFreePort();
@@ -148,7 +146,8 @@ public class HeaderMiddlewareTest {
             if (h.getValue().length() == 0) {
                 assertFalse(actual.contains(h.getKey()), String.format(errMsgFormat, name,
                         String.format("should not contain request header key '%s'", h.getKey())));
-            } else {
+            }
+            else {
                 assertTrue(actual.contains(h.getKey()), String.format(errMsgFormat, name,
                         String.format("should contain request header key '%s'", h.getKey())));
                 assertTrue(actual.getAll(h.getKey()).contains(h.getValue()), String.format(errMsgFormat, name,

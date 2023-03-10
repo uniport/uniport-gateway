@@ -21,7 +21,7 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_new() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue("0:" +System.currentTimeMillis());
+        final DetectionCookieValue cookieValue = new DetectionCookieValue("0:" + System.currentTimeMillis());
         // when
         final boolean withInLimit = cookieValue.isWithInLimit();
         // then
@@ -31,7 +31,7 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_max() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue((MAX_RETRIES - 1) + SPLITTER +System.currentTimeMillis());
+        final DetectionCookieValue cookieValue = new DetectionCookieValue((MAX_RETRIES - 1) + SPLITTER + System.currentTimeMillis());
         // when
         final boolean withInLimit = cookieValue.isWithInLimit();
         // then
@@ -41,7 +41,7 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_false_counter() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(MAX_RETRIES +SPLITTER +System.currentTimeMillis());
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(MAX_RETRIES + SPLITTER + System.currentTimeMillis());
         // when
         final boolean withInLimit = cookieValue.isWithInLimit();
         // then
@@ -51,7 +51,7 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_false_access() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue((MAX_RETRIES - 1) +SPLITTER +1000);
+        final DetectionCookieValue cookieValue = new DetectionCookieValue((MAX_RETRIES - 1) + SPLITTER + 1000);
         // when
         final boolean withInLimit = cookieValue.isWithInLimit();
         // then
@@ -62,11 +62,11 @@ public class DetectionCookieValueTest {
     public void test_toString() {
         // given
         final long accessTime = System.currentTimeMillis();
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 +SPLITTER +accessTime);
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + accessTime);
         // when
         final String value = cookieValue.toString();
         // then
-        Assertions.assertEquals(1 +SPLITTER +accessTime, value);
+        Assertions.assertEquals(1 + SPLITTER + accessTime, value);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class DetectionCookieValueTest {
     public void test_contstructor_with_one() {
         // given
         final long accessTime = System.currentTimeMillis();
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 +SPLITTER +accessTime);
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + accessTime);
         // when
         // then
         Assertions.assertEquals(1, cookieValue.counter);

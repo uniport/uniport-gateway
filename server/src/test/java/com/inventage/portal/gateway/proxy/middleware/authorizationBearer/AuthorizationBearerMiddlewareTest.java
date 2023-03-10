@@ -1,23 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -32,6 +18,18 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
 public class AuthorizationBearerMiddlewareTest {
@@ -175,7 +173,8 @@ public class AuthorizationBearerMiddlewareTest {
         try {
             CountDownLatch waiter = new CountDownLatch(1);
             waiter.await(AuthorizationBearerMiddleware.EXPIRATION_LEEWAY_SECONDS + expiresIn + 1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -257,7 +256,6 @@ public class AuthorizationBearerMiddlewareTest {
         AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware("authBearer", sessionScope);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
-        ;
 
         Router router = Router.router(vertx);
         router.route().handler(sessionHandler).handler(injectTokenHandler).handler(authBearer).handler(endHandler);

@@ -73,7 +73,7 @@ public class PassAuthorizationMiddlewareTest {
                 .withRoutingContextHolder(routingContext)
                 .build()
                 .start()
-                .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers),  testCtx, (resp) -> {
+                .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     assertTrue(routingContext.get().request().headers().contains(HttpHeaders.AUTHORIZATION));

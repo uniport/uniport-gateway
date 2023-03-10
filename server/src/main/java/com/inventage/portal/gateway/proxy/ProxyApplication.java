@@ -1,8 +1,5 @@
 package com.inventage.portal.gateway.proxy;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
@@ -10,12 +7,14 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+
+import java.util.Collections;
+import java.util.Optional;
 
 /**
  * Application for the proxy feature of the portal gateway. The routers will be read from the
@@ -132,7 +131,7 @@ public class ProxyApplication implements Application {
         final ProviderAggregator aggregator = new ProviderAggregator(vertx, configurationAddress, providers, this.env);
 
         final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, configurationAddress,
-                this.providersThrottleDuration, Arrays.asList(this.entrypoint));
+                this.providersThrottleDuration, Collections.singletonList(this.entrypoint));
 
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort);
 

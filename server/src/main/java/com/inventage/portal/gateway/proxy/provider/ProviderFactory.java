@@ -28,8 +28,8 @@ public interface ProviderFactory {
         public static ProviderFactory getFactory(String providerName) {
             LOGGER.debug("Get provider factory '{}'", providerName);
             final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class).stream()
-                .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
-                .findFirst();
+                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
+                    .findFirst();
             return provider.orElse(null);
         }
     }

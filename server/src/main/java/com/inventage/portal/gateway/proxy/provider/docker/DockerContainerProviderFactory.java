@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
 import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.DockerContainerServiceImporter;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 

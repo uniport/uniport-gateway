@@ -30,12 +30,10 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
  */
 public class ControlApiMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddleware.class);
-
     public static final String CONTROL_COOKIE_NAME = "IPS_GW_CONTROL";
     public static final String SESSION_TERMINATE_ACTION = "SESSION_TERMINATE";
     public static final String SESSION_RESET_ACTION = "SESSION_RESET";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddleware.class);
     private final String name;
     private final String action;
     private final WebClient webClient;

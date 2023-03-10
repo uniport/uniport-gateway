@@ -1,14 +1,12 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 

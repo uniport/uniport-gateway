@@ -1,10 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The incoming requests can be prepared by different middlewares before being routed to its final
@@ -28,8 +28,7 @@ public interface Middleware extends Handler<RoutingContext> {
     }
 
     /**
-     *
-     * @param ctx current request context
+     * @param ctx      current request context
      * @param modifier to be applied when processing incoming response headers
      */
     default void addResponseHeaderModifier(RoutingContext ctx, Handler modifier) {

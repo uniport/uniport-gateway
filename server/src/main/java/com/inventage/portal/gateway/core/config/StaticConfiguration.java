@@ -26,8 +26,6 @@ import java.util.List;
  * It defines the structure of the static configuration.
  */
 public class StaticConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
-
     // keywords used for internal purpose only
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
@@ -41,26 +39,22 @@ public class StaticConfiguration {
     public static final String APPLICATION_REQUEST_SELECTOR = "requestSelector";
     public static final String APPLICATION_REQUEST_SELECTOR_URL_PREFIX = "urlPrefix";
     public static final String APPLICATION_PROVIDER = "provider";
-
     public static final String PROVIDERS = "providers";
     // TODO: the following property is currently not publicly available due to not fitting into the
     // usual provider schema
     public static final String PROVIDERS_THROTTLE_INTERVAL_MS = "providersThrottleIntervalMs";
     public static final String PROVIDER_NAME = "name";
-
     public static final String PROVIDER_FILE = "file";
     public static final String PROVIDER_FILE_FILENAME = "filename";
     public static final String PROVIDER_FILE_DIRECTORY = "directory";
     public static final String PROVIDER_FILE_WATCH = "watch";
-
     public static final String PROVIDER_DOCKER = "docker";
     public static final String PROVIDER_DOCKER_ENDPOINT = "endpoint";
     public static final String PROVIDER_DOCKER_EXPOSED_BY_DEFAULT = "exposedByDefault";
     public static final String PROVIDER_DOCKER_NETWORK = "network";
     public static final String PROVIDER_DOCKER_DEFAULT_RULE = "defaultRule";
-
     public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
     private static Validator validator;
 
     private StaticConfiguration() {

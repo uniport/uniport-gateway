@@ -46,6 +46,15 @@ public class Entrypoint {
         this.entryMiddlewares = entryMiddlewares;
     }
 
+    public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
+        final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
+        return configs.stream().map(object -> new JsonObject(Json.encode(object)))
+                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
+                .findFirst().orElseThrow(() -> {
+                    throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
+                });
+    }
+
     public String name() {
         return name;
     }
@@ -102,21 +111,6 @@ public class Entrypoint {
         enabled = false;
     }
 
-    static class Tls {
-        public JksOptions jksOptions() {
-            return null;
-        }
-    }
-
-    public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
-        final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
-        return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
-                .findFirst().orElseThrow(() -> {
-                    throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
-                });
-    }
-
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
 
         final List<Future> entryMiddlewaresFuture = new ArrayList<>();
@@ -157,6 +151,12 @@ public class Entrypoint {
 
         final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
         middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
+    }
+
+    static class Tls {
+        public JksOptions jksOptions() {
+            return null;
+        }
     }
 
 }

@@ -23,8 +23,8 @@ public class MiddlewareServer {
     private final Vertx vertx;
     private final HttpServer httpServer;
     private final int port;
-    private String host;
-    private VertxTestContext testCtx;
+    private final String host;
+    private final VertxTestContext testCtx;
 
     public MiddlewareServer(Vertx vertx, HttpServer httpServer, String host, VertxTestContext testCtx) {
         this.port = TestUtils.findFreePort();

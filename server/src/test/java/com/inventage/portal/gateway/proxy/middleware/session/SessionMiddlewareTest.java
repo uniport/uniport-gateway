@@ -74,15 +74,16 @@ public class SessionMiddlewareTest {
         browser.request(GET, "/request1")
                 .thenCompose(response -> {
                     assertThat(response).hasStatusCode(200);
-                    return browser.request(GET, "/request2"); })
+                    return browser.request(GET, "/request2");
+                })
                 .thenCompose(response -> browser.request(POST, "/request3"))
                 .whenComplete((response, error) -> {
-            // then
-            assertThat(response)
-                    .hasStatusCode(200)
-                    .hasSetCookieForSession(null);
-            testCtx.completeNow();
-        });
+                    // then
+                    assertThat(response)
+                            .hasStatusCode(200)
+                            .hasSetCookieForSession(null);
+                    testCtx.completeNow();
+                });
     }
 
 }

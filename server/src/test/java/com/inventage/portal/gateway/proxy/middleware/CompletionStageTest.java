@@ -1,17 +1,16 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import java.util.Random;
-import java.util.concurrent.CompletionStage;
-
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import java.util.Random;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Learning Test for composing CompletionStages.
@@ -29,7 +28,8 @@ public class CompletionStageTest {
                 .whenComplete((result, error) -> {
                     if (error == null) {
                         Assertions.assertEquals("HELLO", result);
-                    } else {
+                    }
+                    else {
                         Assertions.fail(error);
                     }
                     testContext.completeNow();

@@ -1,5 +1,22 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.http.HttpClientResponse;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
+import org.assertj.core.api.AbstractAssert;
+import org.junit.jupiter.api.Assertions;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.CODE_CHALLENGE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.CODE_CHALLENGE_METHOD;
@@ -10,28 +27,9 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2Middlew
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.COOKIE_NAME_DEFAULT;
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import io.vertx.core.MultiMap;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URLEncodedUtils;
-import org.assertj.core.api.AbstractAssert;
-import org.junit.jupiter.api.Assertions;
-
-import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
-
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.vertx.core.http.HttpClientResponse;
-
 /**
  * Custom assertion class for authentication redirect request of a relying party (RP).
- *
+ * <p>
  * see also https://assertj.github.io/doc/#assertj-core-custom-assertions-creation
  */
 public class AuthenticationRedirectRequestAssert
@@ -69,7 +67,7 @@ public class AuthenticationRedirectRequestAssert
             expectedLocationParameters.entrySet().stream()
                     .filter(entry -> locationParameters.containsKey(entry.getKey())).findAny()
                     .orElseThrow(() -> new IllegalStateException(
-                            "expecting: " + expectedLocationParameters.toString() + ", found: " + locationParameters));
+                            "expecting: " + expectedLocationParameters + ", found: " + locationParameters));
         }
         return this;
     }
@@ -94,8 +92,9 @@ public class AuthenticationRedirectRequestAssert
     private Map<String, String> extractParametersFromHeader(String header) {
         List<NameValuePair> responseParamsList = null;
         try {
-            responseParamsList = URLEncodedUtils.parse(new URI(header), Charset.forName("UTF-8"));
-        } catch (URISyntaxException e) {
+            responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
+        }
+        catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         Assertions.assertNotNull(responseParamsList);
@@ -164,13 +163,13 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName) {
         List<String> cookies = actual.cookies();
-        Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(cookieName+"=")).findAny().isPresent());
+        Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasNotSetCookie(String cookieName) {
         List<String> cookies = actual.cookies();
-        Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(cookieName+"=")).findAny().isPresent());
+        Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
         return this;
     }
 }

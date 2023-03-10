@@ -1,12 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Middleware for adding the CorsHandler of Vert.x.

@@ -1,13 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the authentication bearer. If the user is authenticated it provides either an ID token or

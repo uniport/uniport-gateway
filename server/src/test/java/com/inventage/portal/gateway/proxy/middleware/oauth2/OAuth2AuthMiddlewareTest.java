@@ -1,5 +1,24 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
+import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
+import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.RequestOptions;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Arrays;
+import java.util.Map;
+
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_PKCE;
@@ -8,27 +27,6 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMid
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.COOKIE_NAME_DEFAULT;
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
-
-import java.util.Arrays;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
-import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
-import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
-import com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
-
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.RequestOptions;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class OAuth2AuthMiddlewareTest {

@@ -42,15 +42,13 @@ public class DockerContainerProvider extends Provider {
     private final String configurationAddress;
 
     private final ServiceImporter serviceImporter;
-    private ServiceDiscovery dockerDiscovery;
     private final JsonObject serviceImporterConfiguration;
-
     private final Boolean exposedByDefault;
     private final String network;
     private final String defaultRule;
     private final Boolean watch;
-
     private final Map<String, JsonObject> configurations = new HashMap<>();
+    private ServiceDiscovery dockerDiscovery;
 
     public DockerContainerProvider(Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
                                    JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,

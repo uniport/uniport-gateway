@@ -1,22 +1,8 @@
 package com.inventage.portal.gateway.proxy.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-
-import org.apache.commons.collections4.QueueUtils;
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -25,6 +11,18 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.QueueUtils;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * It listens to incoming dynamic configurations. Upon passing several checks is passed to all
@@ -39,25 +37,17 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private final Vertx vertx;
 
     private final EventBus eventBus;
-
-    private long timerId;
-
     private final Provider provider;
-
     private final String configurationAddress;
-
     private final Map<String, JsonObject> currentConfigurations;
-
     private final int providersThrottleIntervalMs;
-
+    private final List<String> defaultEntrypoints;
+    private final Set<String> providerConfigReloadThrottler;
+    private long timerId;
     private List<Listener> configurationListeners;
 
-    private final List<String> defaultEntrypoints;
-
-    private final Set<String> providerConfigReloadThrottler;
-
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
-            int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
+                                int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
         this.provider = provider;
@@ -66,160 +56,6 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.defaultEntrypoints = defaultEntrypoints;
         this.currentConfigurations = new HashMap<>();
         this.providerConfigReloadThrottler = new HashSet<>();
-    }
-
-    @Override
-    public void start(Promise<Void> startPromise) {
-        listenProviders();
-        listenConfigurations();
-
-        this.vertx.deployVerticle(this.provider).onComplete(ar -> {
-            startPromise.complete();
-        }).onFailure(err -> {
-            startPromise.fail(err);
-        });
-    }
-
-    @Override
-    public void stop(Promise<Void> stopPromise) {
-        this.vertx.cancelTimer(this.timerId);
-        stopPromise.complete();
-    }
-
-    public void addListener(Listener listener) {
-        LOGGER.debug("Adding listener '{}'", listener);
-        if (this.configurationListeners == null) {
-            this.configurationListeners = new ArrayList<>();
-        }
-        this.configurationListeners.add(listener);
-    }
-
-    // listenProviders receives configuration changes from the providers.
-    // The configuration message then gets passed along a series of check
-    // to finally end up in a throttler that sends it to listenConfigurations.
-    private void listenProviders() {
-        LOGGER.debug("Listening for new configuration...");
-        final MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
-
-        configConsumer.handler(message -> onConfigurationAnnounce(message));
-    }
-
-    // handler for address: configuration-announce-address
-    private void onConfigurationAnnounce(Message<JsonObject> message) {
-        final JsonObject nextConfig = message.body();
-
-        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        LOGGER.debug("Received next configuration from '{}'", providerName);
-
-        preloadConfiguration(nextConfig);
-    }
-
-    private void preloadConfiguration(JsonObject nextConfig) {
-        if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
-                || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
-            LOGGER.warn("Invalid configuration received");
-            return;
-        }
-
-        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
-
-        if (DynamicConfiguration.isEmptyConfiguration(providerConfig)) {
-            LOGGER.info("Skipping empty configuration for provider '{}'", providerName);
-            return;
-        }
-
-        // there is at most one config reload throttler per provider
-        if (!this.providerConfigReloadThrottler.contains(providerName)) {
-            this.providerConfigReloadThrottler.add(providerName);
-
-            this.throttleProviderConfigReload(this.providersThrottleIntervalMs, providerName);
-        }
-
-        LOGGER.info("Publishing next configuration from '{}' provider", providerName);
-        this.eventBus.publish(providerName, nextConfig);
-    }
-
-    // throttleProviderConfigReload throttles the configuration reload speed for a single provider.
-    // It will immediately publish a new configuration and then only publish the next configuration
-    // after the throttle duration.
-    // Note that in the case it receives N new configs in the timeframe of the throttle duration
-    // after publishing, it will publish the last of the newly received configurations.
-    private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
-        final Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
-        final Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
-
-        final MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
-        consumer.handler(message -> onConfigReload(message, throttleMs, nextConfigRing, prevConfigRing));
-    }
-
-    // handler for address: <provider> (e.g. file)
-    private void onConfigReload(Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
-            Queue<JsonObject> prevConfigRing) {
-        final JsonObject nextConfig = message.body();
-        if (prevConfigRing.isEmpty()) {
-            LOGGER.debug("Publishing initial configuration immediately");
-            prevConfigRing.add(nextConfig.copy());
-            nextConfigRing.add(nextConfig.copy());
-            publishConfiguration(nextConfigRing);
-            this.timerId = this.vertx.setPeriodic(throttleMs, tId -> {
-                publishConfiguration(nextConfigRing);
-            });
-            return;
-        }
-
-        LOGGER.debug("Received new config for throttling");
-        if (prevConfigRing.peek().equals(nextConfig)) {
-            LOGGER.info("Skipping same configuration");
-            return;
-        }
-
-        prevConfigRing.add(nextConfig.copy());
-        nextConfigRing.add(nextConfig.copy());
-    }
-
-    private void publishConfiguration(Queue<JsonObject> nextConfigRing) {
-        final JsonObject nextConfig = nextConfigRing.poll();
-        if (nextConfig == null) {
-            return;
-        }
-        LOGGER.info("Publishing configuration");
-        this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
-    }
-
-    private void listenConfigurations() {
-        LOGGER.debug("Listening for new configuration...");
-        final MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
-                .consumer(CONFIG_VALIDATED_ADDRESS);
-
-        validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
-    }
-
-    // handler for address: CONFIG_VALIDATED_ADDRESS
-    private void onValidConfiguration(Message<JsonObject> message) {
-        final JsonObject nextConfig = message.body();
-
-        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
-        final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
-
-        if (providerConfig == null) {
-            return;
-        }
-
-        this.currentConfigurations.put(providerName, providerConfig);
-
-        final JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
-        applyEntrypoints(mergedConfig, this.defaultEntrypoints);
-
-        DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
-            LOGGER.debug("Informing listeners about new configuration '{}'", mergedConfig);
-            for (Listener listener : this.configurationListeners) {
-                listener.listen(mergedConfig);
-            }
-        }).onFailure(err -> {
-            LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
-                    err.getMessage());
-        });
     }
 
     private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
@@ -353,5 +189,159 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     private static boolean isQualifiedName(String name) {
         return name.contains("@");
+    }
+
+    @Override
+    public void start(Promise<Void> startPromise) {
+        listenProviders();
+        listenConfigurations();
+
+        this.vertx.deployVerticle(this.provider).onComplete(ar -> {
+            startPromise.complete();
+        }).onFailure(err -> {
+            startPromise.fail(err);
+        });
+    }
+
+    @Override
+    public void stop(Promise<Void> stopPromise) {
+        this.vertx.cancelTimer(this.timerId);
+        stopPromise.complete();
+    }
+
+    public void addListener(Listener listener) {
+        LOGGER.debug("Adding listener '{}'", listener);
+        if (this.configurationListeners == null) {
+            this.configurationListeners = new ArrayList<>();
+        }
+        this.configurationListeners.add(listener);
+    }
+
+    // listenProviders receives configuration changes from the providers.
+    // The configuration message then gets passed along a series of check
+    // to finally end up in a throttler that sends it to listenConfigurations.
+    private void listenProviders() {
+        LOGGER.debug("Listening for new configuration...");
+        final MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
+
+        configConsumer.handler(message -> onConfigurationAnnounce(message));
+    }
+
+    // handler for address: configuration-announce-address
+    private void onConfigurationAnnounce(Message<JsonObject> message) {
+        final JsonObject nextConfig = message.body();
+
+        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        LOGGER.debug("Received next configuration from '{}'", providerName);
+
+        preloadConfiguration(nextConfig);
+    }
+
+    private void preloadConfiguration(JsonObject nextConfig) {
+        if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
+                || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
+            LOGGER.warn("Invalid configuration received");
+            return;
+        }
+
+        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+
+        if (DynamicConfiguration.isEmptyConfiguration(providerConfig)) {
+            LOGGER.info("Skipping empty configuration for provider '{}'", providerName);
+            return;
+        }
+
+        // there is at most one config reload throttler per provider
+        if (!this.providerConfigReloadThrottler.contains(providerName)) {
+            this.providerConfigReloadThrottler.add(providerName);
+
+            this.throttleProviderConfigReload(this.providersThrottleIntervalMs, providerName);
+        }
+
+        LOGGER.info("Publishing next configuration from '{}' provider", providerName);
+        this.eventBus.publish(providerName, nextConfig);
+    }
+
+    // throttleProviderConfigReload throttles the configuration reload speed for a single provider.
+    // It will immediately publish a new configuration and then only publish the next configuration
+    // after the throttle duration.
+    // Note that in the case it receives N new configs in the timeframe of the throttle duration
+    // after publishing, it will publish the last of the newly received configurations.
+    private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
+        final Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
+        final Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
+
+        final MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
+        consumer.handler(message -> onConfigReload(message, throttleMs, nextConfigRing, prevConfigRing));
+    }
+
+    // handler for address: <provider> (e.g. file)
+    private void onConfigReload(Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
+                                Queue<JsonObject> prevConfigRing) {
+        final JsonObject nextConfig = message.body();
+        if (prevConfigRing.isEmpty()) {
+            LOGGER.debug("Publishing initial configuration immediately");
+            prevConfigRing.add(nextConfig.copy());
+            nextConfigRing.add(nextConfig.copy());
+            publishConfiguration(nextConfigRing);
+            this.timerId = this.vertx.setPeriodic(throttleMs, tId -> {
+                publishConfiguration(nextConfigRing);
+            });
+            return;
+        }
+
+        LOGGER.debug("Received new config for throttling");
+        if (prevConfigRing.peek().equals(nextConfig)) {
+            LOGGER.info("Skipping same configuration");
+            return;
+        }
+
+        prevConfigRing.add(nextConfig.copy());
+        nextConfigRing.add(nextConfig.copy());
+    }
+
+    private void publishConfiguration(Queue<JsonObject> nextConfigRing) {
+        final JsonObject nextConfig = nextConfigRing.poll();
+        if (nextConfig == null) {
+            return;
+        }
+        LOGGER.info("Publishing configuration");
+        this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
+    }
+
+    private void listenConfigurations() {
+        LOGGER.debug("Listening for new configuration...");
+        final MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
+                .consumer(CONFIG_VALIDATED_ADDRESS);
+
+        validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
+    }
+
+    // handler for address: CONFIG_VALIDATED_ADDRESS
+    private void onValidConfiguration(Message<JsonObject> message) {
+        final JsonObject nextConfig = message.body();
+
+        final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
+        final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+
+        if (providerConfig == null) {
+            return;
+        }
+
+        this.currentConfigurations.put(providerName, providerConfig);
+
+        final JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
+        applyEntrypoints(mergedConfig, this.defaultEntrypoints);
+
+        DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
+            LOGGER.debug("Informing listeners about new configuration '{}'", mergedConfig);
+            for (Listener listener : this.configurationListeners) {
+                listener.listen(mergedConfig);
+            }
+        }).onFailure(err -> {
+            LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
+                    err.getMessage());
+        });
     }
 }

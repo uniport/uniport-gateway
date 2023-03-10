@@ -16,7 +16,7 @@ public class TestBearerOnlyJWTProvider {
         // JWT signing is normally done in Keycloak
         System.setProperty("smallrye.jwt.sign.key.location", "FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem");
         // token life time in seconds: 1 year
-        System.setProperty("smallrye.jwt.new-token.lifespan", "" + (1 * 60 * 60 * 24 * 365));
+        System.setProperty("smallrye.jwt.new-token.lifespan", "" + (60 * 60 * 24 * 365));
     }
 
     public static void main(String[] args) {
@@ -31,11 +31,12 @@ public class TestBearerOnlyJWTProvider {
     public static String signToken(Map<String, Object> jsonMap) {
         return Jwt.sign(jsonMap);
     }
+
     /**
      * @param jsonObject to be signed.
      * @return jwt string token, signed with the private key stored under /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
      */
-    public static String signToken(JsonObject jsonObject){
+    public static String signToken(JsonObject jsonObject) {
         return Jwt.sign(jsonObject);
     }
 }

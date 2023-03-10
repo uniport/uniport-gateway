@@ -30,16 +30,13 @@ public class FileConfigProvider extends Provider {
 
     private final EventBus eb;
     private final String configurationAddress;
+    private final Boolean watch;
+    private final JsonObject env;
+    private final int scanPeriodMs = 5000;
     private Path staticConfigDir;
-
     private Path filename;
     private Path directory;
-    private final Boolean watch;
-
-    private final JsonObject env;
     private String source;
-
-    private final int scanPeriodMs = 5000;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
                               Boolean watch, JsonObject env) {
@@ -102,7 +99,7 @@ public class FileConfigProvider extends Provider {
             LOGGER.info("Reading file '{}'", file.getAbsolutePath());
 
             final ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
-                .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
+                    .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
             this.source = "file";
             return options.addStore(fileStore);
@@ -133,7 +130,7 @@ public class FileConfigProvider extends Provider {
             }
 
             final ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
-                .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
+                    .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
 
             this.source = "directory";
             return options.addStore(dirStore);
@@ -151,12 +148,12 @@ public class FileConfigProvider extends Provider {
         }
         if (this.staticConfigDir == null) {
             LOGGER.warn(
-                "No static config dir defined. Cannot assemble absolute config path from '{}'",
-                path);
+                    "No static config dir defined. Cannot assemble absolute config path from '{}'",
+                    path);
             return null;
         }
         LOGGER.debug("Using path relative to the static config file in '{}'",
-            this.staticConfigDir.toAbsolutePath());
+                this.staticConfigDir.toAbsolutePath());
         return this.staticConfigDir.resolve(path).normalize();
     }
 
@@ -208,12 +205,12 @@ public class FileConfigProvider extends Provider {
     private void validateAndPublish(JsonObject config) {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
             this.eb.publish(this.configurationAddress,
-                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
-                    .put(Provider.PROVIDER_CONFIGURATION, config));
+                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                            .put(Provider.PROVIDER_CONFIGURATION, config));
             LOGGER.info("Configuration published from '{}'", this.source);
         }).onFailure(err -> {
             LOGGER.warn("Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
-                this.source);
+                    this.source);
         });
     }
 }

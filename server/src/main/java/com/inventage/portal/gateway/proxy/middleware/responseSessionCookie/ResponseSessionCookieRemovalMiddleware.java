@@ -1,13 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
-
 import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Remove the session cookie from the response, if the context holds a data for the key `REMOVE_SESSION_COOKIE_SIGNAL`.
@@ -15,10 +13,9 @@ import io.vertx.ext.web.RoutingContext;
  * a replaced "previously" valid session (replaced by session.regenerateId()). We need to remove the session cookie or else the browser
  * will restore the replaced (now invalid) session cookie. For more details refer to
  * {@link com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware}
- *
+ * <p>
  * {@link #sessionCookieName} specifies the name (can be configured) of the session cookie. Keep in mind that the name has to be same as
  * the cookie name in the {@link com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware}
- *
  */
 public class ResponseSessionCookieRemovalMiddleware implements Middleware {
 
@@ -35,7 +32,6 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
     }
 
     /**
-     *
      * @param ctx
      */
     public static void addSignal(RoutingContext ctx) {

@@ -9,22 +9,21 @@ import org.slf4j.LoggerFactory;
 
 public class CSRFMiddleware implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddleware.class);
     public static final String DEFAULT_COOKIE_NAME = CSRFHandler.DEFAULT_COOKIE_NAME;
     public static final String DEFAULT_HEADER_NAME = CSRFHandler.DEFAULT_HEADER_NAME;
     public static final String DEFAULT_COOKIE_PATH = CSRFHandler.DEFAULT_COOKIE_PATH;
     public static final int DEFAULT_TIMEOUT_IN_MINUTES = 15;
     public static final boolean DEFAULT_COOKIE_SECURE = true;
     public static final boolean DEFAULT_NAG_HTTPS = true;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddleware.class);
     private static final int MILLISECONDS_IN_1_MINUTE = 60000;
 
     private final String name;
     private final CSRFHandler csrfHandler;
 
     public CSRFMiddleware(Vertx vertx, String name, String secret, String cookieName, String cookiePath,
-            Boolean cookieSecure,
-            String headerName, Long timeoutInMinute, String origin, Boolean nagHttps) {
+                          Boolean cookieSecure,
+                          String headerName, Long timeoutInMinute, String origin, Boolean nagHttps) {
         this.name = name;
         this.csrfHandler = CSRFHandler.create(vertx, secret)
                 .setCookieName(cookieName == null ? DEFAULT_COOKIE_NAME : cookieName)

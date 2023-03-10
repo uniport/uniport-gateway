@@ -30,8 +30,8 @@ public class Parser {
     private static final String SERVICE_SERVERS = "servers";
 
     private static final List<String> VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES = Arrays.asList(ROUTERS, MIDDLEWARES,
-        SERVICES);
-    private static final List<String> VALUES_ARE_OBJECTS = Arrays.asList(SERVICE_SERVERS);
+            SERVICES);
+    private static final List<String> VALUES_ARE_OBJECTS = List.of(SERVICE_SERVERS);
     private static final List<String> VALUES_ARE_SEPERATED_BY_COMMA = Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
 
     public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
@@ -64,7 +64,7 @@ public class Parser {
         }
         catch (IllegalArgumentException e) {
             LOGGER.warn("Decoding to JSON failed: '{}' '{}'", e.getMessage(),
-                labels.toString());
+                    labels.toString());
         }
         return null;
     }
@@ -95,7 +95,7 @@ public class Parser {
 
                 if (v.charAt(0) == '[') {
                     throw new IllegalArgumentException(
-                        "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
+                            "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
                 }
 
                 if (v.equals(rootName)) {
@@ -191,8 +191,8 @@ public class Parser {
             else {
                 if (root.containsKey(key)) {
                     LOGGER.warn(
-                        "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
-                        key, root.getString(key), value);
+                            "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
+                            key, root.getString(key), value);
                 }
                 if (isInteger(value)) {
                     root.put(key, Integer.parseInt(value));

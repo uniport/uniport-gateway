@@ -1,10 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
-import org.apache.commons.lang3.Validate;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.Validate;
 
 /**
  * JWTClaim Model.

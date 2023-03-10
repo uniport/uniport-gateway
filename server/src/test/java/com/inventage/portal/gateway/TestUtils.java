@@ -1,24 +1,24 @@
 package com.inventage.portal.gateway;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.junit.jupiter.api.Assertions;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TestUtils {
     /**
@@ -37,16 +37,20 @@ public class TestUtils {
             int port = socket.getLocalPort();
             try {
                 socket.close();
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 // Ignore IOException on close()
             }
             return port;
-        } catch (IOException e) {
-        } finally {
+        }
+        catch (IOException e) {
+        }
+        finally {
             if (socket != null) {
                 try {
                     socket.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                 }
             }
         }
@@ -189,15 +193,15 @@ public class TestUtils {
     }
 
     // For static configuration
-    public static JsonObject buildStaticConfiguration(Handler<JsonObject>... staticConfiguration){
+    public static JsonObject buildStaticConfiguration(Handler<JsonObject>... staticConfiguration) {
         JsonObject conf = new JsonObject();
-        for(Handler<JsonObject> build: staticConfiguration){
+        for (Handler<JsonObject> build : staticConfiguration) {
             build.handle(conf);
         }
         return conf;
     }
 
-    public static Handler<JsonObject> withEntrypoints(Handler<JsonObject>... opts){
+    public static Handler<JsonObject> withEntrypoints(Handler<JsonObject>... opts) {
         return conf -> {
             JsonArray entrypoints = new JsonArray();
             conf.put(StaticConfiguration.ENTRYPOINTS, entrypoints);
@@ -209,7 +213,7 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withEntrypoint(String name, int port, Handler<JsonObject> entryMiddleware){
+    public static Handler<JsonObject> withEntrypoint(String name, int port, Handler<JsonObject> entryMiddleware) {
         return conf -> {
             conf.put(StaticConfiguration.ENTRYPOINT_NAME, name);
             conf.put(StaticConfiguration.ENTRYPOINT_PORT, port);
@@ -217,14 +221,14 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withEntrypoint(String name, int port){
+    public static Handler<JsonObject> withEntrypoint(String name, int port) {
         return conf -> {
             conf.put(StaticConfiguration.ENTRYPOINT_NAME, name);
             conf.put(StaticConfiguration.ENTRYPOINT_PORT, port);
         };
     }
 
-    public static Handler<JsonObject> withApplications(Handler<JsonObject>... opts){
+    public static Handler<JsonObject> withApplications(Handler<JsonObject>... opts) {
         return conf -> {
             JsonArray applications = new JsonArray();
             conf.put(StaticConfiguration.APPLICATIONS, applications);
@@ -236,7 +240,7 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withApplication(String name, String entrypoint, String provider, Handler<JsonObject> requestSelector){
+    public static Handler<JsonObject> withApplication(String name, String entrypoint, String provider, Handler<JsonObject> requestSelector) {
         return application -> {
             application.put(StaticConfiguration.APPLICATION_NAME, name);
             application.put(StaticConfiguration.APPLICATION_ENTRYPOINT, entrypoint);
@@ -245,13 +249,13 @@ public class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withRequestSelector(String urlPrefix){
+    public static Handler<JsonObject> withRequestSelector(String urlPrefix) {
         return application -> {
             application.put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR_URL_PREFIX, urlPrefix);
         };
     }
 
-    public static Handler<JsonObject> withProviders(Handler<JsonObject>... opts){
+    public static Handler<JsonObject> withProviders(Handler<JsonObject>... opts) {
         return conf -> {
             JsonArray providers = new JsonArray();
             conf.put(StaticConfiguration.PROVIDERS, providers);
@@ -266,8 +270,9 @@ public class TestUtils {
     public static Map<String, String> extractParametersFromHeader(String header) {
         List<NameValuePair> responseParamsList = null;
         try {
-            responseParamsList = URLEncodedUtils.parse(new URI(header), Charset.forName("UTF-8"));
-        } catch (URISyntaxException e) {
+            responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
+        }
+        catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         Assertions.assertNotNull(responseParamsList);

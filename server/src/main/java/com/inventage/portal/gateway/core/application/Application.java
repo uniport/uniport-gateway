@@ -1,10 +1,10 @@
 package com.inventage.portal.gateway.core.application;
 
-import java.util.Optional;
-
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
+
+import java.util.Optional;
 
 /**
  * The portal gateway is made of different application. Every one has to implement this interface.
@@ -19,7 +19,7 @@ public interface Application {
     /**
      * @return router which will be mounted by the global router for receiving requests
      * @see ApplicationFactory#create(io.vertx.core.json.JsonObject, io.vertx.core.json.JsonObject,
-     *      io.vertx.core.Vertx)
+     * io.vertx.core.Vertx)
      */
     Optional<Router> router();
 

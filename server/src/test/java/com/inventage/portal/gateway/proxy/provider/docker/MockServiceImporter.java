@@ -1,12 +1,5 @@
 package com.inventage.portal.gateway.proxy.provider.docker;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -14,6 +7,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MockServiceImporter implements ServiceImporter {
 
@@ -22,11 +21,11 @@ public class MockServiceImporter implements ServiceImporter {
     private Vertx vertx;
     private ServicePublisher publisher;
 
-    private long scanPeriodMs;
+    private final long scanPeriodMs;
     private long timerId;
 
-    private List<JsonObject> containers;
-    private AtomicInteger count;
+    private final List<JsonObject> containers;
+    private final AtomicInteger count;
 
     public MockServiceImporter(List<JsonObject> containers, long scanPeriodMs) {
         if (containers == null) {

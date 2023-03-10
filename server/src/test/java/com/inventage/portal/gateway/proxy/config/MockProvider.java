@@ -1,28 +1,26 @@
 package com.inventage.portal.gateway.proxy.config;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.provider.Provider;
-
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MockProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockProvider.class);
 
-    private Vertx vertx;
-    private EventBus eb;
-    private String configurationAddress;
+    private final Vertx vertx;
+    private final EventBus eb;
+    private final String configurationAddress;
 
-    private List<JsonObject> messages;
-    private long waitMs;
+    private final List<JsonObject> messages;
+    private final long waitMs;
 
     private long timerId;
 
@@ -38,7 +36,8 @@ public class MockProvider extends Provider {
 
         if (waitMs == 0) {
             this.waitMs = 20;
-        } else {
+        }
+        else {
             this.waitMs = waitMs;
         }
     }

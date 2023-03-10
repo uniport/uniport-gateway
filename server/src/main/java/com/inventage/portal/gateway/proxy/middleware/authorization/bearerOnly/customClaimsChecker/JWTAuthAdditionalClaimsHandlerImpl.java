@@ -35,53 +35,6 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         }
     }
 
-    @Override
-    public void postAuthentication(RoutingContext ctx) {
-        final User user = ctx.user();
-        if (user == null) {
-            // bad state
-            LOGGER.debug("no user in context");
-            ctx.fail(403, new IllegalStateException("no user in the context"));
-            return;
-        }
-
-        final JsonObject jwt = user.get("accessToken");
-        if (jwt == null) {
-            LOGGER.debug("invalid JWT: malformed or audience, issuer or signature is invalid");
-            ctx.fail(403,
-                    new IllegalStateException("Invalid JWT: malformed or audience, issuer or signature is invalid"));
-            return;
-        }
-
-        // Check that all required additional claims are present
-        try {
-            for (JWTClaim additionalClaim : additionalJWTClaims) {
-                LOGGER.debug("Verifying claims. Path: {}, Operator: {}, Claim: {}", additionalClaim.path,
-                        additionalClaim.operator, additionalClaim.value);
-
-                // Claims are provided by the dynamic configuration file.
-                // We verify that each payload complies with the claims defined in the configuration
-                // Throws an exception if the path does not exist in the payload
-                final var payloadValue = JsonPath.read(jwt.toString(), additionalClaim.path);
-
-                // Verify if the value stored in that path complies to the claim.
-                if (!verifyClaim(payloadValue, additionalClaim.value, additionalClaim.operator)) {
-                    throw new IllegalStateException(String.format(
-                            "Invalid JWT token: Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
-                            additionalClaim.path, additionalClaim.operator,
-                            additionalClaim.value,
-                            payloadValue));
-                }
-            }
-        }
-        catch (RuntimeException | JsonProcessingException e) {
-            LOGGER.warn(e.getMessage());
-            ctx.fail(403, e);
-        }
-
-        super.postAuthentication(ctx);
-    }
-
     private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator)
             throws JsonProcessingException {
 
@@ -169,6 +122,53 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         }
 
         return payloadValue;
+    }
+
+    @Override
+    public void postAuthentication(RoutingContext ctx) {
+        final User user = ctx.user();
+        if (user == null) {
+            // bad state
+            LOGGER.debug("no user in context");
+            ctx.fail(403, new IllegalStateException("no user in the context"));
+            return;
+        }
+
+        final JsonObject jwt = user.get("accessToken");
+        if (jwt == null) {
+            LOGGER.debug("invalid JWT: malformed or audience, issuer or signature is invalid");
+            ctx.fail(403,
+                    new IllegalStateException("Invalid JWT: malformed or audience, issuer or signature is invalid"));
+            return;
+        }
+
+        // Check that all required additional claims are present
+        try {
+            for (JWTClaim additionalClaim : additionalJWTClaims) {
+                LOGGER.debug("Verifying claims. Path: {}, Operator: {}, Claim: {}", additionalClaim.path,
+                        additionalClaim.operator, additionalClaim.value);
+
+                // Claims are provided by the dynamic configuration file.
+                // We verify that each payload complies with the claims defined in the configuration
+                // Throws an exception if the path does not exist in the payload
+                final var payloadValue = JsonPath.read(jwt.toString(), additionalClaim.path);
+
+                // Verify if the value stored in that path complies to the claim.
+                if (!verifyClaim(payloadValue, additionalClaim.value, additionalClaim.operator)) {
+                    throw new IllegalStateException(String.format(
+                            "Invalid JWT token: Claim verification failed. Path: %s, Operator: %s, claim: %s, payload: %s",
+                            additionalClaim.path, additionalClaim.operator,
+                            additionalClaim.value,
+                            payloadValue));
+                }
+            }
+        }
+        catch (RuntimeException | JsonProcessingException e) {
+            LOGGER.warn(e.getMessage());
+            ctx.fail(403, e);
+        }
+
+        super.postAuthentication(ctx);
     }
 
 }

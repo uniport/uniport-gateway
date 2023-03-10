@@ -1,13 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
@@ -24,7 +16,6 @@ import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
-
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -39,6 +30,13 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MiddlewareServerBuilder {
 
@@ -46,8 +44,15 @@ public class MiddlewareServerBuilder {
 
     private final String host;
     private final Vertx vertx;
-    private VertxTestContext testCtx;
     private final Router router;
+    private final VertxTestContext testCtx;
+
+    private MiddlewareServerBuilder(Vertx vertx, String host, VertxTestContext testCtx) {
+        this.vertx = vertx;
+        this.host = host;
+        this.testCtx = testCtx;
+        router = Router.router(vertx);
+    }
 
     public static MiddlewareServerBuilder portalGateway(Vertx vertx, VertxTestContext testCtx) {
         return portalGateway(vertx, "localhost", testCtx);
@@ -55,13 +60,6 @@ public class MiddlewareServerBuilder {
 
     public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, VertxTestContext testCtx) {
         return new MiddlewareServerBuilder(vertx, host, testCtx);
-    }
-
-    private MiddlewareServerBuilder(Vertx vertx, String host, VertxTestContext testCtx) {
-        this.vertx = vertx;
-        this.host = host;
-        this.testCtx = testCtx;
-        router = Router.router(vertx);
     }
 
     public MiddlewareServerBuilder withSessionMiddleware() {
@@ -82,23 +80,21 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider,
-            JWTAuthAdditionalClaimsOptions options, boolean optional) {
+                                                                       JWTAuthAdditionalClaimsOptions options, boolean optional) {
         return withMiddleware(
                 new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
                         optional));
     }
 
     /**
-     *
-     * @param mockKeycloakServer
-     * @param scope will be used as the path prefix of incoming requests (e.g. /scope/*)
      * @return this
      */
     public MiddlewareServerBuilder withBearerOnlyMiddleware(KeycloakServer mockKeycloakServer,
-            String issuer, List<String> audience, JsonArray publicKeys) {
+                                                            String issuer, List<String> audience, JsonArray publicKeys) {
         try {
             withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys));
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
             }
@@ -116,7 +112,8 @@ public class MiddlewareServerBuilder {
         while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -167,15 +164,15 @@ public class MiddlewareServerBuilder {
     }
 
     /**
-     *
      * @param mockKeycloakServer
-     * @param scope will be used as the path prefix of incoming requests (e.g. /scope/*)
+     * @param scope              will be used as the path prefix of incoming requests (e.g. /scope/*)
      * @return this
      */
     public MiddlewareServerBuilder withOAuth2AuthMiddlewareForScope(KeycloakServer mockKeycloakServer, String scope) {
         try {
             withOAuth2AuthMiddleware(mockKeycloakServer.getOAuth2AuthConfig(scope), scope);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
             }
@@ -197,7 +194,8 @@ public class MiddlewareServerBuilder {
         while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -206,7 +204,8 @@ public class MiddlewareServerBuilder {
         }
         if (scope == null) {
             return withMiddleware(middlewareFuture.result());
-        } else {
+        }
+        else {
             return withMiddlewareOnPath(middlewareFuture.result(), "/" + scope + "/*");
         }
     }

@@ -38,6 +38,7 @@ import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 import io.vertx.ext.web.handler.impl.HTTPAuthorizationHandler;
+import io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl;
 import io.vertx.ext.web.handler.impl.ScopedAuthentication;
 import io.vertx.ext.web.impl.Origin;
 
@@ -66,11 +67,19 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
         implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RelyingPartyHandler.class);
+    private static final Set<String> OPENID_SCOPES = new HashSet<>();
+
+    static {
+        OPENID_SCOPES.add("openid");
+        OPENID_SCOPES.add("profile");
+        OPENID_SCOPES.add("email");
+        OPENID_SCOPES.add("phone");
+        OPENID_SCOPES.add("offline");
+    }
 
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
     private final MessageDigest sha256;
-
     private final List<String> scopes;
     private final boolean openId;
     private JsonObject extraParams;
@@ -78,7 +87,6 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     private int pkce = -1;
     // explicit signal that tokens are handled as bearer only (meaning, no backend server known)
     private boolean bearerOnly = true;
-
     private int order = -1;
     private Route callback;
 
@@ -325,16 +333,6 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
         // handler has full oauth2 support, not just basic JWT
         bearerOnly = false;
         return this;
-    }
-
-    private static final Set<String> OPENID_SCOPES = new HashSet<>();
-
-    static {
-        OPENID_SCOPES.add("openid");
-        OPENID_SCOPES.add("profile");
-        OPENID_SCOPES.add("email");
-        OPENID_SCOPES.add("phone");
-        OPENID_SCOPES.add("offline");
     }
 
     /**

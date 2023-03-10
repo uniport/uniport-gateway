@@ -65,7 +65,7 @@ public class PortalGatewayConfigRetriever {
         staticConfigFileName = String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
         if (existsAsFile(staticConfigFileName)) {
             LOGGER.info("Reading from default file within working directory '{}'",
-                staticConfigFileName);
+                    staticConfigFileName);
             return Optional.of(Path.of(staticConfigFileName));
         }
         LOGGER.warn("No portal-gateway.json file configured");
@@ -103,8 +103,8 @@ public class PortalGatewayConfigRetriever {
 
     private static ConfigStoreOptions configStoreOptions(Path filePath) {
         return new ConfigStoreOptions().setType("file")
-            .setFormat(filePath.toString().endsWith("json") ? "json" : "properties")
-            .setConfig(new JsonObject().put("path", filePath.toAbsolutePath()).put("raw-data", true));
+                .setFormat(filePath.toString().endsWith("json") ? "json" : "properties")
+                .setConfig(new JsonObject().put("path", filePath.toAbsolutePath()).put("raw-data", true));
     }
 
     private static boolean existsAsFile(String fileName) {

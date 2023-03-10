@@ -40,7 +40,7 @@ class CSRFMiddlewareTest {
             final List<String> cookies = httpClientResponse.cookies();
             final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
 
-            assertTrue(csrfCookie.isPresent(), String.format("Csrf Cookie needs to be included in the response."));
+            assertTrue(csrfCookie.isPresent(), "Csrf Cookie needs to be included in the response.");
 
             testCtx.completeNow();
         }));
@@ -63,7 +63,7 @@ class CSRFMiddlewareTest {
             final List<String> cookies = httpClientResponse.cookies();
             final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
 
-            assertTrue(csrfCookie.isPresent(), String.format("Csrf Cookie needs to be included in the response."));
+            assertTrue(csrfCookie.isPresent(), "Csrf Cookie needs to be included in the response.");
 
             testCtx.completeNow();
         }));

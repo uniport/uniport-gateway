@@ -18,10 +18,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AuthTokenMiddlewareBase implements Middleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthTokenMiddlewareBase.class);
-
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthTokenMiddlewareBase.class);
     protected final String name;
     private final String sessionScope;
 

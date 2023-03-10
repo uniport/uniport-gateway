@@ -1,6 +1,15 @@
 package com.inventage.portal.gateway.proxy.config.label;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -9,18 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
 public class ParserTest {
@@ -44,17 +42,6 @@ public class ParserTest {
                 Arguments.of("filter keys", labels, List.of("test", "some"), List.of("testA", "someB")));
     }
 
-    @ParameterizedTest
-    @MethodSource("filterKeysTestData")
-    void filterKeysTest(String name, Map<String, Object> labels, List<String> filters, List<String> expected,
-            Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed. Labels: '%s', Filters: '%s'", name, labels, filters);
-
-        List<String> actual = Parser.filterKeys(labels, filters);
-        testCtx.verify(() -> assertEquals(expected, actual, errMsg));
-        testCtx.completeNow();
-    }
-
     static Stream<Arguments> decodeTestData() {
         // the middleware type needs to be one of 'DynamicConfiguration.MIDDLEWARE_TYPES'
         Map<String, Object> labels = new HashMap<String, Object>(Map.ofEntries(//
@@ -71,26 +58,26 @@ public class ParserTest {
 
         JsonObject expectedDecoding = new JsonObject().//
                 put(DynamicConfiguration.HTTP, new JsonObject()//
-                        .put(DynamicConfiguration.ROUTERS, new JsonArray()//
-                                .add(new JsonObject()//
-                                        .put(DynamicConfiguration.ROUTER_NAME, "blub")//
-                                        .put(DynamicConfiguration.ROUTER_RULE, "someRule")//
-                                        .put(DynamicConfiguration.ROUTER_MIDDLEWARES, new JsonArray()//
-                                                .add("one")//
-                                                .add("two")//
-                                                .add("foo"))))
-                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()//
-                                .add(new JsonObject()//
-                                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")//
-                                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, "headers")//
-                                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()//
-                                                .put("bar", "baz"))))//
-                        .put(DynamicConfiguration.SERVICES, new JsonArray()//
-                                .add(new JsonObject()//
-                                        .put(DynamicConfiguration.SERVICE_NAME, "moose")//
-                                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()//
-                                                .add(new JsonObject()//
-                                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
+                .put(DynamicConfiguration.ROUTERS, new JsonArray()//
+                        .add(new JsonObject()//
+                                .put(DynamicConfiguration.ROUTER_NAME, "blub")//
+                                .put(DynamicConfiguration.ROUTER_RULE, "someRule")//
+                                .put(DynamicConfiguration.ROUTER_MIDDLEWARES, new JsonArray()//
+                                        .add("one")//
+                                        .add("two")//
+                                        .add("foo"))))
+                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()//
+                        .add(new JsonObject()//
+                                .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")//
+                                .put(DynamicConfiguration.MIDDLEWARE_TYPE, "headers")//
+                                .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()//
+                                        .put("bar", "baz"))))//
+                .put(DynamicConfiguration.SERVICES, new JsonArray()//
+                        .add(new JsonObject()//
+                                .put(DynamicConfiguration.SERVICE_NAME, "moose")//
+                                .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()//
+                                        .add(new JsonObject()//
+                                                .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
 
         return Stream.of(Arguments.of("labels is null", null, "", null),
                 Arguments.of("labels with no match", labelsWithNoMatch, "nomatch", null),
@@ -99,9 +86,20 @@ public class ParserTest {
     }
 
     @ParameterizedTest
+    @MethodSource("filterKeysTestData")
+    void filterKeysTest(String name, Map<String, Object> labels, List<String> filters, List<String> expected,
+                        Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = String.format("'%s' failed. Labels: '%s', Filters: '%s'", name, labels, filters);
+
+        List<String> actual = Parser.filterKeys(labels, filters);
+        testCtx.verify(() -> assertEquals(expected, actual, errMsg));
+        testCtx.completeNow();
+    }
+
+    @ParameterizedTest
     @MethodSource("decodeTestData")
     void decodeTest(String name, Map<String, Object> labels, String rootName, JsonObject expected, Vertx vertx,
-            VertxTestContext testCtx) {
+                    VertxTestContext testCtx) {
         List<String> filters = null; // usage of filters is tested in 'filterKeysTest'
         String errMsg = String.format("'%s' failed. Labels: '%s', RootName: '%s', Filters: '%s'", name, labels,
                 rootName, filters);

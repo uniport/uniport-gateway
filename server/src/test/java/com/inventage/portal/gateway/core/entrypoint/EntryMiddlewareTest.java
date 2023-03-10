@@ -6,7 +6,11 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.*;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -53,11 +57,11 @@ public class EntryMiddlewareTest {
                 req -> {
                     req.response().setStatusCode(200).end("ok");
                 }).listen(serverPort, ready -> {
-                    if (ready.failed()) {
-                        throw new RuntimeException(ready.cause());
-                    }
-                    latch.countDown();
-                });
+            if (ready.failed()) {
+                throw new RuntimeException(ready.cause());
+            }
+            latch.countDown();
+        });
 
         latch.await();
 
@@ -116,7 +120,7 @@ public class EntryMiddlewareTest {
     }
 
     private void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts,
-            Consumer<HttpClientResponse> assertionHandler) {
+                           Consumer<HttpClientResponse> assertionHandler) {
         CountDownLatch latch = new CountDownLatch(1);
 
         reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
@@ -128,16 +132,17 @@ public class EntryMiddlewareTest {
 
         try {
             latch.await();
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             testCtx.failNow(e);
         }
     }
 
     private Map<String, JsonObject> oneEntryRedirectMiddlewareTwoRoutesConfiguration(String entryPointIdentifier,
-            String redirect) {
+                                                                                     String redirect) {
         JsonObject dynamicConfig = TestUtils.buildConfiguration(
                 TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                        TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares()),
+                                TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares()),
                         TestUtils.withRouter("foo2", TestUtils.withRouterService("bar"),
                                 TestUtils.withRouterRule("Path('/pathB')"), TestUtils.withRouterMiddlewares())),
                 TestUtils.withServices(

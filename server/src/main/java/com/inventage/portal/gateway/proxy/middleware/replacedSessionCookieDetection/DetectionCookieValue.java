@@ -9,11 +9,9 @@ import org.slf4j.LoggerFactory;
  */
 public class DetectionCookieValue {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DetectionCookieValue.class);
-
     protected static final String SPLITTER = ":";
     protected static final int MAX_RETRIES = 5;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(DetectionCookieValue.class);
     protected int counter;
     protected long lastSessionAccess;
 

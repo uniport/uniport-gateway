@@ -1,16 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import com.inventage.portal.gateway.TestUtils;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -19,6 +9,14 @@ import io.vertx.ext.web.Router;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
 public class RedirectRegexMiddlewareTest {
@@ -53,7 +51,7 @@ public class RedirectRegexMiddlewareTest {
     @ParameterizedTest
     @MethodSource("redirectTestData")
     void redirectTest(String name, String regex, String replacement, String URL, int expectedStatusCode,
-            String expectedURL, Vertx vertx, VertxTestContext testCtx) {
+                      String expectedURL, Vertx vertx, VertxTestContext testCtx) {
 
         String failureMsg = String.format("Failure of '%s' test case", name);
 

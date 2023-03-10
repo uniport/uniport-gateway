@@ -44,16 +44,13 @@ import java.util.List;
 public class DockerContainerServiceImporter implements ServiceImporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerServiceImporter.class);
-
+    private final List<DockerContainerService> services = new ArrayList<>();
+    volatile boolean started;
     private long timerId;
     private DockerClient client;
-
-    private final List<DockerContainerService> services = new ArrayList<>();
     private ServicePublisher publisher;
     private Vertx vertx;
     private String host;
-
-    volatile boolean started;
 
     /**
      * Starts the bridge.
@@ -118,7 +115,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         }
 
         final DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
-            .sslConfig(config.getSSLConfig()).maxConnections(100).build();
+                .sslConfig(config.getSSLConfig()).maxConnections(100).build();
 
         client = DockerClientImpl.getInstance(config, httpClient);
 
@@ -135,7 +132,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         vertx.<List<Container>>executeBlocking(future -> {
             try {
                 future.complete(
-                    client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
+                        client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
             }
             catch (Exception e) {
                 future.fail(e);

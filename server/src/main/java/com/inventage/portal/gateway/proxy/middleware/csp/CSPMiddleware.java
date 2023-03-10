@@ -1,15 +1,13 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CSPMiddleware implements Middleware {
 

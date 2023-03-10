@@ -9,12 +9,44 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 
 public class MockOAuth2Auth implements OAuth2Auth {
 
-    private JsonObject principal;
     private final int refreshedExpiresIn;
+    private final JsonObject principal;
 
     public MockOAuth2Auth(JsonObject principal, int refreshedExpiresIn) {
         this.principal = principal;
         this.refreshedExpiresIn = refreshedExpiresIn;
+    }
+
+    public static User createUser(JsonObject json) {
+        // update the principal
+        final User user = User.create(json);
+        final long now = System.currentTimeMillis() / 1000;
+
+        // compute the expires_at if any
+        if (json.containsKey("expires_in")) {
+            Long expiresIn;
+            try {
+                expiresIn = json.getLong("expires_in");
+            }
+            catch (ClassCastException e) {
+                // for some reason someone decided to send a number as a String...
+                expiresIn = Long.valueOf(json.getString("expires_in"));
+            }
+            // don't interfere with the principal object
+            user.attributes().put("iat", now).put("exp", now + expiresIn);
+        }
+
+        if (json.containsKey("access_token")) {
+            final String token = json.getString("access_token");
+            user.attributes().put("accessToken", token);
+        }
+
+        if (json.containsKey("id_token")) {
+            final String token = json.getString("id_token");
+            user.attributes().put("idToken", token);
+        }
+
+        return user;
     }
 
     @Override
@@ -61,39 +93,7 @@ public class MockOAuth2Auth implements OAuth2Auth {
         return "";
     }
 
-    public static User createUser(JsonObject json) {
-        // update the principal
-        final User user = User.create(json);
-        final long now = System.currentTimeMillis() / 1000;
-
-        // compute the expires_at if any
-        if (json.containsKey("expires_in")) {
-            Long expiresIn;
-            try {
-                expiresIn = json.getLong("expires_in");
-            } catch (ClassCastException e) {
-                // for some reason someone decided to send a number as a String...
-                expiresIn = Long.valueOf(json.getString("expires_in"));
-            }
-            // don't interfere with the principal object
-            user.attributes().put("iat", now).put("exp", now + expiresIn);
-        }
-
-        if (json.containsKey("access_token")) {
-            final String token = json.getString("access_token");
-            user.attributes().put("accessToken", token);
-        }
-
-        if (json.containsKey("id_token")) {
-            final String token = json.getString("id_token");
-            user.attributes().put("idToken", token);
-        }
-
-        return user;
-    }
-
     @Override
     public void close() {
-        return;
     }
 }

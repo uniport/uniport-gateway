@@ -12,7 +12,7 @@ import java.util.concurrent.CompletionStage;
  */
 public class BrowserConnected {
 
-    private MiddlewareServer portalGateway;
+    private final MiddlewareServer portalGateway;
 
     public BrowserConnected(MiddlewareServer portalGateway) {
         this.portalGateway = portalGateway;

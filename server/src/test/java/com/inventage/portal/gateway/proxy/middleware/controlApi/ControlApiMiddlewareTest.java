@@ -133,7 +133,7 @@ public class ControlApiMiddlewareTest {
 
     private Handler<RoutingContext> getCookieInsertionHandler(List<Cookie> cookies) {
         return ctx -> {
-            for (Cookie cookie: cookies) {
+            for (Cookie cookie : cookies) {
                 ctx.response().addCookie(cookie);
             }
             ctx.response().end();

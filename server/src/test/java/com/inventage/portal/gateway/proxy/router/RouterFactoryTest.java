@@ -22,7 +22,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("unchecked")
@@ -36,6 +38,32 @@ public class RouterFactoryTest {
     private int serverPort;
     private RouterFactory routerFactory;
     private Router proxyRouter;
+
+    private static Stream<String> provideStringsForValidParseRule() {
+        return Stream.of(
+                "Path('/foo')",
+                "Path('/foo/bar')",
+                "Path('/.bar')",
+                "Path('/.foo-bar/baz')",
+
+                "PathPrefix('/foo')",
+                "PathPrefix('/foo/bar')",
+                "PathPrefix('/.bar')",
+                "PathPrefix('/.foo-bar/baz')",
+
+                "Host('/foo')",
+                "Host('/foo/bar')",
+                "Host('/.bar')",
+                "Host('/.foo-bar/baz')");
+    }
+
+    private static Stream<String> provideStringsForInvalidParseRule() {
+        return Stream.of(
+                "Path(\"/foo\")",
+                "PathPrefix(\"/foo\")",
+                "Host(\"/foo\")",
+                "Foo('/foo')");
+    }
 
     @BeforeEach
     public void setup(Vertx vertx) throws Exception {
@@ -281,7 +309,7 @@ public class RouterFactoryTest {
         JsonObject config = TestUtils
                 .buildConfiguration(
                         TestUtils.withRouters(TestUtils.withRouter("shortPath", TestUtils.withRouterService("bar"),
-                                TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100)),
+                                        TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100)),
                                 TestUtils
                                         .withRouter("longPath", TestUtils.withRouterService("noServer"),
                                                 TestUtils.withRouterRule("PathPrefix('/path/long')"))),
@@ -330,32 +358,6 @@ public class RouterFactoryTest {
                 String.format("%s should not be parseable into a routing rule", input));
     }
 
-    private static Stream<String> provideStringsForValidParseRule() {
-        return Stream.of(
-                "Path('/foo')",
-                "Path('/foo/bar')",
-                "Path('/.bar')",
-                "Path('/.foo-bar/baz')",
-
-                "PathPrefix('/foo')",
-                "PathPrefix('/foo/bar')",
-                "PathPrefix('/.bar')",
-                "PathPrefix('/.foo-bar/baz')",
-
-                "Host('/foo')",
-                "Host('/foo/bar')",
-                "Host('/.bar')",
-                "Host('/.foo-bar/baz')");
-    }
-
-    private static Stream<String> provideStringsForInvalidParseRule() {
-        return Stream.of(
-                "Path(\"/foo\")",
-                "PathPrefix(\"/foo\")",
-                "Host(\"/foo\")",
-                "Foo('/foo')");
-    }
-
     private void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -368,7 +370,8 @@ public class RouterFactoryTest {
 
         try {
             latch.await();
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             testCtx.failNow(e);
         }
     }

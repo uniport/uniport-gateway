@@ -1,19 +1,18 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map.Entry;
 
 // -- request headers --> HeaderMiddleware -- updated request headers -->
 // <-- updated response headers -- HeaderMiddleware <-- response headers --
+
 /**
  * Manages request/response headers. It can add/remove headers on both requests and responses.
  */
@@ -36,36 +35,30 @@ public class HeaderMiddleware implements Middleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         for (Entry<String, String> header : this.requestHeaders.entries()) {
-            switch (header.getValue()) {
-                case "": {
-                    LOGGER.debug("Removing request header '{}'", header.getKey());
-                    ctx.request().headers().remove(header.getKey());
-                    break;
-                }
-                default: {
-                    LOGGER.debug("Setting request header '{}:{}'", header.getKey(), header.getValue());
-                    ctx.request().headers().add(header.getKey(), header.getValue());
-                }
+            if (header.getValue().equals("")) {
+                LOGGER.debug("Removing request header '{}'", header.getKey());
+                ctx.request().headers().remove(header.getKey());
+            }
+            else {
+                LOGGER.debug("Setting request header '{}:{}'", header.getKey(), header.getValue());
+                ctx.request().headers().add(header.getKey(), header.getValue());
             }
         }
 
         final Handler<MultiMap> respHeadersModifier = headers -> {
             for (Entry<String, String> header : this.responseHeaders.entries()) {
-                switch (header.getValue()) {
-                    case "": {
-                        if (headers.contains(header.getKey())) {
-                            LOGGER.debug("Removing response header '{}'", header.getKey());
-                            headers.remove(header.getKey());
-                        }
-                        break;
+                if (header.getValue().equals("")) {
+                    if (headers.contains(header.getKey())) {
+                        LOGGER.debug("Removing response header '{}'", header.getKey());
+                        headers.remove(header.getKey());
                     }
-                    default: {
-                        final List<String> hs = headers.getAll(header.getKey());
-                        if (hs == null || !hs.contains(header.getValue())) {
-                            LOGGER.debug("Setting response header '{}:{}'", header.getKey(),
-                                    header.getValue());
-                            headers.add(header.getKey(), header.getValue());
-                        }
+                }
+                else {
+                    final List<String> hs = headers.getAll(header.getKey());
+                    if (hs == null || !hs.contains(header.getValue())) {
+                        LOGGER.debug("Setting response header '{}:{}'", header.getKey(),
+                                header.getValue());
+                        headers.add(header.getKey(), header.getValue());
                     }
                 }
             }

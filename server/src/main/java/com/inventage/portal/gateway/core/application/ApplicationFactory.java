@@ -1,13 +1,12 @@
 package com.inventage.portal.gateway.core.application;
 
-import java.util.Optional;
-import java.util.ServiceLoader;
-
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 /**
  * Service interface for providing applications. Implementations must add an entry with the fully
@@ -26,7 +25,6 @@ public interface ApplicationFactory {
     String provides();
 
     /**
-     *
      * @param applicationConfig extract of the config for this application
      * @param globalConfig      complete config
      * @param vertx             running instance by which an application can get their router

@@ -20,10 +20,10 @@ public class CheckRouteMiddlewareTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "/" +DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH,
-            "/a/b/" +DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH,
-            "/a/b/" +DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH+ "/c/d",
-            "/prefix" +DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH+ "postfix"
+            "/" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH,
+            "/a/b/" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH,
+            "/a/b/" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH + "/c/d",
+            "/prefix" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH + "postfix"
     })
     public void isHandledByCheckRoute(String uri, Vertx vertx, VertxTestContext testCtx) {
         // given

@@ -1,12 +1,10 @@
 package com.inventage.portal.gateway.proxy.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builds and deploys the router structure after receiving a new/changed dynamic configuration.
