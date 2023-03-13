@@ -12,12 +12,13 @@
 !/.idea/prettier.xml
 *.iml
 
-# Ignore all VS Code stuff
+# Ignore all VS Code stuff and include the important things
 /.vscode/*
 .settings
 .project
 .classpath
 .factorypath
+!/.vscode/portal-java-formatter.xml
 
 # Maven
 target/
