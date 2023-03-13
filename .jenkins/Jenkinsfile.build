@@ -7,7 +7,7 @@ pipeline {
 
     triggers {
         // every sunday between 3am and 5am (https://www.jenkins.io/doc/book/pipeline/syntax/)
-        cron(env.BRANCH_NAME == 'master' ? 'H H(3-5) * * 7' : '')
+        cron(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'main' ? 'H H(3-5) * * 7' : '')
     }
 
     options {
