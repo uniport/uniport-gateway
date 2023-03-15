@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
@@ -24,6 +25,8 @@ import static io.vertx.core.http.Cookie.cookie;
 public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
+
+    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddleware.COOKIE_NAME_DEFAULT;
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
     private final String name;
@@ -42,6 +45,14 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
+        if (requestComingFromLoggedOutUser(ctx)) {
+            ctx.response().addCookie(
+                    cookie(this.detectionCookieKey, "").setPath("/")
+                            .setHttpOnly(true));
+            ctx.next();
+            return;
+        }
 
         if (requestComingFromReplacedSessionId(ctx)) {
             retryWithNewSessionIdFromBrowser(ctx);
@@ -63,6 +74,10 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      */
     private boolean requestComingFromReplacedSessionId(RoutingContext ctx) {
         return noUserInSession(ctx) && isDetectionCookieValueWithInLimit(ctx);
+    }
+
+    private boolean requestComingFromLoggedOutUser(RoutingContext ctx) {
+        return this.noSessionCookie(ctx) && getDetectionCookie(ctx).isPresent();
     }
 
     /**
@@ -117,6 +132,11 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     private boolean isUserInSession(RoutingContext ctx) {
         return ctx.user() != null;
+    }
+
+    private boolean noSessionCookie(RoutingContext ctx) {
+        final Cookie cookie = ctx.request().getCookie(ReplacedSessionCookieDetectionMiddleware.DEFAULT_SESSION_COOKIE_NAME);
+        return cookie == null;
     }
 
     /**
