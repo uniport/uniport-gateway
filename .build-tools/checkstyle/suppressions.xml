@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <suppress checks="LineLength" files=".*.properties"/>
+
+    <suppress checks=".*" files=".*/java-generated/.*"/>
+    <suppress checks=".*" files=".*/api-kafka-avro/.*"/>
+    <suppress checks=".*" files=".*/package-info.java"/>
+
+    <suppress checks="TypeName" files=".*/timestamp.java"/>
+    <suppress checks=".*" files=".*/timestamptz.java"/>
+
+    <suppress checks=".*" files=".*/api-graphql/.*java"/>
+
+    <suppress checks="LineLength" files=".*/EntityRelationLoader.java"/>
+</suppressions>

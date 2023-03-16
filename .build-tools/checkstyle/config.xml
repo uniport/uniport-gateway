@@ -10,7 +10,11 @@
         <property name="onCommentFormat" value="CHECKSTYLE ON"/>
     </module>
     <module name="SuppressionFilter">
-        <property name="file" value="build-tools/checkstyle/suppressions.xml"/>
+        <property name="file" value=".build-tools/checkstyle/suppressions.xml"/>
+    </module>
+    <module name="SuppressionFilter">
+        <property name="file" value=".build-tools/checkstyle/suppressions-specific.xml"/>
+        <property name="optional" value="true"/>
     </module>
     <module name="TreeWalker">
         <module name="ArrayTypeStyle"/>

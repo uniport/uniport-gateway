@@ -35,6 +35,7 @@
         <jib.goal>build</jib.goal>
 
         <portal-helm-chart-library.version>4.2.0-202303042317-175-49efbc0</portal-helm-chart-library.version>
+        <portal-code-style-version.version>1.0.0-SNAPSHOT</portal-code-style-version.version>
     </properties>
 
     <dependencyManagement>
@@ -212,6 +213,13 @@
                 <artifactId>assertj-core</artifactId>
                 <version>3.24.1</version>
             </dependency>
+            <!-- shared codestyle settings -->
+            <dependency>
+                <groupId>com.inventage.portal</groupId>
+                <artifactId>codestyle</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <type>zip</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -371,9 +379,9 @@
                     <configuration>
                         <consoleOutput>true</consoleOutput>
                         <!--suppress UnresolvedMavenProperty -->
-                        <configLocation>${maven.multiModuleProjectDirectory}/build-tools/checkstyle/config.xml</configLocation>
+                        <configLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/config.xml</configLocation>
                         <!--suppress UnresolvedMavenProperty -->
-                        <suppressionsLocation>${maven.multiModuleProjectDirectory}/build-tools/checkstyle/suppressions.xml</suppressionsLocation>
+                        <suppressionsLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/suppressions.xml</suppressionsLocation>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -393,7 +401,7 @@
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
                         <!--suppress UnresolvedMavenProperty -->
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/build-tools/spotbugs/exclude.xml</excludeFilterFile>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude.xml</excludeFilterFile>
                     </configuration>
                 </plugin>
             </plugins>
@@ -429,6 +437,35 @@
                                     <version>3.3.9</version>
                                 </requireMavenVersion>
                             </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- download shared code style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>unpack-zip</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.inventage.portal</groupId>
+                                    <artifactId>codestyle</artifactId>
+                                    <version>${portal-code-style-version.version}</version>
+                                    <type>zip</type>
+                                    <overWrite>true</overWrite>
+                                    <excludes>META-INF/</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.basedir}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -469,7 +506,7 @@
                         <removeUnusedImports></removeUnusedImports>
 
                         <eclipse>
-                            <file>${maven.multiModuleProjectDirectory}/build-tools/portal-java-formatter.xml</file>
+                            <file>${maven.multiModuleProjectDirectory}/.build-tools/portal-java-formatter.xml</file>
                         </eclipse>
 
                         <!-- Has to be last (See: https://github.com/diffplug/spotless/tree/main/plugin-maven#formatannotations= -->
@@ -500,7 +537,7 @@
                         <goals>
                             <goal>apply</goal>
                         </goals>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -510,7 +547,7 @@
                 <version>3.4.1</version>
                 <configuration>
                     <installHooks>
-                        <pre-commit>build-tools/hooks/pre-commit</pre-commit>
+                        <pre-commit>.build-tools/hooks/pre-commit</pre-commit>
                     </installHooks>
                 </configuration>
                 <executions>
