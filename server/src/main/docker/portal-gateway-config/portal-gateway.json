@@ -47,6 +47,10 @@
                             {
                                 "name": "uniport.language",
                                 "path": "/"
+                            },
+                            {
+                                "name": "ips.language",
+                                "path": "/"
                             }
                         ]
                     }
