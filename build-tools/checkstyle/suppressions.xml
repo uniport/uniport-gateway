@@ -4,10 +4,6 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-<!--    <suppress checks="JavadocMethod" files=".*Test.java"/>-->
-<!--    <suppress checks="MethodName" files=".*Test.java"/>-->
-<!--    <suppress checks="TypeName" files=".*Test.java"/>-->
-<!--    <suppress checks="VisibilityModifier" files=".*DTO.java"/>-->
     <suppress checks="LineLength" files=".*.properties"/>
 
     <suppress checks="HideUtilityClassConstructor" files=".*/ApplicationFactory.java"/>
@@ -30,5 +26,4 @@
     <suppress checks="FinalClass" files=".*/StaticConfiguration.java"/>
 
     <suppress checks="VisibilityModifier" files=".*/HTTPAuthClaimHandler.java"/>
-<!--    <suppress checks="[a-zA-Z0-9]*" files="generated/.*"/>-->
 </suppressions>
