@@ -235,7 +235,7 @@ def codeQualityEvaluation() {
         properties: [
             'java.io.tmpdir': WORKSPACE
         ],
-        'checkstyle:check spotbugs:check'
+        'spotless:check checkstyle:check spotbugs:check'
     )
 
     recordIssues(
@@ -303,4 +303,3 @@ def sendNotifications() {
         ])
     }
 }
-
