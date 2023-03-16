@@ -10,6 +10,7 @@
 !/.idea/encodings.xml
 !/.idea/sqldialects.xml
 !/.idea/prettier.xml
+!/.idea/eclipseCodeFormatter.xml
 *.iml
 
 # Ignore all VS Code stuff and include the important things
@@ -18,7 +19,7 @@
 .project
 .classpath
 .factorypath
-!/.vscode/portal-java-formatter.xml
+!/.vscode/settings.json
 
 # Maven
 target/

@@ -1,0 +1,4 @@
+{
+    "java.format.settings.url": "build-tools/portal-java-formatter.xml",
+    "java.format.settings.profile": "PortalStyle",
+}
