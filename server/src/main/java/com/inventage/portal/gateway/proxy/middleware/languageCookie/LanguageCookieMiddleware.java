@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LanguageCookieMiddleware implements Middleware {
 
-    public static final String IPS_LANGUAGE_COOKIE_NAME = "ips.language";
+    public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddleware.class);
 
@@ -29,10 +29,10 @@ public class LanguageCookieMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        final Cookie cookie = ctx.request().getCookie(IPS_LANGUAGE_COOKIE_NAME);
+        final Cookie cookie = ctx.request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME);
 
         if (cookie != null) {
-            LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", IPS_LANGUAGE_COOKIE_NAME,
+            LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", DEFAULT_LANGUAGE_COOKIE_NAME,
                     cookie.getValue());
             ctx.request().headers().remove(HttpHeaders.ACCEPT_LANGUAGE);
             ctx.request().headers().add(HttpHeaders.ACCEPT_LANGUAGE, cookie.getValue());

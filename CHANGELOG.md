@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Changed
+
+- Changed cookie name `ips.language` to `uniport.language`, `inventage-portal-gateway.session` to `uniport.session`, and `ipg.state` to `uniport.state` ([PORTAL-718](https://issue.inventage.com/browse/PORTAL-718)).
+
+
 ## [7.0.1]-202303091216-1-ee2c2a1 - 2023-03-09
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.1-202303091216-1-ee2c2a1~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)

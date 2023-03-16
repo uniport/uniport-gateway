@@ -32,7 +32,7 @@ public class CookieUtilTest {
     @Test
     public void test_cookieMap_4_cookies() {
         // given
-        final String cookieHeader = "KEYCLOAK_SESSION=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b; KEYCLOAK_SESSION_LEGACY=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b; app-platform=iOS App Store; inventage-portal-gateway.session=73ba363ad1ab36ea17681b882687e70458f14b2b2ff89d9215e0f655f3660d80";
+        final String cookieHeader = "KEYCLOAK_SESSION=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b; KEYCLOAK_SESSION_LEGACY=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b; app-platform=iOS App Store; uniport.session=73ba363ad1ab36ea17681b882687e70458f14b2b2ff89d9215e0f655f3660d80";
         // when
         final Map<String, Cookie> cookieMap = CookieUtil.cookieMapFromRequestHeader(List.of(cookieHeader));
         // then
@@ -42,14 +42,14 @@ public class CookieUtilTest {
                 cookieMap.get("KEYCLOAK_SESSION_LEGACY").value());
         Assertions.assertEquals("iOS App Store", cookieMap.get("app-platform").value());
         Assertions.assertEquals("73ba363ad1ab36ea17681b882687e70458f14b2b2ff89d9215e0f655f3660d80",
-                cookieMap.get("inventage-portal-gateway.session").value());
+                cookieMap.get("uniport.session").value());
     }
 
     @Test
     public void test_cookieMap_4_cookies_from_2_entries() {
         // given
         final String cookieHeader1 = "KEYCLOAK_SESSION=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b";
-        final String cookieHeader2 = "KEYCLOAK_SESSION_LEGACY=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b; app-platform=iOS App Store; inventage-portal-gateway.session=73ba363ad1ab36ea17681b882687e70458f14b2b2ff89d9215e0f655f3660d80";
+        final String cookieHeader2 = "KEYCLOAK_SESSION_LEGACY=portal/f:b805becf-9777-4cbb-abd9-9da9ad3ce867:35/535fbc26-86fb-44e4-a971-24526fa7868b; app-platform=iOS App Store; uniport.session=73ba363ad1ab36ea17681b882687e70458f14b2b2ff89d9215e0f655f3660d80";
         // when
         final Map<String, Cookie> cookieMap = CookieUtil
                 .cookieMapFromRequestHeader(List.of(cookieHeader1, cookieHeader2));
@@ -60,7 +60,7 @@ public class CookieUtilTest {
                 cookieMap.get("KEYCLOAK_SESSION_LEGACY").value());
         Assertions.assertEquals("iOS App Store", cookieMap.get("app-platform").value());
         Assertions.assertEquals("73ba363ad1ab36ea17681b882687e70458f14b2b2ff89d9215e0f655f3660d80",
-                cookieMap.get("inventage-portal-gateway.session").value());
+                cookieMap.get("uniport.session").value());
     }
 
     @Test

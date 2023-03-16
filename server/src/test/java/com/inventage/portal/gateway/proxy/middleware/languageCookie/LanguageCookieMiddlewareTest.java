@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.IPS_LANGUAGE_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.DEFAULT_LANGUAGE_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 
 @ExtendWith(VertxExtension.class)
@@ -26,7 +26,7 @@ public class LanguageCookieMiddlewareTest {
     public void removeCookieInRequestsTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-        headers.add(HttpHeaders.COOKIE, IPS_LANGUAGE_COOKIE_NAME + "=de");
+        headers.add(HttpHeaders.COOKIE, DEFAULT_LANGUAGE_COOKIE_NAME + "=de");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
         portalGateway(vertx, host, testCtx)
@@ -40,7 +40,7 @@ public class LanguageCookieMiddlewareTest {
                             "request should contain accept language");
                     Assertions.assertEquals("de", routingContext.get().request().getHeader(HttpHeaders.ACCEPT_LANGUAGE),
                             "accept-language header should be set to 'de'");
-                    Assertions.assertNotNull(routingContext.get().request().getCookie(IPS_LANGUAGE_COOKIE_NAME),
+                    Assertions.assertNotNull(routingContext.get().request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME),
                             "request should contain IPS language cookie.");
                     testCtx.completeNow();
                 });
@@ -58,7 +58,7 @@ public class LanguageCookieMiddlewareTest {
                 // when
                 .incomingRequest(GET, "/", testCtx, (incomingResponse) -> {
                     // then
-                    Assertions.assertFalse(routingContext.get().request().headers().contains(IPS_LANGUAGE_COOKIE_NAME),
+                    Assertions.assertFalse(routingContext.get().request().headers().contains(DEFAULT_LANGUAGE_COOKIE_NAME),
                             "response should not contain IPS language cookie.");
                     Assertions.assertFalse(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
                             "response should not contain accept language");

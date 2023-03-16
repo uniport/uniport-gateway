@@ -148,7 +148,7 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
         return withMiddleware(
-                new SessionBagMiddleware("sessionBag", whitelistedCookies, "inventage-portal-gateway.session"));
+                new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session"));
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {

@@ -14,7 +14,7 @@ import static io.vertx.core.http.Cookie.cookie;
 
 public class SessionMiddleware implements Middleware {
 
-    public static final String COOKIE_NAME_DEFAULT = "inventage-portal-gateway.session";
+    public static final String SESSION_COOKIE_NAME_DEFAULT = "uniport.session";
 
     public static final String SESSION_LIFETIME_COOKIE_NAME_DEFAULT = "uniport.session-lifetime";
     public static final String SESSION_LIFETIME_HEADER_NAME_DEFAULT = "x-uniport-session-lifetime";
@@ -51,7 +51,7 @@ public class SessionMiddleware implements Middleware {
         this.withLifetimeCookie = withLifetimeCookie == null ? SESSION_LIFETIME_COOKIE_DEFAULT : withLifetimeCookie;
         sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
                 .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
-                .setSessionCookieName(cookieName == null ? COOKIE_NAME_DEFAULT : cookieName)
+                .setSessionCookieName(cookieName == null ? SESSION_COOKIE_NAME_DEFAULT : cookieName)
                 .setCookieHttpOnlyFlag(cookieHttpOnly == null ? COOKIE_HTTP_ONLY_DEFAULT : cookieHttpOnly)
                 .setCookieSecureFlag(cookieSecure == null ? COOKIE_SECURE_DEFAULT : cookieSecure)
                 .setCookieSameSite(

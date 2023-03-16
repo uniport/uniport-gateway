@@ -650,7 +650,7 @@ public class DynamicConfiguration {
                         if (cookieName == null) {
                             LOGGER.debug(String.format(
                                     "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                    SessionMiddleware.COOKIE_NAME_DEFAULT));
+                                    SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT));
                         }
                         final String cookiePath = cookie.getString(MIDDLEWARE_CSRF_COOKIE_PATH);
                         if (cookiePath == null) {
@@ -810,7 +810,7 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format(
                                 "%s: No session cookie name specified to be removed. Use default value: %s",
                                 mwType,
-                                SessionMiddleware.COOKIE_NAME_DEFAULT));
+                                SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT));
                     }
                     break;
                 }
@@ -864,7 +864,7 @@ public class DynamicConfiguration {
                         if (cookieName == null) {
                             LOGGER.debug(String.format(
                                     "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                    SessionMiddleware.COOKIE_NAME_DEFAULT));
+                                    SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT));
                         }
                         final Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
                         if (cookieHttpOnly == null) {

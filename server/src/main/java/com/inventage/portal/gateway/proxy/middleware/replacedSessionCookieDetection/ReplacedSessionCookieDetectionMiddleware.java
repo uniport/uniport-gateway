@@ -24,9 +24,9 @@ import static io.vertx.core.http.Cookie.cookie;
  */
 public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
-    public static final String DEFAULT_DETECTION_COOKIE_NAME = "ipg.state";
+    public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
 
-    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddleware.COOKIE_NAME_DEFAULT;
+    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
     private final String name;

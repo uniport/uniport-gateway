@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +23,7 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMid
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_S256;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.COOKIE_NAME_DEFAULT;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
 /**
@@ -122,7 +121,7 @@ public class AuthenticationRedirectRequestAssert
     }
 
     private String valueFromSetCookie(String aSetCookieHeader) {
-        return Arrays.stream(aSetCookieHeader.split(";")).filter(element -> element.startsWith(COOKIE_NAME_DEFAULT))
+        return Arrays.stream(aSetCookieHeader.split(";")).filter(element -> element.startsWith(SESSION_COOKIE_NAME_DEFAULT))
                 .findFirst().orElse(null);
     }
 
