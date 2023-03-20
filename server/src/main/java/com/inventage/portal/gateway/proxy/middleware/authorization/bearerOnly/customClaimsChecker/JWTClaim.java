@@ -14,18 +14,19 @@ public class JWTClaim {
     final Object value;
 
     /**
-     * @param claimObject json Object containing the entries of the claim.
-     *                    path: In JsonPath syntax (https://github.com/json-path/JsonPath), which describes the path to the entry in the payload to be checked.
-     *                    operator: The operator that defines the rule for the check.
-     *                    value: The claim value, that is compared to the payload entry
+     * @param claimObject
+     *            json Object containing the entries of the claim.
+     *            path: In JsonPath syntax (https://github.com/json-path/JsonPath), which describes the path to the entry in the payload to be checked.
+     *            operator: The operator that defines the rule for the check.
+     *            value: The claim value, that is compared to the payload entry
      */
     public JWTClaim(JsonObject claimObject) {
         this(
-                claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
-                JWTClaimOperator
-                        .valueOf(claimObject
-                                .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
-                claimObject.getValue(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
+            claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
+            JWTClaimOperator
+                .valueOf(claimObject
+                    .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
+            claimObject.getValue(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
     }
 
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {

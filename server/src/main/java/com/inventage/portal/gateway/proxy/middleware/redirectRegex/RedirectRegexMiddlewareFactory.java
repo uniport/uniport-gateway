@@ -23,8 +23,8 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX);
         return Future.succeededFuture(new RedirectRegexMiddleware(
-                name,
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
+            name,
+            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX),
+            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
     }
 }

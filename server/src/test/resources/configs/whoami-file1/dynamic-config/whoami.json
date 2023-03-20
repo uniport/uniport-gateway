@@ -3,17 +3,17 @@
         "routers": [
             {
                 "name": "root",
-                "middlewares": ["rootRedirectregex"],
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
                 "rule": "Path('/')",
                 "service": "whoami1-service"
             },
-
             {
                 "name": "auth",
                 "rule": "PathPrefix('/auth')",
                 "service": "portal-iam"
             },
-
             {
                 "name": "whoami1",
                 "middlewares": [
@@ -26,7 +26,6 @@
                 "rule": "PathPrefix('/whoami1')",
                 "service": "whoami1-service"
             },
-
             {
                 "name": "whoami2",
                 "middlewares": [
@@ -39,12 +38,13 @@
                 "service": "whoami2-service"
             }
         ],
-
         "middlewares": [
             {
                 "name": "whoami1AuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "Organisation" }
+                "options": {
+                    "sessionScope": "Organisation"
+                }
             },
             {
                 "name": "whoami1Oauth2",
@@ -56,11 +56,12 @@
                     "sessionScope": "Organisation"
                 }
             },
-
             {
                 "name": "whoami2AuthBearer",
                 "type": "authorizationBearer",
-                "options": { "sessionScope": "Dashboard" }
+                "options": {
+                    "sessionScope": "Dashboard"
+                }
             },
             {
                 "name": "whoami2Oauth2",
@@ -72,13 +73,14 @@
                     "sessionScope": "Dashboard"
                 }
             },
-
             {
                 "name": "rootRedirectregex",
                 "type": "redirectRegex",
-                "options": { "regex": "^/$", "replacement": "/whoami1/" }
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/whoami1/"
+                }
             },
-
             {
                 "name": "whoami1LoginRedirectRegex",
                 "type": "redirectRegex",
@@ -90,31 +92,40 @@
             {
                 "name": "whoami1RedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/whoami1)$", "replacement": "$1/" }
+                "options": {
+                    "regex": "^(/whoami1)$",
+                    "replacement": "$1/"
+                }
             },
             {
                 "name": "whoami1ReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/whoami1/(.*)", "replacement": "/$1" }
+                "options": {
+                    "regex": "/whoami1/(.*)",
+                    "replacement": "/$1"
+                }
             },
-
             {
                 "name": "whoami2RedirectRegex",
                 "type": "redirectRegex",
-                "options": { "regex": "^(/whoami2)$", "replacement": "$1/" }
+                "options": {
+                    "regex": "^(/whoami2)$",
+                    "replacement": "$1/"
+                }
             },
             {
                 "name": "whoami2ReplacePath",
                 "type": "replacePathRegex",
-                "options": { "regex": "/whoami2/(.*)", "replacement": "/$1" }
+                "options": {
+                    "regex": "/whoami2/(.*)",
+                    "replacement": "/$1"
+                }
             },
-
             {
                 "name": "ShowSessionContentMiddleware",
                 "type": "_session_"
             }
         ],
-
         "services": [
             {
                 "name": "portal-iam",
@@ -125,15 +136,23 @@
                     }
                 ]
             },
-
             {
                 "name": "whoami1-service",
-                "servers": [{ "host": "${whoami1.host}", "port": 8001 }]
+                "servers": [
+                    {
+                        "host": "${whoami1.host}",
+                        "port": 8001
+                    }
+                ]
             },
-
             {
                 "name": "whoami2-service",
-                "servers": [{ "host": "${whoami2.host}", "port": 8002 }]
+                "servers": [
+                    {
+                        "host": "${whoami2.host}",
+                        "port": 8002
+                    }
+                ]
             }
         ]
     }

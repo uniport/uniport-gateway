@@ -13,11 +13,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates a complete dynamic configuration from a file.
@@ -39,7 +38,7 @@ public class FileConfigProvider extends Provider {
     private String source;
 
     public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
-                              Boolean watch, JsonObject env) {
+        Boolean watch, JsonObject env) {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -99,7 +98,7 @@ public class FileConfigProvider extends Provider {
             LOGGER.info("Reading file '{}'", file.getAbsolutePath());
 
             final ConfigStoreOptions fileStore = new ConfigStoreOptions().setType("file").setFormat("json")
-                    .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
+                .setConfig(new JsonObject().put("path", file.getAbsolutePath()));
 
             this.source = "file";
             return options.addStore(fileStore);
@@ -118,8 +117,7 @@ public class FileConfigProvider extends Provider {
             final File[] children = path.toFile().listFiles();
             if (children == null) {
                 throw new IllegalArgumentException("The `path` must be a directory");
-            }
-            else {
+            } else {
                 for (File file : children) {
                     // we only take files into account at depth 2 (like general/test.json)
                     if (file.isDirectory()) {
@@ -130,7 +128,7 @@ public class FileConfigProvider extends Provider {
             }
 
             final ConfigStoreOptions dirStore = new ConfigStoreOptions().setType("jsonDirectory")
-                    .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
+                .setConfig(new JsonObject().put("path", path.toString()).put("filesets", fileSets));
 
             this.source = "directory";
             return options.addStore(dirStore);
@@ -148,12 +146,12 @@ public class FileConfigProvider extends Provider {
         }
         if (this.staticConfigDir == null) {
             LOGGER.warn(
-                    "No static config dir defined. Cannot assemble absolute config path from '{}'",
-                    path);
+                "No static config dir defined. Cannot assemble absolute config path from '{}'",
+                path);
             return null;
         }
         LOGGER.debug("Using path relative to the static config file in '{}'",
-                this.staticConfigDir.toAbsolutePath());
+            this.staticConfigDir.toAbsolutePath());
         return this.staticConfigDir.resolve(path).normalize();
     }
 
@@ -190,8 +188,7 @@ public class FileConfigProvider extends Provider {
 
                 try {
                     port = Integer.parseInt(portStr);
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOGGER.warn("Failed to parse server port '{}'", portStr);
                     return config;
                 }
@@ -205,12 +202,12 @@ public class FileConfigProvider extends Provider {
     private void validateAndPublish(JsonObject config) {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
             this.eb.publish(this.configurationAddress,
-                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
-                            .put(Provider.PROVIDER_CONFIGURATION, config));
+                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                    .put(Provider.PROVIDER_CONFIGURATION, config));
             LOGGER.info("Configuration published from '{}'", this.source);
         }).onFailure(err -> {
             LOGGER.warn("Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
-                    this.source);
+                this.source);
         });
     }
 }

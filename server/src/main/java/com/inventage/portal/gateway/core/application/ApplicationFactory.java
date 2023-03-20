@@ -2,11 +2,10 @@ package com.inventage.portal.gateway.core.application;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 import java.util.ServiceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service interface for providing applications. Implementations must add an entry with the fully
@@ -25,9 +24,12 @@ public interface ApplicationFactory {
     String provides();
 
     /**
-     * @param applicationConfig extract of the config for this application
-     * @param globalConfig      complete config
-     * @param vertx             running instance by which an application can get their router
+     * @param applicationConfig
+     *            extract of the config for this application
+     * @param globalConfig
+     *            complete config
+     * @param vertx
+     *            running instance by which an application can get their router
      * @return new application instance
      */
     Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx);
@@ -36,12 +38,11 @@ public interface ApplicationFactory {
         public static ApplicationFactory getProvider(String providerId) {
             LOGGER.debug("Get application provider for '{}'", providerId);
             final Optional<ApplicationFactory> provider = ServiceLoader.load(ApplicationFactory.class).stream()
-                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerId))
-                    .findFirst();
+                .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerId))
+                .findFirst();
             if (provider.isPresent()) {
                 return provider.get();
-            }
-            else {
+            } else {
                 throw new IllegalStateException(String.format("Application provider '%s' doesn't exist!", providerId));
             }
         }

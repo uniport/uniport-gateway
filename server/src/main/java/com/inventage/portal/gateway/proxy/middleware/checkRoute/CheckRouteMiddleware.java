@@ -30,10 +30,9 @@ public class CheckRouteMiddleware implements Middleware {
 
         if (isCheckRoute(ctx)) {
             LOGGER.info("done for URL '{}' with status code '{}'", ctx.request().absoluteURI(),
-                    RESPONSE_STATUS_CODE.code());
+                RESPONSE_STATUS_CODE.code());
             HttpResponder.respondWithStatusCode(RESPONSE_STATUS_CODE, ctx);
-        }
-        else {
+        } else {
             ctx.next();
         }
     }

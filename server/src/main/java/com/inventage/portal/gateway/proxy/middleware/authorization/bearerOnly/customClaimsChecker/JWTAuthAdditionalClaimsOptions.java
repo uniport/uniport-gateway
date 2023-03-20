@@ -2,10 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.c
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.Validate;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.Validate;
 
 public class JWTAuthAdditionalClaimsOptions {
 

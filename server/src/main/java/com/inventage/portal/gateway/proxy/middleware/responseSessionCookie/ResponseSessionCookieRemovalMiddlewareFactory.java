@@ -22,9 +22,9 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final String sessionCookieName = middlewareConfig
-                .getString(DynamicConfiguration.MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
+            .getString(DynamicConfiguration.MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
         LOGGER.debug("Created '{}' middleware successfully",
-                DynamicConfiguration.MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL);
+            DynamicConfiguration.MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL);
         return Future.succeededFuture(new ResponseSessionCookieRemovalMiddleware(name, sessionCookieName));
     }
 }

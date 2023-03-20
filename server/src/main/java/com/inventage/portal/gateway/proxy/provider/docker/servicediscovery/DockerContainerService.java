@@ -20,14 +20,13 @@ import com.github.dockerjava.api.model.ContainerPort;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent a Docker container.
@@ -48,8 +47,7 @@ public class DockerContainerService {
         containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
         if (!containerNames.isEmpty()) {
             name = containerNames.get(0);
-        }
-        else {
+        } else {
             name = containerId;
         }
 

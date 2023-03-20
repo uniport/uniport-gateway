@@ -22,17 +22,17 @@ public class CSRFMiddleware implements Middleware {
     private final CSRFHandler csrfHandler;
 
     public CSRFMiddleware(Vertx vertx, String name, String secret, String cookieName, String cookiePath,
-                          Boolean cookieSecure,
-                          String headerName, Long timeoutInMinute, String origin, Boolean nagHttps) {
+        Boolean cookieSecure,
+        String headerName, Long timeoutInMinute, String origin, Boolean nagHttps) {
         this.name = name;
         this.csrfHandler = CSRFHandler.create(vertx, secret)
-                .setCookieName(cookieName == null ? DEFAULT_COOKIE_NAME : cookieName)
-                .setCookiePath(cookiePath == null ? DEFAULT_COOKIE_PATH : cookiePath)
-                .setCookieSecure(cookieSecure == null ? DEFAULT_COOKIE_SECURE : cookieSecure)
-                .setHeaderName(headerName == null ? DEFAULT_HEADER_NAME : headerName)
-                .setTimeout(timeoutInMinute == null ? DEFAULT_TIMEOUT_IN_MINUTES * MILLISECONDS_IN_1_MINUTE
-                        : timeoutInMinute * MILLISECONDS_IN_1_MINUTE)
-                .setNagHttps(nagHttps == null ? DEFAULT_NAG_HTTPS : nagHttps);
+            .setCookieName(cookieName == null ? DEFAULT_COOKIE_NAME : cookieName)
+            .setCookiePath(cookiePath == null ? DEFAULT_COOKIE_PATH : cookiePath)
+            .setCookieSecure(cookieSecure == null ? DEFAULT_COOKIE_SECURE : cookieSecure)
+            .setHeaderName(headerName == null ? DEFAULT_HEADER_NAME : headerName)
+            .setTimeout(timeoutInMinute == null ? DEFAULT_TIMEOUT_IN_MINUTES * MILLISECONDS_IN_1_MINUTE
+                : timeoutInMinute * MILLISECONDS_IN_1_MINUTE)
+            .setNagHttps(nagHttps == null ? DEFAULT_NAG_HTTPS : nagHttps);
         if (origin != null) {
             this.csrfHandler.setOrigin(origin);
         }

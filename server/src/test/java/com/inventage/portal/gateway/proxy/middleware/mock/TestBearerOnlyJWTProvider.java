@@ -1,11 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.mock;
 
-
 import io.smallrye.jwt.build.Jwt;
-
-import javax.json.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
+import javax.json.JsonObject;
 
 /**
  * Signing JWTs for Unit tests
@@ -25,7 +23,8 @@ public class TestBearerOnlyJWTProvider {
     }
 
     /**
-     * @param jsonMap, map of the JsonObject to be signed.
+     * @param jsonMap,
+     *            map of the JsonObject to be signed.
      * @return jwt string token, signed with the private key stored under /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
      */
     public static String signToken(Map<String, Object> jsonMap) {
@@ -33,7 +32,8 @@ public class TestBearerOnlyJWTProvider {
     }
 
     /**
-     * @param jsonObject to be signed.
+     * @param jsonObject
+     *            to be signed.
      * @return jwt string token, signed with the private key stored under /resources/FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
      */
     public static String signToken(JsonObject jsonObject) {

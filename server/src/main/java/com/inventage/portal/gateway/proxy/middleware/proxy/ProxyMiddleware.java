@@ -14,11 +14,10 @@ import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Proxies requests and set the FORWARDED headers.
@@ -77,10 +76,10 @@ public class ProxyMiddleware implements Middleware {
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
         useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
-                        portFromHostValue(
-                                ctx.request().headers().get(X_FORWARDED_HOST),
-                                portFromHostValue(ctx.request().host(), -1))),
-                ctx.request().headers());
+            portFromHostValue(
+                ctx.request().headers().get(X_FORWARDED_HOST),
+                portFromHostValue(ctx.request().host(), -1))),
+            ctx.request().headers());
         ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
         captureModifiers(ctx);
 
@@ -149,15 +148,17 @@ public class ProxyMiddleware implements Middleware {
     /**
      * If the given header name is already contained in the request, this header will be used, otherwise the given header value is used.
      *
-     * @param headerName  to check the request for
-     * @param headerValue to use if the header name is not yet in the request
-     * @param headers     of the request
+     * @param headerName
+     *            to check the request for
+     * @param headerValue
+     *            to use if the header name is not yet in the request
+     * @param headers
+     *            of the request
      */
     protected void useOrSetHeader(String headerName, String headerValue, MultiMap headers) {
         if (headers.contains(headerName)) { // use
             LOGGER.debug("Using provided header '{}' with '{}'", headerName, headers.get(headerName));
-        }
-        else { // set
+        } else { // set
             headers.add(headerName, headerValue);
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
@@ -168,8 +169,7 @@ public class ProxyMiddleware implements Middleware {
             final String existingHeader = headers.get(headerName);
             headers.set(headerName, existingHeader + ", " + headerValue);
             LOGGER.debug("Appended to header '{}' to '{}' ", headerName, headers.get(headerName));
-        }
-        else { // set
+        } else { // set
             headers.add(headerName, headerValue);
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
@@ -178,13 +178,11 @@ public class ProxyMiddleware implements Middleware {
     private int portFromHostValue(String hostToParse, int defaultPort) {
         if (hostToParse == null) {
             return -1;
-        }
-        else {
+        } else {
             final int portSeparatorIdx = hostToParse.lastIndexOf(':');
             if (portSeparatorIdx > hostToParse.lastIndexOf(']')) {
                 return parsePort(hostToParse.substring(portSeparatorIdx + 1), defaultPort);
-            }
-            else {
+            } else {
                 return -1;
             }
         }
@@ -193,8 +191,7 @@ public class ProxyMiddleware implements Middleware {
     private int parsePort(String portToParse, int defaultPort) {
         try {
             return Integer.parseInt(portToParse);
-        }
-        catch (NumberFormatException ignored) {
+        } catch (NumberFormatException ignored) {
             LOGGER.debug("Failed to parse a port from '{}'", portToParse);
             return defaultPort;
         }

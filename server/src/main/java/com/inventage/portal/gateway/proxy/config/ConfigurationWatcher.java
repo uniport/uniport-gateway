@@ -11,11 +11,6 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.collections4.QueueUtils;
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import org.apache.commons.collections4.QueueUtils;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * It listens to incoming dynamic configurations. Upon passing several checks is passed to all
@@ -47,7 +46,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private List<Listener> configurationListeners;
 
     public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
-                                int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
+        int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
         this.provider = provider;
@@ -72,9 +71,9 @@ public class ConfigurationWatcher extends AbstractVerticle {
             final String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
             if (rEntrypoints == null || rEntrypoints.size() == 0) {
                 LOGGER.debug(
-                        "No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
-                        routerName,
-                        entrypoints.toString());
+                    "No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
+                    routerName,
+                    entrypoints.toString());
                 r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
             }
         }
@@ -239,7 +238,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     private void preloadConfiguration(JsonObject nextConfig) {
         if (!nextConfig.containsKey(Provider.PROVIDER_NAME)
-                || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
+            || !nextConfig.containsKey(Provider.PROVIDER_CONFIGURATION)) {
             LOGGER.warn("Invalid configuration received");
             return;
         }
@@ -278,7 +277,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     // handler for address: <provider> (e.g. file)
     private void onConfigReload(Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
-                                Queue<JsonObject> prevConfigRing) {
+        Queue<JsonObject> prevConfigRing) {
         final JsonObject nextConfig = message.body();
         if (prevConfigRing.isEmpty()) {
             LOGGER.debug("Publishing initial configuration immediately");
@@ -313,7 +312,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private void listenConfigurations() {
         LOGGER.debug("Listening for new configuration...");
         final MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
-                .consumer(CONFIG_VALIDATED_ADDRESS);
+            .consumer(CONFIG_VALIDATED_ADDRESS);
 
         validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
     }
@@ -341,7 +340,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             }
         }).onFailure(err -> {
             LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
-                    err.getMessage());
+                err.getMessage());
         });
     }
 }

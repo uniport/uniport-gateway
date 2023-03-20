@@ -41,7 +41,7 @@ public class KubernetesServiceProvider extends Provider {
         final String announceAddress = "service-announce";
 
         this.kubernetesDiscovery = ServiceDiscovery.create(vertx,
-                new ServiceDiscoveryOptions().setAnnounceAddress(announceAddress).setName("kubernetes-discovery"));
+            new ServiceDiscoveryOptions().setAnnounceAddress(announceAddress).setName("kubernetes-discovery"));
 
         // LOCAL KUBERNETES CLUSTER RUNNING WITH MINIKUBE
         // HOST:PORT
@@ -63,8 +63,8 @@ public class KubernetesServiceProvider extends Provider {
         final String namespace = "default";
 
         this.kubernetesDiscovery.registerServiceImporter(new KubernetesServiceImporter(),
-                new JsonObject().put("host", host).put("port", port).put("ssl", useTLS).put("token", token)
-                        .put("namespace", namespace));
+            new JsonObject().put("host", host).put("port", port).put("ssl", useTLS).put("token", token)
+                .put("namespace", namespace));
 
         final EventBus eb = vertx.eventBus();
         final MessageConsumer<JsonObject> announceConsumer = eb.consumer(announceAddress);
@@ -87,8 +87,8 @@ public class KubernetesServiceProvider extends Provider {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
             LOGGER.info("Configuration published");
             this.eb.publish(this.configurationAddress,
-                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_KUBERNETES)
-                            .put(Provider.PROVIDER_CONFIGURATION, config));
+                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_KUBERNETES)
+                    .put(Provider.PROVIDER_CONFIGURATION, config));
         }).onFailure(err -> {
             LOGGER.warn("Cannot publish invalid configuration '{}'", err.getMessage());
         });

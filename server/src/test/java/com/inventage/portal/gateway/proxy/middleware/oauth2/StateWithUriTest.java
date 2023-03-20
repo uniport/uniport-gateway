@@ -1,11 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class StateWithUriTest {
 
@@ -20,8 +19,8 @@ public class StateWithUriTest {
         Assertions.assertEquals(state, stateWithUri.state());
         Assertions.assertEquals(uri, stateWithUri.uri().orElse(null));
         Assertions.assertEquals(
-                "QWJDZDEyOi9zZWdtZW50L3N1YnNlZ21lbnQvc3Vic3Vic2VnbWVudD9wYXJhbTE9dmFsdWUxJnBhcmFtMj12YWx1ZTIjZnJhZ21lbnQx",
-                stateWithUri.toStateParameter());
+            "QWJDZDEyOi9zZWdtZW50L3N1YnNlZ21lbnQvc3Vic3Vic2VnbWVudD9wYXJhbTE9dmFsdWUxJnBhcmFtMj12YWx1ZTIjZnJhZ21lbnQx",
+            stateWithUri.toStateParameter());
     }
 
     @Test
@@ -44,8 +43,7 @@ public class StateWithUriTest {
         try {
             StateWithUri stateWithUri = new StateWithUri(null, null);
             Assertions.fail("IllegalArgumentException expected");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // then
             Assertions.assertEquals("Null is not a valid state value!", e.getMessage());
         }
@@ -60,7 +58,7 @@ public class StateWithUriTest {
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertEquals("/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1",
-                stateWithUri.uri().orElse(null));
+            stateWithUri.uri().orElse(null));
         Assertions.assertEquals(stateParameterBase64Encoded, stateWithUri.toStateParameter());
     }
 
@@ -107,8 +105,7 @@ public class StateWithUriTest {
         try {
             StateWithUri stateWithUri = new StateWithUri(null);
             Assertions.fail("IllegalArgumentException expected");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // then
             Assertions.assertEquals("Null is not a valid state parameter value!", e.getMessage());
         }
@@ -149,7 +146,7 @@ public class StateWithUriTest {
         // then
         Assertions.assertNotNull(relativeURI);
         Assertions.assertEquals("/secure/RapidBoard.jspa?projectKey=PORTAL&rapidView=105#fragment",
-                relativeURI.toString());
+            relativeURI.toString());
     }
 
 }

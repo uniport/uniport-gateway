@@ -12,10 +12,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Base64;
 
 /**
  * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
@@ -47,24 +46,20 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
         if (LOGGER.isTraceEnabled()) {
             logRequestTrace(ctx);
-        }
-        else if (LOGGER.isDebugEnabled()) {
+        } else if (LOGGER.isDebugEnabled()) {
             logRequestDebug(ctx);
-        }
-        else if (LOGGER.isInfoEnabled()) {
+        } else if (LOGGER.isInfoEnabled()) {
             logRequestInfo(ctx);
         }
 
         ctx.addHeadersEndHandler(
-                v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
+            v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
         ctx.addBodyEndHandler(v -> {
             if (LOGGER.isTraceEnabled()) {
                 logResponseTrace(ctx, start);
-            }
-            else if (LOGGER.isDebugEnabled()) {
+            } else if (LOGGER.isDebugEnabled()) {
                 logResponseDebug(ctx, start);
-            }
-            else if (LOGGER.isInfoEnabled()) {
+            } else if (LOGGER.isInfoEnabled()) {
                 logResponseInfo(ctx, start);
             }
         });
@@ -103,8 +98,7 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             }).onFailure(error -> {
                 LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, error.getMessage());
             });
-        }
-        else {
+        } else {
             LOGGER.trace("{} incoming Request '{}'\n Headers '{}'\n Content-type '{}'", name, infoLog, headersLog, contentType);
         }
     }
@@ -135,12 +129,12 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         final HttpMethod method = routingContext.request().method();
 
         return String.format("\"%s %s \" %d %s %d \" in %d ms \"",
-                method,
-                uri,
-                statusCode,
-                statusMessage,
-                System.currentTimeMillis() - start,
-                timestamp - start);
+            method,
+            uri,
+            statusCode,
+            statusMessage,
+            System.currentTimeMillis() - start,
+            timestamp - start);
     }
 
     private String generateHttpRequestLogMessage(RoutingContext routingContext) {
@@ -156,8 +150,7 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         if (obj != null) {
             try {
                 contentLength = Long.parseLong(obj.toString());
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // ignore it and continue
             }
         }
@@ -187,14 +180,14 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         userAgent = userAgent == null ? "-" : userAgent;
 
         return String.format("\"%s %s %s\" %d \"%s\" \"%s\" - %dms %s",
-                method,
-                uri,
-                versionFormatted,
-                contentLength,
-                referrer,
-                userAgent,
-                (System.currentTimeMillis() - timestamp),
-                remoteClient);
+            method,
+            uri,
+            versionFormatted,
+            contentLength,
+            referrer,
+            userAgent,
+            (System.currentTimeMillis() - timestamp),
+            remoteClient);
     }
 
     private String generateHttpHeaderLogMessage(MultiMap headers) {
@@ -220,8 +213,7 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             if (idToken.containsKey("preferred_username")) {
                 userId = idToken.getString("preferred_username");
             }
-        }
-        else if (principal.containsKey("access_token")) {
+        } else if (principal.containsKey("access_token")) {
             final JsonObject accessToken = decodeJWT(principal.getString("access_token"));
             if (accessToken.containsKey("preferred_username")) {
                 userId = accessToken.getString("preferred_username");

@@ -16,12 +16,11 @@ import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom Vert.x Launcher for the portal gateway.
@@ -45,13 +44,14 @@ public class PortalGatewayLauncher extends Launcher {
     /**
      * main method to start the server.
      *
-     * @param args startup arguments
+     * @param args
+     *            startup arguments
      */
     public static void main(String[] args) {
         // https://logback.qos.ch/manual/configuration.html#configFileProperty
         final Optional<Path> loggingConfigPath = getLoggingConfigPath();
         loggingConfigPath
-                .ifPresent(path -> System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, path.toString()));
+            .ifPresent(path -> System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, path.toString()));
 
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
@@ -61,8 +61,7 @@ public class PortalGatewayLauncher extends Launcher {
 
         if (loggingConfigPath.isPresent()) {
             logger.info("Using logback configuration file from '{}'", loggingConfigPath.get());
-        }
-        else {
+        } else {
             logger.info("No custom logback configuration file found");
         }
 
@@ -74,8 +73,8 @@ public class PortalGatewayLauncher extends Launcher {
             // thread blocking warnings
             System.setProperty("vertx.options.maxEventLoopExecuteTime", "600000000000");
         }
-        final String[] arguments = new String[]{"run", PortalGatewayVerticle.class.getName(), "--instances",
-                Runtime.numberOfVerticleInstances()};
+        final String[] arguments = new String[] { "run", PortalGatewayVerticle.class.getName(), "--instances",
+            Runtime.numberOfVerticleInstances() };
         new PortalGatewayLauncher().dispatch(arguments);
         logger.info("PortalGatewayLauncher started.");
     }
@@ -101,7 +100,7 @@ public class PortalGatewayLauncher extends Launcher {
 
         // take path from the default path
         loggingConfigFileName = String.format("%s/%s", DEFAULT_LOGGING_CONFIG_FILE_PATH,
-                DEFAULT_LOGGING_CONFIG_FILE_NAME);
+            DEFAULT_LOGGING_CONFIG_FILE_NAME);
         if (existsAsFile(loggingConfigFileName)) {
             return Optional.of(Path.of(loggingConfigFileName));
         }
@@ -118,8 +117,8 @@ public class PortalGatewayLauncher extends Launcher {
         logger.info("Before starting Vertx");
         options.setTracingOptions(new OpenTelemetryOptions(configureOpenTelemetry()));
         options.setMetricsOptions(new MicrometerMetricsOptions()
-                .setPrometheusOptions(configurePrometheus())
-                .setEnabled(true));
+            .setPrometheusOptions(configurePrometheus())
+            .setEnabled(true));
     }
 
     @Override
@@ -139,8 +138,7 @@ public class PortalGatewayLauncher extends Launcher {
         if (metricsPortStr != null) {
             try {
                 metricsPort = Integer.parseInt(metricsPortStr);
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // default is applied
             }
         }
@@ -149,10 +147,10 @@ public class PortalGatewayLauncher extends Launcher {
 
         logger.info("Configuring prometheus endpoint on port '{}' on path '{}'", metricsPort, metricsPath);
         return new VertxPrometheusOptions()
-                .setStartEmbeddedServer(true)
-                .setEmbeddedServerOptions(new HttpServerOptions().setPort(metricsPort))
-                .setEmbeddedServerEndpoint(metricsPath)
-                .setEnabled(true);
+            .setStartEmbeddedServer(true)
+            .setEmbeddedServerOptions(new HttpServerOptions().setPort(metricsPort))
+            .setEmbeddedServerEndpoint(metricsPath)
+            .setEnabled(true);
     }
 
     private void bindJVMMetrics() {

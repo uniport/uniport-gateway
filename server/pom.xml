@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -217,10 +216,10 @@
                 <executions>
                     <execution>
                         <id>copy-configuration</id>
-                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <resources>
                                 <resource>
@@ -303,21 +302,20 @@
                 <executions>
                     <execution>
                         <id>default-jar</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <phase>package</phase>
                     </execution>
                     <execution>
                         <!-- needed for the native build -->
                         <id>configuration</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
-                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config
-                            </classesDirectory>
+                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config</classesDirectory>
                             <classifier>configuration</classifier>
                         </configuration>
                     </execution>
@@ -325,14 +323,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>fat</shadedClassifierName>
@@ -355,24 +345,32 @@
                                 <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
                             </manifestEntries>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"></transformer>
                     </transformers>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
             </plugin>
             <!-- for creating the common.env and the secrets.env file needed in docker-compose.yml -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <target>
-                                <touch file="src/main/config/portal-gateway.specific.env"/>
-                            </target>
-                        </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <target>
+                                <touch file="src/main/config/portal-gateway.specific.env"></touch>
+                            </target>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

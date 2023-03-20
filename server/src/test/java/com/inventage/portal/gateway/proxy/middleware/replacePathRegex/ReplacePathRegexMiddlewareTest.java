@@ -9,7 +9,7 @@ public class ReplacePathRegexMiddlewareTest {
     public void test_starting_with() {
         // given
         final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("replacePath", "^/organisation/(.*)",
-                "/$1");
+            "/$1");
         // when
         final String uri = r.apply("/organisation/v1/graphql");
         // then
@@ -20,7 +20,7 @@ public class ReplacePathRegexMiddlewareTest {
     public void test_exact() {
         // given
         final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("replacePath", "^/status*.*",
-                "/status/200");
+            "/status/200");
         // when
         final String uri = r.apply("/status/404");
         // then
@@ -31,7 +31,7 @@ public class ReplacePathRegexMiddlewareTest {
     public void test_exact2() {
         // given
         final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("replacePath", "^/organisation/(.*)",
-                "/$1");
+            "/$1");
         // when
         final String uri = r.apply("/organisation/headers");
         // then

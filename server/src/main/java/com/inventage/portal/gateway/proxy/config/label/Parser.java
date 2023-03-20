@@ -3,14 +3,13 @@ package com.inventage.portal.gateway.proxy.config.label;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Labels are parsed to its JSON representation. Labels not starting with one of specified filters
@@ -30,7 +29,7 @@ public class Parser {
     private static final String SERVICE_SERVERS = "servers";
 
     private static final List<String> VALUES_ARE_OBJECTS_WITH_CUSTOM_NAMES = Arrays.asList(ROUTERS, MIDDLEWARES,
-            SERVICES);
+        SERVICES);
     private static final List<String> VALUES_ARE_OBJECTS = List.of(SERVICE_SERVERS);
     private static final List<String> VALUES_ARE_SEPERATED_BY_COMMA = Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
 
@@ -61,10 +60,9 @@ public class Parser {
         try {
             final JsonObject decodedConf = decodeToJson(labels, rootName, filters);
             return decodedConf;
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             LOGGER.warn("Decoding to JSON failed: '{}' '{}'", e.getMessage(),
-                    labels.toString());
+                labels.toString());
         }
         return null;
     }
@@ -95,7 +93,7 @@ public class Parser {
 
                 if (v.charAt(0) == '[') {
                     throw new IllegalArgumentException(
-                            "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
+                        "invalid leading character '[' in field name (bracket is a slice delimiter): " + v);
                 }
 
                 if (v.equals(rootName)) {
@@ -106,8 +104,7 @@ public class Parser {
                     final int indexLeft = v.indexOf("[");
                     parts.add(v.substring(0, indexLeft));
                     parts.add(v.substring(indexLeft));
-                }
-                else {
+                } else {
                     parts.add(v);
                 }
             }
@@ -126,16 +123,14 @@ public class Parser {
                 final JsonObject child = DynamicConfiguration.getObjByKeyWithValue(children, getName(key), path.get(1));
                 if (child != null) {
                     decodeToJson(child, path.subList(2, path.size()), value);
-                }
-                else {
+                } else {
                     final JsonObject newChild = new JsonObject();
                     newChild.put(getName(key), path.get(1));
                     decodeToJson(newChild, path.subList(2, path.size()), value);
                     children.add(newChild);
                     root.put(key, children);
                 }
-            }
-            else if (VALUES_ARE_OBJECTS.contains(key)) {
+            } else if (VALUES_ARE_OBJECTS.contains(key)) {
                 // NOTE: later definitions overwrite previous ones since there is no id
                 JsonArray children = root.getJsonArray(key);
                 if (children == null) {
@@ -146,37 +141,31 @@ public class Parser {
                 if (children.size() < 1) {
                     child = new JsonObject();
                     children.add(child);
-                }
-                else {
+                } else {
                     child = children.getJsonObject(0);
                 }
                 decodeToJson(child, path.subList(1, path.size()), value);
-            }
-            else if (DynamicConfiguration.MIDDLEWARE_TYPES.contains(key)) {
+            } else if (DynamicConfiguration.MIDDLEWARE_TYPES.contains(key)) {
                 final JsonObject child;
                 if (root.containsKey(DynamicConfiguration.MIDDLEWARE_OPTIONS)) {
                     child = root.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS);
-                }
-                else {
+                } else {
                     child = new JsonObject();
                 }
                 decodeToJson(child, path.subList(1, path.size()), value);
                 root.put(DynamicConfiguration.MIDDLEWARE_TYPE, key);
                 root.put(DynamicConfiguration.MIDDLEWARE_OPTIONS, child);
-            }
-            else {
+            } else {
                 if (root.containsKey(key)) {
                     final JsonObject child = root.getJsonObject(key);
                     decodeToJson(child, path.subList(1, path.size()), value);
-                }
-                else {
+                } else {
                     final JsonObject newChild = new JsonObject();
                     decodeToJson(newChild, path.subList(1, path.size()), value);
                     root.put(key, newChild);
                 }
             }
-        }
-        else {
+        } else {
             if (VALUES_ARE_SEPERATED_BY_COMMA.contains(key)) {
                 JsonArray values = root.getJsonArray(key);
                 if (values == null) {
@@ -187,20 +176,17 @@ public class Parser {
                     values.add(s.trim());
                 }
                 root.put(key, values);
-            }
-            else {
+            } else {
                 if (root.containsKey(key)) {
                     LOGGER.warn(
-                            "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
-                            key, root.getString(key), value);
+                        "Found multiple values for the same setting. Overwriting '{}': '{}' with '{}'",
+                        key, root.getString(key), value);
                 }
                 if (isInteger(value)) {
                     root.put(key, Integer.parseInt(value));
-                }
-                else if (isBoolean(value)) {
+                } else if (isBoolean(value)) {
                     root.put(key, Boolean.parseBoolean(value));
-                }
-                else {
+                } else {
                     root.put(key, value);
                 }
             }
@@ -228,8 +214,7 @@ public class Parser {
         try {
             Integer.parseInt(strNum);
             return true;
-        }
-        catch (NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             return false;
         }
     }

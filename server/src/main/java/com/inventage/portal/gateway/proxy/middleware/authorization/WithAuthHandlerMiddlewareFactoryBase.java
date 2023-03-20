@@ -22,15 +22,14 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
@@ -44,8 +43,10 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     /**
      * Creates the actual middleware.
      *
-     * @param authHandler      The {@link AuthenticationHandler} to use in the middleware
-     * @param middlewareConfig The config for the middleware
+     * @param authHandler
+     *            The {@link AuthenticationHandler} to use in the middleware
+     * @param middlewareConfig
+     *            The config for the middleware
      * @return Your {@link Middleware}
      */
     protected abstract Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig);
@@ -57,28 +58,28 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
         final String issuer = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER);
         final JsonArray audience = middlewareConfig
-                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
+            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE);
         final JsonArray additionalClaims = middlewareConfig
-                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
+            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
         final JsonArray publicKeys = middlewareConfig
-                .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
+            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
 
         this.fetchPublicKeys(vertx, publicKeys)
-                .onSuccess(setupMiddleware(vertx, name,
-                        issuer, audience, additionalClaims,
-                        middlewareConfig, middlewarePromise))
-                .onFailure(err -> {
-                    final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
-                    LOGGER.warn(errMsg);
-                    middlewarePromise.handle(Future.failedFuture(errMsg));
-                });
+            .onSuccess(setupMiddleware(vertx, name,
+                issuer, audience, additionalClaims,
+                middlewareConfig, middlewarePromise))
+            .onFailure(err -> {
+                final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
+                LOGGER.warn(errMsg);
+                middlewarePromise.handle(Future.failedFuture(errMsg));
+            });
 
         return middlewarePromise.future();
     }
 
     private Handler<JWTAuthOptions> setupMiddleware(Vertx vertx, String name, String issuer, JsonArray audience,
-                                                    JsonArray additionalClaims, JsonObject middlewareConfig,
-                                                    Handler<AsyncResult<Middleware>> handler) {
+        JsonArray additionalClaims, JsonObject middlewareConfig,
+        Handler<AsyncResult<Middleware>> handler) {
         return authOpts -> {
             final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
@@ -101,7 +102,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
             final JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
             final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider,
-                    additionalClaimsOptions);
+                additionalClaimsOptions);
 
             handler.handle(Future.succeededFuture(create(name, authHandler, middlewareConfig)));
             LOGGER.debug("Created middleware successfully");
@@ -115,7 +116,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
-                                 Handler<AsyncResult<JWTAuthOptions>> handler) {
+        Handler<AsyncResult<JWTAuthOptions>> handler) {
 
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
 
@@ -128,8 +129,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             try {
                 new URL(publicKey).toURI();
                 isURL = true;
-            }
-            catch (MalformedURLException | URISyntaxException e) {
+            } catch (MalformedURLException | URISyntaxException e) {
                 // intended case
                 LOGGER.debug("URI is malformed, hence it is has to be a raw public key: '{}'", e.getMessage());
             }
@@ -138,33 +138,32 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 LOGGER.info("Public key provided by URL. Fetching JWKs...");
 
                 futures.add(
-                        this.fetchJWKsFromDiscoveryURL(vertx, publicKey)
-                                .onSuccess(jwks -> {
-                                    jwks.forEach(jwk -> authOpts.addJwk(jwk));
-                                })
-                                .onFailure(err -> handler.handle(Future.failedFuture(err))));
+                    this.fetchJWKsFromDiscoveryURL(vertx, publicKey)
+                        .onSuccess(jwks -> {
+                            jwks.forEach(jwk -> authOpts.addJwk(jwk));
+                        })
+                        .onFailure(err -> handler.handle(Future.failedFuture(err))));
 
-            }
-            else {
+            } else {
                 LOGGER.info("Public key provided directly");
 
                 final String publicKeyAlgorithm = pk
-                        .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256");
+                    .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256");
                 authOpts.addPubSecKey(
-                        new PubSecKeyOptions()
-                                .setAlgorithm(publicKeyAlgorithm)
-                                .setBuffer(publickeyToPEM(publicKey)));
+                    new PubSecKeyOptions()
+                        .setAlgorithm(publicKeyAlgorithm)
+                        .setBuffer(publickeyToPEM(publicKey)));
             }
         });
 
         CompositeFuture.join(futures)
-                .onSuccess(psk -> {
-                    LOGGER.info("Successfully fetched JWKs");
-                    handler.handle(Future.succeededFuture(authOpts));
-                }).onFailure(err -> {
-                    LOGGER.error(err.getMessage());
-                    handler.handle(Future.failedFuture(err));
-                });
+            .onSuccess(psk -> {
+                LOGGER.info("Successfully fetched JWKs");
+                handler.handle(Future.succeededFuture(authOpts));
+            }).onFailure(err -> {
+                LOGGER.error(err.getMessage());
+                handler.handle(Future.failedFuture(err));
+            });
     }
 
     private Future<List<JsonObject>> fetchJWKsFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL) {
@@ -174,12 +173,11 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private void fetchJWKsFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL,
-                                           Handler<AsyncResult<List<JsonObject>>> handler) {
+        Handler<AsyncResult<List<JsonObject>>> handler) {
         final URL parsedRealmBaseURL;
         try {
             parsedRealmBaseURL = new URL(rawRealmBaseURL);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOGGER.warn("Malformed discovery URL '{}'", rawRealmBaseURL);
             handler.handle(Future.failedFuture(e));
             return;
@@ -191,8 +189,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         if (port <= 0) {
             if (iamProtocol.endsWith("s")) {
                 port = 443;
-            }
-            else {
+            } else {
                 port = 80;
             }
         }
@@ -218,16 +215,16 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final String iamDiscoveryPath = path;
         LOGGER.debug("Fetching jwks_uri from URL '{}://{}:{}{}'", iamProtocol, iamHost, iamPort, iamDiscoveryPath);
         WebClient.create(vertx).get(iamPort, iamHost, iamDiscoveryPath).as(BodyCodec.jsonObject()).send()
-                .onSuccess(fetchJWKsFromJWKsURL(vertx, iamHost, iamPort, handler))
-                .onFailure(err -> {
-                    LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}'",
-                            iamProtocol, iamHost, iamPort, iamDiscoveryPath);
-                    handler.handle(Future.failedFuture(err));
-                });
+            .onSuccess(fetchJWKsFromJWKsURL(vertx, iamHost, iamPort, handler))
+            .onFailure(err -> {
+                LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}'",
+                    iamProtocol, iamHost, iamPort, iamDiscoveryPath);
+                handler.handle(Future.failedFuture(err));
+            });
     }
 
     private Handler<HttpResponse<JsonObject>> fetchJWKsFromJWKsURL(Vertx vertx, String iamHost,
-                                                                   int iamPort, Handler<AsyncResult<List<JsonObject>>> handler) {
+        int iamPort, Handler<AsyncResult<List<JsonObject>>> handler) {
         return discoveryResp -> {
             final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
             if (rawJWKsURI == null || rawJWKsURI.length() == 0) {
@@ -240,8 +237,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             final URL parsedJWKsURL;
             try {
                 parsedJWKsURL = new URL(rawJWKsURI);
-            }
-            catch (MalformedURLException e) {
+            } catch (MalformedURLException e) {
                 LOGGER.warn("Malformed JWKs URL '{}'", rawJWKsURI);
                 handler.handle(Future.failedFuture(e));
                 return;
@@ -257,16 +253,16 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
             LOGGER.debug("Fetching JWKS from URL '{}'", rawJWKsURI);
             WebClient.create(vertx).get(iamPort, iamHost, iamJWKsPath).as(BodyCodec.jsonObject()).send()
-                    .onSuccess(parseJWKs(handler))
-                    .onFailure(err -> {
-                        LOGGER.info("Failed to complete load JWK from URL '{}'", rawJWKsURI);
-                        handler.handle(Future.failedFuture(err));
-                    });
+                .onSuccess(parseJWKs(handler))
+                .onFailure(err -> {
+                    LOGGER.info("Failed to complete load JWK from URL '{}'", rawJWKsURI);
+                    handler.handle(Future.failedFuture(err));
+                });
         };
     }
 
     private Handler<HttpResponse<JsonObject>> parseJWKs(
-            Handler<AsyncResult<List<JsonObject>>> handler) {
+        Handler<AsyncResult<List<JsonObject>>> handler) {
         return JWKsResp -> {
             LOGGER.debug("Received JWKS");
             final JsonArray keys = JWKsResp.body().getJsonArray(JWK_KEYS_KEY);
@@ -289,9 +285,9 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
     private String publickeyToPEM(String publicKey) {
         return String.join(
-                "\n",
-                "-----BEGIN PUBLIC KEY-----",
-                publicKey,
-                "-----END PUBLIC KEY-----");
+            "\n",
+            "-----BEGIN PUBLIC KEY-----",
+            publicKey,
+            "-----END PUBLIC KEY-----");
     }
 }

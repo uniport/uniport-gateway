@@ -1,5 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -8,18 +13,12 @@ import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.handler.CSRFHandler;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.apache.hc.core5.http.HttpStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
 class CSRFMiddlewareTest {
@@ -31,8 +30,8 @@ class CSRFMiddlewareTest {
         final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withCsrfMiddleware(secret, null, null)
-                .build().start();
+            .withCsrfMiddleware(secret, null, null)
+            .build().start();
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
@@ -54,8 +53,8 @@ class CSRFMiddlewareTest {
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withCsrfMiddleware(secret, cookieName, headerName)
-                .build().start();
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
@@ -77,8 +76,8 @@ class CSRFMiddlewareTest {
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withCsrfMiddleware(secret, cookieName, headerName)
-                .build().start();
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
 
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             final List<String> cookies = httpClientResponse.cookies();
@@ -110,8 +109,8 @@ class CSRFMiddlewareTest {
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withCsrfMiddleware(secret, cookieName, headerName)
-                .build().start();
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
 
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             final List<String> cookies = httpClientResponse.cookies();
@@ -141,8 +140,8 @@ class CSRFMiddlewareTest {
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withCsrfMiddleware(secret, cookieName, headerName)
-                .build().start();
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
 
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             final List<String> cookies = httpClientResponse.cookies();
@@ -164,6 +163,5 @@ class CSRFMiddlewareTest {
 
         }));
     }
-
 
 }

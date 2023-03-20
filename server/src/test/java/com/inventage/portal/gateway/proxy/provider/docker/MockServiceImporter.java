@@ -7,12 +7,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockServiceImporter implements ServiceImporter {
 
@@ -40,10 +39,14 @@ public class MockServiceImporter implements ServiceImporter {
     /**
      * Starts the mock.
      *
-     * @param vertx         the vert.x instance
-     * @param publisher     the service discovery instance
-     * @param configuration the mock configuration if any
-     * @param completion    future to assign with completion status
+     * @param vertx
+     *            the vert.x instance
+     * @param publisher
+     *            the service discovery instance
+     * @param configuration
+     *            the mock configuration if any
+     * @param completion
+     *            future to assign with completion status
      */
     @Override
     public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {

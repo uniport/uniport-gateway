@@ -12,7 +12,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-
 import java.util.Collections;
 import java.util.Optional;
 
@@ -86,7 +85,7 @@ public class ProxyApplication implements Application {
 
         this.providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
         this.providersThrottleDuration = staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS,
-                2000);
+            2000);
 
         this.env = staticConfig.copy();
         this.env.remove(StaticConfiguration.ENTRYPOINTS);
@@ -94,14 +93,14 @@ public class ProxyApplication implements Application {
         this.env.remove(StaticConfiguration.PROVIDERS);
 
         this.entrypointPort = DynamicConfiguration
-                .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
-                        StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
-                .getString(StaticConfiguration.ENTRYPOINT_PORT);
+            .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
+                StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
+            .getString(StaticConfiguration.ENTRYPOINT_PORT);
 
         this.publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL,
-                PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+            PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
         this.publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-                PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+            PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
         this.publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT, entrypointPort);
     }
 
@@ -131,7 +130,7 @@ public class ProxyApplication implements Application {
         final ProviderAggregator aggregator = new ProviderAggregator(vertx, configurationAddress, providers, this.env);
 
         final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, configurationAddress,
-                this.providersThrottleDuration, Collections.singletonList(this.entrypoint));
+            this.providersThrottleDuration, Collections.singletonList(this.entrypoint));
 
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort);
 

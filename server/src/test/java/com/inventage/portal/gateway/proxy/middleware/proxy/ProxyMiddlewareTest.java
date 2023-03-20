@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -12,14 +15,10 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
 public class ProxyMiddlewareTest {
@@ -32,13 +31,13 @@ public class ProxyMiddlewareTest {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withRoutingContextHolder(routingContext)
-                .withProxyMiddleware("test.host.com", 8000)
-                .build().start();
+            .withRoutingContextHolder(routingContext)
+            .withProxyMiddleware("test.host.com", 8000)
+            .build().start();
         // when
         gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
             Assertions.assertEquals("test.host.com",
-                    routingContext.get().request().headers().get(HttpHeaderNames.HOST));
+                routingContext.get().request().headers().get(HttpHeaderNames.HOST));
             testCtx.completeNow();
         });
         // then
@@ -77,15 +76,15 @@ public class ProxyMiddlewareTest {
                 serverStarted.flag();
 
                 vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
-                        .compose(HttpClientRequest::send)
-                        .onComplete(testCtx.succeeding(resp -> {
-                            testCtx.verify(() -> {
-                                assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
-                                responseReceived.flag();
-                            });
-                            resp.body().onComplete(testCtx.succeeding(
-                                    body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
-                        }));
+                    .compose(HttpClientRequest::send)
+                    .onComplete(testCtx.succeeding(resp -> {
+                        testCtx.verify(() -> {
+                            assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
+                            responseReceived.flag();
+                        });
+                        resp.body().onComplete(testCtx.succeeding(
+                            body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
+                    }));
             }));
         }));
 

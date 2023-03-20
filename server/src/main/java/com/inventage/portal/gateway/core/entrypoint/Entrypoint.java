@@ -17,12 +17,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Entry point for the portal gateway.
@@ -49,10 +48,10 @@ public class Entrypoint {
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
         final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-                .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
-                .findFirst().orElseThrow(() -> {
-                    throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
-                });
+            .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
+            .findFirst().orElseThrow(() -> {
+                throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
+            });
     }
 
     public String name() {
@@ -82,11 +81,10 @@ public class Entrypoint {
                 if (enabled()) {
                     router().route(application.rootPath() + "*").subRouter(applicationRouter);
                     LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
-                            application.rootPath(), name);
-                }
-                else {
+                        application.rootPath(), name);
+                } else {
                     LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
-                            application, application.rootPath());
+                        application, application.rootPath());
                 }
             }
         });
@@ -120,12 +118,12 @@ public class Entrypoint {
 
         CompositeFuture.all(entryMiddlewaresFuture).onSuccess(cf -> {
             entryMiddlewaresFuture
-                    .forEach(mf -> router.route().setName("entry middleware")
-                            .handler((Handler<RoutingContext>) mf.result()));
+                .forEach(mf -> router.route().setName("entry middleware")
+                    .handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(err -> {
             throw new RuntimeException(
-                    String.format("Failed to create EntryMiddlewares. Cause: {}", err.getMessage()));
+                String.format("Failed to create EntryMiddlewares. Cause: {}", err.getMessage()));
         });
     }
 
@@ -136,10 +134,10 @@ public class Entrypoint {
     }
 
     private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
-                                       Handler<AsyncResult<Middleware>> handler) {
+        Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                new JsonObject());
+            new JsonObject());
 
         final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory == null) {

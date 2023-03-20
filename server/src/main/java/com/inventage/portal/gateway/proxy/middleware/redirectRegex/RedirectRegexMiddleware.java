@@ -2,10 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.ext.web.RoutingContext;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.regex.Pattern;
 
 /**
  * Redirecting the client to a different location using regex matching and replacement.

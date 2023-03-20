@@ -16,11 +16,10 @@ import io.vertx.json.schema.ValidationException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * It defines the structure of the static configuration.
@@ -62,39 +61,39 @@ public class StaticConfiguration {
 
     private static Validator buildValidator(Vertx vertx) {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
-                .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
-                .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
-                .property(DynamicConfiguration.MIDDLEWARES,
-                        Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
-                .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
-                .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
+            .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
+            .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
+            .property(DynamicConfiguration.MIDDLEWARES,
+                Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
+            .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
+            .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
-                .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
-                .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema())
-                .requiredProperty(APPLICATION_REQUEST_SELECTOR,
-                        Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
-                                Schemas.stringSchema()))
-                .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()).allowAdditionalProperties(false);
+            .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
+            .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema())
+            .requiredProperty(APPLICATION_REQUEST_SELECTOR,
+                Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
+                    Schemas.stringSchema()))
+            .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()).allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
-                .requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
-                .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
-                .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
-                .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
-                .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
-                .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
-                .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
-                .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
+            .requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
+            .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
+            .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
+            .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
+            .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
+            .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
+            .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
+            .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
-                .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
-                .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
-                .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
+            .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
+            .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
+            .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
         final JsonSchema schema = JsonSchema.of(staticConfigBuilder.toJson());
         final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
-                .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
+            .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
         return Validator.create(schema, options);
     }
 
@@ -109,8 +108,7 @@ public class StaticConfiguration {
             if (!result.getValid()) {
                 throw result.toException(json);
             }
-        }
-        catch (SchemaException | ValidationException e) {
+        } catch (SchemaException | ValidationException e) {
             validPromise.fail(e);
             return validPromise.future();
         }
@@ -161,7 +159,7 @@ public class StaticConfiguration {
                     final String filename = provider.getString(PROVIDER_FILE_FILENAME);
                     final String directory = provider.getString(PROVIDER_FILE_DIRECTORY);
                     if ((filename == null || filename.length() == 0)
-                            && (directory == null || directory.length() == 0)) {
+                        && (directory == null || directory.length() == 0)) {
                         errMsg = String.format("%s: either filename or directory has to be defined", providerName);
                         valid = false;
                     }

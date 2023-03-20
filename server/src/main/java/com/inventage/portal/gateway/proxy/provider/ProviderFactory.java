@@ -2,11 +2,10 @@ package com.inventage.portal.gateway.proxy.provider;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 import java.util.ServiceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service interface for providing providers. Implementations must add an entry with the fully
@@ -28,8 +27,8 @@ public interface ProviderFactory {
         public static ProviderFactory getFactory(String providerName) {
             LOGGER.debug("Get provider factory '{}'", providerName);
             final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class).stream()
-                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
-                    .findFirst();
+                .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
+                .findFirst();
             return provider.orElse(null);
         }
     }

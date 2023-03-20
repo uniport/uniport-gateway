@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.DEFAULT_LANGUAGE_COOKIE_NAME;
+import static io.vertx.core.http.HttpMethod.GET;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -7,15 +11,10 @@ import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.DEFAULT_LANGUAGE_COOKIE_NAME;
-import static io.vertx.core.http.HttpMethod.GET;
 
 @ExtendWith(VertxExtension.class)
 public class LanguageCookieMiddlewareTest {
@@ -30,20 +29,20 @@ public class LanguageCookieMiddlewareTest {
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
         portalGateway(vertx, host, testCtx)
-                .withRoutingContextHolder(routingContext)
-                .withLanguageCookieMiddleware()
-                .build().start()
-                // when
-                .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
-                    // then
-                    Assertions.assertTrue(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
-                            "request should contain accept language");
-                    Assertions.assertEquals("de", routingContext.get().request().getHeader(HttpHeaders.ACCEPT_LANGUAGE),
-                            "accept-language header should be set to 'de'");
-                    Assertions.assertNotNull(routingContext.get().request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME),
-                            "request should contain IPS language cookie.");
-                    testCtx.completeNow();
-                });
+            .withRoutingContextHolder(routingContext)
+            .withLanguageCookieMiddleware()
+            .build().start()
+            // when
+            .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
+                // then
+                Assertions.assertTrue(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
+                    "request should contain accept language");
+                Assertions.assertEquals("de", routingContext.get().request().getHeader(HttpHeaders.ACCEPT_LANGUAGE),
+                    "accept-language header should be set to 'de'");
+                Assertions.assertNotNull(routingContext.get().request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME),
+                    "request should contain IPS language cookie.");
+                testCtx.completeNow();
+            });
     }
 
     @Test
@@ -52,17 +51,17 @@ public class LanguageCookieMiddlewareTest {
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
         portalGateway(vertx, host, testCtx)
-                .withRoutingContextHolder(routingContext)
-                .withLanguageCookieMiddleware()
-                .build().start()
-                // when
-                .incomingRequest(GET, "/", testCtx, (incomingResponse) -> {
-                    // then
-                    Assertions.assertFalse(routingContext.get().request().headers().contains(DEFAULT_LANGUAGE_COOKIE_NAME),
-                            "response should not contain IPS language cookie.");
-                    Assertions.assertFalse(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
-                            "response should not contain accept language");
-                    testCtx.completeNow();
-                });
+            .withRoutingContextHolder(routingContext)
+            .withLanguageCookieMiddleware()
+            .build().start()
+            // when
+            .incomingRequest(GET, "/", testCtx, (incomingResponse) -> {
+                // then
+                Assertions.assertFalse(routingContext.get().request().headers().contains(DEFAULT_LANGUAGE_COOKIE_NAME),
+                    "response should not contain IPS language cookie.");
+                Assertions.assertFalse(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
+                    "response should not contain accept language");
+                testCtx.completeNow();
+            });
     }
 }

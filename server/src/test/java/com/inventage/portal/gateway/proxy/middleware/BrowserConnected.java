@@ -4,7 +4,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
-
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -28,9 +27,9 @@ public class BrowserConnected {
 
     public CompletionStage<HttpClientResponse> followRedirect(HttpClientResponse redirectResponse) {
         Promise<HttpClientResponse> result = Promise.promise();
-//        portalGateway.incomingRequest(method, uri, new RequestOptions(), (outgoingResponse) -> {
-//            result.complete(outgoingResponse);
-//        });
+        //        portalGateway.incomingRequest(method, uri, new RequestOptions(), (outgoingResponse) -> {
+        //            result.complete(outgoingResponse);
+        //        });
         return result.future().toCompletionStage();
     }
 }

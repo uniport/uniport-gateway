@@ -57,14 +57,18 @@
                             "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
                         }
                     ],
-                    "audience": ["Portal-Messaging"],
+                    "audience": [
+                        "Portal-Messaging"
+                    ],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
                     "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Portal-Messaging']['roles']",
                             "operator": "CONTAINS",
-                            "value": ["ADMIN"]
+                            "value": [
+                                "ADMIN"
+                            ]
                         }
                     ]
                 }

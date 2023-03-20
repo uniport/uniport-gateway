@@ -7,10 +7,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 public class CSRFMiddlewareFactory implements MiddlewareFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareFactory.class);
@@ -25,11 +24,11 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         final String secret = UUID.randomUUID().toString();
         final JsonObject cookie = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE);
         final String cookieName = (cookie == null) ? null
-                : cookie.getString(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE_NAME);
+            : cookie.getString(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE_NAME);
         final String cookiePath = (cookie == null) ? null
-                : cookie.getString(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE_PATH);
+            : cookie.getString(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE_PATH);
         final Boolean cookieSecure = (cookie == null) ? null
-                : cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE_SECURE);
+            : cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_CSRF_COOKIE_SECURE);
         final String headerName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CSRF_HEADER_NAME);
         final Long timeoutInMinute = middlewareConfig.getLong(DynamicConfiguration.MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES);
         final String origin = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CSRF_ORIGIN);
@@ -37,6 +36,6 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
 
         LOGGER.info("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CSRF);
         return Future.succeededFuture(new CSRFMiddleware(vertx, name, secret, cookieName, cookiePath,
-                cookieSecure, headerName, timeoutInMinute, origin, nagHttps));
+            cookieSecure, headerName, timeoutInMinute, origin, nagHttps));
     }
 }

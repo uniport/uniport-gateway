@@ -1,333 +1,608 @@
 [
-{
-  "name":"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.DateConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.LevelConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.LineSeparatorConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.LoggerConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.MessageConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.ThreadConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.core.ConsoleAppender",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.fasterxml.jackson.databind.deser.Deserializers[]"
-},
-{
-  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.fasterxml.jackson.databind.ser.Serializers[]"
-},
-{
-  "name":"com.inventage.portal.gateway.core.PortalGatewayVerticle",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.jndi.dns.DnsContextFactory"
-},
-{
-  "name":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.grpc.ManagedChannel"
-},
-{
-  "name":"io.grpc.internal.DnsNameResolverProvider"
-},
-{
-  "name":"io.grpc.internal.JndiResourceResolverFactory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.grpc.internal.PickFirstLoadBalancerProvider"
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.DefaultFileRegion"
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.epoll.Epoll",
-  "methods":[{"name":"isAvailable","parameterTypes":[] }]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.epoll.EpollEventLoopGroup",
-  "methods":[{"name":"<init>","parameterTypes":["int","java.util.concurrent.ThreadFactory"] }]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.epoll.EpollServerSocketChannel",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.epoll.EpollSocketChannel",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.epoll.NativeDatagramPacketArray$NativeDatagramPacket"
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.unix.DatagramSocketAddress"
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.unix.DomainDatagramSocketAddress"
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.channel.unix.PeerCredentials"
-},
-{
-  "name": "io.grpc.netty.shaded.io.netty.channel.socket.nio.NioSocketChannel",
-  "methods": [ { "name": "<init>", "parameterTypes": [] } ]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.util.AbstractReferenceCounted",
-  "fields":[{"name":"refCnt", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.util.internal.NativeLibraryUtil",
-  "methods":[{"name":"loadLibrary","parameterTypes":["java.lang.String","boolean"] }]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
-  "fields":[{"name":"producerLimit", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
-  "fields":[{"name":"consumerIndex", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.grpc.netty.shaded.io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
-  "fields":[{"name":"producerIndex", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.grpc.util.SecretRoundRobinLoadBalancerProvider$Provider"
-},
-{
-  "name":"io.netty.buffer.AbstractByteBufAllocator",
-  "allDeclaredMethods":true
-},
-{
-  "name":"io.netty.buffer.AbstractReferenceCountedByteBuf",
-  "fields":[{"name":"refCnt", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
-  "fields":[{"name":"producerLimit", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
-  "fields":[{"name":"consumerIndex", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
-  "fields":[{"name":"producerIndex", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter"
-},
-{
-  "name":"io.opentelemetry.internal.shaded.jctools.queues.MpscArrayQueueConsumerIndexField",
-  "fields":[{"name":"consumerIndex", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.opentelemetry.internal.shaded.jctools.queues.MpscArrayQueueProducerIndexField",
-  "fields":[{"name":"producerIndex", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.opentelemetry.internal.shaded.jctools.queues.MpscArrayQueueProducerLimitField",
-  "fields":[{"name":"producerLimit", "allowUnsafeAccess":true}]
-},
-{
-  "name":"io.reactiverse.contextual.logging.LogbackConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.vertx.core.VertxOptions",
-  "allDeclaredMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.BareCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.ListCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.RunCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.StartCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.StopCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.VersionCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.VertxIsolatedDeployer",
-  "methods":[
-    {"name":"<init>","parameterTypes":[] }, 
-    {"name":"deploy","parameterTypes":["java.lang.String","io.vertx.core.Vertx","io.vertx.core.DeploymentOptions","io.vertx.core.Handler"] }
-  ]
-},
-{
-  "name":"io.vertx.core.logging.SLF4JLogDelegateFactory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.vertx.core.metrics.MetricsOptions",
-  "allDeclaredMethods":true,
-  "allPublicMethods":true
-},
-{
-  "name":"java.io.FileDescriptor"
-},
-{
-  "name":"java.io.FilePermission"
-},
-{
-  "name":"java.io.IOException"
-},
-{
-  "name":"java.lang.OutOfMemoryError"
-},
-{
-  "name":"java.lang.RuntimeException"
-},
-{
-  "name":"java.lang.RuntimePermission"
-},
-{
-  "name":"java.lang.management.ManagementFactory",
-  "methods":[{"name":"getRuntimeMXBean","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.management.RuntimeMXBean",
-  "methods":[{"name":"getInputArguments","parameterTypes":[] }]
-},
-{
-  "name":"java.net.InetSocketAddress"
-},
-{
-  "name":"java.net.NetPermission"
-},
-{
-  "name":"java.net.PortUnreachableException"
-},
-{
-  "name":"java.net.SocketPermission"
-},
-{
-  "name":"java.net.URLPermission",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String"] }]
-},
-{
-  "name":"java.nio.Bits",
-  "fields":[{"name":"UNALIGNED"}]
-},
-{
-  "name":"java.nio.Buffer",
-  "fields":[{"name":"address", "allowUnsafeAccess":true}]
-},
-{
-  "name":"java.nio.ByteBuffer",
-  "methods":[{"name":"alignedSlice","parameterTypes":["int"] }]
-},
-{
-  "name":"java.nio.DirectByteBuffer",
-  "methods":[{"name":"<init>","parameterTypes":["long","int"] }]
-},
-{
-  "name":"java.nio.channels.ClosedChannelException"
-},
-{
-  "name":"java.nio.channels.FileChannel"
-},
-{
-  "name":"java.security.AllPermission"
-},
-{
-  "name":"java.security.MessageDigestSpi"
-},
-{
-  "name":"java.security.SecureRandomParameters"
-},
-{
-  "name":"java.security.SecurityPermission"
-},
-{
-  "name":"java.util.PropertyPermission"
-},
-{
-  "name":"java.util.concurrent.atomic.LongAdder",
-  "allPublicConstructors":true,
-  "methods":[
-    {"name":"add","parameterTypes":["long"] }, 
-    {"name":"sum","parameterTypes":[] }
-  ]
-},
-{
-  "name":"javax.management.ObjectName"
-},
-{
-  "name":"javax.naming.directory.InitialDirContext"
-},
-{
-  "name":"jdk.internal.misc.Unsafe",
-  "methods":[{"name":"getUnsafe","parameterTypes":[] }]
-},
-{
-  "name":"sun.misc.Unsafe",
-  "fields":[{"name":"theUnsafe"}],
-  "methods":[
-    {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] }, 
-    {"name":"getAndAddLong","parameterTypes":["java.lang.Object","long","long"] }, 
-    {"name":"getAndSetObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }, 
-    {"name":"invokeCleaner","parameterTypes":["java.nio.ByteBuffer"] }
-  ]
-},
-{
-  "name":"sun.nio.ch.SelectorImpl",
-  "fields":[
-    {"name":"publicSelectedKeys", "allowUnsafeAccess":true}, 
-    {"name":"selectedKeys", "allowUnsafeAccess":true}
-  ]
-},
-{
-  "name":"sun.security.provider.NativePRNG",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-}
+    {
+        "name": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+        "allPublicMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.classic.pattern.DateConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.classic.pattern.LevelConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.classic.pattern.LineSeparatorConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.classic.pattern.LoggerConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.classic.pattern.MessageConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.classic.pattern.ThreadConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "ch.qos.logback.core.ConsoleAppender",
+        "allPublicMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.databind.deser.Deserializers[]"
+    },
+    {
+        "name": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.databind.ser.Serializers[]"
+    },
+    {
+        "name": "com.inventage.portal.gateway.core.PortalGatewayVerticle",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.sun.jndi.dns.DnsContextFactory"
+    },
+    {
+        "name": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.ManagedChannel"
+    },
+    {
+        "name": "io.grpc.internal.DnsNameResolverProvider"
+    },
+    {
+        "name": "io.grpc.internal.JndiResourceResolverFactory",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.internal.PickFirstLoadBalancerProvider"
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.DefaultFileRegion"
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.epoll.Epoll",
+        "methods": [
+            {
+                "name": "isAvailable",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollEventLoopGroup",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "int",
+                    "java.util.concurrent.ThreadFactory"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollServerSocketChannel",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollSocketChannel",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.epoll.NativeDatagramPacketArray$NativeDatagramPacket"
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.unix.DatagramSocketAddress"
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.unix.DomainDatagramSocketAddress"
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.unix.PeerCredentials"
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.channel.socket.nio.NioSocketChannel",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.util.AbstractReferenceCounted",
+        "fields": [
+            {
+                "name": "refCnt",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.util.internal.NativeLibraryUtil",
+        "methods": [
+            {
+                "name": "loadLibrary",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "boolean"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
+        "fields": [
+            {
+                "name": "producerLimit",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
+        "fields": [
+            {
+                "name": "consumerIndex",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.netty.shaded.io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
+        "fields": [
+            {
+                "name": "producerIndex",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.grpc.util.SecretRoundRobinLoadBalancerProvider$Provider"
+    },
+    {
+        "name": "io.netty.buffer.AbstractByteBufAllocator",
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "io.netty.buffer.AbstractReferenceCountedByteBuf",
+        "fields": [
+            {
+                "name": "refCnt",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
+        "fields": [
+            {
+                "name": "producerLimit",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
+        "fields": [
+            {
+                "name": "consumerIndex",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
+        "fields": [
+            {
+                "name": "producerIndex",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter"
+    },
+    {
+        "name": "io.opentelemetry.internal.shaded.jctools.queues.MpscArrayQueueConsumerIndexField",
+        "fields": [
+            {
+                "name": "consumerIndex",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.opentelemetry.internal.shaded.jctools.queues.MpscArrayQueueProducerIndexField",
+        "fields": [
+            {
+                "name": "producerIndex",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.opentelemetry.internal.shaded.jctools.queues.MpscArrayQueueProducerLimitField",
+        "fields": [
+            {
+                "name": "producerLimit",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "io.reactiverse.contextual.logging.LogbackConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.vertx.core.VertxOptions",
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.BareCommand",
+        "allPublicMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.ListCommand",
+        "allPublicMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.RunCommand",
+        "allPublicMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.StartCommand",
+        "allPublicMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.StopCommand",
+        "allPublicMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.VersionCommand",
+        "allPublicMethods": true
+    },
+    {
+        "name": "io.vertx.core.impl.launcher.commands.VertxIsolatedDeployer",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            },
+            {
+                "name": "deploy",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "io.vertx.core.Vertx",
+                    "io.vertx.core.DeploymentOptions",
+                    "io.vertx.core.Handler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "io.vertx.core.logging.SLF4JLogDelegateFactory",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "io.vertx.core.metrics.MetricsOptions",
+        "allDeclaredMethods": true,
+        "allPublicMethods": true
+    },
+    {
+        "name": "java.io.FileDescriptor"
+    },
+    {
+        "name": "java.io.FilePermission"
+    },
+    {
+        "name": "java.io.IOException"
+    },
+    {
+        "name": "java.lang.OutOfMemoryError"
+    },
+    {
+        "name": "java.lang.RuntimeException"
+    },
+    {
+        "name": "java.lang.RuntimePermission"
+    },
+    {
+        "name": "java.lang.management.ManagementFactory",
+        "methods": [
+            {
+                "name": "getRuntimeMXBean",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "java.lang.management.RuntimeMXBean",
+        "methods": [
+            {
+                "name": "getInputArguments",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "java.net.InetSocketAddress"
+    },
+    {
+        "name": "java.net.NetPermission"
+    },
+    {
+        "name": "java.net.PortUnreachableException"
+    },
+    {
+        "name": "java.net.SocketPermission"
+    },
+    {
+        "name": "java.net.URLPermission",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.nio.Bits",
+        "fields": [
+            {
+                "name": "UNALIGNED"
+            }
+        ]
+    },
+    {
+        "name": "java.nio.Buffer",
+        "fields": [
+            {
+                "name": "address",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "java.nio.ByteBuffer",
+        "methods": [
+            {
+                "name": "alignedSlice",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.nio.DirectByteBuffer",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "long",
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.nio.channels.ClosedChannelException"
+    },
+    {
+        "name": "java.nio.channels.FileChannel"
+    },
+    {
+        "name": "java.security.AllPermission"
+    },
+    {
+        "name": "java.security.MessageDigestSpi"
+    },
+    {
+        "name": "java.security.SecureRandomParameters"
+    },
+    {
+        "name": "java.security.SecurityPermission"
+    },
+    {
+        "name": "java.util.PropertyPermission"
+    },
+    {
+        "name": "java.util.concurrent.atomic.LongAdder",
+        "allPublicConstructors": true,
+        "methods": [
+            {
+                "name": "add",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "sum",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "javax.management.ObjectName"
+    },
+    {
+        "name": "javax.naming.directory.InitialDirContext"
+    },
+    {
+        "name": "jdk.internal.misc.Unsafe",
+        "methods": [
+            {
+                "name": "getUnsafe",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "sun.misc.Unsafe",
+        "fields": [
+            {
+                "name": "theUnsafe"
+            }
+        ],
+        "methods": [
+            {
+                "name": "copyMemory",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "java.lang.Object",
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "getAndAddLong",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "getAndSetObject",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "invokeCleaner",
+                "parameterTypes": [
+                    "java.nio.ByteBuffer"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.nio.ch.SelectorImpl",
+        "fields": [
+            {
+                "name": "publicSelectedKeys",
+                "allowUnsafeAccess": true
+            },
+            {
+                "name": "selectedKeys",
+                "allowUnsafeAccess": true
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.NativePRNG",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.SHA",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    }
 ]

@@ -21,6 +21,6 @@ public class ProxyApplicationFactory implements ApplicationFactory {
     public Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx) {
         LOGGER.info("Created '{}' middleware successfully", "proxy");
         return new ProxyApplication(applicationConfig.getString(StaticConfiguration.APPLICATION_NAME),
-                applicationConfig.getString(StaticConfiguration.APPLICATION_ENTRYPOINT), globalConfig, vertx);
+            applicationConfig.getString(StaticConfiguration.APPLICATION_ENTRYPOINT), globalConfig, vertx);
     }
 }

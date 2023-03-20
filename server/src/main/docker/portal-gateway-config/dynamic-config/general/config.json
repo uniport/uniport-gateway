@@ -3,7 +3,9 @@
         "routers": [
             {
                 "name": "root",
-                "middlewares": ["rootRedirectregex"],
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
                 "rule": "Path('/')",
                 "service": "dashboard-proxy"
             }

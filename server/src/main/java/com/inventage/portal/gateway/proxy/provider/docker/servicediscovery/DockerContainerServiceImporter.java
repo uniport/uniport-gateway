@@ -27,15 +27,14 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A discovery bridge collecting services from Docker, and importing them in the Vert.x discovery
@@ -55,10 +54,14 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     /**
      * Starts the bridge.
      *
-     * @param vertx         the vert.x instance
-     * @param publisher     the service discovery instance
-     * @param configuration the bridge configuration if any
-     * @param completion    future to assign with completion status
+     * @param vertx
+     *            the vert.x instance
+     * @param publisher
+     *            the service discovery instance
+     * @param configuration
+     *            the bridge configuration if any
+     * @param completion
+     *            future to assign with completion status
      */
     @Override
     public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
@@ -105,17 +108,15 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         if (config.getDockerHost().getScheme().equalsIgnoreCase("unix")) {
             try {
                 this.host = InetAddress.getLocalHost().getHostAddress();
-            }
-            catch (UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 completion.fail(e);
             }
-        }
-        else {
+        } else {
             this.host = config.getDockerHost().getHost();
         }
 
         final DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
-                .sslConfig(config.getSSLConfig()).maxConnections(100).build();
+            .sslConfig(config.getSSLConfig()).maxConnections(100).build();
 
         client = DockerClientImpl.getInstance(config, httpClient);
 
@@ -132,17 +133,15 @@ public class DockerContainerServiceImporter implements ServiceImporter {
         vertx.<List<Container>>executeBlocking(future -> {
             try {
                 future.complete(
-                        client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
-            }
-            catch (Exception e) {
+                    client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
+            } catch (Exception e) {
                 future.fail(e);
             }
         }, ar -> {
             if (ar.failed()) {
                 if (completion != null) {
                     completion.fail(ar.cause());
-                }
-                else {
+                } else {
                     LOGGER.warn("Failed to import services from docker", ar.cause());
                 }
                 return;
@@ -223,8 +222,7 @@ public class DockerContainerServiceImporter implements ServiceImporter {
             started = false;
             client.close();
             LOGGER.info("Successfully closed the service importer " + this);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("A failure has been caught while stopping " + this, e);
         }
         if (completionHandler != null) {

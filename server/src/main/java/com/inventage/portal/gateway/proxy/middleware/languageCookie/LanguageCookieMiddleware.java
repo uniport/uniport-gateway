@@ -33,7 +33,7 @@ public class LanguageCookieMiddleware implements Middleware {
 
         if (cookie != null) {
             LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", DEFAULT_LANGUAGE_COOKIE_NAME,
-                    cookie.getValue());
+                cookie.getValue());
             ctx.request().headers().remove(HttpHeaders.ACCEPT_LANGUAGE);
             ctx.request().headers().add(HttpHeaders.ACCEPT_LANGUAGE, cookie.getValue());
         }

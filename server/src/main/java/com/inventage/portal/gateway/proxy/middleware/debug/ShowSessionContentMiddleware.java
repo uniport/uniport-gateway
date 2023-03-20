@@ -10,12 +10,11 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
+import java.util.Base64;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Base64;
-import java.util.Set;
 
 /**
  * Returns an HTML page with information from the current session if "_session_" is in the requested URL.
@@ -74,17 +73,17 @@ public class ShowSessionContentMiddleware implements Middleware {
             if (!idTokenDisplayed) {
                 final String rawIdToken = user.principal().getString("id_token");
                 html.append("id token:\n").append(getFormattedPayloadFromJWT(rawIdToken)).append("\n")
-                        .append(rawIdToken);
+                    .append(rawIdToken);
                 idTokenDisplayed = true;
             }
 
             final String rawAccessToken = user.principal().getString("access_token");
             html.append("\n\n")
-                    .append(key)
-                    .append(":\n")
-                    .append(getFormattedPayloadFromJWT(rawAccessToken))
-                    .append("\n")
-                    .append(rawAccessToken);
+                .append(key)
+                .append(":\n")
+                .append(getFormattedPayloadFromJWT(rawAccessToken))
+                .append("\n")
+                .append(rawAccessToken);
         }
 
         return html.toString();

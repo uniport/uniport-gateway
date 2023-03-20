@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static io.vertx.core.http.HttpMethod.GET;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaim;
@@ -14,18 +18,13 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static io.vertx.core.http.HttpMethod.GET;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import javax.json.Json;
+import javax.json.JsonObject;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * A series of tests to check that the implementation of custom claims behaves correctly.
@@ -37,67 +36,67 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     private static final String publicKeyPath = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String publicKeyAlgorithm = "RS256";
     private static final JsonObject validPayloadTemplate = Json.createObjectBuilder()
-            .add("typ", "Bearer")
-            .add("exp", 1893452400)
-            .add("iat", 1627053747)
-            .add("iss", "http://test.issuer:1234/auth/realms/test")
-            .add("azp", "test-authorized-parties")
-            .add("aud", "Organisation")
-            .add("scope", "openid email profile Test")
-            .add("organisation", "portal")
-            .add("email-verified", false)
-            .add("acr", 1)
-            .add("http://hasura.io/jwt/claims", Json.createObjectBuilder()
-                    .add("x-hasura-user-id", 1234)
-                    .add("x-hasura-allowed-roles",
-                            Json.createArrayBuilder(List.of("KEYCLOAK", "portaluser"))
-                                    .build())
+        .add("typ", "Bearer")
+        .add("exp", 1893452400)
+        .add("iat", 1627053747)
+        .add("iss", "http://test.issuer:1234/auth/realms/test")
+        .add("azp", "test-authorized-parties")
+        .add("aud", "Organisation")
+        .add("scope", "openid email profile Test")
+        .add("organisation", "portal")
+        .add("email-verified", false)
+        .add("acr", 1)
+        .add("http://hasura.io/jwt/claims", Json.createObjectBuilder()
+            .add("x-hasura-user-id", 1234)
+            .add("x-hasura-allowed-roles",
+                Json.createArrayBuilder(List.of("KEYCLOAK", "portaluser"))
                     .build())
-            .add("resource_access", Json.createObjectBuilder()
-                    .add("Organisation", Json.createObjectBuilder()
-                            .add("roles", Json.createArrayBuilder(List.of("TENANT")))
-                            .build())
-                    .build())
-            .build();
+            .build())
+        .add("resource_access", Json.createObjectBuilder()
+            .add("Organisation", Json.createObjectBuilder()
+                .add("roles", Json.createArrayBuilder(List.of("TENANT")))
+                .build())
+            .build())
+        .build();
 
     @Test
     public void validToken(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final JWTClaim claimEqualString = new JWTClaim("$['organisation']", JWTClaimOperator.EQUALS, "portal");
         final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']",
-                JWTClaimOperator.CONTAINS,
-                Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
-                        .build());
+            JWTClaimOperator.CONTAINS,
+            Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
+                .build());
         final JWTClaim claimEqualObject = new JWTClaim("$['http://hasura.io/jwt/claims']",
-                JWTClaimOperator.EQUALS,
-                Json.createObjectBuilder()
-                        .add("x-hasura-allowed-roles",
-                                Json.createArrayBuilder(
-                                        List.of("KEYCLOAK", "portaluser")))
-                        .add("x-hasura-user-id", 1234)
-                        .build());
+            JWTClaimOperator.EQUALS,
+            Json.createObjectBuilder()
+                .add("x-hasura-allowed-roles",
+                    Json.createArrayBuilder(
+                        List.of("KEYCLOAK", "portaluser")))
+                .add("x-hasura-user-id", 1234)
+                .build());
         final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS,
-                Boolean.FALSE);
+            Boolean.FALSE);
         final JWTClaim claimContainInteger = new JWTClaim("$['acr']", JWTClaimOperator.CONTAINS,
-                Json.createArrayBuilder(List.of(1, 9)).build());
+            Json.createArrayBuilder(List.of(1, 9)).build());
         final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']",
-                JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
-                Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
+            JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
+            Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
         final List<JWTClaim> expectedClaims = List.of(claimContainRole, claimEqualString, claimEqualObject,
-                claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
+            claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddlewareOtherClaims(
-                        jwtAuth(vertx, expectedIssuer, expectedAudience),
-                        jwtAdditionalClaims(expectedClaims), false)
-                .build().start()
-                //when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                        bearer(validToken)), testCtx, (resp) -> {
+            .withBearerOnlyMiddlewareOtherClaims(
+                jwtAuth(vertx, expectedIssuer, expectedAudience),
+                jwtAdditionalClaims(expectedClaims), false)
+            .build().start()
+            //when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
+                bearer(validToken)), testCtx, (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -106,11 +105,11 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
 
     @Test
     public void validTokenContainsWhitespaceScope(Vertx vertx, VertxTestContext testCtx)
-            throws InterruptedException {
+        throws InterruptedException {
         //given
         final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']",
-                JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
-                Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
+            JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
+            Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
         final List<JWTClaim> expectedClaims = List.of(claimContainSubstringWhitespace);
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
@@ -118,13 +117,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddlewareOtherClaims(
-                        jwtAuth(vertx, expectedIssuer, expectedAudience),
-                        jwtAdditionalClaims(expectedClaims), false)
-                .build().start()
-                //when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                        bearer(validToken)), testCtx, (resp) -> {
+            .withBearerOnlyMiddlewareOtherClaims(
+                jwtAuth(vertx, expectedIssuer, expectedAudience),
+                jwtAdditionalClaims(expectedClaims), false)
+            .build().start()
+            //when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
+                bearer(validToken)), testCtx, (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -135,13 +134,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     public void pathKeyMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']",
-                JWTClaimOperator.CONTAINS,
-                Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
-                        .build());
+            JWTClaimOperator.CONTAINS,
+            Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
+                .build());
         final List<JWTClaim> expectedClaims = List.of(claimContainRole);
 
         final io.vertx.core.json.JsonObject invalidPayload = new io.vertx.core.json.JsonObject(
-                validPayloadTemplate.toString());
+            validPayloadTemplate.toString());
         invalidPayload.remove("resource_access");
         final String invalidStringToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
 
@@ -149,13 +148,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddlewareOtherClaims(
-                        jwtAuth(vertx, expectedIssuer, expectedAudience),
-                        jwtAdditionalClaims(expectedClaims), false)
-                .build().start()
-                //when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                        bearer(invalidStringToken)), testCtx, (resp) -> {
+            .withBearerOnlyMiddlewareOtherClaims(
+                jwtAuth(vertx, expectedIssuer, expectedAudience),
+                jwtAdditionalClaims(expectedClaims), false)
+            .build().start()
+            //when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
+                bearer(invalidStringToken)), testCtx, (resp) -> {
                     // then
                     assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -166,11 +165,11 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     public void booleanValueMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS,
-                Boolean.FALSE);
+            Boolean.FALSE);
         final List<JWTClaim> expectedClaims = List.of(claimEqualBoolean);
 
         JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate).add("email-verified",
-                true).build();
+            true).build();
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
@@ -178,13 +177,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddlewareOtherClaims(
-                        jwtAuth(vertx, expectedIssuer, expectedAudience),
-                        jwtAdditionalClaims(expectedClaims), false)
-                .build().start()
-                //when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                        bearer(invalidToken)), testCtx, (resp) -> {
+            .withBearerOnlyMiddlewareOtherClaims(
+                jwtAuth(vertx, expectedIssuer, expectedAudience),
+                jwtAdditionalClaims(expectedClaims), false)
+            .build().start()
+            //when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
+                bearer(invalidToken)), testCtx, (resp) -> {
                     // then
                     assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -195,31 +194,31 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     public void entryMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']",
-                JWTClaimOperator.CONTAINS,
-                Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
-                        .build());
+            JWTClaimOperator.CONTAINS,
+            Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
+                .build());
         final List<JWTClaim> expectedClaims = List.of(claimContainRole);
 
         JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate)
-                .add("resource_access", Json.createObjectBuilder()
-                        .add("Organisation", Json.createObjectBuilder()
-                                .add("roles", "Root")
-                                .build())
-                        .build())
-                .build();
+            .add("resource_access", Json.createObjectBuilder()
+                .add("Organisation", Json.createObjectBuilder()
+                    .add("roles", "Root")
+                    .build())
+                .build())
+            .build();
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddlewareOtherClaims(
-                        jwtAuth(vertx, expectedIssuer, expectedAudience),
-                        jwtAdditionalClaims(expectedClaims), false)
-                .build().start()
-                //when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                        bearer(invalidToken)), testCtx, (resp) -> {
+            .withBearerOnlyMiddlewareOtherClaims(
+                jwtAuth(vertx, expectedIssuer, expectedAudience),
+                jwtAdditionalClaims(expectedClaims), false)
+            .build().start()
+            //when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
+                bearer(invalidToken)), testCtx, (resp) -> {
                     // then
                     assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -230,17 +229,16 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         String publicKeyRS256 = null;
         try {
             publicKeyRS256 = Resources.toString(Resources.getResource(publicKeyPath),
-                    StandardCharsets.UTF_8);
-        }
-        catch (IOException e) {
+                StandardCharsets.UTF_8);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return JWTAuth.create(vertx, new JWTAuthOptions()
-                .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm)
-                        .setBuffer(publicKeyRS256))
-                .setJWTOptions(new JWTOptions()
-                        .setIssuer(expectedIssuer)
-                        .setAudience(expectedAudience)));
+            .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm)
+                .setBuffer(publicKeyRS256))
+            .setJWTOptions(new JWTOptions()
+                .setIssuer(expectedIssuer)
+                .setAudience(expectedAudience)));
     }
 
     private JWTAuthAdditionalClaimsOptions jwtAdditionalClaims(List<JWTClaim> claims) {

@@ -4,11 +4,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 import java.util.ServiceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service interface for providing middlewares. Implementations must add an entry with the fully
@@ -27,8 +26,8 @@ public interface MiddlewareFactory {
         public static MiddlewareFactory getFactory(String middlewareName) {
             LOGGER.debug("Middleware factory for '{}'", middlewareName);
             final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()
-                    .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(middlewareName))
-                    .findFirst();
+                .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(middlewareName))
+                .findFirst();
             return middleware.orElse(null);
         }
     }

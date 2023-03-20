@@ -10,7 +10,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +54,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
         return vertx.<List<File>>executeBlocking(promise -> {
             try {
                 promise.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 promise.fail(e);
             }
         }).flatMap(files -> {
@@ -66,8 +64,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
                 set.buildConfiguration(files, json -> {
                     if (json.failed()) {
                         promise.fail(json.cause());
-                    }
-                    else {
+                    } else {
                         promise.complete(json.result());
                     }
                 });
@@ -89,8 +86,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
         for (Map.Entry<String, Object> e : other.getMap().entrySet()) {
             if (e.getValue() == null) {
                 one.getMap().put(e.getKey(), null);
-            }
-            else {
+            } else {
                 one.getMap().merge(e.getKey(), e.getValue(), (oldVal, newVal) -> {
                     if (oldVal instanceof Map) {
                         oldVal = new JsonObject((Map) oldVal);

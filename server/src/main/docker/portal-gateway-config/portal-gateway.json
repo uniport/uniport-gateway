@@ -62,7 +62,9 @@
                         "policyDirectives": [
                             {
                                 "directive": "default-src",
-                                "values": ["self"]
+                                "values": [
+                                    "self"
+                                ]
                             },
                             {
                                 "directive": "style-src",
@@ -93,15 +95,24 @@
                             },
                             {
                                 "directive": "img-src",
-                                "values": ["self", "data: https:"]
+                                "values": [
+                                    "self",
+                                    "data: https:"
+                                ]
                             },
                             {
                                 "directive": "connect-src",
-                                "values": ["self", "https://grafana.com"]
+                                "values": [
+                                    "self",
+                                    "https://grafana.com"
+                                ]
                             },
                             {
                                 "directive": "img-src",
-                                "values": ["self", "data: https:"]
+                                "values": [
+                                    "self",
+                                    "data: https:"
+                                ]
                             }
                         ]
                     }

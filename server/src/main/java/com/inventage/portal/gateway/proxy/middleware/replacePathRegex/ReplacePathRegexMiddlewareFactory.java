@@ -18,10 +18,10 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
-                DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX);
+            DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX);
         return Future.succeededFuture(new ReplacePathRegexMiddleware(
-                name,
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX),
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT)));
+            name,
+            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX),
+            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT)));
     }
 }

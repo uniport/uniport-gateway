@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static io.vertx.core.http.HttpMethod.GET;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
@@ -14,18 +18,13 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static io.vertx.core.http.HttpMethod.GET;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import javax.json.Json;
+import javax.json.JsonObject;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
 public class BearerOnlyMiddlewareTest {
@@ -34,14 +33,14 @@ public class BearerOnlyMiddlewareTest {
     private static final String publicKeyPath = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String publicKeyAlgorithm = "RS256";
     private static final JsonObject validPayloadTemplate = Json.createObjectBuilder()
-            .add("typ", "Bearer")
-            .add("exp", 1893452400)
-            .add("iat", 1627053747)
-            .add("iss", "http://test.issuer:1234/auth/realms/test")
-            .add("azp", "test-authorized-parties")
-            .add("aud", "test-audience")
-            .add("scope", "openid email profile Test")
-            .build();
+        .add("typ", "Bearer")
+        .add("exp", 1893452400)
+        .add("iat", 1627053747)
+        .add("iss", "http://test.issuer:1234/auth/realms/test")
+        .add("azp", "test-authorized-parties")
+        .add("aud", "test-audience")
+        .add("scope", "openid email profile Test")
+        .build();
 
     @Test
     public void noBearer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
@@ -50,14 +49,14 @@ public class BearerOnlyMiddlewareTest {
         final List<String> expectedAudience = List.of("test-audience");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/", testCtx, (resp) -> {
-                    // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
-                    testCtx.completeNow();
-                });
+            .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/", testCtx, (resp) -> {
+                // then
+                assertEquals(401, resp.statusCode(), "unexpected status code");
+                testCtx.completeNow();
+            });
     }
 
     @Test
@@ -69,16 +68,16 @@ public class BearerOnlyMiddlewareTest {
         final String invalidSignatureToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJCZWFyZXIiLCJleHAiOjE4OTM0NTI0MDAsImlhdCI6MTYyNzA1Mzc0NywiaXNzIjoiaHR0cDovL3Rlc3QuaXNzdWVyOjEyMzQvYXV0aC9yZWFsbXMvdGVzdCIsImF6cCI6InRlc3QtYXV0aG9yaXplZC1wYXJ0aWVzIiwiYXVkIjoidGVzdC1hdWRpZW5jZSIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUgVGVzdCJ9.blub";
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/",
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidSignatureToken)),
-                        testCtx, (resp) -> {
-                            // then
-                            assertEquals(401, resp.statusCode(), "unexpected status code");
-                            testCtx.completeNow();
-                        });
+            .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidSignatureToken)),
+                testCtx, (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
@@ -88,46 +87,46 @@ public class BearerOnlyMiddlewareTest {
         final List<String> expectedAudience = List.of("test-audience");
 
         final JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate)
-                .add("iss", "http://malory.issuer:1234/auth/realms/test")
-                .build();
+            .add("iss", "http://malory.issuer:1234/auth/realms/test")
+            .build();
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/",
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
-                        (resp) -> {
-                            // then
-                            assertEquals(401, resp.statusCode(), "unexpected status code");
-                            testCtx.completeNow();
-                        });
+            .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
     public void audienceMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate)
-                .add("aud", "malory-audience")
-                .build();
+            .add("aud", "malory-audience")
+            .build();
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/",
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
-                        (resp) -> {
-                            // then
-                            assertEquals(401, resp.statusCode(), "unexpected status code");
-                            testCtx.completeNow();
-                        });
+            .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
@@ -139,16 +138,16 @@ public class BearerOnlyMiddlewareTest {
         final List<String> expectedAudience = List.of("test-audience");
 
         portalGateway(vertx, host, testCtx)
-                .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/",
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
-                        (resp) -> {
-                            // then
-                            assertEquals(200, resp.statusCode(), "unexpected status code");
-                            testCtx.completeNow();
-                        });
+            .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
     }
 
     @Test
@@ -160,25 +159,25 @@ public class BearerOnlyMiddlewareTest {
         final List<String> expectedAudience = List.of("test-audience");
 
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, "localhost")
-                .startDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
+            .startDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
 
         final JsonArray publicKeys = new JsonArray()
-                .add(
-                        new io.vertx.core.json.JsonObject()
-                                .put("publicKey", "http://localhost:" + keycloakServer.port() + "/auth/realms/test"));
+            .add(
+                new io.vertx.core.json.JsonObject()
+                    .put("publicKey", "http://localhost:" + keycloakServer.port() + "/auth/realms/test"));
 
         portalGateway(vertx, testCtx)
-                .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/",
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
-                        (resp) -> {
-                            // then
-                            assertEquals(200, resp.statusCode(), "unexpected status code");
-                            testCtx.completeNow();
-                            keycloakServer.closeServer();
-                        });
+            .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                    keycloakServer.closeServer();
+                });
     }
 
     @Test
@@ -189,26 +188,26 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
         final JsonArray publicKeys = new JsonArray()
-                .add(new io.vertx.core.json.JsonObject()
-                        .put("publicKey",
-                                "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5hnB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQIDAQAB"));
+            .add(new io.vertx.core.json.JsonObject()
+                .put("publicKey",
+                    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5hnB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQIDAQAB"));
 
         final io.vertx.core.json.JsonObject bearerOnlyConfig = new io.vertx.core.json.JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys)
-                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, expectedIssuer)
-                .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(expectedAudience));
+            .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys)
+            .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, expectedIssuer)
+            .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(expectedAudience));
 
         portalGateway(vertx, testCtx)
-                .withBearerOnlyMiddleware(bearerOnlyConfig)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/",
-                        new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
-                        (resp) -> {
-                            // then
-                            assertEquals(200, resp.statusCode(), "unexpected status code");
-                            testCtx.completeNow();
-                        });
+            .withBearerOnlyMiddleware(bearerOnlyConfig)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
 
     }
 
@@ -216,15 +215,14 @@ public class BearerOnlyMiddlewareTest {
         String publicKeyRS256 = null;
         try {
             publicKeyRS256 = Resources.toString(Resources.getResource(publicKeyPath),
-                    StandardCharsets.UTF_8);
-        }
-        catch (IOException e) {
+                StandardCharsets.UTF_8);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return JWTAuth.create(vertx,
-                new JWTAuthOptions()
-                        .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
-                        .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));
+            new JWTAuthOptions()
+                .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
+                .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));
     }
 
     private String bearer(String value) {

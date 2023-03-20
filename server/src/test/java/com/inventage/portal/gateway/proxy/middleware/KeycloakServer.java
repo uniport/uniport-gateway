@@ -10,7 +10,6 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -63,13 +62,13 @@ public class KeycloakServer {
     public final void startServerWithCustomHandler(Handler<HttpServerRequest> handler) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         this.server = vertx.createHttpServer().requestHandler(handler)
-                .listen(this.port, this.host, ready -> {
-                    if (ready.failed()) {
-                        throw new RuntimeException(ready.cause());
-                    }
-                    // ready
-                    latch.countDown();
-                });
+            .listen(this.port, this.host, ready -> {
+                if (ready.failed()) {
+                    throw new RuntimeException(ready.cause());
+                }
+                // ready
+                latch.countDown();
+            });
         latch.await();
     }
 
@@ -87,43 +86,41 @@ public class KeycloakServer {
         JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
-                req -> {
-                    if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
-                        req.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .send(discoveryResponse.encode());
-                    }
-                    else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
-                        req.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .send(tokenResponse.encode());
-                    }
-                });
+            req -> {
+                if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
+                    req.response()
+                        .putHeader("content-type", "application/json")
+                        .setStatusCode(200)
+                        .send(discoveryResponse.encode());
+                } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
+                    req.response()
+                        .putHeader("content-type", "application/json")
+                        .setStatusCode(200)
+                        .send(tokenResponse.encode());
+                }
+            });
         return this;
     }
 
     public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler)
-            throws InterruptedException {
+        throws InterruptedException {
         JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
-                req -> {
-                    if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
-                        req.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .send(discoveryResponse.encode());
-                    }
-                    else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
-                        req.bodyHandler(bodyHandler);
-                        req.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .send(tokenResponse.encode());
-                    }
-                });
+            req -> {
+                if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
+                    req.response()
+                        .putHeader("content-type", "application/json")
+                        .setStatusCode(200)
+                        .send(discoveryResponse.encode());
+                } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
+                    req.bodyHandler(bodyHandler);
+                    req.response()
+                        .putHeader("content-type", "application/json")
+                        .setStatusCode(200)
+                        .send(tokenResponse.encode());
+                }
+            });
         return this;
     }
 
@@ -131,20 +128,19 @@ public class KeycloakServer {
         JsonObject discoveryResponse = getDiscoveryResponseWithJWKsURI();
         JsonObject jwksURIResponse = getDefaultJWKsURIResponse();
         startServerWithCustomHandler(
-                req -> {
-                    if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
-                        req.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .send(discoveryResponse.encode());
-                    }
-                    else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
-                        req.response()
-                                .putHeader("content-type", "application/json")
-                                .setStatusCode(200)
-                                .send(jwksURIResponse.encode());
-                    }
-                });
+            req -> {
+                if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
+                    req.response()
+                        .putHeader("content-type", "application/json")
+                        .setStatusCode(200)
+                        .send(discoveryResponse.encode());
+                } else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
+                    req.response()
+                        .putHeader("content-type", "application/json")
+                        .setStatusCode(200)
+                        .send(jwksURIResponse.encode());
+                }
+            });
         return this;
     }
 
@@ -211,12 +207,12 @@ public class KeycloakServer {
     private JsonObject getDefaultJWKsURIResponse() {
 
         JsonObject JWK = new JsonObject()
-                .put(JWK_KID_KEY, RANDOM_JWK_KID)
-                .put(JWK_KTY_KEY, RSA_JWK_KTY)
-                .put(JWK_ALG_KEY, RS256_JWK_ALG)
-                .put(JWK_USE_KEY, SIGNING_JWK_USE)
-                .put(JWK_MODULUS_KEY, RANDOM_JWK_MODULUS)
-                .put(JWK_PUBLIC_EXPONENT_KEY, RANDOM_JWK_PUBLIC_EXPONENT);
+            .put(JWK_KID_KEY, RANDOM_JWK_KID)
+            .put(JWK_KTY_KEY, RSA_JWK_KTY)
+            .put(JWK_ALG_KEY, RS256_JWK_ALG)
+            .put(JWK_USE_KEY, SIGNING_JWK_USE)
+            .put(JWK_MODULUS_KEY, RANDOM_JWK_MODULUS)
+            .put(JWK_PUBLIC_EXPONENT_KEY, RANDOM_JWK_PUBLIC_EXPONENT);
 
         JsonArray JWKs = new JsonArray().add(JWK);
 

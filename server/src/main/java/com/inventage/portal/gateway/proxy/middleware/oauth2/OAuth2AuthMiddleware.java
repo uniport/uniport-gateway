@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
+import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware.CONTEXTUAL_DATA_SESSION_ID;
+
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
@@ -13,14 +15,11 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-
-import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware.CONTEXTUAL_DATA_SESSION_ID;
 
 /**
  * Middleware for handling parallel OAuth2 flows for a Vert.x session.
@@ -66,7 +65,8 @@ public class OAuth2AuthMiddleware implements Middleware {
     /**
      * Put the OAuth2 flow parameters back into the session for the state parameter from the request.
      *
-     * @param ctx          context of the callback request
+     * @param ctx
+     *            context of the callback request
      * @param sessionScope
      * @return true if the session was updated successfully otherwise false
      */
@@ -82,14 +82,12 @@ public class OAuth2AuthMiddleware implements Middleware {
 
                 LOGGER.debug("For state parameter '{}' and scope '{}'", requestState, sessionScope);
                 return true;
-            }
-            else {
+            } else {
                 LOGGER.warn("No OAuth2 state found in session for state parameter '{}' and scope '{}'", requestState,
-                        sessionScope);
+                    sessionScope);
                 return false;
             }
-        }
-        else {
+        } else {
             LOGGER.warn("Not state parameter found in request for scope '{}'", sessionScope);
             return false;
         }
@@ -100,7 +98,7 @@ public class OAuth2AuthMiddleware implements Middleware {
         callback.failureHandler(ctx -> {
             // PORTAL-1184: retry with initial uri
             LOGGER.warn("Processing failed for state '{}' caused by '{}'", ctx.request().getParam(OIDC_PARAM_STATE),
-                    ctx.failure() == null ? "unknown error" : ctx.failure().getMessage());
+                ctx.failure() == null ? "unknown error" : ctx.failure().getMessage());
             HttpResponder.respondWithStatusCode(ctx.statusCode(), ctx);
         });
 
@@ -108,15 +106,14 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     // this method is called when the IAM finishs the authentication flow and sends a redirect (callback) with the code
     private static void whenAuthenticationResponseReceived(RoutingContext ctx, String sessionScope,
-                                                           OAuth2Auth authProvider) {
+        OAuth2Auth authProvider) {
         final String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
         final String code = ctx.request().getParam(OIDC_PARAM_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
             LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code.substring(0, 5));
             ctx.addEndHandler(asyncResult -> whenTokenForCodeReceived(asyncResult, ctx, authProvider, sessionScope));
             ctx.next(); // io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl.setupCallback#route.handler(ctx -> {...})
-        }
-        else {
+        } else {
             LOGGER.info("failed because state '{}' wasn't found in session", stateParameter);
             sendResponseFor(stateParameter, ctx);
         }
@@ -127,26 +124,25 @@ public class OAuth2AuthMiddleware implements Middleware {
         final Optional<String> uri = new StateWithUri(stateParameter).uri();
         if (uri.isPresent()) {
             HttpResponder.respondWithRedirectWithoutSetCookie(uri.get(), ctx);
-        }
-        else {
+        } else {
             HttpResponder.respondWithStatusCode(HttpResponseStatus.GONE.code(), ctx);
         }
     }
 
     private static void whenTokenForCodeReceived(AsyncResult<Void> asyncResult, RoutingContext ctx,
-                                                 OAuth2Auth authProvider,
-                                                 String sessionScope) {
+        OAuth2Auth authProvider,
+        String sessionScope) {
         if (asyncResult.succeeded()) {
             if (ctx.user() != null) {
                 LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'", sessionScope,
-                        SessionAdapter.displaySessionId(ctx.session()));
+                    SessionAdapter.displaySessionId(ctx.session()));
                 ContextualData.put(CONTEXTUAL_DATA_SESSION_ID,
-                        SessionAdapter.displaySessionId(ctx.session()));
+                    SessionAdapter.displaySessionId(ctx.session()));
                 // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User objects together.
                 // However, it is marked as deprecated, and therefore we use our own glue.
                 final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(authProvider, ctx.user());
                 ctx.session().put(String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX),
-                        authPair);
+                    authPair);
             }
         }
         if (asyncResult.failed()) {
@@ -179,7 +175,8 @@ public class OAuth2AuthMiddleware implements Middleware {
     /**
      * Update the RoutingContext with the user for the given sessionScope or clear the user if not available.
      *
-     * @param sessionScope an OAuth2 authentication is requested
+     * @param sessionScope
+     *            an OAuth2 authentication is requested
      * @param ctx
      */
     private User setUserForScope(String sessionScope, RoutingContext ctx) {
@@ -187,8 +184,7 @@ public class OAuth2AuthMiddleware implements Middleware {
         final Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
         if (authPair != null) {
             ctx.setUser(authPair.getRight());
-        }
-        else {
+        } else {
             ctx.clearUser();
         }
         return ctx.user();

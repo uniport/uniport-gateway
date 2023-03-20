@@ -11,14 +11,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.PlatformHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages request/response cookies. It removes all cookies from responses,
@@ -81,7 +80,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         final Set<Cookie> requestCookies = CookieUtil
-                .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+            .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
@@ -116,7 +115,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
             return true;
         }
         LOGGER.debug("Ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
-                matchesPath(cookie, path), matchesSSL(cookie, isSSL));
+            matchesPath(cookie, path), matchesSSL(cookie, isSSL));
         return false;
     }
 
@@ -144,7 +143,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
      output %x2F ("/") and skip the remaining step.
      4.  Output the characters of the uri-path from the first character up
      to, but not including, the right-most %x2F ("/").
-
+    
     A request-path path-matches a given cookie-path if at least one of
      the following conditions holds:
      -  The cookie-path and the request-path are identical.
@@ -153,15 +152,14 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
      -  The cookie-path is a prefix of the request-path, and the first
     character of the request-path that is not included in the cookie-
     path is a %x2F ("/") character.
-
+    
     https://tools.ietf.org/html/rfc6265#section-5.1.4
     */
     private boolean matchesPath(Cookie cookie, String uriPath) {
         final String requestPath;
         if (!uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
             requestPath = "/";
-        }
-        else {
+        } else {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
@@ -172,10 +170,9 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         final String cookiePath;
         if (cookie.path().isEmpty()) {
             cookiePath = "/";
-        }
-        else {
+        } else {
             cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
-                    : cookie.path();
+                : cookie.path();
         }
         final String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
         return Pattern.compile(regex).matcher(requestPath).matches();
@@ -249,8 +246,8 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
     private String escapeSpecialRegexChars(String regex) {
         return regex.replace("\\", "\\\\").replace("^", "\\^").replace("$", "\\$").replace(".", "\\.")
-                .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
-                .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
+            .replace("|", "\\.").replace("?", "\\?").replace("*", "\\*").replace("+", "\\+").replace("(", "\\(")
+            .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
 
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
@@ -275,9 +272,9 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
             final JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
             final String whitelistedCookieName = whitelistedCookie
-                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
+                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
             final String whitelistedCookiePath = whitelistedCookie
-                    .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
+                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
             if (whitelistedCookieName.equals(cookie.name()) && whitelistedCookiePath.equals(cookie.path())) {
                 return true;
             }

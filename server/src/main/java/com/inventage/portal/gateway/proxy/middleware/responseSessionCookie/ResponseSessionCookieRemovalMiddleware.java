@@ -28,7 +28,7 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
     public ResponseSessionCookieRemovalMiddleware(String name, String sessionCookieName) {
         this.name = name;
         this.sessionCookieName = (sessionCookieName == null) ? SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT
-                : sessionCookieName;
+            : sessionCookieName;
     }
 
     /**

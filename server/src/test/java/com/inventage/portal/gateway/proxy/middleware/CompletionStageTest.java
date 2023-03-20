@@ -4,13 +4,12 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.Random;
+import java.util.concurrent.CompletionStage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Random;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Learning Test for composing CompletionStages.
@@ -23,17 +22,16 @@ public class CompletionStageTest {
     //@Test
     void thenCompose(Vertx vertx, VertxTestContext testContext) {
         asyncToUpperCase("hello", vertx)
-                .thenCompose(s -> asyncToLowerCase(s, vertx))
-                .thenCompose(s -> asyncToUpperCase(s, vertx))
-                .whenComplete((result, error) -> {
-                    if (error == null) {
-                        Assertions.assertEquals("HELLO", result);
-                    }
-                    else {
-                        Assertions.fail(error);
-                    }
-                    testContext.completeNow();
-                });
+            .thenCompose(s -> asyncToLowerCase(s, vertx))
+            .thenCompose(s -> asyncToUpperCase(s, vertx))
+            .whenComplete((result, error) -> {
+                if (error == null) {
+                    Assertions.assertEquals("HELLO", result);
+                } else {
+                    Assertions.fail(error);
+                }
+                testContext.completeNow();
+            });
     }
 
     private CompletionStage<String> asyncToUpperCase(String input, Vertx vertx) {

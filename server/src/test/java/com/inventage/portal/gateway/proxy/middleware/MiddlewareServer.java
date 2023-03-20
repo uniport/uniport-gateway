@@ -11,10 +11,9 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.junit5.VertxTestContext;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MiddlewareServer {
 
@@ -38,8 +37,7 @@ public class MiddlewareServer {
         Future<HttpServer> httpServerFuture = httpServer.listen(port, host);
         try {
             awaitComplete(httpServerFuture);
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             throw new RuntimeException("MiddlewareServer.start failed.", e);
         }
         return this;
@@ -67,7 +65,7 @@ public class MiddlewareServer {
     }
 
     private void createHttpClientWithRequestOptionsAndResponseHandler(VertxTestContext testCtx, RequestOptions reqOpts,
-                                                                      Handler<HttpClientResponse> responseHandler) {
+        Handler<HttpClientResponse> responseHandler) {
         LOGGER.info("requesting '{}'", reqOpts.getURI());
         vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(resp -> {
             responseHandler.handle(resp);
@@ -96,8 +94,7 @@ public class MiddlewareServer {
                     // @Blocking
                     lock.wait();
                 }
-            }
-            while (null == resultRef.get());
+            } while (null == resultRef.get());
         }
         final AsyncResult<T> result = resultRef.get();
         final Throwable t = result.cause();

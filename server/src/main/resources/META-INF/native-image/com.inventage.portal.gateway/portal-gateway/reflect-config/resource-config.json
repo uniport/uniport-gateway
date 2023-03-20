@@ -1,18 +1,43 @@
 {
-  "resources":{
-  "includes":[
-    {"pattern":"\\QMETA-INF/MANIFEST.MF\\E"}, 
-    {"pattern":"\\QMETA-INF/native/libio_grpc_netty_shaded_netty_transport_native_epoll_x86_64.so\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.grpc.LoadBalancerProvider\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.grpc.ManagedChannelProvider\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.grpc.NameResolverProvider\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.vertx.config.spi.ConfigProcessor\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.vertx.config.spi.ConfigStoreFactory\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.VertxServiceProvider\\E"}, 
-    {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.launcher.CommandFactory\\E"}, 
-    {"pattern":"\\Qio/opentelemetry/sdk/common/version.properties\\E"}, 
-    {"pattern":"\\Qlogback.xml\\E"}, 
-    {"pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"}
-  ]},
-  "bundles":[]
+    "resources": {
+        "includes": [
+            {
+                "pattern": "\\QMETA-INF/MANIFEST.MF\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/native/libio_grpc_netty_shaded_netty_transport_native_epoll_x86_64.so\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.grpc.LoadBalancerProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.grpc.ManagedChannelProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.grpc.NameResolverProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.vertx.config.spi.ConfigProcessor\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.vertx.config.spi.ConfigStoreFactory\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.vertx.core.spi.VertxServiceProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/io.vertx.core.spi.launcher.CommandFactory\\E"
+            },
+            {
+                "pattern": "\\Qio/opentelemetry/sdk/common/version.properties\\E"
+            },
+            {
+                "pattern": "\\Qlogback.xml\\E"
+            },
+            {
+                "pattern": "\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+            }
+        ]
+    },
+    "bundles": []
 }

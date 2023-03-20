@@ -1,5 +1,12 @@
 package com.inventage.portal.gateway.proxy.middleware.controlApi;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.CONTROL_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.SESSION_RESET_ACTION;
+import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.SESSION_TERMINATE_ACTION;
+import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
+import static io.vertx.core.http.HttpMethod.GET;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.vertx.core.Handler;
@@ -14,10 +21,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,13 +28,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.CONTROL_COOKIE_NAME;
-import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.SESSION_RESET_ACTION;
-import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.SESSION_TERMINATE_ACTION;
-import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
-import static io.vertx.core.http.HttpMethod.GET;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
 public class ControlApiMiddlewareTest {
@@ -52,20 +51,20 @@ public class ControlApiMiddlewareTest {
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, sessionTerminateCookie));
 
         portalGateway(vertx, host, testCtx)
-                .withRoutingContextHolder(routingContext)
-                .withSessionMiddleware()
-                .withMockOAuth2Middleware()
-                .withSessionBagMiddleware(new JsonArray())
-                .withControlApiMiddleware("SESSION_TERMINATE")
-                .withProxyMiddleware(backendPort)
-                .withBackend(vertx, backendPort, cookieInsertionHandler)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
-                    // then
-                    assertSessionTermination(outgoingResponse, routingContext.get());
-                    responseReceived.flag();
-                });
+            .withRoutingContextHolder(routingContext)
+            .withSessionMiddleware()
+            .withMockOAuth2Middleware()
+            .withSessionBagMiddleware(new JsonArray())
+            .withControlApiMiddleware("SESSION_TERMINATE")
+            .withProxyMiddleware(backendPort)
+            .withBackend(vertx, backendPort, cookieInsertionHandler)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
+                // then
+                assertSessionTermination(outgoingResponse, routingContext.get());
+                responseReceived.flag();
+            });
     }
 
     private void assertSessionTermination(HttpClientResponse outgoingResponse, RoutingContext routingContext) {
@@ -73,9 +72,9 @@ public class ControlApiMiddlewareTest {
         Assertions.assertEquals(200, outgoingResponse.statusCode(), "expected status code: 200");
         Assertions.assertTrue(routingContext.session().isDestroyed(), "session should be destroyed");
         Assertions.assertNull(outgoingResponse.headers().get("test-cookie"),
-                "test-cookie should not appear in the response (all data deleted from session)");
+            "test-cookie should not appear in the response (all data deleted from session)");
         Assertions.assertEquals(routingContext.session().data(), new HashMap<>(),
-                "all data should be deleted from session");
+            "all data should be deleted from session");
     }
 
     @Test
@@ -93,42 +92,41 @@ public class ControlApiMiddlewareTest {
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, keycloakTestCookie, sessionResetCookie));
 
-
         portalGateway(vertx, host, testCtx)
-                .withRoutingContextHolder(routingContext)
-                .withSessionMiddleware()
-                .withMockOAuth2Middleware()
-                .withSessionBagMiddleware(new JsonArray())
-                .withControlApiMiddleware("SESSION_RESET")
-                .withBackend(vertx, backendPort, cookieInsertionHandler)
-                .withProxyMiddleware(backendPort)
-                .build().start()
-                // when
-                .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
-                    // then
-                    assertSessionReset(outgoingResponse, routingContext.get(), keycloakTestCookie);
-                    responseReceived.flag();
-                });
+            .withRoutingContextHolder(routingContext)
+            .withSessionMiddleware()
+            .withMockOAuth2Middleware()
+            .withSessionBagMiddleware(new JsonArray())
+            .withControlApiMiddleware("SESSION_RESET")
+            .withBackend(vertx, backendPort, cookieInsertionHandler)
+            .withProxyMiddleware(backendPort)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
+                // then
+                assertSessionReset(outgoingResponse, routingContext.get(), keycloakTestCookie);
+                responseReceived.flag();
+            });
     }
 
     private void assertSessionReset(HttpClientResponse outgoingResponse, RoutingContext routingContext, io.vertx.core.http.Cookie keycloakCookie) {
         Assertions.assertEquals(200, outgoingResponse.statusCode(), "expected status code: 200");
         Assertions.assertFalse(routingContext.session().isDestroyed(), "session should not be destroyed");
         Assertions.assertNull(outgoingResponse.headers().get("test-cookie"),
-                "test-cookie should not appear in the response");
+            "test-cookie should not appear in the response");
         Assertions.assertEquals(Collections.emptyList(), filterSessionScopesFrom(routingContext.session().data()),
-                "there should be no session scope data in the session");
+            "there should be no session scope data in the session");
         Set<io.netty.handler.codec.http.cookie.DefaultCookie> cookiesInContext = routingContext.session().get(SESSION_BAG_COOKIES);
         Assertions.assertEquals(1, cookiesInContext.size(),
-                "there should be only one cookie in the session bag");
+            "there should be only one cookie in the session bag");
         Assertions.assertTrue(cookiesInContext.stream().anyMatch(cookie1 -> cookie1.name().equals(keycloakCookie.getName())),
-                "there should be the test keycloak cookie in the session bag");
+            "there should be the test keycloak cookie in the session bag");
     }
 
     private List<String> filterSessionScopesFrom(Map<String, Object> contextData) {
         return contextData.keySet().stream()
-                .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
-                .collect(Collectors.toList());
+            .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
+            .collect(Collectors.toList());
     }
 
     private Handler<RoutingContext> getCookieInsertionHandler(List<Cookie> cookies) {

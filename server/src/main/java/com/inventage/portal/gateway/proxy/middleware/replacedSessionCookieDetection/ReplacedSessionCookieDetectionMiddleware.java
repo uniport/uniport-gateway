@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
+import static io.vertx.core.http.Cookie.cookie;
+
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
@@ -8,12 +10,9 @@ import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-
-import static io.vertx.core.http.Cookie.cookie;
 
 /**
  * Handle situations, where the browser has sent requests during the session id regeneration.
@@ -48,8 +47,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
         if (requestComingFromLoggedOutUser(ctx)) {
             ctx.response().addCookie(
-                    cookie(this.detectionCookieKey, "").setPath("/")
-                            .setHttpOnly(true));
+                cookie(this.detectionCookieKey, "").setPath("/")
+                    .setHttpOnly(true));
             ctx.next();
             return;
         }
@@ -65,12 +64,14 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     /**
      * @return true, if an <strong>authenticated</strong> user's request is sent with the replaced session (but now invalid, due do session.regenerateId(),
-     * which has generated a new id for this session) <strong>session id</strong>. This special case is detected by checking (1) if the request contains
-     * our detection cookie (+ satisfies some conditions) ({@link #isDetectionCookieValueWithInLimit(RoutingContext)} and (2) if the user is not
-     * authenticated from the portal gateway's point of view (because the <strong>session id</strong> has changed) ({@link #noUserInSession(RoutingContext)}).
-     * <p>
-     * Detection-cookies are only handed to <strong>authenticated</strong> users on each new request (with {@link #responseWithDetectionCookie(RoutingContext)}).
-     * Therefore the detection-cookie serves as proof that the user has been authenticated before.
+     *         which has generated a new id for this session) <strong>session id</strong>. This special case is detected by checking (1) if the request contains
+     *         our detection cookie (+ satisfies some conditions) ({@link #isDetectionCookieValueWithInLimit(RoutingContext)} and (2) if the user is not
+     *         authenticated from the portal gateway's point of view (because the <strong>session id</strong> has changed)
+     *         ({@link #noUserInSession(RoutingContext)}).
+     *         <p>
+     *         Detection-cookies are only handed to <strong>authenticated</strong> users on each new request (with
+     *         {@link #responseWithDetectionCookie(RoutingContext)}).
+     *         Therefore the detection-cookie serves as proof that the user has been authenticated before.
      */
     private boolean requestComingFromReplacedSessionId(RoutingContext ctx) {
         return noUserInSession(ctx) && isDetectionCookieValueWithInLimit(ctx);
@@ -87,7 +88,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
         ctx.response().addCookie(
-                cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
+            cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
@@ -98,7 +99,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     /**
      * @return true if our cookie-entry exists and its value is still valid.
-     * Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
+     *         Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
      */
     private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
         final Optional<Cookie> cookie = getDetectionCookie(ctx);
@@ -125,8 +126,8 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         if (isUserInSession(ctx)) {
             LOGGER.debug("Adding cookie '{}'", this.detectionCookieKey);
             ctx.response().addCookie(
-                    cookie(this.detectionCookieKey, new DetectionCookieValue().toString()).setPath("/")
-                            .setHttpOnly(true));
+                cookie(this.detectionCookieKey, new DetectionCookieValue().toString()).setPath("/")
+                    .setHttpOnly(true));
         }
     }
 
@@ -141,18 +142,18 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     /**
      * @param ctx
-     * @return true if no user is associated with this session: Either (a) the user has not been authenticated or (b) the session id has expired (due do session.regenerateId()).
+     * @return true if no user is associated with this session: Either (a) the user has not been authenticated or (b) the session id has expired (due do
+     *         session.regenerateId()).
      */
     private boolean noUserInSession(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
             return false;
         }
         final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx,
-                this.sessionCookiePrefix);
+            this.sessionCookiePrefix);
         if (sessionCookie != null) {
             LOGGER.debug("For received session cookie value '{}'", sessionCookie.value());
-        }
-        else {
+        } else {
             LOGGER.debug("No session cookie '{}' received", this.sessionCookiePrefix);
         }
         return true;
@@ -161,7 +162,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
     private io.netty.handler.codec.http.cookie.Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
         return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
-                .get(cookieName);
+            .get(cookieName);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-
 import java.net.URI;
 
 /**

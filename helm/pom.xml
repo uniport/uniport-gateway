@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -32,11 +31,11 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <phase>prepare-package</phase>
                         <id>with-substitution</id>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <outputDirectory>${project.build.directory}/portal-gateway</outputDirectory>
                             <resources>
@@ -49,11 +48,11 @@
                     </execution>
 
                     <execution>
-                        <phase>prepare-package</phase>
                         <id>copy-server-config</id>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <outputDirectory>${project.build.directory}/portal-gateway/app-config</outputDirectory>
                             <resources>
@@ -68,11 +67,11 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <phase>prepare-package</phase>
                         <id>copy-server-config-template</id>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <outputDirectory>${project.build.directory}/portal-gateway-template/app-config</outputDirectory>
                             <resources>
@@ -95,10 +94,10 @@
                 <executions>
                     <execution>
                         <id>unpack</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
@@ -125,10 +124,10 @@
                 <executions>
                     <execution>
                         <id>default-jar</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <classesDirectory>${project.build.directory}/portal-gateway-template</classesDirectory>
                         </configuration>

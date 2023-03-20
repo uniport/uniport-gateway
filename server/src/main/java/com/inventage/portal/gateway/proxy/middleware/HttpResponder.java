@@ -23,23 +23,23 @@ public class HttpResponder {
 
     public static void respondWithRedirectForRetry(String uri, RoutingContext ctx) {
         ctx.response()
-                .setStatusCode(307) // redirect by using the same HTTP method (307)
-                .putHeader(HttpHeaders.LOCATION, uri)
-                .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain; charset=utf-8")
-                .end("Redirecting for retry to " + ctx.request().uri() + ".");
+            .setStatusCode(307) // redirect by using the same HTTP method (307)
+            .putHeader(HttpHeaders.LOCATION, uri)
+            .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain; charset=utf-8")
+            .end("Redirecting for retry to " + ctx.request().uri() + ".");
     }
 
     public static void respondWithStatusCode(int statusCode, RoutingContext ctx) {
         ctx.response()
-                .setStatusCode(statusCode)
-                .end();
+            .setStatusCode(statusCode)
+            .end();
     }
 
     public static void respondWithStatusCode(HttpResponseStatus status, RoutingContext ctx) {
         ctx.response()
-                .setStatusCode(status.code())
-                .setStatusMessage(status.toString())
-                .end();
+            .setStatusCode(status.code())
+            .setStatusMessage(status.toString())
+            .end();
     }
 
 }

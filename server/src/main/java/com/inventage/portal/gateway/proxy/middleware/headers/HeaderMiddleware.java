@@ -4,11 +4,10 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // -- request headers --> HeaderMiddleware -- updated request headers -->
 // <-- updated response headers -- HeaderMiddleware <-- response headers --
@@ -38,8 +37,7 @@ public class HeaderMiddleware implements Middleware {
             if (header.getValue().equals("")) {
                 LOGGER.debug("Removing request header '{}'", header.getKey());
                 ctx.request().headers().remove(header.getKey());
-            }
-            else {
+            } else {
                 LOGGER.debug("Setting request header '{}:{}'", header.getKey(), header.getValue());
                 ctx.request().headers().add(header.getKey(), header.getValue());
             }
@@ -52,12 +50,11 @@ public class HeaderMiddleware implements Middleware {
                         LOGGER.debug("Removing response header '{}'", header.getKey());
                         headers.remove(header.getKey());
                     }
-                }
-                else {
+                } else {
                     final List<String> hs = headers.getAll(header.getKey());
                     if (hs == null || !hs.contains(header.getValue())) {
                         LOGGER.debug("Setting response header '{}:{}'", header.getKey(),
-                                header.getValue());
+                            header.getValue());
                         headers.add(header.getKey(), header.getValue());
                     }
                 }

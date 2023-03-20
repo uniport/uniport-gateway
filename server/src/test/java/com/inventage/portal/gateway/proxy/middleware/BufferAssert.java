@@ -1,12 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import io.vertx.core.buffer.Buffer;
-import org.assertj.core.api.AbstractAssert;
-import org.junit.jupiter.api.Assertions;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.assertj.core.api.AbstractAssert;
+import org.junit.jupiter.api.Assertions;
 
 public class BufferAssert extends AbstractAssert<BufferAssert, Buffer> {
 
@@ -28,6 +27,6 @@ public class BufferAssert extends AbstractAssert<BufferAssert, Buffer> {
 
     private Map<String, String> extractParametersFromBody(String body) {
         return Arrays.stream(body.split("&"))
-                .collect(Collectors.toMap(entry -> entry.split("=")[0], entry -> entry.split("=")[1]));
+            .collect(Collectors.toMap(entry -> entry.split("=")[0], entry -> entry.split("=")[1]));
     }
 }

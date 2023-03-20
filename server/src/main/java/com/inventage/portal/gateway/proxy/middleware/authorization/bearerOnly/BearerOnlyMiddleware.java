@@ -44,8 +44,7 @@ public class BearerOnlyMiddleware implements Middleware {
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization != null) {
             LOGGER.debug("Authentication by '{}'", authorization);
-        }
-        else if (optional) {
+        } else if (optional) {
             LOGGER.debug("Letting through request with no authorization header");
             ctx.next();
             return;

@@ -13,15 +13,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.spi.ServiceImporter;
-import org.apache.commons.text.StringSubstitutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.text.StringSubstitutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates a complete dynamic configuration from announcements about created/removed docker
@@ -51,8 +50,8 @@ public class DockerContainerProvider extends Provider {
     private ServiceDiscovery dockerDiscovery;
 
     public DockerContainerProvider(Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
-                                   JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,
-                                   Boolean watch) {
+        JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,
+        Boolean watch) {
         this.vertx = vertx;
         this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;
@@ -102,7 +101,7 @@ public class DockerContainerProvider extends Provider {
     private ServiceDiscovery getOrCreateDockerContainerDiscovery() {
         if (this.dockerDiscovery == null) {
             this.dockerDiscovery = ServiceDiscovery.create(this.vertx,
-                    new ServiceDiscoveryOptions().setAnnounceAddress(ANNOUNCE_ADDRESS).setName("docker-discovery"));
+                new ServiceDiscoveryOptions().setAnnounceAddress(ANNOUNCE_ADDRESS).setName("docker-discovery"));
             this.dockerDiscovery.registerServiceImporter(this.serviceImporter, this.serviceImporterConfiguration);
         }
         return this.dockerDiscovery;
@@ -122,8 +121,7 @@ public class DockerContainerProvider extends Provider {
                 return DynamicConfiguration.merge(this.configurations);
             }
             return null;
-        }
-        else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKNOWN
+        } else if (!status.equals("UP")) { // OUT_OF_SERVICE, UNKNOWN
             LOGGER.warn("Ignoring unknown status '{}'", status);
             return null;
         }
@@ -179,8 +177,8 @@ public class DockerContainerProvider extends Provider {
             LOGGER.debug("Configuration from labels '{}'", confFromLabels);
             this.configurations.put(containerId, confFromLabels);
         }).onFailure(err -> LOGGER.warn(
-                "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
-                err.getMessage(), containerName, confFromLabels));
+            "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
+            err.getMessage(), containerName, confFromLabels));
 
         return DynamicConfiguration.merge(this.configurations);
     }
@@ -189,7 +187,7 @@ public class DockerContainerProvider extends Provider {
         final String enableFilter = String.format("%s.%s", Parser.DEFAULT_ROOT_NAME, EXTRA_CONFIG_ENABLE);
         final String dockerFilter = String.format("%s.%s", Parser.DEFAULT_ROOT_NAME, StaticConfiguration.PROVIDER_DOCKER);
         JsonObject extraConfig = Parser.decode(labels.getMap(), Parser.DEFAULT_ROOT_NAME,
-                Arrays.asList(dockerFilter, enableFilter));
+            Arrays.asList(dockerFilter, enableFilter));
 
         if (extraConfig == null) {
             extraConfig = new JsonObject();
@@ -218,47 +216,42 @@ public class DockerContainerProvider extends Provider {
             final String defaultNetwork = "defaultNetworkMode";
             LOGGER.debug("Use default network mode '{}' of container '{}'", defaultNetwork, containerName);
             host = hostPerNetwork.getString(defaultNetwork);
-        }
-        else if (hostPerNetwork.size() > 1) {
+        } else if (hostPerNetwork.size() > 1) {
             LOGGER.debug("Container '{}' is linked to several networks (total: {})", containerName,
-                    hostPerNetwork.size());
+                hostPerNetwork.size());
             final JsonObject dockerExtraConfig = extraConfig.getJsonObject(StaticConfiguration.PROVIDER_DOCKER);
             String network = null;
             if (dockerExtraConfig != null && dockerExtraConfig.containsKey(EXTRA_CONFIG_NETWORK)) {
                 network = dockerExtraConfig.getString(EXTRA_CONFIG_NETWORK);
                 LOGGER.debug("Trying network '{}' as specified in the labels of container '{}'", network,
-                        containerName);
-            }
-            else if (this.network != null && this.network.length() != 0) {
+                    containerName);
+            } else if (this.network != null && this.network.length() != 0) {
                 network = this.network;
                 LOGGER.debug(
-                        "Trying network '{}' as specified in the provider configuration of container '{}'",
-                        network, containerName);
+                    "Trying network '{}' as specified in the provider configuration of container '{}'",
+                    network, containerName);
             }
 
             if (network != null) {
                 if (hostPerNetwork.containsKey(network)) {
                     LOGGER.debug("Using network '{}' of container '{}'", network, containerName);
                     host = hostPerNetwork.getString(network);
-                }
-                else {
+                } else {
                     LOGGER.info("Unknown network '{}'. Using random one of container '{}'.", network,
-                            containerName);
+                        containerName);
                     for (Object h : hostPerNetwork.getMap().values()) {
                         host = (String) h;
                         break;
                     }
                 }
-            }
-            else {
+            } else {
                 LOGGER.info("No network specified. Using random one of container '{}'", containerName);
                 for (Object h : hostPerNetwork.getMap().values()) {
                     host = (String) h;
                     break;
                 }
             }
-        }
-        else {
+        } else {
             for (Object h : hostPerNetwork.getMap().values()) {
                 host = (String) h;
             }
@@ -271,8 +264,7 @@ public class DockerContainerProvider extends Provider {
         if (ports.size() < 1) {
             LOGGER.warn("Ignoring container with no exposed ports '{}'", containerName);
             return -1;
-        }
-        else if (ports.size() > 1) {
+        } else if (ports.size() > 1) {
             // check if a port is specified in the labels
             LOGGER.debug("Container exposes more than one port");
             final String errMsgFormat = "getPort: Ignoring container '%s' with more than one exposed port and none specified in the labels (invalid %s)";
@@ -299,8 +291,7 @@ public class DockerContainerProvider extends Provider {
 
             final JsonObject server = servers.getJsonObject(0);
             port = server.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT);
-        }
-        else {
+        } else {
             port = ports.getInteger(0);
         }
         return port;
@@ -310,7 +301,7 @@ public class DockerContainerProvider extends Provider {
         final JsonArray services = httpConf.getJsonArray(DynamicConfiguration.SERVICES);
         if (services.size() == 0) {
             final JsonObject fallbackService = new JsonObject().put(DynamicConfiguration.SERVICE_NAME, containerName)
-                    .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray());
+                .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray());
             services.add(fallbackService);
         }
 
@@ -319,7 +310,7 @@ public class DockerContainerProvider extends Provider {
             final JsonObject server = this.addServer(service, host, port);
             if (server == null) {
                 LOGGER.warn("Failed to add server to service '{}', host '{}', port '{}'",
-                        service, host, port);
+                    service, host, port);
                 return null;
             }
         }
@@ -358,8 +349,7 @@ public class DockerContainerProvider extends Provider {
             if (services.size() > 1) {
                 LOGGER.warn("Could not create a router for the container: too many services '{}'", services);
                 return null;
-            }
-            else {
+            } else {
                 routers.add(new JsonObject());
             }
         }
@@ -396,7 +386,7 @@ public class DockerContainerProvider extends Provider {
                 }
                 for (int j = 0; j < services.size(); j++) {
                     router.put(DynamicConfiguration.ROUTER_SERVICE,
-                            services.getJsonObject(j).getString(DynamicConfiguration.SERVICE_NAME));
+                        services.getJsonObject(j).getString(DynamicConfiguration.SERVICE_NAME));
                 }
             }
         }
@@ -407,9 +397,9 @@ public class DockerContainerProvider extends Provider {
         DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
             LOGGER.info("Configuration published");
             this.eb.publish(this.configurationAddress,
-                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
-                            .put(Provider.PROVIDER_CONFIGURATION, config));
+                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
+                    .put(Provider.PROVIDER_CONFIGURATION, config));
         }).onFailure(err -> LOGGER.warn("Unable to publish invalid configuration '{}': '{}'", config,
-                err.getMessage()));
+            err.getMessage()));
     }
 }

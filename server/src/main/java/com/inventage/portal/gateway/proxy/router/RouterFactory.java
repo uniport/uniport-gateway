@@ -16,14 +16,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Essentially it translates the dynamic configuration to what vertx understands. It creates a new
@@ -86,8 +85,7 @@ public class RouterFactory {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
                     router.route("/*").setName("router").subRouter((Router) srf.result());
-                }
-                else {
+                } else {
                     handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
                 }
@@ -105,7 +103,7 @@ public class RouterFactory {
     }
 
     private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-                                 Handler<AsyncResult<Router>> handler) {
+        Handler<AsyncResult<Router>> handler) {
         final Router router = Router.router(this.vertx);
         final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -125,13 +123,13 @@ public class RouterFactory {
         for (int j = 0; j < middlewareNames.size(); j++) {
             final String middlewareName = middlewareNames.getString(j);
             final JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
-                    DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
+                DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
             middlewareFutures.add(createMiddleware(middlewareConfig, router));
         }
 
         final String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
         final JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
-                DynamicConfiguration.SERVICE_NAME, serviceName);
+            DynamicConfiguration.SERVICE_NAME, serviceName);
         final JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
         // TODO support multiple servers
         final JsonObject serverConfig = serverConfigs.getJsonObject(0);
@@ -139,7 +137,7 @@ public class RouterFactory {
 
         // required to be the last middleware
         final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, "proxy", router,
-                serverConfig);
+            serverConfig);
         middlewareFutures.add(proxyMiddlewareFuture);
 
         // Handlers will get called if and only if
@@ -163,14 +161,14 @@ public class RouterFactory {
     }
 
     private void createMiddleware(JsonObject middlewareConfig, Router router,
-                                  Handler<AsyncResult<Middleware>> handler) {
+        Handler<AsyncResult<Middleware>> handler) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                new JsonObject());
+            new JsonObject());
 
         // needed to ensure authenticating requests are routed through this application
         if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)
-                || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
+            || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
             middlewareOptions.put(PUBLIC_PROTOCOL_KEY, this.publicProtocol);
             middlewareOptions.put(PUBLIC_HOSTNAME_KEY, this.publicHostname);
             middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);
@@ -195,7 +193,8 @@ public class RouterFactory {
      * No routes configured (apart from the health check) results in an unhealthy
      * state.
      *
-     * @param router used as the proxy router
+     * @param router
+     *            used as the proxy router
      */
     private void addHealthRoute(Router router) {
         boolean isHealthy = true;
@@ -207,8 +206,7 @@ public class RouterFactory {
         final int statusCode;
         if (isHealthy) {
             statusCode = HttpResponseStatus.OK.code();
-        }
-        else {
+        } else {
             statusCode = HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
         }
         router.route("/health").setName("health").handler(ctx -> {
@@ -270,7 +268,7 @@ public class RouterFactory {
     // only rules like Path("/foo"), PathPrefix('/bar') and Host('example.com') are supported
     protected RoutingRule parseRule(String rule) {
         final Pattern rulePattern = Pattern
-                .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");
+            .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");
         final Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {

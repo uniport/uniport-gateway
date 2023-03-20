@@ -27,8 +27,7 @@ public class MockOAuth2Auth implements OAuth2Auth {
             Long expiresIn;
             try {
                 expiresIn = json.getLong("expires_in");
-            }
-            catch (ClassCastException e) {
+            } catch (ClassCastException e) {
                 // for some reason someone decided to send a number as a String...
                 expiresIn = Long.valueOf(json.getString("expires_in"));
             }

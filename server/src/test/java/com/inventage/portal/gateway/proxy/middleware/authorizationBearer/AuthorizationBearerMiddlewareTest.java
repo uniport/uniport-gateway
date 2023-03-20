@@ -1,5 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
@@ -18,18 +23,12 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
 public class AuthorizationBearerMiddlewareTest {
@@ -74,7 +73,7 @@ public class AuthorizationBearerMiddlewareTest {
         };
 
         AuthorizationBearerMiddleware authBearer = new AuthorizationBearerMiddleware("authBearer",
-                DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID);
+            DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID);
 
         Handler<RoutingContext> endHandler = ctx -> ctx.response().end("ok");
 
@@ -85,20 +84,20 @@ public class AuthorizationBearerMiddlewareTest {
             testCtx.verify(() -> {
                 assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION), "should contain auth header");
                 assertEquals(String.format("Bearer %s", rawIdToken), req.headers().get(HttpHeaders.AUTHORIZATION),
-                        "should match token");
+                    "should match token");
             });
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
-                    .onComplete(testCtx.succeeding(resp -> {
-                        testCtx.verify(() -> {
-                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                    "should not contain auth header");
-                        });
-                        responseReceived.flag();
-                    }));
+                .onComplete(testCtx.succeeding(resp -> {
+                    testCtx.verify(() -> {
+                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                    });
+                    responseReceived.flag();
+                }));
         }));
     }
 
@@ -135,20 +134,20 @@ public class AuthorizationBearerMiddlewareTest {
             testCtx.verify(() -> {
                 assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION), "should contain auth header");
                 assertEquals(String.format("Bearer %s", rawAccessToken), req.headers().get(HttpHeaders.AUTHORIZATION),
-                        "should match token");
+                    "should match token");
             });
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
-                    .onComplete(testCtx.succeeding(resp -> {
-                        testCtx.verify(() -> {
-                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                    "should not contain auth header");
-                        });
-                        responseReceived.flag();
-                    }));
+                .onComplete(testCtx.succeeding(resp -> {
+                    testCtx.verify(() -> {
+                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                    });
+                    responseReceived.flag();
+                }));
         }));
 
     }
@@ -163,7 +162,7 @@ public class AuthorizationBearerMiddlewareTest {
         String rawAccessToken = "mayIAccessThisRessource";
         int expiresIn = 1;
         JsonObject principal = new JsonObject().put("access_token", rawAccessToken).put("expires_in", expiresIn)
-                .put("refresh_token", rawRefreshToken);
+            .put("refresh_token", rawRefreshToken);
 
         User initialUser = MockOAuth2Auth.createUser(principal);
         OAuth2Auth initialAuthProvider = new MockOAuth2Auth(principal, refreshedExpiresIn);
@@ -173,8 +172,7 @@ public class AuthorizationBearerMiddlewareTest {
         try {
             CountDownLatch waiter = new CountDownLatch(1);
             waiter.await(AuthorizationBearerMiddleware.EXPIRATION_LEEWAY_SECONDS + expiresIn + 1, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -201,9 +199,9 @@ public class AuthorizationBearerMiddlewareTest {
                 User refreshedUser = refreshedAuthPair.getRight();
 
                 assertEquals(refreshedUser.principal().getInteger("expires_in", -1), refreshedExpiresIn,
-                        "should be updated");
+                    "should be updated");
                 assertTrue(refreshedUser.attributes().getInteger("exp", -1) > initialUser.attributes().getInteger("exp",
-                        -1), "'exp' should be updated");
+                    -1), "'exp' should be updated");
             });
             ctx.response().end("ok");
         };
@@ -215,20 +213,20 @@ public class AuthorizationBearerMiddlewareTest {
             testCtx.verify(() -> {
                 assertTrue(req.headers().contains(HttpHeaders.AUTHORIZATION), "should contain auth header");
                 assertEquals(String.format("Bearer %s", rawAccessToken), req.headers().get(HttpHeaders.AUTHORIZATION),
-                        "should match token");
+                    "should match token");
             });
             requestServed.flag();
         }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
-                    .onComplete(testCtx.succeeding(resp -> {
-                        testCtx.verify(() -> {
-                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                    "should not contain auth header");
-                        });
-                        responseReceived.flag();
-                    }));
+                .onComplete(testCtx.succeeding(resp -> {
+                    testCtx.verify(() -> {
+                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                    });
+                    responseReceived.flag();
+                }));
         }));
     }
 
@@ -269,13 +267,13 @@ public class AuthorizationBearerMiddlewareTest {
             serverStarted.flag();
             // server is started, we can proceed
             vertx.createHttpClient().request(HttpMethod.GET, port, host, "/blub").compose(req -> req.send())
-                    .onComplete(testCtx.succeeding(resp -> {
-                        testCtx.verify(() -> {
-                            assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
-                                    "should not contain auth header");
-                        });
-                        responseReceived.flag();
-                    }));
+                .onComplete(testCtx.succeeding(resp -> {
+                    testCtx.verify(() -> {
+                        assertFalse(resp.headers().contains(HttpHeaders.AUTHORIZATION),
+                            "should not contain auth header");
+                    });
+                    responseReceived.flag();
+                }));
         }));
 
     }

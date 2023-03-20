@@ -5,20 +5,18 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URLEncodedUtils;
-import org.junit.jupiter.api.Assertions;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
+import org.junit.jupiter.api.Assertions;
 
 public class TestUtils {
     /**
@@ -28,7 +26,8 @@ public class TestUtils {
      * Slightly improved with close() missing in JDT. And throws exception instead of returning -1.
      *
      * @return a free port number on localhost
-     * @throws IllegalStateException if unable to find a free port
+     * @throws IllegalStateException
+     *             if unable to find a free port
      */
     public static int findFreePort() {
         ServerSocket socket = null;
@@ -37,20 +36,16 @@ public class TestUtils {
             int port = socket.getLocalPort();
             try {
                 socket.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 // Ignore IOException on close()
             }
             return port;
-        }
-        catch (IOException e) {
-        }
-        finally {
+        } catch (IOException e) {
+        } finally {
             if (socket != null) {
                 try {
                     socket.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                 }
             }
         }
@@ -133,7 +128,7 @@ public class TestUtils {
     }
 
     public static Handler<JsonObject> withMiddleware(String middlewareName, String middlewareType,
-                                                     Handler<JsonObject>... opts) {
+        Handler<JsonObject>... opts) {
         return middleware -> {
             middleware.put(DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
             middleware.put(DynamicConfiguration.MIDDLEWARE_TYPE, middlewareType);
@@ -271,14 +266,12 @@ public class TestUtils {
         List<NameValuePair> responseParamsList = null;
         try {
             responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
-        }
-        catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         Assertions.assertNotNull(responseParamsList);
         Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
-                entry -> entry.getName(), entry -> entry.getValue()
-        ));
+            entry -> entry.getName(), entry -> entry.getValue()));
 
         return responseParamsMap;
     }

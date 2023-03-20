@@ -22,10 +22,10 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
-                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
+            DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
         return Future.succeededFuture(new AuthorizationBearerMiddleware(
-                name,
-                middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
+            name,
+            middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
     }
 
 }

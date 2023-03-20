@@ -30,13 +30,12 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class MiddlewareServerBuilder {
 
@@ -68,7 +67,7 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
         return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie,
-                null, null, null, null, null, null));
+            null, null, null, null, null, null));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -80,21 +79,20 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider,
-                                                                       JWTAuthAdditionalClaimsOptions options, boolean optional) {
+        JWTAuthAdditionalClaimsOptions options, boolean optional) {
         return withMiddleware(
-                new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
-                        optional));
+            new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
+                optional));
     }
 
     /**
      * @return this
      */
     public MiddlewareServerBuilder withBearerOnlyMiddleware(KeycloakServer mockKeycloakServer,
-                                                            String issuer, List<String> audience, JsonArray publicKeys) {
+        String issuer, List<String> audience, JsonArray publicKeys) {
         try {
             withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys));
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
             }
@@ -112,8 +110,7 @@ public class MiddlewareServerBuilder {
         while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -125,17 +122,17 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly) {
         return withMiddleware(
-                new CSPMiddleware("csp", directives, reportOnly));
+            new CSPMiddleware("csp", directives, reportOnly));
     }
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
-                new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, null, headerName, null, null, null));
+            new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, null, headerName, null, null, null));
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
         return withMiddleware(new PassAuthorizationMiddleware("passAutherization", sessionScope,
-                JWTAuthHandler.create(authProvider)));
+            JWTAuthHandler.create(authProvider)));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
@@ -148,7 +145,7 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
         return withMiddleware(
-                new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session"));
+            new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session"));
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {
@@ -165,14 +162,14 @@ public class MiddlewareServerBuilder {
 
     /**
      * @param mockKeycloakServer
-     * @param scope              will be used as the path prefix of incoming requests (e.g. /scope/*)
+     * @param scope
+     *            will be used as the path prefix of incoming requests (e.g. /scope/*)
      * @return this
      */
     public MiddlewareServerBuilder withOAuth2AuthMiddlewareForScope(KeycloakServer mockKeycloakServer, String scope) {
         try {
             withOAuth2AuthMiddleware(mockKeycloakServer.getOAuth2AuthConfig(scope), scope);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
             }
@@ -194,8 +191,7 @@ public class MiddlewareServerBuilder {
         while (!middlewareFuture.isComplete() && atMost > 0) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -204,8 +200,7 @@ public class MiddlewareServerBuilder {
         }
         if (scope == null) {
             return withMiddleware(middlewareFuture.result());
-        }
-        else {
+        } else {
             return withMiddlewareOnPath(middlewareFuture.result(), "/" + scope + "/*");
         }
     }
@@ -227,7 +222,7 @@ public class MiddlewareServerBuilder {
         });
 
         vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
-                .onComplete(testContext.succeedingThenComplete());
+            .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
@@ -237,14 +232,14 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler)
-            throws InterruptedException {
+        throws InterruptedException {
         VertxTestContext testContext = new VertxTestContext();
         Router serviceRouter = Router.router(vertx);
 
         serviceRouter.route().handler(handler);
 
         vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
-                .onComplete(testContext.succeedingThenComplete());
+            .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");

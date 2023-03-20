@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
+import static io.vertx.core.http.Cookie.cookie;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -9,8 +11,6 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.vertx.core.http.Cookie.cookie;
 
 public class SessionMiddleware implements Middleware {
 
@@ -42,22 +42,21 @@ public class SessionMiddleware implements Middleware {
     private final Handler<RoutingContext> sessionHandler;
 
     public SessionMiddleware(Vertx vertx, String name, Long sessionIdleTimeoutInMinutes, Boolean withLifetimeHeader, Boolean withLifetimeCookie, String cookieName,
-                             Boolean cookieHttpOnly,
-                             Boolean cookieSecure, String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps) {
+        Boolean cookieHttpOnly,
+        Boolean cookieSecure, String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps) {
         this.name = name;
-        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes == null ?
-                SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT * MILLIS : sessionIdleTimeoutInMinutes * MILLIS;
+        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes == null ? SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT * MILLIS : sessionIdleTimeoutInMinutes * MILLIS;
         this.withLifetimeHeader = withLifetimeHeader == null ? SESSION_LIFETIME_HEADER_DEFAULT : withLifetimeHeader;
         this.withLifetimeCookie = withLifetimeCookie == null ? SESSION_LIFETIME_COOKIE_DEFAULT : withLifetimeCookie;
         sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
-                .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
-                .setSessionCookieName(cookieName == null ? SESSION_COOKIE_NAME_DEFAULT : cookieName)
-                .setCookieHttpOnlyFlag(cookieHttpOnly == null ? COOKIE_HTTP_ONLY_DEFAULT : cookieHttpOnly)
-                .setCookieSecureFlag(cookieSecure == null ? COOKIE_SECURE_DEFAULT : cookieSecure)
-                .setCookieSameSite(
-                        cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
-                .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
-                .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
+            .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
+            .setSessionCookieName(cookieName == null ? SESSION_COOKIE_NAME_DEFAULT : cookieName)
+            .setCookieHttpOnlyFlag(cookieHttpOnly == null ? COOKIE_HTTP_ONLY_DEFAULT : cookieHttpOnly)
+            .setCookieSecureFlag(cookieSecure == null ? COOKIE_SECURE_DEFAULT : cookieSecure)
+            .setCookieSameSite(
+                cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
+            .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
+            .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
     }
 
     @Override
@@ -78,8 +77,8 @@ public class SessionMiddleware implements Middleware {
         if (withLifetimeCookie) {
             LOGGER.debug("Adding cookie '{}'", SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
             ctx.response().addCookie(
-                    cookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT, sessionLifetime).setPath("/")
-                            .setHttpOnly(false)); // false := cookie must be accessible by client side scripts
+                cookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT, sessionLifetime).setPath("/")
+                    .setHttpOnly(false)); // false := cookie must be accessible by client side scripts
         }
     }
 

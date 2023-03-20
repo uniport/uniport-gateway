@@ -26,9 +26,9 @@ public class RouterSwitchListener implements Listener {
     @Override
     public void listen(JsonObject config) {
         routerFactory.createRouter(config)
-                .onSuccess(this::setSubRouter)
-                .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", config,
-                        err.getMessage()));
+            .onSuccess(this::setSubRouter)
+            .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", config,
+                err.getMessage()));
 
     }
 

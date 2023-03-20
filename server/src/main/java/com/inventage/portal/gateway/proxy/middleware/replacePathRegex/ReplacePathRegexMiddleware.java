@@ -3,10 +3,9 @@ package com.inventage.portal.gateway.proxy.middleware.replacePathRegex;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.regex.Pattern;
 
 /**
  * Replaces the URI using regex matching and replacement.

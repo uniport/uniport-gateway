@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
+import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -8,24 +11,20 @@ import io.vertx.core.MultiMap;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie.
  * Supported actions:
- * - SESSION_TERMINATE:     invalidates the session and calls "end_session_endpoint" on Keycloak
- * - SESSION_RESET:         resets the session by deleting all session scopes (removing all JWTs from this session)
+ * - SESSION_TERMINATE: invalidates the session and calls "end_session_endpoint" on Keycloak
+ * - SESSION_RESET: resets the session by deleting all session scopes (removing all JWTs from this session)
  * and empty the session bag (removing all not whitelisted cookies).
  */
 public class ControlApiMiddleware implements Middleware {
@@ -60,9 +59,9 @@ public class ControlApiMiddleware implements Middleware {
             if (isNotEmpty(storedCookies)) {
                 // find the first control api cookie with an action equals to the configured one
                 final List<Cookie> actionCookies = storedCookies.stream()
-                        .filter(cookie -> Objects.equals(cookie.name(), CONTROL_COOKIE_NAME))
-                        .filter(cookie -> Objects.equals(cookie.value(), action))
-                        .collect(Collectors.toList());
+                    .filter(cookie -> Objects.equals(cookie.name(), CONTROL_COOKIE_NAME))
+                    .filter(cookie -> Objects.equals(cookie.value(), action))
+                    .collect(Collectors.toList());
 
                 final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
                 if (controlApiActionToExecute.isPresent()) {
@@ -106,25 +105,24 @@ public class ControlApiMiddleware implements Middleware {
         // 4. call the url
         // 5. destroy the vertx session
         ctx.session().data().keySet().stream()
-                .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
-                .findFirst()
-                .map(key -> ctx.session().data().get(key))
-                .map(obj -> {
-                    if ((obj instanceof Pair) && (((Pair<?, ?>) obj).getLeft() instanceof OAuth2Auth)) {
-                        return (OAuth2Auth) ((Pair<?, ?>) obj).getLeft();
-                    }
-                    else {
-                        return null;
-                    }
-                })
-                .map(auth -> auth.endSessionURL(ctx.user()))
-                .ifPresent(endSessionURL -> {
-                    LOGGER.debug("endSessionURL {}", endSessionURL);
-                    webClient.getAbs(endSessionURL).send()
-                            .onSuccess(response -> LOGGER.info("end_session_endpoint call succeeded"))
-                            .onFailure(throwable -> LOGGER.warn("end_session_endpoint call failed: {}",
-                                    throwable.getMessage()));
-                });
+            .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
+            .findFirst()
+            .map(key -> ctx.session().data().get(key))
+            .map(obj -> {
+                if ((obj instanceof Pair) && (((Pair<?, ?>) obj).getLeft() instanceof OAuth2Auth)) {
+                    return (OAuth2Auth) ((Pair<?, ?>) obj).getLeft();
+                } else {
+                    return null;
+                }
+            })
+            .map(auth -> auth.endSessionURL(ctx.user()))
+            .ifPresent(endSessionURL -> {
+                LOGGER.debug("endSessionURL {}", endSessionURL);
+                webClient.getAbs(endSessionURL).send()
+                    .onSuccess(response -> LOGGER.info("end_session_endpoint call succeeded"))
+                    .onFailure(throwable -> LOGGER.warn("end_session_endpoint call failed: {}",
+                        throwable.getMessage()));
+            });
 
         // destroy gateway session anyway
         LOGGER.info("vertx session destroyed");
@@ -140,8 +138,8 @@ public class ControlApiMiddleware implements Middleware {
 
     private void removeAllSessionScopesFrom(RoutingContext ctx) {
         final List<String> toDeleteSessionScopes = ctx.session().data().keySet().stream()
-                .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
-                .collect(Collectors.toList());
+            .filter(key -> key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX))
+            .collect(Collectors.toList());
 
         for (String sessionScope : toDeleteSessionScopes) {
             LOGGER.debug("removing following session scope: '{}'", sessionScope);
@@ -161,7 +159,7 @@ public class ControlApiMiddleware implements Middleware {
 
     private Set<Cookie> getKeycloakCookiesFrom(Set<Cookie> cookiesInSessionBag) {
         return cookiesInSessionBag.stream()
-                .filter(cookie -> cookie.name().startsWith("KEYCLOAK_"))
-                .collect(Collectors.toSet());
+            .filter(cookie -> cookie.name().startsWith("KEYCLOAK_"))
+            .collect(Collectors.toSet());
     }
 }

@@ -5,11 +5,10 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockProvider extends Provider {
 
@@ -36,8 +35,7 @@ public class MockProvider extends Provider {
 
         if (waitMs == 0) {
             this.waitMs = 20;
-        }
-        else {
+        } else {
             this.waitMs = waitMs;
         }
     }

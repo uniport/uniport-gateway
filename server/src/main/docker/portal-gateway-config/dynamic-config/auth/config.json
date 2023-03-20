@@ -4,18 +4,26 @@
             {
                 "name": "auth",
                 "rule": "PathPrefix('/auth')",
-                "middlewares": ["authRedirectRegex", "languageCookie"],
+                "middlewares": [
+                    "authRedirectRegex",
+                    "languageCookie"
+                ],
                 "service": "portal-iam"
             },
             {
                 "name": "login",
-                "middlewares": ["dashboardOauth2", "loginRedirectRegex"],
+                "middlewares": [
+                    "dashboardOauth2",
+                    "loginRedirectRegex"
+                ],
                 "rule": "PathPrefix('/login')",
                 "service": "base-proxy"
             },
             {
                 "name": "logout",
-                "middlewares": ["logoutRedirectRegex"],
+                "middlewares": [
+                    "logoutRedirectRegex"
+                ],
                 "rule": "PathPrefix('/logout')",
                 "service": "base-proxy"
             }

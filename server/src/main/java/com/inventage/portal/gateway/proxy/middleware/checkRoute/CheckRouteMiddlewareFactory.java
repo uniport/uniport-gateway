@@ -25,7 +25,7 @@ public class CheckRouteMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
-                DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE);
+            DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE);
         return Future.succeededFuture(new CheckRouteMiddleware(name));
     }
 
