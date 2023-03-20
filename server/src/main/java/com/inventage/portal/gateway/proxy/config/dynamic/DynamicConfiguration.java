@@ -120,7 +120,9 @@ public class DynamicConfiguration {
     /**
      * @deprecated This field should no longer be used as of version 4.3.0.
      *             <p>
-     *             Use {@link DynamicConfiguration#MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES } instead
+     *             Use
+     *             {@link DynamicConfiguration#MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES }
+     *             instead
      *             </p>
      */
     @Deprecated(since = "4.3.0")
@@ -146,7 +148,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
-    public static final List<String> MIDDLEWARE_TYPES = Arrays.asList(
+    public static final List<String> MIDDLEWARE_TYPES = List.of(
         MIDDLEWARE_AUTHORIZATION_BEARER,
         MIDDLEWARE_BEARER_ONLY,
         MIDDLEWARE_CHECK_ROUTE,
@@ -326,8 +328,9 @@ public class DynamicConfiguration {
         final Map<String, List<String>> services = new HashMap<>();
         final Set<String> servicesToDelete = new HashSet<>();
 
-        for (String key : configurations.keySet()) {
-            final JsonObject conf = configurations.get(key);
+        for (Entry<String, JsonObject> entry : configurations.entrySet()) {
+            final String key = entry.getKey();
+            final JsonObject conf = entry.getValue();
             final JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
             if (httpConf != null) {
@@ -423,7 +426,9 @@ public class DynamicConfiguration {
      * @param json
      *            the json object to validate
      * @param complete
-     *            if set to true, all references to objects need to point to existing objects (e.g. router middlewares and router services)
+     *            if set to true, all references to objects need to point to
+     *            existing objects (e.g. router middlewares and router
+     *            services)
      * @return a Future that will succeed or fail eventually
      */
     public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
@@ -973,7 +978,8 @@ public class DynamicConfiguration {
                 return Future.failedFuture(String.format("%s: Empty public key defined", mwType));
             }
 
-            // the public key has to be either a valid URL to fetch it from or base64 encoded
+            // the public key has to be either a valid URL to fetch it from or base64
+            // encoded
             boolean isBase64;
             try {
                 Base64.getDecoder().decode(publicKey);

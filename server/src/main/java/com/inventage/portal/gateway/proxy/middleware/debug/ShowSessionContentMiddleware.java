@@ -10,6 +10,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,7 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Returns an HTML page with information from the current session if "_session_" is in the requested URL.
+ * Returns an HTML page with information from the current session if "_session_"
+ * is in the requested URL.
  */
 public class ShowSessionContentMiddleware implements Middleware {
 
@@ -93,7 +95,7 @@ public class ShowSessionContentMiddleware implements Middleware {
         final String[] chunks = jwt.split("\\.");
         final Base64.Decoder decoder = Base64.getDecoder();
         // header: chunks[0], signature: chunks[2]
-        final String payload = new String(decoder.decode(chunks[1]));
+        final String payload = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
 
         return new JsonObject(payload).encodePrettily();
     }

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import org.apache.commons.collections4.QueueUtils;
@@ -24,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * It listens to incoming dynamic configurations. Upon passing several checks is passed to all
+ * It listens to incoming dynamic configurations. Upon passing several checks is
+ * passed to all
  * registered listeners. A namespace per provider exists to avoid clashes.
  */
 public class ConfigurationWatcher extends AbstractVerticle {
@@ -52,7 +54,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.provider = provider;
         this.configurationAddress = configurationAddress;
         this.providersThrottleIntervalMs = providersThrottleIntervalMs;
-        this.defaultEntrypoints = defaultEntrypoints;
+        this.defaultEntrypoints = new ArrayList<String>(defaultEntrypoints);
         this.currentConfigurations = new HashMap<>();
         this.providerConfigReloadThrottler = new HashSet<>();
     }
@@ -90,8 +92,9 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return mergedConfig;
         }
 
-        final Set<String> providerNames = configurations.keySet();
-        for (String providerName : providerNames) {
+        final Set<Entry<String, JsonObject>> providers = configurations.entrySet();
+        for (Entry<String, JsonObject> provider : providers) {
+            final String providerName = provider.getKey();
             final JsonObject conf = configurations.get(providerName);
             final JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
 
@@ -262,11 +265,13 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.eventBus.publish(providerName, nextConfig);
     }
 
-    // throttleProviderConfigReload throttles the configuration reload speed for a single provider.
-    // It will immediately publish a new configuration and then only publish the next configuration
-    // after the throttle duration.
-    // Note that in the case it receives N new configs in the timeframe of the throttle duration
-    // after publishing, it will publish the last of the newly received configurations.
+    // throttleProviderConfigReload throttles the configuration reload speed for a
+    // single provider.
+    // It will immediately publish a new configuration and then only publish the
+    // next configuration after the throttle duration.
+    // Note that in the case it receives N new configs in the timeframe of the
+    // throttle duration after publishing, it will publish the last of the newly
+    // received configurations.
     private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
         final Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
         final Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));

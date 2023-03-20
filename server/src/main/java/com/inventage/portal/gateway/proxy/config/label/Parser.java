@@ -8,11 +8,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Labels are parsed to its JSON representation. Labels not starting with one of specified filters
+ * Labels are parsed to its JSON representation. Labels not starting with one of
+ * specified filters
  * are ignored.
  */
 public class Parser {
@@ -38,7 +40,8 @@ public class Parser {
         if (labels == null) {
             return filteredKeys;
         }
-        for (String key : labels.keySet()) {
+        for (Entry<String, Object> entry : labels.entrySet()) {
+            final String key = entry.getKey();
             if (!(labels.get(key) instanceof String)) {
                 continue;
             }

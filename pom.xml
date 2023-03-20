@@ -378,9 +378,7 @@
                     <version>3.2.1</version>
                     <configuration>
                         <consoleOutput>true</consoleOutput>
-                        <!--suppress UnresolvedMavenProperty -->
                         <configLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/config.xml</configLocation>
-                        <!--suppress UnresolvedMavenProperty -->
                         <suppressionsLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/suppressions.xml</suppressionsLocation>
                     </configuration>
                     <dependencies>
@@ -400,8 +398,7 @@
                     <configuration>
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
-                        <!--suppress UnresolvedMavenProperty -->
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude.xml</excludeFilterFile>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude-specific.xml</excludeFilterFile>
                     </configuration>
                 </plugin>
             </plugins>

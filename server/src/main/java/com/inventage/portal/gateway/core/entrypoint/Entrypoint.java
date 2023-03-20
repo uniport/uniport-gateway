@@ -42,7 +42,7 @@ public class Entrypoint {
         this.name = name;
         this.port = port;
         this.enabled = true;
-        this.entryMiddlewares = entryMiddlewares;
+        this.entryMiddlewares = new JsonArray(entryMiddlewares.getList());
     }
 
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {

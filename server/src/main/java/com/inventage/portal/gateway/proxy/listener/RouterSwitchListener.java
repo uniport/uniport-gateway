@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Builds and deploys the router structure after receiving a new/changed dynamic configuration.
+ * Builds and deploys the router structure after receiving a new/changed dynamic
+ * configuration.
  */
 public class RouterSwitchListener implements Listener {
 
@@ -20,7 +21,7 @@ public class RouterSwitchListener implements Listener {
 
     public RouterSwitchListener(Router router, RouterFactory routerFactory) {
         this.router = router;
-        this.routerFactory = routerFactory;
+        this.routerFactory = new RouterFactory(routerFactory);
     }
 
     @Override

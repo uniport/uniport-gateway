@@ -25,16 +25,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Essentially it translates the dynamic configuration to what vertx understands. It creates a new
- * vertx router with routes for each router, middleware and service defined in the dynamic
- * configuration. Special cases are the proxy middleware, URI middleware and the OAuth2 middleware.
- * The proxy middleware is always the final middleware (if no redirect applies) to forward the
- * request to the corresponding server. Since Vertx does not allow to manipulate the URI of a
- * request, this manipulation is done in the proxy middleware. The OAuth2 middleware requires to
- * know the public hostname (like localhost or example.com) and the entrypoint port of this
- * application to route all authenticating requests through this application as well. To avoid path
- * overlap, routes are sorted, by default, in descending order using rules length. The priority is
- * directly equal to the length of the rule, and so the longest length has the highest priority.
+ * Essentially it translates the dynamic configuration to what vertx
+ * understands. It creates a new vertx router with routes for each router,
+ * middleware and service defined in the dynamic configuration. Special cases
+ * are the proxy middleware, URI middleware and the OAuth2 middleware.
+ * The proxy middleware is always the final middleware (if no redirect applies)
+ * to forward the request to the corresponding server. Since Vertx does not
+ * allow to manipulate the URI of a request, this manipulation is done in the
+ * proxy middleware. The OAuth2 middleware requires to know the public hostname
+ * (like localhost or example.com) and the entrypoint port of this
+ * application to route all authenticating requests through this application as
+ * well. To avoid path overlap, routes are sorted, by default, in descending
+ * order using rules length. The priority is directly equal to the length of the
+ * rule, and so the longest length has the highest priority.
  */
 public class RouterFactory {
 
@@ -54,6 +57,13 @@ public class RouterFactory {
         this.publicProtocol = publicProtocol;
         this.publicHostname = publicHostname;
         this.publicPort = publicPort;
+    }
+
+    public RouterFactory(RouterFactory other) {
+        this.vertx = other.vertx;
+        this.publicProtocol = other.publicProtocol;
+        this.publicHostname = other.publicHostname;
+        this.publicPort = other.publicPort;
     }
 
     public Future<Router> createRouter(JsonObject dynamicConfig) {
@@ -215,10 +225,13 @@ public class RouterFactory {
     }
 
     /**
-     * To avoid path overlap, routes are sorted, by default, in descending order using rules length.
-     * The priority is directly equal to the length of the rule, and so the longest length has the
+     * To avoid path overlap, routes are sorted, by default, in descending order
+     * using rules length.
+     * The priority is directly equal to the length of the rule, and so the longest
+     * length has the
      * highest priority.
-     * Additionally, a priority for each router can be defined. This overwrites priority calculates
+     * Additionally, a priority for each router can be defined. This overwrites
+     * priority calculates
      * by the length of the rule.
      */
     private void sortByRuleLength(JsonArray routers) {
@@ -265,7 +278,8 @@ public class RouterFactory {
         };
     }
 
-    // only rules like Path("/foo"), PathPrefix('/bar') and Host('example.com') are supported
+    // only rules like Path("/foo"), PathPrefix('/bar') and Host('example.com') are
+    // supported
     protected RoutingRule parseRule(String rule) {
         final Pattern rulePattern = Pattern
             .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");

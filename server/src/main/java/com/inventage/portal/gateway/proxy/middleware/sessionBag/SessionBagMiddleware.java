@@ -25,8 +25,10 @@ import org.slf4j.LoggerFactory;
  * It guarantees that no cookies except the session ID is sent to the client.
  * <p>
  * Divergences from RFC 6265:
- * - If the server omits the Path attribute, the middleware will use the "/" as the default value (instead of the request-uri path).
- * - The domain attribute is ignored i.e. all cookies are included in all requests
+ * - If the server omits the Path attribute, the middleware will use the "/" as
+ * the default value (instead of the request-uri path).
+ * - The domain attribute is ignored i.e. all cookies are included in all
+ * requests
  */
 public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
@@ -45,7 +47,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
     public SessionBagMiddleware(String name, JsonArray whitelistedCookies, String sessionCookieName) {
         this.name = name;
-        this.whitelistedCookies = whitelistedCookies;
+        this.whitelistedCookies = new JsonArray(whitelistedCookies.getList());
         this.sessionCookieName = sessionCookieName;
     }
 
@@ -120,41 +122,44 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
     }
 
     private boolean matchesSSL(Cookie cookie, boolean isSSL) {
-        // hardcoded to true, necessary for Keycloak login flow, otherwise special handling for Keycloak
-        // cookies `AUTH_SESSION` and `AUTH_SESSION_LEGACY` is required. Keycloak seems to set the secure
-        // flag on both cookies if the request is forwarded via HTTPS, even if the Portal-Gateway --> Keycloak
+        // hardcoded to true, necessary for Keycloak login flow, otherwise special
+        // handling for Keycloak
+        // cookies `AUTH_SESSION` and `AUTH_SESSION_LEGACY` is required. Keycloak seems
+        // to set the secure
+        // flag on both cookies if the request is forwarded via HTTPS, even if the
+        // Portal-Gateway --> Keycloak
         // connection is HTTP.
         return true;
     }
 
     /*
-    The user agent MUST use an algorithm equivalent to the following
-    algorithm to compute the default-path of a cookie:
-     1.  Let uri-path be the path portion of the request-uri if such a
-     portion exists (and empty otherwise).  For example, if the
-     request-uri contains just a path (and optional query string),
-     then the uri-path is that path (without the %x3F ("?") character
-     or query string), and if the request-uri contains a full
-     absoluteURI, the uri-path is the path component of that URI.
-     2.  If the uri-path is empty or if the first character of the uri-
-     path is not a %x2F ("/") character, output %x2F ("/") and skip
-     the remaining steps.
-     3.  If the uri-path contains no more than one %x2F ("/") character,
-     output %x2F ("/") and skip the remaining step.
-     4.  Output the characters of the uri-path from the first character up
-     to, but not including, the right-most %x2F ("/").
-    
-    A request-path path-matches a given cookie-path if at least one of
-     the following conditions holds:
-     -  The cookie-path and the request-path are identical.
-     -  The cookie-path is a prefix of the request-path, and the last
-    character of the cookie-path is %x2F ("/").
-     -  The cookie-path is a prefix of the request-path, and the first
-    character of the request-path that is not included in the cookie-
-    path is a %x2F ("/") character.
-    
-    https://tools.ietf.org/html/rfc6265#section-5.1.4
-    */
+     * The user agent MUST use an algorithm equivalent to the following
+     * algorithm to compute the default-path of a cookie:
+     * 1. Let uri-path be the path portion of the request-uri if such a
+     * portion exists (and empty otherwise). For example, if the
+     * request-uri contains just a path (and optional query string),
+     * then the uri-path is that path (without the %x3F ("?") character
+     * or query string), and if the request-uri contains a full
+     * absoluteURI, the uri-path is the path component of that URI.
+     * 2. If the uri-path is empty or if the first character of the uri-
+     * path is not a %x2F ("/") character, output %x2F ("/") and skip
+     * the remaining steps.
+     * 3. If the uri-path contains no more than one %x2F ("/") character,
+     * output %x2F ("/") and skip the remaining step.
+     * 4. Output the characters of the uri-path from the first character up
+     * to, but not including, the right-most %x2F ("/").
+     * 
+     * A request-path path-matches a given cookie-path if at least one of
+     * the following conditions holds:
+     * - The cookie-path and the request-path are identical.
+     * - The cookie-path is a prefix of the request-path, and the last
+     * character of the cookie-path is %x2F ("/").
+     * - The cookie-path is a prefix of the request-path, and the first
+     * character of the request-path that is not included in the cookie-
+     * path is a %x2F ("/") character.
+     * 
+     * https://tools.ietf.org/html/rfc6265#section-5.1.4
+     */
     private boolean matchesPath(Cookie cookie, String uriPath) {
         final String requestPath;
         if (!uriPath.startsWith("/") || uriPath.split("/").length - 1 <= 1) {
@@ -211,12 +216,12 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
     }
 
     /*
-    If a new cookie is received with the same cookie-name, and
-    path-value as a cookie that it has already stored,
-    the existing cookie is evicted and replaced with the new cookie.
-    Cookies can be deleted by sending a new cookie with an Expires
-    attribute with a value in the past.
-    */
+     * If a new cookie is received with the same cookie-name, and
+     * path-value as a cookie that it has already stored,
+     * the existing cookie is evicted and replaced with the new cookie.
+     * Cookies can be deleted by sending a new cookie with an Expires
+     * attribute with a value in the past.
+     */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
         if (newCookie.name() == null) {
             LOGGER.warn("Ignoring cookie without a name");

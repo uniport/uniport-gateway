@@ -12,12 +12,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Log every request and/or response and adds the requestId and the sessionId to the contextual data.
+ * Log every request and/or response and adds the requestId and the sessionId to
+ * the contextual data.
  */
 public class RequestResponseLoggerMiddleware implements Middleware {
 
@@ -89,17 +91,21 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         final String headersLog = generateHttpHeaderLogMessage(context.request().headers());
         final var request = context.request();
         final String contentType = request.getHeader("Content-Type");
-        if (contentType != null && (contentType.startsWith("text/plain") || contentType.startsWith("application/json"))) {
+        if (contentType != null
+            && (contentType.startsWith("text/plain") || contentType.startsWith("application/json"))) {
             request.body().onSuccess(body -> {
                 if (body != null) {
                     final String bodyContent = body.toString();
-                    LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, bodyContent);
+                    LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog,
+                        bodyContent);
                 }
             }).onFailure(error -> {
-                LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog, error.getMessage());
+                LOGGER.trace("{} incoming Request '{}'\nHeaders '{}'\nBody '{}'", name, infoLog, headersLog,
+                    error.getMessage());
             });
         } else {
-            LOGGER.trace("{} incoming Request '{}'\n Headers '{}'\n Content-type '{}'", name, infoLog, headersLog, contentType);
+            LOGGER.trace("{} incoming Request '{}'\n Headers '{}'\n Content-type '{}'", name, infoLog, headersLog,
+                contentType);
         }
     }
 
@@ -173,7 +179,8 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
         final MultiMap headers = request.headers();
 
-        // as per RFC1945 the header is referer but it is not mandatory some implementations use referrer
+        // as per RFC1945 the header is referer but it is not mandatory some
+        // implementations use referrer
         String referrer = headers.contains("referrer") ? headers.get("referrer") : headers.get("referer");
         String userAgent = request.headers().get("user-agent");
         referrer = referrer == null ? "-" : referrer;
@@ -225,7 +232,7 @@ public class RequestResponseLoggerMiddleware implements Middleware {
     private JsonObject decodeJWT(String jwt) {
         final String[] chunks = jwt.split("\\.");
         final Base64.Decoder decoder = Base64.getDecoder();
-        final String payload = new String(decoder.decode(chunks[1]));
+        final String payload = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
         return new JsonObject(payload);
     }
 }

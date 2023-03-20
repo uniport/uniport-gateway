@@ -43,6 +43,13 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
         Pair<OAuth2Auth, User> authPair = null;
         boolean idTokenDemanded = false;
 
+        if (this.sessionScope == null) {
+            final String errMsg = "No session scope found";
+            LOGGER.debug("{}", errMsg);
+            handler.handle(Future.failedFuture(errMsg));
+            return;
+        }
+
         if (this.sessionScope.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
             idTokenDemanded = true;
             // all ID tokens are the same hence take the first one
@@ -53,7 +60,7 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
                 authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
                 break;
             }
-        } else if (this.sessionScope != null && this.sessionScope.length() != 0) {
+        } else if (this.sessionScope.length() != 0) {
             final String key = String.format("%s%s", this.sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
             authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
         } else {
@@ -87,7 +94,8 @@ public abstract class AuthTokenMiddlewareBase implements Middleware {
             preparedUser.complete(authPair);
         }
 
-        // fix: Local variable defined in an enclosing scope must be final or effectively final
+        // fix: Local variable defined in an enclosing scope must be final or
+        // effectively final
         final boolean finalIdTokenDemanded = idTokenDemanded;
         preparedUser.future().onSuccess(ap -> {
             final JsonObject principal = ap.getRight().principal();

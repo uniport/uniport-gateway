@@ -60,7 +60,8 @@ import java.util.Set;
  *      - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
  *      - wrap oauth2 state parameter with StateWithUri
  *      - dont implement OrderListener interface (mount callback immediately)
- *      - fix private constructor bugs (see https://github.com/vert-x3/vertx-web/pull/2337)
+ *      - fix private constructor bugs
+ *      (see https://github.com/vert-x3/vertx-web/pull/2337)
  */
 public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
@@ -84,7 +85,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     private JsonObject extraParams;
     private String prompt;
     private int pkce = -1;
-    // explicit signal that tokens are handled as bearer only (meaning, no backend server known)
+    // explicit signal that tokens are handled as bearer only (meaning, no backend
+    // server known)
     private boolean bearerOnly = true;
     private int order = -1;
     private Route callback;
@@ -142,7 +144,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
     @Override
     public void authenticate(RoutingContext context, Handler<AsyncResult<User>> handler) {
-        // when the handler is working as bearer only, then the `Authorization` header is required
+        // when the handler is working as bearer only, then the `Authorization` header
+        // is required
         parseAuthorization(context, !bearerOnly, parseAuthorization -> {
             if (parseAuthorization.failed()) {
                 handler.handle(Future.failedFuture(parseAuthorization.cause()));
@@ -158,9 +161,12 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                     handler.handle(Future.failedFuture("callback route is not configured."));
                     return;
                 }
-                // when this handle is mounted as a catch all, the callback route must be configured before,
-                // as it would shade the callback route. When a request matches the callback path and has the
-                // method GET the exceptional case should not redirect to the oauth2 server as it would become
+                // when this handle is mounted as a catch all, the callback route must be
+                // configured before,
+                // as it would shade the callback route. When a request matches the callback
+                // path and has the
+                // method GET the exceptional case should not redirect to the oauth2 server as
+                // it would become
                 // an infinite redirect loop. In this case an exception must be raised.
                 if (context.request().method() == HttpMethod.GET
                     && context.normalizedPath().equals(callbackURL.resource())) {
@@ -191,7 +197,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                             return;
                         }
                     } else {
-                        // there's a session we can make this request comply to the Oauth2 spec and add an opaque state
+                        // there's a session we can make this request comply to the Oauth2 spec and add
+                        // an opaque state
                         session.put("redirect_uri", context.request().uri());
 
                         // create a state value to mitigate replay attacks
@@ -259,7 +266,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
     @Override
     public OAuth2AuthHandler extraParams(JsonObject extraParams) {
-        this.extraParams = extraParams;
+        this.extraParams = new JsonObject(extraParams.getMap());
         return this;
     }
 
@@ -332,7 +339,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
      */
     @Override
     public void postAuthentication(RoutingContext ctx) {
-        // the user is authenticated, however the user may not have all the required scopes
+        // the user is authenticated, however the user may not have all the required
+        // scopes
         if (scopes != null && scopes.size() > 0) {
             final User user = ctx.user();
             if (user == null) {
@@ -470,7 +478,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
             }
 
             // The valid callback URL set in your IdP application settings.
-            // This must exactly match the redirect_uri passed to the authorization URL in the previous step.
+            // This must exactly match the redirect_uri passed to the authorization URL in
+            // the previous step.
             credentials.setRedirectUri(callbackURL.href());
 
             authProvider.authenticate(credentials, res -> {

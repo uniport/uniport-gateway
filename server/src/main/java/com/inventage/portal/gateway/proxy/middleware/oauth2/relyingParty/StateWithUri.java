@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is for handling the enhanced state parameter of the OIDC authentication flow.
- * The enhanced state parameter contains beside a random value also an (optional) initial uri, which triggered the
+ * This class is for handling the enhanced state parameter of the OIDC
+ * authentication flow.
+ * The enhanced state parameter contains beside a random value also an
+ * (optional) initial uri, which triggered the
  * authentication flow. Additionally, the String value is Base64 encoded.
  */
 public class StateWithUri {
@@ -22,11 +24,13 @@ public class StateWithUri {
 
     /**
      * Constructor from a state parameter.
-     * If the given state parameter is not Base64 encoded it will be used as an opaque value and an uri value
+     * If the given state parameter is not Base64 encoded it will be used as an
+     * opaque value and an uri value
      * will not be available.
      *
      * @param stateParameterBase64Encoded
-     *            state parameter with format base64(<state>:<uri>)
+     *            state parameter with format
+     *            base64(<state>:<uri>)
      */
     public StateWithUri(String stateParameterBase64Encoded) {
         if (stateParameterBase64Encoded == null) {
@@ -101,7 +105,7 @@ public class StateWithUri {
     private Optional<String> base64Decode(String stateParameter) {
         try {
             final byte[] bytes = Base64.getDecoder().decode(stateParameter);
-            return Optional.of(new String(bytes));
+            return Optional.of(new String(bytes, StandardCharsets.UTF_8));
         } catch (IllegalArgumentException e) {
             LOGGER.warn("failed with '{}'", e.getMessage());
         }
