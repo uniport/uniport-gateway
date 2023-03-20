@@ -1,5 +1,11 @@
 # Migration Guide
 
+## `7.*.*` -> `8.*.*`
+
+Breaking change if any of your client is dependent on the (now deprecated) session cookie name by default: `inventage-portal-gateway.session`. The new default for the session cookie name is: `uniport.session`.
+
+Concretely: Change any occurrence of the old session cookie name to `uniport.session`.
+
 ## `6.*.*` -> `7.*.*`
 
 Breaking change if `bearerOnly` middleware is configured in your portal-gateway instance. From version `7.0.0+`, `bearerOnly` middleware expects in its `options`, an `publicKeys` key, instead of `publicKey` and `publicKeyAlgorithm`. The `publicKeys` arrays contains objects, and each object contains the keys `publicKey` and `publicKeyAlgorithm`. The underlying functionality remains the same, however it is now possible to allow multiple public keys for signature verification. Additionally, now all available public keys used for signing of a realms are loaded instead of only the main one.
