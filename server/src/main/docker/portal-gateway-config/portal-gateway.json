@@ -90,7 +90,8 @@
                                     "self",
                                     "blob:",
                                     "unsafe-inline",
-                                    "unsafe-eval"
+                                    "unsafe-eval",
+                                    "https://analytics.ips.inventage.dev"
                                 ]
                             },
                             {
@@ -104,7 +105,8 @@
                                 "directive": "connect-src",
                                 "values": [
                                     "self",
-                                    "https://grafana.com"
+                                    "https://grafana.com",
+                                    "https://analytics.ips.inventage.dev"
                                 ]
                             },
                             {
