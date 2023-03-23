@@ -117,16 +117,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH = "path";
-    /**
-     * @deprecated This field should no longer be used as of version 4.3.0.
-     *             <p>
-     *             Use
-     *             {@link DynamicConfiguration#MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES }
-     *             instead
-     *             </p>
-     */
-    @Deprecated(since = "4.3.0")
-    public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY = "whithelistedCookies";
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";

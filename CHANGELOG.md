@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Changed cookie name `ips.language` to `uniport.language`, `inventage-portal-gateway.session` to `uniport.session`, and `ipg.state` to `uniport.state` ([PORTAL-718](https://issue.inventage.com/browse/PORTAL-718)).
+- **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
 
 
 ## [7.0.1]-202303091216-1-ee2c2a1 - 2023-03-09
