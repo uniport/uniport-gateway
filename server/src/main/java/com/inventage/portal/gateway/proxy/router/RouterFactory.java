@@ -89,6 +89,10 @@ public class RouterFactory {
         }
 
         final Router router = Router.router(this.vertx);
+
+        // has to be first route, so no other paths are shadowing it
+        addHealthRoute(router);
+
         // Handlers will get called if and only if
         // - all futures are completed
         CompositeFuture.join(subRouterFutures).onComplete(ar -> {
@@ -101,7 +105,6 @@ public class RouterFactory {
                 }
             });
 
-            addHealthRoute(router);
             handler.handle(Future.succeededFuture(router));
         });
     }
@@ -196,31 +199,9 @@ public class RouterFactory {
         middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
     }
 
-    /**
-     * Adds a health check route to the given router. The health check return '200
-     * OK' for a successful health check and '500 Internal Server Error' for a
-     * failed health check.
-     * No routes configured (apart from the health check) results in an unhealthy
-     * state.
-     *
-     * @param router
-     *            used as the proxy router
-     */
     private void addHealthRoute(Router router) {
-        boolean isHealthy = true;
-        if (router.getRoutes().size() == 0) {
-            LOGGER.info("No routes configured");
-            isHealthy = false;
-        }
-
-        final int statusCode;
-        if (isHealthy) {
-            statusCode = HttpResponseStatus.OK.code();
-        } else {
-            statusCode = HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
-        }
         router.route("/health").setName("health").handler(ctx -> {
-            ctx.response().setStatusCode(statusCode).end();
+            ctx.response().setStatusCode(HttpResponseStatus.OK.code()).end();
         });
     }
 
