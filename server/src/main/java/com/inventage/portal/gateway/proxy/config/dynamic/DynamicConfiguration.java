@@ -221,7 +221,6 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema())
             .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
             .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
-            .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY, Schemas.arraySchema())
             .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
             .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
             .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
@@ -883,10 +882,7 @@ public class DynamicConfiguration {
                 case MIDDLEWARE_SESSION_BAG: {
                     JsonArray whitelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
                     if (whitelistedCookies == null) {
-                        whitelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES_LEGACY);
-                        if (whitelistedCookies == null) {
-                            return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
-                        }
+                        return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
                     }
                     for (int j = 0; j < whitelistedCookies.size(); j++) {
                         final JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
