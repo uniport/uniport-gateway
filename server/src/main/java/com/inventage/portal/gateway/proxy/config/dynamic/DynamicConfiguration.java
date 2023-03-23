@@ -880,7 +880,8 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_SESSION_BAG: {
-                    JsonArray whitelistedCookies = mwOptions.getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
+                    final JsonArray whitelistedCookies = mwOptions
+                        .getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
                     if (whitelistedCookies == null) {
                         return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
                     }
