@@ -6,7 +6,7 @@
         <option name="formatter" value="ECLIPSE" />
         <option name="importOrderFromFile" value="true" />
         <option name="optimizeImports" value="false" />
-        <option name="pathToConfigFileJava" value="$PROJECT_DIR$/build-tools/portal-java-formatter.xml" />
+        <option name="pathToConfigFileJava" value="$PROJECT_DIR$/.build-tools/portal-java-formatter.xml" />
         <option name="selectedJavaProfile" value="PortalStyle" />
       </ProjectSpecificProfile>
     </option>

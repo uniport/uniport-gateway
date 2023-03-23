@@ -3,7 +3,7 @@
 
 <!-- See https://checkstyle.sourceforge.io/checks.html -->
 <module name="Checker">
-    <property name="severity" value="warning"/>
+    <property name="severity" value="error"/>
     <module name="SuppressWarningsFilter"/>
     <module name="SuppressWithPlainTextCommentFilter">
         <property name="offCommentFormat" value="CHECKSTYLE OFF"/>
