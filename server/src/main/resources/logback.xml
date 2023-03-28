@@ -18,7 +18,8 @@
                                 "message": "%message",
                                 "userId": "%vcl{userId}",
                                 "sessionId": "%vcl{sessionId}",
-                                "traceId": "%vcl{traceId}"
+                                "traceId": "%vcl{traceId}",
+                                "stacktrace": "%ex"
                             }
                             </pattern>
                         </pattern>
