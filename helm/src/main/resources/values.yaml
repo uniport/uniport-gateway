@@ -155,6 +155,10 @@ containers:
       # OTEL_METRICS_EXPORTER is the list of exporters user for metrics, separated by commas
       OTEL_METRICS_EXPORTER:
         value: "none"
+      PORTAL_GATEWAY_ANALYTICS_HOST:
+        value: analytics-matomo
+      PORTAL_GATEWAY_ANALYTICS_PORT:
+        value: "80"
     livenessProbe:
       enabled: true
       httpGet:
