@@ -106,6 +106,7 @@
                                 "values": [
                                     "self",
                                     "https://grafana.com",
+                                    "https://fonts.googleapis.com",
                                     "https://analytics.ips.inventage.dev"
                                 ]
                             },
