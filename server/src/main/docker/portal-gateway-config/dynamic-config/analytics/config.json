@@ -14,11 +14,19 @@
         "service": "analytics-proxy"
       },
       {
-        "name": "analytics-public",
+        "name": "analytics-public-tracker",
         "middlewares": [
           "analyticsPublicReplacePath"
         ],
         "rule": "PathPrefix('/analytics/matomo.php')",
+        "service": "analytics-proxy"
+      },
+      {
+        "name": "analytics-public-tracker-script",
+        "middlewares": [
+          "analyticsPublicReplacePath"
+        ],
+        "rule": "PathPrefix('/analytics/matomo.js')",
         "service": "analytics-proxy"
       }
     ],
