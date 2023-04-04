@@ -72,7 +72,7 @@ public class ProxyMiddleware implements Middleware {
             options.setSsl(true);
             options.setTrustAll((httpsTrustAll != null) ? httpsTrustAll : DEFAULT_HTTPS_TRUST_ALL);
             options.setVerifyHost((httpsVerifyHostname != null) ? httpsVerifyHostname : DEFAULT_HTTPS_VERIFY_HOSTNAME);
-            if (httpsTrustStorePath == null || httpsTrustStorePath == null) {
+            if (httpsTrustStorePath == null || httpsTrustStorePassword == null) {
                 options.setTrustStoreOptions(new JksOptions().setPath(DEFAULT_HTTPS_TRUST_STORE_PATH).setPassword(DEFAULT_HTTPS_TRUST_STORE_PASSWORD));
             } else {
                 options.setTrustStoreOptions(new JksOptions().setPath(httpsTrustStorePath).setPassword(httpsTrustStorePassword));
