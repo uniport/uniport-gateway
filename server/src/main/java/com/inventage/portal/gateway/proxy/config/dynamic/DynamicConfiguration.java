@@ -162,6 +162,11 @@ public class DynamicConfiguration {
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
     public static final String SERVICE_SERVER_PROTOCOL = "protocol";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS = "httpsOptions";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME = "verifyHostname";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL = "trustAll";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH = "trustStorePath";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = "trustStorePassword";
     public static final String SERVICE_SERVER_HOST = "host";
     public static final String SERVICE_SERVER_PORT = "port";
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicConfiguration.class);
@@ -246,6 +251,7 @@ public class DynamicConfiguration {
             .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .optionalProperty(SERVICE_SERVER_PROTOCOL, Schemas.stringSchema())
+                    .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema())
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                     .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
                     .allowAdditionalProperties(false)))

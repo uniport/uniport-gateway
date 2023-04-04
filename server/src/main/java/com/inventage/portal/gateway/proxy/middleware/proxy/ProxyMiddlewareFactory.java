@@ -24,11 +24,17 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject serviceConfig) {
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_PROXY);
+        final JsonObject httpsOptions = serviceConfig.getJsonObject(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS);
+        final Boolean trustAll = httpsOptions == null ? null : httpsOptions.getBoolean(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL);
+        final Boolean verifyHost = httpsOptions == null ? null : httpsOptions.getBoolean(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME);
+        final String storePath = httpsOptions == null ? null : httpsOptions.getString(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH);
+        final String storePassword = httpsOptions == null ? null : httpsOptions.getString(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD);
         return Future.succeededFuture(
             new ProxyMiddleware(vertx,
                 name,
                 serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_PROTOCOL),
                 serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
-                serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT)));
+                serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT),
+                trustAll, verifyHost, storePath, storePassword));
     }
 }

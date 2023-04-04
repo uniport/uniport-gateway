@@ -8,6 +8,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 import io.vertx.httpproxy.ProxyContext;
@@ -28,8 +29,14 @@ public class ProxyMiddleware implements Middleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
 
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
+
+    private static final boolean DEFAULT_HTTPS_TRUST_ALL = true;
+    private static final boolean DEFAULT_HTTPS_VERIFY_HOSTNAME = false;
+    private static final String DEFAULT_HTTPS_TRUST_STORE_PATH = "";
+    private static final String DEFAULT_HTTPS_TRUST_STORE_PASSWORD = "";
 
     private final HttpProxy httpProxy;
 
@@ -41,13 +48,14 @@ public class ProxyMiddleware implements Middleware {
     private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
 
     public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
-        this(vertx, name, "http", serverHost, serverPort);
+        this(vertx, name, "http", serverHost, serverPort, DEFAULT_HTTPS_TRUST_ALL, DEFAULT_HTTPS_VERIFY_HOSTNAME, DEFAULT_HTTPS_TRUST_STORE_PATH, DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
     }
 
-    public ProxyMiddleware(Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort) {
+    public ProxyMiddleware(Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort, Boolean httpsTrustAll,
+        Boolean httpsVerifyHostname, String httpsTrustStorePath, String httpsTrustStorePassword) {
         this.name = name;
 
-        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, serverPort, vertx));
+        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
@@ -57,15 +65,22 @@ public class ProxyMiddleware implements Middleware {
         applyModifiers(httpProxy);
     }
 
-    protected HttpClient createHttpClient(String serverProtocol, String serverHost, int serverPort, Vertx vertx) {
+    protected HttpClient createHttpClient(String serverProtocol, String serverHost, Boolean httpsTrustAll, Boolean httpsVerifyHostname,
+        String httpsTrustStorePath, String httpsTrustStorePassword, Vertx vertx) {
         final HttpClientOptions options = new HttpClientOptions();
         if ("https".equalsIgnoreCase(serverProtocol)) {
             options.setSsl(true);
-            options.setTrustAll(true);
-            options.setVerifyHost(false);
+            options.setTrustAll((httpsTrustAll != null) ? httpsTrustAll : DEFAULT_HTTPS_TRUST_ALL);
+            options.setVerifyHost((httpsVerifyHostname != null) ? httpsVerifyHostname : DEFAULT_HTTPS_VERIFY_HOSTNAME);
+            if (httpsTrustStorePath == null || httpsTrustStorePath == null) {
+                options.setTrustStoreOptions(new JksOptions().setPath(DEFAULT_HTTPS_TRUST_STORE_PATH).setPassword(DEFAULT_HTTPS_TRUST_STORE_PASSWORD));
+            } else {
+                options.setTrustStoreOptions(new JksOptions().setPath(httpsTrustStorePath).setPassword(httpsTrustStorePassword));
+            }
             options.setLogActivity(LOGGER.isDebugEnabled());
             LOGGER.info("using HTTPS for host '{}'", serverHost);
         }
+
         return vertx.createHttpClient(options);
     }
 
@@ -84,7 +99,12 @@ public class ProxyMiddleware implements Middleware {
         captureModifiers(ctx);
 
         LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
-        httpProxy.handle(ctx.request());
+        try {
+            httpProxy.handle(ctx.request());
+        } catch (Exception e) {
+            LOGGER.error("Error while proxying request", e);
+            ctx.fail(e);
+        }
     }
 
     // capture the modifiers set by previous middlewares for use by the proxy interceptors
