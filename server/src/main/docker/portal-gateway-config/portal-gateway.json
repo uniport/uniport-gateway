@@ -91,6 +91,7 @@
                                     "blob:",
                                     "unsafe-inline",
                                     "unsafe-eval",
+                                    "https://cdn.jsdelivr.net",
                                     "https://analytics.ips.inventage.dev"
                                 ]
                             },
