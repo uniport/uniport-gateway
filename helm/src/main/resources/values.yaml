@@ -156,7 +156,7 @@ containers:
       OTEL_METRICS_EXPORTER:
         value: "none"
       PORTAL_GATEWAY_ANALYTICS_HOST:
-        value: analytics-matomo
+        value: analytics
       PORTAL_GATEWAY_ANALYTICS_PORT:
         value: "80"
     livenessProbe:

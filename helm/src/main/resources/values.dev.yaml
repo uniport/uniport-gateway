@@ -35,4 +35,4 @@ containers:
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
       PORTAL_GATEWAY_ANALYTICS_HOST:
-        value: analytics-matomo.analytics
+        value: analytics.analytics
