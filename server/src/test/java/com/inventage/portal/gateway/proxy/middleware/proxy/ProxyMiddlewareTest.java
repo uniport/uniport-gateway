@@ -10,11 +10,14 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -45,21 +48,21 @@ public class ProxyMiddlewareTest {
 
     @Test
     void proxyTest(Vertx vertx, VertxTestContext testCtx) {
-        String host = "localhost";
-        int proxyPort = TestUtils.findFreePort();
-        int serverPort = TestUtils.findFreePort();
-        String proxyResponse = "proxy";
-        String serverResponse = "server";
+        final String host = "localhost";
+        final int proxyPort = TestUtils.findFreePort();
+        final int serverPort = TestUtils.findFreePort();
+        final String proxyResponse = "proxy";
+        final String serverResponse = "server";
 
-        ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, serverPort);
+        final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, serverPort);
 
-        Checkpoint proxyStarted = testCtx.checkpoint();
-        Checkpoint serverStarted = testCtx.checkpoint();
-        Checkpoint requestProxied = testCtx.checkpoint();
-        Checkpoint requestServed = testCtx.checkpoint();
-        Checkpoint responseReceived = testCtx.checkpoint();
+        final Checkpoint proxyStarted = testCtx.checkpoint();
+        final Checkpoint serverStarted = testCtx.checkpoint();
+        final Checkpoint requestProxied = testCtx.checkpoint();
+        final Checkpoint requestServed = testCtx.checkpoint();
+        final Checkpoint responseReceived = testCtx.checkpoint();
 
-        Router router = Router.router(vertx);
+        final Router router = Router.router(vertx);
         router.route().handler(proxy).handler(ctx -> ctx.response().end(proxyResponse));
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
@@ -89,4 +92,65 @@ public class ProxyMiddlewareTest {
         }));
 
     }
+
+    @Test
+    void proxyRequestToHTTPSServer(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String host = "localhost";
+        final int serverPort = TestUtils.findFreePort();
+        final File file = loadFile("truststore-test.jks");
+        final String serverResponse = "server";
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, serverPort, "https", true, false, file.getPath(), "123456")
+            .build().start();
+
+        final HttpServerOptions options = new HttpServerOptions()
+            .setSsl(true)
+            .setKeyStoreOptions(new JksOptions()
+                .setPath(file.getPath())
+                .setPassword("123456"));
+
+        vertx.createHttpServer(options).requestHandler(req -> {
+            req.response().end(serverResponse);
+        }).listen(serverPort);
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+            response.body().onComplete((body) -> {
+                //then
+                Assertions.assertEquals(body.result().toString(), serverResponse);
+                testCtx.completeNow();
+            });
+        });
+    }
+
+    @Test
+    void proxyRequestToNotHTTPSServer(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String host = "localhost";
+        final int serverPort = TestUtils.findFreePort();
+        final String serverResponse = "server";
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, serverPort, "https", true, false, "", "")
+            .build().start();
+
+        final HttpServerOptions options = new HttpServerOptions();
+
+        vertx.createHttpServer(options).requestHandler(req -> {
+            req.response().end(serverResponse);
+        }).listen(serverPort);
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+            //then
+            Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            testCtx.completeNow();
+        });
+    }
+
+    private static File loadFile(String path) {
+        final ClassLoader classLoader = ProxyMiddlewareTest.class.getClassLoader();
+        return new File(classLoader.getResource(path).getFile());
+    }
+
 }

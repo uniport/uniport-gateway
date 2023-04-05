@@ -213,6 +213,10 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port));
     }
 
+    public MiddlewareServerBuilder withProxyMiddleware(String host, int port, String serverProtocol, boolean httpsTrustAll, boolean verifyHost, String httpsTrustStorePath, String httpsTrustStorePassword) {
+        return withMiddleware(new ProxyMiddleware(vertx, "proxy", serverProtocol, host, port, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword));
+    }
+
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
         VertxTestContext testContext = new VertxTestContext();
         Router serviceRouter = Router.router(vertx);
