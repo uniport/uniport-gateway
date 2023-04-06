@@ -98,11 +98,44 @@ public class ProxyMiddlewareTest {
         //given
         final String host = "localhost";
         final int serverPort = TestUtils.findFreePort();
-        final File file = loadFile("truststore-test.jks");
+        final File trustStoreFile = loadFile("truststore-test.jks");
+        final String trustStorePassword = "123456";
         final String serverResponse = "server";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware(host, serverPort, "https", true, false, file.getPath(), "123456")
+            .withProxyMiddleware(host, serverPort, "https", false, false, trustStoreFile.getPath(), trustStorePassword)
+            .build().start();
+
+        final HttpServerOptions options = new HttpServerOptions()
+            .setSsl(true)
+            .setKeyStoreOptions(new JksOptions()
+                .setPath(trustStoreFile.getPath())
+                .setPassword(trustStorePassword));
+
+        vertx.createHttpServer(options).requestHandler(req -> {
+            req.response().end(serverResponse);
+        }).listen(serverPort);
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+            response.body().onComplete((body) -> {
+                //then
+                Assertions.assertEquals(body.result().toString(), serverResponse);
+                testCtx.completeNow();
+            });
+        });
+    }
+
+    @Test
+    void proxyRequestToHTTPSServerTrustAllCertificates(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String host = "localhost";
+        final int serverPort = TestUtils.findFreePort();
+        final File file = loadFile("truststore-test.jks");
+        final String serverResponse = "server";
+        final boolean trustAllCertificates = true;
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, serverPort, "https", trustAllCertificates, false, null, null)
             .build().start();
 
         final HttpServerOptions options = new HttpServerOptions()
@@ -125,14 +158,40 @@ public class ProxyMiddlewareTest {
     }
 
     @Test
+    void proxyRequestToHTTPSServerWithoutCertificate(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String host = "localhost";
+        final int serverPort = TestUtils.findFreePort();
+        final String serverResponse = "server";
+        final boolean trustAllCertificates = true;
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, serverPort, "https", trustAllCertificates, false, null, null)
+            .build().start();
+
+        final HttpServerOptions options = new HttpServerOptions()
+            .setSsl(true);
+
+        vertx.createHttpServer(options).requestHandler(req -> {
+            req.response().end(serverResponse);
+        }).listen(serverPort);
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+            Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            testCtx.completeNow();
+        });
+    }
+
+    @Test
     void proxyRequestToNotHTTPSServer(Vertx vertx, VertxTestContext testCtx) {
         //given
         final String host = "localhost";
         final int serverPort = TestUtils.findFreePort();
         final String serverResponse = "server";
+        final boolean trustAllCertificates = true;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware(host, serverPort, "https", true, false, "", "")
+            .withProxyMiddleware(host, serverPort, "https", trustAllCertificates, false, null, null)
             .build().start();
 
         final HttpServerOptions options = new HttpServerOptions();
