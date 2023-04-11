@@ -36,6 +36,14 @@
                 ],
                 "rule": "PathPrefix('/analytics/matomo.js')",
                 "service": "analytics-proxy"
+            },
+            {
+                "name": "analytics-public-tracker-script-alias",
+                "middlewares": [
+                    "analyticsPublicReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics/pmt.js')",
+                "service": "analytics-proxy"
             }
         ],
         "middlewares": [
