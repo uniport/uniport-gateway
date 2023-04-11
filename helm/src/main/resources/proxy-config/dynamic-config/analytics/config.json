@@ -22,6 +22,14 @@
                 "service": "analytics-proxy"
             },
             {
+                "name": "analytics-heatmap-session-recorder",
+                "middlewares": [
+                    "analyticsPublicReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics/plugins/HeatmapSessionRecording/configs.php')",
+                "service": "analytics-proxy"
+            },
+            {
                 "name": "analytics-public-tracker-script",
                 "middlewares": [
                     "analyticsPublicReplacePath"
