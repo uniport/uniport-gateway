@@ -257,10 +257,6 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>${project.build.directory}/docker-context/portal-gateway-config/</from>
-                                <into>/etc/portal-gateway/default/</into>
-                            </path>
-                            <path>
                                 <from>${project.build.directory}/docker-context</from>
                                 <into>/etc/portal-gateway</into>
                                 <includes>logback.xml</includes>
