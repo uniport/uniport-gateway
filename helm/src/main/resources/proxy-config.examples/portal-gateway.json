@@ -93,8 +93,7 @@
                                     "blob:",
                                     "unsafe-inline",
                                     "unsafe-eval",
-                                    "https://cdn.jsdelivr.net",
-                                    "https://analytics.ips.inventage.dev"
+                                    "https://cdn.jsdelivr.net"
                                 ]
                             },
                             {
@@ -109,8 +108,7 @@
                                 "values": [
                                     "self",
                                     "https://grafana.com",
-                                    "https://fonts.googleapis.com",
-                                    "https://analytics.ips.inventage.dev"
+                                    "https://fonts.googleapis.com"
                                 ]
                             },
                             {
