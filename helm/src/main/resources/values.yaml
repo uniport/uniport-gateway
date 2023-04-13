@@ -196,41 +196,6 @@ containers:
         # As mounting a configMap creates a dir and mounts the config map's data as files in it
         # and there are existing files in /etc/portal-gateway, an additional path `app-config` is used
         mountPath: /etc/portal-gateway/logging-config
-      proxy-config:
-        type: configMap
-        configMapName: portal-gateway-proxy-config
-        mountPath: /etc/portal-gateway/default
-        items:
-          - key: portal-gateway.json
-            path: portal-gateway.json
-          - key: dynamic-config..analytics..config.json
-            path: dynamic-config/analytics/config.json
-          - key: dynamic-config..auth..config.json
-            path: dynamic-config/auth/config.json
-          - key: dynamic-config..base..config.json
-            path: dynamic-config/base/config.json
-          - key: dynamic-config..content..config.json
-            path: dynamic-config/content/config.json
-          - key: dynamic-config..conversation..config.json
-            path: dynamic-config/conversation/config.json
-          - key: dynamic-config..dashboard..config.json
-            path: dynamic-config/dashboard/config.json
-          - key: dynamic-config..filestorage..config.json
-            path: dynamic-config/filestorage/config.json
-          - key: dynamic-config..general..config.json
-            path: dynamic-config/general/config.json
-          - key: dynamic-config..notification..config.json
-            path: dynamic-config/notification/config.json
-          - key: dynamic-config..organisation..config.json
-            path: dynamic-config/organisation/config.json
-          - key: dynamic-config..portal-database..config.json
-            path: dynamic-config/portal-database/config.json
-          - key: dynamic-config..portal-iam..config.json
-            path: dynamic-config/portal-iam/config.json
-          - key: dynamic-config..portal-messaging..config.json
-            path: dynamic-config/portal-messaging/config.json
-          - key: dynamic-config..portal-monitoring..config.json
-            path: dynamic-config/portal-monitoring/config.json
 
 serviceAccount:
   imagePullSecrets:
