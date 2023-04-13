@@ -208,37 +208,3 @@ configMaps:
     data:
       logback.xml:
         valueFromFile: app-config/logback.xml
-
-  portal-gateway-proxy-config:
-    enabled: true
-    data:
-      portal-gateway.json:
-        valueFromFile: proxy-config/portal-gateway.json
-      dynamic-config..analytics..config.json:
-        valueFromFile: proxy-config/dynamic-config/analytics/config.json
-      dynamic-config..auth..config.json:
-        valueFromFile: proxy-config/dynamic-config/auth/config.json
-      dynamic-config..base..config.json:
-        valueFromFile: proxy-config/dynamic-config/base/config.json
-      dynamic-config..content..config.json:
-        valueFromFile: proxy-config/dynamic-config/content/config.json
-      dynamic-config..conversation..config.json:
-        valueFromFile: proxy-config/dynamic-config/conversation/config.json
-      dynamic-config..dashboard..config.json:
-        valueFromFile: proxy-config/dynamic-config/dashboard/config.json
-      dynamic-config..filestorage..config.json:
-        valueFromFile: proxy-config/dynamic-config/filestorage/config.json
-      dynamic-config..general..config.json:
-        valueFromFile: proxy-config/dynamic-config/general/config.json
-      dynamic-config..notification..config.json:
-        valueFromFile: proxy-config/dynamic-config/notification/config.json
-      dynamic-config..organisation..config.json:
-        valueFromFile: proxy-config/dynamic-config/organisation/config.json
-      dynamic-config..portal-database..config.json:
-        valueFromFile: proxy-config/dynamic-config/portal-database/config.json
-      dynamic-config..portal-iam..config.json:
-        valueFromFile: proxy-config/dynamic-config/portal-iam/config.json
-      dynamic-config..portal-messaging..config.json:
-        valueFromFile: proxy-config/dynamic-config/portal-messaging/config.json
-      dynamic-config..portal-monitoring..config.json:
-        valueFromFile: proxy-config/dynamic-config/portal-monitoring/config.json
