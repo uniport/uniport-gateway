@@ -187,7 +187,7 @@
                 <artifactId>grpc-netty-shaded</artifactId>
                 <version>1.45.0</version>
             </dependency>
-            <!-- OpenTelemtry BOM -->
+            <!-- OpenTelemetry BOM -->
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-bom</artifactId>
@@ -398,6 +398,7 @@
                     <configuration>
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude.xml</excludeFilterFile>
                         <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude-specific.xml</excludeFilterFile>
                     </configuration>
                 </plugin>
@@ -405,6 +406,127 @@
         </pluginManagement>
 
         <plugins>
+            <!-- apply shared Code Style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>unpack-zip</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.inventage.portal</groupId>
+                                    <artifactId>codestyle</artifactId>
+                                    <version>1.0.0-SNAPSHOT</version>
+                                    <type>zip</type>
+                                    <overWrite>true</overWrite>
+                                    <excludes>META-INF/</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.basedir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- For consistent formatting -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.35.0</version>
+                <!-- See https://github.com/diffplug/spotless/tree/maven/2.35.0/plugin-maven -->
+                <configuration>
+                    <!-- limit format enforcement to just the files changed by this feature branch -->
+                    <ratchetFrom>origin/master</ratchetFrom>
+                    <formats>
+                        <!-- you can define as many formats as you want, each is independent -->
+                        <format>
+                            <includes>
+                                <include>**/*.md</include>
+                                <include>.gitignore</include>
+                                <include>.jenkins/Jenkinsfile.build</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/node_modules/**</exclude>
+                            </excludes>
+
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <indent>
+                                <spaces>true</spaces>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <java>
+                        <includes>
+                            <include>**/src/main/java/**/*.java</include>
+                            <include>**/src/test/java/**/*.java</include>
+                        </includes>
+
+                        <removeUnusedImports/>
+
+                        <eclipse>
+                            <file>${maven.multiModuleProjectDirectory}/.build-tools/portal-java-formatter.xml</file>
+                        </eclipse>
+                    </java>
+                    <pom>
+                        <includes>
+                            <include>**/pom.xml</include>
+                        </includes>
+                        <sortPom>
+                            <nrOfIndentSpace>4</nrOfIndentSpace>
+                            <expandEmptyElements>false</expandEmptyElements>
+                        </sortPom>
+                    </pom>
+                    <json>
+                        <includes>
+                            <include>**/*.json</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/package-lock.json</exclude>
+                            <exclude>**/node_modules/**</exclude>
+                        </excludes>
+
+                        <gson>
+                            <version>2.8.1</version>
+                            <indentSpaces>4</indentSpaces>
+                            <sortByKeys>false</sortByKeys>
+                        </gson>
+                    </json>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.rudikershaw.gitbuildhook</groupId>
+                <artifactId>git-build-hook-maven-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <installHooks>
+                        <pre-commit>.build-tools/hooks/pre-commit</pre-commit>
+                    </installHooks>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- for staging with Nexus2 -->
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
