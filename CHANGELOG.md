@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
 - Change route ordering. `/health` route is hard-configured as first route to be considered ([PORTAL-859](https://issue.inventage.com/browse/PORTAL-859)).
 - Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
+- [PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290) : support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment.
+
 ## [7.0.1]-202303091216-1-ee2c2a1 - 2023-03-09
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.1-202303091216-1-ee2c2a1~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)
