@@ -9,15 +9,27 @@ import java.net.URI;
  */
 public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory {
 
+    //---- Static
+
     private static final String AUTH_ENDPOINT = "/protocol/openid-connect/auth";
     private static final String REGISTRATION_ENDPOINT = "/protocol/openid-connect/registrations";
+
+
+    //---- Methods
 
     @Override
     public String provides() {
         return DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION;
     }
 
-    protected String authorizationPath(String publicUrl, URI keycloakAuthorizationEndpoint) {
+    /**
+     * Replaces the {@link #AUTH_ENDPOINT} substring with {@link #REGISTRATION_ENDPOINT}.
+     *
+     * @param publicUrl the base url
+     * @param keycloakAuthorizationEndpoint auth endpoint containing the patch to be patched.
+     * @return the patched URL.
+     */
+    protected String patchPath(String publicUrl, URI keycloakAuthorizationEndpoint) {
         final String registrationPath = keycloakAuthorizationEndpoint.getPath().replace(AUTH_ENDPOINT, REGISTRATION_ENDPOINT);
         return String.format("%s%s", publicUrl, registrationPath);
     }
