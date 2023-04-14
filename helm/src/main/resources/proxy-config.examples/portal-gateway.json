@@ -12,7 +12,8 @@
                     "name": "session",
                     "type": "session",
                     "options": {
-                        "lifetimeCookie": true
+                        "lifetimeCookie": true,
+                        "idleTimeoutInMinute": 30
                     }
                 },
                 {
