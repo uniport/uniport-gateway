@@ -18,7 +18,7 @@
                 "middlewares": [
                     "analyticsPublicReplacePath"
                 ],
-                "rule": "PathPrefix('/analytics/matomo.php')",
+                "rule": "PathPrefix('/analytics/pmt.pmt')",
                 "service": "analytics-proxy"
             },
             {
