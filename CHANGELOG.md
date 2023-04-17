@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
 - [PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290) : support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment.
 
+## [7.0.2]-202304141241-4-576b35e4 - 2023-04-17
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/18068) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.2-202304141241-4-576b35e4~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D7.0.2-202304141241-4-576b35e4)
+
+### Fixed
+
+- [PORTAL-1396](https://issue.inventage.com/browse/PORTAL-1396)
+
 ## [7.0.1]-202303091216-1-ee2c2a1 - 2023-03-09
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~7.0.1-202303091216-1-ee2c2a1~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)
@@ -29,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Logout triggers 5 redirect requests fixed ([PORTAL-864](https://issue.inventage.com/browse/PORTAL-864)).
 - "Unknown algorithm RSA" bug fixed ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092)).
+
 
 ## [7.0.0]-202303080728-648-fe6be73 - 2023-03-08
 
@@ -382,7 +391,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F7.0.1
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F7.0.2
+[7.0.2]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F7.0.1&sourceBranch=refs%2Ftags%2F7.0.2
 [7.0.1]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F7.0.0&sourceBranch=refs%2Ftags%2F7.0.1
 [7.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F6.0.0&sourceBranch=refs%2Ftags%2F7.0.0
 [6.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F5.1.0&sourceBranch=refs%2Ftags%2F6.0.0

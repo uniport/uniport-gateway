@@ -108,6 +108,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         return result.future();
     }
 
+    protected String patchPath(String publicUrl, URI keycloakUrl) {
+        return String.format("%s%s", publicUrl, keycloakUrl.getPath());
+    }
+
     private boolean isFormPost(String aResponseMode) {
         return OIDC_RESPONSE_MODE_DEFAULT.equals(aResponseMode);
     }
@@ -149,7 +153,4 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         return value;
     }
 
-    private String patchPath(String publicUrl, URI keycloakUrl) {
-        return String.format("%s%s", publicUrl, keycloakUrl.getPath());
-    }
 }
