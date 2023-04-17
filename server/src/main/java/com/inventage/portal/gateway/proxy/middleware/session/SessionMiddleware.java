@@ -1,16 +1,20 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
 import static io.vertx.core.http.Cookie.cookie;
+import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_KEY;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class SessionMiddleware implements Middleware {
 
@@ -41,9 +45,23 @@ public class SessionMiddleware implements Middleware {
 
     private final Handler<RoutingContext> sessionHandler;
 
-    public SessionMiddleware(Vertx vertx, String name, Long sessionIdleTimeoutInMinutes, Boolean withLifetimeHeader, Boolean withLifetimeCookie, String cookieName,
-        Boolean cookieHttpOnly,
-        Boolean cookieSecure, String cookieSameSite, Integer sessionIdMinLength, Boolean nagHttps) {
+    private final List<String> noSessionTimeoutResetUrls;
+
+    public SessionMiddleware(
+            Vertx vertx,
+            String name,
+            Long sessionIdleTimeoutInMinutes,
+            Boolean withLifetimeHeader,
+            Boolean withLifetimeCookie,
+            String cookieName,
+            Boolean cookieHttpOnly,
+            Boolean cookieSecure,
+            String cookieSameSite,
+            Integer sessionIdMinLength,
+            Boolean nagHttps,
+            List<String> noSessionTimeoutResetUrls
+
+    ) {
         this.name = name;
         this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes == null ? SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT * MILLIS : sessionIdleTimeoutInMinutes * MILLIS;
         this.withLifetimeHeader = withLifetimeHeader == null ? SESSION_LIFETIME_HEADER_DEFAULT : withLifetimeHeader;
@@ -57,6 +75,7 @@ public class SessionMiddleware implements Middleware {
                 cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
             .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
             .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
+        this.noSessionTimeoutResetUrls = noSessionTimeoutResetUrls;
     }
 
     @Override
@@ -65,6 +84,9 @@ public class SessionMiddleware implements Middleware {
         if (withLifetimeHeader || withLifetimeCookie) {
             ctx.addHeadersEndHandler(v -> responseWithSessionLifetime(ctx));
         }
+
+        noSessionTimeoutResetIfRequestPathMatches(ctx);
+
         this.sessionHandler.handle(ctx);
     }
 
@@ -82,4 +104,21 @@ public class SessionMiddleware implements Middleware {
         }
     }
 
+    private void noSessionTimeoutResetIfRequestPathMatches(RoutingContext ctx) {
+        if (noSessionTimeoutResetUrls == null) {
+            return;
+        }
+
+        final String pathRequest = ctx.request().path();
+        if (pathRequest == null) {
+            return;
+        }
+
+        for (String path : noSessionTimeoutResetUrls) {
+            if (pathRequest.startsWith(path)) {
+                ctx.put(SESSION_FLUSHED_KEY, true);
+                break;
+            }
+        }
+    }
 }

@@ -65,9 +65,14 @@ public class MiddlewareServerBuilder {
         return withSessionMiddleware(false, false);
     }
 
+    public MiddlewareServerBuilder withSessionMiddleware(List<String> noSessionTimeoutResetPaths) {
+        return withMiddleware(new SessionMiddleware(vertx, "session", null, false, false,
+                null, null, null, null, null, null, noSessionTimeoutResetPaths));
+    }
+
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
         return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie,
-            null, null, null, null, null, null));
+            null, null, null, null, null, null, List.of("/request2")));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {

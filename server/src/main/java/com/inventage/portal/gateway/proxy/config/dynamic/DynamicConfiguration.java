@@ -110,6 +110,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
     public static final String MIDDLEWARE_SESSION_LIFETIME_COOKIE = "lifetimeCookie";
+    public static final String MIDDLEWARE_SESSION_NO_TIMEOUT_RESET_URLS = "noSessionTimeoutResetUrls";
     public static final String MIDDLEWARE_SESSION_LIFETIME_HEADER = "lifetimeHeader";
     public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
