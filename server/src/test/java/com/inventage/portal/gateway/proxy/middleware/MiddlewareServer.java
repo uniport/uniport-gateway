@@ -2,12 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.TestUtils;
 import io.vertx.core.*;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.RequestOptions;
-import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.http.*;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -54,11 +49,11 @@ public class MiddlewareServer {
     }
 
     public void incomingRequest(
-            HttpMethod method,
-            String URI,
-            RequestOptions reqOpts,
-            Handler<HttpClientResponse> responseHandler,
-            MultiMap headers
+        HttpMethod method,
+        String URI,
+        RequestOptions reqOpts,
+        Handler<HttpClientResponse> responseHandler,
+        MultiMap headers
     ) {
         reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method).setHeaders(headers);
         createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
@@ -74,19 +69,21 @@ public class MiddlewareServer {
     }
 
     public void incomingRequest(
-            HttpMethod method,
-            String URI,
-            RequestOptions reqOpts,
-            VertxTestContext testCtx,
-            Handler<HttpClientResponse> responseHandler,
-            MultiMap headers
+        HttpMethod method,
+        String URI,
+        RequestOptions reqOpts,
+        VertxTestContext testCtx,
+        Handler<HttpClientResponse> responseHandler,
+        MultiMap headers
     ) {
         reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method).setHeaders(headers);
         createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
     }
 
-    private void createHttpClientWithRequestOptionsAndResponseHandler(VertxTestContext testCtx, RequestOptions reqOpts,
-        Handler<HttpClientResponse> responseHandler) {
+    private void createHttpClientWithRequestOptionsAndResponseHandler(
+        VertxTestContext testCtx, RequestOptions reqOpts,
+        Handler<HttpClientResponse> responseHandler
+    ) {
         LOGGER.info("requesting '{}'", reqOpts.getURI());
         vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(resp -> {
             responseHandler.handle(resp);

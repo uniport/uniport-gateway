@@ -65,14 +65,14 @@ public class MiddlewareServerBuilder {
         return withSessionMiddleware(false, false);
     }
 
-    public MiddlewareServerBuilder withSessionMiddleware(List<String> noSessionTimeoutResetPaths) {
+    public MiddlewareServerBuilder withSessionMiddleware(String pathsWithoutSessionTimeoutReset) {
         return withMiddleware(new SessionMiddleware(vertx, "session", null, false, false,
-                null, null, null, null, null, null, noSessionTimeoutResetPaths));
+            null, null, null, null, null, null, pathsWithoutSessionTimeoutReset));
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
         return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie,
-            null, null, null, null, null, null, List.of("/request2")));
+            null, null, null, null, null, null, null));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -83,8 +83,10 @@ public class MiddlewareServerBuilder {
         return withMiddleware(new BearerOnlyMiddleware("bearerOnly", JWTAuthHandler.create(authProvider), optional));
     }
 
-    public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(JWTAuth authProvider,
-        JWTAuthAdditionalClaimsOptions options, boolean optional) {
+    public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(
+        JWTAuth authProvider,
+        JWTAuthAdditionalClaimsOptions options, boolean optional
+    ) {
         return withMiddleware(
             new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
                 optional));
@@ -93,8 +95,10 @@ public class MiddlewareServerBuilder {
     /**
      * @return this
      */
-    public MiddlewareServerBuilder withBearerOnlyMiddleware(KeycloakServer mockKeycloakServer,
-        String issuer, List<String> audience, JsonArray publicKeys) {
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(
+        KeycloakServer mockKeycloakServer,
+        String issuer, List<String> audience, JsonArray publicKeys
+    ) {
         try {
             withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys));
         } catch (Throwable t) {

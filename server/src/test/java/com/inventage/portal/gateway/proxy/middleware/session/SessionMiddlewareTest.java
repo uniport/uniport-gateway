@@ -1,5 +1,12 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
+import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
+import static io.vertx.core.http.HttpMethod.GET;
+import static io.vertx.core.http.HttpMethod.POST;
+import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
+
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Vertx;
@@ -7,23 +14,11 @@ import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-
-import org.assertj.core.api.Assertions;
-import org.assertj.core.error.AssertJMultipleFailuresError;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
-import static io.vertx.core.http.HttpMethod.GET;
-import static io.vertx.core.http.HttpMethod.POST;
-import static io.vertx.ext.web.handler.SessionHandler.DEFAULT_SESSION_COOKIE_NAME;
-import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
 public class SessionMiddlewareTest {
@@ -102,7 +97,7 @@ public class SessionMiddlewareTest {
     public void sessionTimeoutNoReset(Vertx vertx, VertxTestContext testCtx) {
         // given
         MiddlewareServer gateway = portalGateway(vertx, testCtx)
-                .withSessionMiddleware(List.of("/request2", "/request3")).build().start();
+            .withSessionMiddleware("/request2").build().start();
         BrowserConnected browser = gateway.connectBrowser();
         HeadersMultiMap headersMultiMap = new HeadersMultiMap();
 
@@ -114,36 +109,31 @@ public class SessionMiddlewareTest {
                 assertThat(response).hasStatusCode(200);
                 vertx.getOrCreateContext();
                 SharedDataSessionImpl sharedDataSession = vertx.sharedData().getLocalMap(DEFAULT_SESSION_MAP_NAME)
-                        .values()
-                        .stream()
-                        .map(item -> (SharedDataSessionImpl) item)
-                        .findFirst()
-                        .orElseThrow();
+                    .values()
+                    .stream()
+                    .map(item -> (SharedDataSessionImpl) item)
+                    .findFirst()
+                    .orElseThrow();
                 sessionId.add(sharedDataSession.id());
                 lastAccessed.add(sharedDataSession.lastAccessed());
 
             })
             .thenCompose(response -> {
-                final String sessionCookie = response.cookies().stream().filter(cookie -> cookie.startsWith(SESSION_COOKIE_NAME_DEFAULT)).findFirst().orElseThrow();
-                System.out.println(SESSION_COOKIE_NAME_DEFAULT + "=" + sessionId.get(0));
                 headersMultiMap.add("cookie", SESSION_COOKIE_NAME_DEFAULT + "=" + sessionId.get(0));
-                System.out.println("session in response: " + sessionCookie);
                 return browser.request(GET, "/request2", headersMultiMap);
             })
             .whenComplete((response, error) -> {
                 // then
-                System.out.println(response);
-
                 assertThat(response)
-                        .hasStatusCode(200);
+                    .hasStatusCode(200);
 
                 vertx.getOrCreateContext();
                 SharedDataSessionImpl sharedDataSession = vertx.sharedData().getLocalMap(DEFAULT_SESSION_MAP_NAME)
-                        .values()
-                        .stream()
-                        .map(item -> (SharedDataSessionImpl) item)
-                        .findFirst()
-                        .orElseThrow();
+                    .values()
+                    .stream()
+                    .map(item -> (SharedDataSessionImpl) item)
+                    .findFirst()
+                    .orElseThrow();
                 Assertions.assertThat(sharedDataSession.id()).isEqualTo(sessionId.get(0));
                 Assertions.assertThat(sharedDataSession.lastAccessed()).isEqualTo(lastAccessed.get(0));
                 testCtx.completeNow();

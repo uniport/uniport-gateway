@@ -6,15 +6,13 @@ import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_K
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class SessionMiddleware implements Middleware {
 
@@ -28,6 +26,7 @@ public class SessionMiddleware implements Middleware {
     public static final CookieSameSite COOKIE_SAME_SITE_DEFAULT = CookieSameSite.STRICT;
     public static final int SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT = 15;
     public static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
+    public static final String SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET_DEFAULT = "";
     public static final boolean NAG_HTTPS_DEFAULT = true;
     public static final boolean SESSION_LIFETIME_HEADER_DEFAULT = false;
     public static final boolean SESSION_LIFETIME_COOKIE_DEFAULT = false;
@@ -45,21 +44,21 @@ public class SessionMiddleware implements Middleware {
 
     private final Handler<RoutingContext> sessionHandler;
 
-    private final List<String> noSessionTimeoutResetUrls;
+    private final Pattern pathsWithoutSessionTimeoutReset;
 
     public SessionMiddleware(
-            Vertx vertx,
-            String name,
-            Long sessionIdleTimeoutInMinutes,
-            Boolean withLifetimeHeader,
-            Boolean withLifetimeCookie,
-            String cookieName,
-            Boolean cookieHttpOnly,
-            Boolean cookieSecure,
-            String cookieSameSite,
-            Integer sessionIdMinLength,
-            Boolean nagHttps,
-            List<String> noSessionTimeoutResetUrls
+        Vertx vertx,
+        String name,
+        Long sessionIdleTimeoutInMinutes,
+        Boolean withLifetimeHeader,
+        Boolean withLifetimeCookie,
+        String cookieName,
+        Boolean cookieHttpOnly,
+        Boolean cookieSecure,
+        String cookieSameSite,
+        Integer sessionIdMinLength,
+        Boolean nagHttps,
+        String pathsWithoutSessionTimeoutReset
 
     ) {
         this.name = name;
@@ -75,7 +74,8 @@ public class SessionMiddleware implements Middleware {
                 cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
             .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
             .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
-        this.noSessionTimeoutResetUrls = noSessionTimeoutResetUrls;
+        this.pathsWithoutSessionTimeoutReset = (pathsWithoutSessionTimeoutReset == null) ? Pattern.compile(SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET_DEFAULT)
+            : Pattern.compile(pathsWithoutSessionTimeoutReset);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class SessionMiddleware implements Middleware {
             ctx.addHeadersEndHandler(v -> responseWithSessionLifetime(ctx));
         }
 
-        noSessionTimeoutResetIfRequestPathMatches(ctx);
+        checkRequestPathIfNoSessionTimeoutResetIsNecessary(ctx);
 
         this.sessionHandler.handle(ctx);
     }
@@ -104,21 +104,19 @@ public class SessionMiddleware implements Middleware {
         }
     }
 
-    private void noSessionTimeoutResetIfRequestPathMatches(RoutingContext ctx) {
-        if (noSessionTimeoutResetUrls == null) {
+    private void checkRequestPathIfNoSessionTimeoutResetIsNecessary(RoutingContext ctx) {
+        if (pathsWithoutSessionTimeoutReset == null) {
             return;
         }
 
-        final String pathRequest = ctx.request().path();
-        if (pathRequest == null) {
+        final String requestUri = ctx.request().uri();
+        if (requestUri == null) {
             return;
         }
 
-        for (String path : noSessionTimeoutResetUrls) {
-            if (pathRequest.startsWith(path)) {
-                ctx.put(SESSION_FLUSHED_KEY, true);
-                break;
-            }
+        if (this.pathsWithoutSessionTimeoutReset.matcher(requestUri).matches()) {
+            LOGGER.debug("'{}' request uri matches pathsWithoutSessionTimeoutReset, hence no session timeout reset.", name);
+            ctx.put(SESSION_FLUSHED_KEY, true);
         }
     }
 }

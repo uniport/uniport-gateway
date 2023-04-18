@@ -9,12 +9,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -687,6 +682,22 @@ public class DynamicConfigurationTest {
                                     .add(123)
                                     .add(true))))))));
 
+        JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+            TestUtils.withMiddleware(
+                "sessionMiddleware",
+                DynamicConfiguration.MIDDLEWARE_SESSION,
+                TestUtils.withMiddlewareOpts(
+                    new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, true)
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET, "/request")
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+
         // the sole purpose of the following variable are to improve readability
         boolean expectedTrue = true;
         boolean expectedFalse = false;
@@ -800,6 +811,10 @@ public class DynamicConfigurationTest {
             Arguments.of("reject csp middleware with invalid values",
                 cspMiddlewareWithInvalidValues, complete,
                 expectedFalse),
+
+            // session middleware
+            Arguments.of("accept session middleware",
+                sessionMiddleware, complete, expectedTrue),
 
             // services
             Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),
@@ -1017,8 +1032,10 @@ public class DynamicConfigurationTest {
 
     @ParameterizedTest
     @MethodSource("validateTestData")
-    void validateTest(String name, JsonObject json, Boolean complete, Boolean expected, Vertx vertx,
-        VertxTestContext testCtx) {
+    void validateTest(
+        String name, JsonObject json, Boolean complete, Boolean expected, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
 
         DynamicConfiguration.validate(vertx, json, complete).onComplete(ar -> {
             if (ar.succeeded() && expected || ar.failed() && !expected) {
@@ -1045,8 +1062,10 @@ public class DynamicConfigurationTest {
 
     @ParameterizedTest
     @MethodSource("isEmptyConfigurationTestData")
-    void isEmptyConfigurationTest(String name, JsonObject json, boolean expected, Vertx vertx,
-        VertxTestContext testCtx) {
+    void isEmptyConfigurationTest(
+        String name, JsonObject json, boolean expected, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'", name,
             expected ? "succeeded" : "failed", json != null ? json.encodePrettily() : json);
         testCtx.verify(() -> assertEquals(expected, DynamicConfiguration.isEmptyConfiguration(json), errMsg));
@@ -1055,8 +1074,10 @@ public class DynamicConfigurationTest {
 
     @ParameterizedTest
     @MethodSource("mergeTestData")
-    void mergeTest(String name, Map<String, JsonObject> configurations, JsonObject expected, Vertx vertx,
-        VertxTestContext testCtx) {
+    void mergeTest(
+        String name, Map<String, JsonObject> configurations, JsonObject expected, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         String errMsg = String.format("'%s' failed. Input: '%s'", name, configurations);
 
         Comparator<JsonObject> sortByName = new Comparator<JsonObject>() {
@@ -1102,8 +1123,10 @@ public class DynamicConfigurationTest {
 
     @ParameterizedTest
     @MethodSource("getObjByKeyWithValueTestData")
-    void getObjByKeyWithValueTest(String name, JsonArray arr, String key, String value, JsonObject expected,
-        Vertx vertx, VertxTestContext testCtx) {
+    void getObjByKeyWithValueTest(
+        String name, JsonArray arr, String key, String value, JsonObject expected,
+        Vertx vertx, VertxTestContext testCtx
+    ) {
         String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'", name,
             arr != null ? arr.encodePrettily() : arr, key, value);
         testCtx.verify(
