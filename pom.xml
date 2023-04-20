@@ -35,7 +35,7 @@
         <jib.goal>build</jib.goal>
 
         <portal-helm-chart-library.version>4.2.0-202303042317-175-49efbc0</portal-helm-chart-library.version>
-        <portal-code-style-version.version>1.0.0-SNAPSHOT</portal-code-style-version.version>
+        <portal-code-style-version.version>1.0.0-202304201455-34-34cf04e</portal-code-style-version.version>
     </properties>
 
     <dependencyManagement>
@@ -217,7 +217,7 @@
             <dependency>
                 <groupId>com.inventage.portal</groupId>
                 <artifactId>codestyle</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${portal-code-style-version.version}</version>
                 <type>zip</type>
             </dependency>
         </dependencies>
@@ -380,8 +380,8 @@
                     <configuration>
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude.xml</excludeFilterFile>
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude-specific.xml</excludeFilterFile>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude-specific.xml</excludeFilterFile>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -447,7 +447,7 @@
                                 <fileset>
                                     <directory>${project.basedir}</directory>
                                     <includes>
-                                        <include>.build-tools/**/*</include>
+                                        <include>.code-style-settings/**/*</include>
                                         <include>.idea/**/*</include>
                                         <include>.vscode/**/*</include>
                                     </includes>
@@ -481,7 +481,6 @@
                                     <artifactId>codestyle</artifactId>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
-                                    <excludes>META-INF/</excludes>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.basedir}</outputDirectory>
@@ -506,8 +505,8 @@
                                 <include>.jenkins/Jenkinsfile.build</include>
                             </includes>
 
-                            <trimTrailingWhitespace></trimTrailingWhitespace>
-                            <endWithNewline></endWithNewline>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
                             <indent>
                                 <spaces>true</spaces>
                                 <spacesPerTab>4</spacesPerTab>
@@ -520,15 +519,15 @@
                             <include>**/src/test/java/**/*.java</include>
                         </includes>
 
-                        <importOrder></importOrder>
-                        <removeUnusedImports></removeUnusedImports>
+                        <importOrder/>
+                        <removeUnusedImports/>
 
                         <eclipse>
-                            <file>${maven.multiModuleProjectDirectory}/.build-tools/portal-java-formatter.xml</file>
+                            <file>${maven.multiModuleProjectDirectory}/.code-style-settings/portal-java-formatter.xml</file>
                         </eclipse>
 
                         <!-- Has to be last (See: https://github.com/diffplug/spotless/tree/main/plugin-maven#formatannotations= -->
-                        <formatAnnotations></formatAnnotations>
+                        <formatAnnotations/>
                     </java>
                     <pom>
                         <includes>
@@ -568,8 +567,8 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <consoleOutput>true</consoleOutput>
-                    <configLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/config.xml</configLocation>
-                    <suppressionsLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/suppressions.xml</suppressionsLocation>
+                    <configLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/config.xml</configLocation>
+                    <suppressionsLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/suppressions.xml</suppressionsLocation>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -585,7 +584,7 @@
                 <artifactId>git-build-hook-maven-plugin</artifactId>
                 <configuration>
                     <installHooks>
-                        <pre-commit>.build-tools/hooks/pre-commit</pre-commit>
+                        <pre-commit>.code-style-settings/hooks/pre-commit</pre-commit>
                     </installHooks>
                 </configuration>
                 <executions>

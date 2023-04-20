@@ -1,5 +1,5 @@
 {
-    "java.format.settings.url": ".build-tools/portal-java-formatter.xml",
+    "java.format.settings.url": ".code-style-settings/portal-java-formatter.xml",
     "java.format.settings.profile": "PortalStyle",
-    "java.checkstyle.configuration": "${workspaceFolder}/.build-tools/checkstyle/config.xml"
+    "java.checkstyle.configuration": "${workspaceFolder}/.code-style-settings/checkstyle/config.xml"
 }
