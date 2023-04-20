@@ -485,8 +485,8 @@
                                 <include>.jenkins/Jenkinsfile.build</include>
                             </includes>
 
-                            <trimTrailingWhitespace></trimTrailingWhitespace>
-                            <endWithNewline></endWithNewline>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
                             <indent>
                                 <spaces>true</spaces>
                                 <spacesPerTab>4</spacesPerTab>
@@ -499,15 +499,15 @@
                             <include>**/src/test/java/**/*.java</include>
                         </includes>
 
-                        <importOrder></importOrder>
-                        <removeUnusedImports></removeUnusedImports>
+                        <importOrder/>
+                        <removeUnusedImports/>
 
                         <eclipse>
                             <file>${maven.multiModuleProjectDirectory}/.build-tools/portal-java-formatter.xml</file>
                         </eclipse>
 
                         <!-- Has to be last (See: https://github.com/diffplug/spotless/tree/main/plugin-maven#formatannotations= -->
-                        <formatAnnotations></formatAnnotations>
+                        <formatAnnotations/>
                     </java>
                     <pom>
                         <includes>
@@ -515,6 +515,7 @@
                         </includes>
                         <sortPom>
                             <nrOfIndentSpace>4</nrOfIndentSpace>
+                            <expandEmptyElements>false</expandEmptyElements>
                         </sortPom>
                     </pom>
                     <json>
