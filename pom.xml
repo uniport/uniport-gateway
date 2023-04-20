@@ -431,6 +431,37 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- remove code-style-settings first to delete not anymore present files in the download -->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>remove-code-style-settings</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <phase>clean</phase>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>.build-tools/**/*</include>
+                                        <include>.idea/**/*</include>
+                                        <include>.vscode/**/*</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>**/*specific*</exclude>
+                                        <exclude>**/encodings.xml</exclude>
+                                        <exclude>**/runConfigurations/*</exclude>
+                                    </excludes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- download shared code style -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
