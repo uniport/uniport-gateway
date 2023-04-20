@@ -35,7 +35,7 @@
         <jib.goal>build</jib.goal>
 
         <portal-helm-chart-library.version>4.2.0-202303042317-175-49efbc0</portal-helm-chart-library.version>
-        <portal-code-style-version.version>1.0.0-202304201455-34-34cf04e</portal-code-style-version.version>
+        <portal-code-style-version.version>1.0.0-202304201544-36-0469d3c</portal-code-style-version.version>
     </properties>
 
     <dependencyManagement>
@@ -454,6 +454,7 @@
                                     <excludes>
                                         <exclude>**/*specific*</exclude>
                                         <exclude>**/encodings.xml</exclude>
+                                        <exclude>**/dataSources.xml</exclude>
                                         <exclude>**/runConfigurations/*</exclude>
                                     </excludes>
                                 </fileset>
