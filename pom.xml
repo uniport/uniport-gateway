@@ -525,9 +525,6 @@
                         <eclipse>
                             <file>${maven.multiModuleProjectDirectory}/.code-style-settings/portal-java-formatter.xml</file>
                         </eclipse>
-
-                        <!-- Has to be last (See: https://github.com/diffplug/spotless/tree/main/plugin-maven#formatannotations= -->
-                        <formatAnnotations/>
                     </java>
                     <pom>
                         <includes>
