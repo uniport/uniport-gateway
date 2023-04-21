@@ -29,6 +29,7 @@ public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory
      *            auth endpoint containing the patch to be patched.
      * @return the patched URL.
      */
+    @Override
     protected String patchPath(String publicUrl, URI keycloakAuthorizationEndpoint) {
         final String registrationPath = keycloakAuthorizationEndpoint.getPath().replace(AUTH_ENDPOINT, REGISTRATION_ENDPOINT);
         return String.format("%s%s", publicUrl, registrationPath);
