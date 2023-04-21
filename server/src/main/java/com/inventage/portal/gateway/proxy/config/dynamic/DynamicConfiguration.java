@@ -856,7 +856,8 @@ public class DynamicConfiguration {
                     }
                     final String pathsWithoutSessionTimeoutReset = mwOptions.getString(MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET);
                     if (pathsWithoutSessionTimeoutReset == null) {
-                        LOGGER.debug(String.format("%s: PathsWithoutSessionTimeoutReset settings not specified. Use default setting", mwType));
+                        LOGGER.debug(String.format("%s: PathsWithoutSessionTimeoutReset settings not specified. Use default setting: '%s'", mwType,
+                            SessionMiddleware.SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET_DEFAULT));
                     }
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {
