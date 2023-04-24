@@ -60,7 +60,7 @@ public class PortalGatewayConfigRetriever {
 
     protected static Optional<Path> getPathFor(String fileName, String logMessage) {
         if (existsAsFile(fileName)) {
-            LOGGER.info(logMessage, fileName);
+            LOGGER.info(logMessage, new File(fileName).getAbsolutePath());
             return Optional.of(Path.of(fileName));
         } else {
             if (fileName == null) {
