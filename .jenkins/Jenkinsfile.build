@@ -110,7 +110,7 @@ pipeline {
                         junit testResults: '**/target/surefire-reports/TEST-*.xml'
                     },
                     'IQ Evaluation': {
-                        iqEvaluation('inventage-portal-gateway', 'build', '**/target/quarkus-app/lib/**/')
+                        iqEvaluation('inventage-portal-gateway', 'build', '**/target/bom.xml')
                     },
                     'Code Quality': {
                         codeQualityEvaluation()

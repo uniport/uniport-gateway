@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Maven Dependency that generates an SBom with all dependencies for CLM Analysis ([PORTAL-1017](https://issue.inventage.com/browse/PORTAL-1017)).
 - "httpsOptions" configuration to define the outgoing HTTPS connection ([PORTAL-1296](https://issue.inventage.com/browse/PORTAL-1296)).
 
 ### Changed
