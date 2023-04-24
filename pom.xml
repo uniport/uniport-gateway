@@ -35,7 +35,7 @@
         <jib.goal>build</jib.goal>
 
         <portal-helm-chart-library.version>4.2.0-202303042317-175-49efbc0</portal-helm-chart-library.version>
-        <portal-code-style-version.version>1.0.0-SNAPSHOT</portal-code-style-version.version>
+        <portal-code-style-version.version>1.0.0-202304241247-39-2f7aa66</portal-code-style-version.version>
     </properties>
 
     <dependencyManagement>
@@ -187,7 +187,7 @@
                 <artifactId>grpc-netty-shaded</artifactId>
                 <version>1.45.0</version>
             </dependency>
-            <!-- OpenTelemtry BOM -->
+            <!-- OpenTelemetry BOM -->
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-bom</artifactId>
@@ -213,11 +213,11 @@
                 <artifactId>assertj-core</artifactId>
                 <version>3.24.1</version>
             </dependency>
-            <!-- shared codestyle settings -->
+            <!-- shared code-style-settings settings -->
             <dependency>
                 <groupId>com.inventage.portal</groupId>
-                <artifactId>codestyle</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <artifactId>code-style-settings</artifactId>
+                <version>${portal-code-style-version.version}</version>
                 <type>zip</type>
             </dependency>
         </dependencies>
@@ -369,28 +369,10 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!--
-                    For checkstyle reports
-                    @see http://maven.apache.org/plugins/maven-checkstyle-plugin/index.html
-                -->
                 <plugin>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.2.1</version>
-                    <configuration>
-                        <consoleOutput>true</consoleOutput>
-                        <configLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/config.xml</configLocation>
-                        <suppressionsLocation>${maven.multiModuleProjectDirectory}/.build-tools/checkstyle/suppressions.xml</suppressionsLocation>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <!-- Keep same version as used by the IntelliJ plugin, see IntelliJ IDEA > Preferences > Tools > Checkstyle -->
-                            <version>10.7.0</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
-                <!-- For spotbug reports -->
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
@@ -398,8 +380,19 @@
                     <configuration>
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.build-tools/spotbugs/exclude-specific.xml</excludeFilterFile>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude-specific.xml</excludeFilterFile>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.35.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.rudikershaw.gitbuildhook</groupId>
+                    <artifactId>git-build-hook-maven-plugin</artifactId>
+                    <version>3.4.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -438,11 +431,42 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- remove code-style-settings first to delete not anymore present files in the download -->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>remove-code-style-settings</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <phase>clean</phase>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>.code-style-settings/**/*</include>
+                                        <include>.idea/**/*</include>
+                                        <include>.vscode/**/*</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>**/*specific*</exclude>
+                                        <exclude>**/encodings.xml</exclude>
+                                        <exclude>**/dataSources.xml</exclude>
+                                        <exclude>**/runConfigurations/*</exclude>
+                                    </excludes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- download shared code style -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>unpack-zip</id>
@@ -455,11 +479,9 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.inventage.portal</groupId>
-                                    <artifactId>codestyle</artifactId>
-                                    <version>${portal-code-style-version.version}</version>
+                                    <artifactId>code-style-settings</artifactId>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
-                                    <excludes>META-INF/</excludes>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.basedir}</outputDirectory>
@@ -471,7 +493,6 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.35.0</version>
                 <!-- See https://github.com/diffplug/spotless/tree/maven/2.35.0/plugin-maven -->
                 <configuration>
                     <!-- limit format enforcement to just the files changed by this feature branch -->
@@ -503,11 +524,8 @@
                         <removeUnusedImports/>
 
                         <eclipse>
-                            <file>${maven.multiModuleProjectDirectory}/.build-tools/portal-java-formatter.xml</file>
+                            <file>${maven.multiModuleProjectDirectory}/.code-style-settings/portal-java-formatter.xml</file>
                         </eclipse>
-
-                        <!-- Has to be last (See: https://github.com/diffplug/spotless/tree/main/plugin-maven#formatannotations= -->
-                        <formatAnnotations/>
                     </java>
                     <pom>
                         <includes>
@@ -539,13 +557,32 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                    For checkstyle reports
+                    @see http://maven.apache.org/plugins/maven-checkstyle-plugin/index.html
+                -->
+            <plugin>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <consoleOutput>true</consoleOutput>
+                    <configLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/config.xml</configLocation>
+                    <suppressionsLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/suppressions.xml</suppressionsLocation>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <!-- Keep same version as used by the IntelliJ plugin, see IntelliJ IDEA > Preferences > Tools > Checkstyle -->
+                        <version>10.7.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <plugin>
                 <groupId>com.rudikershaw.gitbuildhook</groupId>
                 <artifactId>git-build-hook-maven-plugin</artifactId>
-                <version>3.4.1</version>
                 <configuration>
                     <installHooks>
-                        <pre-commit>.build-tools/hooks/pre-commit</pre-commit>
+                        <pre-commit>.code-style-settings/hooks/pre-commit</pre-commit>
                     </installHooks>
                 </configuration>
                 <executions>

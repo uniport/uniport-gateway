@@ -10,10 +10,10 @@
         <property name="onCommentFormat" value="CHECKSTYLE ON"/>
     </module>
     <module name="SuppressionFilter">
-        <property name="file" value=".build-tools/checkstyle/suppressions.xml"/>
+        <property name="file" value=".code-style-settings/checkstyle/suppressions.xml"/>
     </module>
     <module name="SuppressionFilter">
-        <property name="file" value=".build-tools/checkstyle/suppressions-specific.xml"/>
+        <property name="file" value=".code-style-settings/checkstyle/suppressions-specific.xml"/>
         <property name="optional" value="true"/>
     </module>
     <module name="TreeWalker">
