@@ -42,34 +42,34 @@ public class PortalGatewayConfigRetriever {
         return ConfigRetriever.create(vertx, getOrCreateOptions());
     }
 
+    /**
+     * Check the 4 places for existence, first one wins.
+     *
+     * @return the path to the static config file
+     */
     public static Optional<Path> getStaticConfigPath() {
-        // 1.
-        String staticConfigFileName = System.getenv(PROPERTY);
-        if (existsAsFile(staticConfigFileName)) {
-            LOGGER.info("Reading from system env variable as '{}'", staticConfigFileName);
-            return Optional.of(Path.of(staticConfigFileName));
+        return getPathFor(System.getenv(PROPERTY), "reading from system env variable '" + PROPERTY + "' as '{}'")
+            .or(() -> getPathFor(System.getProperty(PROPERTY), "reading from system property '" + PROPERTY + "' as '{}'"))
+            .or(() -> getPathFor(String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME), "reading from default file '{}'"))
+            .or(() -> getPathFor(String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME), "reading from default file within working directory '{}'"))
+            .or(() -> {
+                LOGGER.warn("No portal-gateway.json file found, working directory is '{}'", new File(LOCAL_CONFIG_FILE_PATH).getAbsolutePath());
+                return Optional.empty();
+            });
+    }
+
+    protected static Optional<Path> getPathFor(String fileName, String logMessage) {
+        if (existsAsFile(fileName)) {
+            LOGGER.info(logMessage, fileName);
+            return Optional.of(Path.of(fileName));
+        } else {
+            if (fileName == null) {
+                LOGGER.debug("Failed " + logMessage, fileName);
+            } else {
+                LOGGER.debug("Failed " + logMessage, new File(fileName).getAbsolutePath());
+            }
+            return Optional.empty();
         }
-        // 2.
-        staticConfigFileName = System.getProperty(PROPERTY);
-        if (existsAsFile(staticConfigFileName)) {
-            LOGGER.info("Reading from system property as '{}'", staticConfigFileName);
-            return Optional.of(Path.of(staticConfigFileName));
-        }
-        // 3.
-        staticConfigFileName = String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
-        if (existsAsFile(staticConfigFileName)) {
-            LOGGER.info("Reading from default file '{}'", staticConfigFileName);
-            return Optional.of(Path.of(staticConfigFileName));
-        }
-        // 4.
-        staticConfigFileName = String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME);
-        if (existsAsFile(staticConfigFileName)) {
-            LOGGER.info("Reading from default file within working directory '{}'",
-                staticConfigFileName);
-            return Optional.of(Path.of(staticConfigFileName));
-        }
-        LOGGER.warn("No portal-gateway.json file configured");
-        return Optional.empty();
     }
 
     /**
