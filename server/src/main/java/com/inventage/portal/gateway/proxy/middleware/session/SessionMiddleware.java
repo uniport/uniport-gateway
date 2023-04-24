@@ -14,6 +14,9 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Middleware for customizing the session management.
+ */
 public class SessionMiddleware implements Middleware {
 
     public static final String SESSION_COOKIE_NAME_DEFAULT = "uniport.session";
@@ -26,7 +29,6 @@ public class SessionMiddleware implements Middleware {
     public static final CookieSameSite COOKIE_SAME_SITE_DEFAULT = CookieSameSite.STRICT;
     public static final int SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT = 15;
     public static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
-    public static final String SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET_DEFAULT = "";
     public static final boolean NAG_HTTPS_DEFAULT = true;
     public static final boolean SESSION_LIFETIME_HEADER_DEFAULT = false;
     public static final boolean SESSION_LIFETIME_COOKIE_DEFAULT = false;
@@ -44,8 +46,34 @@ public class SessionMiddleware implements Middleware {
 
     private final Handler<RoutingContext> sessionHandler;
 
-    private final Pattern pathsWithoutSessionTimeoutReset;
+    private final Pattern uriPatternForIgnoringSessionTimeoutReset;
 
+    /**
+     * @param vertx
+     *            current instance of Vert.x
+     * @param name
+     *            name for this SessionMiddleware instance
+     * @param sessionIdleTimeoutInMinutes
+     *            default is 15 minutes
+     * @param withLifetimeHeader
+     *            switch if session lifetime header should be set
+     * @param withLifetimeCookie
+     *            switch if session lifetime cookie should be set
+     * @param cookieName
+     *            name of the session cookie
+     * @param cookieHttpOnly
+     *            switch if the session cookie can only be accessed by the browser (and not via JS)
+     * @param cookieSecure
+     *            switch if the session cookie is marked as secure
+     * @param cookieSameSite
+     *            same site settings for the session cookie
+     * @param sessionIdMinLength
+     *            length of the session id
+     * @param nagHttps
+     *            switch if a nagging log should be written when access is not via HTTPS
+     * @param uriWithoutSessionIdleTimeoutReset
+     *            null or regex for specifying uri with no session timeout reset
+     */
     public SessionMiddleware(
         Vertx vertx,
         String name,
@@ -58,7 +86,7 @@ public class SessionMiddleware implements Middleware {
         String cookieSameSite,
         Integer sessionIdMinLength,
         Boolean nagHttps,
-        String pathsWithoutSessionTimeoutReset
+        String uriWithoutSessionIdleTimeoutReset
 
     ) {
         this.name = name;
@@ -74,8 +102,7 @@ public class SessionMiddleware implements Middleware {
                 cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
             .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
             .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
-        this.pathsWithoutSessionTimeoutReset = (pathsWithoutSessionTimeoutReset == null) ? Pattern.compile(SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET_DEFAULT)
-            : Pattern.compile(pathsWithoutSessionTimeoutReset);
+        this.uriPatternForIgnoringSessionTimeoutReset = uriWithoutSessionIdleTimeoutReset == null ? null : Pattern.compile(uriWithoutSessionIdleTimeoutReset);
     }
 
     @Override
@@ -85,7 +112,7 @@ public class SessionMiddleware implements Middleware {
             ctx.addHeadersEndHandler(v -> responseWithSessionLifetime(ctx));
         }
 
-        checkRequestPathIfNoSessionTimeoutResetIsNecessary(ctx);
+        checkForSessionTimeoutReset(ctx);
 
         this.sessionHandler.handle(ctx);
     }
@@ -104,8 +131,8 @@ public class SessionMiddleware implements Middleware {
         }
     }
 
-    private void checkRequestPathIfNoSessionTimeoutResetIsNecessary(RoutingContext ctx) {
-        if (pathsWithoutSessionTimeoutReset == null) {
+    private void checkForSessionTimeoutReset(RoutingContext ctx) {
+        if (uriPatternForIgnoringSessionTimeoutReset == null) {
             return;
         }
 
@@ -114,9 +141,13 @@ public class SessionMiddleware implements Middleware {
             return;
         }
 
-        if (this.pathsWithoutSessionTimeoutReset.matcher(requestUri).matches()) {
-            LOGGER.debug("'{}' request uri matches pathsWithoutSessionTimeoutReset, hence no session timeout reset.", name);
+        if (isRequestUriMatching(requestUri)) {
             ctx.put(SESSION_FLUSHED_KEY, true);
+            LOGGER.debug("Ignored for uri '{}'", requestUri);
         }
+    }
+
+    protected boolean isRequestUriMatching(String requestUri) {
+        return uriPatternForIgnoringSessionTimeoutReset.matcher(requestUri).matches();
     }
 }

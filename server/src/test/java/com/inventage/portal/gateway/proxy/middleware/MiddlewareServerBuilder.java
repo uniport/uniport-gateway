@@ -65,9 +65,9 @@ public class MiddlewareServerBuilder {
         return withSessionMiddleware(false, false);
     }
 
-    public MiddlewareServerBuilder withSessionMiddleware(String pathsWithoutSessionTimeoutReset) {
+    public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset) {
         return withMiddleware(new SessionMiddleware(vertx, "session", null, false, false,
-            null, null, null, null, null, null, pathsWithoutSessionTimeoutReset));
+            null, null, null, null, null, null, uriWithoutSessionTimeoutReset));
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {

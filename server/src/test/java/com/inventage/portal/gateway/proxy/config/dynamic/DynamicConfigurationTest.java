@@ -691,7 +691,22 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
                         .put(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
                         .put(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, true)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET, "/request")
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*")
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
+                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+
+        JsonObject sessionMiddlewareMinimal = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+            TestUtils.withMiddleware(
+                "sessionMiddleware",
+                DynamicConfiguration.MIDDLEWARE_SESSION,
+                TestUtils.withMiddlewareOpts(
+                    new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
+                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, true)
                         .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
@@ -815,6 +830,8 @@ public class DynamicConfigurationTest {
             // session middleware
             Arguments.of("accept session middleware",
                 sessionMiddleware, complete, expectedTrue),
+            Arguments.of("accept minimal session middleware",
+                sessionMiddlewareMinimal, complete, expectedTrue),
 
             // services
             Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),

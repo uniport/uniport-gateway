@@ -37,12 +37,12 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         final Boolean nagHttps = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS);
         final Boolean lifetimeHeader = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_HEADER);
         final Boolean lifetimeCookie = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_COOKIE);
-        final String pathsWithoutSessionTimeoutReset = middlewareConfig
-            .getString(DynamicConfiguration.MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET);
+        final String pathWithoutSessionTimeoutReset = middlewareConfig
+            .getString(DynamicConfiguration.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
 
         LOGGER.info("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_SESSION);
         return Future.succeededFuture(new SessionMiddleware(vertx, name, sessionIdleTimeoutInMinutes, lifetimeHeader, lifetimeCookie, cookieName,
-            cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength, nagHttps, pathsWithoutSessionTimeoutReset));
+            cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength, nagHttps, pathWithoutSessionTimeoutReset));
     }
 }

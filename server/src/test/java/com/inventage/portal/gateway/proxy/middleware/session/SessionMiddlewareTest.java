@@ -97,7 +97,7 @@ public class SessionMiddlewareTest {
     public void sessionTimeoutNoReset(Vertx vertx, VertxTestContext testCtx) {
         // given
         MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withSessionMiddleware("/request2").build().start();
+            .withSessionMiddleware("^/(request2|request3).*").build().start();
         BrowserConnected browser = gateway.connectBrowser();
         HeadersMultiMap headersMultiMap = new HeadersMultiMap();
 
@@ -108,36 +108,31 @@ public class SessionMiddlewareTest {
             .whenComplete((response, error) -> {
                 assertThat(response).hasStatusCode(200);
                 vertx.getOrCreateContext();
-                SharedDataSessionImpl sharedDataSession = vertx.sharedData().getLocalMap(DEFAULT_SESSION_MAP_NAME)
-                    .values()
-                    .stream()
-                    .map(item -> (SharedDataSessionImpl) item)
-                    .findFirst()
-                    .orElseThrow();
+                SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 sessionId.add(sharedDataSession.id());
                 lastAccessed.add(sharedDataSession.lastAccessed());
-
             })
             .thenCompose(response -> {
                 headersMultiMap.add("cookie", SESSION_COOKIE_NAME_DEFAULT + "=" + sessionId.get(0));
-                return browser.request(GET, "/request2", headersMultiMap);
+                return browser.request(GET, "/request2?key=value", headersMultiMap);
             })
             .whenComplete((response, error) -> {
                 // then
-                assertThat(response)
-                    .hasStatusCode(200);
-
+                assertThat(response).hasStatusCode(200);
                 vertx.getOrCreateContext();
-                SharedDataSessionImpl sharedDataSession = vertx.sharedData().getLocalMap(DEFAULT_SESSION_MAP_NAME)
-                    .values()
-                    .stream()
-                    .map(item -> (SharedDataSessionImpl) item)
-                    .findFirst()
-                    .orElseThrow();
+                SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 Assertions.assertThat(sharedDataSession.id()).isEqualTo(sessionId.get(0));
                 Assertions.assertThat(sharedDataSession.lastAccessed()).isEqualTo(lastAccessed.get(0));
                 testCtx.completeNow();
             });
     }
 
+    private SharedDataSessionImpl getSharedDataSession(Vertx vertx) {
+        return vertx.sharedData().getLocalMap(DEFAULT_SESSION_MAP_NAME)
+            .values()
+            .stream()
+            .map(item -> (SharedDataSessionImpl) item)
+            .findFirst()
+            .orElseThrow();
+    }
 }

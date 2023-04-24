@@ -110,7 +110,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
     public static final String MIDDLEWARE_SESSION_LIFETIME_COOKIE = "lifetimeCookie";
-    public static final String MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET = "pathsWithoutSessionTimeoutReset";
+    public static final String MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
     public static final String MIDDLEWARE_SESSION_LIFETIME_HEADER = "lifetimeHeader";
     public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
@@ -233,7 +233,7 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
-            .property(MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET, Schemas.stringSchema())
+            .optionalProperty(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema())
@@ -854,10 +854,9 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format("%s: LifetimeCookie not specified. Use default value: %s", mwType,
                             SessionMiddleware.SESSION_LIFETIME_COOKIE_DEFAULT));
                     }
-                    final String pathsWithoutSessionTimeoutReset = mwOptions.getString(MIDDLEWARE_SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET);
-                    if (pathsWithoutSessionTimeoutReset == null) {
-                        LOGGER.debug(String.format("%s: PathsWithoutSessionTimeoutReset settings not specified. Use default setting: '%s'", mwType,
-                            SessionMiddleware.SESSION_PATHS_WITHOUT_SESSION_TIMEOUT_RESET_DEFAULT));
+                    final String uriWithoutSessionTimeoutReset = mwOptions.getString(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+                    if (uriWithoutSessionTimeoutReset == null) {
+                        LOGGER.debug(String.format("%s: URI without session timeout reset not specified.", mwType));
                     }
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
                     if (cookie == null) {
