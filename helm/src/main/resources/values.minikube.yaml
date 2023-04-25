@@ -1,2 +1,76 @@
 ingress:
   host: portal.minikube
+
+containers:
+  portal-gateway:
+    storages:
+      proxy-config:
+        type: configMap
+        configMapName: portal-gateway-proxy-config
+        mountPath: /etc/portal-gateway/default
+        items:
+          - key: portal-gateway.json
+            path: portal-gateway.json
+          - key: dynamic-config..analytics..config.json
+            path: dynamic-config/analytics/config.json
+          - key: dynamic-config..auth..config.json
+            path: dynamic-config/auth/config.json
+          - key: dynamic-config..base..config.json
+            path: dynamic-config/base/config.json
+          - key: dynamic-config..content..config.json
+            path: dynamic-config/content/config.json
+          - key: dynamic-config..conversation..config.json
+            path: dynamic-config/conversation/config.json
+          - key: dynamic-config..dashboard..config.json
+            path: dynamic-config/dashboard/config.json
+          - key: dynamic-config..filestorage..config.json
+            path: dynamic-config/filestorage/config.json
+          - key: dynamic-config..general..config.json
+            path: dynamic-config/general/config.json
+          - key: dynamic-config..notification..config.json
+            path: dynamic-config/notification/config.json
+          - key: dynamic-config..organisation..config.json
+            path: dynamic-config/organisation/config.json
+          - key: dynamic-config..portal-database..config.json
+            path: dynamic-config/portal-database/config.json
+          - key: dynamic-config..portal-iam..config.json
+            path: dynamic-config/portal-iam/config.json
+          - key: dynamic-config..portal-messaging..config.json
+            path: dynamic-config/portal-messaging/config.json
+          - key: dynamic-config..portal-monitoring..config.json
+            path: dynamic-config/portal-monitoring/config.json
+
+configMaps:
+  portal-gateway-proxy-config:
+    enabled: true
+    data:
+      portal-gateway.json:
+        valueFromFile: proxy-config.examples/portal-gateway.json
+      dynamic-config..analytics..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/analytics/config.json
+      dynamic-config..auth..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/auth/config.json
+      dynamic-config..base..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/base/config.json
+      dynamic-config..content..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/content/config.json
+      dynamic-config..conversation..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/conversation/config.json
+      dynamic-config..dashboard..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/dashboard/config.json
+      dynamic-config..filestorage..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/filestorage/config.json
+      dynamic-config..general..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/general/config.json
+      dynamic-config..notification..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/notification/config.json
+      dynamic-config..organisation..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/organisation/config.json
+      dynamic-config..portal-database..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/portal-database/config.json
+      dynamic-config..portal-iam..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/portal-iam/config.json
+      dynamic-config..portal-messaging..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/portal-messaging/config.json
+      dynamic-config..portal-monitoring..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/portal-monitoring/config.json
