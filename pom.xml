@@ -456,6 +456,9 @@
                                         <exclude>**/encodings.xml</exclude>
                                         <exclude>**/dataSources.xml</exclude>
                                         <exclude>**/runConfigurations/*</exclude>
+                                        <exclude>.idea/shelf/**/*</exclude>
+                                        <exclude>.idea/vcs.xml</exclude>
+                                        <exclude>.idea/misc.xml</exclude>
                                     </excludes>
                                 </fileset>
                             </filesets>
