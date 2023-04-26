@@ -173,16 +173,8 @@ public class DynamicConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicConfiguration.class);
     private static Validator validator;
 
-    private static Validator buildValidator(Vertx vertx) {
-        final ObjectSchemaBuilder routerSchema = buildRouterSchema();
-        final ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
-        final ObjectSchemaBuilder serviceSchema = buildServiceSchema();
-        final ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
-
-        final ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
-            .allowAdditionalProperties(false);
-
-        final JsonSchema schema = JsonSchema.of(dynamicConfigBuilder.toJson());
+    private static Validator buildValidator() {
+        final JsonSchema schema = buildSchema();
         final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
             .setBaseUri("https://inventage.com/portal-gateway/dynamic-configuration");
         return Validator.create(schema, options);
@@ -417,6 +409,20 @@ public class DynamicConfiguration {
         return null;
     }
 
+    public static JsonSchema buildSchema() {
+        final ObjectSchemaBuilder routerSchema = buildRouterSchema();
+        final ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
+        final ObjectSchemaBuilder serviceSchema = buildServiceSchema();
+        final ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
+
+        final ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
+            .allowAdditionalProperties(false);
+
+        final JsonSchema schema = JsonSchema.of(dynamicConfigBuilder.toJson());
+
+        return schema;
+    }
+
     /**
      * Validates a JSON object representing a dynamic configuration instance.
      *
@@ -432,7 +438,7 @@ public class DynamicConfiguration {
      */
     public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
         if (validator == null) {
-            validator = buildValidator(vertx);
+            validator = buildValidator();
         }
 
         final Promise<Void> validPromise = Promise.promise();

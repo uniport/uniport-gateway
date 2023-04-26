@@ -59,7 +59,14 @@ public class StaticConfiguration {
     private StaticConfiguration() {
     }
 
-    private static Validator buildValidator(Vertx vertx) {
+    private static Validator buildValidator() {
+        final JsonSchema schema = buildSchema();
+        final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
+            .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
+        return Validator.create(schema, options);
+    }
+
+    public static JsonSchema buildSchema() {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
             .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
             .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
@@ -91,15 +98,12 @@ public class StaticConfiguration {
             .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
             .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
-        final JsonSchema schema = JsonSchema.of(staticConfigBuilder.toJson());
-        final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
-            .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
-        return Validator.create(schema, options);
+        return JsonSchema.of(staticConfigBuilder.toJson());
     }
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
         if (validator == null) {
-            validator = buildValidator(vertx);
+            validator = buildValidator();
         }
 
         final Promise<Void> validPromise = Promise.promise();

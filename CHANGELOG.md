@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Maven Dependency that generates an SBom with all dependencies for CLM Analysis ([PORTAL-1017](https://issue.inventage.com/browse/PORTAL-1017)).
 - Added SharedCodeStyle Plugin ([PORTAL-919](https://issue.inventage.com/browse/PORTAL-919)).
 - "httpsOptions" configuration to define the outgoing HTTPS connection ([PORTAL-1296](https://issue.inventage.com/browse/PORTAL-1296)).
+- New "config-schemas" module that creates new json schemas for gateway/proxy's configuration files ([PORTAL-407](https://issue.inventage.com/browse/PORTAL-407)).
 
 ### Changed
 
@@ -40,7 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Logout triggers 5 redirect requests fixed ([PORTAL-864](https://issue.inventage.com/browse/PORTAL-864)).
 - "Unknown algorithm RSA" bug fixed ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092)).
-
 
 ## [7.0.0]-202303080728-648-fe6be73 - 2023-03-08
 

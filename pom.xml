@@ -12,6 +12,7 @@
         <module>server</module>
         <!--<module>native</module>-->
         <module>helm</module>
+        <module>config-schemas</module>
     </modules>
 
     <properties>
@@ -423,9 +424,11 @@
                                         <exclude>.idea/encodings.xml</exclude>
                                         <exclude>.idea/dataSources.xml</exclude>
                                         <exclude>.idea/runConfigurations/*</exclude>
+                                        <exclude>.idea/jsonSchemas.xml</exclude>
                                         <exclude>.idea/shelf/**/*</exclude>
                                         <exclude>.idea/vcs.xml</exclude>
                                         <exclude>.idea/misc.xml</exclude>
+                                        <exclude>.idea/schema/**</exclude>
                                     </excludes>
                                 </fileset>
                             </filesets>
