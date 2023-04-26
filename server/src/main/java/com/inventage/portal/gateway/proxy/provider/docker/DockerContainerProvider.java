@@ -49,9 +49,11 @@ public class DockerContainerProvider extends Provider {
     private final Map<String, JsonObject> configurations = new HashMap<>();
     private ServiceDiscovery dockerDiscovery;
 
-    public DockerContainerProvider(Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
+    public DockerContainerProvider(
+        Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
         JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,
-        Boolean watch) {
+        Boolean watch
+    ) {
         this.vertx = vertx;
         this.eb = this.vertx.eventBus();
         this.configurationAddress = configurationAddress;

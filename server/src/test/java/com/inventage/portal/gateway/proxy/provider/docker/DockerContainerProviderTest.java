@@ -225,8 +225,10 @@ public class DockerContainerProviderTest {
 
     @ParameterizedTest
     @MethodSource("defaultRuleTestData")
-    void dockerContainerTest(String desc, String defaultRule, List<JsonObject> containers, JsonObject expectedConfig,
-        Vertx vertx, VertxTestContext testCtx) {
+    void dockerContainerTest(
+        String desc, String defaultRule, List<JsonObject> containers, JsonObject expectedConfig,
+        Vertx vertx, VertxTestContext testCtx
+    ) {
         String errMsg = String.format("'%s' failed", desc);
 
         Checkpoint dockerProviderStarted = testCtx.checkpoint();

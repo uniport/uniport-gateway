@@ -86,8 +86,10 @@ public class ParserTest {
 
     @ParameterizedTest
     @MethodSource("filterKeysTestData")
-    void filterKeysTest(String name, Map<String, Object> labels, List<String> filters, List<String> expected,
-        Vertx vertx, VertxTestContext testCtx) {
+    void filterKeysTest(
+        String name, Map<String, Object> labels, List<String> filters, List<String> expected,
+        Vertx vertx, VertxTestContext testCtx
+    ) {
         String errMsg = String.format("'%s' failed. Labels: '%s', Filters: '%s'", name, labels, filters);
 
         List<String> actual = Parser.filterKeys(labels, filters);
@@ -97,8 +99,10 @@ public class ParserTest {
 
     @ParameterizedTest
     @MethodSource("decodeTestData")
-    void decodeTest(String name, Map<String, Object> labels, String rootName, JsonObject expected, Vertx vertx,
-        VertxTestContext testCtx) {
+    void decodeTest(
+        String name, Map<String, Object> labels, String rootName, JsonObject expected, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         List<String> filters = null; // usage of filters is tested in 'filterKeysTest'
         String errMsg = String.format("'%s' failed. Labels: '%s', RootName: '%s', Filters: '%s'", name, labels,
             rootName, filters);

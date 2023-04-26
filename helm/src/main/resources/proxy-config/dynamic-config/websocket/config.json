@@ -1,0 +1,23 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "portal-websocket-proxy",
+                "rule": "PathPrefix('/websocket')",
+                "service": "portal-websocket-proxy"
+            }
+        ],
+        "middlewares": [],
+        "services": [
+            {
+                "name": "portal-websocket-proxy",
+                "servers": [
+                    {
+                        "host": "localhost",
+                        "port": "1234"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -105,8 +105,10 @@ public class OAuth2AuthMiddleware implements Middleware {
     }
 
     // this method is called when the IAM finishs the authentication flow and sends a redirect (callback) with the code
-    private static void whenAuthenticationResponseReceived(RoutingContext ctx, String sessionScope,
-        OAuth2Auth authProvider) {
+    private static void whenAuthenticationResponseReceived(
+        RoutingContext ctx, String sessionScope,
+        OAuth2Auth authProvider
+    ) {
         final String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
         final String code = ctx.request().getParam(OIDC_PARAM_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
@@ -129,9 +131,11 @@ public class OAuth2AuthMiddleware implements Middleware {
         }
     }
 
-    private static void whenTokenForCodeReceived(AsyncResult<Void> asyncResult, RoutingContext ctx,
+    private static void whenTokenForCodeReceived(
+        AsyncResult<Void> asyncResult, RoutingContext ctx,
         OAuth2Auth authProvider,
-        String sessionScope) {
+        String sessionScope
+    ) {
         if (asyncResult.succeeded()) {
             if (ctx.user() != null) {
                 LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'", sessionScope,

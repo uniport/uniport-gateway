@@ -233,9 +233,11 @@ public class SessionBagMiddlewareTest {
 
     }
 
-    void testHarness(Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, JsonArray whitelistedCookies,
+    void testHarness(
+        Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, JsonArray whitelistedCookies,
         Handler<RoutingContext> serverReqHandler, List<Cookie> reqCookies, Handler<HttpClientResponse> respHandler,
-        List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler) {
+        List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler
+    ) {
         int port = TestUtils.findFreePort();
         int servicePort = TestUtils.findFreePort();
 
@@ -318,9 +320,11 @@ public class SessionBagMiddlewareTest {
      * @param expectedSessionBagCookies
      *            cookie expected to be stored in the session bag
      */
-    void expectedCookies(VertxTestContext testCtx, String errMsg, SessionStore sessionStore,
+    void expectedCookies(
+        VertxTestContext testCtx, String errMsg, SessionStore sessionStore,
         AtomicReference<String> sessionId, JsonArray whitelistedCookies, HttpClientResponse resp,
-        List<Cookie> expectedSessionBagCookies) {
+        List<Cookie> expectedSessionBagCookies
+    ) {
         testCtx.verify(() -> {
             io.netty.handler.codec.http.cookie.Cookie sessionCookie = null;
             List<io.netty.handler.codec.http.cookie.Cookie> decodedRespCookies = new ArrayList<>();

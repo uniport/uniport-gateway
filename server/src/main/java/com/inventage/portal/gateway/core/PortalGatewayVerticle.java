@@ -67,8 +67,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         });
     }
 
-    private void createListenersForEntrypoints(List<Entrypoint> entrypoints, JsonObject config,
-        Promise<Void> startPromise) {
+    private void createListenersForEntrypoints(
+        List<Entrypoint> entrypoints, JsonObject config,
+        Promise<Void> startPromise
+    ) {
         LOGGER.debug("Number of entrypoints {}'", entrypoints.size());
         listenOnEntrypoints(entrypoints).onSuccess(handler -> {
             startPromise.complete();

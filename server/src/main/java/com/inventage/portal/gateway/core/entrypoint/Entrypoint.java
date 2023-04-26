@@ -138,8 +138,10 @@ public class Entrypoint {
         return promise.future();
     }
 
-    private void createEntryMiddleware(JsonObject middlewareConfig, Router router,
-        Handler<AsyncResult<Middleware>> handler) {
+    private void createEntryMiddleware(
+        JsonObject middlewareConfig, Router router,
+        Handler<AsyncResult<Middleware>> handler
+    ) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
             new JsonObject());

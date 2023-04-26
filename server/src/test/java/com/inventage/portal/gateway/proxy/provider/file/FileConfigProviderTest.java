@@ -133,8 +133,10 @@ public class FileConfigProviderTest {
 
     @ParameterizedTest
     @MethodSource("provideWithoutWatchTestData")
-    void provideWithoutWatchTest(String name, String path, int expectedNumRouter, int expectedNumService, Vertx vertx,
-        VertxTestContext testCtx) {
+    void provideWithoutWatchTest(
+        String name, String path, int expectedNumRouter, int expectedNumService, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         String errMsg = String.format("'%s' failed", name);
 
         Checkpoint fileProviderStarted = testCtx.checkpoint();
@@ -175,8 +177,10 @@ public class FileConfigProviderTest {
         }));
     }
 
-    private FileConfigProvider createProvider(Vertx vertx, String path, String configurationAddress, boolean watch,
-        JsonObject env) {
+    private FileConfigProvider createProvider(
+        Vertx vertx, String path, String configurationAddress, boolean watch,
+        JsonObject env
+    ) {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(path).getFile());
 

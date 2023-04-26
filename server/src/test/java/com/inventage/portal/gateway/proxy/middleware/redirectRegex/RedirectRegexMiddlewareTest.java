@@ -49,8 +49,10 @@ public class RedirectRegexMiddlewareTest {
 
     @ParameterizedTest
     @MethodSource("redirectTestData")
-    void redirectTest(String name, String regex, String replacement, String URL, int expectedStatusCode,
-        String expectedURL, Vertx vertx, VertxTestContext testCtx) {
+    void redirectTest(
+        String name, String regex, String replacement, String URL, int expectedStatusCode,
+        String expectedURL, Vertx vertx, VertxTestContext testCtx
+    ) {
 
         String failureMsg = String.format("Failure of '%s' test case", name);
 

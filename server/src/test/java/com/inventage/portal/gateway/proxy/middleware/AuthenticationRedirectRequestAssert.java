@@ -54,7 +54,8 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert isValidAuthenticationRequest(
-        Map<String, String> expectedLocationParameters) {
+        Map<String, String> expectedLocationParameters
+    ) {
         String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
         // Assertions.assertNull(set_cookie);
         String location = actual.getHeader(LOCATION);

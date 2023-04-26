@@ -21,9 +21,11 @@ public class CSRFMiddleware implements Middleware {
     private final String name;
     private final CSRFHandler csrfHandler;
 
-    public CSRFMiddleware(Vertx vertx, String name, String secret, String cookieName, String cookiePath,
+    public CSRFMiddleware(
+        Vertx vertx, String name, String secret, String cookieName, String cookiePath,
         Boolean cookieSecure,
-        String headerName, Long timeoutInMinute, String origin, Boolean nagHttps) {
+        String headerName, Long timeoutInMinute, String origin, Boolean nagHttps
+    ) {
         this.name = name;
         this.csrfHandler = CSRFHandler.create(vertx, secret)
             .setCookieName(cookieName == null ? DEFAULT_COOKIE_NAME : cookieName)

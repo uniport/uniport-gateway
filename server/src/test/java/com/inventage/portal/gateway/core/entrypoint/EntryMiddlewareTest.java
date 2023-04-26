@@ -118,8 +118,10 @@ public class EntryMiddlewareTest {
         }));
     }
 
-    private void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts,
-        Consumer<HttpClientResponse> assertionHandler) {
+    private void doRequest(
+        Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts,
+        Consumer<HttpClientResponse> assertionHandler
+    ) {
         CountDownLatch latch = new CountDownLatch(1);
 
         reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
@@ -136,8 +138,10 @@ public class EntryMiddlewareTest {
         }
     }
 
-    private Map<String, JsonObject> oneEntryRedirectMiddlewareTwoRoutesConfiguration(String entryPointIdentifier,
-        String redirect) {
+    private Map<String, JsonObject> oneEntryRedirectMiddlewareTwoRoutesConfiguration(
+        String entryPointIdentifier,
+        String redirect
+    ) {
         JsonObject dynamicConfig = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
                 TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares()),

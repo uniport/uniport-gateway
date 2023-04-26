@@ -341,7 +341,7 @@
                                 <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
                             </manifestEntries>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"></transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                     </transformers>
                 </configuration>
                 <executions>
@@ -364,7 +364,7 @@
                         <phase>initialize</phase>
                         <configuration>
                             <target>
-                                <touch file="src/main/config/portal-gateway.specific.env"></touch>
+                                <touch file="src/main/config/portal-gateway.specific.env"/>
                             </target>
                         </configuration>
                     </execution>

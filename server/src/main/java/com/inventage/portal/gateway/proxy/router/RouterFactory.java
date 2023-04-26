@@ -115,8 +115,10 @@ public class RouterFactory {
         return promise.future();
     }
 
-    private void createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-        Handler<AsyncResult<Router>> handler) {
+    private void createSubRouter(
+        JsonObject routerConfig, JsonArray middlewares, JsonArray services,
+        Handler<AsyncResult<Router>> handler
+    ) {
         final Router router = Router.router(this.vertx);
         final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
 
@@ -173,8 +175,10 @@ public class RouterFactory {
         return promise.future();
     }
 
-    private void createMiddleware(JsonObject middlewareConfig, Router router,
-        Handler<AsyncResult<Middleware>> handler) {
+    private void createMiddleware(
+        JsonObject middlewareConfig, Router router,
+        Handler<AsyncResult<Middleware>> handler
+    ) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
             new JsonObject());

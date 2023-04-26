@@ -58,8 +58,10 @@ public class HeaderMiddlewareTest {
 
     @ParameterizedTest
     @MethodSource("requestHeaderTestData")
-    void requestHeaderTest(String name, MultiMap reqHeaders, MultiMap expectedReqHeaders, Vertx vertx,
-        VertxTestContext testCtx) {
+    void requestHeaderTest(
+        String name, MultiMap reqHeaders, MultiMap expectedReqHeaders, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         int port = TestUtils.findFreePort();
 
         String errMsgFormat = "Failure of '%s' test case: %s";
@@ -92,8 +94,10 @@ public class HeaderMiddlewareTest {
 
     @ParameterizedTest
     @MethodSource("responseHeaderTestData")
-    void responseHeaderTest(String name, MultiMap respHeaders, MultiMap expectedRespHeaders, Vertx vertx,
-        VertxTestContext testCtx) {
+    void responseHeaderTest(
+        String name, MultiMap respHeaders, MultiMap expectedRespHeaders, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         // given
         int port = TestUtils.findFreePort();
         int servicePort = TestUtils.findFreePort();

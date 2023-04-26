@@ -47,8 +47,10 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private long timerId;
     private List<Listener> configurationListeners;
 
-    public ConfigurationWatcher(Vertx vertx, Provider provider, String configurationAddress,
-        int providersThrottleIntervalMs, List<String> defaultEntrypoints) {
+    public ConfigurationWatcher(
+        Vertx vertx, Provider provider, String configurationAddress,
+        int providersThrottleIntervalMs, List<String> defaultEntrypoints
+    ) {
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
         this.provider = provider;
@@ -281,8 +283,10 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     // handler for address: <provider> (e.g. file)
-    private void onConfigReload(Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
-        Queue<JsonObject> prevConfigRing) {
+    private void onConfigReload(
+        Message<JsonObject> message, int throttleMs, Queue<JsonObject> nextConfigRing,
+        Queue<JsonObject> prevConfigRing
+    ) {
         final JsonObject nextConfig = message.body();
         if (prevConfigRing.isEmpty()) {
             LOGGER.debug("Publishing initial configuration immediately");

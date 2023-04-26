@@ -51,8 +51,10 @@ public class ProxyMiddleware implements Middleware {
         this(vertx, name, "http", serverHost, serverPort, DEFAULT_HTTPS_TRUST_ALL, DEFAULT_HTTPS_VERIFY_HOSTNAME, DEFAULT_HTTPS_TRUST_STORE_PATH, DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
     }
 
-    public ProxyMiddleware(Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort, Boolean httpsTrustAll,
-        Boolean httpsVerifyHostname, String httpsTrustStorePath, String httpsTrustStorePassword) {
+    public ProxyMiddleware(
+        Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort, Boolean httpsTrustAll,
+        Boolean httpsVerifyHostname, String httpsTrustStorePath, String httpsTrustStorePassword
+    ) {
         this.name = name;
 
         httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
@@ -65,8 +67,10 @@ public class ProxyMiddleware implements Middleware {
         applyModifiers(httpProxy);
     }
 
-    protected HttpClient createHttpClient(String serverProtocol, String serverHost, Boolean httpsTrustAll, Boolean httpsVerifyHostname,
-        String httpsTrustStorePath, String httpsTrustStorePassword, Vertx vertx) {
+    protected HttpClient createHttpClient(
+        String serverProtocol, String serverHost, Boolean httpsTrustAll, Boolean httpsVerifyHostname,
+        String httpsTrustStorePath, String httpsTrustStorePassword, Vertx vertx
+    ) {
         final HttpClientOptions options = new HttpClientOptions();
         if ("https".equalsIgnoreCase(serverProtocol)) {
             options.setSsl(true);

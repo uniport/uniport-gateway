@@ -77,9 +77,11 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return middlewarePromise.future();
     }
 
-    private Handler<JWTAuthOptions> setupMiddleware(Vertx vertx, String name, String issuer, JsonArray audience,
+    private Handler<JWTAuthOptions> setupMiddleware(
+        Vertx vertx, String name, String issuer, JsonArray audience,
         JsonArray additionalClaims, JsonObject middlewareConfig,
-        Handler<AsyncResult<Middleware>> handler) {
+        Handler<AsyncResult<Middleware>> handler
+    ) {
         return authOpts -> {
             final JWTOptions jwtOptions = new JWTOptions();
             if (issuer != null) {
@@ -115,8 +117,10 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return promise.future();
     }
 
-    private void fetchPublicKeys(Vertx vertx, JsonArray rawPublicKeys,
-        Handler<AsyncResult<JWTAuthOptions>> handler) {
+    private void fetchPublicKeys(
+        Vertx vertx, JsonArray rawPublicKeys,
+        Handler<AsyncResult<JWTAuthOptions>> handler
+    ) {
 
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
 
@@ -172,8 +176,10 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return promise.future();
     }
 
-    private void fetchJWKsFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL,
-        Handler<AsyncResult<List<JsonObject>>> handler) {
+    private void fetchJWKsFromDiscoveryURL(
+        Vertx vertx, String rawRealmBaseURL,
+        Handler<AsyncResult<List<JsonObject>>> handler
+    ) {
         final URL parsedRealmBaseURL;
         try {
             parsedRealmBaseURL = new URL(rawRealmBaseURL);
@@ -223,8 +229,10 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             });
     }
 
-    private Handler<HttpResponse<JsonObject>> fetchJWKsFromJWKsURL(Vertx vertx, String iamHost,
-        int iamPort, Handler<AsyncResult<List<JsonObject>>> handler) {
+    private Handler<HttpResponse<JsonObject>> fetchJWKsFromJWKsURL(
+        Vertx vertx, String iamHost,
+        int iamPort, Handler<AsyncResult<List<JsonObject>>> handler
+    ) {
         return discoveryResp -> {
             final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
             if (rawJWKsURI == null || rawJWKsURI.length() == 0) {
@@ -262,7 +270,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private Handler<HttpResponse<JsonObject>> parseJWKs(
-        Handler<AsyncResult<List<JsonObject>>> handler) {
+        Handler<AsyncResult<List<JsonObject>>> handler
+    ) {
         return JWKsResp -> {
             LOGGER.debug("Received JWKS");
             final JsonArray keys = JWKsResp.body().getJsonArray(JWK_KEYS_KEY);

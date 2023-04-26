@@ -37,8 +37,10 @@ public class FileConfigProvider extends Provider {
     private Path directory;
     private String source;
 
-    public FileConfigProvider(Vertx vertx, String configurationAddress, String filename, String directory,
-        Boolean watch, JsonObject env) {
+    public FileConfigProvider(
+        Vertx vertx, String configurationAddress, String filename, String directory,
+        Boolean watch, JsonObject env
+    ) {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
