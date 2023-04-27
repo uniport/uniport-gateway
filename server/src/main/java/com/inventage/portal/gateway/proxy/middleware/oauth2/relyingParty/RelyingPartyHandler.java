@@ -22,8 +22,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
@@ -48,6 +46,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is copied from:
@@ -66,7 +66,7 @@ import java.util.Set;
 public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RelyingPartyHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelyingPartyHandler.class);
     private static final Set<String> OPENID_SCOPES = new HashSet<>();
 
     static {
@@ -170,14 +170,14 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                 // an infinite redirect loop. In this case an exception must be raised.
                 if (context.request().method() == HttpMethod.GET
                     && context.normalizedPath().equals(callbackURL.resource())) {
-                    LOG.warn(
+                    LOGGER.warn(
                         "The callback route is shaded by the OAuth2AuthHandler, ensure the callback route is added BEFORE the OAuth2AuthHandler route!");
                     handler.handle(
                         Future.failedFuture(new HttpException(500, "Infinite redirect loop [oauth2 callback]")));
                 } else {
                     if (context.request().method() != HttpMethod.GET) {
                         // we can only redirect GET requests
-                        LOG.error("OAuth2 redirect attempt to non GET resource");
+                        LOGGER.error("OAuth2 redirect attempt to non GET resource '{}'", context.request().uri());
                         context.fail(405, new IllegalStateException("OAuth2 redirect attempt to non GET resource"));
                         return;
                     }
@@ -319,8 +319,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
         if (callbackPath != null && !"".equals(callbackPath)) {
             if (!callbackPath.endsWith(routePath)) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("callback route doesn't match OAuth2AuthHandler origin configuration");
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("callback route doesn't match OAuth2AuthHandler origin configuration");
                 }
             }
         }
