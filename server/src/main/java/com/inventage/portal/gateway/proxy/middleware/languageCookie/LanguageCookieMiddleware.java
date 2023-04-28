@@ -29,7 +29,12 @@ public class LanguageCookieMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        final Cookie cookie = ctx.request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME);
+        Cookie cookie = ctx.request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME);
+
+        // backward compatibility because of cookie name change (https://issue.inventage.com/browse/PORTAL-718)
+        if (cookie == null) {
+            cookie = ctx.request().getCookie("ips.language"); // support for old cookie name
+        }
 
         if (cookie != null) {
             LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", DEFAULT_LANGUAGE_COOKIE_NAME,

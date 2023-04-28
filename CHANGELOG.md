@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Fixed
+
+- Bug when authentication request is not initiated by Portal-Gateway ([PORTAL-1417](https://issue.inventage.com/browse/PORTAL-1417)).
+
 ### Added
 
 - Maven Dependency that generates an SBom with all dependencies for CLM Analysis ([PORTAL-1017](https://issue.inventage.com/browse/PORTAL-1017)).
 - Added SharedCodeStyle Plugin ([PORTAL-919](https://issue.inventage.com/browse/PORTAL-919)).
 - "httpsOptions" configuration to define the outgoing HTTPS connection ([PORTAL-1296](https://issue.inventage.com/browse/PORTAL-1296)).
 - New "config-schemas" module that creates new json schemas for gateway/proxy's configuration files ([PORTAL-407](https://issue.inventage.com/browse/PORTAL-407)).
+- OpenTelemetryMiddleware for adding traceId and sessionId as early as possible to the logging contextual data ([PORTAL-1416](https://issue.inventage.com/browse/PORTAL-1416)).
 
 ### Changed
 
