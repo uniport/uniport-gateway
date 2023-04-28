@@ -64,7 +64,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
         LOGGER.debug("'{}'", this.detectionCookieKey);
         response.addCookie(
-            cookie(this.detectionCookieKey, cookieValue.isPresent() ? cookieValue.toString() : "")
+            cookie(this.detectionCookieKey, cookieValue.isPresent() ? cookieValue.get().toString() : "")
                 .setPath("/").setHttpOnly(true));
     }
 
