@@ -93,6 +93,11 @@ public class OAuth2AuthMiddleware implements Middleware {
         }
     }
 
+    public static boolean isStateForPendingAuth(RoutingContext ctx) {
+        final String requestState = ctx.request().getParam(OIDC_PARAM_STATE);
+        return ctx.session().get(PREFIX_STATE + requestState) != null;
+    }
+
     protected static void registerCallbackHandlers(Route callback, String sessionScope, OAuth2Auth authProvider) {
         callback.handler(ctx -> whenAuthenticationResponseReceived(ctx, sessionScope, authProvider));
         callback.failureHandler(ctx -> {

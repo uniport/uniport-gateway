@@ -6,6 +6,7 @@
                 "rule": "PathPrefix('/auth')",
                 "middlewares": [
                     "authRedirectRegex",
+                    "checkInitiatedAuthenticationByPortal-Gateway",
                     "languageCookie"
                 ],
                 "service": "portal-iam"
@@ -36,6 +37,10 @@
                     "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/realms/master|auth/resources|auth/js|auth/admin).*",
                     "replacement": "/login"
                 }
+            },
+            {
+                "name": "checkInitiatedAuthenticationByPortal-Gateway",
+                "type": "checkInitiatedAuth"
             },
             {
                 "name": "languageCookie",

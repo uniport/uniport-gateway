@@ -21,6 +21,13 @@ public class HttpResponder {
         respondWithRedirectForRetry(ctx.request().uri(), ctx);
     }
 
+    public static void respondWithRedirect(String uri, RoutingContext ctx) {
+        ctx.response()
+            .setStatusCode(303) // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
+            .putHeader(HttpHeaders.LOCATION, uri)
+            .end();
+    }
+
     public static void respondWithRedirectForRetry(String uri, RoutingContext ctx) {
         ctx.response()
             .setStatusCode(307) // redirect by using the same HTTP method (307)
