@@ -9,6 +9,7 @@ import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -46,9 +47,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (requestComingFromLoggedOutUser(ctx)) {
-            ctx.response().addCookie(
-                cookie(this.detectionCookieKey, "").setPath("/")
-                    .setHttpOnly(true));
+            setDetectionCookieTo(ctx.response(), null);
             ctx.next();
             return;
         }
@@ -60,6 +59,13 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
         ctx.addHeadersEndHandler(v -> responseWithDetectionCookie(ctx));
         ctx.next();
+    }
+
+    private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
+        LOGGER.debug("'{}'", this.detectionCookieKey);
+        response.addCookie(
+            cookie(this.detectionCookieKey, cookieValue.isPresent() ? cookieValue.toString() : "")
+                .setPath("/").setHttpOnly(true));
     }
 
     /**
@@ -77,6 +83,14 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         return noUserInSession(ctx) && isDetectionCookieValueWithInLimit(ctx);
     }
 
+    /**
+     * If the session cookie (uniport.session) is not received AND the state cookie (uniport.state)
+     * is received, then we assume a user as previously logged out.
+     *
+     * @param ctx
+     *            the current routing context
+     * @return true if the user is assumed as logged out
+     */
     private boolean requestComingFromLoggedOutUser(RoutingContext ctx) {
         return this.noSessionCookie(ctx) && getDetectionCookie(ctx).isPresent();
     }
@@ -124,10 +138,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     private void responseWithDetectionCookie(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
-            LOGGER.debug("Adding cookie '{}'", this.detectionCookieKey);
-            ctx.response().addCookie(
-                cookie(this.detectionCookieKey, new DetectionCookieValue().toString()).setPath("/")
-                    .setHttpOnly(true));
+            setDetectionCookieTo(ctx.response(), Optional.of(new DetectionCookieValue()));
         }
     }
 
@@ -142,6 +153,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     /**
      * @param ctx
+     *            the current routing context
      * @return true if no user is associated with this session: Either (a) the user has not been authenticated or (b) the session id has expired (due do
      *         session.regenerateId()).
      */
