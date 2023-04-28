@@ -47,7 +47,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (requestComingFromLoggedOutUser(ctx)) {
-            setDetectionCookieTo(ctx.response(), null);
+            setDetectionCookieTo(ctx.response(), Optional.empty());
             ctx.next();
             return;
         }
