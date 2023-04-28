@@ -64,7 +64,7 @@ public class PortalGatewayConfigRetriever {
             return Optional.of(Path.of(fileName));
         } else {
             if (fileName == null) {
-                LOGGER.debug("Failed " + logMessage, fileName);
+                LOGGER.debug("Failed because given filename is null" + logMessage);
             } else {
                 LOGGER.debug("Failed " + logMessage, new File(fileName).getAbsolutePath());
             }
