@@ -108,13 +108,23 @@ public class SessionMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
-        if (withLifetimeHeader || withLifetimeCookie) {
-            ctx.addHeadersEndHandler(v -> responseWithSessionLifetime(ctx));
-        }
 
+        registerHandlerForRespondingWithSessionLifetime(ctx);
         checkForSessionTimeoutReset(ctx);
 
         this.sessionHandler.handle(ctx);
+    }
+
+    /**
+     * If either withLifetimeHeader or withLifetimeCookie is true, then a HeadersEndHandler is added.
+     *
+     * @param ctx
+     *            current routing context
+     */
+    private void registerHandlerForRespondingWithSessionLifetime(RoutingContext ctx) {
+        if (withLifetimeHeader || withLifetimeCookie) {
+            ctx.addHeadersEndHandler(v -> responseWithSessionLifetime(ctx));
+        }
     }
 
     private void responseWithSessionLifetime(RoutingContext ctx) {
@@ -131,6 +141,12 @@ public class SessionMiddleware implements Middleware {
         }
     }
 
+    /**
+     * Check if the session timeout reset should be skipped.
+     *
+     * @param ctx
+     *            current routing context
+     */
     private void checkForSessionTimeoutReset(RoutingContext ctx) {
         if (uriPatternForIgnoringSessionTimeoutReset == null) {
             return;
