@@ -713,6 +713,9 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
 
+        JsonObject openTelemetryMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+            TestUtils.withMiddleware("openTelemetry", DynamicConfiguration.MIDDLEWARE_OPEN_TELEMETRY)));
+
         // the sole purpose of the following variable are to improve readability
         boolean expectedTrue = true;
         boolean expectedFalse = false;
@@ -832,6 +835,10 @@ public class DynamicConfigurationTest {
                 sessionMiddleware, complete, expectedTrue),
             Arguments.of("accept minimal session middleware",
                 sessionMiddlewareMinimal, complete, expectedTrue),
+
+            // openTelemetry middleware
+            Arguments.of("accept openTelemetry middleware",
+                openTelemetryMiddleware, complete, expectedTrue),
 
             // services
             Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),

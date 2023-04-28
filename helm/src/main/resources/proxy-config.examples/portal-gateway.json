@@ -5,6 +5,10 @@
             "port": 20000,
             "middlewares": [
                 {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
                     "name": "responseSessionCookieRemoval",
                     "type": "responseSessionCookieRemoval"
                 },

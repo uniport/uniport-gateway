@@ -138,6 +138,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
+    public static final String MIDDLEWARE_OPEN_TELEMETRY = "openTelemetry";
+    public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
+    public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
     public static final List<String> MIDDLEWARE_TYPES = List.of(
         MIDDLEWARE_AUTHORIZATION_BEARER,
@@ -158,7 +161,9 @@ public class DynamicConfiguration {
         MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL,
         MIDDLEWARE_SESSION,
         MIDDLEWARE_SESSION_BAG,
-        MIDDLEWARE_SHOW_SESSION_CONTENT);
+        MIDDLEWARE_SHOW_SESSION_CONTENT,
+        MIDDLEWARE_OPEN_TELEMETRY,
+        MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION);
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
@@ -230,6 +235,7 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema())
+            .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema())
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
@@ -809,6 +815,16 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
+                    break;
+                }
+                case MIDDLEWARE_OPEN_TELEMETRY: {
+                    break;
+                }
+                case MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION: {
+                    final String redirect = mwOptions.getString(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
+                    if (redirect == null) {
+                        LOGGER.debug(String.format("%s: URI for redirect not specified.", mwType));
+                    }
                     break;
                 }
                 case MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL: {
