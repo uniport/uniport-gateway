@@ -127,10 +127,22 @@ public class OAuth2AuthMiddleware implements Middleware {
     }
 
     // if the enhanced state parameter contains an uri, we send a redirect to it, otherwise a status code 410 (GONE)
+    // depending on the response_mode configuration the incoming request is GET or POST
     private static void sendResponseFor(String stateParameter, RoutingContext ctx) {
-        final Optional<String> uri = new StateWithUri(stateParameter).uri();
+        final StateWithUri stateWithUri = new StateWithUri(stateParameter);
+        final Optional<String> uri = stateWithUri.uri();
         if (uri.isPresent()) {
-            HttpResponder.respondWithRedirectWithoutSetCookie(uri.get(), ctx);
+            // fix PORTAL-1417: die HTTP Methode ist aufgrund response_mode=FORM_POST immer POST, aber
+            // es muss die Methode vom ursprünglichen Request berücksichtigt werden!
+            final Optional<String> httpMethod = stateWithUri.httpMethod();
+            if (httpMethod.isPresent()) {
+                if (ctx.request().method().name().equals(httpMethod.get())) {
+                    HttpResponder.respondWithRedirectSameMethodWithoutSetCookie(uri.get(), ctx);
+                }
+                HttpResponder.respondWithRedirectWithoutSetCookie(uri.get(), ctx);
+            } else {
+                HttpResponder.respondWithRedirectWithoutSetCookie(uri.get(), ctx);
+            }
         } else {
             HttpResponder.respondWithStatusCode(HttpResponseStatus.GONE.code(), ctx);
         }

@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 
+import io.vertx.core.http.HttpMethod;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -17,9 +18,11 @@ import org.slf4j.LoggerFactory;
  */
 public class StateWithUri {
     private static final Logger LOGGER = LoggerFactory.getLogger(StateWithUri.class);
-    private static final String SPLITTER = ":";
+    private static final String SPLITTER1 = ":";
+    private static final String SPLITTER2 = "@";
     private final String state;
     private final Optional<String> uri;
+    private final Optional<String> method;
     private final String encoded;
 
     /**
@@ -31,6 +34,7 @@ public class StateWithUri {
      * @param stateParameterBase64Encoded
      *            state parameter with format
      *            base64(<state>:<uri>)
+     *            base64(<state>:HTTP-METHOD=base64(<uri>))
      */
     public StateWithUri(String stateParameterBase64Encoded) {
         if (stateParameterBase64Encoded == null) {
@@ -38,17 +42,36 @@ public class StateWithUri {
         }
         final Optional<String> optionalBase64Decoded = base64Decode(stateParameterBase64Encoded);
         if (optionalBase64Decoded.isPresent()) {
-            final String[] strings = optionalBase64Decoded.get().split(SPLITTER, 2);
+            final String[] strings = optionalBase64Decoded.get().split(SPLITTER1, 2);
             this.state = strings[0];
             if (strings.length == 2) {
-                this.uri = Optional.of(ensureRelativeUri(strings[1]));
+                final String[] values = strings[1].split(SPLITTER2);
+                if (values.length == 2) {
+                    //base64(<state>:HTTP-METHOD=base64(<uri>))
+                    final Optional<String> optionalUrl = base64Decode(values[1]);
+                    if (optionalUrl.isPresent()) {
+                        this.method = Optional.of(values[0]);
+                        this.uri = Optional.of(ensureRelativeUri(optionalUrl.get()));
+                    } else {
+                        this.uri = Optional.empty();
+                        this.method = Optional.empty();
+                    }
+                } else {
+                    //base64(<state>:<uri>)
+                    this.uri = Optional.of(ensureRelativeUri(values[0]));
+                    this.method = Optional.empty();
+                }
             } else {
+                //base64(<state>)
                 this.uri = Optional.empty();
+                this.method = Optional.empty();
             }
             this.encoded = encode();
         } else {
+            // <state>
             this.state = stateParameterBase64Encoded;
             this.uri = Optional.empty();
+            this.method = Optional.empty();
             this.encoded = stateParameterBase64Encoded;
         }
     }
@@ -60,11 +83,17 @@ public class StateWithUri {
      * @param uri
      */
     public StateWithUri(String state, String uri) {
+        this(state, uri, null);
+
+    }
+
+    public StateWithUri(String state, String uri, HttpMethod httpMethod) {
         if (state == null) {
             throw new IllegalArgumentException("Null is not a valid state value!");
         }
         this.state = state;
         this.uri = Optional.ofNullable(uri);
+        this.method = Optional.ofNullable(httpMethod == null ? null : httpMethod.name());
         this.encoded = encode();
     }
 
@@ -74,6 +103,10 @@ public class StateWithUri {
 
     public Optional<String> uri() {
         return uri;
+    }
+
+    public Optional<String> httpMethod() {
+        return method;
     }
 
     /**
@@ -89,8 +122,14 @@ public class StateWithUri {
         final StringBuilder stateParameter = new StringBuilder();
         stateParameter.append(state());
         if (uri().isPresent()) {
-            stateParameter.append(SPLITTER);
-            stateParameter.append(uri().get());
+            stateParameter.append(SPLITTER1);
+            if (httpMethod().isPresent()) {
+                stateParameter.append(httpMethod().get());
+                stateParameter.append(SPLITTER2);
+                stateParameter.append(base64Encode(uri().get()));
+            } else {
+                stateParameter.append(uri().get());
+            }
         }
         return base64Encode(stateParameter.toString());
     }

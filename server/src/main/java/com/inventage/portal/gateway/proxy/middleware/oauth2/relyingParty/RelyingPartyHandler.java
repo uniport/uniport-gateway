@@ -202,7 +202,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                         session.put("redirect_uri", context.request().uri());
 
                         // create a state value to mitigate replay attacks
-                        state = new StateWithUri(prng.nextString(6), context.request().uri()).toStateParameter();
+                        state = new StateWithUri(prng.nextString(6), context.request().uri(), context.request().method())
+                            .toStateParameter();
                         // store the state in the session
                         session.put("state", state);
 
