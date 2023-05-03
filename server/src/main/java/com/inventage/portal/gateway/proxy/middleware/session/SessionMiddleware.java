@@ -128,7 +128,7 @@ public class SessionMiddleware implements Middleware {
     }
 
     private void responseWithSessionLifetime(RoutingContext ctx) {
-        final String sessionLifetime = new SessionLifetimeValue(this.sessionIdleTimeoutInMilliSeconds).toString();
+        final String sessionLifetime = new SessionLifetimeValue(ctx.session().lastAccessed(), this.sessionIdleTimeoutInMilliSeconds).toString();
         if (withLifetimeHeader) {
             LOGGER.debug("Adding header '{}'", SESSION_LIFETIME_HEADER_NAME_DEFAULT);
             ctx.response().putHeader(SESSION_LIFETIME_HEADER_NAME_DEFAULT, sessionLifetime);
@@ -156,7 +156,6 @@ public class SessionMiddleware implements Middleware {
         if (requestUri == null) {
             return;
         }
-
         if (isRequestUriMatching(requestUri)) {
             ctx.put(SESSION_FLUSHED_KEY, true);
             LOGGER.debug("Ignored for uri '{}'", requestUri);

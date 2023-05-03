@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_LIFETIME_COOKIE_NAME_DEFAULT;
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
@@ -10,12 +11,15 @@ import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +37,7 @@ public class SessionMiddlewareTest {
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
             assertThat(response)
-                .hasSetCookie(SessionMiddleware.SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+                .hasSetCookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
             testCtx.completeNow();
         });
     }
@@ -49,7 +53,7 @@ public class SessionMiddlewareTest {
             // then
             assertThat(response)
                 .hasHeader(SessionMiddleware.SESSION_LIFETIME_HEADER_NAME_DEFAULT)
-                .hasNotSetCookie(SessionMiddleware.SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+                .hasNotSetCookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
             testCtx.completeNow();
         });
     }
@@ -123,6 +127,51 @@ public class SessionMiddlewareTest {
                 SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 Assertions.assertThat(sharedDataSession.id()).isEqualTo(sessionId.get(0));
                 Assertions.assertThat(sharedDataSession.lastAccessed()).isEqualTo(lastAccessed.get(0));
+                testCtx.completeNow();
+            });
+    }
+
+    @Test
+    public void noResetRequestDoesNotAccessCookie(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final AtomicReference<String> originalCookie = new AtomicReference<>();
+
+        final SessionMiddleware middleware = new SessionMiddleware(
+            vertx,
+            "session",
+            null,
+            true,
+            true,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "^/(ignored).*");
+
+        final Router router = Router.router(vertx);
+        router.route().handler(middleware);
+        router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
+
+        final HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
+        final MiddlewareServer server = new MiddlewareServer(vertx, httpServer, "localhost", testCtx).start();
+        final BrowserConnected browser = server.connectBrowser();
+
+        // when
+        browser.request(GET, "/request")
+            .thenCompose(response -> browser.request(GET, "/ignored"))
+            .whenComplete((response, error) -> {
+                vertx.getOrCreateContext();
+                final String cookie = response.cookies().get(0);
+                originalCookie.set(cookie);
+            })
+            .thenCompose(response -> browser.request(GET, "/ignored"))
+            .whenComplete((response, error) -> {
+                // then
+                vertx.getOrCreateContext();
+                final String cookie = response.cookies().get(0);
+                Assertions.assertThat(originalCookie.get()).isEqualTo(cookie);
                 testCtx.completeNow();
             });
     }

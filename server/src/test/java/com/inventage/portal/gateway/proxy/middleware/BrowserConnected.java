@@ -25,9 +25,7 @@ public class BrowserConnected {
 
     public CompletionStage<HttpClientResponse> request(HttpMethod method, String uri, MultiMap headers) {
         Promise<HttpClientResponse> result = Promise.promise();
-        portalGateway.incomingRequest(method, uri, new RequestOptions(), (outgoingResponse) -> {
-            result.complete(outgoingResponse);
-        }, headers);
+        portalGateway.incomingRequest(method, uri, new RequestOptions(), result::complete, headers);
         return result.future().toCompletionStage();
     }
 }

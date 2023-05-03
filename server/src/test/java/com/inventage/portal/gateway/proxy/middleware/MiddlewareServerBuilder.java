@@ -311,7 +311,7 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServer build() {
         router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
-        HttpServer httpServer = vertx.createHttpServer().requestHandler(router::handle);
+        HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
         return new MiddlewareServer(vertx, httpServer, host, testCtx);
     }
 

@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The filter that determines which requests refresh the session has been updated to exclude polling requests from Conversation [PORTAL-1409](https://issue.inventage.com/browse/PORTAL-1409)).
 - **BREAKING**: Changed cookie name `ips.language` to `uniport.language`, `inventage-portal-gateway.session` to `uniport.session`, and `ipg.state` to `uniport.state` ([PORTAL-718](https://issue.inventage.com/browse/PORTAL-718)).
 - **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
 - Change route ordering. `/health` route is hard-configured as first route to be considered ([PORTAL-859](https://issue.inventage.com/browse/PORTAL-859)).

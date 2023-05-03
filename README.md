@@ -48,7 +48,7 @@ Nach `mvn clean package` wird das native Image unter `server/target/com.inventag
 
 ### IDE
 
-Die Run Configuration `PortalGateway` startet den Portal Gateway Server aus der IDE. Dabei werden die beiden Property Dateien [portal-gateway.common.env](./docker-compose/src/main/resources/portal-gateway.common.env) und [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) zur Konfiguration verwendet.
+Die Run Configuration `PortalGateway` startet den Portal Gateway Server aus der IDE. Dabei werden die beiden Property Dateien [portal-gateway.common.env](server/src/main/config/portal-gateway.common.env) und [portal-gateway.specific.env](server/src/main/config/portal-gateway.specific.env) zur Konfiguration verwendet.
 
 Für den Start der verwendeten Backend Systeme, kann die Run Configuration `whoami: docker-compose` verwendet werden.
 

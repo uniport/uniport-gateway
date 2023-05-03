@@ -7,8 +7,8 @@ public class SessionLifetimeValue {
 
     private final long sessionLifeTime;
 
-    public SessionLifetimeValue(Long sessionIdleTimeoutInMilliSeconds) {
-        sessionLifeTime = System.currentTimeMillis() / 1000 + sessionIdleTimeoutInMilliSeconds / 1000;
+    public SessionLifetimeValue(Long lastAccessed, Long sessionIdleTimeoutInMilliSeconds) {
+        sessionLifeTime = (lastAccessed + sessionIdleTimeoutInMilliSeconds) / 1000;
     }
 
     @Override
