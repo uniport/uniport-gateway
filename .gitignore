@@ -33,3 +33,6 @@ release.properties
 
 # ASDF
 .tool-versions
+
+# config-schema
+/config-schemas/src/main/resources/schema/*
