@@ -49,7 +49,7 @@ public class ShowSessionContentMiddleware implements Middleware {
 
         html.append("session ID:\n").append(session.id());
         html.append("\n");
-        html.append("session last access:\n").append(session.lastAccessed()); // https://www.epochconverter.com/?q=ms
+        html.append("session last access (seconds since epoch:\n").append(session.lastAccessed() / 1000); // https://www.epochconverter.com/?q=ms
         html.append("\n\n");
 
         final Set<Cookie> storedCookies = session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
