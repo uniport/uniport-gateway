@@ -221,6 +221,11 @@
                 <version>${portal-code-style-version.version}</version>
                 <type>zip</type>
             </dependency>
+            <dependency>
+                <groupId>com.inventage.portal.gateway</groupId>
+                <artifactId>config-schemas</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -458,6 +463,23 @@
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.basedir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-config-schemas</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.inventage.portal.gateway</groupId>
+                                    <artifactId>config-schemas</artifactId>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.basedir}/.idea/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

@@ -2,17 +2,20 @@ package com.inventage.portal.gateway;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.JsonSchema;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public final class ConfigurationValidator {
 
     private ConfigurationValidator() {
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String path = "";
         if (args.length >= 1 && args[0] != null) {
             path = args[0];
@@ -21,25 +24,37 @@ public final class ConfigurationValidator {
         createDynamicJsonSchemaValidator(path);
     }
 
-    private static void createStaticJsonSchemaValidator(String path) {
+    private static void createStaticJsonSchemaValidator(String path) throws IOException {
         final JsonSchema schema = StaticConfiguration.buildSchema();
         final JsonObject schemaAsJson = schema.resolve();
-        try (FileWriter file = new FileWriter(path + "static.json")) {
-            file.write(schemaAsJson.encodePrettily());
-            file.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        removeId(schemaAsJson);
+        Files.write(Paths.get(path + "static.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
+
     }
 
-    private static void createDynamicJsonSchemaValidator(String path) {
+    private static void createDynamicJsonSchemaValidator(String path) throws IOException {
         final JsonSchema schema = DynamicConfiguration.buildSchema();
         final JsonObject schemaAsJson = schema.resolve();
-        try (FileWriter file = new FileWriter(path + "dynamic.json")) {
-            file.write(schemaAsJson.encodePrettily());
-            file.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        removeId(schemaAsJson);
+        Files.write(Paths.get(path + "dynamic.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
+
+    }
+
+    private static void removeId(JsonObject jsonObject) {
+        jsonObject.remove("$id");
+        for (String key : jsonObject.fieldNames()) {
+            final Object value = jsonObject.getValue(key);
+            if (value instanceof JsonObject) {
+                removeId((JsonObject) value);
+            } else if (value instanceof JsonArray) {
+                final JsonArray jsonArray = (JsonArray) value;
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    final Object arrayValue = jsonArray.getValue(i);
+                    if (arrayValue instanceof JsonObject) {
+                        removeId((JsonObject) arrayValue);
+                    }
+                }
+            }
         }
     }
 }

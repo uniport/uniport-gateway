@@ -8,8 +8,7 @@
         "type" : "object",
         "properties" : {
           "sessionIdleTimeout" : {
-            "type" : "integer",
-            "$id" : "urn:vertxschemas:55726fd4-2c87-4090-8e34-d6bf0552301c"
+            "type" : "integer"
           },
           "middlewares" : {
             "type" : "array",
@@ -18,171 +17,129 @@
               "type" : "object",
               "properties" : {
                 "name" : {
-                  "type" : "string",
-                  "$id" : "urn:vertxschemas:c041a5a3-4e2c-4bf3-80b3-841b37805000"
+                  "type" : "string"
                 },
                 "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
                     "redirectUri" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:08ae98c1-decf-4707-b632-f3925d03412f"
+                      "type" : "string"
                     },
                     "responseMode" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:4c094cd7-73ac-40b9-af71-638d5f77a3a7"
+                      "type" : "string"
                     },
                     "publicKeys" : {
-                      "type" : "array",
-                      "$id" : "urn:vertxschemas:d838722b-5797-492f-b4e3-1df127397ad0"
+                      "type" : "array"
                     },
                     "uriWithoutSessionTimeoutReset" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:15d7fd16-94bd-4348-bfa3-00ad56a2060f"
+                      "type" : "string"
                     },
                     "origin" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:384b1686-434f-415b-89db-269dbabc939c"
+                      "type" : "string"
                     },
                     "lifetimeCookie" : {
-                      "type" : "boolean",
-                      "$id" : "urn:vertxschemas:54d7e9b5-cc9d-45b5-a7db-23de5fedc8da"
+                      "type" : "boolean"
                     },
                     "idleTimeoutInMinute" : {
-                      "type" : "integer",
-                      "$id" : "urn:vertxschemas:228ae52a-d3ed-4731-afd0-04c5e2eac6e6"
+                      "type" : "integer"
                     },
                     "issuer" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:7e3661f6-39e9-41d4-852b-40e15849133d"
+                      "type" : "string"
                     },
                     "lifetimeHeader" : {
-                      "type" : "boolean",
-                      "$id" : "urn:vertxschemas:42a605f0-129e-4bb3-b1cf-4044a2d989e9"
+                      "type" : "boolean"
                     },
                     "waitTimeInMillisecond" : {
-                      "type" : "integer",
-                      "$id" : "urn:vertxschemas:a3756218-b807-4cfc-9064-d59c88834bb8"
+                      "type" : "integer"
                     },
                     "policyDirectives" : {
-                      "type" : "array",
-                      "$id" : "urn:vertxschemas:84d7f9ee-8e91-4c86-94fd-d8f7fec907dc"
+                      "type" : "array"
                     },
                     "action" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:8bfff3ff-4540-4b13-816e-de083ab58563"
+                      "type" : "string"
                     },
                     "nagHttps" : {
-                      "type" : "boolean",
-                      "$id" : "urn:vertxschemas:2b8baf13-eceb-4ca9-b010-c67427ef5767"
+                      "type" : "boolean"
                     },
                     "customResponseHeaders" : {
-                      "type" : "object",
-                      "$id" : "urn:vertxschemas:b45092e2-81c0-41f3-bfc5-9e6c4368e694"
+                      "type" : "object"
                     },
                     "clientSecret" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:3d9d88f7-d0f1-493f-867f-233d1afd8dc1"
+                      "type" : "string"
                     },
                     "reportOnly" : {
-                      "type" : "boolean",
-                      "$id" : "urn:vertxschemas:5e0c173f-2d1b-457d-a802-3ea41c28f590"
+                      "type" : "boolean"
                     },
                     "timeoutInMinute" : {
-                      "type" : "integer",
-                      "$id" : "urn:vertxschemas:fb0e509c-9bb4-4aa3-9da8-b3d19ad3cf2c"
+                      "type" : "integer"
                     },
                     "cookieName" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:eeb81850-7085-4158-886c-e6a41630aee7"
+                      "type" : "string"
                     },
                     "discoveryUrl" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:2f0285f5-0e93-4944-954e-45abddfde846"
+                      "type" : "string"
                     },
                     "whitelistedCookies" : {
-                      "type" : "array",
-                      "$id" : "urn:vertxschemas:677b35a0-2bb1-4609-a339-fc303e2c12a4"
+                      "type" : "array"
                     },
                     "audience" : {
-                      "type" : "array",
-                      "$id" : "urn:vertxschemas:94cd08cf-96a8-400b-8191-53477669dc77"
+                      "type" : "array"
                     },
                     "headerName" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:9548613c-cfac-42d5-aa0b-5c2cff8deaca"
+                      "type" : "string"
                     },
                     "clientId" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:3cbc5778-4dca-4690-ae1d-7131af58d875"
+                      "type" : "string"
                     },
                     "cookie" : {
-                      "type" : "object",
-                      "$id" : "urn:vertxschemas:5fd053a4-f2d7-41ff-98fd-47675443f4f9"
+                      "type" : "object"
                     },
                     "customRequestHeaders" : {
-                      "type" : "object",
-                      "$id" : "urn:vertxschemas:90591213-a4d2-4d88-a649-aceaf2ba6af7"
+                      "type" : "object"
                     },
                     "optional" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:0a1f94e1-9fbb-4dd6-b7a4-73a3c36cb124"
+                      "type" : "string"
                     },
                     "idMinimumLength" : {
-                      "type" : "integer",
-                      "$id" : "urn:vertxschemas:28f205be-0aa9-4aa3-ab9b-a08b1d2d38c5"
+                      "type" : "integer"
                     },
                     "regex" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:2a812757-3fb1-4918-8544-74996f66550d"
+                      "type" : "string"
                     },
                     "name" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:d69c288e-bb3f-4c3f-94f0-5c5cf5192c66"
+                      "type" : "string"
                     },
                     "claims" : {
-                      "type" : "array",
-                      "$id" : "urn:vertxschemas:2acbebf7-e9f6-44bc-8e9a-f5f90bb8d56c"
+                      "type" : "array"
                     },
                     "sessionScope" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:57380469-2a67-4ed9-bb99-298d3fd469e2"
+                      "type" : "string"
                     },
                     "replacement" : {
-                      "type" : "string",
-                      "$id" : "urn:vertxschemas:5886a416-d7f6-487f-b11e-638c734221f5"
+                      "type" : "string"
                     }
-                  },
-                  "$id" : "urn:vertxschemas:89e4c331-5ce6-4eed-8844-04e5eee27033"
+                  }
                 },
                 "type" : {
-                  "type" : "string",
-                  "$id" : "urn:vertxschemas:2a4e8dc6-7693-45fb-b448-43d3c7de416a"
+                  "type" : "string"
                 }
               },
-              "required" : [ "name", "type" ],
-              "$id" : "urn:vertxschemas:8730078c-ec96-4385-9314-7d9cdd0ce52a"
-            },
-            "$id" : "urn:vertxschemas:f9542c07-76e9-475a-9b6d-3f5b1d102a5d"
+              "required" : [ "name", "type" ]
+            }
           },
           "port" : {
-            "type" : "integer",
-            "$id" : "urn:vertxschemas:accaa25c-4ba4-4d7d-8219-a99302324c4a"
+            "type" : "integer"
           },
           "name" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:bf15247e-bf1d-494a-bbf6-eaaf3de5ed8a"
+            "type" : "string"
           },
           "sessionDisabled" : {
-            "type" : "boolean",
-            "$id" : "urn:vertxschemas:df746619-773d-4e80-a075-f949850d5f78"
+            "type" : "boolean"
           }
         },
-        "required" : [ "port", "name" ],
-        "$id" : "urn:vertxschemas:0d6fbc82-b127-425f-b0af-6bba69605b83"
-      },
-      "$id" : "urn:vertxschemas:22734e8c-5441-456f-a16d-4a20bdf64e5e"
+        "required" : [ "port", "name" ]
+      }
     },
     "providers" : {
       "type" : "array",
@@ -191,42 +148,32 @@
         "type" : "object",
         "properties" : {
           "endpoint" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:a6cfff22-ec05-4a25-9d79-68cf48213420"
+            "type" : "string"
           },
           "filename" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:5bcb2848-df36-4925-8878-30c1225edef8"
+            "type" : "string"
           },
           "watch" : {
-            "type" : "boolean",
-            "$id" : "urn:vertxschemas:e4bcc8a3-2dfa-4b5a-b3b2-ec4b6caa9ac6"
+            "type" : "boolean"
           },
           "name" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:298a8152-e501-405d-94ab-9f9f69fb5926"
+            "type" : "string"
           },
           "directory" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:6c532d7e-688a-4e0a-9a8b-4fbb2ce948e0"
+            "type" : "string"
           },
           "defaultRule" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:14ec0f3b-c3cc-4d5e-8fd6-03838a27419f"
+            "type" : "string"
           },
           "exposedByDefault" : {
-            "type" : "boolean",
-            "$id" : "urn:vertxschemas:4b387eae-b61a-4ec4-845d-50b27823a106"
+            "type" : "boolean"
           },
           "network" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:58bbb160-f203-442d-8c36-5b9dce7c55c5"
+            "type" : "string"
           }
         },
-        "required" : [ "name" ],
-        "$id" : "urn:vertxschemas:121d866c-b025-4eb0-abd8-f4124a02784f"
-      },
-      "$id" : "urn:vertxschemas:f78c02c1-3819-403a-8bed-d046cda4bba1"
+        "required" : [ "name" ]
+      }
     },
     "applications" : {
       "type" : "array",
@@ -235,34 +182,26 @@
         "type" : "object",
         "properties" : {
           "provider" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:40d7320f-4639-4606-b7dd-a69d687cf214"
+            "type" : "string"
           },
           "entrypoint" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:dc90957e-bff7-421d-9640-722e3a4a4cab"
+            "type" : "string"
           },
           "name" : {
-            "type" : "string",
-            "$id" : "urn:vertxschemas:30ba4a60-1f8a-4720-a7c9-f2edaf3c1d96"
+            "type" : "string"
           },
           "requestSelector" : {
             "type" : "object",
             "properties" : {
               "urlPrefix" : {
-                "type" : "string",
-                "$id" : "urn:vertxschemas:9f78c09f-9d27-41e9-9f9c-5361c9825adb"
+                "type" : "string"
               }
             },
-            "required" : [ "urlPrefix" ],
-            "$id" : "urn:vertxschemas:ed63c67c-8d61-40fa-8b57-1ff201f660bd"
+            "required" : [ "urlPrefix" ]
           }
         },
-        "required" : [ "provider", "entrypoint", "name", "requestSelector" ],
-        "$id" : "urn:vertxschemas:55df455a-1874-4292-8d36-274acbe02cc3"
-      },
-      "$id" : "urn:vertxschemas:9f026aa6-6b4c-49ad-984e-b86011020c52"
+        "required" : [ "provider", "entrypoint", "name", "requestSelector" ]
+      }
     }
-  },
-  "$id" : "urn:vertxschemas:dab96c95-e4aa-436d-961d-4bdd325ae53d"
+  }
 }
