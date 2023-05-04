@@ -386,8 +386,10 @@
                     <configuration>
                         <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
-                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude-specific.xml</excludeFilterFile>
+                        <excludeFilterFiles>
+                            <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
+                            <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude-specific.xml</excludeFilterFile>
+                        </excludeFilterFiles>
                     </configuration>
                 </plugin>
                 <plugin>
