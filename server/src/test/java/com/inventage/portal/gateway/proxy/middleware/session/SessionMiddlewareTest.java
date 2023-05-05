@@ -11,9 +11,7 @@ import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
-import io.vertx.ext.web.Router;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -136,27 +134,9 @@ public class SessionMiddlewareTest {
         // given
         final AtomicReference<String> originalCookie = new AtomicReference<>();
 
-        final SessionMiddleware middleware = new SessionMiddleware(
-            vertx,
-            "session",
-            null,
-            true,
-            true,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "^/(ignored).*");
-
-        final Router router = Router.router(vertx);
-        router.route().handler(middleware);
-        router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
-
-        final HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
-        final MiddlewareServer server = new MiddlewareServer(vertx, httpServer, "localhost", testCtx).start();
-        final BrowserConnected browser = server.connectBrowser();
+        BrowserConnected browser = portalGateway(vertx, testCtx)
+            .withSessionMiddleware("^/(ignored).*", true, true)
+            .build().start().connectBrowser();
 
         // when
         browser.request(GET, "/request")
