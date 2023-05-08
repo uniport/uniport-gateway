@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "httpsOptions" configuration to define the outgoing HTTPS connection ([PORTAL-1296](https://issue.inventage.com/browse/PORTAL-1296)).
 - New "config-schemas" module that creates new json schemas for gateway/proxy's configuration files ([PORTAL-407](https://issue.inventage.com/browse/PORTAL-407)).
 - OpenTelemetryMiddleware for adding traceId and sessionId as early as possible to the logging contextual data ([PORTAL-1416](https://issue.inventage.com/browse/PORTAL-1416)).
+- New optional `uriWithoutSessionTimeoutReset` parameter in session middleware added. There will be no session timeout reset if a request contains one of the configured paths ([PORTAL-1321](https://issue.inventage.com/browse/PORTAL-1321))
+- Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
 
 ### Changed
 
@@ -29,9 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
 - The filter that determines which requests refresh the session has been updated to exclude polling requests from Conversation [PORTAL-1409](https://issue.inventage.com/browse/PORTAL-1409)).
 - Change route ordering. `/health` route is hard-configured as first route to be considered ([PORTAL-859](https://issue.inventage.com/browse/PORTAL-859)).
-- Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
-- [PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290) : support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment.
-- New optional `uriWithoutSessionTimeoutReset` parameter in session middleware added. There will be no session timeout reset if a request contains one of the configured paths ([PORTAL-1321](https://issue.inventage.com/browse/PORTAL-1321))
+- Support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment ([PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290)).
 
 ## [7.0.2]-202304141241-4-576b35e4 - 2023-04-17
 
