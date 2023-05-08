@@ -9,10 +9,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>server</module>
-        <!--<module>native</module>-->
-        <module>helm</module>
         <module>config-schemas</module>
+        <module>helm</module>
+        <!--<module>native</module>-->
+        <module>server</module>
     </modules>
 
     <properties>
