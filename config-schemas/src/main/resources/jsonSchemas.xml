@@ -34,6 +34,11 @@
                     <option name="path" value="*/**/portal-gateway.json" />
                     <option name="mappingKind" value="Pattern" />
                   </Item>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/**/**-proxy.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
                 </list>
               </option>
             </SchemaInfo>
