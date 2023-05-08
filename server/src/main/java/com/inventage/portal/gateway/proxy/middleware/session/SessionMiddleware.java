@@ -21,6 +21,7 @@ public class SessionMiddleware implements Middleware {
 
     public static final String SESSION_COOKIE_NAME_DEFAULT = "uniport.session";
 
+    public static final String CONTEXTUAL_DATA_SESSION_ID = "sessionId";
     public static final String SESSION_LIFETIME_COOKIE_NAME_DEFAULT = "uniport.session-lifetime";
     public static final String SESSION_LIFETIME_HEADER_NAME_DEFAULT = "x-uniport-session-lifetime";
 

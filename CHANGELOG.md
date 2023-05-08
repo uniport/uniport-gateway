@@ -23,9 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The filter that determines which requests refresh the session has been updated to exclude polling requests from Conversation [PORTAL-1409](https://issue.inventage.com/browse/PORTAL-1409)).
+- **BREAKING**: HTTP response header `X-IPS-Trace-Id` is not written anymore, please use `OpenTelemetryMiddleware` as entrypoint middleware instead ().
 - **BREAKING**: Changed cookie name `ips.language` to `uniport.language`, `inventage-portal-gateway.session` to `uniport.session`, and `ipg.state` to `uniport.state` ([PORTAL-718](https://issue.inventage.com/browse/PORTAL-718)).
 - **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
+- The filter that determines which requests refresh the session has been updated to exclude polling requests from Conversation [PORTAL-1409](https://issue.inventage.com/browse/PORTAL-1409)).
 - Change route ordering. `/health` route is hard-configured as first route to be considered ([PORTAL-859](https://issue.inventage.com/browse/PORTAL-859)).
 - Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
 - [PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290) : support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment.

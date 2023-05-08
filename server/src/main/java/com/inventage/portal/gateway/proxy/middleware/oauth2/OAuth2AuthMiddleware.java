@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import static com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware.CONTEXTUAL_DATA_SESSION_ID;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.CONTEXTUAL_DATA_SESSION_ID;
 
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
@@ -164,6 +164,8 @@ public class OAuth2AuthMiddleware implements Middleware {
                 final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(authProvider, ctx.user());
                 ctx.session().put(String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX),
                     authPair);
+                //                AuthenticationUserContext authenticationUserContext = new AuthenticationUserContext(authProvider, ctx.user());
+                //                authenticationUserContext.toSessionAtScope(ctx.session(), sessionScope);
             }
         }
         if (asyncResult.failed()) {

@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -22,9 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RequestResponseLoggerMiddleware implements Middleware {
 
-    public static final String HTTP_HEADER_REQUEST_ID = "X-IPS-Trace-Id";
-    public static final String CONTEXTUAL_DATA_REQUEST_ID = "traceId";
-    public static final String CONTEXTUAL_DATA_SESSION_ID = "sessionId";
     public static final String CONTEXTUAL_DATA_USER_ID = "userId";
 
     public static final String EMPTY_USER_ID = null;
@@ -41,11 +37,6 @@ public class RequestResponseLoggerMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         final long start = System.currentTimeMillis();
         ContextualDataAdapter.put(CONTEXTUAL_DATA_USER_ID, getUserId(ctx.user()));
-        final String traceId = Span.current().getSpanContext().getTraceId();
-        // also set in OpenTelemetryMiddleware
-        ContextualDataAdapter.put(CONTEXTUAL_DATA_REQUEST_ID, traceId);
-        // also set in OpenTelemetryMiddleware
-        ContextualDataAdapter.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
 
         LOGGER.debug("{} for '{}'", name, ctx.request().absoluteURI());
 
@@ -57,8 +48,6 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             logRequestInfo(ctx);
         }
 
-        ctx.addHeadersEndHandler(
-            v -> ctx.response().putHeader(HTTP_HEADER_REQUEST_ID, traceId));
         ctx.addBodyEndHandler(v -> {
             if (LOGGER.isTraceEnabled()) {
                 logResponseTrace(ctx, start);
