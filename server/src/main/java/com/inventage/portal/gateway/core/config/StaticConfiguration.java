@@ -55,6 +55,10 @@ public class StaticConfiguration {
     public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
     private static Validator validator;
+    private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
+    private static final String KEYWORD_INT_MIN = "minimum";
+    private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
+    private static final int NON_ZERO_INT_MIN = 1;
 
     private StaticConfiguration() {
     }
@@ -68,30 +72,42 @@ public class StaticConfiguration {
 
     public static JsonSchema buildSchema() {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
-            .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema())
+            .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
             .property(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
             .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
-            .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()).allowAdditionalProperties(false);
+            .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+            .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
-            .requiredProperty(APPLICATION_NAME, Schemas.stringSchema())
-            .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema())
+            .requiredProperty(APPLICATION_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .requiredProperty(APPLICATION_REQUEST_SELECTOR,
                 Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
-                    Schemas.stringSchema()))
-            .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()).allowAdditionalProperties(false);
+                    Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
-            .requiredProperty(PROVIDER_NAME, Schemas.stringSchema())
-            .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema())
-            .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema())
+            .requiredProperty(PROVIDER_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
-            .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema())
+            .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
-            .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema())
-            .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()).allowAdditionalProperties(false);
+            .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
             .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))

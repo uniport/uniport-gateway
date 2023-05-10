@@ -142,6 +142,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
+    public static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
     public static final List<String> MIDDLEWARE_TYPES = List.of(
         MIDDLEWARE_AUTHORIZATION_BEARER,
         MIDDLEWARE_BEARER_ONLY,
@@ -178,6 +179,12 @@ public class DynamicConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicConfiguration.class);
     private static Validator validator;
 
+    private static final String KEYWORD_ENUM = "enum";
+    private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
+    private static final String KEYWORD_INT_MIN = "minimum";
+    private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
+    private static final int NON_ZERO_INT_MIN = 1;
+
     private static Validator buildValidator() {
         final JsonSchema schema = buildSchema();
         final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
@@ -187,60 +194,99 @@ public class DynamicConfiguration {
 
     private static ObjectSchemaBuilder buildRouterSchema() {
         final ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
-            .requiredProperty(ROUTER_NAME, Schemas.stringSchema())
+            .requiredProperty(ROUTER_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
             .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-            .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema())
+            .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
         return routerSchema;
     }
 
     private static ObjectSchemaBuilder buildMiddlewareSchema() {
         final ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
-            .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema())
-            .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema())
-            .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema())
+            .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
-            .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema())
-            .property(MIDDLEWARE_CSRF_HEADER_NAME, Schemas.stringSchema())
+            .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema()
+                .property(MIDDLEWARE_CSRF_COOKIE_NAME, Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .property(MIDDLEWARE_CSRF_COOKIE_PATH, Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .property(MIDDLEWARE_CSRF_COOKIE_SECURE, Schemas.booleanSchema()))
+            .property(MIDDLEWARE_CSRF_HEADER_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSRF_NAG_HTTPS, Schemas.booleanSchema())
-            .property(MIDDLEWARE_CSRF_ORIGIN, Schemas.stringSchema())
-            .property(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema())
+            .property(MIDDLEWARE_CSRF_ORIGIN, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
             .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
             .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
-            .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema())
-            .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema())
-            .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema())
-            .property(MIDDLEWARE_OAUTH2_RESPONSE_MODE, Schemas.stringSchema())
-            .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema())
-            .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema())
-            .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema())
-            .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema())
-            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema())
-            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema())
-            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema())
-            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema())
-            .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema())
-            .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema())
+            .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_RESPONSE_MODE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
+            .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
-            .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema())
-            .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema())
-            .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema())
+            .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema()
+                .property(MIDDLEWARE_SESSION_COOKIE_NAME, Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_ZERO_INT_MIN))
+                .property(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
+                .property(MIDDLEWARE_SESSION_COOKIE_SECURE, Schemas.booleanSchema())
+                .property(MIDDLEWARE_SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
+                    .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray()))))
+            .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+            .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
             .property(MIDDLEWARE_SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
-            .optionalProperty(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema())
+            .optionalProperty(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema())
-            .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema())
+            .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema())
-            .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema())
+            .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
             .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-            .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema())
+            .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_TYPES.toArray())))
             .property(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
         return middlewareSchema;
     }
