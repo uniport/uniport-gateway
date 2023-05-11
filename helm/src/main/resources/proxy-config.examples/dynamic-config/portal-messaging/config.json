@@ -5,7 +5,6 @@
                 "name": "portal-kowl-proxy",
                 "middlewares": [
                     "portalKowlRedirectRegex",
-                    "portalKowlReplacePath",
                     "portalKowlOauth2",
                     "portalKowlAuthBearer",
                     "portalKowlBearerOnly"
