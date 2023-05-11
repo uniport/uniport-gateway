@@ -116,13 +116,6 @@
                                     "https://grafana.com",
                                     "https://fonts.googleapis.com"
                                 ]
-                            },
-                            {
-                                "directive": "img-src",
-                                "values": [
-                                    "self",
-                                    "data: https:"
-                                ]
                             }
                         ]
                     }
