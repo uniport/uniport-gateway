@@ -154,7 +154,20 @@
                       "type" : "string"
                     },
                     "claims" : {
-                      "type" : "array"
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object",
+                        "properties" : {
+                          "claimPath" : {
+                            "type" : "string"
+                          },
+                          "value" : { },
+                          "operator" : {
+                            "type" : "string",
+                            "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
+                          }
+                        }
+                      }
                     },
                     "sessionScope" : {
                       "minLength" : 1,

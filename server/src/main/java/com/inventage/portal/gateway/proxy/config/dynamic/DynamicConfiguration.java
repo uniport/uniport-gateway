@@ -143,6 +143,12 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
     public static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
+
+    public static final List<String> AUTH_HANDLER_CLAIM_OPERATORS = List.of(
+        MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
+        MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
+        MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS,
+        MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
     public static final List<String> MIDDLEWARE_TYPES = List.of(
         MIDDLEWARE_AUTHORIZATION_BEARER,
         MIDDLEWARE_BEARER_ONLY,
@@ -275,7 +281,12 @@ public class DynamicConfiguration {
             .optionalProperty(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
-            .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema())
+            .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema()
+                .items(Schemas.objectSchema()
+                    .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_ENUM, JsonArray.of(AUTH_HANDLER_CLAIM_OPERATORS.toArray())))
+                    .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH, Schemas.stringSchema())
+                    .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
