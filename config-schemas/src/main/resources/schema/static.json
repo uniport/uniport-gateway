@@ -8,7 +8,8 @@
         "type" : "object",
         "properties" : {
           "sessionIdleTimeout" : {
-            "type" : "integer"
+            "type" : "integer",
+            "minimum" : 1
           },
           "middlewares" : {
             "type" : "array",
@@ -24,39 +25,47 @@
                   "type" : "object",
                   "properties" : {
                     "redirectUri" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "responseMode" : {
-                      "type" : "string"
+                      "type" : "string",
+                      "enum" : [ "query", "fragment", "form_post" ]
                     },
                     "publicKeys" : {
                       "type" : "array"
                     },
                     "uriWithoutSessionTimeoutReset" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "origin" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "lifetimeCookie" : {
                       "type" : "boolean"
                     },
                     "idleTimeoutInMinute" : {
-                      "type" : "integer"
+                      "type" : "integer",
+                      "minimum" : 1
                     },
                     "issuer" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "lifetimeHeader" : {
                       "type" : "boolean"
                     },
                     "waitTimeInMillisecond" : {
-                      "type" : "integer"
+                      "type" : "integer",
+                      "minimum" : 1
                     },
                     "policyDirectives" : {
                       "type" : "array"
                     },
                     "action" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "nagHttps" : {
@@ -66,18 +75,22 @@
                       "type" : "object"
                     },
                     "clientSecret" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "reportOnly" : {
                       "type" : "boolean"
                     },
                     "timeoutInMinute" : {
-                      "type" : "integer"
+                      "type" : "integer",
+                      "minimum" : 1
                     },
                     "cookieName" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "discoveryUrl" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "whitelistedCookies" : {
@@ -87,42 +100,67 @@
                       "type" : "array"
                     },
                     "headerName" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "clientId" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "cookie" : {
-                      "type" : "object"
+                      "type" : "object",
+                      "properties" : {
+                        "sameSite" : {
+                          "type" : "string",
+                          "enum" : [ "NONE", "STRICT", "LAX" ]
+                        },
+                        "name" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        },
+                        "httpOnly" : {
+                          "type" : "boolean"
+                        },
+                        "secure" : {
+                          "type" : "boolean"
+                        }
+                      }
                     },
                     "customRequestHeaders" : {
                       "type" : "object"
                     },
                     "optional" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "idMinimumLength" : {
-                      "type" : "integer"
+                      "type" : "integer",
+                      "minimum" : 1
                     },
                     "regex" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "name" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "claims" : {
                       "type" : "array"
                     },
                     "sessionScope" : {
+                      "minLength" : 1,
                       "type" : "string"
                     },
                     "replacement" : {
+                      "minLength" : 1,
                       "type" : "string"
                     }
                   }
                 },
                 "type" : {
-                  "type" : "string"
+                  "type" : "string",
+                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "csrf", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth" ]
                 }
               },
               "required" : [ "name", "type" ]
@@ -132,6 +170,7 @@
             "type" : "integer"
           },
           "name" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "sessionDisabled" : {
@@ -148,27 +187,33 @@
         "type" : "object",
         "properties" : {
           "endpoint" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "filename" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "watch" : {
             "type" : "boolean"
           },
           "name" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "directory" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "defaultRule" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "exposedByDefault" : {
             "type" : "boolean"
           },
           "network" : {
+            "minLength" : 1,
             "type" : "string"
           }
         },
@@ -182,18 +227,22 @@
         "type" : "object",
         "properties" : {
           "provider" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "entrypoint" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "name" : {
+            "minLength" : 1,
             "type" : "string"
           },
           "requestSelector" : {
             "type" : "object",
             "properties" : {
               "urlPrefix" : {
+                "minLength" : 1,
                 "type" : "string"
               }
             },
