@@ -39,12 +39,20 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "publicKeyAlgorithm" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
                     "origin" : {
                       "minLength" : 1,
                       "type" : "string"
                     },
                     "lifetimeCookie" : {
                       "type" : "boolean"
+                    },
+                    "publicKey" : {
+                      "minLength" : 1,
+                      "type" : "string"
                     },
                     "idleTimeoutInMinute" : {
                       "type" : "integer",
