@@ -4,6 +4,7 @@
             {
                 "name": "portal-grafana-proxy",
                 "middlewares": [
+                    "portalGrafanaRedirectRegex",
                     "portalGrafanaOauth2",
                     "portalGrafanaAuthBearer",
                     "portalGrafanaBearerOnly",
