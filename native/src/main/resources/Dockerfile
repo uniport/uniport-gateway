@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/graalvm-ce:java11-21.1.0 AS buildEnv
+FROM ghcr.io/graalvm/graalvm-ce:ol9-java17-22.3.2 AS buildEnv
 RUN gu install native-image
 
 WORKDIR /workdir
@@ -12,6 +12,7 @@ RUN native-image \
     --no-server \
     --no-fallback \
     --allow-incomplete-classpath \
+    --link-at-build-time \
     --enable-url-protocols=http \
     --initialize-at-build-time=org.slf4j.LoggerFactory \
     --initialize-at-run-time=io.netty.bootstrap \
