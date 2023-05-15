@@ -129,6 +129,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                         sh '''
                             set +x
+
                             echo "Downloading service.sh"
 
                             curl -X GET \
