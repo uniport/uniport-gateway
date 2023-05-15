@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING**: Removed entrypoint configuration `sessionDisabled`, that was deprecated in `5.1.0` ([PORTAL-1459](https://issue.inventage.com/browse/PORTAL-1459)).
 - **BREAKING**: HTTP response header `X-IPS-Trace-Id` is not written anymore, please use `OpenTelemetryMiddleware` as entrypoint middleware instead ().
 - **BREAKING**: Changed cookie name `ips.language` to `uniport.language`, `inventage-portal-gateway.session` to `uniport.session`, and `ipg.state` to `uniport.state` ([PORTAL-718](https://issue.inventage.com/browse/PORTAL-718)).
 - **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).

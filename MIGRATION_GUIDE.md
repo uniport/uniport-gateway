@@ -2,9 +2,15 @@
 
 ## `7.*.*` -> `8.*.*`
 
+### Session cookie
 Breaking change if any of your client is dependent on the (now deprecated) session cookie name by default: `inventage-portal-gateway.session`. The new default for the session cookie name is: `uniport.session`.
 
 Concretely: Change any occurrence of the old session cookie name to `uniport.session`.
+
+### `sessionDisabled`
+Breaking change if any of your static configuration file contains `sessionDisabled` in one of its entrypoint. Sessions are disabled per default and can be explicitly enabled by setting the session-middleware.
+
+Concretely: Delete any occurrence of `sessionDisabled` in your static configuration file.
 
 ## `6.*.*` -> `7.*.*`
 

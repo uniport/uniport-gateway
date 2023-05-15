@@ -32,7 +32,6 @@ public class StaticConfiguration {
     public static final String APPLICATIONS = "applications";
     public static final String APPLICATION_NAME = "name";
     public static final String APPLICATION_ENTRYPOINT = "entrypoint";
-    public static final String ENTRYPOINT_SESSION_DISABLED = "sessionDisabled";
     public static final String ENTRYPOINT_SESSION_IDLE_TIMEOUT = "sessionIdleTimeout";
     // TODO: the following two properties are currently not respected by this application
     public static final String APPLICATION_REQUEST_SELECTOR = "requestSelector";
@@ -76,7 +75,6 @@ public class StaticConfiguration {
             .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
             .property(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
-            .property(ENTRYPOINT_SESSION_DISABLED, Schemas.booleanSchema())
             .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
             .allowAdditionalProperties(false);
 

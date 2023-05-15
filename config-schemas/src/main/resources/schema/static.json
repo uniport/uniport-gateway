@@ -193,9 +193,6 @@
           "name" : {
             "minLength" : 1,
             "type" : "string"
-          },
-          "sessionDisabled" : {
-            "type" : "boolean"
           }
         },
         "required" : [ "port", "name" ]
