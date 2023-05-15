@@ -619,20 +619,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- for staging with Nexus2 -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <!-- auch im Jenkins Config File "settings.xml" referenziert -->
-                    <serverId>inventage-portal-staging</serverId>
-                    <nexusUrl>https://nexus.inventage.com</nexusUrl>
-                    <!-- inventage-portal staging -->
-                    <stagingProfileId>2784e0aacf5060</stagingProfileId>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -648,6 +634,27 @@
                 <docker.push.registry>${docker.pull.registry}</docker.push.registry>
                 <jib.goal>dockerBuild</jib.goal>
             </properties>
+        </profile>
+        <profile>
+            <id>jenkins</id>
+            <build>
+                <plugins>
+                    <!-- for staging with Nexus2 -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.8</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <!-- auch im Jenkins Config File "settings.xml" referenziert -->
+                            <serverId>inventage-portal-staging</serverId>
+                            <nexusUrl>https://nexus.inventage.com</nexusUrl>
+                            <!-- inventage-portal staging -->
+                            <stagingProfileId>2784e0aacf5060</stagingProfileId>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
