@@ -311,7 +311,8 @@
                     <version>3.3.1</version>
                     <configuration>
                         <from>
-                            <image>${docker.pull.registry}/eclipse-temurin:11-jre</image>
+                            <!-- PORTAL-453: upgrade to Java 17 because of https://github.com/docker/for-mac/issues/6118 -->
+                            <image>${docker.pull.registry}/eclipse-temurin:17-jre</image>
                         </from>
                         <to>
                             <image>${docker.push.registry}/${docker.image.name}</image>

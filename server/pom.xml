@@ -244,16 +244,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <from>
-                        <!-- PORTAL-453: upgrade to Java 17 because of https://github.com/docker/for-mac/issues/6118 -->
-                        <image>registry://docker-registry.inventage.com:10094/eclipse-temurin:17-jre</image>
-                    </from>
-                    <to>
-                        <image>${docker.push.registry}/${docker.image.name}</image>
-                        <tags>
-                            <tag>${project.version}</tag>
-                        </tags>
-                    </to>
                     <extraDirectories>
                         <paths>
                             <path>
