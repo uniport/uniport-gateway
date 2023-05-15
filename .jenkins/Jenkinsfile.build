@@ -125,7 +125,7 @@ pipeline {
                 expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
             }
             steps {
-                lock(label: 'uniport-portal-gateway-deployment-dev') {
+                lock('uniport-portal-gateway-deployment-dev') {
                     withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                         sh '''
                             set +x
