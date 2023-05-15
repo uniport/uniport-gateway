@@ -40,10 +40,10 @@ pipeline {
         stage('Initialize') {
             steps {
                 checkout([
-                    $class           : 'GitSCM',
-                    branches         : scm.branches,
-                    extensions       : scm.extensions + [[$class: 'CleanBeforeCheckout']],
-                    userRemoteConfigs: scm.userRemoteConfigs
+                        $class           : 'GitSCM',
+                        branches         : scm.branches,
+                        extensions       : scm.extensions + [[$class: 'CleanBeforeCheckout']],
+                        userRemoteConfigs: scm.userRemoteConfigs
                 ])
 
                 // Change the snapshot version in all pom.xml files to a release candidate version
@@ -85,14 +85,14 @@ pipeline {
                 sh 'mvn help:system'
 
                 mvn(
-                    settings: '.jenkins/settings.xml',
-                    profiles: '!local',
-                    properties: [
-                        'java.io.tmpdir': WORKSPACE,
-                        'multiArchBuild': true
-                    ],
-                    'clean',
-                    'deploy'
+                        settings: '.jenkins/settings.xml',
+                        profiles: '!local',
+                        properties: [
+                                'java.io.tmpdir': WORKSPACE,
+                                'multiArchBuild': true
+                        ],
+                        'clean',
+                        'deploy'
                 )
 
                 withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
@@ -106,15 +106,15 @@ pipeline {
         stage('Analysis') {
             steps {
                 parallel(
-                    'Test Evaluation': {
-                        junit testResults: '**/target/surefire-reports/TEST-*.xml'
-                    },
-                    'IQ Evaluation': {
-                        iqEvaluation('inventage-portal-gateway', 'build', '**/target/bom.xml')
-                    },
-                    'Code Quality': {
-                        codeQualityEvaluation()
-                    }
+                        'Test Evaluation': {
+                            junit testResults: '**/target/surefire-reports/TEST-*.xml'
+                        },
+                        'IQ Evaluation': {
+                            iqEvaluation('inventage-portal-gateway', 'build', '**/target/bom.xml')
+                        },
+                        'Code Quality': {
+                            codeQualityEvaluation()
+                        }
                 )
             }
         }
@@ -125,21 +125,22 @@ pipeline {
                 expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
             }
             steps {
-                withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                    sh '''
-                        set +x
+                lock(label: 'uniport-portal-gateway-deployment-dev') {
+                    withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        sh '''
+                            set +x
+                            echo "Downloading service.sh"
 
-                        echo "Downloading service.sh"
+                            curl -X GET \
+                                -u "$CI_NEXUS2_BITBUCKET_CREDS_USR:$CI_NEXUS2_BITBUCKET_CREDS_PSW" \
+                                https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh?at=refs%2Ftags%2F1.0.0 \
+                                > service.sh
 
-                        curl -X GET \
-                            -u "$CI_NEXUS2_BITBUCKET_CREDS_USR:$CI_NEXUS2_BITBUCKET_CREDS_PSW" \
-                            https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh?at=refs%2Ftags%2F1.0.0 \
-                            > service.sh
+                            KUBECONFIG=$KUBECONFIG_FILE bash service.sh portal-gateway install ips dev
 
-                        KUBECONFIG=$KUBECONFIG_FILE bash service.sh portal-gateway install ips dev
-
-                        rm -f service.sh
-                    '''
+                            rm -f service.sh
+                        '''
+                    }
                 }
             }
         }
@@ -155,8 +156,8 @@ pipeline {
         stage('Trigger Release Pipeline') {
             steps {
                 build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', wait: false, parameters: [
-                    string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
-                    string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
+                        string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
+                        string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
                 ]
             }
         }
@@ -230,57 +231,57 @@ def iqEvaluation(application, stage, String... scanPatterns) {
  */
 def codeQualityEvaluation() {
     mvn(
-        settings: '.jenkins/settings.xml',
-        profiles: '!local',
-        properties: [
-            'java.io.tmpdir': WORKSPACE
-        ],
-        'spotless:check checkstyle:check spotbugs:check'
+            settings: '.jenkins/settings.xml',
+            profiles: '!local',
+            properties: [
+                    'java.io.tmpdir': WORKSPACE
+            ],
+            'spotless:check checkstyle:check spotbugs:check'
     )
 
     recordIssues(
-        sourceCodeEncoding: 'UTF-8',
-        tools: [
-            mavenConsole(reportEncoding: 'UTF-8')
-        ]
+            sourceCodeEncoding: 'UTF-8',
+            tools: [
+                    mavenConsole(reportEncoding: 'UTF-8')
+            ]
     )
 
     recordIssues(
-        healthy: 1,
-        unhealthy: 10,
-        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-        sourceCodeEncoding: 'UTF-8',
-        tools: [
-            java(reportEncoding: 'UTF-8')
-        ]
+            healthy: 1,
+            unhealthy: 10,
+            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
+            sourceCodeEncoding: 'UTF-8',
+            tools: [
+                    java(reportEncoding: 'UTF-8')
+            ]
     )
 
     recordIssues(
-        healthy: 1,
-        unhealthy: 10,
-        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-        sourceCodeEncoding: 'UTF-8',
-        tools: [
-            checkStyle(reportEncoding: 'UTF-8')
-        ]
+            healthy: 1,
+            unhealthy: 10,
+            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
+            sourceCodeEncoding: 'UTF-8',
+            tools: [
+                    checkStyle(reportEncoding: 'UTF-8')
+            ]
     )
 
     recordIssues(
-        qualityGates: [
-            [threshold: 1, type: 'TOTAL_NORMAL', unstable: true],
-            [threshold: 1, type: 'TOTAL_HIGH', unstable: true],
-        ],
-        sourceCodeEncoding: 'UTF-8',
-        tools: [
-            spotBugs(reportEncoding: 'UTF-8', useRankAsPriority: true)
-        ]
+            qualityGates: [
+                    [threshold: 1, type: 'TOTAL_NORMAL', unstable: true],
+                    [threshold: 1, type: 'TOTAL_HIGH', unstable: true],
+            ],
+            sourceCodeEncoding: 'UTF-8',
+            tools: [
+                    spotBugs(reportEncoding: 'UTF-8', useRankAsPriority: true)
+            ]
     )
 
     recordIssues(
-        sourceCodeEncoding: 'UTF-8',
-        tools: [
-            taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
-        ]
+            sourceCodeEncoding: 'UTF-8',
+            tools: [
+                    taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
+            ]
     )
 }
 
@@ -297,9 +298,9 @@ def sendNotifications() {
         }
 
         step([
-            $class                  : 'Mailer',
-            notifyEveryUnstableBuild: true,
-            recipients              : recipient
+                $class                  : 'Mailer',
+                notifyEveryUnstableBuild: true,
+                recipients              : recipient
         ])
     }
 }
