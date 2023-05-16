@@ -661,6 +661,7 @@
                                         <artifactItem>
                                             <groupId>com.inventage.portal.gateway</groupId>
                                             <artifactId>config-schemas</artifactId>
+                                            <overWrite>true</overWrite>
                                         </artifactItem>
                                     </artifactItems>
                                     <outputDirectory>${project.basedir}/.idea/</outputDirectory>

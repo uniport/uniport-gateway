@@ -28,7 +28,7 @@ public final class ConfigurationValidator {
         final JsonSchema schema = StaticConfiguration.buildSchema();
         final JsonObject schemaAsJson = schema.resolve();
         removeId(schemaAsJson);
-        Files.write(Paths.get(path + "static.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(path + "portalGatewayStaticSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
 
     }
 
@@ -36,7 +36,7 @@ public final class ConfigurationValidator {
         final JsonSchema schema = DynamicConfiguration.buildSchema();
         final JsonObject schemaAsJson = schema.resolve();
         removeId(schemaAsJson);
-        Files.write(Paths.get(path + "dynamic.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(path + "portalGatewayDynamicSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
 
     }
 

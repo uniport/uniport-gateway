@@ -8,7 +8,7 @@
             <SchemaInfo>
               <option name="generatedName" value="New Schema" />
               <option name="name" value="Dynamic Configuration Schema" />
-              <option name="relativePathToSchema" value=".idea/schema/dynamic.json" />
+              <option name="relativePathToSchema" value=".idea/schema/portalGatewayDynamicSchema.json" />
               <option name="patterns">
                 <list>
                   <Item>
@@ -26,7 +26,7 @@
             <SchemaInfo>
               <option name="generatedName" value="New Schema" />
               <option name="name" value="Static Configuration Schema" />
-              <option name="relativePathToSchema" value=".idea/schema/static.json" />
+              <option name="relativePathToSchema" value=".idea/schema/portalGatewayStaticSchema.json" />
               <option name="patterns">
                 <list>
                   <Item>
