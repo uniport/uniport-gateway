@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenTelemetryMiddleware for adding traceId and sessionId as early as possible to the logging contextual data ([PORTAL-1416](https://issue.inventage.com/browse/PORTAL-1416)).
 - New optional `uriWithoutSessionTimeoutReset` parameter in session middleware added. There will be no session timeout reset if a request contains one of the configured paths ([PORTAL-1321](https://issue.inventage.com/browse/PORTAL-1321))
 - Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
-
+- Process exits with code 0 if any middleware initialization fails ([PORTAL-1016](https://issue.inventage.com/browse/PORTAL-1016)).
 ### Changed
 
 - **BREAKING**: Removed entrypoint configuration `sessionDisabled`, that was deprecated in `5.1.0` ([PORTAL-1459](https://issue.inventage.com/browse/PORTAL-1459)).

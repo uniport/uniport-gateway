@@ -127,8 +127,9 @@ public class Entrypoint {
                     .handler((Handler<RoutingContext>) mf.result()));
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(err -> {
-            throw new RuntimeException(
-                String.format("Failed to create EntryMiddlewares. Cause: {}", err.getMessage()));
+            vertx.close().onComplete(event -> {
+                LOGGER.error("Gateway is shutting down '{}'", err.getMessage());
+            });
         });
     }
 

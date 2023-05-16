@@ -102,6 +102,11 @@ public class RouterFactory {
                 } else {
                     handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
+
+                    //Fast-failing
+                    vertx.close().onComplete(event -> {
+                        LOGGER.error("Gateway is shutting down '{}'", srf.cause().getMessage());
+                    });
                 }
             });
 
