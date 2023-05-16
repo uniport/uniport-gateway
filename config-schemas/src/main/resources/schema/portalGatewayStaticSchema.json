@@ -141,6 +141,9 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "uriWithoutLoggingRegex" : {
+                      "type" : "string"
+                    },
                     "idMinimumLength" : {
                       "type" : "integer",
                       "minimum" : 1

@@ -117,6 +117,25 @@ public class DynamicConfigurationTest {
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE, "blub"))));
 
+        JsonObject requestResponseLoggerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject().put(
+                            DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX,
+                            ".*/health.*|.*/ready.*")))));
+
+        JsonObject requestResponseLoggerHttpMiddlewareMinimal = new JsonObject().put(
+            DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER))));
+
         JsonObject replacePathRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -763,6 +782,11 @@ public class DynamicConfigurationTest {
             Arguments.of("reject replace path middleware with missing options",
                 replacePathRegexHttpMiddlewareWithMissingOptions, complete,
                 expectedFalse),
+            // request response logger middleware
+            Arguments.of("accept request response logger middleware",
+                requestResponseLoggerHttpMiddleware, complete, expectedTrue),
+            Arguments.of("accept minimal request response logger middleware",
+                requestResponseLoggerHttpMiddlewareMinimal, complete, expectedTrue),
             // redirect regex middleware
             Arguments.of("accept redirect regex middleware", directRegexHttpMiddleware, complete,
                 expectedTrue),

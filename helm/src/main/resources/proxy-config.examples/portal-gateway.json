@@ -23,7 +23,10 @@
                 },
                 {
                     "name": "requestResponseLogger",
-                    "type": "requestResponseLogger"
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*"
+                    }
                 },
                 {
                     "name": "replacedSessionCookieDetection",

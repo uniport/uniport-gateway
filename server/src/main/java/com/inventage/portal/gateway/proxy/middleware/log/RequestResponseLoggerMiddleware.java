@@ -12,6 +12,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +30,20 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
     private final String name;
 
-    public RequestResponseLoggerMiddleware(String name) {
+    private final Pattern uriPatternForIgnoringRequests;
+
+    public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests) {
         this.name = name;
+        this.uriPatternForIgnoringRequests = uriPatternForIgnoringRequests == null ? null : Pattern.compile(uriPatternForIgnoringRequests);
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        if (isRequestIgnoredForLogging(ctx.request().uri())) {
+            ctx.next();
+            return;
+        }
+
         final long start = System.currentTimeMillis();
         ContextualDataAdapter.put(CONTEXTUAL_DATA_USER_ID, getUserId(ctx.user()));
 
@@ -58,6 +67,13 @@ public class RequestResponseLoggerMiddleware implements Middleware {
             }
         });
         ctx.next();
+    }
+
+    private boolean isRequestIgnoredForLogging(String requestUri) {
+        if (this.uriPatternForIgnoringRequests == null) {
+            return false;
+        }
+        return uriPatternForIgnoringRequests.matcher(requestUri).matches();
     }
 
     private String getClientAddress(SocketAddress inetSocketAddress) {

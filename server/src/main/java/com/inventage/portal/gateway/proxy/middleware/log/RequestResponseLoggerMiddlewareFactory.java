@@ -21,8 +21,10 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+        final String requestFilterPattern = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX);
+
         LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER);
-        return Future.succeededFuture(new RequestResponseLoggerMiddleware(name));
+        return Future.succeededFuture(new RequestResponseLoggerMiddleware(name, requestFilterPattern));
     }
 
 }
