@@ -36,7 +36,7 @@
                                 <groupId>com.inventage.portal.gateway</groupId>
                                 <artifactId>server</artifactId>
                             </executableDependency>
-                            <mainClass>com.inventage.portal.gateway.ConfigurationValidator</mainClass>
+                            <mainClass>com.inventage.portal.gateway.JsonSchemaGenerator</mainClass>
                             <arguments>
                                 <argument>./config-schemas/src/main/resources/schema/</argument>
                             </arguments>

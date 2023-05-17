@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public final class ConfigurationValidator {
+public final class JsonSchemaGenerator {
 
-    private ConfigurationValidator() {
+    private JsonSchemaGenerator() {
     }
 
     public static void main(String[] args) throws IOException {
