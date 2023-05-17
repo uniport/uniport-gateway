@@ -56,7 +56,7 @@
                     },
                     "idleTimeoutInMinute" : {
                       "type" : "integer",
-                      "minimum" : 1
+                      "minimum" : 0
                     },
                     "issuer" : {
                       "minLength" : 1,
@@ -67,7 +67,7 @@
                     },
                     "waitTimeInMillisecond" : {
                       "type" : "integer",
-                      "minimum" : 1
+                      "minimum" : 0
                     },
                     "policyDirectives" : {
                       "type" : "array"
@@ -91,7 +91,7 @@
                     },
                     "timeoutInMinute" : {
                       "type" : "integer",
-                      "minimum" : 1
+                      "minimum" : 0
                     },
                     "cookieName" : {
                       "minLength" : 1,
@@ -123,7 +123,7 @@
                           "enum" : [ "NONE", "STRICT", "LAX" ]
                         },
                         "name" : {
-                          "minLength" : 1,
+                          "minLength" : 0,
                           "type" : "string"
                         },
                         "httpOnly" : {
@@ -146,7 +146,7 @@
                     },
                     "idMinimumLength" : {
                       "type" : "integer",
-                      "minimum" : 1
+                      "minimum" : 0
                     },
                     "regex" : {
                       "minLength" : 1,
@@ -191,7 +191,8 @@
             }
           },
           "port" : {
-            "type" : "integer"
+            "pattern" : "^\\$\\{.*\\}$",
+            "type" : [ "integer", "string" ]
           },
           "name" : {
             "minLength" : 1,

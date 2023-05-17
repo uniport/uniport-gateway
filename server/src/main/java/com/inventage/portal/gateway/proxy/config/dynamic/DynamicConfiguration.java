@@ -190,7 +190,11 @@ public class DynamicConfiguration {
     private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
     private static final String KEYWORD_INT_MIN = "minimum";
     private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
-    private static final int NON_ZERO_INT_MIN = 1;
+    private static final int INT_MIN = 0;
+    private static final String KEYWORD_TYPE = "type";
+    private static final String KEYWORD_PATTERN = "pattern";
+    private static final JsonArray INT_OR_STRING_TYPE = JsonArray.of("integer", "string");
+    private static final String ENV_VARIABLE_PATTERN_STRING_TO_INT = "^\\$\\{.*\\}$";
 
     private static Validator buildValidator() {
         final JsonSchema schema = buildSchema();
@@ -233,7 +237,7 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_CSRF_ORIGIN, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
             .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
             .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema()
@@ -255,7 +259,7 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
@@ -268,15 +272,15 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
             .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema()
                 .property(MIDDLEWARE_SESSION_COOKIE_NAME, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_ZERO_INT_MIN))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, INT_MIN))
                 .property(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
                 .property(MIDDLEWARE_SESSION_COOKIE_SECURE, Schemas.booleanSchema())
                 .property(MIDDLEWARE_SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
                     .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray()))))
             .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .property(MIDDLEWARE_SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
@@ -316,7 +320,9 @@ public class DynamicConfiguration {
                     .optionalProperty(SERVICE_SERVER_PROTOCOL, Schemas.stringSchema())
                     .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema())
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
-                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.intSchema())
+                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.schema()
+                        .withKeyword(KEYWORD_TYPE, INT_OR_STRING_TYPE)
+                        .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT))
                     .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
         return serviceSchema;

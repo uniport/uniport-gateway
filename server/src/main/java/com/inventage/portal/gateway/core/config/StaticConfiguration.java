@@ -56,6 +56,10 @@ public class StaticConfiguration {
     private static Validator validator;
     private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
     private static final String KEYWORD_INT_MIN = "minimum";
+    private static final String KEYWORD_TYPE = "type";
+    private static final String KEYWORD_PATTERN = "pattern";
+    private static final JsonArray INT_OR_STRING_TYPE = JsonArray.of("integer", "string");
+    private static final String ENV_VARIABLE_PATTERN_STRING_TO_INT = "^\\$\\{.*\\}$";
     private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
     private static final int NON_ZERO_INT_MIN = 1;
 
@@ -72,7 +76,9 @@ public class StaticConfiguration {
     public static JsonSchema buildSchema() {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
             .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .requiredProperty(ENTRYPOINT_PORT, Schemas.intSchema())
+            .requiredProperty(ENTRYPOINT_PORT, Schemas.schema()
+                .withKeyword(KEYWORD_TYPE, INT_OR_STRING_TYPE)
+                .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT))
             .property(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
             .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
