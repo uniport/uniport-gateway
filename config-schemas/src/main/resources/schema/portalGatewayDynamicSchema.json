@@ -201,7 +201,7 @@
                       "type" : "string"
                     },
                     "port" : {
-                      "anyOf": [
+                      "oneOf": [
                         {
                           "type": "integer"
                         },

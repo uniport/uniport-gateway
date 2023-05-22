@@ -191,7 +191,7 @@
             }
           },
           "port" : {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "integer"
               },
