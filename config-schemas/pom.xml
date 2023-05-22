@@ -81,7 +81,7 @@
                             <goal>npx</goal>
                         </goals>
                         <configuration>
-                            <arguments>ajv-cli validate -s src/main/resources/schema/portalGatewayStaticSchema.json -d ${project.build.directory}/helm/proxy-config.examples/portal-gateway.json</arguments>
+                            <arguments>ajv-cli validate --allow-union-types -s src/main/resources/schema/portalGatewayStaticSchema.json -d ${project.build.directory}/helm/proxy-config.examples/portal-gateway.json</arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -90,7 +90,7 @@
                             <goal>npx</goal>
                         </goals>
                         <configuration>
-                            <arguments>ajv-cli validate -s src/main/resources/schema/portalGatewayDynamicSchema.json -d "${project.build.directory}/helm/proxy-config.examples/dynamic-config/**/*.json"</arguments>
+                            <arguments>ajv-cli validate --allow-union-types -s src/main/resources/schema/portalGatewayDynamicSchema.json -d "${project.build.directory}/helm/proxy-config.examples/dynamic-config/**/*.json"</arguments>
                         </configuration>
                     </execution>
                 </executions>
