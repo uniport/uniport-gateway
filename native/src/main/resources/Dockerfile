@@ -7,7 +7,7 @@ COPY ${project.artifactId}-${project.version}-fat.jar ./portal-gateway.jar
 # copy reachability metadata and reflection configuration
 # https://www.graalvm.org/22.3/reference-manual/native-image/metadata/#specifying-metadata-with-json
 # https://www.graalvm.org/22.3/reference-manual/native-image/dynamic-features/Reflection/#manual-configuration
-COPY META-INF/native-image .
+COPY native-image .
 
 # https://www.graalvm.org/22.3/reference-manual/native-image/overview/BuildOptions/
 RUN native-image \
@@ -30,7 +30,7 @@ FROM debian:buster-slim
 
 COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
-COPY portal-gateway /etc/portal-gateway/default/
+COPY logback.xml /etc/portal-gateway/default/
 
 ENV TZ="Europe/Zurich"
 

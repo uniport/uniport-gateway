@@ -234,7 +234,7 @@
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
-                            <outputDirectory>${project.build.directory}/docker-context/</outputDirectory>
+                            <outputDirectory>${docker.contextDir}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -247,7 +247,7 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>${project.build.directory}/docker-context</from>
+                                <from>${docker.contextDir}</from>
                                 <into>/etc/portal-gateway</into>
                                 <includes>logback.xml</includes>
                             </path>
@@ -292,18 +292,6 @@
                             <goal>jar</goal>
                         </goals>
                         <phase>package</phase>
-                    </execution>
-                    <execution>
-                        <!-- needed for the native build -->
-                        <id>configuration</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <classesDirectory>${project.build.directory}/docker-context/portal-gateway-config</classesDirectory>
-                            <classifier>configuration</classifier>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

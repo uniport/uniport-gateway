@@ -40,25 +40,6 @@
                             </artifactItems>
                         </configuration>
                     </execution>
-                    <!-- copy server configuration -->
-                    <execution>
-                        <id>unpack-configuration</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.inventage.portal.gateway</groupId>
-                                    <artifactId>server</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>configuration</classifier>
-                                    <outputDirectory>${docker.contextDir}/portal-gateway</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -66,9 +47,18 @@
                 <configuration>
                     <outputDirectory>${docker.contextDir}</outputDirectory>
                     <resources>
+                        <!-- copy native-image configuration -->
                         <resource>
                             <directory>src/main/resources</directory>
                             <filtering>true</filtering>
+                        </resource>
+                        <!-- copy server configuration -->
+                        <resource>
+                            <directory>../server/src/main/resources</directory>
+                            <includes>
+                                <include>logback.xml</include>
+                            </includes>
+                            <filtering>false</filtering>
                         </resource>
                     </resources>
                 </configuration>
