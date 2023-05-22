@@ -3,24 +3,20 @@ RUN gu install native-image
 
 WORKDIR /workdir
 COPY ${project.artifactId}-${project.version}-fat.jar ./portal-gateway.jar
-# reflection configuration so that logback can use io.reactiverse.contextual.logging.LogbackConverter
-# https://www.graalvm.org/21.3/reference-manual/native-image/Reflection/#manual-configuration
-COPY META-INF/native-image/reflection-config.json ./reflection-config.json
 
-# https://www.graalvm.org/reference-manual/native-image/Options/#options-to-native-image-builder
+# copy reachability metadata and reflection configuration
+# https://www.graalvm.org/22.3/reference-manual/native-image/metadata/#specifying-metadata-with-json
+# https://www.graalvm.org/22.3/reference-manual/native-image/dynamic-features/Reflection/#manual-configuration
+COPY META-INF/native-image .
+
+# https://www.graalvm.org/22.3/reference-manual/native-image/overview/BuildOptions/
 RUN native-image \
-    --no-server \
+    --verbose \
     --no-fallback \
-    --allow-incomplete-classpath \
-    --link-at-build-time \
     --enable-url-protocols=http \
     --initialize-at-build-time=org.slf4j.LoggerFactory \
-    --initialize-at-run-time=io.netty.bootstrap \
-    --initialize-at-run-time=io.netty.buffer \
-    --initialize-at-run-time=io.netty.channel \
-    --initialize-at-run-time=io.netty.handler \
-    --initialize-at-run-time=io.netty.resolver \
-    --initialize-at-run-time=io.netty.util \
+    --initialize-at-build-time=ch.qos.logback \
+    --initialize-at-run-time=io.netty \
     --initialize-at-run-time=org.slf4j.impl.StaticLoggerBinder \
     --initialize-at-run-time=io.grpc.netty.shaded.io.netty \
     -H:+ReportExceptionStackTraces \
