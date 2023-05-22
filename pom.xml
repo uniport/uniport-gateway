@@ -611,7 +611,7 @@
                         <goals>
                             <goal>makeAggregateBom</goal>
                         </goals>
-                        <phase>package</phase>
+                        <phase>install</phase>
                     </execution>
                 </executions>
             </plugin>
