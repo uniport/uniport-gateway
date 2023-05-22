@@ -221,11 +221,6 @@
                 <version>${portal-code-style-version.version}</version>
                 <type>zip</type>
             </dependency>
-            <dependency>
-                <groupId>com.inventage.portal.gateway</groupId>
-                <artifactId>config-schemas</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -648,35 +643,6 @@
                 <docker.push.registry>${docker.pull.registry}</docker.push.registry>
                 <jib.goal>dockerBuild</jib.goal>
             </properties>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>unpack-config-schemas</id>
-                                <goals>
-                                    <goal>unpack</goal>
-                                </goals>
-                                <phase>generate-sources</phase>
-                                <inherited>false</inherited>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>com.inventage.portal.gateway</groupId>
-                                            <artifactId>config-schemas</artifactId>
-                                            <overWrite>true</overWrite>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.basedir}/.idea/</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 

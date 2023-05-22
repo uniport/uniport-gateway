@@ -12,6 +12,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-json-schema</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.inventage.portal.gateway</groupId>
             <artifactId>server</artifactId>
             <version>${project.version}</version>
@@ -32,14 +44,30 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <executableDependency>
-                                <groupId>com.inventage.portal.gateway</groupId>
-                                <artifactId>server</artifactId>
-                            </executableDependency>
                             <mainClass>com.inventage.portal.gateway.JsonSchemaGenerator</mainClass>
                             <arguments>
-                                <argument>./config-schemas/src/main/resources/schema/</argument>
+                                <argument>${project.basedir}/../config-schemas/src/main/resources/schema/</argument>
                             </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-json-schemas-to-idea-folder</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/../.idea/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../config-schemas/src/main/resources/</directory>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>
