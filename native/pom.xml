@@ -19,6 +19,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <!-- copy server fat jar -->
                 <executions>
                     <execution>
                         <id>copy-server</id>
@@ -39,6 +40,7 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <!-- copy server configuration -->
                     <execution>
                         <id>unpack-configuration</id>
                         <goals>
