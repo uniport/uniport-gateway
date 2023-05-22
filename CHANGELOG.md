@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Bug when authentication request is not initiated by Portal-Gateway ([PORTAL-1417](https://issue.inventage.com/browse/PORTAL-1417)).
+- Fixed native image build ([PORTAL-764](https://issue.inventage.com/browse/PORTAL-764)).
 
 ### Added
 
