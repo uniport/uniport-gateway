@@ -28,10 +28,73 @@
             <artifactId>server</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.inventage.portal.gateway</groupId>
+            <artifactId>helm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-helm</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.inventage.portal.gateway</groupId>
+                                    <artifactId>helm</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <includes>proxy-config.examples/**/*</includes>
+                                    <outputDirectory>${project.build.directory}/helm</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.12.1</version>
+                <configuration>
+                    <nodeVersion>v18.16.0</nodeVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>validate-static-gateway-configs</id>
+                        <goals>
+                            <goal>npx</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>ajv-cli validate -s src/main/resources/schema/portalGatewayStaticSchema.json -d ${project.build.directory}/helm/proxy-config.examples/portal-gateway.json</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>validate-dynamic-gateway-configs</id>
+                        <goals>
+                            <goal>npx</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>ajv-cli validate -s src/main/resources/schema/portalGatewayDynamicSchema.json -d "${project.build.directory}/helm/proxy-config.examples/dynamic-config/**/*.json"</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
