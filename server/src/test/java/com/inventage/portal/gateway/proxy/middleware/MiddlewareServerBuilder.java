@@ -6,6 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.cu
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
@@ -317,6 +318,10 @@ public class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withMiddlewareOnPath(Handler<RoutingContext> middleware, String path) {
         router.route().path(path).handler(middleware);
         return this;
+    }
+
+    public MiddlewareServerBuilder withClaimToMiddleware(String claim, String headerName) {
+        return withMiddleware(new ClaimToHeaderMiddleware("withClaimToMiddleware", claim, headerName));
     }
 
     public MiddlewareServer build() {

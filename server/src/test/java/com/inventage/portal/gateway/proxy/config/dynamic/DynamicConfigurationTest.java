@@ -735,6 +735,13 @@ public class DynamicConfigurationTest {
         JsonObject openTelemetryMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware("openTelemetry", DynamicConfiguration.MIDDLEWARE_OPEN_TELEMETRY)));
 
+        JsonObject claimToHeaderMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+            TestUtils.withMiddleware("claimToHeader", DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER,
+                TestUtils.withMiddlewareOpts(
+                    new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER_PATH, "claimPath")
+                        .put(DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER_NAME, "headerName")))));
+
         // the sole purpose of the following variable are to improve readability
         boolean expectedTrue = true;
         boolean expectedFalse = false;
@@ -863,6 +870,10 @@ public class DynamicConfigurationTest {
             // openTelemetry middleware
             Arguments.of("accept openTelemetry middleware",
                 openTelemetryMiddleware, complete, expectedTrue),
+
+            // claimToHeader middleware
+            Arguments.of("accept claimToHeader middleware",
+                claimToHeaderMiddleware, complete, expectedTrue),
 
             // services
             Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),

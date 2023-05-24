@@ -39,6 +39,10 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "claimPath" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
                     "publicKeyAlgorithm" : {
                       "minLength" : 1,
                       "type" : "string"
@@ -184,7 +188,7 @@
                 },
                 "type" : {
                   "type" : "string",
-                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "csrf", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth" ]
+                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "csrf", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader" ]
                 }
               },
               "required" : [ "name", "type" ]

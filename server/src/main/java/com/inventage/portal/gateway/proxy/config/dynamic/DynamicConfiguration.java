@@ -142,6 +142,10 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OPEN_TELEMETRY = "openTelemetry";
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
+
+    public static final String MIDDLEWARE_CLAIM_TO_HEADER = "claimToHeader";
+    public static final String MIDDLEWARE_CLAIM_TO_HEADER_PATH = "claimPath";
+    public static final String MIDDLEWARE_CLAIM_TO_HEADER_NAME = "headerName";
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
     public static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
 
@@ -171,7 +175,8 @@ public class DynamicConfiguration {
         MIDDLEWARE_SESSION_BAG,
         MIDDLEWARE_SHOW_SESSION_CONTENT,
         MIDDLEWARE_OPEN_TELEMETRY,
-        MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION);
+        MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION,
+        MIDDLEWARE_CLAIM_TO_HEADER);
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
@@ -301,6 +306,10 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema())
             .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_CLAIM_TO_HEADER_PATH, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_CLAIM_TO_HEADER_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
 
@@ -1008,6 +1017,17 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_SHOW_SESSION_CONTENT: {
+                    break;
+                }
+                case MIDDLEWARE_CLAIM_TO_HEADER: {
+                    final String path = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_PATH);
+                    if (path == null || path.length() == 0) {
+                        return Future.failedFuture(String.format("%s: Claim path not defined", mwType));
+                    }
+                    final String name = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_PATH);
+                    if (name == null || name.length() == 0) {
+                        return Future.failedFuture(String.format("%s: Header name not defined", mwType));
+                    }
                     break;
                 }
                 default: {
