@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add stacktrace to logback configuration ([PORTAL-1243](https://issue.inventage.com/browse/PORTAL-1243)).
 - Process exits with code 0 if any middleware initialization fails ([PORTAL-1016](https://issue.inventage.com/browse/PORTAL-1016)).
 - `uriWithoutLoggingRegex` option for RequestResponseLoggerMiddleware allowing selective logging of requests based on their URI ([PORTAL-1418](https://issue.inventage.com/browse/PORTAL-1418))
+- Fail build when example configs are invalid ([PORTAL-1461](https://issue.inventage.com/browse/PORTAL-1461)).
 
 ### Changed
 
@@ -208,7 +209,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTTP header `X-Forwarded-Port` is set for outgoing requests to services ([PORTAL-713](https://issue.inventage.com/browse/PORTAL-713)).
 - Add route to portal-monitoring UI ([PORTAL-695](https://issue.inventage.com/browse/PORTAL-695))
 - Allow literal dot `.` characters in `Path` and `PathPrefix` and `Host` rule values in the router factory.
-- Fail build when example configs are invalid ([PORTAL-1461](https://issue.inventage.com/browse/PORTAL-1461)).
 
 ### Removed
 
