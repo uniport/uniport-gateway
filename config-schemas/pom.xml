@@ -36,6 +36,15 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -62,43 +71,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.12.1</version>
-                <configuration>
-                    <nodeVersion>v18.16.0</nodeVersion>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-node</id>
-                        <goals>
-                            <goal>install-node-and-npm</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>validate-static-gateway-configs</id>
-                        <goals>
-                            <goal>npx</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>ajv-cli validate --allow-union-types -s src/main/resources/schema/portalGatewayStaticSchema.json -d ${project.build.directory}/helm/proxy-config.examples/portal-gateway.json</arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>validate-dynamic-gateway-configs</id>
-                        <goals>
-                            <goal>npx</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>ajv-cli validate --allow-union-types -s src/main/resources/schema/portalGatewayDynamicSchema.json -d "${project.build.directory}/helm/proxy-config.examples/dynamic-config/**/*.json"</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>create-json-schemas</id>
@@ -113,6 +87,17 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <!--                    <execution>-->
+                    <!--                        <id>validate-static-config</id>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>exec</goal>-->
+                    <!--                        </goals>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <configuration>-->
+                    <!--                            <executable>validate-configs.sh</executable>-->
+                    <!--                            <workingDirectory>${project.basedir}</workingDirectory>-->
+                    <!--                        </configuration>-->
+                    <!--                    </execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -131,6 +116,24 @@
                                     <directory>${project.basedir}/../config-schemas/src/main/resources/</directory>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate-configs</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <!--  @see https://ant.apache.org/manual/Tasks -->
+                                <exec executable="./validate-configs.sh" failonerror="true"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
