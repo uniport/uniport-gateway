@@ -87,17 +87,16 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <!--                    <execution>-->
-                    <!--                        <id>validate-static-config</id>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>exec</goal>-->
-                    <!--                        </goals>-->
-                    <!--                        <phase>package</phase>-->
-                    <!--                        <configuration>-->
-                    <!--                            <executable>validate-configs.sh</executable>-->
-                    <!--                            <workingDirectory>${project.basedir}</workingDirectory>-->
-                    <!--                        </configuration>-->
-                    <!--                    </execution>-->
+                    <execution>
+                        <id>validate-static-config</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <executable>./validate-configs.sh</executable>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -116,24 +115,6 @@
                                     <directory>${project.basedir}/../config-schemas/src/main/resources/</directory>
                                 </resource>
                             </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>validate-configs</id>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <!--  @see https://ant.apache.org/manual/Tasks -->
-                                <exec executable="./validate-configs.sh" failonerror="true"/>
-                            </target>
                         </configuration>
                     </execution>
                 </executions>
