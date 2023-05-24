@@ -201,15 +201,8 @@
                       "type" : "string"
                     },
                     "port" : {
-                      "oneOf": [
-                        {
-                          "type": "integer"
-                        },
-                        {
-                          "type": "string",
-                          "pattern": "^\\$\\{.*\\}$"
-                        }
-                      ]
+                      "pattern" : "^\\$\\{.*\\}$",
+                      "type" : [ "integer", "string" ]
                     },
                     "host" : {
                       "type" : "string"

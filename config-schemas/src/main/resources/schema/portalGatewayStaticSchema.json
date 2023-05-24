@@ -191,15 +191,8 @@
             }
           },
           "port" : {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "string",
-                "pattern": "^\\$\\{.*\\}$"
-              }
-            ]
+            "pattern" : "^\\$\\{.*\\}$",
+            "type" : [ "integer", "string" ]
           },
           "name" : {
             "minLength" : 1,
