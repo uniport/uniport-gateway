@@ -433,6 +433,7 @@
                                         <exclude>.idea/jsonSchemas.xml</exclude>
                                         <exclude>.idea/shelf/**/*</exclude>
                                         <exclude>.idea/vcs.xml</exclude>
+                                        <exclude>.idea/workspace.xml</exclude>
                                         <exclude>.idea/misc.xml</exclude>
                                         <exclude>.idea/schema/**</exclude>
                                     </excludes>
