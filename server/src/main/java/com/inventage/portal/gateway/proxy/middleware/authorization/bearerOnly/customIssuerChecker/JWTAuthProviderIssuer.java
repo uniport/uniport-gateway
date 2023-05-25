@@ -18,7 +18,7 @@ public interface JWTAuthProviderIssuer extends AuthenticationProvider {
 
     static JWTAuth create(Vertx vertx, JWTAuthOptions config, JsonArray additionalIssuers) {
         if (additionalIssuers == null) {
-            return JWTAuth.create(vertx, config);
+            return create(vertx, config);
         }
         return new JWTAuthProviderIssuerImpl(vertx, config, additionalIssuers.getList());
     }
