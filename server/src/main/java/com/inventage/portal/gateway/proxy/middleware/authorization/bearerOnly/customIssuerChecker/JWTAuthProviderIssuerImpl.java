@@ -63,7 +63,7 @@ public class JWTAuthProviderIssuerImpl extends JWTAuthProviderImpl {
             }
         }
 
-        // The jwt issuer is not one of the defined additional issuers, therefore we can use the integrated check.
+        // The jwt issuer is not one of the defined additional issuers, therefore we can use the built-in check.
         if (!issuerFound) {
             return super.authenticate(credentials);
         }
