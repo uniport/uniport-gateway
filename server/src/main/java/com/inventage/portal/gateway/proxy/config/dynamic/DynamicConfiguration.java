@@ -1024,7 +1024,7 @@ public class DynamicConfiguration {
                     if (path == null || path.length() == 0) {
                         return Future.failedFuture(String.format("%s: Claim path not defined", mwType));
                     }
-                    final String name = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_PATH);
+                    final String name = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_NAME);
                     if (name == null || name.length() == 0) {
                         return Future.failedFuture(String.format("%s: Header name not defined", mwType));
                     }
