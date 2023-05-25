@@ -136,6 +136,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH = "claimPath";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE = "value";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER = "issuer";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS = "additionalIssuers";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
@@ -300,6 +301,7 @@ public class DynamicConfiguration {
                     .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, Schemas.arraySchema().items(Schemas.stringSchema()))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Middleware `claimToHeader` for setting an HTTP header from a JWT claim value ([PORTAL-1483](https://issue.inventage.com/browse/PORTAL-1483)).
-
+- Support for additional issuers. Can be defined in the configuration with `additionalIssuers` (([PORTAL-1331](https://issue.inventage.com/browse/PORTAL-1331)).
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17887) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~8.0.0-202305240847-789-bdd58cd9~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.0.0-202305240847-789-bdd58cd9)

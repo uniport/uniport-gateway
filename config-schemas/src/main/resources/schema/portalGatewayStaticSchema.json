@@ -141,6 +141,12 @@
                     "customRequestHeaders" : {
                       "type" : "object"
                     },
+                    "additionalIssuers" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "string"
+                      }
+                    },
                     "optional" : {
                       "minLength" : 1,
                       "type" : "string"

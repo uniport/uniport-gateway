@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthProviderIssuer;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -94,6 +95,61 @@ public class BearerOnlyMiddlewareTest {
 
         portalGateway(vertx, host, testCtx)
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void validIssuerAdditionalIssuers(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
+        final String additionalIssuer = "http://test.issuer:1234/auth/realms/additional";
+        final JsonArray additionalIssuers = JsonArray.of(additionalIssuer, "http://test.issuer:1234/auth/realms/test2");
+
+        final List<String> expectedAudience = List.of("test-audience");
+
+        final JsonObject validPayload = Json.createObjectBuilder(validPayloadTemplate)
+            .add("iss", additionalIssuer)
+            .build();
+
+        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayload);
+
+        portalGateway(vertx, host, testCtx)
+            .withBearerOnlyMiddleware(jwtAuthWithAdditionalIssuers(vertx, expectedIssuer, expectedAudience, additionalIssuers), false)
+            .build().start()
+            // when
+            .incomingRequest(GET, "/",
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                (resp) -> {
+                    // then
+                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void invalidIssuerAdditionalIssuers(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
+        final JsonArray additionalIssuers = JsonArray.of("http://test.issuer:1234/auth/realms/additional", "http://test.issuer:1234/auth/realms/test2");
+
+        final List<String> expectedAudience = List.of("test-audience");
+
+        final JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate)
+            .add("iss", "http://malory.issuer:1234/auth/realms/test")
+            .build();
+
+        final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
+
+        portalGateway(vertx, host, testCtx)
+            .withBearerOnlyMiddleware(jwtAuthWithAdditionalIssuers(vertx, expectedIssuer, expectedAudience, additionalIssuers), false)
             .build().start()
             // when
             .incomingRequest(GET, "/",
@@ -212,6 +268,10 @@ public class BearerOnlyMiddlewareTest {
     }
 
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience) {
+        return jwtAuthWithAdditionalIssuers(vertx, expectedIssuer, expectedAudience, null);
+    }
+
+    private JWTAuth jwtAuthWithAdditionalIssuers(Vertx vertx, String expectedIssuer, List<String> expectedAudience, JsonArray additionalIssuers) {
         String publicKeyRS256 = null;
         try {
             publicKeyRS256 = Resources.toString(Resources.getResource(publicKeyPath),
@@ -219,10 +279,11 @@ public class BearerOnlyMiddlewareTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return JWTAuth.create(vertx,
+        return JWTAuthProviderIssuer.create(vertx,
             new JWTAuthOptions()
                 .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm).setBuffer(publicKeyRS256))
-                .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)));
+                .setJWTOptions(new JWTOptions().setIssuer(expectedIssuer).setAudience(expectedAudience)),
+            additionalIssuers);
     }
 
     private String bearer(String value) {

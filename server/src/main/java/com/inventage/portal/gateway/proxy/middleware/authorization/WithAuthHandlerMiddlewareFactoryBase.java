@@ -5,6 +5,7 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthProviderIssuer;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -63,10 +64,12 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS);
         final JsonArray publicKeys = middlewareConfig
             .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS);
+        final JsonArray additionalIssuers = middlewareConfig
+            .getJsonArray(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS);
 
         this.fetchPublicKeys(vertx, publicKeys)
             .onSuccess(setupMiddleware(vertx, name,
-                issuer, audience, additionalClaims,
+                issuer, additionalIssuers, audience, additionalClaims,
                 middlewareConfig, middlewarePromise))
             .onFailure(err -> {
                 final String errMsg = String.format("create: Failed to get public key '%s'", err.getMessage());
@@ -78,7 +81,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     }
 
     private Handler<JWTAuthOptions> setupMiddleware(
-        Vertx vertx, String name, String issuer, JsonArray audience,
+        Vertx vertx, String name, String issuer, JsonArray additionalIssuers, JsonArray audience,
         JsonArray additionalClaims, JsonObject middlewareConfig,
         Handler<AsyncResult<Middleware>> handler
     ) {
@@ -102,7 +105,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 LOGGER.debug("With claims '{}'", additionalClaims);
             }
 
-            final JWTAuth authProvider = JWTAuth.create(vertx, authConfig);
+            final JWTAuth authProvider = JWTAuthProviderIssuer.create(vertx, authConfig, additionalIssuers);
             final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider,
                 additionalClaimsOptions);
 
