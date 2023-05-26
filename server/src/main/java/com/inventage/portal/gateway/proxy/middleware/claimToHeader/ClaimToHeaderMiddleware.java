@@ -46,6 +46,7 @@ public class ClaimToHeaderMiddleware implements Middleware {
                 final String claimValue = JsonPath.read(jwt, claimPath);
                 if (claimValue != null) {
                     ctx.request().headers().add(headerName, claimValue);
+                    LOGGER.debug("Adding header '{}: {}'", headerName, claimValue);
                 }
             });
         } catch (PathNotFoundException e) {
