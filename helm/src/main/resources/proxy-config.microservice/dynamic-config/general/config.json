@@ -1,0 +1,71 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "base-backend",
+                "rule": "PathPrefix('/service')",
+                "middlewares": [
+                    "bearerOnly"
+                ],
+                "service": "base-backend"
+            },
+            {
+                "name": "base-frontend",
+                "rule": "PathPrefix('/')",
+                "middlewares": [
+                    "bearerOnly",
+                    "tenantFromJwtToHeader"
+                ],
+                "service": "base-frontend"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "bearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "${PROXY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
+                    ],
+                    "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
+                    "audience": [
+                        "Portal-Gateway",
+                        "Base",
+                        "Organisation"
+                    ],
+                    "optional": "${PROXY_BEARER_TOKEN_OPTIONAL}"
+                }
+            },
+            {
+                "name": "tenantFromJwtToHeader",
+                "type": "claimToHeader",
+                "options": {
+                    "claimPath": "tenant",
+                    "headerName": "X-Uniport-Tenant"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "base-backend",
+                "servers": [
+                    {
+                        "host": "${PROXY_BASE_BACKEND_HOST}",
+                        "port": 20012
+                    }
+                ]
+            },
+            {
+                "name": "base-frontend",
+                "servers": [
+                    {
+                        "host": "${PROXY_BASE_FRONTEND_HOST}",
+                        "port": 8001
+                    }
+                ]
+            }
+        ]
+    }
+}

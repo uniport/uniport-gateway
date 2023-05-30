@@ -38,14 +38,15 @@ public class ClaimToHeaderMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("Adding claim '{}' to header '{}'", claimPath, headerName);
         ctx.request().headers().remove(headerName);
         // e.g. authorization header = Bearer base64(header).base64(payload).base64(signature)
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         try {
             extractJwtFromHeader(authorization).ifPresent(jwt -> {
-                final String claimValue = JsonPath.read(jwt, claimPath);
+                final Object claimValue = JsonPath.read(jwt, claimPath);
                 if (claimValue != null) {
-                    ctx.request().headers().add(headerName, claimValue);
+                    ctx.request().headers().add(headerName, claimValue.toString());
                     LOGGER.debug("Adding header '{}: {}'", headerName, claimValue);
                 }
             });
