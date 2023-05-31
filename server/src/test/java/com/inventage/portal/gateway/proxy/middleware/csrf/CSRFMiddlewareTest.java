@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.proxy.middleware.csrf;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
@@ -125,10 +124,9 @@ class CSRFMiddlewareTest {
             //when
             gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, httpClientPostResponse -> {
                 //then
-                assertNotEquals(HttpStatus.SC_OK, httpClientPostResponse.statusCode());
+                assertEquals(HttpStatus.SC_SERVER_ERROR, httpClientPostResponse.statusCode());
                 testCtx.completeNow();
             });
-
         }));
     }
 
