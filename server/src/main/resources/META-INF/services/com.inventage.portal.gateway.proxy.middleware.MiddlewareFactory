@@ -20,3 +20,4 @@ com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.openTelemetry.OpenTelemetryMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.oauth2.foreignInitiated.PreventForeignInitiatedAuthMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddlewareFactory

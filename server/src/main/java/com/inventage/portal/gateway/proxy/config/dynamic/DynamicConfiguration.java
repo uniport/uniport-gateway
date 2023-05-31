@@ -72,6 +72,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
     public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
     public static final String MIDDLEWARE_CSRF = "csrf";
+    public static final String MIDDLEWARE_BODY_HANDLER = "bodyHandler";
     public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
     public static final String MIDDLEWARE_CSRF_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_CSRF_COOKIE_PATH = "path";
@@ -162,6 +163,7 @@ public class DynamicConfiguration {
         MIDDLEWARE_CONTROL_API,
         MIDDLEWARE_CSP,
         MIDDLEWARE_CSRF,
+        MIDDLEWARE_BODY_HANDLER,
         MIDDLEWARE_HEADERS,
         MIDDLEWARE_LANGUAGE_COOKIE,
         MIDDLEWARE_OAUTH2,
@@ -762,6 +764,8 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
+                case MIDDLEWARE_BODY_HANDLER:
+                    break;
                 case MIDDLEWARE_HEADERS: {
                     final JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
                     if (requestHeaders != null) {

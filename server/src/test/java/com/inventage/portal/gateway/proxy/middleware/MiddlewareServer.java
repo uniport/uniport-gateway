@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.TestUtils;
 import io.vertx.core.*;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,6 +49,14 @@ public class MiddlewareServer {
         incomingRequest(method, URI, reqOpts, testCtx, responseHandler);
     }
 
+    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, String body, Handler<HttpClientResponse> responseHandler) {
+        incomingRequest(method, URI, reqOpts, body, testCtx, responseHandler);
+    }
+
+    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, Buffer body, Handler<HttpClientResponse> responseHandler) {
+        incomingRequest(method, URI, reqOpts, body, testCtx, responseHandler);
+    }
+
     public void incomingRequest(
         HttpMethod method,
         String URI,
@@ -68,6 +77,16 @@ public class MiddlewareServer {
         createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
     }
 
+    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, String body, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method);
+        createHttpClientWithRequestOptionsBodyAndResponseHandler(testCtx, reqOpts, body, responseHandler);
+    }
+
+    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, Buffer body, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method);
+        createHttpClientWithRequestOptionsBufferBodyAndResponseHandler(testCtx, reqOpts, body, responseHandler);
+    }
+
     public void incomingRequest(
         HttpMethod method,
         String URI,
@@ -86,6 +105,24 @@ public class MiddlewareServer {
     ) {
         LOGGER.info("requesting '{}'", reqOpts.getURI());
         vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(responseHandler));
+    }
+
+    private void createHttpClientWithRequestOptionsBodyAndResponseHandler(
+        VertxTestContext testCtx, RequestOptions reqOpts, String body,
+        Handler<HttpClientResponse> responseHandler
+    ) {
+        LOGGER.info("requesting '{}'", reqOpts.getURI());
+        vertx.createHttpClient().request(reqOpts).compose(httpClientRequest -> httpClientRequest.send(body)).onComplete(testCtx.succeeding(responseHandler));
+    }
+
+    private void createHttpClientWithRequestOptionsBufferBodyAndResponseHandler(
+        VertxTestContext testCtx, RequestOptions reqOpts, Buffer body,
+        Handler<HttpClientResponse> responseHandler
+    ) {
+        LOGGER.info("requesting '{}'", reqOpts.getURI());
+        vertx.createHttpClient().request(reqOpts).compose(httpClientRequest -> {
+            return httpClientRequest.send(body);
+        }).onComplete(testCtx.succeeding(responseHandler));
     }
 
     // wait until Vert.x is listening to prevent test failures because of not open ports

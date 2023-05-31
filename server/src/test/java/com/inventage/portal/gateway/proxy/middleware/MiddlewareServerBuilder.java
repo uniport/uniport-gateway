@@ -5,6 +5,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.Be
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
@@ -144,6 +145,11 @@ public class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
             new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, null, headerName, null, null, null));
+    }
+
+    public MiddlewareServerBuilder withBodyHandlerMiddleware() {
+        return withMiddleware(
+            new BodyHandlerMiddleware(this.vertx, "bodyHandler"));
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
