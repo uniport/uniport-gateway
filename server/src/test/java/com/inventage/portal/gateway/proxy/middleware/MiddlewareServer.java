@@ -85,9 +85,7 @@ public class MiddlewareServer {
         Handler<HttpClientResponse> responseHandler
     ) {
         LOGGER.info("requesting '{}'", reqOpts.getURI());
-        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(resp -> {
-            responseHandler.handle(resp);
-        }));
+        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(responseHandler));
     }
 
     // wait until Vert.x is listening to prevent test failures because of not open ports
@@ -119,8 +117,7 @@ public class MiddlewareServer {
         if (null != t) {
             throw t;
         }
-        final T x = result.result();
-        return x;
+        return result.result();
     }
 
 }
