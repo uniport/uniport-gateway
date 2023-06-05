@@ -1,0 +1,37 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "organisation-2.0-proxy",
+                "middlewares": [
+                    "organisation2RedirectRegex",
+                    "ShowSessionContentMiddleware",
+                    "organisationOauth2",
+                    "organisationAuthBearer",
+                    "organisation2ReplacePath",
+                    "organisationCheckRoute"
+                ],
+                "rule": "PathPrefix('/organisation-2.0')",
+                "service": "organisation-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "organisation2RedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/organisation-2.0)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "organisation2ReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/organisation-2.0/(.*)",
+                    "replacement": "/$1"
+                }
+            }
+        ]
+    }
+}
