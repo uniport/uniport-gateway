@@ -62,7 +62,7 @@
                                     <artifactId>helm</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
-                                    <includes>proxy-config.examples/**/*</includes>
+                                    <includes>proxy-config.*/**/*</includes>
                                     <outputDirectory>${project.build.directory}/helm</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
