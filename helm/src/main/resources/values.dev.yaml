@@ -76,6 +76,9 @@ containers:
 configMaps:
   portal-gateway-proxy-config:
     enabled: true
+    # The '..' character in the following key names DO NOT have a special meaning.
+    # Its a limitation of k8s that configmap key have to constist of alphanumeric characters, -, _ or .
+    # With the '..' characters we want to symbolize the path the config file will live under.
     data:
       portal-gateway.json:
         valueFromFile: proxy-config.examples/portal-gateway.json
