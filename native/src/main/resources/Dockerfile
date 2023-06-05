@@ -26,7 +26,8 @@ RUN native-image \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar
 
-FROM debian:buster-slim
+# https://www.graalvm.org/22.0/reference-manual/native-image/StaticImages/#what-is-the-recommended-base-docker-image-for-deploying-a-static-or-mostly-static-native-image
+FROM debian:bookworm-slim
 
 COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
