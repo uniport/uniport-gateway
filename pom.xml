@@ -36,7 +36,7 @@
         <jib.goal>build</jib.goal>
 
         <portal-helm-chart-library.version>4.3.0-202305220818-197-8c61d10</portal-helm-chart-library.version>
-        <portal-code-style-version.version>1.0.0-202305081139-48-275c253</portal-code-style-version.version>
+        <portal-code-style-settings.version>1.0.0-202305081139-48-275c253</portal-code-style-settings.version>
     </properties>
 
     <dependencyManagement>
@@ -218,7 +218,7 @@
             <dependency>
                 <groupId>com.inventage.portal</groupId>
                 <artifactId>code-style-settings</artifactId>
-                <version>${portal-code-style-version.version}</version>
+                <version>${portal-code-style-settings.version}</version>
                 <type>zip</type>
             </dependency>
         </dependencies>
@@ -419,24 +419,27 @@
                         <configuration>
                             <filesets>
                                 <fileset>
-                                    <directory>${project.basedir}</directory>
-                                    <includes>
-                                        <include>.code-style-settings/**/*</include>
-                                        <include>.idea/**/*</include>
-                                        <include>.vscode/**/*</include>
-                                    </includes>
+                                    <directory>${project.basedir}/.code-style-settings</directory>
                                     <excludes>
-                                        <exclude>**/*specific*</exclude>
-                                        <exclude>.idea/encodings.xml</exclude>
-                                        <exclude>.idea/dataSources.xml</exclude>
-                                        <exclude>.idea/runConfigurations/*</exclude>
-                                        <exclude>.idea/jsonSchemas.xml</exclude>
-                                        <exclude>.idea/shelf/**/*</exclude>
-                                        <exclude>.idea/vcs.xml</exclude>
-                                        <exclude>.idea/workspace.xml</exclude>
-                                        <exclude>.idea/misc.xml</exclude>
-                                        <exclude>.idea/schema/**</exclude>
+                                        <exclude>spotbugs/exclude-specific.xml</exclude>
+                                        <exclude>checkstyle/suppressions-specific.xml</exclude>
                                     </excludes>
+                                </fileset>
+                                <fileset>
+                                    <directory>${project.basedir}/.vscode</directory>
+                                    <includes>
+                                        <include>settings.json</include>
+                                    </includes>
+                                </fileset>
+                                <fileset>
+                                    <directory>${project.basedir}/.idea</directory>
+                                    <includes>
+                                        <include>checkstyle-idea.xml</include>
+                                        <include>eclipseCodeFormatter.xml</include>
+                                        <include>prettier.xml</include>
+                                        <include>codeStyles/**/*</include>
+                                        <include>jsLinters/**/*</include>
+                                    </includes>
                                 </fileset>
                             </filesets>
                         </configuration>
