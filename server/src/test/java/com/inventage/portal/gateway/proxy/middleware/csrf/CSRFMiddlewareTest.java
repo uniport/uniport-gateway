@@ -239,6 +239,42 @@ class CSRFMiddlewareTest {
         }));
     }
 
+    @Test
+    void invalidPostRequestWithCSRFTokenInHeaderCaseInsensitive(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String secret = UUID.randomUUID().toString();
+        final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
+        final String headerName = "X-XSRF-TOKEN";
+        final String headerNameInLowercase = headerName.toLowerCase();
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withBodyHandlerMiddleware()
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
+
+        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
+            final List<String> cookies = httpClientResponse.cookies();
+            final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
+            final String csrfToken = csrfCookie.get().split("=")[1].split(";")[0];
+
+            final RequestOptions requestOptions = new RequestOptions();
+            final HeadersMultiMap headerEntries = new HeadersMultiMap();
+
+            headerEntries.add(headerNameInLowercase, csrfToken);
+            headerEntries.add("Cookie", csrfCookie.get());
+
+            requestOptions.setHeaders(headerEntries);
+
+            //when
+            gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, httpClientPostResponse -> {
+                //then
+                assertEquals(HttpStatus.SC_OK, httpClientPostResponse.statusCode());
+                testCtx.completeNow();
+            });
+
+        }));
+    }
+
     // Util
 
     private String addMultiFormDataToRequest(Map<String, String> formData, HeadersMultiMap headerEntries) {
