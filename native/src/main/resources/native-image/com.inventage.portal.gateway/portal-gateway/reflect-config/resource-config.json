@@ -5,6 +5,9 @@
                 "pattern": "\\QMETA-INF/MANIFEST.MF\\E"
             },
             {
+                "pattern": "\\QMETA-INF/services/com.fasterxml.jackson.databind.Module\\E"
+            },
+            {
                 "pattern": "\\QMETA-INF/services/com.inventage.portal.gateway.core.application.ApplicationFactory\\E"
             },
             {

@@ -22,6 +22,7 @@ RUN native-image \
     -H:+ReportExceptionStackTraces \
     -H:IncludeResources='.*/vertx/.*$' \
     -H:ReflectionConfigurationFiles=reflection-config.json \
+    -H:ConfigurationFileDirectories=com.inventage.portal.gateway/portal-gateway/reflect-config \
     -Dio.netty.noUnsafe=true \
     -Dfile.encoding=UTF-8 \
     -jar portal-gateway.jar

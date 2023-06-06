@@ -88,6 +88,15 @@
         ]
     },
     {
+        "name": "ch.qos.logback.classic.pattern.ThrowableProxyConverter",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
         "name": "ch.qos.logback.core.ConsoleAppender",
         "queryAllPublicMethods": true,
         "methods": [
@@ -153,6 +162,24 @@
     },
     {
         "name": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.module.jaxb.deser.DataHandlerJsonDeserializer",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.module.jaxb.ser.DataHandlerJsonSerializer",
         "methods": [
             {
                 "name": "<init>",
@@ -1521,6 +1548,75 @@
             {
                 "name": "getUnsafe",
                 "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "net.logstash.logback.composite.AbstractPatternJsonProvider",
+        "methods": [
+            {
+                "name": "setPattern",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider",
+        "queryAllPublicMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders",
+        "queryAllPublicMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            },
+            {
+                "name": "addArguments",
+                "parameterTypes": [
+                    "net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider"
+                ]
+            },
+            {
+                "name": "addPattern",
+                "parameterTypes": [
+                    "net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider",
+        "queryAllPublicMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            }
+        ]
+    },
+    {
+        "name": "net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder",
+        "queryAllPublicMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": []
+            },
+            {
+                "name": "setProviders",
+                "parameterTypes": [
+                    "net.logstash.logback.composite.JsonProviders"
+                ]
             }
         ]
     },
