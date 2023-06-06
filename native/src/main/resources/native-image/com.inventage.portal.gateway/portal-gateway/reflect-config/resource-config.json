@@ -1,49 +1,48 @@
 {
-    "resources": {
-        "includes": [
-            {
-                "pattern": "\\QMETA-INF/MANIFEST.MF\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/com.fasterxml.jackson.databind.Module\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/com.inventage.portal.gateway.core.application.ApplicationFactory\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/com.inventage.portal.gateway.proxy.provider.ProviderFactory\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/io.opentelemetry.context.ContextStorageProvider\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/io.vertx.config.spi.ConfigProcessor\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/io.vertx.config.spi.ConfigStoreFactory\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/io.vertx.core.spi.VertxServiceProvider\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/services/io.vertx.core.spi.launcher.CommandFactory\\E"
-            },
-            {
-                "pattern": "\\QMETA-INF/vertx/vertx-version.txt\\E"
-            },
-            {
-                "pattern": "\\Qio/opentelemetry/sdk/common/version.properties\\E"
-            },
-            {
-                "pattern": "\\Qlogback.xml\\E"
-            },
-            {
-                "pattern": "\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
-            }
-        ]
-    },
-    "bundles": []
+  "resources":{
+  "includes":[
+    {
+      "pattern":"\\QMETA-INF/MANIFEST.MF\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/com.fasterxml.jackson.databind.Module\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/com.inventage.portal.gateway.core.application.ApplicationFactory\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/com.inventage.portal.gateway.proxy.provider.ProviderFactory\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/io.opentelemetry.context.ContextStorageProvider\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/io.vertx.config.spi.ConfigProcessor\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/io.vertx.config.spi.ConfigStoreFactory\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/io.vertx.core.spi.VertxServiceProvider\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/services/io.vertx.core.spi.launcher.CommandFactory\\E"
+    }, 
+    {
+      "pattern":"\\QMETA-INF/vertx/vertx-version.txt\\E"
+    }, 
+    {
+      "pattern":"\\Qio/opentelemetry/sdk/common/version.properties\\E"
+    }, 
+    {
+      "pattern":"\\Qlogback.xml\\E"
+    }, 
+    {
+      "pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+    }
+  ]},
+  "bundles":[]
 }
