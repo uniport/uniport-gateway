@@ -52,14 +52,6 @@
                             <directory>src/main/resources</directory>
                             <filtering>true</filtering>
                         </resource>
-                        <!-- copy server configuration -->
-                        <resource>
-                            <directory>../server/src/main/resources</directory>
-                            <includes>
-                                <include>logback.xml</include>
-                            </includes>
-                            <filtering>false</filtering>
-                        </resource>
                     </resources>
                 </configuration>
             </plugin>

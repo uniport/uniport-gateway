@@ -32,7 +32,15 @@ FROM debian:bookworm-slim
 
 COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
-COPY logback.xml /etc/portal-gateway/default/
+# In our logback configuration we use a condition based on a env var to decide if we log structured or unstructered log messages.
+# For this we rely on a library called Janino.
+# See server/src/main/resources/logback.xml.
+#
+# Unforuntately, Janino cannot be used with a native image build, hence we have two logback configurations for both cases.
+# To choose between the two configurations the PORTAL_GATEWAY_LOGGING_CONFIG env var can be used.
+# See: https://github.com/spring-projects/spring-boot/issues/33758
+COPY logback-structured.xml /etc/portal-gateway/default/
+COPY logback-unstructured.xml /etc/portal-gateway/default/
 
 ENV TZ="Europe/Zurich"
 
