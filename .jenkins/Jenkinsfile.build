@@ -1,7 +1,7 @@
 pipeline {
     agent {
         node {
-            label 'java11'
+            label 'java11 && docker && !northport'
         }
     }
 
