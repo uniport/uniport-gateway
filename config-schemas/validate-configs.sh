@@ -1,8 +1,15 @@
 #!/bin/bash
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
 NODE_IMAGE=node:18-alpine
+
+if [ -n "$MINIKUBE_ACTIVE_DOCKERD" ]
+then
+    echo "\$MINIKUBE_ACTIVE_DOCKERD is set, skipping validation…"
+    exit
+fi
+
 
 docker run --rm \
   -e NPM_CONFIG_UPDATE_NOTIFIER=false \
