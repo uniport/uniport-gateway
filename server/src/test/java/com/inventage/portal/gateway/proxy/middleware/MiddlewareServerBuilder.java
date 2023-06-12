@@ -26,6 +26,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Router;
@@ -300,6 +301,15 @@ public class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withCustomSessionState(Map<String, String> sessionEntries) {
         Handler<RoutingContext> handler = ctx -> {
             sessionEntries.forEach((key, value) -> ctx.session().put(key, value));
+            ctx.next();
+        };
+        router.route().handler(handler);
+        return this;
+    }
+
+    public MiddlewareServerBuilder withUser() {
+        Handler<RoutingContext> handler = ctx -> {
+            ctx.setUser(new UserImpl());
             ctx.next();
         };
         router.route().handler(handler);

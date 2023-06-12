@@ -1,11 +1,13 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -142,6 +144,116 @@ class CSRFMiddlewareTest {
     }
 
     @Test
+    void validPostRequestWithCSRFTokenInHeaderCaseInsensitive(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String secret = UUID.randomUUID().toString();
+        final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
+        final String headerName = "X-XSRF-TOKEN";
+        final String headerNameInLowercase = headerName.toLowerCase();
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withBodyHandlerMiddleware()
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
+
+        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
+            final List<String> cookies = httpClientResponse.cookies();
+            final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
+            final String csrfToken = csrfCookie.get().split("=")[1].split(";")[0];
+
+            final RequestOptions requestOptions = new RequestOptions();
+            final HeadersMultiMap headerEntries = new HeadersMultiMap();
+
+            headerEntries.add(headerNameInLowercase, csrfToken);
+            headerEntries.add("Cookie", csrfCookie.get());
+
+            requestOptions.setHeaders(headerEntries);
+
+            //when
+            gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, httpClientPostResponse -> {
+                //then
+                assertEquals(HttpStatus.SC_OK, httpClientPostResponse.statusCode());
+                testCtx.completeNow();
+            });
+
+        }));
+    }
+
+    @Test
+    void validPostRequestWithCSRFTokenInHeaderWithUserSession(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String secret = UUID.randomUUID().toString();
+        final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
+        final String headerName = "X-XSRF-TOKEN";
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withBodyHandlerMiddleware()
+            .withCsrfMiddleware(secret, cookieName, headerName)
+            .build().start();
+
+        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
+
+            final List<String> cookies = httpClientResponse.cookies();
+            final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
+            final Optional<String> sessionCookie = cookies.stream().filter(cookie -> cookie.startsWith(SESSION_COOKIE_NAME_DEFAULT)).findFirst();
+
+            final String csrfToken = csrfCookie.get().split("=")[1].split(";")[0];
+
+            final RequestOptions requestOptions = new RequestOptions();
+            final HeadersMultiMap headerEntries = new HeadersMultiMap();
+
+            headerEntries.add(headerName, csrfToken);
+            headerEntries.add("Cookie", csrfCookie.get() + ";" + sessionCookie.get());
+
+            requestOptions.setHeaders(headerEntries);
+
+            //when
+            gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, httpClientPostResponse -> {
+                //then
+                assertEquals(HttpStatus.SC_OK, httpClientPostResponse.statusCode());
+                testCtx.completeNow();
+            });
+
+        }));
+    }
+
+    @Test
+    void validGraphQLPostRequestWithCSRFToken(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String secret = UUID.randomUUID().toString();
+        final String csrfCookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
+        final String csrfResponseName = CSRFHandler.DEFAULT_HEADER_NAME;
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withBodyHandlerMiddleware()
+            .withCsrfMiddleware(secret, csrfCookieName, csrfResponseName)
+            .build().start();
+
+        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
+            final List<String> cookies = httpClientResponse.cookies();
+            final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(csrfCookieName)).findFirst();
+            final String csrfToken = csrfCookie.get().split("=")[1].split(";")[0];
+
+            final RequestOptions requestOptions = new RequestOptions();
+            final HeadersMultiMap headerEntries = new HeadersMultiMap();
+            requestOptions.setHeaders(headerEntries);
+
+            headerEntries.add("Cookie", csrfCookie.get());
+            headerEntries.add(CSRFHandler.DEFAULT_HEADER_NAME, csrfToken);
+            headerEntries.add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+
+            String payload = "{\"operationName\":\"OrganisationList\",\"variables\":{},\"query\":\"query OrganisationList {\\n  organisations: OrganisationView(order_by: {name: asc}) {\\n    ...OrganisationList\\n    __typename\\n  }\\n}\\n\\nfragment OrganisationList on OrganisationView {\\n  id\\n  name\\n  active\\n  internalIdentifier\\n  createdAt\\n  createdBy\\n  __typename\\n}\"}";
+            //when
+            gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, payload, httpClientPostResponse -> {
+                //then
+                assertEquals(HttpStatus.SC_OK, httpClientPostResponse.statusCode());
+                testCtx.completeNow();
+            });
+        }));
+    }
+
+    @Test
     void invalidPostRequestWithNoCSRFTokenInHeader(Vertx vertx, VertxTestContext testCtx) {
         //given
         final String secret = UUID.randomUUID().toString();
@@ -236,42 +348,6 @@ class CSRFMiddlewareTest {
                 assertEquals(HttpStatus.SC_FORBIDDEN, httpClientPostResponse.statusCode());
                 testCtx.completeNow();
             });
-        }));
-    }
-
-    @Test
-    void invalidPostRequestWithCSRFTokenInHeaderCaseInsensitive(Vertx vertx, VertxTestContext testCtx) {
-        //given
-        final String secret = UUID.randomUUID().toString();
-        final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
-        final String headerName = "X-XSRF-TOKEN";
-        final String headerNameInLowercase = headerName.toLowerCase();
-
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withBodyHandlerMiddleware()
-            .withCsrfMiddleware(secret, cookieName, headerName)
-            .build().start();
-
-        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
-            final List<String> cookies = httpClientResponse.cookies();
-            final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
-            final String csrfToken = csrfCookie.get().split("=")[1].split(";")[0];
-
-            final RequestOptions requestOptions = new RequestOptions();
-            final HeadersMultiMap headerEntries = new HeadersMultiMap();
-
-            headerEntries.add(headerNameInLowercase, csrfToken);
-            headerEntries.add("Cookie", csrfCookie.get());
-
-            requestOptions.setHeaders(headerEntries);
-
-            //when
-            gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, httpClientPostResponse -> {
-                //then
-                assertEquals(HttpStatus.SC_OK, httpClientPostResponse.statusCode());
-                testCtx.completeNow();
-            });
-
         }));
     }
 
