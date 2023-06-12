@@ -9,8 +9,7 @@
                     "organisationOauth2",
                     "organisationAuthBearer",
                     "organisationReplacePath",
-                    "organisationCheckRoute",
-                    "organisationCsrf"
+                    "organisationCheckRoute"
                 ],
                 "rule": "PathPrefix('/organisation')",
                 "service": "organisation-proxy"
