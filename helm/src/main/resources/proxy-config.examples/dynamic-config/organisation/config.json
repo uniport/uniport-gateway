@@ -9,7 +9,8 @@
                     "organisationOauth2",
                     "organisationAuthBearer",
                     "organisationReplacePath",
-                    "organisationCheckRoute"
+                    "organisationCheckRoute",
+                    "organisationCsrf"
                 ],
                 "rule": "PathPrefix('/organisation')",
                 "service": "organisation-proxy"
@@ -52,10 +53,6 @@
             {
                 "name": "organisationCheckRoute",
                 "type": "checkRoute"
-            },
-            {
-                "name": "organisationBodyHandler",
-                "type": "bodyHandler"
             },
             {
                 "name": "organisationCsrf",
