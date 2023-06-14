@@ -226,13 +226,6 @@
                                     <directory>src/main/docker</directory>
                                     <filtering>false</filtering>
                                 </resource>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                    <includes>
-                                        <include>logback.xml</include>
-                                    </includes>
-                                    <filtering>false</filtering>
-                                </resource>
                             </resources>
                             <outputDirectory>${docker.contextDir}</outputDirectory>
                         </configuration>
@@ -244,16 +237,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <extraDirectories>
-                        <paths>
-                            <path>
-                                <from>${docker.contextDir}</from>
-                                <into>/etc/portal-gateway</into>
-                                <includes>logback.xml</includes>
-                            </path>
-                        </paths>
-                    </extraDirectories>
-
                     <container>
                         <mainClass>com.inventage.portal.gateway.PortalGatewayLauncher</mainClass>
                         <args>

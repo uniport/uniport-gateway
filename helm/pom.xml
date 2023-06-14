@@ -46,46 +46,6 @@
                             </resources>
                         </configuration>
                     </execution>
-
-                    <execution>
-                        <id>copy-server-config</id>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/portal-gateway/app-config</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/../server/src/main/resources</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>logback.xml</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-server-config-template</id>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/portal-gateway-template/app-config</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/../server/src/main/resources</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>logback.xml</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-
                 </executions>
             </plugin>
             <plugin>

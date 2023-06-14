@@ -194,7 +194,7 @@ containers:
         type: configMap
         configMapName: portal-gateway-logging-config
         # As mounting a configMap creates a dir and mounts the config map's data as files in it
-        # and there are existing files in /etc/portal-gateway, an additional path `app-config` is used
+        # and there are existing files in /etc/portal-gateway, an additional path `logging-config` is used
         mountPath: /etc/portal-gateway/logging-config
 
 serviceAccount:
