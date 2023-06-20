@@ -108,6 +108,10 @@
                     "whitelistedCookies" : {
                       "type" : "array"
                     },
+                    "iamSessionResetUrl" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
                     "audience" : {
                       "type" : "array"
                     },

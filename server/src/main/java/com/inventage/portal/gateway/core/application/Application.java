@@ -28,7 +28,7 @@ public interface Application {
     String entrypoint();
 
     /**
-     * Deploy the verticles this application is made of.
+     * Deploy the vertices this application is made of.
      *
      * @param vertx
      *            running instance

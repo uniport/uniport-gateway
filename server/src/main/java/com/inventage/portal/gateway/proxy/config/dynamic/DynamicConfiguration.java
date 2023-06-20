@@ -64,6 +64,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CHECK_ROUTE = "checkRoute";
     public static final String MIDDLEWARE_CHECK_ROUTE_PATH = "_check-route_";
     public static final String MIDDLEWARE_CONTROL_API = "controlApi";
+    public static final String MIDDLEWARE_CONTROL_API_SESSION_RESET_URL = "iamSessionResetUrl";
     public static final String MIDDLEWARE_CONTROL_API_ACTION = "action";
     public static final String MIDDLEWARE_CORS = "cors";
     public static final String MIDDLEWARE_CSP = "csp";
@@ -230,6 +231,8 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .optionalProperty(MIDDLEWARE_CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())

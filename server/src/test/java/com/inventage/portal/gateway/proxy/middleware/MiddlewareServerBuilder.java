@@ -154,7 +154,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
-        return withMiddleware(new PassAuthorizationMiddleware("passAutherization", sessionScope,
+        return withMiddleware(new PassAuthorizationMiddleware("passAuthorization", sessionScope,
             JWTAuthHandler.create(authProvider)));
     }
 
@@ -214,13 +214,15 @@ public class MiddlewareServerBuilder {
     private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) {
         OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
-        int atMost = 20;
-        while (!middlewareFuture.isComplete() && atMost > 0) {
+        final int atMost = 20;
+        int counter = 0;
+        while (!middlewareFuture.isComplete() && atMost > counter) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            counter++;
         }
         if (middlewareFuture.failed()) {
             throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
@@ -248,9 +250,7 @@ public class MiddlewareServerBuilder {
         VertxTestContext testContext = new VertxTestContext();
         Router serviceRouter = Router.router(vertx);
 
-        serviceRouter.route().handler(ctx -> {
-            ctx.response().end();
-        });
+        serviceRouter.route().handler(ctx -> ctx.response().end());
 
         vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
             .onComplete(testContext.succeedingThenComplete());

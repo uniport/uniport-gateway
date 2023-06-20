@@ -7,7 +7,8 @@
                 "middlewares": [
                     "authRedirectRegex",
                     "fixThemeingKeycloak21",
-                    "languageCookie"
+                    "languageCookie",
+                    "xForwardedPortHeader"
                 ],
                 "service": "portal-iam"
             },
@@ -44,6 +45,15 @@
                 "options": {
                     "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/realms/master|auth/resources|auth/js|auth/admin).*",
                     "replacement": "/login"
+                }
+            },
+            {
+                "name": "xForwardedPortHeader",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "X-Forwarded-Port": ""
+                    }
                 }
             },
             {

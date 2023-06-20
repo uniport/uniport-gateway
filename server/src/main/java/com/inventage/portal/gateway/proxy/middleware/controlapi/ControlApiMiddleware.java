@@ -8,10 +8,16 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFact
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -35,11 +41,17 @@ public class ControlApiMiddleware implements Middleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddleware.class);
     private final String name;
     private final String action;
+    private final String resetUri;
     private final WebClient webClient;
 
     public ControlApiMiddleware(String name, final String action, final WebClient webClient) {
+        this(name, action, null, webClient);
+    }
+
+    public ControlApiMiddleware(String name, final String action, String resetUri, final WebClient webClient) {
         this.name = name;
         this.action = action;
+        this.resetUri = resetUri;
         this.webClient = webClient;
     }
 
@@ -132,6 +144,7 @@ public class ControlApiMiddleware implements Middleware {
     private void handleSessionReset(RoutingContext ctx) {
         LOGGER.info("reset session {}", action);
 
+        informKeycloakAboutSessionReset(ctx);
         removeAllSessionScopesFrom(ctx);
         removeAllCookiesFromSessionBagExceptForKeycloakCookiesFrom(ctx);
     }
@@ -154,6 +167,29 @@ public class ControlApiMiddleware implements Middleware {
         if (cookiesInSessionBag != null) {
             final Set<Cookie> filteredCookies = getKeycloakCookiesFrom(cookiesInSessionBag);
             ctx.session().put(SESSION_BAG_COOKIES, filteredCookies);
+        }
+    }
+
+    private void informKeycloakAboutSessionReset(RoutingContext ctx) {
+        if (this.resetUri == null) {
+            LOGGER.warn("Keycloak will not be informed of session reset because 'resetUri' is undefined.");
+            return;
+        }
+        LOGGER.info("informing Keycloak about session reset");
+
+        try {
+            final URI uri = new URI(resetUri);
+            final HttpRequest<Buffer> request = webClient.post(uri.getPort(), uri.getHost(), uri.getPath());
+            final Map<String, Object> sessionData = ctx.session().data();
+            final HashSet<Cookie> cookies = (HashSet<Cookie>) sessionData.get(SESSION_BAG_COOKIES);
+            final Cookie authCookie = cookies.stream().filter(cookie -> cookie.name().equals("AUTH_SESSION_ID")).findFirst().get();
+
+            request.putHeader(authCookie.name(), authCookie.value().substring(0, authCookie.value().indexOf('.')));
+            request.send()
+                .onSuccess(response -> LOGGER.info("keycloak was successfully informed of session reset. Response: {}", response))
+                .onFailure(throwable -> LOGGER.warn("keycloak was not informed of session reset: {}", throwable.getMessage()));
+        } catch (URISyntaxException e) {
+            LOGGER.warn(e.getMessage());
         }
     }
 

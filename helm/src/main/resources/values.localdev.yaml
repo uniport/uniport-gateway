@@ -1,6 +1,8 @@
 ingress:
-  host: portal.minikube
-
+  host: portal1.localdev.me
+  className: nginx
+  tls:
+    enabled: false
 containers:
   portal-gateway:
     storages:
@@ -39,6 +41,26 @@ containers:
             path: dynamic-config/portal-messaging/config.json
           - key: dynamic-config..portal-monitoring..config.json
             path: dynamic-config/portal-monitoring/config.json
+    resources:
+      requests:
+        memory: "512Mi"
+      limits:
+        memory: "512Mi"
+    env:
+      # PORTAL_GATEWAY_PUBLIC_HOSTNAME is the HTTP host name for external access
+      PORTAL_GATEWAY_PUBLIC_HOSTNAME:
+        value: "portal1.localdev.me"
+      # PORTAL_GATEWAY_PUBLIC_PORT is the HTTP port for external access
+      PORTAL_GATEWAY_PUBLIC_PORT:
+        value: "29000"
+      # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
+      PORTAL_GATEWAY_PUBLIC_PROTOCOL:
+        value: "http"
+      # PORTAL_GATEWAY_BEARER_TOKEN_ISSUER is the expected value for the "iss" claim
+      PORTAL_GATEWAY_BEARER_TOKEN_ISSUER:
+        value: "http://portal1.localdev.me:29000/auth/realms/portal"
+      PORTAL_GATEWAY_LOG_LEVEL:
+        value: "DEBUG"
 
 configMaps:
   portal-gateway-proxy-config:
