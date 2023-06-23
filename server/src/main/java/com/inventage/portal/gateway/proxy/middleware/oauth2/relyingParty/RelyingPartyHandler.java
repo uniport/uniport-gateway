@@ -352,6 +352,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
 
             if (user.principal().containsKey("scope")) {
                 final String handlerScopes = user.principal().getString("scope");
+                LOGGER.debug("handlerScopes is " + handlerScopes);
                 if (handlerScopes != null) {
                     // user principal contains scope, a basic assertion is required to ensure that
                     // the scopes present match the required ones
@@ -368,12 +369,12 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                                 (idx + scope.length() != handlerScopes.length()
                                     && handlerScopes.charAt(idx + scope.length()) != ' ')) {
                                 // invalid scope assignment
-                                ctx.fail(403, new IllegalStateException("principal scope != handler scopes"));
+                                ctx.fail(403, new IllegalStateException("principal scope != handler scopes. principal scope is " + scope));
                                 return;
                             }
                         } else {
                             // invalid scope assignment
-                            ctx.fail(403, new IllegalStateException("principal scope != handler scopes"));
+                            ctx.fail(403, new IllegalStateException("principal scope != handler scopes. principal scope is " + scope));
                             return;
                         }
                     }
