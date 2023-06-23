@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -182,13 +183,13 @@ public class ControlApiMiddleware implements Middleware {
             final HttpRequest<Buffer> request = webClient.post(uri.getPort(), uri.getHost(), uri.getPath());
             final Map<String, Object> sessionData = ctx.session().data();
             final HashSet<Cookie> cookies = (HashSet<Cookie>) sessionData.get(SESSION_BAG_COOKIES);
-            final Cookie authCookie = cookies.stream().filter(cookie -> cookie.name().equals("AUTH_SESSION_ID")).findFirst().get();
+            final Cookie authCookie = cookies.stream().filter(cookie -> cookie.name().equals("KEYCLOAK_IDENTITY")).findFirst().orElseThrow();
 
-            request.putHeader(authCookie.name(), authCookie.value().substring(0, authCookie.value().indexOf('.')));
+            request.putHeader(authCookie.name(), authCookie.value());
             request.send()
                 .onSuccess(response -> LOGGER.info("keycloak was successfully informed of session reset. Response: {}", response))
                 .onFailure(throwable -> LOGGER.warn("keycloak was not informed of session reset: {}", throwable.getMessage()));
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | NoSuchElementException e) {
             LOGGER.warn(e.getMessage());
         }
     }

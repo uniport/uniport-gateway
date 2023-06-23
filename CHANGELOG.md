@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Changed
+
+- Informs Keycloak on Session-Reset to delete its user state ([PORTAL-1422](https://issue.inventage.com/browse/PORTAL-1422)).
+
 ### Added
 
 - Middleware `claimToHeader` for setting an HTTP header from a JWT claim value ([PORTAL-1483](https://issue.inventage.com/browse/PORTAL-1483)).
 - Support for additional issuers. Can be defined in the configuration with `additionalIssuers` (([PORTAL-1331](https://issue.inventage.com/browse/PORTAL-1331)).
+
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 - Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
 
