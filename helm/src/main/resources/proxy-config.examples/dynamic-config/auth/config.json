@@ -15,7 +15,7 @@
             {
                 "name": "login",
                 "middlewares": [
-                    "dashboardOauth2",
+                    "loginOauth2",
                     "loginRedirectRegex"
                 ],
                 "rule": "PathPrefix('/login')",
@@ -61,13 +61,13 @@
                 "type": "languageCookie"
             },
             {
-                "name": "dashboardOauth2",
+                "name": "loginOauth2",
                 "type": "oauth2",
                 "options": {
                     "clientId": "Portal-Gateway",
                     "clientSecret": "Portal-Gateway!",
                     "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
-                    "sessionScope": "Dashboard"
+                    "sessionScope": "Login"
                 }
             },
             {
