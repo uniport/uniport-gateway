@@ -107,6 +107,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX = "uriWithoutLoggingRegex";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES = "contentTypes";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED = "loggingRequestEnabled";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED = "loggingResponseEnabled";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL = "responseSessionCookieRemoval";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
     public static final String MIDDLEWARE_SESSION = "session";
@@ -278,6 +281,9 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema())
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, Schemas.booleanSchema())
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, Schemas.booleanSchema())
             .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())

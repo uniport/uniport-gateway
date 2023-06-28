@@ -12,6 +12,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,23 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
     private final Pattern uriPatternForIgnoringRequests;
 
-    public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests) {
+    private final List<String> contentTypesToLog;
+
+    private final boolean isLoggingRequestEnabled;
+
+    private final boolean isLoggingResponseEnabled;
+
+    // Default values if not configured otherwise
+    private static final List<String> DEFAULT_CONTENT_TYPES_TO_LOG = List.of();
+    private static final boolean DEFAULT_LOGGING_REQUEST_ENABLED = true;
+    private static final boolean DEFAULT_LOGGING_RESPONSE_ENABLED = true;
+
+    public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests, List<String> contentTypesToLog, Boolean isLoggingRequestEnabled, Boolean isLoggingResponseEnabled) {
         this.name = name;
         this.uriPatternForIgnoringRequests = uriPatternForIgnoringRequests == null ? null : Pattern.compile(uriPatternForIgnoringRequests);
+        this.contentTypesToLog = contentTypesToLog == null ? DEFAULT_CONTENT_TYPES_TO_LOG : contentTypesToLog;
+        this.isLoggingRequestEnabled = isLoggingRequestEnabled == null ? DEFAULT_LOGGING_REQUEST_ENABLED : isLoggingRequestEnabled;
+        this.isLoggingResponseEnabled = isLoggingResponseEnabled == null ? DEFAULT_LOGGING_RESPONSE_ENABLED : isLoggingResponseEnabled;
     }
 
     @Override
@@ -49,23 +64,27 @@ public class RequestResponseLoggerMiddleware implements Middleware {
 
         LOGGER.debug("{} for '{}'", name, ctx.request().absoluteURI());
 
-        if (LOGGER.isTraceEnabled()) {
-            logRequestTrace(ctx);
-        } else if (LOGGER.isDebugEnabled()) {
-            logRequestDebug(ctx);
-        } else if (LOGGER.isInfoEnabled()) {
-            logRequestInfo(ctx);
+        if (isLoggingRequestEnabled) {
+            if (LOGGER.isTraceEnabled()) {
+                logRequestTrace(ctx);
+            } else if (LOGGER.isDebugEnabled()) {
+                logRequestDebug(ctx);
+            } else if (LOGGER.isInfoEnabled()) {
+                logRequestInfo(ctx);
+            }
         }
 
-        ctx.addBodyEndHandler(v -> {
-            if (LOGGER.isTraceEnabled()) {
-                logResponseTrace(ctx, start);
-            } else if (LOGGER.isDebugEnabled()) {
-                logResponseDebug(ctx, start);
-            } else if (LOGGER.isInfoEnabled()) {
-                logResponseInfo(ctx, start);
-            }
-        });
+        if (isLoggingResponseEnabled) {
+            ctx.addBodyEndHandler(v -> {
+                if (LOGGER.isTraceEnabled()) {
+                    logResponseTrace(ctx, start);
+                } else if (LOGGER.isDebugEnabled()) {
+                    logResponseDebug(ctx, start);
+                } else if (LOGGER.isInfoEnabled()) {
+                    logResponseInfo(ctx, start);
+                }
+            });
+        }
         ctx.next();
     }
 
@@ -100,7 +119,7 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         final var request = context.request();
         final String contentType = request.getHeader("Content-Type");
         if (contentType != null
-            && (contentType.startsWith("text/plain") || contentType.startsWith("application/json"))) {
+            && this.contentTypesToLog.stream().anyMatch(ctl -> contentType.startsWith(ctl))) {
             request.body().onSuccess(body -> {
                 if (body != null) {
                     final String bodyContent = body.toString();

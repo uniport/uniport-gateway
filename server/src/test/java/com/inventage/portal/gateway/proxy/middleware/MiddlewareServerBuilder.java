@@ -180,7 +180,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withRequestResponseLoggerMiddleware(String uriPatternForIgnoringRequests) {
-        return withMiddleware(new RequestResponseLoggerMiddleware("requestResponseLogger", uriPatternForIgnoringRequests));
+        return withMiddleware(new RequestResponseLoggerMiddleware("requestResponseLogger", uriPatternForIgnoringRequests, null, null, null));
     }
 
     public MiddlewareServerBuilder withAuthenticationTriggerMiddleware() {

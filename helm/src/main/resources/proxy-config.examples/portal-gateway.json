@@ -25,7 +25,11 @@
                     "name": "requestResponseLogger",
                     "type": "requestResponseLogger",
                     "options": {
-                        "uriWithoutLoggingRegex": "/health.*|/ready.*"
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json"
+                        ]
                     }
                 },
                 {

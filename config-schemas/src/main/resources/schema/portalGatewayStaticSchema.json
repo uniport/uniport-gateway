@@ -166,6 +166,9 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "loggingRequestEnabled" : {
+                      "type" : "boolean"
+                    },
                     "name" : {
                       "minLength" : 1,
                       "type" : "string"
@@ -190,9 +193,18 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "contentTypes" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "string"
+                      }
+                    },
                     "replacement" : {
                       "minLength" : 1,
                       "type" : "string"
+                    },
+                    "loggingResponseEnabled" : {
+                      "type" : "boolean"
                     }
                   }
                 },
