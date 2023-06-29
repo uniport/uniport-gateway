@@ -61,7 +61,11 @@
                                 "ADMIN"
                             ]
                         }
-                    ]
+                    ],
+                    "publicKeysReconcilation": {
+                        "enabled": true,
+                        "intervalMs": 600000
+                    }
                 }
             }
         ],

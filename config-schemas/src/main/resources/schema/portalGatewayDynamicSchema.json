@@ -68,6 +68,9 @@
                     "type" : "integer",
                     "minimum" : 0
                   },
+                  "publicKeysReconcilation" : {
+                    "type" : "object"
+                  },
                   "policyDirectives" : {
                     "type" : "array"
                   },

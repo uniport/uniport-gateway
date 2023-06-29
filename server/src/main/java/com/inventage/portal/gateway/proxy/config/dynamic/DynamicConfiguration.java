@@ -130,7 +130,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
     public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
-    // shared by 'bearerOnly' and 'passAuthorization' middlewares
+    // 'withAuthHandler' is shared by 'bearerOnly' and 'passAuthorization' middlewares
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE = "audience";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS = "claims";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR = "operator";
@@ -145,6 +145,10 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION = "publicKeysReconcilation";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED = "enabled";
+    public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS = "intervalMs";
+
     public static final String MIDDLEWARE_OPEN_TELEMETRY = "openTelemetry";
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
@@ -318,6 +322,10 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema())
+            .optionalProperty(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION, Schemas.objectSchema()
+                .optionalProperty(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, Schemas.booleanSchema())
+                .optionalProperty(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, Schemas.intSchema()
+                    .withKeyword(KEYWORD_INT_MIN, INT_MIN)))
             .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CLAIM_TO_HEADER_PATH, Schemas.stringSchema()

@@ -8,7 +8,7 @@ import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaim;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
-import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthProviderIssuer;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -234,7 +234,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return JWTAuthProviderIssuer.create(vertx, new JWTAuthOptions()
+        return JWTAuthMultipleIssuersProvider.create(vertx, new JWTAuthOptions()
             .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm)
                 .setBuffer(publicKeyRS256))
             .setJWTOptions(new JWTOptions()

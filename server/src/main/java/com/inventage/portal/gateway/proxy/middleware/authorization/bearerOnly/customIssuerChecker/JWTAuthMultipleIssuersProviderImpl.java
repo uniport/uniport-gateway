@@ -11,22 +11,17 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import java.util.List;
 
-public class JWTAuthProviderIssuerImpl extends JWTAuthProviderImpl {
+public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 
     private final JWTAuthOptions config;
 
     private final List<String> additionalIssuers;
 
-    public JWTAuthProviderIssuerImpl(Vertx vertx, JWTAuthOptions config) {
+    public JWTAuthMultipleIssuersProviderImpl(Vertx vertx, JWTAuthOptions config, JWTAuthMultipleIssuersOptions options) {
         super(vertx, config);
-        this.config = config;
-        this.additionalIssuers = List.of();
-    }
 
-    public JWTAuthProviderIssuerImpl(Vertx vertx, JWTAuthOptions config, List<String> additionalIssuers) {
-        super(vertx, config);
         this.config = config;
-        this.additionalIssuers = additionalIssuers;
+        additionalIssuers = options == null ? List.of() : options.getAdditionalIssuers();
     }
 
     @Override

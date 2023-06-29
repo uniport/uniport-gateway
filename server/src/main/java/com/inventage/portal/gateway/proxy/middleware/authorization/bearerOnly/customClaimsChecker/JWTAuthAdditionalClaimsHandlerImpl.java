@@ -2,12 +2,14 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.c
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
 import com.jayway.jsonpath.JsonPath;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.handler.impl.JWTAuthHandlerImpl;
 import java.util.Arrays;
 import java.util.List;
@@ -20,17 +22,17 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthAdditionalClaimsHandlerImpl.class);
 
-    private final List<JWTClaim> additionalJWTClaims;
+    private static final int MAX_AUTH_RETRIES = 1;
+    private static final String AUTH_RETRIES_KEY = "uniport.jwtauth.auth-retries";
 
-    public JWTAuthAdditionalClaimsHandlerImpl(JWTAuth authProvider, JWTAuthAdditionalClaimsOptions options) {
+    private final List<JWTClaim> additionalJWTClaims;
+    private final JWTAuthPublicKeysReconcilerHandler reconciler;
+
+    public JWTAuthAdditionalClaimsHandlerImpl(JWTAuth authProvider, JWTAuthAdditionalClaimsOptions options, JWTAuthPublicKeysReconcilerHandler reconciler) {
         super(authProvider, null);
 
-        // initialize additional claims
-        if (options != null) {
-            additionalJWTClaims = options.getAdditionalClaims();
-        } else {
-            additionalJWTClaims = List.of();
-        }
+        additionalJWTClaims = options == null ? List.of() : options.getAdditionalClaims();
+        this.reconciler = reconciler;
     }
 
     private static boolean verifyClaim(Object payloadValue, Object claimValue, JWTClaimOperator operator)
@@ -163,4 +165,35 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         super.postAuthentication(ctx);
     }
 
+    /*
+     * ProcessException catches a 401 response and retries it until MAX_AUTH_RETRIES is reached.
+     * This is intended to work together with JWTAuthPublicKeysReconcilerHandler that is responsible for public key refreshes
+     */
+    @Override
+    protected void processException(RoutingContext ctx, Throwable exception) {
+        if (reconciler == null || exception == null || !(exception instanceof HttpException)) {
+            super.processException(ctx, exception);
+            return;
+        }
+
+        int authRetries = ctx.get(AUTH_RETRIES_KEY, 0);
+
+        final int statusCode = ((HttpException) exception).getStatusCode();
+        if (statusCode == 401 && authRetries < MAX_AUTH_RETRIES) {
+            ctx.put(AUTH_RETRIES_KEY, ++authRetries);
+            LOGGER.error(String.format("%d", authRetries));
+
+            reconciler.getOrRefreshPublicKeys()
+                .onSuccess(ah -> {
+                    LOGGER.debug("Retrying failed authenticated request");
+                    ctx.reroute(ctx.request().path());
+                })
+                .onFailure(err -> {
+                    LOGGER.warn("Failed to retry failed authenticated request '{}'", err.getMessage());
+                    super.processException(ctx, exception);
+                });
+        } else {
+            super.processException(ctx, exception);
+        }
+    }
 }

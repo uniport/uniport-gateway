@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class MiddlewareServerBuilder {
+public final class MiddlewareServerBuilder {
 
     private static final int TIMEOUT_SERVER_START_SECONDS = 5;
 
@@ -106,10 +107,10 @@ public class MiddlewareServerBuilder {
      */
     public MiddlewareServerBuilder withBearerOnlyMiddleware(
         KeycloakServer mockKeycloakServer,
-        String issuer, List<String> audience, JsonArray publicKeys
+        String issuer, List<String> audience, JsonArray publicKeys, long reconcilationIntervalMs
     ) {
         try {
-            withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys));
+            withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, true, reconcilationIntervalMs));
         } catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
@@ -121,18 +122,27 @@ public class MiddlewareServerBuilder {
         return this;
     }
 
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(
+        KeycloakServer mockKeycloakServer,
+        String issuer, List<String> audience, JsonArray publicKeys
+    ) {
+        return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILATION_INTERVAL_MS));
+    }
+
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JsonObject bearerOnlyConfig) {
-        BearerOnlyMiddlewareFactory factory = new BearerOnlyMiddlewareFactory();
-        Future<Middleware> middlewareFuture = factory.create(vertx, "bearerOnly", router, bearerOnlyConfig);
-        int atMost = 20;
-        while (!middlewareFuture.isComplete() && atMost > 0) {
+        final BearerOnlyMiddlewareFactory factory = new BearerOnlyMiddlewareFactory();
+        final Future<Middleware> middlewareFuture = factory.create(vertx, "bearerOnly", router, bearerOnlyConfig);
+        final int atMost = 50;
+        int counter = 0;
+        while (!middlewareFuture.isComplete() && atMost > counter) {
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            counter++;
         }
-        if (middlewareFuture.failed()) {
+        if (middlewareFuture.failed() || counter >= atMost) {
             throw new IllegalStateException("BearerOnly Middleware could not be instantiated");
         }
         return withMiddleware(middlewareFuture.result());
@@ -212,8 +222,8 @@ public class MiddlewareServerBuilder {
     }
 
     private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) {
-        OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
-        Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
+        final OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
+        final Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
         final int atMost = 20;
         int counter = 0;
         while (!middlewareFuture.isComplete() && atMost > counter) {
@@ -224,7 +234,7 @@ public class MiddlewareServerBuilder {
             }
             counter++;
         }
-        if (middlewareFuture.failed()) {
+        if (middlewareFuture.failed() || counter >= atMost) {
             throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
         }
         if (scope == null) {
@@ -247,8 +257,8 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
-        VertxTestContext testContext = new VertxTestContext();
-        Router serviceRouter = Router.router(vertx);
+        final VertxTestContext testContext = new VertxTestContext();
+        final Router serviceRouter = Router.router(vertx);
 
         serviceRouter.route().handler(ctx -> ctx.response().end());
 
@@ -264,8 +274,8 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler)
         throws InterruptedException {
-        VertxTestContext testContext = new VertxTestContext();
-        Router serviceRouter = Router.router(vertx);
+        final VertxTestContext testContext = new VertxTestContext();
+        final Router serviceRouter = Router.router(vertx);
 
         serviceRouter.route().handler(handler);
 
@@ -289,8 +299,8 @@ public class MiddlewareServerBuilder {
         final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(null, user);
 
         // mock OAuth2 authentication
-        Handler<RoutingContext> injectTokenHandler = ctx -> {
-            String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
+        final Handler<RoutingContext> injectTokenHandler = ctx -> {
+            final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
             ctx.session().put(key, authPair);
             ctx.next();
         };
@@ -299,7 +309,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCustomSessionState(Map<String, String> sessionEntries) {
-        Handler<RoutingContext> handler = ctx -> {
+        final Handler<RoutingContext> handler = ctx -> {
             sessionEntries.forEach((key, value) -> ctx.session().put(key, value));
             ctx.next();
         };
@@ -308,7 +318,7 @@ public class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withUser() {
-        Handler<RoutingContext> handler = ctx -> {
+        final Handler<RoutingContext> handler = ctx -> {
             ctx.setUser(new UserImpl());
             ctx.next();
         };
@@ -342,7 +352,7 @@ public class MiddlewareServerBuilder {
 
     public MiddlewareServer build() {
         router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
-        HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
+        final HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
         return new MiddlewareServer(vertx, httpServer, host, testCtx);
     }
 

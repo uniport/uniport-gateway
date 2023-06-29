@@ -15,35 +15,44 @@ import java.util.concurrent.CountDownLatch;
 
 public class KeycloakServer {
 
-    private final static String SESSION_SCOPE = "test";
-    private final static String HTTP_PREFIX = "http://";
-    private final static String EMPTY_STRING = "";
-    private final static String OPENID_DISCOVERY_PATH = "/.well-known/openid-configuration";
-    private final static String TEST_REALM_PATH = "/auth/realms/test";
-    private final static String AUTHORIZATION_ENDPOINT_KEY = "authorization_endpoint";
-    private final static String TOKEN_ENDPOINT_KEY = "token_endpoint";
-    private final static String TOKEN_ENDPOINT_PATH = "/protocol/openid-connect/token";
-    private final static String ACCESS_TOKEN_KEY = "access_token";
-    private final static String RANDOM_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ";
-    private final static String JWKs_URI_KEY = "jwks_uri";
-    private final static String JWKS_URIS_PATH = "/protocol/openid-connect/certs";
-    private final static String JWKS_KEYS_KEY = "keys";
-    private final static String JWK_KID_KEY = "kid";
-    private final static String JWK_KTY_KEY = "kty";
-    private final static String JWK_ALG_KEY = "alg";
-    private final static String JWK_USE_KEY = "use";
-    private final static String JWK_MODULUS_KEY = "n";
-    private final static String JWK_PUBLIC_EXPONENT_KEY = "e";
-    private final static String RANDOM_JWK_KID = "-xQUHcerDnrhFl6deB8Vw0f4GKPsY6BZMDyHTIbOnL4";
-    private final static String RSA_JWK_KTY = "RSA";
-    private final static String RS256_JWK_ALG = "RS256";
-    private final static String SIGNING_JWK_USE = "sig";
-    private final static String RANDOM_JWK_MODULUS = "uFJ0A754CTB9-mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH-u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm-rOwytUPflAnYIgqinmiFpqyQ8vwj_L82F5kN5hnB-G2heMXSep4uoq--2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ_YySMmE3F-TxXOVbhZqAuH4A2-9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQ";
-    private final static String RANDOM_JWK_PUBLIC_EXPONENT = "AQAB";
+    private static final String SESSION_SCOPE = "test";
+    private static final String HTTP_PREFIX = "http://";
+    private static final String EMPTY_STRING = "";
+    private static final String OPENID_DISCOVERY_PATH = "/.well-known/openid-configuration";
+    private static final String TEST_REALM_PATH = "/auth/realms/test";
+    private static final String AUTHORIZATION_ENDPOINT_KEY = "authorization_endpoint";
+    private static final String TOKEN_ENDPOINT_KEY = "token_endpoint";
+    private static final String TOKEN_ENDPOINT_PATH = "/protocol/openid-connect/token";
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+    private static final String RANDOM_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ";
+
+    private static final String JWKS_URI_KEY = "jwks_uri";
+    private static final String JWKS_URIS_PATH = "/protocol/openid-connect/certs";
+    private static final String JWKS_KEYS_KEY = "keys";
+    private static final String JWK_KID_KEY = "kid";
+    private static final String JWK_KTY_KEY = "kty";
+    private static final String JWK_ALG_KEY = "alg";
+    private static final String JWK_USE_KEY = "use";
+    private static final String JWK_MODULUS_KEY = "n";
+    private static final String JWK_PUBLIC_EXPONENT_KEY = "e";
+
+    private static final String RSA_JWK_KTY = "RSA";
+    private static final String RS256_JWK_ALG = "RS256";
+    private static final String SIGNING_JWK_USE = "sig";
+    // RANDOM_JWK_* matches to FOR_DEVELOPMENT_PURPOSE_ONLY-privateKey.pem
+    private static final String RANDOM_JWK_KID = "validKID";
+    private static final String RANDOM_JWK_MODULUS = "uFJ0A754CTB9-mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH-u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm-rOwytUPflAnYIgqinmiFpqyQ8vwj_L82F5kN5hnB-G2heMXSep4uoq--2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ_YySMmE3F-TxXOVbhZqAuH4A2-9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQ";
+    private static final String RANDOM_JWK_PUBLIC_EXPONENT = "AQAB";
+    // ALTERNATIVERANDOM_JWK_* matches to no private key
+    private static final String ALTERNATIVE_RANDOM_JWK_KID = "invalidKID";
+    private static final String ALTERNATIVE_RANDOM_JWK_MODULUS = "s_7_WfL-gQmQAEv4FmMdntTUMF2_nXYriw8w2euy8AhooCUr33PBBoSkG7R6cEHcTwkgiqn9U7qfRvpwNyAok8GyJA5KhMhsBolNuXsHxBBzMDSRWs5Byd33F2D0Zi8Nv9DjqIY8K56TWHh8MjDGzMIHHVNpLBhjARTzCUuHUg3BfAcohe0G6bgfnuKNNN9gzY2RHNLVsLQrHvhgqjA-Lx5-EpfAUCCB3fSvuhDLmzI_pn14Qqm788WgvjpDzO5lHWA7Ue3aTDz_SaFAuUOww3-2-btboxP_0tozrn8GfsAb5rHWke3s6W5YJcj3yHk1FSu9BQvrUymTkYmZxTTTnQ";
+    private static final String ALTERNATIVE_RANDOM_JWK_PUBLIC_EXPONENT = "AQAB";
+
     private final Vertx vertx;
     private final String host;
     private final int port;
     private HttpServer server;
+    private boolean serveValidPublicKeys = true;
 
     public KeycloakServer(Vertx vertx) {
         this(vertx, "localhost", TestUtils.findFreePort());
@@ -83,8 +92,8 @@ public class KeycloakServer {
     }
 
     public KeycloakServer startWithDefaultDiscoveryHandler() throws InterruptedException {
-        JsonObject discoveryResponse = getDefaultDiscoveryResponse();
-        JsonObject tokenResponse = getDefaultTokenEndpointResponse();
+        final JsonObject discoveryResponse = getDefaultDiscoveryResponse();
+        final JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
             req -> {
                 if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
@@ -104,8 +113,8 @@ public class KeycloakServer {
 
     public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler)
         throws InterruptedException {
-        JsonObject discoveryResponse = getDefaultDiscoveryResponse();
-        JsonObject tokenResponse = getDefaultTokenEndpointResponse();
+        final JsonObject discoveryResponse = getDefaultDiscoveryResponse();
+        final JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
             req -> {
                 if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
@@ -124,9 +133,8 @@ public class KeycloakServer {
         return this;
     }
 
-    public KeycloakServer startDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler() throws InterruptedException {
-        JsonObject discoveryResponse = getDiscoveryResponseWithJWKsURI();
-        JsonObject jwksURIResponse = getDefaultJWKsURIResponse();
+    public KeycloakServer startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler() throws InterruptedException {
+        final JsonObject discoveryResponse = getDiscoveryResponseWithJWKsURI();
         startServerWithCustomHandler(
             req -> {
                 if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
@@ -135,6 +143,12 @@ public class KeycloakServer {
                         .setStatusCode(200)
                         .send(discoveryResponse.encode());
                 } else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
+                    final JsonObject jwksURIResponse;
+                    if (this.serveValidPublicKeys) {
+                        jwksURIResponse = getDefaultJWKsURIResponse();
+                    } else {
+                        jwksURIResponse = getAlternativeJWKsURIResponse();
+                    }
                     req.response()
                         .putHeader("content-type", "application/json")
                         .setStatusCode(200)
@@ -144,8 +158,18 @@ public class KeycloakServer {
         return this;
     }
 
+    public KeycloakServer serveValidPublicKeys() {
+        this.serveValidPublicKeys = true;
+        return this;
+    }
+
+    public KeycloakServer serveInvalidPublicKeys() {
+        this.serveValidPublicKeys = false;
+        return this;
+    }
+
     public JsonObject getDefaultOAuth2AuthConfig() {
-        JsonObject config = new JsonObject();
+        final JsonObject config = new JsonObject();
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, SESSION_SCOPE);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
@@ -157,7 +181,7 @@ public class KeycloakServer {
     }
 
     public JsonObject getOAuth2AuthConfig(String scope) {
-        JsonObject config = new JsonObject();
+        final JsonObject config = new JsonObject();
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, scope);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
@@ -168,11 +192,14 @@ public class KeycloakServer {
         return config;
     }
 
-    public JsonObject getBearerOnlyConfig(String issuer, List<String> audience, JsonArray publicKeys) {
-        JsonObject config = new JsonObject();
+    public JsonObject getBearerOnlyConfig(String issuer, List<String> audience, JsonArray publicKeys, boolean reconcilationEnabled, long reconcilationIntervalMs) {
+        final JsonObject config = new JsonObject();
         config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys);
         config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, issuer);
         config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(audience));
+        config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION, JsonObject.of(
+            DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, reconcilationEnabled,
+            DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, reconcilationIntervalMs));
         config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
         config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
         config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
@@ -184,29 +211,28 @@ public class KeycloakServer {
     }
 
     private JsonObject getDefaultDiscoveryResponse() {
-        JsonObject discoveryResponse = new JsonObject();
+        final JsonObject discoveryResponse = new JsonObject();
         discoveryResponse.put(AUTHORIZATION_ENDPOINT_KEY, this.getDefaultDiscoveryUrl());
         discoveryResponse.put(TOKEN_ENDPOINT_KEY, this.getDefaultDiscoveryUrl() + TOKEN_ENDPOINT_PATH);
         return discoveryResponse;
     }
 
     private JsonObject getDiscoveryResponseWithJWKsURI() {
-        JsonObject discoveryResponse = new JsonObject();
+        final JsonObject discoveryResponse = new JsonObject();
         discoveryResponse.put(AUTHORIZATION_ENDPOINT_KEY, this.getDefaultDiscoveryUrl());
         discoveryResponse.put(TOKEN_ENDPOINT_KEY, this.getDefaultDiscoveryUrl() + TOKEN_ENDPOINT_PATH);
-        discoveryResponse.put(JWKs_URI_KEY, this.getDefaultDiscoveryUrl() + JWKS_URIS_PATH);
+        discoveryResponse.put(JWKS_URI_KEY, this.getDefaultDiscoveryUrl() + JWKS_URIS_PATH);
         return discoveryResponse;
     }
 
     private JsonObject getDefaultTokenEndpointResponse() {
-        JsonObject tokenEndpointResponse = new JsonObject();
+        final JsonObject tokenEndpointResponse = new JsonObject();
         tokenEndpointResponse.put(ACCESS_TOKEN_KEY, RANDOM_ACCESS_TOKEN);
         return tokenEndpointResponse;
     }
 
     private JsonObject getDefaultJWKsURIResponse() {
-
-        JsonObject JWK = new JsonObject()
+        final JsonObject jwk = new JsonObject()
             .put(JWK_KID_KEY, RANDOM_JWK_KID)
             .put(JWK_KTY_KEY, RSA_JWK_KTY)
             .put(JWK_ALG_KEY, RS256_JWK_ALG)
@@ -214,10 +240,23 @@ public class KeycloakServer {
             .put(JWK_MODULUS_KEY, RANDOM_JWK_MODULUS)
             .put(JWK_PUBLIC_EXPONENT_KEY, RANDOM_JWK_PUBLIC_EXPONENT);
 
-        JsonArray JWKs = new JsonArray().add(JWK);
+        final JsonArray jwks = new JsonArray().add(jwk);
+        final JsonObject jwksURIResponse = new JsonObject().put(JWKS_KEYS_KEY, jwks);
+        return jwksURIResponse;
+    }
 
-        JsonObject JWKsURIResponse = new JsonObject().put(JWKS_KEYS_KEY, JWKs);
-        return JWKsURIResponse;
+    private JsonObject getAlternativeJWKsURIResponse() {
+        final JsonObject jwk = new JsonObject()
+            .put(JWK_KID_KEY, ALTERNATIVE_RANDOM_JWK_KID)
+            .put(JWK_KTY_KEY, RSA_JWK_KTY)
+            .put(JWK_ALG_KEY, RS256_JWK_ALG)
+            .put(JWK_USE_KEY, SIGNING_JWK_USE)
+            .put(JWK_MODULUS_KEY, ALTERNATIVE_RANDOM_JWK_MODULUS)
+            .put(JWK_PUBLIC_EXPONENT_KEY, ALTERNATIVE_RANDOM_JWK_PUBLIC_EXPONENT);
+
+        final JsonArray jwks = new JsonArray().add(jwk);
+        final JsonObject jwksURIResponse = new JsonObject().put(JWKS_KEYS_KEY, jwks);
+        return jwksURIResponse;
     }
 
     private String formatURL(String url) {
