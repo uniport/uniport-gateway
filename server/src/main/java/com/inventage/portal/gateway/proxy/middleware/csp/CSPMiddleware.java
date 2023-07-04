@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.csp;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -22,7 +23,7 @@ public class CSPMiddleware implements Middleware {
 
     public CSPMiddleware(String name, JsonArray cspDirectives, Boolean reportOnly) {
         this.name = name;
-        this.cspHandler = CSPHandler.create();
+        this.cspHandler = CompositeCSPHandler.create();
 
         this.removeBuiltinDirective(this.cspHandler);
         this.cspHandler.setReportOnly((reportOnly == null) ? DEFAULT_REPORT_ONLY : reportOnly);

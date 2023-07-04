@@ -84,6 +84,70 @@ class CspMiddlewareTest {
         }));
     }
 
+    @Test
+    void chainingTwoCSPMiddlewaresDifferentDirectives(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String style_directive = "style-src";
+        final String style_value = "self";
+
+        final String media_directive = "media-src";
+        final String media_value = "self";
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withCspMiddleware(JsonArray.of(createDirective(media_directive, media_value)), false)
+            .withCspMiddleware(JsonArray.of(createDirective(style_directive, style_value)), false)
+            .build().start();
+
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
+            //then
+            final MultiMap headers = httpClientResponse.headers();
+            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+
+            assertNotNull(csp_values,
+                String.format("'%s' is NOT contained in http response header!",
+                    CONTENT_SECURITY_POLICY));
+            assertTrue(csp_values.contains(style_directive) && csp_values.contains(style_value),
+                " Csp directive and value NOT contained in http response header!");
+            assertTrue(csp_values.contains(media_directive) && csp_values.contains(media_value),
+                " Csp directive and value NOT contained in http response header!");
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    void chainingTwoCSPMiddlewaresWithSameDirective(Vertx vertx, VertxTestContext testCtx) {
+        //given
+        final String style_directive = "style-src";
+        final String style_value = "self";
+        final String different_style_value = "https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net";
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withCspMiddleware(JsonArray.of(createDirective(style_directive, different_style_value)), false)
+            .withCspMiddleware(JsonArray.of(createDirective(style_directive, style_value)), false)
+            .build().start();
+
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
+            //then
+            final MultiMap headers = httpClientResponse.headers();
+            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+
+            assertNotNull(csp_values,
+                String.format("'%s' is NOT contained in http response header!",
+                    CONTENT_SECURITY_POLICY));
+            assertTrue(csp_values.contains(style_directive) && csp_values.contains(style_value),
+                " Csp directive and value NOT contained in http response header!");
+
+            for (String expected_value : different_style_value.split(" ")) {
+                assertTrue(csp_values.contains(expected_value),
+                    " Expected " + expected_value + " in csp header");
+            }
+
+            testCtx.completeNow();
+        }));
+    }
+
     private JsonObject createDirective(String directive, String... values) {
         return JsonObject.of(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME, directive,
             DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of(values));
