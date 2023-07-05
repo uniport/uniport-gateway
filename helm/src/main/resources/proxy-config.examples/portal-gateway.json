@@ -120,7 +120,6 @@
                                 "directive": "connect-src",
                                 "values": [
                                     "self",
-                                    "https://grafana.com",
                                     "https://fonts.googleapis.com"
                                 ]
                             }
