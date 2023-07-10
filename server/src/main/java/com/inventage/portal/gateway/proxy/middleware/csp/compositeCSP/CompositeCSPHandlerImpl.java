@@ -136,15 +136,15 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
     private String mergeWithPreviousPolicyString(RoutingContext ctx) {
         final StringBuilder mergedPolicyString = new StringBuilder();
         final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String currentPolicyString = getPolicyString();
+        final String currentPolicy = getPolicyString();
 
         if (previousPolicy == null) {
-            ctx.put(CSP_PREVIOUS_POLICY_KEY, currentPolicyString);
-            return currentPolicyString;
+            ctx.put(CSP_PREVIOUS_POLICY_KEY, currentPolicy);
+            return currentPolicy;
         }
 
         final Map<String, Set<String>> oldPoliciesDirectives = extractCspDirectives(previousPolicy);
-        final Map<String, Set<String>> currentPoliciesDirectives = extractCspDirectives(currentPolicyString);
+        final Map<String, Set<String>> currentPoliciesDirectives = extractCspDirectives(currentPolicy);
 
         oldPoliciesDirectives.forEach((directive, values) -> {
             if (currentPoliciesDirectives.containsKey(directive)) {
@@ -168,7 +168,6 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
 
         ctx.put(CSP_PREVIOUS_POLICY_KEY, mergedPolicyString.toString());
         return mergedPolicyString.toString();
-
     }
 
     @Override
