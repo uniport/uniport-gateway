@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
-class CspMiddlewareTest {
+class CSPMiddlewareTest {
 
     private static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
     private static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
