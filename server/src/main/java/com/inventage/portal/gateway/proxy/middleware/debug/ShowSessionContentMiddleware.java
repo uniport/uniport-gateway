@@ -5,7 +5,6 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 import io.netty.handler.codec.http.cookie.Cookie;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -33,7 +32,6 @@ public class ShowSessionContentMiddleware implements Middleware {
     }
 
     @Override
-    @WithSpan
     public void handle(RoutingContext ctx) {
         // Bail if we're not on the debug URL
         if (!ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {

@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
@@ -39,7 +38,6 @@ public class BearerOnlyMiddleware implements Middleware {
     }
 
     @Override
-    @WithSpan
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 

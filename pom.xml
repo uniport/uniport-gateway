@@ -201,11 +201,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>io.opentelemetry.instrumentation</groupId>
-                <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
             <!-- Metrics Prometheus -->
             <!-- has to be in sync with vertx-micrometer-metrics micrometer version (see https://mvnrepository.com/artifact/io.vertx/vertx-micrometer-metrics/4.3.8) -->
             <dependency>
