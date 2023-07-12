@@ -44,6 +44,7 @@
 
         <docker-java.version>3.2.8</docker-java.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
+        <!-- https://github.com/open-telemetry/opentelemetry-java/releases -->
         <opentelemetry.version>1.21.0</opentelemetry.version>
         <micrometer.version>1.9.5</micrometer.version>
 
@@ -216,6 +217,11 @@
                 <version>${opentelemetry.version}-alpha</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+                <version>${opentelemetry.version}</version>
             </dependency>
             <!-- Metrics Prometheus -->
             <!-- has to be in sync with vertx-micrometer-metrics micrometer version (see https://mvnrepository.com/artifact/io.vertx/vertx-micrometer-metrics/4.3.8) -->

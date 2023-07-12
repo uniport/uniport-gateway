@@ -4,6 +4,7 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.log.ContextualDataAdapter;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -30,6 +31,7 @@ public class OpenTelemetryMiddleware implements Middleware {
     }
 
     @Override
+    @WithSpan
     public void handle(RoutingContext ctx) {
         final String openTelemetryTraceId = getOpenTelemetryTraceId();
 

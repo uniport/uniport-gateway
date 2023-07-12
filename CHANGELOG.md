@@ -21,9 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for additional issuers. Can be defined in the configuration with `additionalIssuers` ([PORTAL-1331](https://issue.inventage.com/browse/PORTAL-1331)).
 - Configuring the CSP middleware at route level. It is now possible to define basic CSP policies on the entry-middleware and specific/more restrictive CSP policies on each specific route ([PORTAL-1230](https://issue.inventage.com/browse/PORTAL-1230)).
 - Support for periodical public keys refreshs for `bearerOnly` and `passAuthorization` midllewares. Can be configured with `publicKeysReconcilation.enabled` and `publicKeysReconcilation.intervalMs` in the middleware options ([PORTAL-1020](https://issue.inventage.com/browse/PORTAL-1020)).
+- Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
+- All middleware create an own OpenTelemetry span ((PORTAL-1617)[https://issue.inventage.com/browse/PORTAL-1617].
 
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
-- Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17887) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~8.0.0-202305240847-789-bdd58cd9~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.0.0-202305240847-789-bdd58cd9)
 
