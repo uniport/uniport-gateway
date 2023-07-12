@@ -21,6 +21,9 @@
         <!-- because we deploy via nexus-staging-maven-plugin -->
         <maven.deploy.skip>true</maven.deploy.skip>
 
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+
         <!--
             fabric8io/docker-maven-plugin configuration
             @see https://dmp.fabric8.io/
@@ -671,7 +674,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                             <!-- auch im Jenkins Config File "settings.xml" referenziert -->

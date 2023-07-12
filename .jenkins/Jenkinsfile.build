@@ -1,7 +1,7 @@
 pipeline {
     agent {
         node {
-            label 'java11 && docker && !northport'
+            label 'java17 && docker && !northport'
         }
     }
 
@@ -33,7 +33,7 @@ pipeline {
 
     tools {
         maven 'maven-release-latest'
-        jdk 'Open-JDK-11'
+        jdk 'OpenJDK-17'
     }
 
     stages {
