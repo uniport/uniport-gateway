@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuring the CSP middleware at route level. It is now possible to define basic CSP policies on the entry-middleware and specific/more restrictive CSP policies on each specific route ([PORTAL-1230](https://issue.inventage.com/browse/PORTAL-1230)).
 - Support for periodical public keys refreshs for `bearerOnly` and `passAuthorization` midllewares. Can be configured with `publicKeysReconcilation.enabled` and `publicKeysReconcilation.intervalMs` in the middleware options ([PORTAL-1020](https://issue.inventage.com/browse/PORTAL-1020)).
 - Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
-- All middleware create an own OpenTelemetry span ((PORTAL-1617)[https://issue.inventage.com/browse/PORTAL-1617].
+- All middleware create an own OpenTelemetry span ([PORTAL-1617](https://issue.inventage.com/browse/PORTAL-1617)).
 
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 
