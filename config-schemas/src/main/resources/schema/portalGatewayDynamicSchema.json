@@ -69,7 +69,16 @@
                     "minimum" : 0
                   },
                   "publicKeysReconcilation" : {
-                    "type" : "object"
+                    "type" : "object",
+                    "properties" : {
+                      "intervalMs" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      },
+                      "enabled" : {
+                        "type" : "boolean"
+                      }
+                    }
                   },
                   "policyDirectives" : {
                     "type" : "array"
