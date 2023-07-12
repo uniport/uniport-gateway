@@ -1,9 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.mock;
 
 import io.smallrye.jwt.build.Jwt;
+import jakarta.json.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
-import javax.json.JsonObject;
 
 /**
  * Signing JWTs for Unit tests

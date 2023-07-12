@@ -131,18 +131,13 @@
             <artifactId>jakarta.json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
         </dependency>
         <!-- OpenTelemetry - Vertx -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-opentelemetry</artifactId>
-        </dependency>
-        <!-- Because of Exception in thread "main" java.lang.NoSuchMethodError: 'void com.google.common.base.Preconditions.checkArgument(boolean, java.lang.String, char, java.lang.Object)'-->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
         <!-- OpenTelemetry - Exporters -->
         <dependency>
