@@ -314,7 +314,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- for creating the common.env and the secrets.env file needed in docker-compose.yml -->
+            <!-- for creating the specific.env file needed in runConfigurations -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>

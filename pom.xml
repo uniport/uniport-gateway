@@ -45,7 +45,6 @@
         <docker-java.version>3.2.8</docker-java.version>
         <junit-jupiter.version>5.7.0</junit-jupiter.version>
         <opentelemetry.version>1.21.0</opentelemetry.version>
-        <!-- should be in sync with vertx-micrometer-metrics micrometer version -->
         <micrometer.version>1.9.5</micrometer.version>
 
         <jib.goal>build</jib.goal>
@@ -219,10 +218,11 @@
                 <scope>import</scope>
             </dependency>
             <!-- Metrics Prometheus -->
+            <!-- has to be in sync with vertx-micrometer-metrics micrometer version (see https://mvnrepository.com/artifact/io.vertx/vertx-micrometer-metrics/4.3.8) -->
             <dependency>
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-registry-prometheus</artifactId>
-                <version>${micrometer.version}</version>
+                <version>1.9.5</version>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
@@ -235,6 +235,11 @@
                 <artifactId>code-style-settings</artifactId>
                 <version>${portal-code-style-settings.version}</version>
                 <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>com.inventage.portal.helm-chart-library</groupId>
+                <artifactId>helm</artifactId>
+                <version>${portal-helm-chart-library.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -425,6 +430,16 @@
                     <groupId>com.rudikershaw.gitbuildhook</groupId>
                     <artifactId>git-build-hook-maven-plugin</artifactId>
                     <version>3.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.cyclonedx</groupId>
+                    <artifactId>cyclonedx-maven-plugin</artifactId>
+                    <version>2.7.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.1.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -635,7 +650,6 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.7.7</version>
                 <executions>
                     <execution>
                         <goals>

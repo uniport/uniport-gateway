@@ -63,14 +63,12 @@
                                 <artifactItem>
                                     <groupId>com.inventage.portal.helm-chart-library</groupId>
                                     <artifactId>helm</artifactId>
-                                    <version>${portal-helm-chart-library.version}</version>
                                     <outputDirectory>${project.build.directory}/portal-gateway-template/charts</outputDirectory>
                                     <includes>portal-lib/**/*</includes>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.inventage.portal.helm-chart-library</groupId>
                                     <artifactId>helm</artifactId>
-                                    <version>${portal-helm-chart-library.version}</version>
                                     <outputDirectory>${project.build.directory}//portal-gateway/charts</outputDirectory>
                                     <includes>portal-lib/**/*</includes>
                                 </artifactItem>
