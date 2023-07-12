@@ -21,8 +21,7 @@
         <!-- because we deploy via nexus-staging-maven-plugin -->
         <maven.deploy.skip>true</maven.deploy.skip>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
 
         <!--
             fabric8io/docker-maven-plugin configuration
@@ -275,9 +274,6 @@
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
-                    <configuration>
-                        <release>11</release>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
@@ -327,7 +323,6 @@
                     <version>3.3.1</version>
                     <configuration>
                         <from>
-                            <!-- PORTAL-453: upgrade to Java 17 because of https://github.com/docker/for-mac/issues/6118 -->
                             <image>${docker.pull.registry}/eclipse-temurin:17-jre</image>
                         </from>
                         <to>
