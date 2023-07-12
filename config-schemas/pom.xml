@@ -28,6 +28,11 @@
             <artifactId>server</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.inventage.portal.gateway</groupId>
+            <artifactId>helm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
