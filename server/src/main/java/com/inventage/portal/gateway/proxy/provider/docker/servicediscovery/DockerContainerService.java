@@ -25,15 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represent a Docker container.
  */
 public class DockerContainerService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DockerContainerService.class.getName());
 
     private final String name;
     private final String containerId;

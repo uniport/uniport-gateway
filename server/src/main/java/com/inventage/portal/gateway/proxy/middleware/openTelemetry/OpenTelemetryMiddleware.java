@@ -5,6 +5,8 @@ import com.inventage.portal.gateway.proxy.middleware.log.ContextualDataAdapter;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This middleware should be one of the first middlewares in the request chain.
@@ -16,6 +18,8 @@ import io.vertx.ext.web.RoutingContext;
  * logging contextual data: https://reactiverse.io/reactiverse-contextual-logging/
  */
 public class OpenTelemetryMiddleware implements Middleware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenTelemetryMiddleware.class);
 
     public static final String HTTP_HEADER_REQUEST_ID = "X-Uniport-Trace-Id";
 
@@ -31,6 +35,8 @@ public class OpenTelemetryMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         final String openTelemetryTraceId = getOpenTelemetryTraceId();
 
         ContextualDataAdapter.put(CONTEXTUAL_DATA_TRACE_ID, openTelemetryTraceId);

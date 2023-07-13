@@ -16,7 +16,7 @@ public class ClaimToHeaderMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClaimToHeaderMiddleware.class);
 
-    private final String middlewareName;
+    private final String name;
     private final String claimPath;
     private final String headerName;
 
@@ -31,13 +31,15 @@ public class ClaimToHeaderMiddleware implements Middleware {
      *            name of the HTTP header to be set
      */
     public ClaimToHeaderMiddleware(String name, String claimPath, String headerName) {
-        this.middlewareName = name;
+        this.name = name;
         this.claimPath = claimPath;
         this.headerName = headerName;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
         LOGGER.debug("Adding claim '{}' to header '{}'", claimPath, headerName);
         ctx.request().headers().remove(headerName);
         // e.g. authorization header = Bearer base64(header).base64(payload).base64(signature)

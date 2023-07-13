@@ -24,7 +24,7 @@ public class OpenTelemetryMiddlewareTest {
     public void test(Vertx vertx, VertxTestContext testCtx) {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withMiddleware(new OpenTelemetryMiddleware("openTelemetry"))
             .build().start();

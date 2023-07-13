@@ -44,7 +44,7 @@ public class AuthenticationRedirectRequestAssert
     public AuthenticationRedirectRequestAssert isRedirectTo(String expectedLocation) {
         Assertions.assertTrue(String.valueOf(actual.statusCode()).startsWith("3"),
             "Redirect status code expected, but was: " + actual.statusCode());
-        String location = actual.getHeader(LOCATION);
+        final String location = actual.getHeader(LOCATION);
         Assertions.assertEquals(expectedLocation, location);
         return this;
     }
@@ -56,11 +56,11 @@ public class AuthenticationRedirectRequestAssert
     public AuthenticationRedirectRequestAssert isValidAuthenticationRequest(
         Map<String, String> expectedLocationParameters
     ) {
-        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        // Assertions.assertNull(set_cookie);
-        String location = actual.getHeader(LOCATION);
+        // final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
+        // Assertions.assertNull(setCookie);
+        final String location = actual.getHeader(LOCATION);
         Assertions.assertNotNull(location, "No 'location' header found in response");
-        Map<String, String> locationParameters = extractParametersFromHeader(location);
+        final Map<String, String> locationParameters = extractParametersFromHeader(location);
         Assertions.assertNotNull(locationParameters);
         if (expectedLocationParameters != null) {
             expectedLocationParameters.entrySet().stream()
@@ -72,13 +72,13 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert isUsingFormPost() {
-        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
+        final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
         Assertions.assertEquals(locationParameters.get(OIDC_RESPONSE_MODE), OIDC_RESPONSE_MODE_DEFAULT);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasPKCE() {
-        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
+        final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
 
         Assertions.assertNotNull(locationParameters.get(CODE_CHALLENGE));
         Assertions.assertNotNull(locationParameters.get(CODE_CHALLENGE_METHOD));
@@ -96,16 +96,16 @@ public class AuthenticationRedirectRequestAssert
             throw new RuntimeException(e);
         }
         Assertions.assertNotNull(responseParamsList);
-        Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
+        final Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
             entry -> entry.getName(), entry -> entry.getValue()));
 
         return responseParamsMap;
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookieForSession(String withValue) {
-        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNotNull(set_cookie);
-        String sessionCookie = valueFromSetCookie(set_cookie);
+        final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
+        Assertions.assertNotNull(setCookie);
+        final String sessionCookie = valueFromSetCookie(setCookie);
         Assertions.assertNotNull(sessionCookie);
         if (withValue != null) {
             Assertions.assertEquals(withValue, sessionCookie);
@@ -114,8 +114,8 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasNotSetCookieForSession() {
-        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNull(set_cookie);
+        final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
+        Assertions.assertNull(setCookie);
         return this;
     }
 
@@ -135,38 +135,38 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader) {
-        String value = actual.getHeader(expectedHeader);
+        final String value = actual.getHeader(expectedHeader);
         Assertions.assertNotNull(value);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader, String expectedValue) {
-        String value = actual.getHeader(expectedHeader);
+        final String value = actual.getHeader(expectedHeader);
         Assertions.assertEquals(expectedValue, value);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasStateWithUri(String expectedUriInStateParameter) {
-        Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
+        final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
         Assertions.assertEquals(expectedUriInStateParameter,
             new StateWithUri(locationParameters.get(OIDC_PARAM_STATE)).uri().orElse(null));
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookieForSessionDifferentThan(String sessionCookie) {
-        String set_cookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNotEquals(sessionCookie, set_cookie);
+        final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
+        Assertions.assertNotEquals(sessionCookie, setCookie);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName) {
-        List<String> cookies = actual.cookies();
+        final List<String> cookies = actual.cookies();
         Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasNotSetCookie(String cookieName) {
-        List<String> cookies = actual.cookies();
+        final List<String> cookies = actual.cookies();
         Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
         return this;
     }

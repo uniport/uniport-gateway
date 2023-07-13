@@ -15,7 +15,7 @@ public class StateWithUriTest {
         final String state = "AbCd12";
         final String uri = "/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1";
         // when
-        StateWithUri stateWithUri = new StateWithUri(state, uri);
+        final StateWithUri stateWithUri = new StateWithUri(state, uri);
         // then
         Assertions.assertEquals(state, stateWithUri.state());
         Assertions.assertEquals(uri, stateWithUri.uri().orElse(null));
@@ -30,7 +30,7 @@ public class StateWithUriTest {
         final String state = "AbCd12";
         final String uri = "/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1";
         // when
-        StateWithUri stateWithUri = new StateWithUri(state, uri, HttpMethod.POST);
+        final StateWithUri stateWithUri = new StateWithUri(state, uri, HttpMethod.POST);
         // then
         Assertions.assertEquals(state, stateWithUri.state());
         Assertions.assertEquals(uri, stateWithUri.uri().orElse(null));
@@ -45,7 +45,7 @@ public class StateWithUriTest {
         final String state = "AbCd12";
         final String uri = null;
         // when
-        StateWithUri stateWithUri = new StateWithUri(state, uri);
+        final StateWithUri stateWithUri = new StateWithUri(state, uri);
         // then
         Assertions.assertEquals(state, stateWithUri.state());
         Assertions.assertNull(stateWithUri.uri().orElse(null));
@@ -57,7 +57,7 @@ public class StateWithUriTest {
         // given
         // when
         try {
-            StateWithUri stateWithUri = new StateWithUri(null, null);
+            final StateWithUri stateWithUri = new StateWithUri(null, null);
             Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // then
@@ -66,11 +66,11 @@ public class StateWithUriTest {
     }
 
     @Test
-    public void fromValuesNull_3() {
+    public void fromValuesNull3() {
         // given
         // when
         try {
-            StateWithUri stateWithUri = new StateWithUri(null, null, null);
+            final StateWithUri stateWithUri = new StateWithUri(null, null, null);
             Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // then
@@ -83,7 +83,7 @@ public class StateWithUriTest {
         // given
         final String stateParameterBase64Encoded = "QWJDZDEyOlBPU1RATDNObFoyMWxiblF2YzNWaWMyVm5iV1Z1ZEM5emRXSnpkV0p6WldkdFpXNTBQM0JoY21GdE1UMTJZV3gxWlRFbWNHRnlZVzB5UFhaaGJIVmxNaU5tY21GbmJXVnVkREU9"; // state=AbCd12; uri=/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1
         // when
-        StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
+        final StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertEquals("/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1",
@@ -96,7 +96,7 @@ public class StateWithUriTest {
         // given
         final String stateParameterBase64Encoded = "QWJDZDEyOi9zZWdtZW50L3N1YnNlZ21lbnQvc3Vic3Vic2VnbWVudD9wYXJhbTE9dmFsdWUxJnBhcmFtMj12YWx1ZTIjZnJhZ21lbnQx"; // state=AbCd12; uri=/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1
         // when
-        StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
+        final StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertEquals("/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1",
@@ -109,7 +109,7 @@ public class StateWithUriTest {
         // given
         final String stateParameterBase64Encoded = "QWJDZDEy"; // state=AbCd12
         // when
-        StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
+        final StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertNull(stateWithUri.uri().orElse(null));
@@ -121,7 +121,7 @@ public class StateWithUriTest {
         // given
         final String stateParameterBase64Encoded = "QWJDZDEyOg=="; // state=AbCd12
         // when
-        StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
+        final StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertEquals("", stateWithUri.uri().get());
@@ -129,11 +129,11 @@ public class StateWithUriTest {
     }
 
     @Test
-    public void fromInvalidEncoded_all() {
+    public void fromInvalidEncodedAll() {
         // given
         final String stateParameter = "a-not-encoded-string"; // state=AbCd12; uri=/segment/subsegment/subsubsegment?param1=value1&param2=value2#fragment1
         // when
-        StateWithUri stateWithUri = new StateWithUri(stateParameter);
+        final StateWithUri stateWithUri = new StateWithUri(stateParameter);
         // then
         Assertions.assertEquals("a-not-encoded-string", stateWithUri.state());
         Assertions.assertNull(stateWithUri.uri().orElse(null));
@@ -142,11 +142,11 @@ public class StateWithUriTest {
     }
 
     @Test
-    public void fromInvalidEncoded_Uri() {
+    public void fromInvalidEncodedURI() {
         // given
         final String stateParameter = "QWJDZDEyOlBPU1RAYS1ub3QtZW5jb2RlZC1zdHJpbmc="; // AbCd12:POST@a-not-encoded-string
         // when
-        StateWithUri stateWithUri = new StateWithUri(stateParameter);
+        final StateWithUri stateWithUri = new StateWithUri(stateParameter);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
         Assertions.assertNull(stateWithUri.uri().orElse(null));
@@ -158,7 +158,7 @@ public class StateWithUriTest {
         // given
         // when
         try {
-            StateWithUri stateWithUri = new StateWithUri(null);
+            final StateWithUri stateWithUri = new StateWithUri(null);
             Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // then
