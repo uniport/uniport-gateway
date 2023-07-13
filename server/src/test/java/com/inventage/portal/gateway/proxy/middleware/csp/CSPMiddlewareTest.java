@@ -150,6 +150,6 @@ class CSPMiddlewareTest {
 
     private JsonObject createDirective(String directive, String... values) {
         return JsonObject.of(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME, directive,
-            DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of((Object) values));
+            DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of((Object[]) values));
     }
 }
