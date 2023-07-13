@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.core.config;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -67,13 +66,13 @@ public class StaticConfiguration {
     }
 
     private static Validator buildValidator() {
-        final JsonSchema schema = buildSchema();
+        final JsonSchema schema = JsonSchema.of(buildSchema().toJson());
         final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
             .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
         return Validator.create(schema, options);
     }
 
-    public static JsonSchema buildSchema() {
+    public static ObjectSchemaBuilder buildSchema() {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
             .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .requiredProperty(ENTRYPOINT_PORT, Schemas.schema()
@@ -118,7 +117,7 @@ public class StaticConfiguration {
             .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
             .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
-        return JsonSchema.of(staticConfigBuilder.toJson());
+        return staticConfigBuilder;
     }
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
@@ -137,9 +136,9 @@ public class StaticConfiguration {
             return validPromise.future();
         }
 
-        final List<Future> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
+        final List<Future<Void>> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
         futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
-        CompositeFuture.all(futures).onSuccess(cf -> {
+        Future.all(futures).onSuccess(cf -> {
             validPromise.complete();
         }).onFailure(cfErr -> {
             validPromise.fail(cfErr.getMessage());
@@ -148,8 +147,8 @@ public class StaticConfiguration {
         return validPromise.future();
     }
 
-    private static List<Future> validateEntrypoints(JsonArray entrypoints) {
-        final List<Future> middlewareFutures = new ArrayList<>();
+    private static List<Future<Void>> validateEntrypoints(JsonArray entrypoints) {
+        final List<Future<Void>> middlewareFutures = new ArrayList<>();
         if (entrypoints != null) {
             for (int i = 0; i < entrypoints.size(); i++) {
                 final JsonObject entrypointJson = entrypoints.getJsonObject(i);

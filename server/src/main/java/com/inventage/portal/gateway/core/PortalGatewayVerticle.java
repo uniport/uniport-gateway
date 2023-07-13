@@ -8,7 +8,6 @@ import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerOptions;
@@ -82,7 +81,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     }
 
     private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-        return CompositeFuture.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
+        return Future.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
     }
 
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {

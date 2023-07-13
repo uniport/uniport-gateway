@@ -6,7 +6,6 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -116,12 +115,12 @@ public class Entrypoint {
 
     private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
 
-        final List<Future> entryMiddlewaresFuture = new ArrayList<>();
+        final List<Future<Middleware>> entryMiddlewaresFuture = new ArrayList<>();
         for (int i = 0; i < entryMiddlewares.size(); i++) {
             entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
         }
 
-        CompositeFuture.all(entryMiddlewaresFuture).onSuccess(cf -> {
+        Future.all(entryMiddlewaresFuture).onSuccess(cf -> {
             entryMiddlewaresFuture
                 .forEach(mf -> router.route().setName("entry middleware")
                     .handler((Handler<RoutingContext>) mf.result()));

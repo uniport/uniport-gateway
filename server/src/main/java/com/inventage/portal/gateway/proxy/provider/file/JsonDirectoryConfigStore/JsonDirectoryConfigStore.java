@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.proxy.provider.file.JsonDirectoryConfigStor
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.FileSet;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -16,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// Mostly copied from DirectoryConfigStore
-// with a custom Json merge function
-// https://github.com/vert-x3/vertx-config/blob/master/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java
+// Mostly copied from DirectoryConfigStore with a custom Json merge function
+// We only need to change the merge method in get(), but we cannot extend DirectoryConfigStore and overwrite get(), because the path and filesets members are private
+// https://github.com/vert-x3/vertx-config/blob/4.4.4/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
 public class JsonDirectoryConfigStore implements ConfigStore {
 
     private final VertxInternal vertx;
@@ -58,7 +57,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
                 promise.fail(e);
             }
         }).flatMap(files -> {
-            final List<Future> futures = new ArrayList<>();
+            final List<Future<JsonObject>> futures = new ArrayList<>();
             for (FileSet set : filesets) {
                 final Promise<JsonObject> promise = vertx.promise();
                 set.buildConfiguration(files, json -> {
@@ -70,7 +69,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
                 });
                 futures.add(promise.future());
             }
-            return CompositeFuture.all(futures);
+            return Future.all(futures);
         }).map(compositeFuture -> {
             final JsonObject json = new JsonObject();
             compositeFuture.<JsonObject>list().forEach(config -> this.merge(json, config));
@@ -78,10 +77,9 @@ public class JsonDirectoryConfigStore implements ConfigStore {
         });
     }
 
-    // Mostly copied from vertx JsonObject
-    // The difference is on how JsonArrays are merged. This implementation creates a deduplicated
-    // concatenation of two arrays.
-    // https://github.com/eclipse-vertx/vert.x/blob/master/src/main/java/io/vertx/core/json/JsonObject.java
+    // Mostly copied from vertx JsonObject#mergeIn(JsonObject, int)
+    // The difference is on how JsonArrays are merged. This implementation creates a deduplicated concatenation of two arrays.
+    // https://github.com/eclipse-vertx/vert.x/blob/4.4.4/src/main/java/io/vertx/core/json/JsonObject.java#L1007-L1026
     private JsonObject merge(JsonObject one, JsonObject other) {
         for (Map.Entry<String, Object> e : other.getMap().entrySet()) {
             if (e.getValue() == null) {

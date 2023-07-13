@@ -51,13 +51,6 @@ public class CSPMiddleware implements Middleware {
 
         values.forEach(value -> {
             cspHandler.addDirective(name, (String) value);
-
-            // TODO (fbuetler) remove, once this issue is fixed: https://github.com/vert-x3/vertx-web/issues/2359
-            // io.vertx.ext.web.handler.impl.CSPHandlerImpl.handl in vertx-web:4.3.7 only supports report-uri, which is deprecated.
-            // it is suggested to support report-to as well. We enable report-to support by adding this directive to report-uri as well.
-            if (name.equals(REPORT_TO)) {
-                cspHandler.addDirective(REPORT_URI, (String) value);
-            }
         });
     }
 

@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
 
 public class MockOAuth2Auth implements OAuth2Auth {
 
@@ -66,6 +67,11 @@ public class MockOAuth2Auth implements OAuth2Auth {
 
     @Override
     public String authorizeURL(JsonObject params) {
+        return "";
+    }
+
+    @Override
+    public String authorizeURL(OAuth2AuthorizationURL url) {
         return "";
     }
 

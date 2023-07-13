@@ -161,10 +161,10 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
         if (isUserInSession(ctx)) {
             return false;
         }
-        final io.netty.handler.codec.http.cookie.Cookie sessionCookie = getCookieFromHeader(ctx,
+        final Cookie sessionCookie = getCookieFromHeader(ctx,
             this.sessionCookiePrefix);
         if (sessionCookie != null) {
-            LOGGER.debug("For received session cookie value '{}'", sessionCookie.value());
+            LOGGER.debug("For received session cookie value '{}'", sessionCookie.getValue());
         } else {
             LOGGER.debug("No session cookie '{}' received", this.sessionCookiePrefix);
         }
@@ -172,7 +172,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     }
 
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
-    private io.netty.handler.codec.http.cookie.Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
+    private Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
         return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
             .get(cookieName);
     }

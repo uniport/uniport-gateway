@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.provider.aggregator;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -42,7 +41,7 @@ public class ProviderAggregator extends Provider {
 
     @Override
     public void provide(Promise<Void> startPromise) {
-        final List<Future> futures = new ArrayList<>();
+        final List<Future<String>> futures = new ArrayList<>();
         for (int i = 0; i < this.providers.size(); i++) {
             final JsonObject providerConfig = this.providers.getJsonObject(i);
 
@@ -60,7 +59,7 @@ public class ProviderAggregator extends Provider {
             futures.add(launchProvider(provider));
         }
 
-        CompositeFuture.join(futures).onSuccess(cf -> {
+        Future.join(futures).onSuccess(cf -> {
             LOGGER.info("Launched {}/{} providers successfully", futures.size(), this.providers.size());
             startPromise.complete();
         }).onFailure(err -> {

@@ -68,6 +68,8 @@ public class ControlApiMiddleware implements Middleware {
 
         // on response
         final Handler<MultiMap> respHeadersModifier = headers -> {
+            LOGGER.debug("{}: Handling response of '{}'", name, ctx.request().absoluteURI());
+
             final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
             if (isNotEmpty(storedCookies)) {
                 // find the first control api cookie with an action equals to the configured one

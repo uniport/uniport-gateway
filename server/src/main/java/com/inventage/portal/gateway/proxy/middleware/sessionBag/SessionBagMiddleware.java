@@ -3,9 +3,9 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
-import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -92,7 +92,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         // stored cookie have precedence to avoid cookie injection
         for (Cookie requestCookie : requestCookies) {
             if (this.containsCookie(storedCookies, requestCookie, ctx.request().path()) != null) {
-                LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.name());
+                LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
                 continue;
             }
             cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, requestCookie.toString());
@@ -105,8 +105,8 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         final List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
-                LOGGER.debug("Add cookie '{}' to request", storedCookie.name());
-                encodedStoredCookies.add(String.format("%s=%s", storedCookie.name(), storedCookie.value()));
+                LOGGER.debug("Add cookie '{}' to request", storedCookie.getName());
+                encodedStoredCookies.add(String.format("%s=%s", storedCookie.getName(), storedCookie.getValue()));
             }
         }
         return String.join(COOKIE_DELIMITER, encodedStoredCookies);
@@ -116,7 +116,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         if (matchesSSL(cookie, isSSL) && matchesPath(cookie, path)) {
             return true;
         }
-        LOGGER.debug("Ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.name(),
+        LOGGER.debug("Ignoring cookie '{}', match path = '{}', match ssl = '{}'", cookie.getName(),
             matchesPath(cookie, path), matchesSSL(cookie, isSSL));
         return false;
     }
@@ -168,16 +168,16 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
             requestPath = uriPath.endsWith("/") ? uriPath.substring(0, uriPath.length() - 1) : uriPath;
         }
 
-        if (cookie.path() == null) {
+        if (cookie.getPath() == null) {
             return false;
         }
 
         final String cookiePath;
-        if (cookie.path().isEmpty()) {
+        if (cookie.getPath().isEmpty()) {
             cookiePath = "/";
         } else {
-            cookiePath = cookie.path().endsWith("/") ? cookie.path().substring(0, cookie.path().length() - 1)
-                : cookie.path();
+            cookiePath = cookie.getPath().endsWith("/") ? cookie.getPath().substring(0, cookie.getPath().length() - 1)
+                : cookie.getPath();
         }
         final String regex = String.format("^%s(\\/.*)?$", escapeSpecialRegexChars(cookiePath));
         return Pattern.compile(regex).matcher(requestPath).matches();
@@ -198,10 +198,8 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         }
 
         for (String cookieToSet : cookiesToSet) {
-            // use netty cookie until maxAge getter is implemented
-            // https://github.com/eclipse-vertx/vert.x/issues/3906
-            final Cookie decodedCookieToSet = ClientCookieDecoder.STRICT.decode(cookieToSet);
-            if (decodedCookieToSet.name().equals(sessionCookieName)) {
+            final Cookie decodedCookieToSet = CookieUtil.fromNettyCookie(ClientCookieDecoder.STRICT.decode(cookieToSet));
+            if (decodedCookieToSet.getName().equals(sessionCookieName)) {
                 continue;
             }
             if (isWhitelisted(decodedCookieToSet)) {
@@ -223,29 +221,29 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
      * attribute with a value in the past.
      */
     private void updateSessionBag(Set<Cookie> storedCookies, Cookie newCookie) {
-        if (newCookie.name() == null) {
+        if (newCookie.getName() == null) {
             LOGGER.warn("Ignoring cookie without a name");
             return;
         }
-        if (newCookie.path() == null) {
+        if (newCookie.getPath() == null) {
             newCookie.setPath("/");
         }
 
         final Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
         if (foundCookie != null) {
-            final boolean expired = (foundCookie.maxAge() == 0L);
+            final boolean expired = (foundCookie.getMaxAge() == 0L);
             storedCookies.remove(foundCookie);
             if (expired) {
-                LOGGER.debug("Removing expired cookie '{}' from session bag", newCookie.name());
+                LOGGER.debug("Removing expired cookie '{}' from session bag", newCookie.getName());
                 return;
             }
         }
 
-        if (newCookie.maxAge() == 0L) {
-            LOGGER.debug("Ignoring expired cookie '{}'", newCookie.name());
+        if (newCookie.getMaxAge() == 0L) {
+            LOGGER.debug("Ignoring expired cookie '{}'", newCookie.getName());
             return;
         }
-        LOGGER.debug("Adding new cookie '{}'", newCookie.name());
+        LOGGER.debug("Adding new cookie '{}'", newCookie.getName());
         storedCookies.add(newCookie);
     }
 
@@ -257,7 +255,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
         for (Cookie c : set) {
-            if (c.name().equals(cookie.name()) && c.path().equals(cookie.path())) {
+            if (c.getName().equals(cookie.getName()) && c.getPath().equals(cookie.getPath())) {
                 return c;
             }
         }
@@ -266,7 +264,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie, String path) {
         for (Cookie c : set) {
-            if (c.name().equals(cookie.name()) && path.startsWith(c.path())) {
+            if (c.getName().equals(cookie.getName()) && path.startsWith(c.getPath())) {
                 return c;
             }
         }
@@ -280,7 +278,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
                 .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
             final String whitelistedCookiePath = whitelistedCookie
                 .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
-            if (whitelistedCookieName.equals(cookie.name()) && whitelistedCookiePath.equals(cookie.path())) {
+            if (whitelistedCookieName.equals(cookie.getName()) && whitelistedCookiePath.equals(cookie.getPath())) {
                 return true;
             }
         }

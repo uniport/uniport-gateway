@@ -4,7 +4,7 @@ import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.JsonSchema;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -25,16 +25,16 @@ public final class JsonSchemaGenerator {
     }
 
     private static void createStaticJsonSchemaValidator(String path) throws IOException {
-        final JsonSchema schema = StaticConfiguration.buildSchema();
-        final JsonObject schemaAsJson = schema.resolve();
+        final ObjectSchemaBuilder schema = StaticConfiguration.buildSchema();
+        final JsonObject schemaAsJson = schema.toJson();
         removeId(schemaAsJson);
         Files.write(Paths.get(path + "portalGatewayStaticSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
 
     }
 
     private static void createDynamicJsonSchemaValidator(String path) throws IOException {
-        final JsonSchema schema = DynamicConfiguration.buildSchema();
-        final JsonObject schemaAsJson = schema.resolve();
+        final ObjectSchemaBuilder schema = DynamicConfiguration.buildSchema();
+        final JsonObject schemaAsJson = schema.toJson();
         removeId(schemaAsJson);
         Files.write(Paths.get(path + "portalGatewayDynamicSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
 

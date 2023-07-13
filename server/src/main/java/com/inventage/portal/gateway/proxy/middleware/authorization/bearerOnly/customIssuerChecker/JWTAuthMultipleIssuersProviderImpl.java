@@ -32,7 +32,8 @@ public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
         }
 
         // Otherwise we manually check if the current jwt has one of our additional issuer included.
-        // Copied from the built-in authenticate method.
+        // Copied from the JWTAuthProviderImpl#authenticate method.
+        // https://github.com/eclipse-vertx/vertx-auth/blob/4.4.4/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java#L146-L154
         final TokenCredentials authInfo;
         try {
             // cast

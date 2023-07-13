@@ -7,7 +7,6 @@ import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetect
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -213,7 +212,7 @@ public class DynamicConfiguration {
     private static final String ENV_VARIABLE_PATTERN_STRING_TO_INT = "^\\$\\{.*\\}$";
 
     private static Validator buildValidator() {
-        final JsonSchema schema = buildSchema();
+        final JsonSchema schema = JsonSchema.of(buildSchema().toJson());
         final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
             .setBaseUri("https://inventage.com/portal-gateway/dynamic-configuration");
         return Validator.create(schema, options);
@@ -514,18 +513,17 @@ public class DynamicConfiguration {
         return null;
     }
 
-    public static JsonSchema buildSchema() {
+    public static ObjectSchemaBuilder buildSchema() {
         final ObjectSchemaBuilder routerSchema = buildRouterSchema();
         final ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
         final ObjectSchemaBuilder serviceSchema = buildServiceSchema();
         final ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
 
-        final ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema().requiredProperty(HTTP, httpSchema)
+        final ObjectSchemaBuilder dynamicConfigBuilder = Schemas.objectSchema()
+            .requiredProperty(HTTP, httpSchema)
             .allowAdditionalProperties(false);
 
-        final JsonSchema schema = JsonSchema.of(dynamicConfigBuilder.toJson());
-
-        return schema;
+        return dynamicConfigBuilder;
     }
 
     /**
@@ -558,10 +556,10 @@ public class DynamicConfiguration {
         }
 
         final JsonObject httpConfig = json.getJsonObject(HTTP);
-        final List<Future> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
+        final List<Future<Void>> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
             validateMiddlewares(httpConfig), validateServices(httpConfig));
 
-        CompositeFuture.all(validFutures).onSuccess(h -> {
+        Future.all(validFutures).onSuccess(h -> {
             validPromise.complete();
         }).onFailure(err -> {
             validPromise.fail(err.getMessage());

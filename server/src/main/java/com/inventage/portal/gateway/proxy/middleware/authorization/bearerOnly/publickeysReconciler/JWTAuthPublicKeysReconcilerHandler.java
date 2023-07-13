@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -70,7 +69,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandle
         final List<JsonObject> publicKeys = rawPublicKeys.getList();
 
         final JWTAuthOptions authOpts = new JWTAuthOptions();
-        final List<Future> futures = new LinkedList<>();
+        final List<Future<List<JsonObject>>> futures = new LinkedList<>();
 
         publicKeys.forEach(pk -> {
             final String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
@@ -105,7 +104,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandle
             }
         });
 
-        CompositeFuture.join(futures)
+        Future.join(futures)
             .onSuccess(psk -> {
                 LOGGER.info("Successfully fetched JWKs");
                 handler.handle(Future.succeededFuture(authOpts));

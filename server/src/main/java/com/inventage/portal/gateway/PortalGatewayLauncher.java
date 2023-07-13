@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway;
 
-import ch.qos.logback.classic.util.ContextInitializer;
+import ch.qos.logback.classic.ClassicConstants;
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
@@ -51,7 +51,7 @@ public class PortalGatewayLauncher extends Launcher {
         // https://logback.qos.ch/manual/configuration.html#configFileProperty
         final Optional<Path> loggingConfigPath = getLoggingConfigPath();
         loggingConfigPath
-            .ifPresent(path -> System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, path.toString()));
+            .ifPresent(path -> System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, path.toString()));
 
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());

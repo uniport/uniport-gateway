@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-stack-depchain</artifactId>
-                <version>4.3.8</version>
+                <version>4.4.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -667,7 +667,6 @@
                 <configuration>
                     <excludes>
                         <exclude>io.vertx:vertx-stack-depchain</exclude>
-                        <exclude>io.micrometer:micrometer-registry-prometheus</exclude>
                     </excludes>
                 </configuration>
             </plugin>

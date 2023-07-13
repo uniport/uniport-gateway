@@ -15,7 +15,8 @@ import java.util.Set;
  * Modified version of the default CSPHandler that allows the stacking of multiple CSPMiddleware. By doing so, the union of CSP policies from
  * all CSPMiddlewares on the same route are enforced.
  *
- * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web:4.3.8
+ * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web
+ * https://github.com/vert-x3/vertx-web/blob/4.4.4/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/CSPHandlerImpl.java
  */
 public class CompositeCSPHandlerImpl implements CSPHandler {
 
@@ -176,8 +177,9 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
         final String mergedPolicyString = mergeWithPreviousPolicyString(ctx);
 
         if (reportOnly) {
-            if (!policy.containsKey("report-uri")) {
-                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri policy."));
+            // add support for 'report-to'
+            if (!policy.containsKey("report-uri") && !policy.containsKey("report-to")) {
+                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri/report-to policy."));
             } else {
                 ctx.response()
                     .putHeader("Content-Security-Policy-Report-Only", mergedPolicyString);

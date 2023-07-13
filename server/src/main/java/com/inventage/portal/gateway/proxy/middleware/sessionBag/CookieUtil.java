@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.vertx.core.http.Cookie;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +17,7 @@ public class CookieUtil {
         }
         return cookieEntries.stream()
             .flatMap(cookieEntry -> ServerCookieDecoder.LAX.decode(cookieEntry).stream())
+            .map(cookie -> CookieUtil.fromNettyCookie(cookie))
             .collect(Collectors.toSet());
     }
 
@@ -25,9 +26,18 @@ public class CookieUtil {
         if (cookieEntries != null) {
             cookieEntries.stream()
                 .flatMap(cookieEntry -> ServerCookieDecoder.LAX.decode(cookieEntry).stream())
-                .forEach(cookie -> cookieMap.put(cookie.name(), cookie));
+                .forEach(cookie -> cookieMap.put(cookie.name(), CookieUtil.fromNettyCookie(cookie)));
         }
         return cookieMap;
+    }
+
+    public static Cookie fromNettyCookie(io.netty.handler.codec.http.cookie.Cookie nettyCookie) {
+        return Cookie.cookie(nettyCookie.name(), nettyCookie.value())
+            .setDomain(nettyCookie.domain())
+            .setHttpOnly(nettyCookie.isHttpOnly())
+            .setMaxAge(nettyCookie.maxAge())
+            .setPath(nettyCookie.path())
+            .setSecure(nettyCookie.isSecure());
     }
 
 }

@@ -6,7 +6,6 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -82,7 +81,7 @@ public class RouterFactory {
         sortByRuleLength(routers);
 
         LOGGER.debug("Creating router from config");
-        final List<Future> subRouterFutures = new ArrayList<>();
+        final List<Future<Router>> subRouterFutures = new ArrayList<>();
         for (int i = 0; i < routers.size(); i++) {
             final JsonObject routerConfig = routers.getJsonObject(i);
             subRouterFutures.add(createSubRouter(routerConfig, middlewares, services));
@@ -95,7 +94,7 @@ public class RouterFactory {
 
         // Handlers will get called if and only if
         // - all futures are completed
-        CompositeFuture.join(subRouterFutures).onComplete(ar -> {
+        Future.join(subRouterFutures).onComplete(ar -> {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
                     router.route("/*").setName("router").subRouter((Router) srf.result());
@@ -137,7 +136,7 @@ public class RouterFactory {
         }
         final Route route = routingRule.apply(router);
 
-        final List<Future> middlewareFutures = new ArrayList<>();
+        final List<Future<Middleware>> middlewareFutures = new ArrayList<>();
 
         final JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
         for (int j = 0; j < middlewareNames.size(); j++) {
@@ -163,7 +162,7 @@ public class RouterFactory {
         // Handlers will get called if and only if
         // - all futures are succeeded and completed
         // - any future is failed.
-        CompositeFuture.all(middlewareFutures).onSuccess(cf -> {
+        Future.all(middlewareFutures).onSuccess(cf -> {
             middlewareFutures.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
             LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
             handler.handle(Future.succeededFuture(router));

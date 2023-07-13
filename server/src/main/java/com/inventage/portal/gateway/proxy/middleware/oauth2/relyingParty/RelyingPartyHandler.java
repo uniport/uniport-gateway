@@ -51,20 +51,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is copied from:
- * https://github.com/vert-x3/vertx-web/blob/4.3.7/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
+ * https://github.com/vert-x3/vertx-web/blob/4.4.4/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
  *
- * @author <a href="http://pmlopes@gmail.com">Paulo Lopes</a>
+ * The following changes were made:
+ * - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
+ * - wrap oauth2 state parameter with StateWithUri
+ * - dont implement OrderListener interface (mount callback immediately)
+ * 
  * @see OAuth2AuthHandlerImpl
- *      <p>
- *      The following changes were made:
- *      - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
- *      - wrap oauth2 state parameter with StateWithUri
- *      - dont implement OrderListener interface (mount callback immediately)
- *      - fix private constructor bugs
- *      (see https://github.com/vert-x3/vertx-web/pull/2337)
  */
-public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
-    implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
+public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelyingPartyHandler.class);
     private static final Set<String> OPENID_SCOPES = new HashSet<>();
@@ -80,14 +76,15 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
     private final MessageDigest sha256;
+
     private final List<String> scopes;
     private final boolean openId;
     private JsonObject extraParams;
     private String prompt;
     private int pkce = -1;
-    // explicit signal that tokens are handled as bearer only (meaning, no backend
-    // server known)
+    // explicit signal that tokens are handled as bearer only (meaning, no backend server known)
     private boolean bearerOnly = true;
+
     private int order = -1;
     private Route callback;
 
@@ -134,18 +131,16 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
         if (base.extraParams != null) {
             extraParams = base.extraParams.copy();
         }
+        this.callback = base.callback;
+        this.order = base.order;
         // apply the new scopes
         this.scopes = scopes;
         this.openId = scopes != null && scopes.contains("openid");
-
-        this.order = base.order;
-        this.callback = base.callback;
     }
 
     @Override
     public void authenticate(RoutingContext context, Handler<AsyncResult<User>> handler) {
-        // when the handler is working as bearer only, then the `Authorization` header
-        // is required
+        // when the handler is working as bearer only, then the `Authorization` header is required
         parseAuthorization(context, !bearerOnly, parseAuthorization -> {
             if (parseAuthorization.failed()) {
                 handler.handle(Future.failedFuture(parseAuthorization.cause()));
@@ -161,19 +156,13 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                     handler.handle(Future.failedFuture("callback route is not configured."));
                     return;
                 }
-                // when this handle is mounted as a catch all, the callback route must be
-                // configured before,
-                // as it would shade the callback route. When a request matches the callback
-                // path and has the
-                // method GET the exceptional case should not redirect to the oauth2 server as
-                // it would become
+                // when this handle is mounted as a catch all, the callback route must be configured before,
+                // as it would shade the callback route. When a request matches the callback path and has the
+                // method GET the exceptional case should not redirect to the oauth2 server as it would become
                 // an infinite redirect loop. In this case an exception must be raised.
-                if (context.request().method() == HttpMethod.GET
-                    && context.normalizedPath().equals(callbackURL.resource())) {
-                    LOGGER.warn(
-                        "The callback route is shaded by the OAuth2AuthHandler, ensure the callback route is added BEFORE the OAuth2AuthHandler route!");
-                    handler.handle(
-                        Future.failedFuture(new HttpException(500, "Infinite redirect loop [oauth2 callback]")));
+                if (context.request().method() == HttpMethod.GET && context.normalizedPath().equals(callbackURL.resource())) {
+                    LOGGER.warn("The callback route is shaded by the OAuth2AuthHandler, ensure the callback route is added BEFORE the OAuth2AuthHandler route!");
+                    handler.handle(Future.failedFuture(new HttpException(500, "Infinite redirect loop [oauth2 callback]")));
                 } else {
                     if (context.request().method() != HttpMethod.GET) {
                         // we can only redirect GET requests
@@ -192,13 +181,11 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                     if (session == null) {
                         if (pkce > 0) {
                             // we can only handle PKCE with a session
-                            context.fail(500,
-                                new IllegalStateException("OAuth2 PKCE requires a session to be present"));
+                            context.fail(500, new IllegalStateException("OAuth2 PKCE requires a session to be present"));
                             return;
                         }
                     } else {
-                        // there's a session we can make this request comply to the Oauth2 spec and add
-                        // an opaque state
+                        // there's a session we can make this request comply to the Oauth2 spec and add an opaque state
                         session.put("redirect_uri", context.request().uri());
 
                         // create a state value to mitigate replay attacks
@@ -213,13 +200,11 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
                             session.put("pkce", codeVerifier);
                         }
                     }
-                    handler.handle(
-                        Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier))));
+                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier))));
                 }
             } else {
                 // continue
-                final Credentials credentials = scopes.size() > 0 ? new TokenCredentials(token).setScopes(scopes)
-                    : new TokenCredentials(token);
+                final Credentials credentials = scopes.size() > 0 ? new TokenCredentials(token).setScopes(scopes) : new TokenCredentials(token);
 
                 authProvider.authenticate(credentials, authn -> {
                     if (authn.failed()) {
@@ -340,8 +325,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
      */
     @Override
     public void postAuthentication(RoutingContext ctx) {
-        // the user is authenticated, however the user may not have all the required
-        // scopes
+        // the user is authenticated, however the user may not have all the required scopes
         if (scopes != null && scopes.size() > 0) {
             final User user = ctx.user();
             if (user == null) {
@@ -480,8 +464,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth>
             }
 
             // The valid callback URL set in your IdP application settings.
-            // This must exactly match the redirect_uri passed to the authorization URL in
-            // the previous step.
+            // This must exactly match the redirect_uri passed to the authorization URL in the previous step.
             credentials.setRedirectUri(callbackURL.href());
 
             authProvider.authenticate(credentials, res -> {
