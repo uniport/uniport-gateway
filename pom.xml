@@ -634,6 +634,10 @@
                                 <requireMavenVersion>
                                     <version>3.3.9</version>
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>${maven.compiler.release}</version>
+                                </requireJavaVersion>
+                                <banDuplicatePomDependencyVersions/>
                             </rules>
                         </configuration>
                     </execution>
