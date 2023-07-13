@@ -429,6 +429,11 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>3.1.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.16.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -646,6 +651,17 @@
                         <phase>install</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- mvn versions:use-latest-releases versions:display-property-updates versions:display-plugin-updates -N -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>io.vertx:vertx-stack-depchain</exclude>
+                        <exclude>io.micrometer:micrometer-registry-prometheus</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
