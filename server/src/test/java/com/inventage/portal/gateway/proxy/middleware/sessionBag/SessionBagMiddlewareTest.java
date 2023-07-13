@@ -18,7 +18,6 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.http.impl.CookieImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -42,17 +41,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public class SessionBagMiddlewareTest {
 
-    static final String host = "localhost";
-    static final String sessionCookieName = "portal-gateway-test.session";
+    static final String HOST = "localhost";
+    static final String SESSION_COOKIE_NAME = "portal-gateway-test.session";
 
     @Test
     void cookiesAreRemovedInResponses(Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = "'test removal of response cookies' failed.";
+        final String errMsg = "'test removal of response cookies' failed.";
+        final Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
-        SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFirstReq = new AtomicBoolean(true);
-        AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
@@ -70,12 +69,12 @@ public class SessionBagMiddlewareTest {
 
     @Test
     void cookiesAreIncludedInFollowUpRequests(Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = "'test cookies are included in follow up requests' failed.";
+        final String errMsg = "'test cookies are included in follow up requests' failed.";
+        final Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
-        SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFirstReq = new AtomicBoolean(true);
-        AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
@@ -99,13 +98,13 @@ public class SessionBagMiddlewareTest {
 
     @Test
     void laterReturnedCookiesAreSavedToo(Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = "'test cookies included in follow up responses are saved too' failed.";
+        final String errMsg = "'test cookies included in follow up responses are saved too' failed.";
+        final Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
+        final Cookie followUpCookie = Cookie.cookie("moose", "test").setPath("/").setMaxAge(3600);
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        Cookie cookie = Cookie.cookie("blub-cookie", "foobar").setPath("/").setMaxAge(3600);
-        Cookie followUpCookie = Cookie.cookie("moose", "test").setPath("/").setMaxAge(3600);
-        SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFirstReq = new AtomicBoolean(true);
-        AtomicReference<String> sessionId = new AtomicReference<>();
         testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
@@ -125,12 +124,12 @@ public class SessionBagMiddlewareTest {
 
     @Test
     void expiredCookieIsRemoved(Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = "'test expired cookie are removed from session bag' failed.";
-        Cookie cookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(3600);
-        Cookie expiredCookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(0);
-        SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFirstReq = new AtomicBoolean(true);
-        AtomicReference<String> sessionId = new AtomicReference<>();
+        final String errMsg = "'test expired cookie are removed from session bag' failed.";
+        final Cookie cookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(3600);
+        final Cookie expiredCookie = Cookie.cookie("blub", "foobar").setPath("/").setMaxAge(0);
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        final AtomicReference<String> sessionId = new AtomicReference<>();
 
         testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
             if (isFirstReq.get()) {
@@ -150,21 +149,20 @@ public class SessionBagMiddlewareTest {
 
     @Test
     void keycloakMasterRealmCookieIsPassedInResponse(Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = "'test keycloak master realm cookie is passed to user agent' failed";
-        Cookie masterRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/master/")
+        final String errMsg = "'test keycloak master realm cookie is passed to user agent' failed";
+        final Cookie masterRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/master/").setMaxAge(3600);
+        final Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/portal/")
             .setMaxAge(3600);
-        Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/portal/")
-            .setMaxAge(3600);
-        JsonArray whitelistedCookies = new JsonArray().add(new JsonObject()
+        final JsonArray whitelistedCookies = new JsonArray().add(new JsonObject()
             .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
             .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH, "/auth/realms/master/"))
             .add(new JsonObject()
                 .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
                 .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
                     "/auth/realms/portal/"));
-        SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFirstReq = new AtomicBoolean(true);
-        AtomicReference<String> sessionId = new AtomicReference<>();
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        final AtomicReference<String> sessionId = new AtomicReference<>();
 
         testHarness(vertx, testCtx, sessionStore, whitelistedCookies, ctx -> {
             if (isFirstReq.get()) {
@@ -177,10 +175,9 @@ public class SessionBagMiddlewareTest {
             testCtx.verify(() -> {
                 boolean foundMasterRealmCookie = false;
                 for (String respCookie : resp.cookies()) {
-                    io.netty.handler.codec.http.cookie.Cookie decodedRespCookie = ClientCookieDecoder.STRICT
-                        .decode(respCookie);
-                    if (decodedRespCookie.name().equals(masterRealmCookie.getName())
-                        && decodedRespCookie.path().equals(masterRealmCookie.getPath())) {
+                    final Cookie decodedRespCookie = CookieUtil.fromNettyCookie(ClientCookieDecoder.STRICT.decode(respCookie));
+                    if (decodedRespCookie.getName().equals(masterRealmCookie.getName())
+                        && decodedRespCookie.getPath().equals(masterRealmCookie.getPath())) {
                         foundMasterRealmCookie = true;
                         break;
                     }
@@ -200,12 +197,12 @@ public class SessionBagMiddlewareTest {
 
     @Test
     void storedCookieHasPrecedenceOverRequestCookie(Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = "'test stored cookies have precedence over request cookies with the same name' failed";
-        Cookie storedCookie = Cookie.cookie("blub", "foo").setPath("/").setMaxAge(3600);
-        Cookie reqCookie = Cookie.cookie("blub", "bar").setPath("/").setMaxAge(3600);
-        SessionStore sessionStore = LocalSessionStore.create(vertx);
-        AtomicBoolean isFirstReq = new AtomicBoolean(true);
-        AtomicReference<String> sessionId = new AtomicReference<>();
+        final String errMsg = "'test stored cookies have precedence over request cookies with the same name' failed";
+        final Cookie storedCookie = Cookie.cookie("blub", "foo").setPath("/").setMaxAge(3600);
+        final Cookie reqCookie = Cookie.cookie("blub", "bar").setPath("/").setMaxAge(3600);
+        final SessionStore sessionStore = LocalSessionStore.create(vertx);
+        final AtomicBoolean isFirstReq = new AtomicBoolean(true);
+        final AtomicReference<String> sessionId = new AtomicReference<>();
 
         testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
             if (isFirstReq.get()) {
@@ -215,7 +212,7 @@ public class SessionBagMiddlewareTest {
                 testCtx.verify(() -> {
                     for (Cookie cookie : ctx.request().cookies()) {
                         if (cookie.getName().equals("blub")) {
-                            String cookieVal = cookie.getValue();
+                            final String cookieVal = cookie.getValue();
                             assertEquals("foo", cookieVal, String.format(
                                 "%s: Expected cookie value to be '%s' but was '%s'", errMsg, "foo", cookieVal));
                         }
@@ -238,17 +235,17 @@ public class SessionBagMiddlewareTest {
         Handler<RoutingContext> serverReqHandler, List<Cookie> reqCookies, Handler<HttpClientResponse> respHandler,
         List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler
     ) {
-        int port = TestUtils.findFreePort();
-        int servicePort = TestUtils.findFreePort();
+        final int port = TestUtils.findFreePort();
+        final int servicePort = TestUtils.findFreePort();
 
-        Checkpoint proxyStarted = testCtx.checkpoint();
-        Checkpoint serverStarted = testCtx.checkpoint();
-        Checkpoint requestServed = testCtx.checkpoint(2);
-        Checkpoint responseServed = testCtx.checkpoint();
-        Checkpoint followUpResponseServed = testCtx.checkpoint();
+        final Checkpoint proxyStarted = testCtx.checkpoint();
+        final Checkpoint serverStarted = testCtx.checkpoint();
+        final Checkpoint requestServed = testCtx.checkpoint(2);
+        final Checkpoint responseServed = testCtx.checkpoint();
+        final Checkpoint followUpResponseServed = testCtx.checkpoint();
 
         // setup server
-        Router serverRouter = Router.router(vertx);
+        final Router serverRouter = Router.router(vertx);
         serverRouter.route().handler(serverReqHandler);
         vertx.createHttpServer().requestHandler(req -> {
             serverRouter.handle(req);
@@ -256,11 +253,11 @@ public class SessionBagMiddlewareTest {
             serverStarted.flag();
 
             // setup proxy
-            SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(sessionCookieName);
-            SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies,
+            final SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(SESSION_COOKIE_NAME);
+            final SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies,
                 "uniport.session");
-            ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, servicePort);
-            Router proxyRouter = Router.router(vertx);
+            final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", HOST, servicePort);
+            final Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);
 
             vertx.createHttpServer().requestHandler(req -> {
@@ -269,16 +266,16 @@ public class SessionBagMiddlewareTest {
             }).listen(port).onComplete(testCtx.succeeding(p -> {
                 proxyStarted.flag();
 
-                HttpClient client = vertx.createHttpClient();
+                final HttpClient client = vertx.createHttpClient();
                 // send first request
-                client.request(new RequestOptions().setMethod(HttpMethod.GET).setPort(port).setHost(host))
+                client.request(new RequestOptions().setMethod(HttpMethod.GET).setPort(port).setHost(HOST))
                     .onComplete(testCtx.succeeding(req -> {
                         req.send().onComplete(testCtx.succeeding(resp -> {
                             respHandler.handle(resp);
                             responseServed.flag();
 
                             // send second request
-                            MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+                            final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
                             for (String respCookie : resp.cookies()) {
                                 headers.add(HttpHeaders.COOKIE, respCookie);
                             }
@@ -288,7 +285,7 @@ public class SessionBagMiddlewareTest {
                                 }
                             }
                             client.request(new RequestOptions().setMethod(HttpMethod.GET).setPort(port)
-                                .setHost(host).setURI("").setHeaders(headers))
+                                .setHost(HOST).setURI("").setHeaders(headers))
                                 .onComplete(testCtx.succeeding(followUpReq -> {
                                     followUpReq.send().onComplete(testCtx.succeeding(followUpResp -> {
                                         followUpRespHandler.handle(followUpResp);
@@ -326,15 +323,14 @@ public class SessionBagMiddlewareTest {
         List<Cookie> expectedSessionBagCookies
     ) {
         testCtx.verify(() -> {
-            io.netty.handler.codec.http.cookie.Cookie sessionCookie = null;
-            List<io.netty.handler.codec.http.cookie.Cookie> decodedRespCookies = new ArrayList<>();
+            Cookie sessionCookie = null;
+            final List<Cookie> decodedRespCookies = new ArrayList<>();
             for (String respCookie : resp.cookies()) {
-                io.netty.handler.codec.http.cookie.Cookie decodedRespCookie = ClientCookieDecoder.STRICT
-                    .decode(respCookie);
+                final Cookie decodedRespCookie = CookieUtil.fromNettyCookie(ClientCookieDecoder.STRICT.decode(respCookie));
                 decodedRespCookies.add(decodedRespCookie);
 
                 // only session cookie and whitelisted cookies are passed
-                if (decodedRespCookie.name().equals(sessionCookieName)) {
+                if (decodedRespCookie.getName().equals(SESSION_COOKIE_NAME)) {
                     sessionCookie = decodedRespCookie;
                     continue;
                 }
@@ -342,28 +338,26 @@ public class SessionBagMiddlewareTest {
                 assertTrue(
                     whitelistedCookies.contains(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME,
-                            decodedRespCookie.name())
+                            decodedRespCookie.getName())
                         .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
-                            decodedRespCookie.path())),
+                            decodedRespCookie.getPath())),
                     String.format("%s: Not whitelisted cookie was passed to user agent '%s'", errMsg, respCookie));
             }
 
             // extract session ID to inspect session content i.e. session bag
             if (sessionId.get() == null || sessionId.get().isEmpty()) {
                 assertNotNull(sessionCookie, String.format("%s: No session cookie returned.", errMsg));
-                sessionId.set(sessionCookie.value());
-                assertEquals(sessionCookieName, sessionCookie.name(), String.format("%s: Wrong cookie name", errMsg));
+                sessionId.set(sessionCookie.getValue());
+                assertEquals(SESSION_COOKIE_NAME, sessionCookie.getName(), String.format("%s: Wrong cookie name", errMsg));
             }
 
             // check if cookies are stored in session
             sessionStore.get(sessionId.get()).onSuccess(session -> {
                 assertNotNull(session, "Expected session to be present.");
-                Set<io.netty.handler.codec.http.cookie.Cookie> actualSessionBagCookies = session
-                    .get(SessionBagMiddleware.SESSION_BAG_COOKIES);
+                final Set<Cookie> actualSessionBagCookies = session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
                 assertNotNull(actualSessionBagCookies, "Expected session bag to be present");
-                List<String> actualSessionBagCookiesStr = new ArrayList<String>();
-                for (io.netty.handler.codec.http.cookie.Cookie nettyCookie : actualSessionBagCookies) {
-                    Cookie c = new CookieImpl(nettyCookie.name(), nettyCookie.value());
+                final List<String> actualSessionBagCookiesStr = new ArrayList<String>();
+                for (Cookie c : actualSessionBagCookies) {
                     actualSessionBagCookiesStr.add(c.encode());
                 }
                 for (Cookie cookie : expectedSessionBagCookies) {

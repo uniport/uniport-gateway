@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
-import static io.vertx.core.http.Cookie.cookie;
-
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
@@ -64,7 +62,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
         LOGGER.debug("'{}'", this.detectionCookieKey);
         response.addCookie(
-            cookie(this.detectionCookieKey, cookieValue.isPresent() ? cookieValue.get().toString() : "")
+            Cookie.cookie(this.detectionCookieKey, cookieValue.isPresent() ? cookieValue.get().toString() : "")
                 .setPath("/").setHttpOnly(true));
     }
 
@@ -102,7 +100,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
         ctx.response().addCookie(
-            cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
+            Cookie.cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {

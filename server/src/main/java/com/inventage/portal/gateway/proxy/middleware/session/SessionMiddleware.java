@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
-import static io.vertx.core.http.Cookie.cookie;
 import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_KEY;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -137,7 +137,7 @@ public class SessionMiddleware implements Middleware {
         if (withLifetimeCookie) {
             LOGGER.debug("Adding cookie '{}'", SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
             ctx.response().addCookie(
-                cookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT, sessionLifetime).setPath("/")
+                Cookie.cookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT, sessionLifetime).setPath("/")
                     .setHttpOnly(false)); // false := cookie must be accessible by client side scripts
         }
     }

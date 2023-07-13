@@ -15,7 +15,6 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.http.impl.CookieImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
@@ -35,14 +34,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public class ControlApiMiddlewareTest {
 
-    private static final String host = "localhost";
+    private static final String HOST = "localhost";
 
     @Test
     void sessionTerminationTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final io.vertx.core.http.Cookie testCookie = new CookieImpl("test-cookie", "value");
+        final Cookie testCookie = Cookie.cookie("test-cookie", "value");
         testCookie.setMaxAge(3600);
-        final io.vertx.core.http.Cookie sessionTerminateCookie = new CookieImpl(CONTROL_COOKIE_NAME, SESSION_TERMINATE_ACTION);
+        final Cookie sessionTerminateCookie = Cookie.cookie(CONTROL_COOKIE_NAME, SESSION_TERMINATE_ACTION);
         sessionTerminateCookie.setMaxAge(3600);
         final Checkpoint responseReceived = testCtx.checkpoint();
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
@@ -50,7 +49,7 @@ public class ControlApiMiddlewareTest {
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, sessionTerminateCookie));
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContext)
             .withSessionMiddleware()
             .withMockOAuth2Middleware()
@@ -80,11 +79,11 @@ public class ControlApiMiddlewareTest {
     @Test
     void sessionResetTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final io.vertx.core.http.Cookie testCookie = new CookieImpl("test-cookie", "value");
+        final Cookie testCookie = Cookie.cookie("test-cookie", "value");
         testCookie.setMaxAge(3600);
-        final io.vertx.core.http.Cookie keycloakTestCookie = new CookieImpl("KEYCLOAK_TEST", "keycloak");
+        final Cookie keycloakTestCookie = Cookie.cookie("KEYCLOAK_TEST", "keycloak");
         keycloakTestCookie.setMaxAge(3600);
-        final io.vertx.core.http.Cookie sessionResetCookie = new CookieImpl(CONTROL_COOKIE_NAME, SESSION_RESET_ACTION);
+        final Cookie sessionResetCookie = Cookie.cookie(CONTROL_COOKIE_NAME, SESSION_RESET_ACTION);
         sessionResetCookie.setMaxAge(3600);
         final Checkpoint responseReceived = testCtx.checkpoint();
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
@@ -92,7 +91,7 @@ public class ControlApiMiddlewareTest {
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(testCookie, keycloakTestCookie, sessionResetCookie));
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContext)
             .withSessionMiddleware()
             .withMockOAuth2Middleware()
@@ -109,17 +108,17 @@ public class ControlApiMiddlewareTest {
             });
     }
 
-    private void assertSessionReset(HttpClientResponse outgoingResponse, RoutingContext routingContext, io.vertx.core.http.Cookie keycloakCookie) {
+    private void assertSessionReset(HttpClientResponse outgoingResponse, RoutingContext routingContext, Cookie keycloakCookie) {
         Assertions.assertEquals(200, outgoingResponse.statusCode(), "expected status code: 200");
         Assertions.assertFalse(routingContext.session().isDestroyed(), "session should not be destroyed");
         Assertions.assertNull(outgoingResponse.headers().get("test-cookie"),
             "test-cookie should not appear in the response");
         Assertions.assertEquals(Collections.emptyList(), filterSessionScopesFrom(routingContext.session().data()),
             "there should be no session scope data in the session");
-        Set<io.netty.handler.codec.http.cookie.DefaultCookie> cookiesInContext = routingContext.session().get(SESSION_BAG_COOKIES);
+        final Set<Cookie> cookiesInContext = routingContext.session().get(SESSION_BAG_COOKIES);
         Assertions.assertEquals(1, cookiesInContext.size(),
             "there should be only one cookie in the session bag");
-        Assertions.assertTrue(cookiesInContext.stream().anyMatch(cookie1 -> cookie1.name().equals(keycloakCookie.getName())),
+        Assertions.assertTrue(cookiesInContext.stream().anyMatch(cookie1 -> cookie1.getName().equals(keycloakCookie.getName())),
             "there should be the test keycloak cookie in the session bag");
     }
 

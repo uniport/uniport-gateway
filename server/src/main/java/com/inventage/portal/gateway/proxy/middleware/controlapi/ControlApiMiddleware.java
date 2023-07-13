@@ -5,10 +5,10 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import io.netty.handler.codec.http.cookie.Cookie;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.Cookie;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpRequest;
@@ -74,8 +74,8 @@ public class ControlApiMiddleware implements Middleware {
             if (isNotEmpty(storedCookies)) {
                 // find the first control api cookie with an action equals to the configured one
                 final List<Cookie> actionCookies = storedCookies.stream()
-                    .filter(cookie -> Objects.equals(cookie.name(), CONTROL_COOKIE_NAME))
-                    .filter(cookie -> Objects.equals(cookie.value(), action))
+                    .filter(cookie -> Objects.equals(cookie.getName(), CONTROL_COOKIE_NAME))
+                    .filter(cookie -> Objects.equals(cookie.getValue(), action))
                     .collect(Collectors.toList());
 
                 final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
@@ -87,7 +87,7 @@ public class ControlApiMiddleware implements Middleware {
                 // remove action cookies from session bag
                 actionCookies.forEach(cookieToRemove -> {
                     if (storedCookies.remove(cookieToRemove)) {
-                        LOGGER.debug("Removing handled control api cookie from SessionBag '{}'", cookieToRemove.name());
+                        LOGGER.debug("Removing handled control api cookie from SessionBag '{}'", cookieToRemove.getName());
                     }
                 });
             }
@@ -185,9 +185,9 @@ public class ControlApiMiddleware implements Middleware {
             final HttpRequest<Buffer> request = webClient.post(uri.getPort(), uri.getHost(), uri.getPath());
             final Map<String, Object> sessionData = ctx.session().data();
             final HashSet<Cookie> cookies = (HashSet<Cookie>) sessionData.get(SESSION_BAG_COOKIES);
-            final Cookie authCookie = cookies.stream().filter(cookie -> cookie.name().equals("KEYCLOAK_IDENTITY")).findFirst().orElseThrow();
+            final Cookie authCookie = cookies.stream().filter(cookie -> cookie.getName().equals("KEYCLOAK_IDENTITY")).findFirst().orElseThrow();
 
-            request.putHeader(authCookie.name(), authCookie.value());
+            request.putHeader(authCookie.getName(), authCookie.getName());
             request.send()
                 .onSuccess(response -> LOGGER.info("keycloak was successfully informed of session reset. Response: {}", response))
                 .onFailure(throwable -> LOGGER.warn("keycloak was not informed of session reset: {}", throwable.getMessage()));
@@ -198,7 +198,7 @@ public class ControlApiMiddleware implements Middleware {
 
     private Set<Cookie> getKeycloakCookiesFrom(Set<Cookie> cookiesInSessionBag) {
         return cookiesInSessionBag.stream()
-            .filter(cookie -> cookie.name().startsWith("KEYCLOAK_"))
+            .filter(cookie -> cookie.getName().startsWith("KEYCLOAK_"))
             .collect(Collectors.toSet());
     }
 }
