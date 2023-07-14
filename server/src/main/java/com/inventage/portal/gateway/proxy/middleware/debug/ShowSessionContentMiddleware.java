@@ -58,7 +58,7 @@ public class ShowSessionContentMiddleware implements Middleware {
                 html.append("cookies stored in session bag (each block is one cookie):\n\n");
             }
             for (Cookie cookie : storedCookies) {
-                html.append(String.join("\n", cookie.toString().replace(", ", "\n")));
+                html.append(String.join("\n", getDisplayString(cookie).replace(", ", "\n")));
                 html.append("\n\n");
             }
         }
@@ -98,5 +98,19 @@ public class ShowSessionContentMiddleware implements Middleware {
         final String payload = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
 
         return new JsonObject(payload).encodePrettily();
+    }
+
+    // Set-Cookie:
+    //uniport.session=abc; Path=/; HTTPOnly; SameSite=Strict
+    private String getDisplayString(Cookie cookie) {
+        final StringBuilder display = new StringBuilder();
+        display.append(cookie.name());
+        display.append("; Domain=");
+        display.append(cookie.domain());
+        display.append("; Path=");
+        display.append(cookie.path());
+        display.append("; ");
+        display.append(cookie.isHttpOnly());
+        return display.toString();
     }
 }
