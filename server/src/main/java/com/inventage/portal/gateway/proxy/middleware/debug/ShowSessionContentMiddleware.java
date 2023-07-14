@@ -104,13 +104,14 @@ public class ShowSessionContentMiddleware implements Middleware {
     //uniport.session=abc; Path=/; HTTPOnly; SameSite=Strict
     private String getDisplayString(Cookie cookie) {
         final StringBuilder display = new StringBuilder();
-        display.append(cookie.name());
+        display.append(cookie.getName());
         display.append("; Domain=");
-        display.append(cookie.domain());
+        display.append(cookie.getDomain());
         display.append("; Path=");
-        display.append(cookie.path());
-        display.append("; ");
-        display.append(cookie.isHttpOnly());
+        display.append(cookie.getPath());
+        if (cookie.isHttpOnly()) {
+            display.append("; HttpOnly");
+        }
         return display.toString();
     }
 }
