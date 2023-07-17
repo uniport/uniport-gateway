@@ -153,6 +153,11 @@ public final class MiddlewareServerBuilder {
             new CSPMiddleware("csp", directives, reportOnly));
     }
 
+    public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly, String mergeStrategy) {
+        return withMiddleware(
+            new CSPMiddleware("csp", directives, reportOnly, mergeStrategy));
+    }
+
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
             new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, null, headerName, null, null, null));

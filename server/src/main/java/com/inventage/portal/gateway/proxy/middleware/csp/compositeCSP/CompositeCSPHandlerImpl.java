@@ -1,26 +1,31 @@
 package com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP;
 
 import com.google.common.collect.Sets;
+import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
 import io.vertx.ext.web.handler.HttpException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.LoggerFactory;
 
 /**
  * Modified version of the default CSPHandler that allows the stacking of multiple CSPMiddleware. By doing so, the union of CSP policies from
  * all CSPMiddlewares on the same route are enforced.
  *
- * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web
- * https://github.com/vert-x3/vertx-web/blob/4.4.4/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/CSPHandlerImpl.java
+ * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web:4.3.8
  */
 public class CompositeCSPHandlerImpl implements CSPHandler {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CompositeCSPHandlerImpl.class);
+
     private static final String CSP_PREVIOUS_POLICY_KEY = "CSP_POLICY";
+    private static final CSPMergeStrategy DEFAULT_CSP_MERGE_STRATEGY = CSPMergeStrategy.UNION;
     private static final List<String> MUST_BE_QUOTED = Arrays.asList(
         "none",
         "self",
@@ -30,11 +35,16 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
     private final Map<String, String> policy = new LinkedHashMap<>();
     // cache the computed policy
     private String policyString;
-
     private boolean reportOnly;
+    private final CSPMergeStrategy cspMergeStrategy;
 
     public CompositeCSPHandlerImpl() {
-        addDirective("default-src", "self");
+        this(DEFAULT_CSP_MERGE_STRATEGY.toString());
+    }
+
+    // Modified constructor to configure the merging strategy of multiple csp policies
+    public CompositeCSPHandlerImpl(String mergeStrategy) {
+        this.cspMergeStrategy = CSPMergeStrategy.valueOf(mergeStrategy);
     }
 
     @Override
@@ -113,7 +123,6 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
     }
 
     // Modified code to support multiple chained CSP Middlewares
-
     private Map<String, Set<String>> extractCspDirectives(String policyString) {
         final Map<String, Set<String>> directives = new HashMap<>();
 
@@ -134,61 +143,90 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
         return directives;
     }
 
-    private String mergeWithPreviousPolicyString(RoutingContext ctx) {
-        final StringBuilder mergedPolicyString = new StringBuilder();
-        final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String currentPolicy = getPolicyString();
+    private String mergePolicies(List<String> policies) {
+        final Map<String, Set<String>> finalPolicies = extractCspDirectives(policies.get(0));
+        for (int i = 1; i < policies.size(); i++) {
+            final Map<String, Set<String>> policy = extractCspDirectives(policies.get(i));
 
-        if (previousPolicy == null) {
-            ctx.put(CSP_PREVIOUS_POLICY_KEY, currentPolicy);
-            return currentPolicy;
+            policy.forEach((directive, values) -> {
+                if (finalPolicies.containsKey(directive)) {
+                    final Set<String> currentValues = finalPolicies.get(directive);
+                    finalPolicies.put(directive, Sets.union(currentValues, values));
+                } else {
+                    finalPolicies.put(directive, values);
+                }
+            });
         }
 
-        final Map<String, Set<String>> oldPoliciesDirectives = extractCspDirectives(previousPolicy);
-        final Map<String, Set<String>> currentPoliciesDirectives = extractCspDirectives(currentPolicy);
+        final StringBuilder mergedPolicyString = new StringBuilder();
 
-        oldPoliciesDirectives.forEach((directive, values) -> {
-            if (currentPoliciesDirectives.containsKey(directive)) {
-                final Set<String> currentValues = currentPoliciesDirectives.get(directive);
-                currentPoliciesDirectives.put(directive, Sets.union(currentValues, values));
-            } else {
-                currentPoliciesDirectives.put(directive, values);
-            }
-        });
-
-        currentPoliciesDirectives.forEach((directive, values) -> {
+        finalPolicies.forEach((directive, values) -> {
             if (mergedPolicyString.length() > 0) {
                 mergedPolicyString.append("; ");
             }
-
             final String mergedValues = values.stream().reduce((resultValue, newDirectiveValue) -> resultValue + " " + newDirectiveValue).get();
             mergedPolicyString.append(directive)
                 .append(' ')
                 .append(mergedValues);
         });
 
-        ctx.put(CSP_PREVIOUS_POLICY_KEY, mergedPolicyString.toString());
         return mergedPolicyString.toString();
+    }
+
+    private String computeEffectiveCSPPolicy(RoutingContext ctx) {
+        final String currentPolicy = getPolicyString();
+        final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
+
+        if (previousPolicy == null) {
+            return currentPolicy;
+        }
+        return mergePolicies(List.of(previousPolicy, currentPolicy));
+    }
+
+    private String mergeIncomingResponsePolicies(String internalCSPPolicy, String externalCSPPolicy) {
+        LOGGER.info(cspMergeStrategy.toString());
+        if (cspMergeStrategy == CSPMergeStrategy.UNION) {
+            final List<String> policies = new LinkedList<>();
+            policies.add(internalCSPPolicy);
+            policies.add(externalCSPPolicy);
+            return mergePolicies(policies);
+        } else if (cspMergeStrategy == CSPMergeStrategy.EXTERNAL) {
+            return externalCSPPolicy;
+        } else if (cspMergeStrategy == CSPMergeStrategy.INTERNAL) {
+            return internalCSPPolicy;
+        } else {
+            throw new IllegalStateException(
+                String.format("No support for the following merging strategy: %s", cspMergeStrategy));
+        }
+    }
+
+    public void handleResponse(RoutingContext ctx, MultiMap headers) {
+        final String internalCSPPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
+        final String headerCSPKey = (reportOnly) ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
+        final String externalCSPPolicy = headers.get(headerCSPKey);
+        headers.remove(headerCSPKey);
+        final String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
+        ctx.response().putHeader(headerCSPKey, effectiveCSPPolicy);
     }
 
     @Override
     public void handle(RoutingContext ctx) {
-
-        final String mergedPolicyString = mergeWithPreviousPolicyString(ctx);
+        final String effectiveCSPPolicy = computeEffectiveCSPPolicy(ctx);
+        ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
 
         if (reportOnly) {
-            // add support for 'report-to'
-            if (!policy.containsKey("report-uri") && !policy.containsKey("report-to")) {
-                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri/report-to policy."));
+            if (!policy.containsKey("report-uri")) {
+                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri policy."));
             } else {
                 ctx.response()
-                    .putHeader("Content-Security-Policy-Report-Only", mergedPolicyString);
+                    .putHeader("Content-Security-Policy-Report-Only", effectiveCSPPolicy);
                 ctx.next();
             }
         } else {
             ctx.response()
-                .putHeader("Content-Security-Policy", mergedPolicyString);
+                .putHeader("Content-Security-Policy", effectiveCSPPolicy);
             ctx.next();
         }
+
     }
 }

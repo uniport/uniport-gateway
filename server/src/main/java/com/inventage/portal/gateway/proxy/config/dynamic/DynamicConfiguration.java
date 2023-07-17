@@ -71,6 +71,11 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "directive";
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
     public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
+    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_STRATEGY = "mergeStrategy";
+    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_UNION = "UNION";
+    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_EXTERNAL = "EXTERNAL";
+    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_INTERNAL = "INTERNAL";
+
     public static final String MIDDLEWARE_CSRF = "csrf";
     public static final String MIDDLEWARE_BODY_HANDLER = "bodyHandler";
     public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
@@ -187,6 +192,10 @@ public class DynamicConfiguration {
         MIDDLEWARE_OPEN_TELEMETRY,
         MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION,
         MIDDLEWARE_CLAIM_TO_HEADER);
+    public static final List<String> CSP_MERGE_STRATEGIES = List.of(
+        MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_UNION,
+        MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_EXTERNAL,
+        MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_INTERNAL);
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
@@ -242,6 +251,8 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
+            .property(MIDDLEWARE_CSP_EXTERNAL_MERGE_STRATEGY, Schemas.stringSchema()
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
             .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema()
                 .property(MIDDLEWARE_CSRF_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))

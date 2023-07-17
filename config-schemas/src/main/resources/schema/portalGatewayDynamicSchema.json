@@ -152,6 +152,10 @@
                   "customRequestHeaders" : {
                     "type" : "object"
                   },
+                  "mergeStrategy" : {
+                    "type" : "string",
+                    "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
+                  },
                   "additionalIssuers" : {
                     "type" : "array",
                     "items" : {
