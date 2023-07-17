@@ -25,6 +25,8 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CompositeCSPHandlerImpl.class);
 
     private static final String CSP_PREVIOUS_POLICY_KEY = "CSP_POLICY";
+    private static final String CSP_PREVIOUS_RESPONSE_POLICY_KEY = "RESPONSE_CSP_POLICY";
+
     private static final CSPMergeStrategy DEFAULT_CSP_MERGE_STRATEGY = CSPMergeStrategy.UNION;
     private static final List<String> MUST_BE_QUOTED = Arrays.asList(
         "none",
@@ -205,8 +207,17 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
         final String headerCSPKey = (reportOnly) ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
         final String externalCSPPolicy = headers.get(headerCSPKey);
         headers.remove(headerCSPKey);
-        final String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
+        String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
+        if (ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY) != null) {
+            final String previousResponsePolicy = ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY);
+            effectiveCSPPolicy = mergeIncomingResponsePolicies(effectiveCSPPolicy, previousResponsePolicy);
+            ctx.put(CSP_PREVIOUS_POLICY_KEY, null);
+        } else {
+            ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
+        }
+
         ctx.response().putHeader(headerCSPKey, effectiveCSPPolicy);
+
     }
 
     @Override
