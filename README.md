@@ -22,7 +22,7 @@ Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet
 ```xml
 <servers>
     <server>
-        <id>inventage-projectware</id>
+        <id>inventage-portal-group</id>
         <username>username</username>
         <password>password</password>
     </server>

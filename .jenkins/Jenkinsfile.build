@@ -26,7 +26,6 @@ pipeline {
     environment {
         LINE_SEPARATOR = '================================================================================'
         IQ_SERVER_CREDENTIALS_ID = 'portal-registry-creds'
-        NEXUS2_CREDS = credentials('inventage-ierp')
         CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
     }
