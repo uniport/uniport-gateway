@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using sessionScope "Login" for /login route (instead of "Dashboard") ([PORTAL-1558](https://issue.inventage.com/browse/PORTAL-1558)).
 - Informs Keycloak on Session-Reset to delete its user state ([PORTAL-1422](https://issue.inventage.com/browse/PORTAL-1422)).
 - Upgrade to Java 17 ([PORTAL-1575](https://issue.inventage.com/browse/PORTAL-1575)).
+- Upgrade the Vert.x stack to `4.4.4` ([PORTAL-1454](https://issue.inventage.com/browse/PORTAL-1454)).
+- Upgrade all plugins and dependecies to their latest version.
 
 ### Added
 
