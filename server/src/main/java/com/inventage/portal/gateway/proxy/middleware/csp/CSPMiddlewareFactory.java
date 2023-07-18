@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 public class CSPMiddlewareFactory implements MiddlewareFactory {
 
+    public static final boolean DEFAULT_REPORT_ONLY = false;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddlewareFactory.class);
 
     @Override
@@ -22,10 +24,10 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final Boolean reportOnly = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_CSP_REPORT_ONLY);
+        final Boolean reportOnly = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_CSP_REPORT_ONLY, DEFAULT_REPORT_ONLY);
         final JsonArray directives = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVES);
 
         LOGGER.info("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CSP);
-        return Future.succeededFuture(new CSPMiddleware(name, directives, reportOnly));
+        return Future.succeededFuture(new CSPMiddleware(name, directives, reportOnly.booleanValue()));
     }
 }

@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
@@ -709,6 +711,7 @@ public class DynamicConfiguration {
                         return Future.failedFuture(
                             String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
                     } else {
+                        boolean hasReportToOrUriDirective = false;
                         for (Object directive : directives) {
                             if (directive instanceof JsonObject) {
                                 final String directiveName = ((JsonObject) directive)
@@ -716,6 +719,9 @@ public class DynamicConfiguration {
                                 if (directiveName == null) {
                                     return Future.failedFuture(
                                         String.format("Directive name is not defined, middleware: '%s'", mwType));
+                                }
+                                if (directiveName.equals(CompositeCSPHandler.REPORT_URI) || directiveName.equals(CompositeCSPHandler.REPORT_TO)) {
+                                    hasReportToOrUriDirective = true;
                                 }
                                 final JsonArray directiveValues = ((JsonObject) directive)
                                     .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
@@ -732,6 +738,10 @@ public class DynamicConfiguration {
                                     }
                                 }
                             }
+                        }
+                        final Boolean reportOnly = mwOptions.getBoolean(MIDDLEWARE_CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
+                        if (reportOnly && !hasReportToOrUriDirective) {
+                            return Future.failedFuture(String.format("Reporting enabled, but no report-uri or report-to set: '%s'", mwType));
                         }
                     }
                     break;

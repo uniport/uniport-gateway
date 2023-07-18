@@ -16,19 +16,18 @@ import org.slf4j.LoggerFactory;
 public class CSPMiddleware implements Middleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddleware.class);
-    private static final boolean DEFAULT_REPORT_ONLY = false;
 
     private final String name;
     private final CompositeCSPHandler cspHandler;
 
-    public CSPMiddleware(String name, JsonArray cspDirectives, Boolean reportOnly) {
+    public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly) {
         this(name, cspDirectives, reportOnly, CSPMergeStrategy.UNION.toString());
     }
 
-    public CSPMiddleware(String name, JsonArray cspDirectives, Boolean reportOnly, String mergeStrategy) {
+    public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly, String mergeStrategy) {
         this.name = name;
         this.cspHandler = CompositeCSPHandler.create(mergeStrategy);
-        this.cspHandler.setReportOnly((reportOnly == null) ? DEFAULT_REPORT_ONLY : reportOnly);
+        this.cspHandler.setReportOnly(reportOnly);
         cspDirectives.forEach((directive -> {
             this.addDirective(this.cspHandler, (JsonObject) directive);
         }));

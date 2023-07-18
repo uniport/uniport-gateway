@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
-import io.vertx.ext.web.handler.HttpException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,11 +27,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
 
     private static final String CSP_PREVIOUS_POLICY_KEY = "CSP_POLICY";
     private static final String CSP_PREVIOUS_RESPONSE_POLICY_KEY = "RESPONSE_CSP_POLICY";
-
-    private static final String CSP_HEADER_NAME = "Content-Security-Policy";
-    private static final String CSP_REPORT_ONLY_HEADER_NAME = "Content-Security-Policy-Report-Only";
-    private static final String REPORT_URI = "report-uri";
-    private static final String REPORT_TO = "report-to";
 
     private static final CSPMergeStrategy DEFAULT_CSP_MERGE_STRATEGY = CSPMergeStrategy.UNION;
     private static final List<String> MUST_BE_QUOTED = Arrays.asList(
@@ -59,17 +53,11 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     @Override
     public void handle(RoutingContext ctx) {
         final String effectiveCSPPolicy = computeEffectiveCSPPolicy(ctx);
-        ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
-
-        final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
-        if (reportOnly) {
-            if (!policy.containsKey(REPORT_URI) && !policy.containsKey(REPORT_TO)) {
-                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri or a report-to policy."));
-            }
-        }
-
         if (effectiveCSPPolicy.length() != 0) {
+            final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
             ctx.response().putHeader(cspHeaderName, effectiveCSPPolicy);
+
+            ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
         }
         ctx.next();
     }
