@@ -154,14 +154,14 @@ class CSPMiddlewareTest {
     @Test
     void emptyExternalCSPPoliciesFromBackend(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.UNION.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
@@ -173,12 +173,12 @@ class CSPMiddlewareTest {
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertTrue(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -187,40 +187,40 @@ class CSPMiddlewareTest {
     @Test
     void chainingTwoCSPMiddlewareAndMergingDisjunctiveExternalCSPPoliciesFromBackend(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
         final String differentStyleValue = "https://fonts.googleapis.com";
 
-        final String backend_media_directive = "media-src";
-        final String backend_media_value = "'self'";
+        final String backendMediaDirective = "media-src";
+        final String backendMediaValue = "'self'";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.UNION.toString())
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, differentStyleValue)), false, CSPMergeStrategy.UNION.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertTrue(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertTrue(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertTrue(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend NOT contained in http response header!");
-            assertTrue(csp_values.contains(differentStyleValue),
+            assertTrue(cspValues.contains(differentStyleValue),
                 " Csp directive and value from second CSP Middleware is NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -229,40 +229,40 @@ class CSPMiddlewareTest {
     @Test
     void chainingTwoCSPMiddlewareAndIgnoringExternalCSPPoliciesFromBackend(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
         final String differentStyleValue = "https://fonts.googleapis.com";
 
-        final String backend_media_directive = "media-src";
-        final String backend_media_value = "'self'";
+        final String backendMediaDirective = "media-src";
+        final String backendMediaValue = "'self'";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.INTERNAL.toString())
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, differentStyleValue)), false)
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.INTERNAL)
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertTrue(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertFalse(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertFalse(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend ARE contained in http response header!");
-            assertTrue(csp_values.contains(differentStyleValue),
+            assertTrue(cspValues.contains(differentStyleValue),
                 " Csp directive and value from second CSP Middleware is NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -271,40 +271,40 @@ class CSPMiddlewareTest {
     @Test
     void chainingTwoCSPMiddlewareAndUsingExternalCSPPoliciesFromBackend(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
         final String differentStyleValue = "https://fonts.googleapis.com";
 
-        final String backend_media_directive = "media-src";
-        final String backend_media_value = "'self'";
+        final String backendMediaDirective = "media-src";
+        final String backendMediaValue = "'self'";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.EXTERNAL.toString())
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, differentStyleValue)), false, CSPMergeStrategy.EXTERNAL.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertFalse(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertFalse(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertTrue(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertTrue(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend ARE contained in http response header!");
-            assertFalse(csp_values.contains(differentStyleValue),
+            assertFalse(cspValues.contains(differentStyleValue),
                 " Csp directive and value from second CSP Middleware is NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -313,36 +313,36 @@ class CSPMiddlewareTest {
     @Test
     void mergingDisjunctiveExternalCSPPoliciesFromBackend(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
 
-        final String backend_media_directive = "media-src";
-        final String backend_media_value = "'self'";
+        final String backendMediaDirective = "media-src";
+        final String backendMediaValue = "'self'";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.UNION.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertTrue(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertTrue(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertTrue(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -351,36 +351,36 @@ class CSPMiddlewareTest {
     @Test
     void mergingSameDirectiveDifferentValuesExternalCSPPoliciesFromBackend(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
 
-        final String backend_media_directive = "style-src";
-        final String backend_media_value = "http://test.com";
+        final String backendMediaDirective = "style-src";
+        final String backendMediaValue = "http://test.com";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.UNION.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertTrue(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertTrue(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertTrue(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertTrue(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -389,36 +389,36 @@ class CSPMiddlewareTest {
     @Test
     void keepExternalPolicies(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
 
-        final String backend_media_directive = "style-src";
-        final String backend_media_value = "http://test.com";
+        final String backendMediaDirective = "style-src";
+        final String backendMediaValue = "http://test.com";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.EXTERNAL.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertFalse(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertFalse(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertTrue(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertTrue(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend NOT contained in http response header!");
             testCtx.completeNow();
         }));
@@ -427,36 +427,36 @@ class CSPMiddlewareTest {
     @Test
     void keepInternalPolicies(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String middleware_style_directive = "style-src";
-        final String middleware_style_value = "self";
+        final String middlewareStyleDirective = "style-src";
+        final String middlewareStyleValue = "self";
 
-        final String backend_media_directive = "style-src";
-        final String backend_media_value = "http://test.com";
+        final String backendMediaDirective = "style-src";
+        final String backendMediaValue = "http://test.com";
 
         final int backendPort = TestUtils.findFreePort();
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middleware_style_directive, middleware_style_value)), false, CSPMergeStrategy.EXTERNAL.toString())
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
         vertx.createHttpServer().requestHandler(handler -> {
-            handler.response().putHeader(CONTENT_SECURITY_POLICY, backend_media_directive + " " + backend_media_value).end();
+            handler.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue).end();
         }).listen(backendPort, backendHost);
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", (httpClientResponse -> {
             //then
             final MultiMap headers = httpClientResponse.headers();
-            final String csp_values = headers.get(CONTENT_SECURITY_POLICY);
+            final String cspValues = headers.get(CONTENT_SECURITY_POLICY);
 
-            assertNotNull(csp_values,
+            assertNotNull(cspValues,
                 String.format("'%s' is NOT contained in http response header!",
                     CONTENT_SECURITY_POLICY));
-            assertFalse(csp_values.contains(middleware_style_directive) && csp_values.contains(middleware_style_value),
+            assertFalse(cspValues.contains(middlewareStyleDirective) && cspValues.contains(middlewareStyleValue),
                 " Csp directive and value NOT contained in http response header!");
-            assertTrue(csp_values.contains(backend_media_directive) && csp_values.contains(backend_media_value),
+            assertTrue(cspValues.contains(backendMediaDirective) && cspValues.contains(backendMediaValue),
                 " Csp directive and value from backend NOT contained in http response header!");
             testCtx.completeNow();
         }));
