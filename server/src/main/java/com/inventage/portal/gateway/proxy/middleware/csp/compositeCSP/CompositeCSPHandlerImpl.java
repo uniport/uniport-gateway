@@ -12,20 +12,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Modified version of the default CSPHandler that allows the stacking of multiple CSPMiddleware. By doing so, the union of CSP policies from
  * all CSPMiddlewares on the same route are enforced.
  *
- * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web:4.3.8
+ * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web
+ * https://github.com/vert-x3/vertx-web/blob/4.4.4/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/CSPHandlerImpl.java
  */
-public class CompositeCSPHandlerImpl implements CSPHandler {
+public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CompositeCSPHandlerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompositeCSPHandlerImpl.class);
 
     private static final String CSP_PREVIOUS_POLICY_KEY = "CSP_POLICY";
     private static final String CSP_PREVIOUS_RESPONSE_POLICY_KEY = "RESPONSE_CSP_POLICY";
+
+    private static final String CSP_HEADER_NAME = "Content-Security-Policy";
+    private static final String CSP_REPORT_ONLY_HEADER_NAME = "Content-Security-Policy-Report-Only";
+    private static final String REPORT_URI = "report-uri";
+    private static final String REPORT_TO = "report-to";
 
     private static final CSPMergeStrategy DEFAULT_CSP_MERGE_STRATEGY = CSPMergeStrategy.UNION;
     private static final List<String> MUST_BE_QUOTED = Arrays.asList(
@@ -146,6 +153,10 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
     }
 
     private String mergePolicies(List<String> policies) {
+        if (policies == null || policies.size() == 0) {
+            return "";
+        }
+
         final Map<String, Set<String>> finalPolicies = extractCspDirectives(policies.get(0));
         for (int i = 1; i < policies.size(); i++) {
             final Map<String, Set<String>> policy = extractCspDirectives(policies.get(i));
@@ -204,7 +215,7 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
 
     public void handleResponse(RoutingContext ctx, MultiMap headers) {
         final String internalCSPPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String headerCSPKey = (reportOnly) ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
+        final String headerCSPKey = (reportOnly) ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
         final String externalCSPPolicy = headers.get(headerCSPKey);
         headers.remove(headerCSPKey);
         String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
@@ -217,7 +228,6 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
         }
 
         ctx.response().putHeader(headerCSPKey, effectiveCSPPolicy);
-
     }
 
     @Override
@@ -225,19 +235,16 @@ public class CompositeCSPHandlerImpl implements CSPHandler {
         final String effectiveCSPPolicy = computeEffectiveCSPPolicy(ctx);
         ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
 
+        final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
         if (reportOnly) {
-            if (!policy.containsKey("report-uri")) {
-                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri policy."));
-            } else {
-                ctx.response()
-                    .putHeader("Content-Security-Policy-Report-Only", effectiveCSPPolicy);
-                ctx.next();
+            if (!policy.containsKey(REPORT_URI) && !policy.containsKey(REPORT_TO)) {
+                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri or a report-to policy."));
             }
-        } else {
-            ctx.response()
-                .putHeader("Content-Security-Policy", effectiveCSPPolicy);
-            ctx.next();
         }
 
+        if (effectiveCSPPolicy.length() != 0) {
+            ctx.response().putHeader(cspHeaderName, effectiveCSPPolicy);
+        }
+        ctx.next();
     }
 }
