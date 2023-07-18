@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 public class DynamicConfiguration {
     // keywords used for internal purpose only
     public static final String HTTP = "http";
+    // routers
     public static final String ROUTERS = "routers";
     public static final String ROUTER_NAME = "name";
     public static final String ROUTER_ENTRYPOINTS = "entrypoints";
@@ -54,32 +55,40 @@ public class DynamicConfiguration {
     public static final String ROUTER_SERVICE = "service";
     public static final String ROUTER_RULE = "rule";
     public static final String ROUTER_PRIORITY = "priority";
+    // middlewares
     public static final String MIDDLEWARES = "middlewares";
     public static final String MIDDLEWARE_NAME = "name";
     public static final String MIDDLEWARE_TYPE = "type";
     public static final String MIDDLEWARE_OPTIONS = "options";
+    // auth bearer
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER = "authorizationBearer";
     public static final String MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
+    // bearer only
     public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
     public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
+    // body handler
+    public static final String MIDDLEWARE_BODY_HANDLER = "bodyHandler";
+    // check route
     public static final String MIDDLEWARE_CHECK_ROUTE = "checkRoute";
     public static final String MIDDLEWARE_CHECK_ROUTE_PATH = "_check-route_";
+    // control api
     public static final String MIDDLEWARE_CONTROL_API = "controlApi";
     public static final String MIDDLEWARE_CONTROL_API_SESSION_RESET_URL = "iamSessionResetUrl";
     public static final String MIDDLEWARE_CONTROL_API_ACTION = "action";
+    // cors
     public static final String MIDDLEWARE_CORS = "cors";
+    // csp
     public static final String MIDDLEWARE_CSP = "csp";
     public static final String MIDDLEWARE_CSP_DIRECTIVES = "policyDirectives";
     public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "directive";
     public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
     public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
-    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_STRATEGY = "mergeStrategy";
-    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_UNION = "UNION";
-    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_EXTERNAL = "EXTERNAL";
-    public static final String MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_INTERNAL = "INTERNAL";
-
+    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY = "mergeStrategy";
+    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_UNION = "UNION";
+    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL = "EXTERNAL";
+    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL = "INTERNAL";
+    // csrf
     public static final String MIDDLEWARE_CSRF = "csrf";
-    public static final String MIDDLEWARE_BODY_HANDLER = "bodyHandler";
     public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
     public static final String MIDDLEWARE_CSRF_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_CSRF_COOKIE_PATH = "path";
@@ -88,10 +97,13 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSRF_NAG_HTTPS = "nagHttps";
     public static final String MIDDLEWARE_CSRF_ORIGIN = "origin";
     public static final String MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES = "timeoutInMinute";
+    // headers
     public static final String MIDDLEWARE_HEADERS = "headers";
     public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
+    // language cookie
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
+    // oauth2
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
     public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
@@ -100,24 +112,31 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_RESPONSE_MODE = "responseMode";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
+    // path authorization
     public static final String MIDDLEWARE_PASS_AUTHORIZATION = "passAuthorization";
     public static final String MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE = "sessionScope";
+    // redirect
     public static final String MIDDLEWARE_REDIRECT_REGEX = "redirectRegex";
     public static final String MIDDLEWARE_REDIRECT_REGEX_REGEX = "regex";
     public static final String MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT = "replacement";
+    // replaced session cookie detection
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
+    // replace path
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX = "replacePathRegex";
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REGEX = "regex";
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
+    // req/resp logger
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX = "uriWithoutLoggingRegex";
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES = "contentTypes";
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED = "loggingRequestEnabled";
     public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED = "loggingResponseEnabled";
+    // response session cookie removal
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL = "responseSessionCookieRemoval";
     public static final String MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
+    // session
     public static final String MIDDLEWARE_SESSION = "session";
     public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
@@ -125,18 +144,21 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
     public static final String MIDDLEWARE_SESSION_LIFETIME_HEADER = "lifetimeHeader";
     public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
+    // session bag
     public static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
     public static final String MIDDLEWARE_SESSION_BAG_COOKIE_NAME = "cookieName";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH = "path";
+    // session cookie
     public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
     public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
     public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
+    // show session content
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
-    // 'withAuthHandler' is shared by 'bearerOnly' and 'passAuthorization' middlewares
+    // withAuthHandler: shared by 'bearerOnly' and 'passAuthorization' middlewares
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE = "audience";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS = "claims";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR = "operator";
@@ -154,17 +176,19 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION = "publicKeysReconcilation";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED = "enabled";
     public static final String MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS = "intervalMs";
-
+    // open telemtry
     public static final String MIDDLEWARE_OPEN_TELEMETRY = "openTelemetry";
+    // prevent foreign initiated authentication
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
     public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
-
+    // claim to header
     public static final String MIDDLEWARE_CLAIM_TO_HEADER = "claimToHeader";
     public static final String MIDDLEWARE_CLAIM_TO_HEADER_PATH = "claimPath";
     public static final String MIDDLEWARE_CLAIM_TO_HEADER_NAME = "headerName";
+
+    // option enumerations of various middlewares
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
     public static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
-
     public static final List<String> AUTH_HANDLER_CLAIM_OPERATORS = List.of(
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
@@ -195,9 +219,11 @@ public class DynamicConfiguration {
         MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION,
         MIDDLEWARE_CLAIM_TO_HEADER);
     public static final List<String> CSP_MERGE_STRATEGIES = List.of(
-        MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_UNION,
-        MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_EXTERNAL,
-        MIDDLEWARE_CSP_EXTERNAL_MERGE_POLICY_INTERNAL);
+        MIDDLEWARE_CSP_MERGE_STRATEGY_UNION,
+        MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL,
+        MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL);
+
+    // services
     public static final String SERVICES = "services";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
@@ -209,9 +235,11 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = "trustStorePassword";
     public static final String SERVICE_SERVER_HOST = "host";
     public static final String SERVICE_SERVER_PORT = "port";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicConfiguration.class);
     private static Validator validator;
 
+    // config schema
     private static final String KEYWORD_ENUM = "enum";
     private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
     private static final String KEYWORD_INT_MIN = "minimum";
@@ -253,7 +281,7 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
-            .property(MIDDLEWARE_CSP_EXTERNAL_MERGE_STRATEGY, Schemas.stringSchema()
+            .property(MIDDLEWARE_CSP_MERGE_STRATEGY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
             .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema()
                 .property(MIDDLEWARE_CSRF_COOKIE_NAME, Schemas.stringSchema()
