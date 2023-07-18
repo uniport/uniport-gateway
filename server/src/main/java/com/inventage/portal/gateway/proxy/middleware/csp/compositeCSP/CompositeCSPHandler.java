@@ -14,7 +14,7 @@ public interface CompositeCSPHandler extends CSPHandler {
         return new CompositeCSPHandlerImpl();
     }
 
-    static CompositeCSPHandler create(String mergeStrategy) {
+    static CompositeCSPHandler create(CSPMergeStrategy mergeStrategy) {
         return new CompositeCSPHandlerImpl(mergeStrategy);
     }
 

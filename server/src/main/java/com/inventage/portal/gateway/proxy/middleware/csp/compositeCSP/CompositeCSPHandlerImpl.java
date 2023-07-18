@@ -42,12 +42,12 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     private final CSPMergeStrategy cspMergeStrategy;
 
     public CompositeCSPHandlerImpl() {
-        this(DEFAULT_CSP_MERGE_STRATEGY.toString());
+        this(DEFAULT_CSP_MERGE_STRATEGY);
     }
 
     // Modified constructor to configure the merging strategy of multiple csp policies
-    public CompositeCSPHandlerImpl(String mergeStrategy) {
-        this.cspMergeStrategy = CSPMergeStrategy.valueOf(mergeStrategy);
+    public CompositeCSPHandlerImpl(CSPMergeStrategy mergeStrategy) {
+        this.cspMergeStrategy = mergeStrategy;
     }
 
     @Override

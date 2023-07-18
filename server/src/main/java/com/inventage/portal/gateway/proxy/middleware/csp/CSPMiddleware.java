@@ -21,10 +21,10 @@ public class CSPMiddleware implements Middleware {
     private final CompositeCSPHandler cspHandler;
 
     public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly) {
-        this(name, cspDirectives, reportOnly, CSPMergeStrategy.UNION.toString());
+        this(name, cspDirectives, reportOnly, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY);
     }
 
-    public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly, String mergeStrategy) {
+    public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
         this.name = name;
         this.cspHandler = CompositeCSPHandler.create(mergeStrategy);
         this.cspHandler.setReportOnly(reportOnly);
