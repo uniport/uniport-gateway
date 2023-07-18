@@ -49,9 +49,17 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         this.cspMergeStrategy = mergeStrategy;
     }
 
+    /*
+     * handles requests
+     * assemble configured policy and saves it in the routing context
+     * merge policies of multiple csp middleware instances
+     */
     @Override
     public void handle(RoutingContext ctx) {
-        final String effectiveCSPPolicy = computeEffectiveCSPPolicy(ctx);
+        final String currentPolicy = getConfiguredPolicyAsString();
+        final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
+        final String effectiveCSPPolicy = unitePolicies(Arrays.asList(previousPolicy, currentPolicy));
+
         if (effectiveCSPPolicy.length() != 0) {
             final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
             ctx.response().putHeader(cspHeaderName, effectiveCSPPolicy);
@@ -61,6 +69,12 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         ctx.next();
     }
 
+    /*
+     * handles responses
+     * internal policies are read from the routing context, configured by previous middleware instance
+     * external policies are read from Content-Security-Policy and Content-Security-Policy-Report-Only headers and merged (union)
+     * if external is configured, all internal configured policies are ingored
+     */
     public void handleResponse(RoutingContext ctx, MultiMap headers) {
         final String internalCSPPolicy = cspMergeStrategy == CSPMergeStrategy.EXTERNAL ? "" : ctx.get(CSP_PREVIOUS_POLICY_KEY);
         final String externalCSPPolicy = mergePolicies(headers.get(CSP_HEADER_NAME), headers.get(CSP_REPORT_ONLY_HEADER_NAME), CSPMergeStrategy.UNION);
@@ -134,21 +148,31 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return this;
     }
 
-    private String computeEffectiveCSPPolicy(RoutingContext ctx) {
-        final String currentPolicy = getPolicyString();
-        final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
+    private String getConfiguredPolicyAsString() {
+        if (policyString == null) {
+            final StringBuilder buffer = new StringBuilder();
 
-        if (previousPolicy == null) {
-            return currentPolicy;
+            for (Map.Entry<String, String> entry : policy.entrySet()) {
+                if (buffer.length() > 0) {
+                    buffer.append("; ");
+                }
+                buffer
+                    .append(entry.getKey())
+                    .append(' ')
+                    .append(entry.getValue());
+            }
+
+            policyString = buffer.toString();
         }
-        return mergePolicies(List.of(previousPolicy, currentPolicy));
+
+        return policyString;
     }
 
     private String mergePolicies(String internal, String external, CSPMergeStrategy strategy) {
         LOGGER.info("Merging CSP policies with strategy '{}'", strategy.toString());
         switch (strategy) {
             case UNION:
-                return mergePolicies(Arrays.asList(internal, external));
+                return unitePolicies(Arrays.asList(internal, external));
             case INTERNAL:
                 return internal;
             case EXTERNAL:
@@ -159,7 +183,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         }
     }
 
-    private String mergePolicies(List<String> policies) {
+    private String unitePolicies(List<String> policies) {
         if (policies == null || policies.size() == 0) {
             return "";
         }
@@ -191,26 +215,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         });
 
         return mergedPolicyString.toString();
-    }
-
-    private String getPolicyString() {
-        if (policyString == null) {
-            final StringBuilder buffer = new StringBuilder();
-
-            for (Map.Entry<String, String> entry : policy.entrySet()) {
-                if (buffer.length() > 0) {
-                    buffer.append("; ");
-                }
-                buffer
-                    .append(entry.getKey())
-                    .append(' ')
-                    .append(entry.getValue());
-            }
-
-            policyString = buffer.toString();
-        }
-
-        return policyString;
     }
 
     // Modified code to support multiple chained CSP Middlewares
