@@ -57,6 +57,41 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     }
 
     @Override
+    public void handle(RoutingContext ctx) {
+        final String effectiveCSPPolicy = computeEffectiveCSPPolicy(ctx);
+        ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
+
+        final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
+        if (reportOnly) {
+            if (!policy.containsKey(REPORT_URI) && !policy.containsKey(REPORT_TO)) {
+                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri or a report-to policy."));
+            }
+        }
+
+        if (effectiveCSPPolicy.length() != 0) {
+            ctx.response().putHeader(cspHeaderName, effectiveCSPPolicy);
+        }
+        ctx.next();
+    }
+
+    public void handleResponse(RoutingContext ctx, MultiMap headers) {
+        final String internalCSPPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
+        final String headerCSPKey = (reportOnly) ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
+        final String externalCSPPolicy = headers.get(headerCSPKey);
+        headers.remove(headerCSPKey);
+        String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
+        if (ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY) != null) {
+            final String previousResponsePolicy = ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY);
+            effectiveCSPPolicy = mergeIncomingResponsePolicies(effectiveCSPPolicy, previousResponsePolicy);
+            ctx.put(CSP_PREVIOUS_POLICY_KEY, null);
+        } else {
+            ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
+        }
+
+        ctx.response().putHeader(headerCSPKey, effectiveCSPPolicy);
+    }
+
+    @Override
     public synchronized CSPHandler setDirective(String name, String value) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
@@ -111,6 +146,67 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return this;
     }
 
+    private String computeEffectiveCSPPolicy(RoutingContext ctx) {
+        final String currentPolicy = getPolicyString();
+        final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
+
+        if (previousPolicy == null) {
+            return currentPolicy;
+        }
+        return mergePolicies(List.of(previousPolicy, currentPolicy));
+    }
+
+    private String mergeIncomingResponsePolicies(String internalCSPPolicy, String externalCSPPolicy) {
+        LOGGER.info(cspMergeStrategy.toString());
+        if (cspMergeStrategy == CSPMergeStrategy.UNION) {
+            final List<String> policies = new LinkedList<>();
+            policies.add(internalCSPPolicy);
+            policies.add(externalCSPPolicy);
+            return mergePolicies(policies);
+        } else if (cspMergeStrategy == CSPMergeStrategy.EXTERNAL) {
+            return externalCSPPolicy;
+        } else if (cspMergeStrategy == CSPMergeStrategy.INTERNAL) {
+            return internalCSPPolicy;
+        } else {
+            throw new IllegalStateException(
+                String.format("No support for the following merging strategy: %s", cspMergeStrategy));
+        }
+    }
+
+    private String mergePolicies(List<String> policies) {
+        if (policies == null || policies.size() == 0) {
+            return "";
+        }
+
+        final Map<String, Set<String>> finalPolicies = extractCspDirectives(policies.get(0));
+        for (int i = 1; i < policies.size(); i++) {
+            final Map<String, Set<String>> policy = extractCspDirectives(policies.get(i));
+
+            policy.forEach((directive, values) -> {
+                if (finalPolicies.containsKey(directive)) {
+                    final Set<String> currentValues = finalPolicies.get(directive);
+                    finalPolicies.put(directive, Sets.union(currentValues, values));
+                } else {
+                    finalPolicies.put(directive, values);
+                }
+            });
+        }
+
+        final StringBuilder mergedPolicyString = new StringBuilder();
+
+        finalPolicies.forEach((directive, values) -> {
+            if (mergedPolicyString.length() > 0) {
+                mergedPolicyString.append("; ");
+            }
+            final String mergedValues = values.stream().reduce((resultValue, newDirectiveValue) -> resultValue + " " + newDirectiveValue).get();
+            mergedPolicyString.append(directive)
+                .append(' ')
+                .append(mergedValues);
+        });
+
+        return mergedPolicyString.toString();
+    }
+
     private String getPolicyString() {
         if (policyString == null) {
             final StringBuilder buffer = new StringBuilder();
@@ -152,99 +248,4 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return directives;
     }
 
-    private String mergePolicies(List<String> policies) {
-        if (policies == null || policies.size() == 0) {
-            return "";
-        }
-
-        final Map<String, Set<String>> finalPolicies = extractCspDirectives(policies.get(0));
-        for (int i = 1; i < policies.size(); i++) {
-            final Map<String, Set<String>> policy = extractCspDirectives(policies.get(i));
-
-            policy.forEach((directive, values) -> {
-                if (finalPolicies.containsKey(directive)) {
-                    final Set<String> currentValues = finalPolicies.get(directive);
-                    finalPolicies.put(directive, Sets.union(currentValues, values));
-                } else {
-                    finalPolicies.put(directive, values);
-                }
-            });
-        }
-
-        final StringBuilder mergedPolicyString = new StringBuilder();
-
-        finalPolicies.forEach((directive, values) -> {
-            if (mergedPolicyString.length() > 0) {
-                mergedPolicyString.append("; ");
-            }
-            final String mergedValues = values.stream().reduce((resultValue, newDirectiveValue) -> resultValue + " " + newDirectiveValue).get();
-            mergedPolicyString.append(directive)
-                .append(' ')
-                .append(mergedValues);
-        });
-
-        return mergedPolicyString.toString();
-    }
-
-    private String computeEffectiveCSPPolicy(RoutingContext ctx) {
-        final String currentPolicy = getPolicyString();
-        final String previousPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
-
-        if (previousPolicy == null) {
-            return currentPolicy;
-        }
-        return mergePolicies(List.of(previousPolicy, currentPolicy));
-    }
-
-    private String mergeIncomingResponsePolicies(String internalCSPPolicy, String externalCSPPolicy) {
-        LOGGER.info(cspMergeStrategy.toString());
-        if (cspMergeStrategy == CSPMergeStrategy.UNION) {
-            final List<String> policies = new LinkedList<>();
-            policies.add(internalCSPPolicy);
-            policies.add(externalCSPPolicy);
-            return mergePolicies(policies);
-        } else if (cspMergeStrategy == CSPMergeStrategy.EXTERNAL) {
-            return externalCSPPolicy;
-        } else if (cspMergeStrategy == CSPMergeStrategy.INTERNAL) {
-            return internalCSPPolicy;
-        } else {
-            throw new IllegalStateException(
-                String.format("No support for the following merging strategy: %s", cspMergeStrategy));
-        }
-    }
-
-    public void handleResponse(RoutingContext ctx, MultiMap headers) {
-        final String internalCSPPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String headerCSPKey = (reportOnly) ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
-        final String externalCSPPolicy = headers.get(headerCSPKey);
-        headers.remove(headerCSPKey);
-        String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
-        if (ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY) != null) {
-            final String previousResponsePolicy = ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY);
-            effectiveCSPPolicy = mergeIncomingResponsePolicies(effectiveCSPPolicy, previousResponsePolicy);
-            ctx.put(CSP_PREVIOUS_POLICY_KEY, null);
-        } else {
-            ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
-        }
-
-        ctx.response().putHeader(headerCSPKey, effectiveCSPPolicy);
-    }
-
-    @Override
-    public void handle(RoutingContext ctx) {
-        final String effectiveCSPPolicy = computeEffectiveCSPPolicy(ctx);
-        ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
-
-        final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
-        if (reportOnly) {
-            if (!policy.containsKey(REPORT_URI) && !policy.containsKey(REPORT_TO)) {
-                ctx.fail(new HttpException(500, "Please disable CSP reportOnly or add a report-uri or a report-to policy."));
-            }
-        }
-
-        if (effectiveCSPPolicy.length() != 0) {
-            ctx.response().putHeader(cspHeaderName, effectiveCSPPolicy);
-        }
-        ctx.next();
-    }
 }
