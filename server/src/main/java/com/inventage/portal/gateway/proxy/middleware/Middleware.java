@@ -22,7 +22,7 @@ public interface Middleware extends Handler<RoutingContext> {
         if (modifiers == null) {
             modifiers = new ArrayList<>();
         }
-        modifiers.add(modifier);
+        modifiers.add(0, modifier);
         ctx.put(modifierType, modifiers);
     }
 
