@@ -7,7 +7,6 @@ import io.vertx.ext.web.handler.CSPHandler;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,20 +62,21 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     }
 
     public void handleResponse(RoutingContext ctx, MultiMap headers) {
-        final String internalCSPPolicy = ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String headerCSPKey = (reportOnly) ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
-        final String externalCSPPolicy = headers.get(headerCSPKey);
-        headers.remove(headerCSPKey);
-        String effectiveCSPPolicy = mergeIncomingResponsePolicies(internalCSPPolicy, externalCSPPolicy);
-        if (ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY) != null) {
-            final String previousResponsePolicy = ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY);
-            effectiveCSPPolicy = mergeIncomingResponsePolicies(effectiveCSPPolicy, previousResponsePolicy);
-            ctx.put(CSP_PREVIOUS_POLICY_KEY, null);
-        } else {
-            ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
-        }
+        final String internalCSPPolicy = cspMergeStrategy == CSPMergeStrategy.EXTERNAL ? "" : ctx.get(CSP_PREVIOUS_POLICY_KEY);
+        final String externalCSPPolicy = mergePolicies(headers.get(CSP_HEADER_NAME), headers.get(CSP_REPORT_ONLY_HEADER_NAME), CSPMergeStrategy.UNION);
 
-        ctx.response().putHeader(headerCSPKey, effectiveCSPPolicy);
+        headers.remove(CSP_HEADER_NAME);
+        headers.remove(CSP_REPORT_ONLY_HEADER_NAME);
+
+        String effectiveCSPPolicy = mergePolicies(internalCSPPolicy, externalCSPPolicy, cspMergeStrategy);
+
+        final String previousResponsePolicy = ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY);
+        if (previousResponsePolicy != null) {
+            effectiveCSPPolicy = mergePolicies(effectiveCSPPolicy, previousResponsePolicy, CSPMergeStrategy.UNION);
+        }
+        ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
+
+        ctx.response().putHeader(reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME, effectiveCSPPolicy);
     }
 
     @Override
@@ -144,20 +144,18 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return mergePolicies(List.of(previousPolicy, currentPolicy));
     }
 
-    private String mergeIncomingResponsePolicies(String internalCSPPolicy, String externalCSPPolicy) {
-        LOGGER.info(cspMergeStrategy.toString());
-        if (cspMergeStrategy == CSPMergeStrategy.UNION) {
-            final List<String> policies = new LinkedList<>();
-            policies.add(internalCSPPolicy);
-            policies.add(externalCSPPolicy);
-            return mergePolicies(policies);
-        } else if (cspMergeStrategy == CSPMergeStrategy.EXTERNAL) {
-            return externalCSPPolicy;
-        } else if (cspMergeStrategy == CSPMergeStrategy.INTERNAL) {
-            return internalCSPPolicy;
-        } else {
-            throw new IllegalStateException(
-                String.format("No support for the following merging strategy: %s", cspMergeStrategy));
+    private String mergePolicies(String internal, String external, CSPMergeStrategy strategy) {
+        LOGGER.info("Merging CSP policies with strategy '{}'", strategy.toString());
+        switch (strategy) {
+            case UNION:
+                return mergePolicies(Arrays.asList(internal, external));
+            case INTERNAL:
+                return internal;
+            case EXTERNAL:
+                return external;
+            default:
+                throw new IllegalStateException(
+                    String.format("No support for the following merging strategy: %s", strategy));
         }
     }
 
