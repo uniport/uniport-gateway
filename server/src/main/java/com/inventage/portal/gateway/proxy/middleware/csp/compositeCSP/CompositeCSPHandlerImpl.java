@@ -73,11 +73,12 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
      * handles responses
      * internal policies are read from the routing context, configured by previous middleware instance
      * external policies are read from Content-Security-Policy and Content-Security-Policy-Report-Only headers and merged (union)
+     * if internal is configured, all external configured policies are ingored
      * if external is configured, all internal configured policies are ingored
      */
     public void handleResponse(RoutingContext ctx, MultiMap headers) {
         final String internalCSPPolicy = cspMergeStrategy == CSPMergeStrategy.EXTERNAL ? "" : ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String externalCSPPolicy = mergePolicies(headers.get(CSP_HEADER_NAME), headers.get(CSP_REPORT_ONLY_HEADER_NAME), CSPMergeStrategy.UNION);
+        final String externalCSPPolicy = cspMergeStrategy == CSPMergeStrategy.INTERNAL ? "" : mergePolicies(headers.get(CSP_HEADER_NAME), headers.get(CSP_REPORT_ONLY_HEADER_NAME), CSPMergeStrategy.UNION);
 
         headers.remove(CSP_HEADER_NAME);
         headers.remove(CSP_REPORT_ONLY_HEADER_NAME);

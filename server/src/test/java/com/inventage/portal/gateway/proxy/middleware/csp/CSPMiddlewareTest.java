@@ -240,8 +240,8 @@ class CSPMiddlewareTest {
         final String backendHost = "localhost";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.INTERNAL)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false)
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.INTERNAL)
             .withProxyMiddleware(backendHost, backendPort)
             .build().start();
 
