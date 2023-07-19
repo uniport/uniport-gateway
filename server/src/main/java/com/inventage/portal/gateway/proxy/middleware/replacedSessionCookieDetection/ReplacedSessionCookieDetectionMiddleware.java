@@ -22,10 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
-    public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
-
     public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
-    public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
     private final String name;
     private final String detectionCookieKey;
@@ -35,9 +32,9 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     public ReplacedSessionCookieDetectionMiddleware(String name, String cookieName, Integer waitBeforeRetryInMs) {
         this.name = name;
-        this.detectionCookieKey = (cookieName == null) ? DEFAULT_DETECTION_COOKIE_NAME : cookieName;
+        this.detectionCookieKey = cookieName;
         this.sessionCookiePrefix = this.detectionCookieKey + "=";
-        this.waitBeforeRetryMs = (waitBeforeRetryInMs == null) ? DEFAULT_WAIT_BEFORE_RETRY_MS : waitBeforeRetryInMs;
+        this.waitBeforeRetryMs = waitBeforeRetryInMs;
     }
 
     @Override

@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 
 public class ReplacedSessionCookieDetectionMiddlewareFactory implements MiddlewareFactory {
 
+    public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
+    public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
+
     private static final Logger LOGGER = LoggerFactory
         .getLogger(ReplacedSessionCookieDetectionMiddlewareFactory.class);
 
@@ -23,9 +26,9 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final String cookieName = middlewareConfig
-            .getString(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+            .getString(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, DEFAULT_DETECTION_COOKIE_NAME);
         final Integer waitTimeRetryInMs = middlewareConfig
-            .getInteger(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+            .getInteger(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, DEFAULT_WAIT_BEFORE_RETRY_MS);
 
         LOGGER.debug("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION);

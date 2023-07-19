@@ -5,7 +5,7 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
@@ -943,7 +943,7 @@ public class DynamicConfiguration {
                     if (waitTimeRetryInMs == null) {
                         LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s",
                             mwType,
-                            ReplacedSessionCookieDetectionMiddleware.DEFAULT_WAIT_BEFORE_RETRY_MS));
+                            ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS));
                     } else {
                         if (waitTimeRetryInMs <= 0) {
                             return Future.failedFuture(
@@ -955,7 +955,7 @@ public class DynamicConfiguration {
                     if (detectionCookieName == null) {
                         LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s",
                             mwType,
-                            ReplacedSessionCookieDetectionMiddleware.DEFAULT_DETECTION_COOKIE_NAME));
+                            ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME));
                     }
                     break;
                 }
