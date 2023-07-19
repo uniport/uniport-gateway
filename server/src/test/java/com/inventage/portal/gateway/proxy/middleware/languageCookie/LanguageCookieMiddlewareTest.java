@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware.DEFAULT_LANGUAGE_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import io.vertx.core.MultiMap;

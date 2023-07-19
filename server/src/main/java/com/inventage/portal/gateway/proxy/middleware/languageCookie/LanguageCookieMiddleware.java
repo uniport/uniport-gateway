@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
+import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
@@ -14,8 +16,6 @@ import org.slf4j.LoggerFactory;
  * token is sent to the Client.
  */
 public class LanguageCookieMiddleware implements Middleware {
-
-    public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddleware.class);
 
