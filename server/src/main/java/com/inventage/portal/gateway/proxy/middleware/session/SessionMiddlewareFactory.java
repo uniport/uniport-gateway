@@ -34,19 +34,19 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final JsonObject cookie = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE);
+        final JsonObject cookie = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject());
         final String cookieName = cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
         final boolean cookieHttpOnly = cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, DEFAULT_COOKIE_HTTP_ONLY);
         final boolean cookieSecure = cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
-        final String cookieSameSiteValue = cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, String.valueOf(DEFAULT_COOKIE_SAME_SITE));
-        final CookieSameSite cookieSameSite = CookieSameSite.valueOf(cookieSameSiteValue);
+        final String cookieSameSiteValue = cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, DEFAULT_COOKIE_SAME_SITE.toString());
+        final CookieSameSite cookieSameSite = CookieSameSite.valueOf(cookieSameSiteValue.toUpperCase());
         final int sessionIdleTimeoutInMinutes = middlewareConfig
             .getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
         final int sessionIdMinLength = middlewareConfig
             .getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, DEFAULT_SESSION_ID_MINIMUM_LENGTH);
         final Boolean nagHttps = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, DEFAULT_NAG_HTTPS);
-        final Boolean lifetimeHeader = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_HEADER);
-        final Boolean lifetimeCookie = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_COOKIE);
+        final Boolean lifetimeHeader = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_HEADER, DEFAULT_SESSION_LIFETIME_HEADER);
+        final Boolean lifetimeCookie = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_COOKIE, DEFAULT_SESSION_LIFETIME_COOKIE);
         final String pathWithoutSessionTimeoutReset = middlewareConfig
             .getString(DynamicConfiguration.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
 
