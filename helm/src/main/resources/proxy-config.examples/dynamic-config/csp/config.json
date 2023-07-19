@@ -4,7 +4,7 @@
             {
                 "name": "csp-violation-reporting-server",
                 "middlewares": [
-                    "rootRedirectregex"
+                    "cspViolationReportingServer"
                 ],
                 "rule": "Path('/csp-reports')",
                 "service": "dashboard-proxy"
