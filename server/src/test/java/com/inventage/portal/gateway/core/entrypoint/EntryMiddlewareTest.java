@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
 public class EntryMiddlewareTest {
-    static final String host = "localhost";
+    static final String HOST = "localhost";
 
     private HttpServer proxy;
     private HttpServer server;
@@ -64,7 +64,7 @@ public class EntryMiddlewareTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, "http", host, String.format("%d", proxyPort));
+        routerFactory = new RouterFactory(vertx, "http", HOST, String.format("%d", proxyPort));
     }
 
     @AfterEach
@@ -81,26 +81,25 @@ public class EntryMiddlewareTest {
     @Test
     void entryRedirectMiddlewareRunsOnAllRoutes(Vertx vertx, VertxTestContext testCtx) {
         //given
-        String entryPointIdentifier = "http" + proxyPort;
-        String expectedRedirect = "/to/some/page";
+        final String entryPointIdentifier = "http" + proxyPort;
+        final String expectedRedirect = "/to/some/page";
 
-        Map<String, JsonObject> configuration = oneEntryRedirectMiddlewareTwoRoutesConfiguration(entryPointIdentifier,
+        final Map<String, JsonObject> configuration = oneEntryRedirectMiddlewareTwoRoutesConfiguration(entryPointIdentifier,
             expectedRedirect);
-        JsonObject dynamicConfig = configuration.get("dynamic");
-        JsonObject staticConfig = configuration.get("static");
-        JsonObject entryMiddlewareConfig = configuration.get("entryMiddleware");
+        final JsonObject dynamicConfig = configuration.get("dynamic");
+        final JsonObject entryMiddlewareConfig = configuration.get("entryMiddleware");
 
-        Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort,
+        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort,
             new JsonArray().add(entryMiddlewareConfig));
-        ProxyApplication proxyApplication = new ProxyApplication("proxy", entryPointIdentifier, staticConfig, vertx);
+        final ProxyApplication proxyApplication = new ProxyApplication(vertx, "proxy", entryPointIdentifier, 1234, JsonArray.of(), JsonObject.of());
         entrypoint.mount(proxyApplication);
 
         routerFactory.createRouter(dynamicConfig).onComplete(testCtx.succeeding(router -> {
             entrypoint.router().route("/*").subRouter(router);
             proxyRouter = entrypoint.router();
 
-            RequestOptions optA = new RequestOptions().setURI("/pathA");
-            RequestOptions optB = new RequestOptions().setURI("/pathB");
+            final RequestOptions optA = new RequestOptions().setURI("/pathA");
+            final RequestOptions optB = new RequestOptions().setURI("/pathB");
 
             //when
             doRequest(vertx, testCtx, optA, responsePathA -> {
@@ -122,9 +121,9 @@ public class EntryMiddlewareTest {
         Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts,
         Consumer<HttpClientResponse> assertionHandler
     ) {
-        CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
 
-        reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
+        reqOpts.setHost(HOST).setPort(proxyPort).setMethod(HttpMethod.GET);
         vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send)
             .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
                 assertionHandler.accept(resp);
@@ -142,25 +141,21 @@ public class EntryMiddlewareTest {
         String entryPointIdentifier,
         String redirect
     ) {
-        JsonObject dynamicConfig = TestUtils.buildConfiguration(
+        final JsonObject dynamicConfig = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
                 TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares()),
                 TestUtils.withRouter("foo2", TestUtils.withRouterService("bar"),
                     TestUtils.withRouterRule("Path('/pathB')"), TestUtils.withRouterMiddlewares())),
             TestUtils.withServices(
-                TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
-        JsonObject staticConfig = TestUtils.buildStaticConfiguration(
-            TestUtils.withEntrypoints(TestUtils.withEntrypoint(entryPointIdentifier, proxyPort),
-                TestUtils.withApplication("proxy", entryPointIdentifier, "ProxyApplication",
-                    TestUtils.withRequestSelector("/"))));
+                TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(HOST, serverPort)))));
 
-        JsonObject entryMiddlewareConfig = TestUtils.buildStaticConfiguration(
+        final JsonObject entryMiddlewareConfig = TestUtils.buildStaticConfiguration(
             TestUtils.withMiddleware("redirect", "redirectRegex",
                 TestUtils.withMiddlewareOpts(
                     new JsonObject().put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX, "/.*").put(
                         DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, redirect))));
 
-        return Map.of("static", staticConfig, "dynamic", dynamicConfig, "entryMiddleware", entryMiddlewareConfig);
+        return Map.of("dynamic", dynamicConfig, "entryMiddleware", entryMiddlewareConfig);
     }
 
 }

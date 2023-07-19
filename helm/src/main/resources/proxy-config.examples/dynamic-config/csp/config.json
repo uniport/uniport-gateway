@@ -7,7 +7,7 @@
                     "rootRedirectregex"
                 ],
                 "rule": "Path('/csp-reports')",
-                "service": ""
+                "service": "dashboard-proxy"
             }
         ],
         "middlewares": [

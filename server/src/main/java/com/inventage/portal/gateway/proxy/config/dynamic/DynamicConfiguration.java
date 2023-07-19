@@ -784,6 +784,9 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
+                case MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER: {
+                    break;
+                }
                 case MIDDLEWARE_CSRF: {
                     final Integer timeoutInMinutes = mwOptions
                         .getInteger(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES);

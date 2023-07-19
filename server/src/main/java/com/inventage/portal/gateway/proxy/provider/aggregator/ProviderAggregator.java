@@ -25,16 +25,17 @@ public class ProviderAggregator extends Provider {
     private final Vertx vertx;
 
     private final String configurationAddress;
-    private final JsonArray providers;
+    private final JsonArray providerConfigs;
     private final JsonObject env;
 
-    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providers, JsonObject env) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providerConfigs, JsonObject env) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
-        this.providers = new JsonArray(providers.getList());
+        this.providerConfigs = new JsonArray(providerConfigs.getList());
         this.env = new JsonObject(env.getMap());
     }
 
+    @Override
     public void start(Promise<Void> startPromise) {
         provide(startPromise);
     }
@@ -42,8 +43,8 @@ public class ProviderAggregator extends Provider {
     @Override
     public void provide(Promise<Void> startPromise) {
         final List<Future<String>> futures = new ArrayList<>();
-        for (int i = 0; i < this.providers.size(); i++) {
-            final JsonObject providerConfig = this.providers.getJsonObject(i);
+        for (int i = 0; i < this.providerConfigs.size(); i++) {
+            final JsonObject providerConfig = this.providerConfigs.getJsonObject(i);
 
             final String providerName = providerConfig.getString(StaticConfiguration.PROVIDER_NAME);
             final ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
@@ -53,20 +54,20 @@ public class ProviderAggregator extends Provider {
                 continue;
             }
 
-            final Provider provider = providerFactory.create(this.vertx, this.configurationAddress, providerConfig,
-                this.env);
+            final Provider provider = providerFactory.create(this.vertx, this.configurationAddress, providerConfig, this.env);
 
             futures.add(launchProvider(provider));
         }
 
         Future.join(futures).onSuccess(cf -> {
-            LOGGER.info("Launched {}/{} providers successfully", futures.size(), this.providers.size());
+            LOGGER.info("Launched {}/{} providers successfully", futures.size(), this.providerConfigs.size());
             startPromise.complete();
         }).onFailure(err -> {
             startPromise.fail(err.getMessage());
         });
     }
 
+    @Override
     public String toString() {
         return NAME;
     }

@@ -60,6 +60,7 @@ public class FileConfigProvider extends Provider {
         this.env = env;
     }
 
+    @Override
     public void start(Promise<Void> startPromise) {
         provide(startPromise);
     }
@@ -70,7 +71,7 @@ public class FileConfigProvider extends Provider {
         retriever.getConfig().onSuccess(config -> {
             this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
         }).onFailure(err -> {
-            final String errMsg = String.format("provide: cannot retrieve configuration '{}'", err.getMessage());
+            final String errMsg = String.format("failed to retrieve dynamic configuration '{}'", err.getMessage());
             LOGGER.warn(errMsg);
         });
 
@@ -84,6 +85,7 @@ public class FileConfigProvider extends Provider {
         startPromise.complete();
     }
 
+    @Override
     public String toString() {
         return StaticConfiguration.PROVIDER_FILE;
     }

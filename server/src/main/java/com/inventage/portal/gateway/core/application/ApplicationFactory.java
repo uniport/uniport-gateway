@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.application;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -24,15 +25,15 @@ public interface ApplicationFactory {
     String provides();
 
     /**
-     * @param applicationConfig
-     *            extract of the config for this application
-     * @param globalConfig
-     *            complete config
      * @param vertx
      *            running instance by which an application can get their router
+     * @param applicationConfig
+     *            extract of the config for this application
+     * @param env
+     *            environment variables
      * @return new application instance
      */
-    Application create(JsonObject applicationConfig, JsonObject globalConfig, Vertx vertx);
+    Application create(Vertx vertx, JsonObject applicationConfig, JsonArray entrypointConfigs, JsonArray providerConfigs, JsonObject env);
 
     class Loader {
         public static ApplicationFactory getProvider(String providerId) {

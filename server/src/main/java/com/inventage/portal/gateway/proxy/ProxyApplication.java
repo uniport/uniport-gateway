@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
@@ -51,12 +50,7 @@ public class ProxyApplication implements Application {
     /**
      * the name of the entrypoint this application should be mounted on
      */
-    private final String entrypoint;
-
-    /**
-     * the port of the entrypoint this application should be mounted on
-     */
-    private final String entrypointPort;
+    private final String entrypointName;
 
     /**
      * the selection criteria for delegating incoming requests to this application
@@ -72,38 +66,30 @@ public class ProxyApplication implements Application {
      * the providers that should be launched for this application to retrieve the dynamic
      * configuration
      */
-    private final JsonArray providers;
+    private final JsonArray providerConfigs;
 
     private final JsonObject env;
 
     private final int providersThrottleDuration;
 
-    public ProxyApplication(String name, String entrypoint, JsonObject staticConfig, Vertx vertx) {
+    public ProxyApplication(Vertx vertx, String name, String entrypointName, int entrypointPort, JsonArray providerConfigs, JsonObject env) {
         this.name = name;
-        this.entrypoint = entrypoint;
+        this.entrypointName = entrypointName;
         this.router = Router.router(vertx);
 
-        this.providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS);
-        this.providersThrottleDuration = staticConfig.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS,
-            2000);
+        this.providerConfigs = providerConfigs.copy();
+        this.providersThrottleDuration = env.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);
 
-        this.env = staticConfig.copy();
-        this.env.remove(StaticConfiguration.ENTRYPOINTS);
-        this.env.remove(StaticConfiguration.APPLICATIONS);
-        this.env.remove(StaticConfiguration.PROVIDERS);
-
-        this.entrypointPort = DynamicConfiguration
-            .getObjByKeyWithValue(staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS),
-                StaticConfiguration.ENTRYPOINT_NAME, this.entrypoint)
-            .getString(StaticConfiguration.ENTRYPOINT_PORT);
+        this.env = env.copy();
 
         this.publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL,
             PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
         this.publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
             PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
-        this.publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT, entrypointPort);
+        this.publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT, String.format("%d", entrypointPort));
     }
 
+    @Override
     public String toString() {
         return String.format("%s:%s", getClass().getSimpleName(), name);
     }
@@ -120,17 +106,17 @@ public class ProxyApplication implements Application {
 
     @Override
     public String entrypoint() {
-        return entrypoint;
+        return entrypointName;
     }
 
     @Override
     public Future<?> deployOn(Vertx vertx) {
         final String configurationAddress = "configuration-announce-address";
 
-        final ProviderAggregator aggregator = new ProviderAggregator(vertx, configurationAddress, providers, this.env);
+        final ProviderAggregator aggregator = new ProviderAggregator(vertx, configurationAddress, providerConfigs, this.env);
 
         final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, configurationAddress,
-            this.providersThrottleDuration, Collections.singletonList(this.entrypoint));
+            this.providersThrottleDuration, Collections.singletonList(this.entrypointName));
 
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort);
 
