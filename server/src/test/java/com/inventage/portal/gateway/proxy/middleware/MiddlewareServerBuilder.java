@@ -15,6 +15,7 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware;
@@ -173,7 +174,7 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
-            new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, null, headerName, null, null, null));
+            new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE, headerName, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES, null, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
     }
 
     public MiddlewareServerBuilder withBodyHandlerMiddleware() {

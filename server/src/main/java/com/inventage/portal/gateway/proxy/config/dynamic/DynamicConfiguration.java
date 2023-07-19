@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.proxy.config.dynamic;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
-import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
@@ -790,7 +790,7 @@ public class DynamicConfiguration {
                     if (timeoutInMinutes == null) {
                         LOGGER.debug(String.format("%s: csrf token timeout not specified. Use default value: %s",
                             mwType,
-                            CSRFMiddleware.DEFAULT_TIMEOUT_IN_MINUTES));
+                            CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES));
                     } else {
                         if (timeoutInMinutes <= 0) {
                             return Future.failedFuture(String
@@ -806,12 +806,12 @@ public class DynamicConfiguration {
                     final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_CSRF_NAG_HTTPS);
                     if (nagHttps == null) {
                         LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
-                            CSRFMiddleware.DEFAULT_NAG_HTTPS));
+                            CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
                     }
                     final String headerName = mwOptions.getString(MIDDLEWARE_CSRF_HEADER_NAME);
                     if (headerName == null) {
                         LOGGER.debug(String.format("%s: header name not specified. Use default value: %s", mwType,
-                            CSRFMiddleware.DEFAULT_HEADER_NAME));
+                            CSRFMiddlewareFactory.DEFAULT_HEADER_NAME));
                     }
                     final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_CSRF_COOKIE);
                     if (cookie == null) {
@@ -827,13 +827,13 @@ public class DynamicConfiguration {
                         if (cookiePath == null) {
                             LOGGER.debug(String.format(
                                 "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                CSRFMiddleware.DEFAULT_COOKIE_NAME));
+                                CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME));
                         }
                         final Boolean cookieSecure = cookie.getBoolean(MIDDLEWARE_CSRF_COOKIE_SECURE);
                         if (cookieSecure == null) {
                             LOGGER.debug(String.format(
                                 "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                CSRFMiddleware.DEFAULT_COOKIE_SECURE));
+                                CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE));
                         }
                     }
                     break;

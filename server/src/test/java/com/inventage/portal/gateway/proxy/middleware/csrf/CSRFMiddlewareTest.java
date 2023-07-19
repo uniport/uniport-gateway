@@ -35,7 +35,7 @@ class CSRFMiddlewareTest {
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
-            .withCsrfMiddleware(secret, null, null)
+            .withCsrfMiddleware(secret, CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME, CSRFMiddlewareFactory.DEFAULT_HEADER_NAME)
             .build().start();
 
         //when
