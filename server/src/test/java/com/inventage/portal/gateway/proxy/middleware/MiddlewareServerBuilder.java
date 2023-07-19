@@ -12,6 +12,7 @@ import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeader
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
@@ -163,6 +164,11 @@ public final class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
         return withMiddleware(
             new CSPMiddleware("csp", directives, reportOnly, mergeStrategy));
+    }
+
+    public MiddlewareServerBuilder withCspViolationReportingServerMiddleware() {
+        return withMiddleware(
+            new CSPViolationReportingServerMiddleware("cspViolationReportingServer"));
     }
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {

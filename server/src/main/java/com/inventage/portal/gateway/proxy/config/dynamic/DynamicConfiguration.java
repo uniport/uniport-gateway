@@ -87,6 +87,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_UNION = "UNION";
     public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL = "EXTERNAL";
     public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL = "INTERNAL";
+    // csp violation reporting server
+    public static final String MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
     // csrf
     public static final String MIDDLEWARE_CSRF = "csrf";
     public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
@@ -201,6 +203,7 @@ public class DynamicConfiguration {
         MIDDLEWARE_CHECK_ROUTE,
         MIDDLEWARE_CONTROL_API,
         MIDDLEWARE_CSP,
+        MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
         MIDDLEWARE_CSRF,
         MIDDLEWARE_BODY_HANDLER,
         MIDDLEWARE_HEADERS,
@@ -264,9 +267,11 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
             .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
-            .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema()).property(ROUTER_RULE, Schemas.stringSchema()
+            .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
+            .property(ROUTER_RULE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(ROUTER_PRIORITY, Schemas.intSchema()).allowAdditionalProperties(false);
+            .property(ROUTER_PRIORITY, Schemas.intSchema())
+            .allowAdditionalProperties(false);
         return routerSchema;
     }
 
@@ -381,7 +386,8 @@ public class DynamicConfiguration {
             .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
             .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_TYPES.toArray())))
-            .property(MIDDLEWARE_OPTIONS, middlewareOptionsSchema).allowAdditionalProperties(false);
+            .property(MIDDLEWARE_OPTIONS, middlewareOptionsSchema)
+            .allowAdditionalProperties(false);
         return middlewareSchema;
     }
 
@@ -408,7 +414,8 @@ public class DynamicConfiguration {
         final ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
             .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
             .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
-            .property(SERVICES, Schemas.arraySchema().items(serviceSchema)).allowAdditionalProperties(false);
+            .property(SERVICES, Schemas.arraySchema().items(serviceSchema))
+            .allowAdditionalProperties(false);
         return httpSchema;
     }
 

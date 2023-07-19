@@ -1,0 +1,21 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "csp-violation-reporting-server",
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
+                "rule": "Path('/csp-reports')",
+                "service": ""
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "cspViolationReportingServer",
+                "type": "cspViolationReportingServer"
+            }
+        ],
+        "services": []
+    }
+}

@@ -74,6 +74,12 @@
                     "options": {
                         "policyDirectives": [
                             {
+                                "directive": "report-to",
+                                "values": [
+                                    "${PORTAL_GATEWAY_PUBLIC_HOSTNAME}/csp-reports"
+                                ]
+                            },
+                            {
                                 "directive": "default-src",
                                 "values": [
                                     "self"

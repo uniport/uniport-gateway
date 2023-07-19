@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `uriWithoutLoggingRegex` option for RequestResponseLoggerMiddleware allowing selective logging of requests based on their URI ([PORTAL-1418](https://issue.inventage.com/browse/PORTAL-1418))
 - Fail build when example configs are invalid ([PORTAL-1461](https://issue.inventage.com/browse/PORTAL-1461)).
 - `contentTypes`, `loggingRequestEnabled` and `loggingResponseEnabled` options added for the `requestResponseLogger` middleware ([PORTAL-1341](https://issue.inventage.com/browse/PORTAL-1341)).
+- Add a CSP violation reporting server middleware ([PORTAL-1241](https://issue.inventage.com/browse/PORTAL-1241)).
 
 ### Changed
 

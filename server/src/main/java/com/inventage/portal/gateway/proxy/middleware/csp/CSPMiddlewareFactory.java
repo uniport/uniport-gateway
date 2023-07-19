@@ -16,7 +16,6 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
 
     public static final boolean DEFAULT_REPORT_ONLY = false;
     public static final CSPMergeStrategy DEFAULT_MERGE_STRATEGY = CSPMergeStrategy.UNION;
-    public static final String DEFAULT_REPORTING_PATH = "/csp-reports";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddlewareFactory.class);
 
