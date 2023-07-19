@@ -21,6 +21,8 @@ containers:
             path: dynamic-config/content/config.json
           - key: dynamic-config..conversation..config.json
             path: dynamic-config/conversation/config.json
+          - key: dynamic-config..csp..config.json
+            path: dynamic-config/csp/config.json
           - key: dynamic-config..dashboard..config.json
             path: dynamic-config/dashboard/config.json
           - key: dynamic-config..filestorage..config.json
