@@ -24,7 +24,7 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE);
-        final String languageCookieName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE, DEFAULT_LANGUAGE_COOKIE_NAME);
+        final String languageCookieName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
         return Future.succeededFuture(new LanguageCookieMiddleware(name, languageCookieName));
     }
 }
