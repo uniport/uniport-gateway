@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME;
 import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_KEY;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
@@ -19,28 +21,13 @@ import org.slf4j.LoggerFactory;
  */
 public class SessionMiddleware implements Middleware {
 
-    public static final String SESSION_COOKIE_NAME_DEFAULT = "uniport.session";
-
-    public static final String CONTEXTUAL_DATA_SESSION_ID = "sessionId";
-    public static final String SESSION_LIFETIME_COOKIE_NAME_DEFAULT = "uniport.session-lifetime";
-    public static final String SESSION_LIFETIME_HEADER_NAME_DEFAULT = "x-uniport-session-lifetime";
-
-    public static final boolean COOKIE_HTTP_ONLY_DEFAULT = true;
-    public static final boolean COOKIE_SECURE_DEFAULT = false;
-    public static final CookieSameSite COOKIE_SAME_SITE_DEFAULT = CookieSameSite.STRICT;
-    public static final int SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT = 15;
-    public static final int SESSION_ID_MINIMUM_LENGTH_DEFAULT = 32;
-    public static final boolean NAG_HTTPS_DEFAULT = true;
-    public static final boolean SESSION_LIFETIME_HEADER_DEFAULT = false;
-    public static final boolean SESSION_LIFETIME_COOKIE_DEFAULT = false;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
     private static final int MILLIS = 60000;
 
     private final String name;
 
-    private final Long sessionIdleTimeoutInMilliSeconds;
+    private final long sessionIdleTimeoutInMilliSeconds;
 
     private final boolean withLifetimeHeader;
     private final boolean withLifetimeCookie;
@@ -78,31 +65,29 @@ public class SessionMiddleware implements Middleware {
     public SessionMiddleware(
         Vertx vertx,
         String name,
-        Long sessionIdleTimeoutInMinutes,
-        Boolean withLifetimeHeader,
-        Boolean withLifetimeCookie,
+        int sessionIdleTimeoutInMinutes,
+        boolean withLifetimeHeader,
+        boolean withLifetimeCookie,
         String cookieName,
-        Boolean cookieHttpOnly,
-        Boolean cookieSecure,
-        String cookieSameSite,
-        Integer sessionIdMinLength,
-        Boolean nagHttps,
+        boolean cookieHttpOnly,
+        boolean cookieSecure,
+        CookieSameSite cookieSameSite,
+        int sessionIdMinLength,
+        boolean nagHttps,
         String uriWithoutSessionIdleTimeoutReset
-
     ) {
         this.name = name;
-        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes == null ? SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT * MILLIS : sessionIdleTimeoutInMinutes * MILLIS;
-        this.withLifetimeHeader = withLifetimeHeader == null ? SESSION_LIFETIME_HEADER_DEFAULT : withLifetimeHeader;
-        this.withLifetimeCookie = withLifetimeCookie == null ? SESSION_LIFETIME_COOKIE_DEFAULT : withLifetimeCookie;
+        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MILLIS;
+        this.withLifetimeHeader = withLifetimeHeader;
+        this.withLifetimeCookie = withLifetimeCookie;
         sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
             .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
-            .setSessionCookieName(cookieName == null ? SESSION_COOKIE_NAME_DEFAULT : cookieName)
-            .setCookieHttpOnlyFlag(cookieHttpOnly == null ? COOKIE_HTTP_ONLY_DEFAULT : cookieHttpOnly)
-            .setCookieSecureFlag(cookieSecure == null ? COOKIE_SECURE_DEFAULT : cookieSecure)
-            .setCookieSameSite(
-                cookieSameSite == null ? COOKIE_SAME_SITE_DEFAULT : CookieSameSite.valueOf(cookieSameSite))
-            .setMinLength(sessionIdMinLength == null ? SESSION_ID_MINIMUM_LENGTH_DEFAULT : sessionIdMinLength)
-            .setNagHttps(nagHttps == null ? NAG_HTTPS_DEFAULT : nagHttps);
+            .setSessionCookieName(cookieName)
+            .setCookieHttpOnlyFlag(cookieHttpOnly)
+            .setCookieSecureFlag(cookieSecure)
+            .setCookieSameSite(cookieSameSite)
+            .setMinLength(sessionIdMinLength)
+            .setNagHttps(nagHttps);
         this.uriPatternForIgnoringSessionTimeoutReset = uriWithoutSessionIdleTimeoutReset == null ? null : Pattern.compile(uriWithoutSessionIdleTimeoutReset);
     }
 
@@ -131,13 +116,13 @@ public class SessionMiddleware implements Middleware {
     private void responseWithSessionLifetime(RoutingContext ctx) {
         final String sessionLifetime = new SessionLifetimeValue(ctx.session().lastAccessed(), this.sessionIdleTimeoutInMilliSeconds).toString();
         if (withLifetimeHeader) {
-            LOGGER.debug("Adding header '{}'", SESSION_LIFETIME_HEADER_NAME_DEFAULT);
-            ctx.response().putHeader(SESSION_LIFETIME_HEADER_NAME_DEFAULT, sessionLifetime);
+            LOGGER.debug("Adding header '{}'", DEFAULT_SESSION_LIFETIME_HEADER_NAME);
+            ctx.response().putHeader(DEFAULT_SESSION_LIFETIME_HEADER_NAME, sessionLifetime);
         }
         if (withLifetimeCookie) {
-            LOGGER.debug("Adding cookie '{}'", SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+            LOGGER.debug("Adding cookie '{}'", DEFAULT_SESSION_LIFETIME_COOKIE_NAME);
             ctx.response().addCookie(
-                Cookie.cookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT, sessionLifetime).setPath("/")
+                Cookie.cookie(DEFAULT_SESSION_LIFETIME_COOKIE_NAME, sessionLifetime).setPath("/")
                     .setHttpOnly(false)); // false := cookie must be accessible by client side scripts
         }
     }

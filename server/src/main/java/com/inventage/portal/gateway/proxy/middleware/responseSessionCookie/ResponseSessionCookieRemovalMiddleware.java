@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
 
     public ResponseSessionCookieRemovalMiddleware(String name, String sessionCookieName) {
         this.name = name;
-        this.sessionCookieName = (sessionCookieName == null) ? SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT
+        this.sessionCookieName = (sessionCookieName == null) ? SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME
             : sessionCookieName;
     }
 

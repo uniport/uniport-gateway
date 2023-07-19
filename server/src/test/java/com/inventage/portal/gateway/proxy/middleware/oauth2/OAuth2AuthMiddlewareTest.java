@@ -5,7 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuil
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_PKCE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_REDIRECT_URI;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 
@@ -372,7 +372,7 @@ public class OAuth2AuthMiddlewareTest {
 
     private String cookieFrom(HttpClientResponse response) {
         String set_cookie = response.getHeader(HttpHeaderNames.SET_COOKIE);
-        return Arrays.stream(set_cookie.split(";")).filter(element -> element.startsWith(SESSION_COOKIE_NAME_DEFAULT))
+        return Arrays.stream(set_cookie.split(";")).filter(element -> element.startsWith(DEFAULT_SESSION_COOKIE_NAME))
             .findFirst().orElse(null);
     }
 

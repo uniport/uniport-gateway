@@ -2,8 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_LIFETIME_COOKIE_NAME_DEFAULT;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
@@ -35,7 +36,7 @@ public class SessionMiddlewareTest {
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
             assertThat(response)
-                .hasSetCookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+                .hasSetCookie(DEFAULT_SESSION_LIFETIME_COOKIE_NAME);
             testCtx.completeNow();
         });
     }
@@ -50,8 +51,8 @@ public class SessionMiddlewareTest {
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
             assertThat(response)
-                .hasHeader(SessionMiddleware.SESSION_LIFETIME_HEADER_NAME_DEFAULT)
-                .hasNotSetCookie(SESSION_LIFETIME_COOKIE_NAME_DEFAULT);
+                .hasHeader(DEFAULT_SESSION_LIFETIME_HEADER_NAME)
+                .hasNotSetCookie(DEFAULT_SESSION_LIFETIME_COOKIE_NAME);
             testCtx.completeNow();
         });
     }
@@ -115,7 +116,7 @@ public class SessionMiddlewareTest {
                 lastAccessed.add(sharedDataSession.lastAccessed());
             })
             .thenCompose(response -> {
-                headersMultiMap.add("cookie", SESSION_COOKIE_NAME_DEFAULT + "=" + sessionId.get(0));
+                headersMultiMap.add("cookie", DEFAULT_SESSION_COOKIE_NAME + "=" + sessionId.get(0));
                 return browser.request(GET, "/request2?key=value", headersMultiMap);
             })
             .whenComplete((response, error) -> {

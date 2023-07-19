@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -196,7 +196,7 @@ class CSRFMiddlewareTest {
 
             final List<String> cookies = httpClientResponse.cookies();
             final Optional<String> csrfCookie = cookies.stream().filter(cookie -> cookie.startsWith(cookieName)).findFirst();
-            final Optional<String> sessionCookie = cookies.stream().filter(cookie -> cookie.startsWith(SESSION_COOKIE_NAME_DEFAULT)).findFirst();
+            final Optional<String> sessionCookie = cookies.stream().filter(cookie -> cookie.startsWith(DEFAULT_SESSION_COOKIE_NAME)).findFirst();
 
             final String csrfToken = csrfCookie.get().split("=")[1].split(";")[0];
 

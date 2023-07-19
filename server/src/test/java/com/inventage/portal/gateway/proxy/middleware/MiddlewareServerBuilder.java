@@ -20,6 +20,7 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFact
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -72,18 +73,22 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", null, false, false,
-            null, null, null, null, null, null, uriWithoutSessionTimeoutReset));
+        return withMiddleware(new SessionMiddleware(vertx, "session", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
+            SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER, false, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY,
+            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE, SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
+            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS, uriWithoutSessionTimeoutReset));
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie,
-            null, null, null, null, null, null, null));
+        return withMiddleware(new SessionMiddleware(vertx, "session", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE, withLifetimeHeader, withLifetimeCookie, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
+            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE, SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
+            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS, null));
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset, boolean withLifetimeHeader, boolean withLifetimeCookie) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", null, withLifetimeHeader, withLifetimeCookie,
-            null, null, null, null, null, null, uriWithoutSessionTimeoutReset));
+        return withMiddleware(new SessionMiddleware(vertx, "session", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE, withLifetimeHeader, withLifetimeCookie, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
+            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE, SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
+            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS, uriWithoutSessionTimeoutReset));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {

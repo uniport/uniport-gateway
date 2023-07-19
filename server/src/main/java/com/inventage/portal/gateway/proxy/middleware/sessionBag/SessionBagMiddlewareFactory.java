@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
-    private static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
+    private static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
     private static final String MIDDLEWARE_SESSION_BAG = "sessionBag";
 

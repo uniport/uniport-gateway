@@ -6,7 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeC
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
 import io.vertx.core.Future;
@@ -811,7 +811,7 @@ public class DynamicConfiguration {
                         if (cookieName == null) {
                             LOGGER.debug(String.format(
                                 "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT));
+                                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
                         }
                         final String cookiePath = cookie.getString(MIDDLEWARE_CSRF_COOKIE_PATH);
                         if (cookiePath == null) {
@@ -981,7 +981,7 @@ public class DynamicConfiguration {
                         LOGGER.debug(String.format(
                             "%s: No session cookie name specified to be removed. Use default value: %s",
                             mwType,
-                            SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT));
+                            SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
                     }
                     break;
                 }
@@ -991,7 +991,7 @@ public class DynamicConfiguration {
                     if (sessionIdleTimeoutInMinutes == null) {
                         LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s",
                             mwType,
-                            SessionMiddleware.SESSION_IDLE_TIMEOUT_IN_MINUTE_DEFAULT));
+                            SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE));
                     } else {
                         if (sessionIdleTimeoutInMinutes <= 0) {
                             return Future.failedFuture(String
@@ -1002,7 +1002,7 @@ public class DynamicConfiguration {
                     if (sessionIdMinLength == null) {
                         LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s",
                             mwType,
-                            SessionMiddleware.SESSION_ID_MINIMUM_LENGTH_DEFAULT));
+                            SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH));
                     } else {
                         if (sessionIdMinLength <= 0) {
                             return Future.failedFuture(String
@@ -1012,17 +1012,17 @@ public class DynamicConfiguration {
                     final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
                     if (nagHttps == null) {
                         LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
-                            SessionMiddleware.NAG_HTTPS_DEFAULT));
+                            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS));
                     }
                     final Boolean lifetimeHeader = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_HEADER);
                     if (lifetimeHeader == null) {
                         LOGGER.debug(String.format("%s: LifetimeHeader not specified. Use default value: %s", mwType,
-                            SessionMiddleware.SESSION_LIFETIME_HEADER_DEFAULT));
+                            SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER));
                     }
                     final Boolean lifetimeCookie = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_COOKIE);
                     if (lifetimeCookie == null) {
                         LOGGER.debug(String.format("%s: LifetimeCookie not specified. Use default value: %s", mwType,
-                            SessionMiddleware.SESSION_LIFETIME_COOKIE_DEFAULT));
+                            SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE));
                     }
                     final String uriWithoutSessionTimeoutReset = mwOptions.getString(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
                     if (uriWithoutSessionTimeoutReset == null) {
@@ -1036,17 +1036,17 @@ public class DynamicConfiguration {
                         if (cookieName == null) {
                             LOGGER.debug(String.format(
                                 "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT));
+                                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
                         }
                         final Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
                         if (cookieHttpOnly == null) {
                             LOGGER.debug(String.format("%s: Cookie HttpOnly not specified. Use default value: %s",
-                                mwType, SessionMiddleware.COOKIE_HTTP_ONLY_DEFAULT));
+                                mwType, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY));
                         }
                         final String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
                         if (cookieSameSite == null) {
                             LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s",
-                                mwType, SessionMiddleware.COOKIE_SAME_SITE_DEFAULT));
+                                mwType, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE));
                         } else {
                             try {
                                 CookieSameSite.valueOf(cookieSameSite);

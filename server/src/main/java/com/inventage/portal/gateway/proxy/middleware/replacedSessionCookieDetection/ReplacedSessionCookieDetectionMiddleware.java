@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
@@ -24,7 +24,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
 
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
 
-    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddleware.SESSION_COOKIE_NAME_DEFAULT;
+    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
     private final String name;
