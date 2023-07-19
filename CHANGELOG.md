@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for periodical public keys refreshs for `bearerOnly` and `passAuthorization` middlewares. Can be configured with `publicKeysReconcilation.enabled` and `publicKeysReconcilation.intervalMs` in the middleware options ([PORTAL-1020](https://issue.inventage.com/browse/PORTAL-1020)).
 - Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
 - Enhanced configuration for CSP-middleware. It is possible to define how external/incoming CSP policies should be merged with the middleware policies ([PORTAL-1470](https://issue.inventage.com/browse/PORTAL-1470)).
+- Language cookie name can be configured ([PORTAL-1636](https://issue.inventage.com/browse/PORTAL-1636)).
 
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 

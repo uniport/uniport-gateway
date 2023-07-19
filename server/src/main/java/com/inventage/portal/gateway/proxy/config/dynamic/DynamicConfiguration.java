@@ -103,6 +103,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
     // language cookie
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
+    public static final String MIDDLEWARE_LANGUAGE_COOKIE_NAME = "name";
     // oauth2
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
@@ -371,6 +372,8 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_CLAIM_TO_HEADER_PATH, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CLAIM_TO_HEADER_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
 

@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
-import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
@@ -21,15 +19,18 @@ public class LanguageCookieMiddleware implements Middleware {
 
     private final String name;
 
-    public LanguageCookieMiddleware(String name) {
+    private final String languageCookieName;
+
+    public LanguageCookieMiddleware(String name, String languageCookieName) {
         this.name = name;
+        this.languageCookieName = languageCookieName;
     }
 
     @Override
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        Cookie cookie = ctx.request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME);
+        Cookie cookie = ctx.request().getCookie(languageCookieName);
 
         // backward compatibility because of cookie name change (https://issue.inventage.com/browse/PORTAL-718)
         if (cookie == null) {
@@ -37,7 +38,7 @@ public class LanguageCookieMiddleware implements Middleware {
         }
 
         if (cookie != null) {
-            LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", DEFAULT_LANGUAGE_COOKIE_NAME,
+            LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", languageCookieName,
                 cookie.getValue());
             ctx.request().headers().remove(HttpHeaders.ACCEPT_LANGUAGE);
             ctx.request().headers().add(HttpHeaders.ACCEPT_LANGUAGE, cookie.getValue());

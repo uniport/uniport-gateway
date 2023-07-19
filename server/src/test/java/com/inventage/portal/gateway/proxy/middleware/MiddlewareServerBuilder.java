@@ -15,6 +15,7 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
@@ -180,7 +181,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
-        return withMiddleware(new LanguageCookieMiddleware("languageCookie"));
+        return withMiddleware(new LanguageCookieMiddleware("languageCookie", LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME));
     }
 
     public MiddlewareServerBuilder withControlApiMiddleware(String action) {
