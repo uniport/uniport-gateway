@@ -701,6 +701,30 @@ public class DynamicConfigurationTest {
                                     .add(123)
                                     .add(true))))))));
 
+        final JsonObject cspViolationReportingServerMiddlewareWithLogLevelTrace = TestUtils
+            .buildConfiguration(TestUtils
+                .withMiddlewares(TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
+                    TestUtils.withMiddlewareOpts(new JsonObject().put(
+                        DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
+                        "TRACE")))));
+
+        final JsonObject cspViolationReportingServerMiddlewareWithLogLevelWithWeirdCaps = TestUtils
+            .buildConfiguration(TestUtils
+                .withMiddlewares(TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
+                    TestUtils.withMiddlewareOpts(new JsonObject().put(
+                        DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
+                        "eRroR")))));
+
+        final JsonObject cspViolationReportingServerMiddlewareWithInvalidValues = TestUtils
+            .buildConfiguration(TestUtils
+                .withMiddlewares(TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
+                    TestUtils.withMiddlewareOpts(new JsonObject().put(
+                        DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
+                        "blub")))));
+
         JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware(
                 "sessionMiddleware",
@@ -860,6 +884,17 @@ public class DynamicConfigurationTest {
             Arguments.of("reject csp middleware with invalid values",
                 cspMiddlewareWithInvalidValues, complete,
                 expectedFalse),
+
+            // content security policy violation reporting server middleware
+            Arguments.of("accept csp violation reporting middleware with log level",
+                cspViolationReportingServerMiddlewareWithLogLevelTrace,
+                complete, expectedTrue),
+            Arguments.of("reject csp violation reporting middleware with log level with weird caps",
+                cspViolationReportingServerMiddlewareWithLogLevelWithWeirdCaps,
+                complete, expectedFalse),
+            Arguments.of("reject csp violation reporting middleware with invalid log level",
+                cspViolationReportingServerMiddlewareWithInvalidValues,
+                complete, expectedFalse),
 
             // session middleware
             Arguments.of("accept session middleware",

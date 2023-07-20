@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.csp;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -13,18 +14,22 @@ import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.function.Predicate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(VertxExtension.class)
 class CSPViolationReportingServerMiddlewareTest {
 
-    @Test
-    void shouldAcceptAndLogConformantCspViolationReports(Vertx vertx, VertxTestContext testCtx) {
+    @ParameterizedTest
+    @ValueSource(strings = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR" })
+    void shouldAcceptAndLogConformantCspViolationReports(String logLevel, Vertx vertx, VertxTestContext testCtx) {
         //given
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspViolationReportingServerMiddleware()
+            .withCspViolationReportingServerMiddleware(logLevel)
             .build().start();
 
         final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -41,19 +46,19 @@ class CSPViolationReportingServerMiddlewareTest {
             "status-code", 200,
             "violated-directive", "style-src-elem");
 
+        Predicate<ILoggingEvent> isCorrectLogLevel = e -> e.getLevel().toString().matches(logLevel);
+        Predicate<ILoggingEvent> hasViolationReport = e -> e.getFormattedMessage().matches(".*\"blocked-uri\":\"http://example.com/css/style.css\".*");
+
         //when
         gateway.incomingRequest(HttpMethod.POST, "/", new RequestOptions(), violationReport.toString(), (httpClientResponse -> {
             //then
             final int statusCode = httpClientResponse.statusCode();
-
             assertTrue(statusCode == 200,
                 "Csp violation reporting server should only accept post requests");
             assertTrue(listAppender.list
                 .stream()
-                .anyMatch(entry -> entry
-                    .getFormattedMessage()
-                    .matches(".*\"blocked-uri\":\"http://example.com/css/style.css\".*")),
-                "Csp violation reporting server should log report");
+                .anyMatch(isCorrectLogLevel.and(hasViolationReport)),
+                "Csp violation reporting server should log report on correct log level");
             testCtx.completeNow();
             logger.detachAppender(listAppender);
         }));
@@ -79,6 +84,8 @@ class CSPViolationReportingServerMiddlewareTest {
     private Logger setupLogger(ListAppender<ILoggingEvent> listAppender) {
         final Logger logger = (Logger) LoggerFactory.getLogger(CSPViolationReportingServerMiddleware.class);
         logger.addAppender(listAppender);
+        // because we also test on trace
+        logger.setLevel(Level.TRACE);
         listAppender.start();
         return logger;
     }

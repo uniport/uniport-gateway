@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 /**
  * Can be used as a CSP violation reporting server to be configured with the 'report-uri' or 'report-to' directive.
@@ -16,9 +17,11 @@ public class CSPViolationReportingServerMiddleware implements Middleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPViolationReportingServerMiddleware.class);
 
     private final String name;
+    private final Level level;
 
-    public CSPViolationReportingServerMiddleware(final String name) {
+    public CSPViolationReportingServerMiddleware(final String name, final Level level) {
         this.name = name;
+        this.level = level;
     }
 
     @Override
@@ -38,11 +41,43 @@ public class CSPViolationReportingServerMiddleware implements Middleware {
             } else {
                 errMsg = String.format("Received CSP violation report: '%s'", body.toString());
             }
-            LOGGER.warn(errMsg);
+            log(errMsg);
         }).onFailure(err -> {
             LOGGER.warn("Received CSP violation report, but failed to read body '{}'", err.getMessage());
         });
 
         ctx.end();
+    }
+
+    private void log(String msg) {
+        switch (this.level) {
+            case TRACE:
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace(msg);
+                }
+                break;
+            case DEBUG:
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(msg);
+                }
+                break;
+            case INFO:
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(msg);
+                }
+                break;
+            case WARN:
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn(msg);
+                }
+                break;
+            case ERROR:
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(msg);
+                }
+                break;
+            default:
+                throw new RuntimeException("unreachable switch case");
+        }
     }
 }

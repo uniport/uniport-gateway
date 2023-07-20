@@ -13,7 +13,10 @@
         "middlewares": [
             {
                 "name": "cspViolationReportingServer",
-                "type": "cspViolationReportingServer"
+                "type": "cspViolationReportingServer",
+                "options": {
+                    "logLevel": "ERROR"
+                }
             }
         ],
         "services": []

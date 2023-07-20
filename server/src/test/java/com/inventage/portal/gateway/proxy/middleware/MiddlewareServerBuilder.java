@@ -13,6 +13,7 @@ import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddle
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
@@ -46,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.event.Level;
 
 public final class MiddlewareServerBuilder {
 
@@ -168,8 +170,11 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCspViolationReportingServerMiddleware() {
-        return withMiddleware(
-            new CSPViolationReportingServerMiddleware("cspViolationReportingServer"));
+        return withCspViolationReportingServerMiddleware(CSPViolationReportingServerMiddlewareFactory.DEFAULT_LOG_LEVEL);
+    }
+
+    public MiddlewareServerBuilder withCspViolationReportingServerMiddleware(String logLevel) {
+        return withMiddleware(new CSPViolationReportingServerMiddleware("cspViolationReportingServer", Level.valueOf(logLevel)));
     }
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {

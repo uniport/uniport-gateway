@@ -89,6 +89,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL = "INTERNAL";
     // csp violation reporting server
     public static final String MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
+    public static final String MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL = "logLevel";
     // csrf
     public static final String MIDDLEWARE_CSRF = "csrf";
     public static final String MIDDLEWARE_CSRF_COOKIE = "cookie";
@@ -191,6 +192,7 @@ public class DynamicConfiguration {
 
     // option enumerations of various middlewares
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
+    public static final List<String> MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = List.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
     public static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
     public static final List<String> AUTH_HANDLER_CLAIM_OPERATORS = List.of(
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
@@ -289,6 +291,8 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
             .property(MIDDLEWARE_CSP_MERGE_STRATEGY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
+            .property(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.toArray())))
             .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema()
                 .property(MIDDLEWARE_CSRF_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
@@ -785,6 +789,11 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER: {
+                    final String logLevel = mwOptions.getString(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL);
+                    if (logLevel != null && !MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.contains(logLevel)) {
+                        return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
+                            MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel, MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS));
+                    }
                     break;
                 }
                 case MIDDLEWARE_CSRF: {
