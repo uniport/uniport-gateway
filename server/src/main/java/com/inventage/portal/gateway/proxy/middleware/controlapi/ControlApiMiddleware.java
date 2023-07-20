@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.Cookie;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpRequest;
@@ -76,7 +77,7 @@ public class ControlApiMiddleware implements Middleware {
                 final List<Cookie> actionCookies = storedCookies.stream()
                     .filter(cookie -> Objects.equals(cookie.getName(), CONTROL_COOKIE_NAME))
                     .filter(cookie -> Objects.equals(cookie.getValue(), action))
-                    .collect(Collectors.toList());
+                    .toList();
 
                 final Optional<Cookie> controlApiActionToExecute = actionCookies.stream().findFirst();
                 if (controlApiActionToExecute.isPresent()) {
@@ -187,7 +188,7 @@ public class ControlApiMiddleware implements Middleware {
             final HashSet<Cookie> cookies = (HashSet<Cookie>) sessionData.get(SESSION_BAG_COOKIES);
             final Cookie authCookie = cookies.stream().filter(cookie -> cookie.getName().equals("KEYCLOAK_IDENTITY")).findFirst().orElseThrow();
 
-            request.putHeader(authCookie.getName(), authCookie.getName());
+            request.putHeader(HttpHeaders.COOKIE.toString(), authCookie.encode());
             request.send()
                 .onSuccess(response -> LOGGER.info("keycloak was successfully informed of session reset. Response: {}", response))
                 .onFailure(throwable -> LOGGER.warn("keycloak was not informed of session reset: {}", throwable.getMessage()));
