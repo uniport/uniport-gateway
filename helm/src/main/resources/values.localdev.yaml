@@ -83,6 +83,8 @@ configMaps:
         valueFromFile: proxy-config.examples/dynamic-config/content/config.json
       dynamic-config..conversation..config.json:
         valueFromFile: proxy-config.examples/dynamic-config/conversation/config.json
+      dynamic-config..csp..config.json:
+        valueFromFile: proxy-config.examples/dynamic-config/csp/config.json
       dynamic-config..dashboard..config.json:
         valueFromFile: proxy-config.examples/dynamic-config/dashboard/config.json
       dynamic-config..filestorage..config.json:
