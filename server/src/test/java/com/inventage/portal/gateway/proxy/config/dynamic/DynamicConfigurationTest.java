@@ -9,7 +9,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,34 +34,34 @@ public class DynamicConfigurationTest {
         */
 
         // root
-        JsonObject nullConfig = null;
+        final JsonObject nullConfig = null;
 
-        JsonObject emptyConfig = new JsonObject();
+        final JsonObject emptyConfig = new JsonObject();
 
-        JsonObject unknownConfigKey = new JsonObject().put("blub", true);
+        final JsonObject unknownConfigKey = new JsonObject().put("blub", true);
 
         // http
-        JsonObject nullHttp = new JsonObject().put(DynamicConfiguration.HTTP, null);
+        final JsonObject nullHttp = new JsonObject().put(DynamicConfiguration.HTTP, null);
 
-        JsonObject emptyHttp = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject());
+        final JsonObject emptyHttp = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject());
 
-        JsonObject unknownHttpKey = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject unknownHttpKey = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put("blub", new JsonArray()));
 
         // http routers
-        JsonObject nullHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject nullHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, null));
 
-        JsonObject emptyHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject emptyHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray()));
 
-        JsonObject singleMinimalHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleMinimalHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.ROUTER_NAME, "foo")
                     .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))));
 
-        JsonObject singleCompleteHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleCompleteHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray().add(new JsonObject()
                 .put(DynamicConfiguration.ROUTER_NAME, "foo")
                 .put(DynamicConfiguration.ROUTER_SERVICE, "bar")
@@ -65,14 +70,14 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.ROUTER_RULE, "bla")
                 .put(DynamicConfiguration.ROUTER_PRIORITY, 42))));
 
-        JsonObject unkownKeyHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject unkownKeyHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.ROUTER_NAME, "foo")
                     .put(DynamicConfiguration.ROUTER_SERVICE, "bar")
                     .put("blub", "baz"))));
 
-        JsonObject doubleMinimalHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject doubleMinimalHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS,
                 new JsonArray()
                     .add(new JsonObject()
@@ -86,14 +91,14 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.ROUTER_SERVICE,
                             "testing"))));
 
-        JsonObject duplicatedRouter = new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
+        final JsonObject duplicatedRouter = new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
             .put(DynamicConfiguration.ROUTER_SERVICE, "bar");
-        JsonObject dublicatedMinimalHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject dublicatedMinimalHttpRouters = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS, new JsonArray().add(duplicatedRouter)
                     .add(duplicatedRouter)));
 
-        JsonObject minimalAndEmptyHttpRouters = new JsonObject()
+        final JsonObject minimalAndEmptyHttpRouters = new JsonObject()
             .put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.ROUTERS,
                     new JsonArray()
@@ -105,19 +110,19 @@ public class DynamicConfigurationTest {
                         .add(new JsonObject())));
 
         // http middlewares
-        JsonObject nullHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject nullHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES, null));
 
-        JsonObject emptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject emptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()));
 
-        JsonObject unkownHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject unkownHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE, "blub"))));
 
-        JsonObject requestResponseLoggerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject requestResponseLoggerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
@@ -128,7 +133,7 @@ public class DynamicConfigurationTest {
                             DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX,
                             ".*/health.*|.*/ready.*")))));
 
-        JsonObject requestResponseLoggerHttpMiddlewareMinimal = new JsonObject().put(
+        final JsonObject requestResponseLoggerHttpMiddlewareMinimal = new JsonObject().put(
             DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -136,7 +141,7 @@ public class DynamicConfigurationTest {
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER))));
 
-        JsonObject replacePathRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject replacePathRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
@@ -149,7 +154,7 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
                                 "foobar")))));
 
-        JsonObject replacePathRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(
+        final JsonObject replacePathRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(
             DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -157,7 +162,7 @@ public class DynamicConfigurationTest {
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX))));
 
-        JsonObject directRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject directRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -171,21 +176,21 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT,
                                 "foorbar")))));
 
-        JsonObject directRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject directRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX))));
 
-        JsonObject headersHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject headersHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_HEADERS))));
 
-        JsonObject headersHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject headersHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
@@ -198,14 +203,14 @@ public class DynamicConfigurationTest {
                                 "foo",
                                 "bar"))))));
 
-        JsonObject authBearerHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject authBearerHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER))));
 
-        JsonObject authBearerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject authBearerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -217,7 +222,7 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
                                 "blub")))));
 
-        JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils
+        final JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils
             .buildConfiguration(TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
                 DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                 TestUtils.withMiddlewareOpts(
@@ -225,7 +230,7 @@ public class DynamicConfigurationTest {
                         DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
                         "blub")))));
 
-        JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
+        final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
                 DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
                 TestUtils.withMiddlewareOpts(new JsonObject()
@@ -238,7 +243,7 @@ public class DynamicConfigurationTest {
                     .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
                         new JsonArray().add("blub"))))));
 
-        JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils
+        final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
                     DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
@@ -253,7 +258,7 @@ public class DynamicConfigurationTest {
                             new JsonArray().add(
                                 "blub"))))));
 
-        JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils
+        final JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
                     DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
@@ -270,7 +275,7 @@ public class DynamicConfigurationTest {
                                 .add(123)
                                 .add(true))))));
 
-        JsonObject bearerOnlyHttpMiddleware = TestUtils
+        final JsonObject bearerOnlyHttpMiddleware = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
                     DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
@@ -288,14 +293,14 @@ public class DynamicConfigurationTest {
                             new JsonArray().add(
                                 "blub"))))));
 
-        JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_OAUTH2))));
 
-        JsonObject oauth2PathHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject oauth2PathHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -313,14 +318,14 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE,
                                 "blub")))));
 
-        JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_SESSION_BAG))));
 
-        JsonObject sessionBagHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject sessionBagHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -337,7 +342,7 @@ public class DynamicConfigurationTest {
                                     .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
                                         "/bar")))))));
 
-        JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -350,7 +355,7 @@ public class DynamicConfigurationTest {
                                 "blub"))
                     .put("blub", true))));
 
-        JsonObject doubleHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject doubleHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                 .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
@@ -369,18 +374,18 @@ public class DynamicConfigurationTest {
                             DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
                             "blub")))));
 
-        JsonObject duplicatedMiddleware = new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+        final JsonObject duplicatedMiddleware = new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
             .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                 DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
             .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
                 .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
                     "blub"));
-        JsonObject duplicatedHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject duplicatedHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(duplicatedMiddleware).add(duplicatedMiddleware)));
 
-        JsonObject completeAndEmptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject completeAndEmptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                 .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
@@ -392,26 +397,26 @@ public class DynamicConfigurationTest {
                 .add(new JsonObject())));
 
         // http services
-        JsonObject nullHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject nullHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES, null));
 
-        JsonObject emptyHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject emptyHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()));
 
-        JsonObject singleHttpServiceWithNoServers = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleHttpServiceWithNoServers = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.SERVICE_NAME, "foo")
                     .put(DynamicConfiguration.SERVICE_SERVERS, null))));
 
-        JsonObject singleHttpServiceWithEmptyServers = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleHttpServiceWithEmptyServers = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.SERVICE_NAME, "foo")
                     .put(DynamicConfiguration.SERVICE_SERVERS,
                         new JsonArray()))));
 
-        JsonObject singleHttpServiceWithOneServer = new JsonObject()
+        final JsonObject singleHttpServiceWithOneServer = new JsonObject()
             .put(DynamicConfiguration.HTTP,
                 new JsonObject().put(DynamicConfiguration.SERVICES,
                     new JsonArray().add(new JsonObject().put(
@@ -425,7 +430,7 @@ public class DynamicConfigurationTest {
                                     .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                                         1234))))));
 
-        JsonObject singleHttpServiceWithOneMissingKeyServer = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleHttpServiceWithOneMissingKeyServer = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray().add(new JsonObject()
                 .put(DynamicConfiguration.SERVICE_NAME, "foo")
                 .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
@@ -433,7 +438,7 @@ public class DynamicConfigurationTest {
                         DynamicConfiguration.SERVICE_SERVER_HOST,
                         "localhost"))))));
 
-        JsonObject singleHttpServiceWithOneUnkownKeyServer = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleHttpServiceWithOneUnkownKeyServer = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.SERVICE_NAME, "foo")
@@ -445,7 +450,7 @@ public class DynamicConfigurationTest {
                                 1234)
                             .put("blub", true))))));
 
-        JsonObject singleHttpServiceWithTwoServers = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject singleHttpServiceWithTwoServers = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray().add(new JsonObject()
                 .put(DynamicConfiguration.SERVICE_NAME, "foo")
                 .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
@@ -460,7 +465,7 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                             5678))))));
 
-        JsonObject unkownKeyHttpService = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject unkownKeyHttpService = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.SERVICE_NAME, "foo")
@@ -472,7 +477,7 @@ public class DynamicConfigurationTest {
                                 1234)))
                     .put("blub", true))));
 
-        JsonObject doubleHttpServices = new JsonObject()
+        final JsonObject doubleHttpServices = new JsonObject()
             .put(DynamicConfiguration.HTTP,
                 new JsonObject()
                     .put(DynamicConfiguration.SERVICES,
@@ -500,16 +505,16 @@ public class DynamicConfigurationTest {
                                             .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                                                 1234))))));
 
-        JsonObject duplicatedService = new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
+        final JsonObject duplicatedService = new JsonObject().put(DynamicConfiguration.SERVICE_NAME, "foo").put(
             DynamicConfiguration.SERVICE_SERVERS,
             new JsonArray().add(new JsonObject()
                 .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
                 .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234)));
-        JsonObject duplicatedHttpServices = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject()
+        final JsonObject duplicatedHttpServices = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject()
             .put(DynamicConfiguration.SERVICES,
                 new JsonArray().add(duplicatedService).add(duplicatedService)));
 
-        JsonObject completeAndEmptyHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject completeAndEmptyHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES,
                 new JsonArray()
                     .add(new JsonObject().put(
@@ -524,7 +529,7 @@ public class DynamicConfigurationTest {
                                         1234))))
                     .add(new JsonObject())));
 
-        JsonObject httpRouterWithMiddlewareAndService = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject httpRouterWithMiddlewareAndService = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
@@ -558,7 +563,7 @@ public class DynamicConfigurationTest {
                                         .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                                             1234))))));
 
-        JsonObject httpRouterWithMissingMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject httpRouterWithMissingMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
@@ -582,7 +587,7 @@ public class DynamicConfigurationTest {
                                         .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                                             1234))))));
 
-        JsonObject httpRouterWithMissingService = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject httpRouterWithMissingService = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
@@ -604,7 +609,7 @@ public class DynamicConfigurationTest {
                                 DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
                                 "blub")))));
 
-        JsonObject controlApiMiddlewareWithSessionTermination = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject controlApiMiddlewareWithSessionTermination = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
@@ -638,7 +643,7 @@ public class DynamicConfigurationTest {
                                         .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                                             1234))))));
 
-        JsonObject controlApiMiddlewareWithSessionReset = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject controlApiMiddlewareWithSessionReset = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
@@ -672,7 +677,7 @@ public class DynamicConfigurationTest {
                                         .put(DynamicConfiguration.SERVICE_SERVER_PORT,
                                             1234))))));
 
-        JsonObject cspMiddlewareWithDefaultSrcSelf = TestUtils
+        final JsonObject cspMiddlewareWithDefaultSrcSelf = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
                     DynamicConfiguration.MIDDLEWARE_CSP,
@@ -686,7 +691,7 @@ public class DynamicConfigurationTest {
                                     new JsonArray().add(
                                         "self"))))))));
 
-        JsonObject cspMiddlewareWithInvalidValues = TestUtils
+        final JsonObject cspMiddlewareWithInvalidValues = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
                     DynamicConfiguration.MIDDLEWARE_CSP,
@@ -725,7 +730,7 @@ public class DynamicConfigurationTest {
                         DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
                         "blub")))));
 
-        JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+        final JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware(
                 "sessionMiddleware",
                 DynamicConfiguration.MIDDLEWARE_SESSION,
@@ -741,7 +746,7 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
 
-        JsonObject sessionMiddlewareMinimal = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+        final JsonObject sessionMiddlewareMinimal = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware(
                 "sessionMiddleware",
                 DynamicConfiguration.MIDDLEWARE_SESSION,
@@ -756,10 +761,10 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
                             .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
 
-        JsonObject openTelemetryMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+        final JsonObject openTelemetryMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware("openTelemetry", DynamicConfiguration.MIDDLEWARE_OPEN_TELEMETRY)));
 
-        JsonObject claimToHeaderMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
+        final JsonObject claimToHeaderMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware("claimToHeader", DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER,
                 TestUtils.withMiddlewareOpts(
                     new JsonObject()
@@ -767,12 +772,12 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER_NAME, "headerName")))));
 
         // the sole purpose of the following variable are to improve readability
-        boolean expectedTrue = true;
-        boolean expectedFalse = false;
+        final boolean expectedTrue = true;
+        final boolean expectedFalse = false;
 
         // the default used in the following should be "complete" since it is more restrictive
-        boolean complete = true;
-        boolean incomplete = false;
+        final boolean complete = true;
+        final boolean incomplete = false;
 
         return Stream.of(
             // general
@@ -951,25 +956,25 @@ public class DynamicConfigurationTest {
 
     static Stream<Arguments> isEmptyConfigurationTestData() {
 
-        JsonObject nullConfig = null;
+        final JsonObject nullConfig = null;
 
-        JsonObject emptyConfig = new JsonObject();
+        final JsonObject emptyConfig = new JsonObject();
 
-        JsonObject nullHttp = new JsonObject().put(DynamicConfiguration.HTTP, null);
+        final JsonObject nullHttp = new JsonObject().put(DynamicConfiguration.HTTP, null);
 
-        JsonObject emptyHttp = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject());
+        final JsonObject emptyHttp = new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject());
 
-        JsonObject nullRouter = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject nullRouter = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, null));
-        JsonObject nullMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject nullMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES, null));
-        JsonObject nullService = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject nullService = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES, null));
-        JsonObject someRouters = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject someRouters = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray()));
-        JsonObject someMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject someMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.SERVICES, new JsonArray()));
-        JsonObject someServices = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject someServices = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()));
 
         return Stream.of(Arguments.of("null config", nullConfig, true),
@@ -984,26 +989,26 @@ public class DynamicConfigurationTest {
     }
 
     static Stream<Arguments> mergeTestData() {
-        JsonObject defaultConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject defaultConfig = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
                 .put(DynamicConfiguration.SERVICES, new JsonArray()));
 
-        Map<String, JsonObject> nullConfig = null;
-        Map<String, JsonObject> emptyConfig = new HashMap<String, JsonObject>(Map.ofEntries());
+        final Map<String, JsonObject> nullConfig = null;
+        final Map<String, JsonObject> emptyConfig = new HashMap<String, JsonObject>(Map.ofEntries());
 
-        JsonObject emptyRoutersServicesMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject emptyRoutersServicesMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
                 .put(DynamicConfiguration.SERVICES, new JsonArray()));
-        Map<String, JsonObject> emptyRoutersMiddlewaresServicesConfigs = new HashMap<String, JsonObject>(
+        final Map<String, JsonObject> emptyRoutersMiddlewaresServicesConfigs = new HashMap<String, JsonObject>(
             Map.ofEntries(
                 new AbstractMap.SimpleEntry<String, JsonObject>("oneConfig",
                     emptyRoutersServicesMiddlewares),
                 new AbstractMap.SimpleEntry<String, JsonObject>("anotherConfig",
                     emptyRoutersServicesMiddlewares)));
 
-        JsonObject someConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject someConfig = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray()
@@ -1023,7 +1028,7 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.SERVICE_SERVERS,
                                 new JsonArray()))));
 
-        Map<String, JsonObject> distinctConfigs = new HashMap<String, JsonObject>(Map.ofEntries(
+        final Map<String, JsonObject> distinctConfigs = new HashMap<String, JsonObject>(Map.ofEntries(
             new AbstractMap.SimpleEntry<String, JsonObject>("someConfig", someConfig),
             new AbstractMap.SimpleEntry<String, JsonObject>("anotherConfig",
                 new JsonObject().put(DynamicConfiguration.HTTP, new JsonObject()
@@ -1042,7 +1047,7 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.SERVICE_SERVERS,
                                 new JsonArray())))))));
 
-        JsonObject expectedMergedDistinctConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject expectedMergedDistinctConfig = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject().put(
@@ -1072,11 +1077,11 @@ public class DynamicConfigurationTest {
                             .put(DynamicConfiguration.SERVICE_SERVERS,
                                 new JsonArray()))));
 
-        Map<String, JsonObject> overlappingConfigs = new HashMap<String, JsonObject>(
+        final Map<String, JsonObject> overlappingConfigs = new HashMap<String, JsonObject>(
             Map.ofEntries(new AbstractMap.SimpleEntry<String, JsonObject>("someConfig", someConfig),
                 new AbstractMap.SimpleEntry<String, JsonObject>("sameConfig",
                     someConfig)));
-        JsonObject mergedOverlappingConfig = someConfig;
+        final JsonObject mergedOverlappingConfig = someConfig;
 
         return Stream.of(Arguments.of("null returns an empty configuration", nullConfig, defaultConfig),
             Arguments.of("empty returns an empty configuration", emptyConfig, defaultConfig),
@@ -1087,22 +1092,22 @@ public class DynamicConfigurationTest {
     }
 
     static Stream<Arguments> getObjByKeyWithValueTestData() {
-        JsonArray nullArray = null;
-        JsonArray emptyArray = new JsonArray();
+        final JsonArray nullArray = null;
+        final JsonArray emptyArray = new JsonArray();
 
-        String theHolyKey = "someKey";
-        String theHolyValue = "someValue";
+        final String theHolyKey = "someKey";
+        final String theHolyValue = "someValue";
 
-        JsonObject theHolyObject = new JsonObject().put(theHolyKey, theHolyValue).put("foo", "bar");
-        JsonObject theUnwantedObject = new JsonObject().put(theHolyKey, "anotherValue").put("foo", "baz");
-        JsonObject theUnwantedObjectJunior = new JsonObject().put(theHolyKey, "wrongValue").put("foo", "baz");
+        final JsonObject theHolyObject = new JsonObject().put(theHolyKey, theHolyValue).put("foo", "bar");
+        final JsonObject theUnwantedObject = new JsonObject().put(theHolyKey, "anotherValue").put("foo", "baz");
+        final JsonObject theUnwantedObjectJunior = new JsonObject().put(theHolyKey, "wrongValue").put("foo", "baz");
 
-        JsonArray oneObjectWithMatch = new JsonArray().add(theHolyObject);
-        JsonArray oneObjectWithoutMatch = new JsonArray().add(theUnwantedObject);
-        JsonArray multipleObjectsWithMatch = new JsonArray().add(theHolyObject).add(theUnwantedObject);
-        JsonArray multipleObjectsWithoutMatch = new JsonArray().add(theUnwantedObject)
+        final JsonArray oneObjectWithMatch = new JsonArray().add(theHolyObject);
+        final JsonArray oneObjectWithoutMatch = new JsonArray().add(theUnwantedObject);
+        final JsonArray multipleObjectsWithMatch = new JsonArray().add(theHolyObject).add(theUnwantedObject);
+        final JsonArray multipleObjectsWithoutMatch = new JsonArray().add(theUnwantedObject)
             .add(theUnwantedObjectJunior);
-        JsonArray stringArray = new JsonArray().add("blub").add("this").add("that");
+        final JsonArray stringArray = new JsonArray().add("blub").add("this").add("that");
 
         return Stream.of(Arguments.of("null array", nullArray, theHolyKey, theHolyValue, null),
             Arguments.of("empty array", emptyArray, theHolyKey, theHolyValue, null),
@@ -1145,8 +1150,8 @@ public class DynamicConfigurationTest {
 
     @Test
     void buildDefaultConfigurationTest(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject actualConfig = DynamicConfiguration.buildDefaultConfiguration();
-        JsonObject expectedConfig = new JsonObject().put(DynamicConfiguration.HTTP,
+        final JsonObject actualConfig = DynamicConfiguration.buildDefaultConfiguration();
+        final JsonObject expectedConfig = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
                 .put(DynamicConfiguration.SERVICES, new JsonArray()));
@@ -1160,7 +1165,7 @@ public class DynamicConfigurationTest {
         String name, JsonObject json, boolean expected, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'", name,
+        final String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'", name,
             expected ? "succeeded" : "failed", json != null ? json.encodePrettily() : json);
         testCtx.verify(() -> assertEquals(expected, DynamicConfiguration.isEmptyConfiguration(json), errMsg));
         testCtx.completeNow();
@@ -1172,42 +1177,42 @@ public class DynamicConfigurationTest {
         String name, Map<String, JsonObject> configurations, JsonObject expected, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        String errMsg = String.format("'%s' failed. Input: '%s'", name, configurations);
+        final String errMsg = String.format("'%s' failed. Input: '%s'", name, configurations);
 
-        Comparator<JsonObject> sortByName = new Comparator<JsonObject>() {
+        final Comparator<JsonObject> sortByName = new Comparator<JsonObject>() {
 
             @Override
             public int compare(JsonObject a, JsonObject b) {
-                String nameA = a.getString(DynamicConfiguration.ROUTER_NAME);
-                String nameB = b.getString(DynamicConfiguration.ROUTER_NAME);
+                final String nameA = a.getString(DynamicConfiguration.ROUTER_NAME);
+                final String nameB = b.getString(DynamicConfiguration.ROUTER_NAME);
 
                 return nameA.compareTo(nameB);
             }
 
         };
 
-        JsonObject actual = DynamicConfiguration.merge(configurations);
+        final JsonObject actual = DynamicConfiguration.merge(configurations);
         testCtx.verify(() -> {
             assertNotNull(actual, errMsg);
 
-            JsonObject expectedHttp = expected.getJsonObject(DynamicConfiguration.HTTP);
-            JsonObject actualHttp = actual.getJsonObject(DynamicConfiguration.HTTP);
+            final JsonObject expectedHttp = expected.getJsonObject(DynamicConfiguration.HTTP);
+            final JsonObject actualHttp = actual.getJsonObject(DynamicConfiguration.HTTP);
             assertNotNull(actualHttp, errMsg);
 
-            JsonArray expectedRouters = expectedHttp.getJsonArray(DynamicConfiguration.ROUTERS);
-            JsonArray actualRouters = actualHttp.getJsonArray(DynamicConfiguration.ROUTERS);
+            final JsonArray expectedRouters = expectedHttp.getJsonArray(DynamicConfiguration.ROUTERS);
+            final JsonArray actualRouters = actualHttp.getJsonArray(DynamicConfiguration.ROUTERS);
             Collections.sort((List<JsonObject>) expectedRouters.getList(), sortByName);
             Collections.sort((List<JsonObject>) actualRouters.getList(), sortByName);
             assertEquals(expectedRouters, actualRouters, errMsg);
 
-            JsonArray expectedMiddlewares = expectedHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            JsonArray actualMiddlewares = actualHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            final JsonArray expectedMiddlewares = expectedHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+            final JsonArray actualMiddlewares = actualHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
             Collections.sort((List<JsonObject>) expectedMiddlewares.getList(), sortByName);
             Collections.sort((List<JsonObject>) actualMiddlewares.getList(), sortByName);
             assertEquals(expectedMiddlewares, actualMiddlewares, errMsg);
 
-            JsonArray expectedServices = expectedHttp.getJsonArray(DynamicConfiguration.SERVICES);
-            JsonArray actualServices = actualHttp.getJsonArray(DynamicConfiguration.SERVICES);
+            final JsonArray expectedServices = expectedHttp.getJsonArray(DynamicConfiguration.SERVICES);
+            final JsonArray actualServices = actualHttp.getJsonArray(DynamicConfiguration.SERVICES);
             Collections.sort((List<JsonObject>) expectedServices.getList(), sortByName);
             Collections.sort((List<JsonObject>) actualServices.getList(), sortByName);
             assertEquals(expectedServices, actualServices, errMsg);
@@ -1221,7 +1226,7 @@ public class DynamicConfigurationTest {
         String name, JsonArray arr, String key, String value, JsonObject expected,
         Vertx vertx, VertxTestContext testCtx
     ) {
-        String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'", name,
+        final String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'", name,
             arr != null ? arr.encodePrettily() : arr, key, value);
         testCtx.verify(
             () -> assertEquals(expected, DynamicConfiguration.getObjByKeyWithValue(arr, key, value),
