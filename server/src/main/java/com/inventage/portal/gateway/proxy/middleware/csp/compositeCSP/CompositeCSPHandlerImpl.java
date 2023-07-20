@@ -6,6 +6,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,7 +233,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
             if (directiveParts.length > 0) {
                 final String directive = directiveParts[0].toLowerCase();
                 final String[] values = Arrays.copyOfRange(directiveParts, 1, directiveParts.length);
-                directives.put(directive, Set.of(values));
+                directives.put(directive, new HashSet<>(Arrays.asList(values)));
             }
         }
 
