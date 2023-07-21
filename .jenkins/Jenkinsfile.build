@@ -1,3 +1,8 @@
+library identifier: 'portal-lib@master', retriever: modernSCM(
+        [$class: 'GitSCMSource',
+         remote: 'ssh://git@git.inventage.com:2048/portal/jenkinsfile-library.git',
+        ])
+
 pipeline {
     agent {
         node {
@@ -38,12 +43,17 @@ pipeline {
     stages {
         stage('Initialize') {
             steps {
-                checkout([
+                script {
+                    Map checkoutCfg = checkout([
                         $class           : 'GitSCM',
                         branches         : scm.branches,
                         extensions       : scm.extensions + [[$class: 'CleanBeforeCheckout']],
                         userRemoteConfigs: scm.userRemoteConfigs
-                ])
+                    ])
+                    env.GIT_URL = checkoutCfg.GIT_URL
+                    env.GIT_BRANCH_NAME = checkoutCfg.GIT_BRANCH
+                    echo "--> Building from remote: ${env.GIT_URL} on branch ${env.GIT_BRANCH_NAME}"
+                }
 
                 // Change the snapshot version in all pom.xml files to a release candidate version
                 updateVersion()
@@ -58,20 +68,7 @@ pipeline {
                 }
 
                 // Display important environment variables
-                sh '''
-                    set +x
-                    echo "Environment variables:"
-
-                    echo $LINE_SEPARATOR
-                    echo "PACKAGE_VERSION = $PACKAGE_VERSION"
-                    echo "PACKAGE_GROUP_ID = $PACKAGE_GROUP_ID"
-                    echo "PACKAGE_ARTIFACT_ID = $PACKAGE_ARTIFACT_ID"
-                    echo "DOCKER_PULL_REGISTRY = $DOCKER_PULL_REGISTRY"
-                    echo "DOCKER_PUSH_REGISTRY = $DOCKER_PUSH_REGISTRY"
-                    echo "PROMOTION_TAG = $PROMOTION_TAG"
-                    echo "PROMOTION_REPO_NAME = $PROMOTION_REPO_NAME"
-                    echo $LINE_SEPARATOR
-                '''
+                sh("env | sort")
             }
         }
         stage('Build') {
@@ -125,7 +122,7 @@ pipeline {
             }
             steps {
                 lock('uniport-portal-gateway-deployment-dev') {
-                    withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    withCredentials([file(credentialsId: 'ips-digitalocean-kubeconfig', variable: 'KUBECONFIG')]) {
                         sh '''
                             set +x
                             echo "Downloading service.sh"
@@ -135,7 +132,7 @@ pipeline {
                                 https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh?at=refs%2Ftags%2F1.0.0 \
                                 > service.sh
 
-                            KUBECONFIG=$KUBECONFIG_FILE bash service.sh portal-gateway install ips dev
+                            bash service.sh portal-gateway install ips dev
 
                             rm -f service.sh
                         '''
@@ -146,48 +143,57 @@ pipeline {
 
         stage('Tag Staging Repository') {
             steps {
-                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG}"
-                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG}"
-                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG}"
+                // Container Images
+                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG_DOCKER}"
+                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG_DOCKER}"
+                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG_DOCKER}"
             }
         }
 
-        stage('Trigger Release Pipeline') {
+        stage('Register Release Link') {
             steps {
-                build job: 'Inventage Portal/Portal Gateway/RegisterCandidate', wait: false, parameters: [
-                        string(name: 'nexus2StagingRepositoryId', value: "${env.STAGING_REPOSITORY_ID}"),
-                        string(name: 'nexus3TagName', value: "${env.PROMOTION_TAG}")
-                ]
+                script {
+                    def params = [
+                        "GIT_RELEASE_BRANCH_NAME": "${env.GIT_BRANCH_NAME}",
+                        "NOTIFICATIONS_RECIPIENT": "${env.NOTIFICATIONS_RECIPIENT}",
+                        "PROMOTION_TAG": "${env.PROMOTION_TAG}",
+                        "PROMOTION_TAG_HELM": "",
+                        "PROMOTION_TAG_DOCKER": "${env.PROMOTION_TAG_DOCKER}",
+                        "PROMOTION_TAG_NPM": "",
+                        "PACKAGE_VERSION": "${env.PACKAGE_VERSION}",
+                        "STAGING_REPOSITORY_ID": "${env.STAGING_REPOSITORY_ID}",
+                        "UPSTREAM_BUILD_URL": "${env.BUILD_URL}"
+                    ]
+
+                    String releaseJobUrl = portal.releaseJobUrl(
+                            "${env.JOB_URL}",
+                            "4wuNLGddgssC6G",
+                            params
+                    )
+
+                    currentBuild.description = currentBuild.description + "<br /><a href=\"${releaseJobUrl}\" target=\"_blank\">Release</a>"
+                }
             }
         }
     }
 
     post {
         always {
-            sendNotifications()
+            configFileProvider([configFile(fileId: 'default-email-recipients', variable: 'DEFAULT_EMAIL_RECIPIENTS')]) {
+                script {
+                    portal.sendNotifications(DEFAULT_EMAIL_RECIPIENTS)
+                }
+            }
         }
     }
-}
-
-/**
- * Returns the "version suffix"  variable. The format is `yyyyMMddhhmm-${JENKINS_BUILD_NUMBER}-${GIT_COMMIT_HASH}`
- *
- * @return
- */
-def getVersionSuffix() {
-    def separator = '-'
-    def now = sh(script: 'date -u +%Y%m%d%H%M', returnStdout: true).trim()
-    def gitCommitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-
-    return now + separator + "${env.BUILD_NUMBER}" + separator + gitCommitHash
 }
 
 /**
  * Sets the appropriate version in `pom.xml`.
  */
 void updateVersion() {
-    env.VERSION_SUFFIX = getVersionSuffix()
-    sh('mvn build-helper:parse-version versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.incrementalVersion}-${VERSION_SUFFIX} -DoldVersion=* -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false')
+    String versionSuffix = portal.getVersionSuffix()
+    portal.updateVersion(versionSuffix)
 }
 
 /**
@@ -204,6 +210,9 @@ void setPackageEnvironmentVariables() {
     env.DOCKER_PULL_REGISTRY = pom.properties['docker.pull.registry']
     env.DOCKER_PUSH_REGISTRY = pom.properties['docker.push.registry']
     env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
+    env.PROMOTION_TAG_DOCKER = "${env.PROMOTION_TAG}_docker"
+    env.PROMOTION_TAG_HELM = "${env.PROMOTION_TAG}_helm"
+    env.PROMOTION_TAG_NPM = "${env.PROMOTION_TAG}_npm"
     env.PROMOTION_REPO_NAME = pom.properties['docker.promotion.repository.name']
 }
 
@@ -282,24 +291,4 @@ def codeQualityEvaluation() {
                     taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
             ]
     )
-}
-
-/**
- * Sends notifications about the build status.
- *
- * @return
- */
-def sendNotifications() {
-    configFileProvider([configFile(fileId: 'default-email-recipients', variable: 'DEFAULT_EMAIL_RECIPIENTS_FILE')]) {
-        def recipient = sh(script: "git show -s --format='%ae'", returnStdout: true, encoding: 'UTF-8').trim()
-        if (!recipient) {
-            recipient = sh(script: "cat '${env.DEFAULT_EMAIL_RECIPIENTS_FILE}'", returnStdout: true, encoding: 'UTF-8').trim()
-        }
-
-        step([
-                $class                  : 'Mailer',
-                notifyEveryUnstableBuild: true,
-                recipients              : recipient
-        ])
-    }
 }
