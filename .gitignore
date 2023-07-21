@@ -15,11 +15,12 @@
 
 # Ignore all VS Code stuff and include the important things
 /.vscode/*
+!/.vscode/settings.json
+!/.vscode/launch.json
 .settings
 .project
 .classpath
 .factorypath
-!/.vscode/settings.json
 
 # Maven
 target/
