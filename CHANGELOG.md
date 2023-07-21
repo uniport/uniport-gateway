@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
 - Enhanced configuration for CSP-middleware. It is possible to define how external/incoming CSP policies should be merged with the middleware policies ([PORTAL-1470](https://issue.inventage.com/browse/PORTAL-1470)).
 - Language cookie name can be configured ([PORTAL-1636](https://issue.inventage.com/browse/PORTAL-1636)).
+- `contentTypes`, `loggingRequestEnabled` and `loggingResponseEnabled` options added for the `requestResponseLogger` middleware ([PORTAL-1341](https://issue.inventage.com/browse/PORTAL-1341)).
+- Add a CSP violation reporting server middleware ([PORTAL-1241](https://issue.inventage.com/browse/PORTAL-1241)).
+
+### Fixed
+
+- Fixed native image build ([PORTAL-764](https://issue.inventage.com/browse/PORTAL-764)).
 
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 
@@ -34,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Bug when authentication request is not initiated by Portal-Gateway ([PORTAL-1417](https://issue.inventage.com/browse/PORTAL-1417)).
-- Fixed native image build ([PORTAL-764](https://issue.inventage.com/browse/PORTAL-764)).
 
 ### Added
 
@@ -48,8 +53,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Process exits with code 0 if any middleware initialization fails ([PORTAL-1016](https://issue.inventage.com/browse/PORTAL-1016)).
 - `uriWithoutLoggingRegex` option for RequestResponseLoggerMiddleware allowing selective logging of requests based on their URI ([PORTAL-1418](https://issue.inventage.com/browse/PORTAL-1418))
 - Fail build when example configs are invalid ([PORTAL-1461](https://issue.inventage.com/browse/PORTAL-1461)).
-- `contentTypes`, `loggingRequestEnabled` and `loggingResponseEnabled` options added for the `requestResponseLogger` middleware ([PORTAL-1341](https://issue.inventage.com/browse/PORTAL-1341)).
-- Add a CSP violation reporting server middleware ([PORTAL-1241](https://issue.inventage.com/browse/PORTAL-1241)).
 
 ### Changed
 
