@@ -92,6 +92,17 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <!-- See https://github.com/kokuwaio/helm-maven-plugin for documentation -->
+                <groupId>io.kokuwa.maven</groupId>
+                <artifactId>helm-maven-plugin</artifactId>
+                <configuration>
+                    <chartDirectory>${project.build.directory}/portal-gateway</chartDirectory>
+                    <excludes>
+                        <exclude>${project.build.directory}/**/charts/*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

@@ -161,6 +161,11 @@ pipeline {
                 echo "Create Nexus3 Tag: ${env.PROMOTION_TAG_DOCKER}"
                 createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG_DOCKER}"
                 associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG_DOCKER}"
+
+                // Helm Charts
+                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG_HELM}"
+                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG_HELM}"
+                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-helm-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG_HELM}"
             }
         }
 
@@ -171,7 +176,7 @@ pipeline {
                         "GIT_RELEASE_BRANCH_NAME": "${env.GIT_BRANCH_NAME}",
                         "NOTIFICATIONS_RECIPIENT": "${env.NOTIFICATIONS_RECIPIENT}",
                         "PROMOTION_TAG": "${env.PROMOTION_TAG}",
-                        "PROMOTION_TAG_HELM": "",
+                        "PROMOTION_TAG_HELM": "${env.PROMOTION_TAG_HELM}",
                         "PROMOTION_TAG_DOCKER": "${env.PROMOTION_TAG_DOCKER}",
                         "PROMOTION_TAG_NPM": "",
                         "PACKAGE_VERSION": "${env.PACKAGE_VERSION}",
