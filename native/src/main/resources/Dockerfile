@@ -34,4 +34,7 @@ COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 
 ENV TZ="Europe/Zurich"
 
+RUN groupadd --system appuser && useradd --system --gid appuser appuser
+USER appuser
+
 ENTRYPOINT ["portal-gateway", "run", "-cluster"]

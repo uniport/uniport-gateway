@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade to Java 17 ([PORTAL-1575](https://issue.inventage.com/browse/PORTAL-1575)).
 - Upgrade the Vert.x stack to `4.4.4` ([PORTAL-1454](https://issue.inventage.com/browse/PORTAL-1454)).
 - Upgrade all plugins and dependecies to their latest version.
+- Changed user in docker containers to non-root ([PORTAL-1342](https://issue.inventage.com/browse/PORTAL-1342)).
 
 ### Added
 
