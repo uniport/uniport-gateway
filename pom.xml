@@ -47,8 +47,6 @@
         <!-- https://github.com/open-telemetry/opentelemetry-java/releases -->
         <opentelemetry.version>1.27.0</opentelemetry.version>
 
-        <jib.goal>build</jib.goal>
-
         <portal-helm-chart-library.version>4.4.0-202307251410-244-fc44010</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.0.0-202305081139-48-275c253</portal-code-style-settings.version>
     </properties>
@@ -312,31 +310,6 @@
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.1.1</version>
-                </plugin>
-                <plugin>
-                    <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
-                    <groupId>com.google.cloud.tools</groupId>
-                    <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.3.2</version>
-                    <configuration>
-                        <from>
-                            <image>${docker.pull.registry}/eclipse-temurin:17-jre</image>
-                        </from>
-                        <to>
-                            <image>${docker.push.registry}/${docker.image.name}</image>
-                            <tags>
-                                <tag>${project.version}</tag>
-                            </tags>
-                        </to>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>${jib.goal}</goal>
-                            </goals>
-                            <phase>install</phase>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
@@ -687,7 +660,6 @@
             <!-- for local builds this should be the same as pull registry, so that we can use locally docker-compose.yml -->
             <properties>
                 <docker.push.registry>${docker.pull.registry}</docker.push.registry>
-                <jib.goal>dockerBuild</jib.goal>
             </properties>
         </profile>
         <profile>
@@ -709,6 +681,17 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>multi-arch</id>
+            <activation>
+                <property>
+                    <name>multiArchBuild</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.platforms>linux/amd64,linux/arm64</docker.platforms>
+            </properties>
         </profile>
     </profiles>
 

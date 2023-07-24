@@ -81,18 +81,18 @@ pipeline {
             steps {
                 sh 'mvn help:system'
 
-                mvn(
-                    settings: '.jenkins/settings.xml',
-                    profiles: 'jenkins,!local',
-                    properties: [
-                        'java.io.tmpdir': WORKSPACE,
-                        'multiArchBuild': true
-                    ],
-                    'clean',
-                    'deploy'
-                )
-
                 withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
+                    mvn(
+                        settings: '.jenkins/settings.xml',
+                        profiles: 'jenkins,!local',
+                        properties: [
+                            'java.io.tmpdir': WORKSPACE,
+                            'multiArchBuild': true
+                        ],
+                        'clean',
+                        'deploy'
+                    )
+
                     script {
                         env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./target/nexus-staging/staging/2784e0aacf5060.properties')
                     }

@@ -12,7 +12,6 @@
 
     <properties>
         <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
-        <docker.build.jib>true</docker.build.jib>
     </properties>
 
     <dependencies>
@@ -184,7 +183,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-configuration</id>
+                        <id>copy-dockerfile</id>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -193,47 +192,13 @@
                             <resources>
                                 <resource>
                                     <directory>src/main/docker</directory>
-                                    <filtering>false</filtering>
+                                    <filtering>true</filtering>
                                 </resource>
                             </resources>
                             <outputDirectory>${docker.contextDir}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <container>
-                        <mainClass>com.inventage.portal.gateway.PortalGatewayLauncher</mainClass>
-                        <args>
-                            <arg>run</arg>
-                            <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
-                            <arg>-cluster</arg>
-                        </args>
-                        <jvmFlags>
-                            <!-- for using 50% of memory limit as max heap size -->
-                            <jvmFlag>-XX:MaxRAMPercentage=50.0</jvmFlag>
-                            <!-- for printing setting out on VM startup -->
-                            <jvmFlag>-XX:+PrintFlagsFinal</jvmFlag>
-                            <!-- for enabling remote debugging -->
-                            <!--                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n</jvmFlag>&ndash;&gt;-->
-                            <!-- for enabling jmx for jconsole -->
-                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote</jvmFlag>-->
-                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.local.only=false</jvmFlag>-->
-                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>-->
-                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.port=9010</jvmFlag>-->
-                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=9010</jvmFlag>-->
-                            <!--                            <jvmFlag>-Djava.rmi.server.hostname=0.0.0.0</jvmFlag>-->
-                            <!--                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false'</jvmFlag>-->
-                        </jvmFlags>
-                        <environment>
-                            <TZ>Europe/Zurich</TZ>
-                        </environment>
-                    </container>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -273,6 +238,7 @@
                         </transformer>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                     </transformers>
+                    <outputDirectory>${docker.contextDir}</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -282,6 +248,10 @@
                         <phase>package</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
             </plugin>
             <!-- for creating the specific.env file needed in runConfigurations -->
             <plugin>
@@ -302,38 +272,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>multi-arch</id>
-            <activation>
-                <property>
-                    <name>multiArchBuild</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin -->
-                        <groupId>com.google.cloud.tools</groupId>
-                        <artifactId>jib-maven-plugin</artifactId>
-                        <configuration>
-                            <from>
-                                <platforms>
-                                    <platform>
-                                        <architecture>amd64</architecture>
-                                        <os>linux</os>
-                                    </platform>
-                                    <platform>
-                                        <architecture>arm64</architecture>
-                                        <os>linux</os>
-                                    </platform>
-                                </platforms>
-                            </from>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
