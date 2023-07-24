@@ -112,14 +112,14 @@ pipeline {
                             codeQualityEvaluation()
                         },
                         'Generated Code Check': {
-                            sh '''
+                            sh """
                                 output=$(git status --porcelain --untracked-files=no | grep -v "pom.xml")
                                 if [ -n "$output" ]; then
                                     echo "You have uncommited generated code!";
                                     echo "$output";
                                     exit 1;
                                 fi
-                            '''
+                            """
                         }
                 )
             }
