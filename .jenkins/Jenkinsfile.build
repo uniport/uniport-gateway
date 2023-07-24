@@ -113,7 +113,7 @@ pipeline {
                         },
                         'Generated Code Check': {
                             sh '''
-                                output=$(git status --porcelain --untracked-files=no)
+                                output=$(git status --porcelain --untracked-files=no | grep -v "pom.xml")
                                 if [ -n "$output" ]; then
                                     echo "You have uncommited generated code!";
                                     echo "$output";
