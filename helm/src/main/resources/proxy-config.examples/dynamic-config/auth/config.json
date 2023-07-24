@@ -6,7 +6,6 @@
                 "rule": "PathPrefix('/auth')",
                 "middlewares": [
                     "authRedirectRegex",
-                    "fixThemeingKeycloak21",
                     "languageCookie"
                 ],
                 "service": "portal-iam"
@@ -30,14 +29,6 @@
             }
         ],
         "middlewares": [
-            {
-                "name": "fixThemeingKeycloak21",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "^(/auth/resources/[a-zA-Z0-9]{5}/common)/inventage/((web_modules/@patternfly/react-core/dist/styles/(base.css|app.css)|node_modules/patternfly/dist/css/(patternfly.min.css|patternfly-additions.min.css)|lib/pficon/pficon.css))$",
-                    "replacement": "$1/keycloak/$2"
-                }
-            },
             {
                 "name": "authRedirectRegex",
                 "type": "redirectRegex",
