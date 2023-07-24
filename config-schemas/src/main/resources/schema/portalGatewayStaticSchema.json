@@ -73,6 +73,10 @@
                       "type" : "integer",
                       "minimum" : 0
                     },
+                    "logLevel" : {
+                      "type" : "string",
+                      "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
+                    },
                     "publicKeysReconcilation" : {
                       "type" : "object",
                       "properties" : {
