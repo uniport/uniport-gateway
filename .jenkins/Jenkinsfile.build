@@ -110,6 +110,16 @@ pipeline {
                         },
                         'Code Quality': {
                             codeQualityEvaluation()
+                        },
+                        'Generated Code Check': {
+                            sh '''
+                                output=$(git status --porcelain --untracked-files=no)
+                                if [ -n "$output" ]; then
+                                    echo "You have uncommited generated code!";
+                                    echo "$output";
+                                    exit 1;
+                                fi
+                            '''
                         }
                 )
             }
