@@ -213,7 +213,6 @@
                             <arg>com.inventage.portal.gateway.core.PortalGatewayVerticle</arg>
                             <arg>-cluster</arg>
                         </args>
-                        <user>nobody</user>
                         <jvmFlags>
                             <!-- for using 50% of memory limit as max heap size -->
                             <jvmFlag>-XX:MaxRAMPercentage=50.0</jvmFlag>
