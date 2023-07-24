@@ -71,6 +71,7 @@ pipeline {
                 sh("env | sort")
             }
         }
+
         stage('Build') {
             // Use the local docker host for building the container image
             environment {
@@ -112,14 +113,16 @@ pipeline {
                             codeQualityEvaluation()
                         },
                         'Generated Code Check': {
-                            sh """
-                                output=$(git status --porcelain --untracked-files=no | grep -v "pom.xml")
-                                if [ -n "$output" ]; then
-                                    echo "You have uncommited generated code!";
-                                    echo "$output";
-                                    exit 1;
-                                fi
-                            """
+                            script {
+                                def git_status_output = sh(returnStdout: true, script: "git status --porcelain --untracked-files=no").trim()
+                                git_status_output.readLines().each { line ->
+                                    echo "${line}"
+                                    if (!(line ==~ '.*pom\\.xml$')) {
+                                        echo "${git_status_output}"
+                                        error("You have uncommited generated code!")
+                                    }
+                                }
+                            }
                         }
                 )
             }
