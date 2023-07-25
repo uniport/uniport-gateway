@@ -79,7 +79,7 @@ pipeline {
                 expression { params.STAGING_REPOSITORY_ID }
             }
             steps {
-                mvn("org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=inventage-portal -DnexusUrl=https://nexus.inventage.com -DstagingRepositoryId=${params.STAGING_REPOSITORY_ID}")
+                mvn("org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=inventage-portal-group -DnexusUrl=https://nexus.inventage.com -DstagingRepositoryId=${params.STAGING_REPOSITORY_ID}")
             }
         }
 
