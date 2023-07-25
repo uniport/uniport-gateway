@@ -178,7 +178,7 @@ pipeline {
                         "UPSTREAM_BUILD_URL": "${env.BUILD_URL}"
                     ]
 
-                    String releaseJobUrl = portal.releaseJobUrl(
+                    String releaseJobUrl = releaseJobUrl(
                             "${env.JOB_URL}",
                             "4wuNLGddgssC6G",
                             params
