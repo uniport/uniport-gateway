@@ -139,7 +139,7 @@ pipeline {
 
         stage('Bump version') {
             steps {
-                bumpVersion(
+                setVersion(
                         currentVersion: params.PACKAGE_VERSION,
                         branchName: params.GIT_RELEASE_BRANCH_NAME
                 )
