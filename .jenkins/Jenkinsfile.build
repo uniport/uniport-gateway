@@ -179,9 +179,9 @@ pipeline {
                     ]
 
                     String releaseJobUrl = releaseJobUrl(
-                            "${env.JOB_URL}",
-                            "4wuNLGddgssC6G",
-                            params
+                            jobUrl: "${env.JOB_URL}",
+                            authToken: "4wuNLGddgssC6G",
+                            queryParams: params
                     )
 
                     currentBuild.description = currentBuild.description + "<br /><a href=\"${releaseJobUrl}\" target=\"_blank\">Release</a>"
