@@ -1,4 +1,4 @@
-FROM ${docker.pull.registry}/eclipse-temurin:17-jre
+FROM ${docker.registry}/eclipse-temurin:17-jre
 
 WORKDIR /app
 

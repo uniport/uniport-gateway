@@ -81,7 +81,7 @@ pipeline {
             steps {
                 sh 'mvn help:system'
 
-                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_PULL_REGISTRY}") {
+                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_REGISTRY}") {
                     mvn(
                         settings: '.jenkins/settings.xml',
                         profiles: 'jenkins,!local',
@@ -220,8 +220,7 @@ void setPackageEnvironmentVariables() {
     env.PACKAGE_VERSION = pom.version
     env.PACKAGE_GROUP_ID = pom.groupId
     env.PACKAGE_ARTIFACT_ID = pom.artifactId
-    env.DOCKER_PULL_REGISTRY = pom.properties['docker.pull.registry']
-    env.DOCKER_PUSH_REGISTRY = pom.properties['docker.push.registry']
+    env.DOCKER_REGISTRY = pom.properties['docker.registry']
     env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
     env.PROMOTION_TAG_DOCKER = "${env.PROMOTION_TAG}_docker"
     env.PROMOTION_TAG_HELM = "${env.PROMOTION_TAG}_helm"
