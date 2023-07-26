@@ -13,9 +13,10 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
+import io.vertx.httpproxy.ProxyOptions;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
-import java.util.ArrayList;
+import io.vertx.httpproxy.impl.ContextAwareReverseProxy;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +39,11 @@ public class ProxyMiddleware implements Middleware {
     private static final String DEFAULT_HTTPS_TRUST_STORE_PATH = "";
     private static final String DEFAULT_HTTPS_TRUST_STORE_PASSWORD = "";
 
-    private final HttpProxy httpProxy;
+    private final ContextAwareReverseProxy httpProxy;
 
     private final String name;
     private final String serverHost;
     private final int serverPort;
-
-    private List<Handler<StringBuilder>> incomingRequestURIModifiers;
-    private List<Handler<MultiMap>> outgoingResponseHeadersModifiers;
 
     public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
         this(vertx, name, "http", serverHost, serverPort, DEFAULT_HTTPS_TRUST_ALL, DEFAULT_HTTPS_VERIFY_HOSTNAME, DEFAULT_HTTPS_TRUST_STORE_PATH, DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
@@ -57,13 +55,11 @@ public class ProxyMiddleware implements Middleware {
     ) {
         this.name = name;
 
-        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
+        httpProxy = new ContextAwareReverseProxy(new ProxyOptions(), createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
 
-        incomingRequestURIModifiers = new ArrayList<>();
-        outgoingResponseHeadersModifiers = new ArrayList<>();
         applyModifiers(httpProxy);
     }
 
@@ -98,39 +94,27 @@ public class ProxyMiddleware implements Middleware {
                 portFromHostValue(ctx.request().host(), -1))),
             ctx.request().headers());
         ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
-        captureModifiers(ctx);
 
         LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
         try {
-            httpProxy.handle(ctx.request());
+            httpProxy.handle(ctx);
         } catch (Exception e) {
             LOGGER.error("Error while proxying request", e);
             ctx.fail(e);
         }
     }
 
-    // capture the modifiers set by previous middlewares for use by the proxy interceptors
-    protected void captureModifiers(RoutingContext ctx) {
-        final List<Handler<StringBuilder>> requestURImodifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
-        if (requestURImodifiers != null) {
-            incomingRequestURIModifiers.addAll(requestURImodifiers);
-        }
-
-        final List<Handler<MultiMap>> responseHeadersModifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
-        if (responseHeadersModifiers != null) {
-            outgoingResponseHeadersModifiers.addAll(responseHeadersModifiers);
-        }
-    }
-
     protected void applyModifiers(HttpProxy proxy) {
         proxy.addInterceptor(new ProxyInterceptor() {
             @Override
-            public Future<ProxyResponse> handleProxyRequest(ProxyContext ctx) {
-                final ProxyRequest incomingRequest = ctx.request();
+            public Future<ProxyResponse> handleProxyRequest(ProxyContext proxyContext) {
+                final ProxyRequest incomingRequest = proxyContext.request();
+
+                final RoutingContext ctx = proxyContext.get(ContextAwareReverseProxy.CONTEXT_AWARE_REVERSE_PROXY_KEY, RoutingContext.class);
 
                 // modify URI
                 final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
-                final List<Handler<StringBuilder>> modifiers = incomingRequestURIModifiers;
+                final List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
                 if (modifiers != null) {
                     if (modifiers.size() > 1) {
                         LOGGER.info("Multiple URI modifiers declared: {} (total {})", modifiers, modifiers.size());
@@ -141,28 +125,26 @@ public class ProxyMiddleware implements Middleware {
                 }
                 incomingRequest.setURI(uri.toString());
 
-                incomingRequestURIModifiers = new ArrayList<>(); // reset
-
                 // Continue the interception chain
-                return ctx.sendRequest();
+                return proxyContext.sendRequest();
             }
 
             @Override
-            public Future<Void> handleProxyResponse(ProxyContext ctx) {
-                final ProxyResponse outgoingResponse = ctx.response();
+            public Future<Void> handleProxyResponse(ProxyContext proxyContext) {
+                final ProxyResponse outgoingResponse = proxyContext.response();
+
+                final RoutingContext ctx = proxyContext.get(ContextAwareReverseProxy.CONTEXT_AWARE_REVERSE_PROXY_KEY, RoutingContext.class);
 
                 // modify headers
-                final List<Handler<MultiMap>> modifiers = outgoingResponseHeadersModifiers;
+                final List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
                 if (modifiers != null) {
                     for (Handler<MultiMap> modifier : modifiers) {
                         modifier.handle(outgoingResponse.headers());
                     }
                 }
 
-                outgoingResponseHeadersModifiers = new ArrayList<>(); // reset
-
                 // Continue the interception chain
-                return ctx.sendResponse();
+                return proxyContext.sendResponse();
             }
         });
     }
