@@ -4,7 +4,6 @@
             {
                 "name": "portal-grafana-proxy",
                 "middlewares": [
-                    "portalGrafanaCSP",
                     "portalGrafanaRedirectRegex",
                     "portalGrafanaOauth2",
                     "portalGrafanaAuthBearer",
@@ -16,20 +15,6 @@
             }
         ],
         "middlewares": [
-            {
-                "name": "portalGrafanaCSP",
-                "type": "csp",
-                "options": {
-                    "policyDirectives": [
-                        {
-                            "directive": "connect-src",
-                            "values": [
-                                "https://grafana.com"
-                            ]
-                        }
-                    ]
-                }
-            },
             {
                 "name": "portalGrafanaRedirectRegex",
                 "type": "redirectRegex",
