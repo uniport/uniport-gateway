@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed native image build ([PORTAL-764](https://issue.inventage.com/browse/PORTAL-764)).
+- Registered CORSMiddlewareFactory. Before it was not possible to use the CORSMiddleware.
 
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 
