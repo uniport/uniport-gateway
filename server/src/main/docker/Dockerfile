@@ -5,7 +5,7 @@ WORKDIR /app
 COPY ${project.artifactId}-${project.version}-fat.jar /app/portal-gateway.jar
 
 RUN groupadd --system appuser && useradd --system --gid appuser appuser
-USER appuser
+USER root
 
 ENV TZ="Europe/Zurich"
 
