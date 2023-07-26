@@ -49,7 +49,7 @@
 
         <jib.goal>build</jib.goal>
 
-        <portal-helm-chart-library.version>4.3.0-202305220818-197-8c61d10</portal-helm-chart-library.version>
+        <portal-helm-chart-library.version>4.4.0-202307251410-244-fc44010</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.0.0-202305081139-48-275c253</portal-code-style-settings.version>
     </properties>
 
