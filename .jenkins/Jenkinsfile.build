@@ -33,6 +33,7 @@ pipeline {
         IQ_SERVER_CREDENTIALS_ID = 'portal-registry-creds'
         CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
+        CI_JENKINS_TOKEN = credentials('jenkins-inventage-portal')
     }
 
     tools {
@@ -180,7 +181,7 @@ pipeline {
 
                     String releaseJobUrl = releaseJobUrl(
                             jobUrl: "${env.JOB_URL}",
-                            authToken: "4wuNLGddgssC6G",
+                            authToken: "${env.CI_JENKINS_TOKEN}",
                             queryParams: params
                     )
 
