@@ -171,7 +171,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     }
 
     private String mergePolicies(String internal, String external, CSPMergeStrategy strategy) {
-        LOGGER.info("Merging CSP policies with strategy '{}'", strategy.toString());
+        LOGGER.debug("Merging CSP policies with strategy '{}'", strategy.toString());
         switch (strategy) {
             case UNION:
                 return unitePolicies(Arrays.asList(internal, external));
