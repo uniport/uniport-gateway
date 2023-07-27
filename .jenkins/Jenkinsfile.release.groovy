@@ -146,6 +146,15 @@ pipeline {
             }
         }
 
+        stage('Update Changelog') {
+            steps {
+                updateChangelog(
+                        packageVersion: params.PACKAGE_VERSION,
+                        branchName: params.GIT_RELEASE_BRANCH_NAME
+                )
+            }
+        }
+
         stage('Jira Release') {
             steps {
                 script {
