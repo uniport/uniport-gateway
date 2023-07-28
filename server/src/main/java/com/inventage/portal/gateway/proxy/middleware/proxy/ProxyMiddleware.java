@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.proxy.contextAware.ContextAwareHttpServerRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -13,10 +14,8 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 import io.vertx.httpproxy.ProxyContext;
 import io.vertx.httpproxy.ProxyInterceptor;
-import io.vertx.httpproxy.ProxyOptions;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
-import io.vertx.httpproxy.impl.ContextAwareReverseProxy;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class ProxyMiddleware implements Middleware {
     private static final String DEFAULT_HTTPS_TRUST_STORE_PATH = "";
     private static final String DEFAULT_HTTPS_TRUST_STORE_PASSWORD = "";
 
-    private final ContextAwareReverseProxy httpProxy;
+    private final HttpProxy httpProxy;
 
     private final String name;
     private final String serverHost;
@@ -55,7 +54,7 @@ public class ProxyMiddleware implements Middleware {
     ) {
         this.name = name;
 
-        httpProxy = new ContextAwareReverseProxy(new ProxyOptions(), createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
+        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
         httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
@@ -97,7 +96,7 @@ public class ProxyMiddleware implements Middleware {
 
         LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
         try {
-            httpProxy.handle(ctx);
+            httpProxy.handle(new ContextAwareHttpServerRequest(ctx.request(), ctx));
         } catch (Exception e) {
             LOGGER.error("Error while proxying request", e);
             ctx.fail(e);
@@ -109,8 +108,14 @@ public class ProxyMiddleware implements Middleware {
             @Override
             public Future<ProxyResponse> handleProxyRequest(ProxyContext proxyContext) {
                 final ProxyRequest incomingRequest = proxyContext.request();
+                if (!(incomingRequest.proxiedRequest() instanceof ContextAwareHttpServerRequest)) {
+                    final String errMsg = "request has to be of type ContextAwareHttpServerRequest";
+                    LOGGER.error(errMsg);
+                    throw new IllegalStateException(errMsg);
+                }
 
-                final RoutingContext ctx = proxyContext.get(ContextAwareReverseProxy.CONTEXT_AWARE_REVERSE_PROXY_KEY, RoutingContext.class);
+                final ContextAwareHttpServerRequest contextAwareRequest = (ContextAwareHttpServerRequest) incomingRequest.proxiedRequest();
+                final RoutingContext ctx = contextAwareRequest.routingContext();
 
                 // modify URI
                 final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
@@ -131,10 +136,17 @@ public class ProxyMiddleware implements Middleware {
 
             @Override
             public Future<Void> handleProxyResponse(ProxyContext proxyContext) {
+                final ProxyRequest proxiedRequest = proxyContext.request();
+                if (!(proxiedRequest.proxiedRequest() instanceof ContextAwareHttpServerRequest)) {
+                    final String errMsg = "request has to be of type ContextAwareHttpServerRequest";
+                    LOGGER.error(errMsg);
+                    throw new IllegalStateException(errMsg);
+                }
+
+                final ContextAwareHttpServerRequest incomingRequest = (ContextAwareHttpServerRequest) proxiedRequest.proxiedRequest();
+                final RoutingContext ctx = incomingRequest.routingContext();
+
                 final ProxyResponse outgoingResponse = proxyContext.response();
-
-                final RoutingContext ctx = proxyContext.get(ContextAwareReverseProxy.CONTEXT_AWARE_REVERSE_PROXY_KEY, RoutingContext.class);
-
                 // modify headers
                 final List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
                 if (modifiers != null) {
