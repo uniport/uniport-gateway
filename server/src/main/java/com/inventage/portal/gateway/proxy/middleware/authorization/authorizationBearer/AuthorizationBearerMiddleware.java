@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -39,7 +38,7 @@ public class AuthorizationBearerMiddleware extends AuthTokenMiddlewareBase {
             final Handler<MultiMap> respHeadersModifier = headers -> {
                 headers.remove(HttpHeaders.AUTHORIZATION);
             };
-            this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
+            this.addResponseHeaderModifier(ctx, respHeadersModifier);
 
             ctx.next();
         }).onFailure(err -> {

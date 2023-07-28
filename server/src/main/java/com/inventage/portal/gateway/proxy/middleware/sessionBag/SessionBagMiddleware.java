@@ -69,7 +69,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
 
         // on response: remove cookies if present and store them in session bag
         final Handler<MultiMap> respHeadersModifier = headers -> storeCookiesInSessionBag(ctx, headers);
-        this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
+        this.addResponseHeaderModifier(ctx, respHeadersModifier);
 
         ctx.next();
     }

@@ -31,7 +31,7 @@ public class ReplacePathRegexMiddleware implements Middleware {
         final Handler<StringBuilder> reqUriModifier = uri -> {
             uri.replace(0, uri.length(), apply(uri.toString()));
         };
-        this.addModifier(ctx, reqUriModifier, Middleware.REQUEST_URI_MODIFIERS);
+        this.addRequestURIModifier(ctx, reqUriModifier);
 
         ctx.next();
     }

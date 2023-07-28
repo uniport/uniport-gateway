@@ -37,7 +37,7 @@ public class CSPMiddleware implements Middleware {
     public void handle(RoutingContext ctx) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
         final Handler<MultiMap> responseHandler = headers -> this.cspHandler.handleResponse(ctx, headers);
-        this.addModifier(ctx, responseHandler, Middleware.RESPONSE_HEADERS_MODIFIERS);
+        this.addResponseHeaderModifier(ctx, responseHandler);
         this.cspHandler.handle(ctx);
     }
 

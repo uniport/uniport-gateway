@@ -60,7 +60,7 @@ public class HeaderMiddleware implements Middleware {
                 }
             }
         };
-        this.addModifier(ctx, respHeadersModifier, Middleware.RESPONSE_HEADERS_MODIFIERS);
+        this.addResponseHeaderModifier(ctx, respHeadersModifier);
 
         ctx.next();
     }

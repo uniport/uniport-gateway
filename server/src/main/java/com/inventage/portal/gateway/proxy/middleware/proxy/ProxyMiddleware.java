@@ -117,7 +117,7 @@ public class ProxyMiddleware implements Middleware {
                 final List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
                 if (modifiers != null) {
                     if (modifiers.size() > 1) {
-                        LOGGER.info("Multiple URI modifiers declared: {} (total {})", modifiers, modifiers.size());
+                        LOGGER.warn("Multiple URI modifiers declared: {} (total {})", modifiers, modifiers.size());
                     }
                     for (Handler<StringBuilder> modifier : modifiers) {
                         modifier.handle(uri);
