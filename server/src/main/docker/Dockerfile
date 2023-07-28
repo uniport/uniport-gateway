@@ -2,7 +2,9 @@ FROM ${docker.registry}/eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY ${project.artifactId}-${project.version}-fat.jar /app/portal-gateway.jar
+COPY dependency-jars dependency-jars
+
+COPY ${project.artifactId}-${project.version}-slim.jar /app/portal-gateway.jar
 
 RUN groupadd --system appuser && useradd --system --gid appuser appuser
 RUN chown -R appuser /app

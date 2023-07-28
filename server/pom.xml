@@ -210,42 +210,43 @@
                         </goals>
                         <phase>package</phase>
                     </execution>
+                    <execution>
+                        <id>slim-jar</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <classpathPrefix>dependency-jars/</classpathPrefix>
+                                </manifest>
+                                <manifestEntries>
+                                    <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                    <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
+                                </manifestEntries>
+                            </archive>
+                            <classifier>slim</classifier>
+                            <outputDirectory>${docker.contextDir}</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <shadedClassifierName>fat</shadedClassifierName>
-                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
-                    <!-- To avoid "java.lang.SecurityException: Invalid signature file digest for Manifest main attributes" we need to exclude manifest signature files -->
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <manifestEntries>
-                                <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
-                                <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
-                            </manifestEntries>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                    </transformers>
-                    <outputDirectory>${docker.contextDir}</outputDirectory>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <!-- copy server dependencies jar -->
                     <execution>
+                        <id>copy-dependencies</id>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                         <phase>package</phase>
+                        <configuration>
+                            <outputDirectory>${docker.contextDir}/dependency-jars/</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
