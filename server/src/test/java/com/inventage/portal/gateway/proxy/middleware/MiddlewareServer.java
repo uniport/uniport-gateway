@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.TestUtils;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientRequest;
@@ -12,7 +11,6 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -50,65 +48,22 @@ public class MiddlewareServer {
         return new BrowserConnected(this);
     }
 
-    public void incomingRequest(HttpMethod method, String URI, Handler<HttpClientResponse> responseHandler) {
-        incomingRequest(method, URI, new RequestOptions(), testCtx, responseHandler);
+    public void incomingRequest(HttpMethod method, String uri, Handler<HttpClientResponse> responseHandler) {
+        incomingRequest(method, uri, new RequestOptions(), responseHandler);
     }
 
-    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler) {
-        incomingRequest(method, URI, reqOpts, testCtx, responseHandler);
-    }
-
-    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, String body, Handler<HttpClientResponse> responseHandler) {
-        incomingRequest(method, URI, reqOpts, body, testCtx, responseHandler);
-    }
-
-    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, Buffer body, Handler<HttpClientResponse> responseHandler) {
-        incomingRequest(method, URI, reqOpts, body, testCtx, responseHandler);
-    }
-
-    public void incomingRequest(
-        HttpMethod method,
-        String URI,
-        RequestOptions reqOpts,
-        Handler<HttpClientResponse> responseHandler,
-        MultiMap headers
-    ) {
-        incomingRequest(method, URI, reqOpts, testCtx, responseHandler, headers);
-    }
-
-    public void incomingRequest(HttpMethod method, String URI, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
-        incomingRequest(method, URI, new RequestOptions(), testCtx, responseHandler);
-    }
-
-    public void incomingRequest(
-        HttpMethod method,
-        String URI,
-        RequestOptions reqOpts,
-        VertxTestContext testCtx,
-        Handler<HttpClientResponse> responseHandler
-    ) {
-        incomingRequest(method, URI, reqOpts, testCtx, responseHandler, HeadersMultiMap.httpHeaders());
-    }
-
-    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, String body, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
-        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method);
+    public void incomingRequest(HttpMethod method, String uri, RequestOptions reqOpts, String body, Handler<HttpClientResponse> responseHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(uri).setMethod(method);
         createHttpClientWithRequestOptionsBodyAndResponseHandler(testCtx, reqOpts, body, responseHandler);
     }
 
-    public void incomingRequest(HttpMethod method, String URI, RequestOptions reqOpts, Buffer body, VertxTestContext testCtx, Handler<HttpClientResponse> responseHandler) {
-        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method);
+    public void incomingRequest(HttpMethod method, String uri, RequestOptions reqOpts, Buffer body, Handler<HttpClientResponse> responseHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(uri).setMethod(method);
         createHttpClientWithRequestOptionsBufferBodyAndResponseHandler(testCtx, reqOpts, body, responseHandler);
     }
 
-    public void incomingRequest(
-        HttpMethod method,
-        String URI,
-        RequestOptions reqOpts,
-        VertxTestContext testCtx,
-        Handler<HttpClientResponse> responseHandler,
-        MultiMap headers
-    ) {
-        reqOpts.setHost(host).setPort(port).setURI(URI).setMethod(method).setHeaders(headers);
+    public void incomingRequest(HttpMethod method, String uri, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(uri).setMethod(method);
         createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
     }
 

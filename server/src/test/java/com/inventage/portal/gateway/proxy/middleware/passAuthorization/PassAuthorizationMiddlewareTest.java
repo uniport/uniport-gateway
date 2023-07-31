@@ -30,7 +30,7 @@ public class PassAuthorizationMiddlewareTest {
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "someToken"))
             .build()
             .start()
-            .incomingRequest(GET, "/", testCtx, (resp) -> {
+            .incomingRequest(GET, "/", (resp) -> {
                 // then
                 assertEquals(401, resp.statusCode(), "unexpected status code");
                 testCtx.completeNow();
@@ -46,7 +46,7 @@ public class PassAuthorizationMiddlewareTest {
             .withMockOAuth2Middleware("unauthorizedAuthHeader")
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "authorizedAuthHeader")).build()
             .start()
-            .incomingRequest(GET, "/", testCtx, (resp) -> {
+            .incomingRequest(GET, "/", (resp) -> {
                 // then
                 assertEquals(401, resp.statusCode(), "unexpected status code");
                 testCtx.completeNow();
@@ -72,7 +72,7 @@ public class PassAuthorizationMiddlewareTest {
             .withRoutingContextHolder(routingContext)
             .build()
             .start()
-            .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (resp) -> {
+            .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (resp) -> {
                 // then
                 assertEquals(200, resp.statusCode(), "unexpected status code");
                 assertTrue(routingContext.get().request().headers().contains(HttpHeaders.AUTHORIZATION));

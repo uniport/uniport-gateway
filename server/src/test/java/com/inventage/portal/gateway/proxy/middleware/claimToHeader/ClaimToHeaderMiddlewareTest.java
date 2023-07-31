@@ -32,7 +32,7 @@ public class ClaimToHeaderMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
             Assertions.assertEquals("ab159413-8924-4f10-8db1-1794f431e72b", routingContext.get().request().headers().get("X-Uniport-Tenant"));
             testCtx.completeNow();
@@ -52,7 +52,7 @@ public class ClaimToHeaderMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
             Assertions.assertEquals("ab159413-8924-4f10-8db1-1794f431e72b", routingContext.get().request().headers().get("X-Uniport-Tenant"));
             testCtx.completeNow();
@@ -72,7 +72,7 @@ public class ClaimToHeaderMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
             Assertions.assertEquals("[\"KEYCLOAK\"]", routingContext.get().request().headers().get("roles"));
             testCtx.completeNow();
@@ -90,7 +90,7 @@ public class ClaimToHeaderMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
             Assertions.assertFalse(routingContext.get().request().headers().contains("X-Uniport-Tenant"));
             testCtx.completeNow();
@@ -109,7 +109,7 @@ public class ClaimToHeaderMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
             Assertions.assertFalse(routingContext.get().request().headers().contains("X-Uniport-Tenant"));
             testCtx.completeNow();
@@ -128,7 +128,7 @@ public class ClaimToHeaderMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
             Assertions.assertFalse(routingContext.get().request().headers().contains("X-Uniport-Tenant"));
             testCtx.completeNow();

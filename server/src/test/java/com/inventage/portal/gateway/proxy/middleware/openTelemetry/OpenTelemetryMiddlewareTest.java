@@ -30,7 +30,7 @@ public class OpenTelemetryMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // then
             Assertions.assertNotNull(ContextualData.get(CONTEXTUAL_DATA_TRACE_ID),
                 "contextual data should contain 'traceId'");

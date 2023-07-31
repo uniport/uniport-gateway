@@ -25,7 +25,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
@@ -42,7 +42,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
             .build().start();
 
         // when
-        gateway.incomingRequest(GET, "/", testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)

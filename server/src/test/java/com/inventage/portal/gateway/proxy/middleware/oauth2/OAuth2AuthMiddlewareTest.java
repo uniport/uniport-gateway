@@ -45,7 +45,7 @@ public class OAuth2AuthMiddlewareTest {
             .build().start();
         final String protectedResource = "http://localhost:8080/protected";
         // when
-        gateway.incomingRequest(GET, protectedResource, testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, protectedResource, (outgoingResponse) -> {
             // then
             assertThat(outgoingResponse)
                 .isValidAuthenticationRequest(Map.of(
@@ -68,12 +68,11 @@ public class OAuth2AuthMiddlewareTest {
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build().start();
         // when
-        gateway.incomingRequest(GET, "http://localhost:8080/protected/one", testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "http://localhost:8080/protected/one", (outgoingResponse) -> {
             assertThat(outgoingResponse).isValidAuthenticationRequest().isUsingFormPost().hasPKCE();
             // when
             final String protectedResource2 = "http://localhost:8080/protected/two";
             gateway.incomingRequest(GET, protectedResource2, withCookie(cookieFrom(outgoingResponse)),
-                testCtx,
                 (secondOutgoingResponse) -> {
                     // then
                     assertThat(secondOutgoingResponse).isValidAuthenticationRequest()
@@ -118,13 +117,13 @@ public class OAuth2AuthMiddlewareTest {
         // when
         final String[] sessionCookie = new String[1];
         String initialUri1 = "http://localhost:8080/protected/one";
-        gateway.incomingRequest(GET, initialUri1, testCtx, (outgoingResponse1) -> {
+        gateway.incomingRequest(GET, initialUri1, (outgoingResponse1) -> {
             assertThat(outgoingResponse1).isValidAuthenticationRequest().hasStateWithUri("/protected/one")
                 .isUsingFormPost()
                 .hasPKCE();
             sessionCookie[0] = cookieFrom(outgoingResponse1);
             String initialUri2 = "http://localhost:8080/protected/two";
-            gateway.incomingRequest(GET, initialUri2, withCookie(sessionCookie[0]), testCtx,
+            gateway.incomingRequest(GET, initialUri2, withCookie(sessionCookie[0]),
                 (outgoingResponse2) -> {
                     // then
                     assertThat(outgoingResponse2).isValidAuthenticationRequest()
@@ -132,7 +131,7 @@ public class OAuth2AuthMiddlewareTest {
                         .isUsingFormPost().hasPKCE();
                 });
             String initialUri3 = "http://localhost:8080/protected/three";
-            gateway.incomingRequest(GET, initialUri3, withCookie(sessionCookie[0]), testCtx,
+            gateway.incomingRequest(GET, initialUri3, withCookie(sessionCookie[0]),
                 (outgoingResponse3) -> {
                     // then
                     assertThat(outgoingResponse3).isValidAuthenticationRequest()
@@ -154,7 +153,7 @@ public class OAuth2AuthMiddlewareTest {
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protectedScope")
             .build().start();
         // when
-        gateway.incomingRequest(GET, "/protectedScope", testCtx, (redirectResponse) -> {
+        gateway.incomingRequest(GET, "/protectedScope", (redirectResponse) -> {
             // then
             assertThat(redirectResponse)
                 .hasPKCE();
@@ -173,7 +172,7 @@ public class OAuth2AuthMiddlewareTest {
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protectedScope")
             .build().start();
         // when
-        gateway.incomingRequest(GET, "/protectedScope", testCtx, (redirectResponse) -> {
+        gateway.incomingRequest(GET, "/protectedScope", (redirectResponse) -> {
             // then
             assertThat(redirectResponse).isUsingFormPost();
             testCtx.completeNow();
@@ -262,7 +261,7 @@ public class OAuth2AuthMiddlewareTest {
             .withCustomSessionState(oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
-        gateway.incomingRequest(GET, "/", testCtx, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // when
             gateway.incomingRequest(POST,
                 "/callback/test?state=" + oidcSessionState.get(OIDC_PARAM_STATE) + "&code=ghijklmnop",

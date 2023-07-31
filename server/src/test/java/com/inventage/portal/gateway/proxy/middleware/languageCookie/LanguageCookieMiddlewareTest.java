@@ -33,7 +33,7 @@ public class LanguageCookieMiddlewareTest {
             .withLanguageCookieMiddleware()
             .build().start()
             // when
-            .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
+            .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (incomingResponse) -> {
                 // then
                 Assertions.assertTrue(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
                     "request should contain accept language");
@@ -55,7 +55,7 @@ public class LanguageCookieMiddlewareTest {
             .withLanguageCookieMiddleware()
             .build().start()
             // when
-            .incomingRequest(GET, "/", testCtx, (incomingResponse) -> {
+            .incomingRequest(GET, "/", (incomingResponse) -> {
                 // then
                 Assertions.assertFalse(routingContext.get().request().headers().contains(DEFAULT_LANGUAGE_COOKIE_NAME),
                     "response should not contain IPS language cookie.");

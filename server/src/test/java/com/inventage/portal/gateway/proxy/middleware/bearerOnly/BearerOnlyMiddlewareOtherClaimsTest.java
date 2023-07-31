@@ -97,7 +97,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .build().start()
             //when
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                bearer(validToken)), testCtx, (resp) -> {
+                bearer(validToken)), (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -124,7 +124,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .build().start()
             //when
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                bearer(validToken)), testCtx, (resp) -> {
+                bearer(validToken)), (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -155,7 +155,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .build().start()
             //when
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                bearer(invalidStringToken)), testCtx, (resp) -> {
+                bearer(invalidStringToken)), (resp) -> {
                     // then
                     assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -184,7 +184,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .build().start()
             //when
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                bearer(invalidToken)), testCtx, (resp) -> {
+                bearer(invalidToken)), (resp) -> {
                     // then
                     assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -219,7 +219,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .build().start()
             //when
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
-                bearer(invalidToken)), testCtx, (resp) -> {
+                bearer(invalidToken)), (resp) -> {
                     // then
                     assertEquals(403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();

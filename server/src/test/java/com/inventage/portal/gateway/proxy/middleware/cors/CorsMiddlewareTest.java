@@ -25,7 +25,7 @@ public class CorsMiddlewareTest {
         final MiddlewareServer portalGateway = portalGateway(vertx, host, testCtx)
             .withCorsMiddleware("http://portal.minikube").build().start();
         // when
-        portalGateway.incomingRequest(HttpMethod.GET, "/", testCtx, (resp) -> {
+        portalGateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
             // then
             assertThat(resp).hasStatusCode(200);
             testCtx.completeNow();
@@ -40,7 +40,7 @@ public class CorsMiddlewareTest {
             // when
             .incomingRequest(HttpMethod.GET, "/",
                 new RequestOptions().addHeader(ORIGIN, "http://portal.minikube"),
-                testCtx, (resp) -> {
+                (resp) -> {
                     // then
                     assertThat(resp)
                         .hasStatusCode(200)
@@ -56,7 +56,7 @@ public class CorsMiddlewareTest {
             .withCorsMiddleware("*").build().start()
             // when
             .incomingRequest(HttpMethod.GET, "/",
-                new RequestOptions().addHeader(ORIGIN, "http://other.com"), testCtx,
+                new RequestOptions().addHeader(ORIGIN, "http://other.com"),
                 (resp) -> {
                     // then
                     assertThat(resp)
@@ -73,7 +73,7 @@ public class CorsMiddlewareTest {
             .withCorsMiddleware("http://portal.minikube").build().start()
             // when
             .incomingRequest(HttpMethod.GET, "/",
-                new RequestOptions().addHeader(ORIGIN, "http://bad.com"), testCtx,
+                new RequestOptions().addHeader(ORIGIN, "http://bad.com"),
                 (resp) -> {
                     // then
                     assertThat(resp).hasStatusCode(403);
@@ -87,7 +87,7 @@ public class CorsMiddlewareTest {
         portalGateway(vertx, host, testCtx)
             .withCorsMiddleware("http://portal.minikube").build().start()
             // when
-            .incomingRequest(HttpMethod.GET, "/", testCtx, (resp) -> {
+            .incomingRequest(HttpMethod.GET, "/", (resp) -> {
                 // then
                 assertThat(resp).hasStatusCode(200);
                 testCtx.completeNow();

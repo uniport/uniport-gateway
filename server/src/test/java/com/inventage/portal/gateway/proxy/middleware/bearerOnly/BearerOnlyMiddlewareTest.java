@@ -55,7 +55,7 @@ public class BearerOnlyMiddlewareTest {
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
             .build().start()
             // when
-            .incomingRequest(GET, "/", testCtx, (resp) -> {
+            .incomingRequest(GET, "/", (resp) -> {
                 // then
                 assertEquals(401, resp.statusCode(), "unexpected status code");
                 testCtx.completeNow();
@@ -76,7 +76,7 @@ public class BearerOnlyMiddlewareTest {
             // when
             .incomingRequest(GET, "/",
                 new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidSignatureToken)),
-                testCtx, (resp) -> {
+                (resp) -> {
                     // then
                     assertEquals(401, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
@@ -100,7 +100,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)),
                 (resp) -> {
                     // then
                     assertEquals(401, resp.statusCode(), "unexpected status code");
@@ -128,7 +128,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)),
                 (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
@@ -155,7 +155,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)),
                 (resp) -> {
                     // then
                     assertEquals(401, resp.statusCode(), "unexpected status code");
@@ -179,7 +179,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidToken)),
                 (resp) -> {
                     // then
                     assertEquals(401, resp.statusCode(), "unexpected status code");
@@ -200,7 +200,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)),
                 (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
@@ -229,7 +229,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)),
                 (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");
@@ -262,7 +262,7 @@ public class BearerOnlyMiddlewareTest {
 
         // when
         gateway.incomingRequest(GET, "/",
-            new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)), testCtx,
+            new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)),
             (outgoingResponse1) -> {
                 assertEquals(200, outgoingResponse1.statusCode(), "unexpected status code");
 
@@ -270,7 +270,7 @@ public class BearerOnlyMiddlewareTest {
 
                 // give the middleware time to refetch the public keys
                 vertx.setTimer(reconcilationIntervalMs, (timerID) -> {
-                    gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)), testCtx, (outgoingResponse2) -> {
+                    gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)), (outgoingResponse2) -> {
                         // then
                         assertEquals(401, outgoingResponse2.statusCode(), "unexpected status code");
 
@@ -306,7 +306,7 @@ public class BearerOnlyMiddlewareTest {
 
         // when
         gateway.incomingRequest(GET, "/",
-            new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(token)), testCtx,
+            new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(token)),
             (outgoingResponse1) -> {
                 assertEquals(200, outgoingResponse1.statusCode(), "unexpected status code");
 
@@ -337,7 +337,7 @@ public class BearerOnlyMiddlewareTest {
             .build().start()
             // when
             .incomingRequest(GET, "/",
-                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)), testCtx,
+                new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validToken)),
                 (resp) -> {
                     // then
                     assertEquals(200, resp.statusCode(), "unexpected status code");

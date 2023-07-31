@@ -59,7 +59,7 @@ public class ControlApiMiddlewareTest {
             .withBackend(vertx, backendPort, cookieInsertionHandler)
             .build().start()
             // when
-            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), (outgoingResponse) -> {
                 // then
                 assertSessionTermination(outgoingResponse, routingContext.get());
                 responseReceived.flag();
@@ -101,7 +101,7 @@ public class ControlApiMiddlewareTest {
             .withProxyMiddleware(backendPort)
             .build().start()
             // when
-            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), testCtx, (outgoingResponse) -> {
+            .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.SET_COOKIE, "test-cookie=value;"), (outgoingResponse) -> {
                 // then
                 assertSessionReset(outgoingResponse, routingContext.get(), keycloakTestCookie);
                 responseReceived.flag();

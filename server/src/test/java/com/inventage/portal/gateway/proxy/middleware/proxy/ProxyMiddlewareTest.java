@@ -38,7 +38,7 @@ public class ProxyMiddlewareTest {
             .withProxyMiddleware("test.host.com", 8000)
             .build().start();
         // when
-        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             Assertions.assertEquals("test.host.com",
                 routingContext.get().request().headers().get(HttpHeaderNames.HOST));
             testCtx.completeNow();
@@ -116,7 +116,7 @@ public class ProxyMiddlewareTest {
             req.response().end(serverResponse);
         }).listen(serverPort);
         //when
-        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             response.body().onComplete((body) -> {
                 //then
                 Assertions.assertEquals(body.result().toString(), serverResponse);
@@ -148,7 +148,7 @@ public class ProxyMiddlewareTest {
             req.response().end(serverResponse);
         }).listen(serverPort);
         //when
-        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             response.body().onComplete((body) -> {
                 //then
                 Assertions.assertEquals(body.result().toString(), serverResponse);
@@ -176,7 +176,7 @@ public class ProxyMiddlewareTest {
             req.response().end(serverResponse);
         }).listen(serverPort);
         //when
-        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
             testCtx.completeNow();
         });
@@ -200,7 +200,7 @@ public class ProxyMiddlewareTest {
             req.response().end(serverResponse);
         }).listen(serverPort);
         //when
-        gateway.incomingRequest(HttpMethod.GET, "/", testCtx, response -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             //then
             Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
             testCtx.completeNow();

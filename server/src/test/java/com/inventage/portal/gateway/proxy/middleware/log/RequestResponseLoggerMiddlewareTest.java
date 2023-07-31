@@ -34,7 +34,7 @@ public class RequestResponseLoggerMiddlewareTest {
             .withRequestResponseLoggerMiddleware("/health.*|/ready.*")
             .build().start()
             // when
-            .incomingRequest(GET, "/health/test", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
+            .incomingRequest(GET, "/health/test", new RequestOptions().setHeaders(headers), (incomingResponse) -> {
                 // then
                 assertTrue(listAppender.list.stream()
                     .noneMatch(event -> event.getFormattedMessage().matches(".*/health.*|/ready.*")));
@@ -56,7 +56,7 @@ public class RequestResponseLoggerMiddlewareTest {
             .withRequestResponseLoggerMiddleware("/health.*")
             .build().start()
             // when
-            .incomingRequest(GET, "/test", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
+            .incomingRequest(GET, "/test", new RequestOptions().setHeaders(headers), (incomingResponse) -> {
                 // then
                 assertTrue(listAppender.list.stream()
                     .anyMatch(event -> event.getFormattedMessage().matches(".*/test.*")));
@@ -78,7 +78,7 @@ public class RequestResponseLoggerMiddlewareTest {
             .withRequestResponseLoggerMiddleware(null)
             .build().start()
             // when
-            .incomingRequest(GET, "/test", new RequestOptions().setHeaders(headers), testCtx, (incomingResponse) -> {
+            .incomingRequest(GET, "/test", new RequestOptions().setHeaders(headers), (incomingResponse) -> {
                 // then
                 assertTrue(listAppender.list.stream()
                     .anyMatch(event -> event.getFormattedMessage().matches(".*/test.*")));
