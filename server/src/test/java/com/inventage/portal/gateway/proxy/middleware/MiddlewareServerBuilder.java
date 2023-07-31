@@ -17,17 +17,20 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingSe
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
@@ -180,6 +183,14 @@ public final class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
             new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE, headerName, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES, null, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
+    }
+
+    public MiddlewareServerBuilder withHeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
+        return withMiddleware(new HeaderMiddleware("header", requestHeaders, responseHeaders));
+    }
+
+    public MiddlewareServerBuilder withReplacePathRegexMiddleware(String regex, String replacement) {
+        return withMiddleware(new ReplacePathRegexMiddleware("replacePath", regex, replacement));
     }
 
     public MiddlewareServerBuilder withBodyHandlerMiddleware() {
