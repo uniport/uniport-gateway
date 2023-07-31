@@ -81,22 +81,25 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
-            SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER, false, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY,
-            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE, SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
-            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS, uriWithoutSessionTimeoutReset));
+        return withSessionMiddleware(uriWithoutSessionTimeoutReset, SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER, false);
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE, withLifetimeHeader, withLifetimeCookie, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
-            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE, SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
-            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS, null));
+        return withSessionMiddleware(null, withLifetimeHeader, withLifetimeCookie);
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset, boolean withLifetimeHeader, boolean withLifetimeCookie) {
-        return withMiddleware(new SessionMiddleware(vertx, "session", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE, withLifetimeHeader, withLifetimeCookie, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
-            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE, SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
-            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS, uriWithoutSessionTimeoutReset));
+        return withMiddleware(new SessionMiddleware(vertx, "session",
+            SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
+            withLifetimeHeader,
+            withLifetimeCookie,
+            SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
+            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY,
+            SessionMiddlewareFactory.DEFAULT_COOKIE_SECURE,
+            SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE,
+            SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
+            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
+            uriWithoutSessionTimeoutReset));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -163,13 +166,11 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly) {
-        return withMiddleware(
-            new CSPMiddleware("csp", directives, reportOnly));
+        return withMiddleware(new CSPMiddleware("csp", directives, reportOnly));
     }
 
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
-        return withMiddleware(
-            new CSPMiddleware("csp", directives, reportOnly, mergeStrategy));
+        return withMiddleware(new CSPMiddleware("csp", directives, reportOnly, mergeStrategy));
     }
 
     public MiddlewareServerBuilder withCspViolationReportingServerMiddleware() {
@@ -194,13 +195,11 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBodyHandlerMiddleware() {
-        return withMiddleware(
-            new BodyHandlerMiddleware(this.vertx, "bodyHandler"));
+        return withMiddleware(new BodyHandlerMiddleware(this.vertx, "bodyHandler"));
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
-        return withMiddleware(new PassAuthorizationMiddleware("passAuthorization", sessionScope,
-            JWTAuthHandler.create(authProvider)));
+        return withMiddleware(new PassAuthorizationMiddleware("passAuthorization", sessionScope, JWTAuthHandler.create(authProvider)));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
@@ -292,19 +291,8 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
-        final VertxTestContext testContext = new VertxTestContext();
-        final Router serviceRouter = Router.router(vertx);
-
-        serviceRouter.route().handler(ctx -> ctx.response().end());
-
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
-            .onComplete(testContext.succeedingThenComplete());
-
-        if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
-            throw new RuntimeException("Timeout: Server did not start in time.");
-        }
-
-        return this;
+        final Handler<RoutingContext> defaultHandler = ctx -> ctx.response().end();
+        return withBackend(vertx, port, defaultHandler);
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler)
@@ -386,6 +374,11 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServer build() {
+        final Handler<RoutingContext> defaultBackendMockHandler = ctx -> ctx.response().setStatusCode(200).end("ok");
+        return build(defaultBackendMockHandler);
+    }
+
+    public MiddlewareServer build(Handler<RoutingContext> backendMockHandler) {
         router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
         final HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
         return new MiddlewareServer(vertx, httpServer, host, testCtx);
