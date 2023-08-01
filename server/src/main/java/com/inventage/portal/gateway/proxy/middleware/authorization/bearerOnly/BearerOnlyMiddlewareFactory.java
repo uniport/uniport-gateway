@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     }
 
     @Override
-    protected Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig) {
+    protected Middleware create(Vertx vertx, String name, AuthenticationHandler authHandler, JsonObject middlewareConfig) {
         final String optionalStr = middlewareConfig.getString(
             DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL,
             "false");

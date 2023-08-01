@@ -1,12 +1,15 @@
 package com.inventage.portal.gateway;
 
 import ch.qos.logback.classic.ClassicConstants;
+import com.hazelcast.config.Config;
+import com.hazelcast.kubernetes.KubernetesProperties;
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Launcher;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -15,9 +18,12 @@ import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
+import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +42,9 @@ public class PortalGatewayLauncher extends Launcher {
     private static final String METRICS_PATH_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PATH";
     private static final String DEFAULT_METRICS_PATH = "/metrics";
 
+    private static final String HEADLESS_SERVICE_NAME_PROPERTY = "PORTAL_GATEWAY_HEADLESS_SERVICE_NAME";
+    private static final String DEFAULT_HEADLESS_SERVICE_NAME = "portal-gateway-headless";
+
     private static Logger logger;
 
     private PortalGatewayLauncher() {
@@ -50,8 +59,7 @@ public class PortalGatewayLauncher extends Launcher {
     public static void main(String[] args) {
         // https://logback.qos.ch/manual/configuration.html#configFileProperty
         final Optional<Path> loggingConfigPath = getLoggingConfigPath();
-        loggingConfigPath
-            .ifPresent(path -> System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, path.toString()));
+        loggingConfigPath.ifPresent(path -> System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, path.toString()));
 
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
@@ -65,17 +73,15 @@ public class PortalGatewayLauncher extends Launcher {
             logger.info("No custom logback configuration file found");
         }
 
-        // increase timeout for worker execution to 2 min
-        System.setProperty("vertx.options.maxWorkerExecuteTime", "240000000000");
-
-        if (Runtime.isDevelopment()) {
-            // increase the max event loop time to 10 min (default is 2000000000 ns = 2s) to omit
-            // thread blocking warnings
-            System.setProperty("vertx.options.maxEventLoopExecuteTime", "600000000000");
+        final List<String> arguments = new LinkedList<String>();
+        arguments.add("run");
+        arguments.add(PortalGatewayVerticle.class.getName());
+        if (Runtime.isClustered()) {
+            arguments.add("--cluster");
         }
-        final String[] arguments = new String[] { "run", PortalGatewayVerticle.class.getName(), "--instances",
-            Runtime.numberOfVerticleInstances() };
-        new PortalGatewayLauncher().dispatch(arguments);
+        logger.debug("Launching with args: {}", arguments);
+        new PortalGatewayLauncher().dispatch(arguments.toArray(String[]::new));
+
         logger.info("PortalGatewayLauncher started.");
     }
 
@@ -115,16 +121,48 @@ public class PortalGatewayLauncher extends Launcher {
     @Override
     public void beforeStartingVertx(VertxOptions options) {
         logger.info("Before starting Vertx");
+
+        if (Runtime.isClustered()) {
+            logger.debug("Configuring cluster manager");
+            options.setClusterManager(new HazelcastClusterManager(configureClusterManager()));
+        }
+
         options.setTracingOptions(new OpenTelemetryOptions(configureOpenTelemetry()));
         options.setMetricsOptions(new MicrometerMetricsOptions()
             .setPrometheusOptions(configurePrometheus())
             .setEnabled(true));
+
+        if (Runtime.isDevelopment()) {
+            // increase the max event loop time to 10 min (default is 2000000000 ns = 2s) to omit thread blocking warnings
+            options.setMaxEventLoopExecuteTime(600000000000L);
+        }
     }
 
     @Override
     public void afterStartingVertx(Vertx vertx) {
         logger.info("After starting Vertx");
         bindJVMMetrics();
+    }
+
+    @Override
+    public void beforeDeployingVerticle(DeploymentOptions deploymentOptions) {
+        logger.info("Before deploying Verticle");
+        deploymentOptions.setInstances(Runtime.numberOfVerticleInstances())
+            // increase timeout for worker execution to 2 min
+            .setMaxWorkerExecuteTime(240000000000L);
+    }
+
+    private Config configureClusterManager() {
+        final String headlessServiceName = System.getenv().getOrDefault(HEADLESS_SERVICE_NAME_PROPERTY, DEFAULT_HEADLESS_SERVICE_NAME);
+
+        // See https://vertx.io/docs/vertx-hazelcast/java/#_configuring_for_kubernetes
+        // See https://docs.hazelcast.com/hazelcast/latest/kubernetes/kubernetes-auto-discovery#using-kubernetes-in-dns-lookup-mode
+        final Config config = new Config();
+        config.setClusterName("portal-gateway-ha");
+        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true)
+            .setProperty(KubernetesProperties.SERVICE_DNS.key(), headlessServiceName);
+        return config;
     }
 
     private OpenTelemetry configureOpenTelemetry() {

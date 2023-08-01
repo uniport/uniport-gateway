@@ -233,6 +233,17 @@
                 <version>${portal-code-style-settings.version}</version>
                 <type>zip</type>
             </dependency>
+            <dependency>
+                <groupId>com.inventage.portal.helm-chart-library</groupId>
+                <artifactId>helm</artifactId>
+                <version>${portal-helm-chart-library.version}</version>
+            </dependency>
+            <!-- needed for HA cluster until vertx-hazelcast upgrades to 5.0 -->
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast-kubernetes</artifactId>
+                <version>2.2.3</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

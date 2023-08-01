@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthoriz
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import org.slf4j.Logger;
@@ -18,11 +19,11 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     }
 
     @Override
-    protected Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig) {
+    protected Middleware create(Vertx vertx, String name, AuthenticationHandler authHandler, JsonObject middlewareConfig) {
         final String sessionScope = middlewareConfig
             .getString(DynamicConfiguration.MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE);
 
-        final Middleware passAuthorizationMiddleware = new PassAuthorizationMiddleware(name, sessionScope, authHandler);
+        final Middleware passAuthorizationMiddleware = new PassAuthorizationMiddleware(vertx, name, sessionScope, authHandler);
         LOGGER.debug("Created '{}' middleware", DynamicConfiguration.MIDDLEWARE_PASS_AUTHORIZATION);
         return passAuthorizationMiddleware;
     }

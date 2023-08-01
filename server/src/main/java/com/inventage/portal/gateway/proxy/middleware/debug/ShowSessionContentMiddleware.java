@@ -2,18 +2,15 @@ package com.inventage.portal.gateway.proxy.middleware.debug;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +23,14 @@ public class ShowSessionContentMiddleware implements Middleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddleware.class);
 
     private final String name;
+    private final String instanceName;
+
+    private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
+    private static final String DEFAULT_INSTANCE_NAME = "unknown";
 
     public ShowSessionContentMiddleware(String name) {
         this.name = name;
+        this.instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);
     }
 
     @Override
@@ -47,6 +49,8 @@ public class ShowSessionContentMiddleware implements Middleware {
     private String getHtml(Session session) {
         final StringBuilder html = new StringBuilder();
 
+        html.append("instance:\n").append(this.instanceName);
+        html.append("\n");
         html.append("session ID:\n").append(session.id());
         html.append("\n");
         html.append("session last access (seconds since epoch:\n").append(session.lastAccessed() / 1000); // https://www.epochconverter.com/?q=ms
@@ -64,24 +68,17 @@ public class ShowSessionContentMiddleware implements Middleware {
         }
 
         boolean idTokenDisplayed = false;
-        for (String key : session.data().keySet()) {
-            LOGGER.debug("Processing {}: {}", key, session.data().get(key));
-            if (!key.endsWith(OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX)) {
-                continue;
-            }
-
-            final Pair<OAuth2Auth, User> authPair = (Pair<OAuth2Auth, User>) session.data().get(key);
-            final User user = authPair.getRight();
+        for (AuthenticationUserContext authContext : AuthenticationUserContext.all(session)) {
             if (!idTokenDisplayed) {
-                final String rawIdToken = user.principal().getString("id_token");
+                final String rawIdToken = authContext.getIdToken();
                 html.append("id token:\n").append(getFormattedPayloadFromJWT(rawIdToken)).append("\n")
                     .append(rawIdToken);
                 idTokenDisplayed = true;
             }
 
-            final String rawAccessToken = user.principal().getString("access_token");
+            final String rawAccessToken = authContext.getAccessToken();
             html.append("\n\n")
-                .append(key)
+                .append(authContext.getSessionScope())
                 .append(":\n")
                 .append(getFormattedPayloadFromJWT(rawAccessToken))
                 .append("\n")

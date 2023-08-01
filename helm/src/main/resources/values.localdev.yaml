@@ -64,6 +64,11 @@ containers:
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
 
+pod:
+  replicas: 1
+  annotations:
+    rollme: true
+
 configMaps:
   portal-gateway-proxy-config:
     enabled: true

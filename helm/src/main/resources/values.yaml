@@ -13,6 +13,10 @@ ingress:
   defaultRule: enabled
 
 services:
+  portal-gateway-headless:
+    ports:
+      hazelcast:
+        port: 5701
   portal-gateway:
     type: ClusterIP
     ports:
@@ -22,10 +26,16 @@ services:
         port: 9090
 
 pod:
-  type: Deployment
-  replicas: 1
+  type: StatefulSet
+  serviceName: portal-gateway-headless
+  replicas: 2
   securityContext:
     enabled: false
+
+strategy:
+  type: RollingUpdate
+  rollingParams:
+    maxUnavailable: 1
 
 initContainers:
   init-portal-iam:
@@ -70,6 +80,13 @@ containers:
         # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
       PORTAL_GATEWAY_LOGGING_CONFIG:
         value: "/etc/portal-gateway/logging-config/logback.xml"
+        # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
+      PORTAL_GATEWAY_CLUSTERED:
+        value: true
+      PORTAL_GATEWAY_INSTANCE_NAME:
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
         # PORTAL_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
       PORTAL_GATEWAY_PORTAL_IAM_HOST:
         value: "portal-iam"
@@ -177,9 +194,9 @@ containers:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /health
+        path: /readiness
         port: http
-      initialDelaySeconds: 10
+      initialDelaySeconds: 30
       timeoutSeconds: 1
       periodSeconds: 20
       failureThreshold: 6
@@ -187,12 +204,12 @@ containers:
     startupProbe:
       enabled: true
       httpGet:
-        path: /health
+        path: /readiness
         port: http
       initialDelaySeconds: 10
       timeoutSeconds: 1
       periodSeconds: 20
-      failureThreshold: 6
+      failureThreshold: 12
       successThreshold: 1
     storages:
       logging-config:

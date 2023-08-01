@@ -37,4 +37,4 @@ ENV TZ="Europe/Zurich"
 RUN groupadd --system appuser && useradd --system --gid appuser appuser
 USER appuser
 
-ENTRYPOINT ["portal-gateway", "run", "-cluster"]
+ENTRYPOINT ["portal-gateway"]

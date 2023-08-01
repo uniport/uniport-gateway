@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+-  Add support to run the Portal-Gateway in cluster mode ([PORTAL-1572](https://issue.inventage.com/browse/PORTAL-1572)).
+
 ### Changed
 
 - Publishing of the chart to the maven repository has been discontinued. Please download the chart from the helm repository instead.

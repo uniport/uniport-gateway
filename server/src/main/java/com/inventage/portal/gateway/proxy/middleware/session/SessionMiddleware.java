@@ -11,7 +11,9 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
+import io.vertx.ext.web.sstore.ClusteredSessionStore;
 import io.vertx.ext.web.sstore.LocalSessionStore;
+import io.vertx.ext.web.sstore.SessionStore;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +82,17 @@ public class SessionMiddleware implements Middleware {
         this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MILLIS;
         this.withLifetimeHeader = withLifetimeHeader;
         this.withLifetimeCookie = withLifetimeCookie;
-        sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx))
+
+        final SessionStore sessionStore;
+        if (vertx.isClustered()) {
+            LOGGER.info("Running clustered session store");
+            sessionStore = ClusteredSessionStore.create(vertx);
+        } else {
+            LOGGER.info("Running local session store");
+            sessionStore = LocalSessionStore.create(vertx);
+        }
+
+        sessionHandler = SessionHandler.create(sessionStore)
             .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
             .setSessionCookieName(cookieName)
             .setCookieHttpOnlyFlag(cookieHttpOnly)

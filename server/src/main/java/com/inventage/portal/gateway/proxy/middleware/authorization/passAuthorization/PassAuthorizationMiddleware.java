@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
@@ -19,8 +20,8 @@ public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
 
     private final AuthenticationHandler authHandler;
 
-    public PassAuthorizationMiddleware(String name, String sessionScope, AuthenticationHandler authHandler) {
-        super(name, sessionScope);
+    public PassAuthorizationMiddleware(Vertx vertx, String name, String sessionScope, AuthenticationHandler authHandler) {
+        super(vertx, name, sessionScope);
         this.authHandler = authHandler;
     }
 

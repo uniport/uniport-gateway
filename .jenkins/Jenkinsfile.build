@@ -125,6 +125,7 @@ pipeline {
                                     echo "${line}"
                                     if (!(line ==~ '.*pom\\.xml$')) {
                                         echo "${git_status_output}"
+                                        sh("git diff")
                                         error("You have uncommited generated code!")
                                     }
                                 }

@@ -2,13 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PortalGateway",
+            "name": "Launch",
             "type": "java",
             "projectName": "server",
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/main/config/portal-gateway.specific.env",
-            "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher",
-            "args": "run -cluster"
+            "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
         }
     ]
 }

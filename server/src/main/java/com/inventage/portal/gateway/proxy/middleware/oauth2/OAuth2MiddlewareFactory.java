@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
-    public static final String SESSION_SCOPE_SUFFIX = "_session";
     public static final String OIDC_RESPONSE_MODE = "response_mode";
     public static final String OIDC_RESPONSE_MODE_DEFAULT = "form_post";
 

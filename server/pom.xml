@@ -69,6 +69,19 @@
             <artifactId>vertx-json-schema</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-hazelcast</artifactId>
+        </dependency>
+        <!-- needed until vertx-hazelcast upgrades to hazelcast 5.0 -->
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-kubernetes</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-health-check</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-core</artifactId>
         </dependency>
@@ -224,7 +237,6 @@
                                 </manifest>
                                 <manifestEntries>
                                     <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
-                                    <Main-Verticle>com.inventage.portal.gateway.core.PortalGatewayVerticle</Main-Verticle>
                                 </manifestEntries>
                             </archive>
                             <classifier>slim</classifier>

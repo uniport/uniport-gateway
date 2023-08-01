@@ -24,6 +24,7 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
         LOGGER.debug("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER);
         return Future.succeededFuture(new AuthorizationBearerMiddleware(
+            vertx,
             name,
             middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE)));
     }

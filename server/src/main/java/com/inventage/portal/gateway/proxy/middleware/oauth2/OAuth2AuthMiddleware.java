@@ -16,8 +16,6 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import java.util.Optional;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +109,8 @@ public class OAuth2AuthMiddleware implements Middleware {
 
     // this method is called when the IAM finishs the authentication flow and sends a redirect (callback) with the code
     private static void whenAuthenticationResponseReceived(
-        RoutingContext ctx, String sessionScope,
+        RoutingContext ctx,
+        String sessionScope,
         OAuth2Auth authProvider
     ) {
         final String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
@@ -155,17 +154,13 @@ public class OAuth2AuthMiddleware implements Middleware {
     ) {
         if (asyncResult.succeeded()) {
             if (ctx.user() != null) {
-                LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'", sessionScope,
-                    SessionAdapter.displaySessionId(ctx.session()));
-                ContextualData.put(CONTEXTUAL_DATA_SESSION_ID,
-                    SessionAdapter.displaySessionId(ctx.session()));
+                LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'",
+                    sessionScope, SessionAdapter.displaySessionId(ctx.session()));
+                ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
+
                 // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User objects together.
                 // However, it is marked as deprecated, and therefore we use our own glue.
-                final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(authProvider, ctx.user());
-                ctx.session().put(String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX),
-                    authPair);
-                //                AuthenticationUserContext authenticationUserContext = new AuthenticationUserContext(authProvider, ctx.user());
-                //                authenticationUserContext.toSessionAtScope(ctx.session(), sessionScope);
+                AuthenticationUserContext.of(authProvider, ctx.user()).toSessionAtScope(ctx.session(), sessionScope);
             }
         }
         if (asyncResult.failed()) {
@@ -203,13 +198,11 @@ public class OAuth2AuthMiddleware implements Middleware {
      * @param ctx
      */
     private User setUserForScope(String sessionScope, RoutingContext ctx) {
-        final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
-        final Pair<OAuth2Auth, User> authPair = ctx.session().get(key);
-        if (authPair != null) {
-            ctx.setUser(authPair.getRight());
-        } else {
-            ctx.clearUser();
-        }
+        AuthenticationUserContext.fromSessionAtScope(ctx.session(), sessionScope)
+            .ifPresentOrElse(
+                ac -> ctx.setUser(ac.getUser()),
+                () -> ctx.clearUser());
+
         return ctx.user();
     }
 

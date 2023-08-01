@@ -6,6 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.Be
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.authorizationBearer.MockOAuth2Auth;
 import com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddleware;
@@ -21,6 +22,7 @@ import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
@@ -48,8 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.event.Level;
 
 public final class MiddlewareServerBuilder {
@@ -199,15 +199,15 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
-        return withMiddleware(new PassAuthorizationMiddleware("passAuthorization", sessionScope, JWTAuthHandler.create(authProvider)));
+        return withMiddleware(new PassAuthorizationMiddleware(vertx, "passAuthorization", sessionScope, JWTAuthHandler.create(authProvider)));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
         return withMiddleware(new LanguageCookieMiddleware("languageCookie", LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME));
     }
 
-    public MiddlewareServerBuilder withControlApiMiddleware(String action) {
-        return withMiddleware(new ControlApiMiddleware("controlAPI", action, WebClient.create(vertx)));
+    public MiddlewareServerBuilder withControlApiMiddleware(String action, WebClient client) {
+        return withMiddleware(new ControlApiMiddleware(vertx, "controlAPI", action, client));
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
@@ -317,14 +317,24 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withMockOAuth2Middleware(String rawAccessToken) {
+        return withMockOAuth2Middleware("localhost", 1234, rawAccessToken);
+    }
+
+    public MiddlewareServerBuilder withMockOAuth2Middleware(String host, int port) {
+        return withMockOAuth2Middleware(host, port, "mayIAccessThisRessource");
+    }
+
+    public MiddlewareServerBuilder withMockOAuth2Middleware(String host, int port, String rawAccessToken) {
         final String sessionScope = "testScope";
-        final User user = User.create(new JsonObject().put("access_token", rawAccessToken));
-        final Pair<OAuth2Auth, User> authPair = ImmutablePair.of(null, user);
+
+        final JsonObject principal = new JsonObject().put("access_token", rawAccessToken);
+        final OAuth2Auth authProvider = new MockOAuth2Auth(host, port, principal, 0);
+        final User user = MockOAuth2Auth.createUser(principal);
+        AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
 
         // mock OAuth2 authentication
         final Handler<RoutingContext> injectTokenHandler = ctx -> {
-            final String key = String.format("%s%s", sessionScope, OAuth2MiddlewareFactory.SESSION_SCOPE_SUFFIX);
-            ctx.session().put(key, authPair);
+            authContext.toSessionAtScope(ctx.session(), sessionScope);
             ctx.next();
         };
         router.route().handler(injectTokenHandler);

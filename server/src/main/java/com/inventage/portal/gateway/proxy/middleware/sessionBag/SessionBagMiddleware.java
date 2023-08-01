@@ -12,7 +12,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.PlatformHandler;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -87,7 +86,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-        String cookieHeaderValue = encodeMatchingCookies(storedCookies, ctx);
+        String cookieHeaderValue = encodeMatchingCookies(ctx, storedCookies);
 
         // check for conflicting request and stored cookies
         // stored cookie have precedence to avoid cookie injection
@@ -96,13 +95,13 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
                 continue;
             }
-            cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, requestCookie.toString());
+            cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, String.format("%s=%s", requestCookie.getName(), requestCookie.getValue()));
         }
 
         return cookieHeaderValue;
     }
 
-    private String encodeMatchingCookies(Set<Cookie> storedCookies, RoutingContext ctx) {
+    private String encodeMatchingCookies(RoutingContext ctx, Set<Cookie> storedCookies) {
         final List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
             if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
@@ -191,12 +190,12 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
             return;
         }
 
-        LOGGER.debug("Set-Cookie detected. Removing and storing in session.");
+        LOGGER.debug("Set-Cookie detected. Removing and storing in session with  id '{}'.", ctx.session().id());
         headers.remove(HttpHeaders.SET_COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
         if (storedCookies == null) {
-            storedCookies = new HashSet<>();
+            storedCookies = new CookieBag();
         }
 
         for (String cookieToSet : cookiesToSet) {
@@ -288,4 +287,5 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         }
         return false;
     }
+
 }

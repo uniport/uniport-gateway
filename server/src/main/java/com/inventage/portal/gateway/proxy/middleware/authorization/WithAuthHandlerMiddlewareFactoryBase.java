@@ -36,7 +36,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
      *            The config for the middleware
      * @return Your {@link Middleware}
      */
-    protected abstract Middleware create(String name, AuthenticationHandler authHandler, JsonObject middlewareConfig);
+    protected abstract Middleware create(Vertx vertx, String name, AuthenticationHandler authHandler, JsonObject middlewareConfig);
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
@@ -94,7 +94,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 final JWTAuthPublicKeysReconcilerHandler reconciler = JWTAuthPublicKeysReconcilerHandler.create(
                     vertx, jwtAuthOptions, additionalIssuersOptions, additionalClaimsOptions, publicKeySources, publicKeysReconcilationEnabled, publicKeysReconcilationIntervalMs);
 
-                handler.handle(Future.succeededFuture(create(name, reconciler, middlewareConfig)));
+                handler.handle(Future.succeededFuture(create(vertx, name, reconciler, middlewareConfig)));
             })
             .onFailure(err -> handler.handle(Future.failedFuture(err.getMessage())));
 

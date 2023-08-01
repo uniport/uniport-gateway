@@ -39,7 +39,9 @@
     https://github.com/eclipse-vertx/vertx-auth/blob/4.3.7/vertx-auth-oauth2/src/main/java/io/vertx/ext/auth/oauth2/impl/OAuth2AuthProviderImpl.java#L606 -->
     <logger name="io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl" level="TRACE"/>
     <logger name="io.netty" level="INFO"/>
+    <logger name="com.hazelcast" level="INFO"/>
     <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="DEBUG"/>
+
     <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>

@@ -10,10 +10,18 @@ import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
 
 public class MockOAuth2Auth implements OAuth2Auth {
 
+    private final String host;
+    private final int port;
     private final int refreshedExpiresIn;
     private final JsonObject principal;
 
     public MockOAuth2Auth(JsonObject principal, int refreshedExpiresIn) {
+        this("localhost", 1234, principal, refreshedExpiresIn);
+    }
+
+    public MockOAuth2Auth(String host, int port, JsonObject principal, int refreshedExpiresIn) {
+        this.host = host;
+        this.port = port;
         this.principal = principal;
         this.refreshedExpiresIn = refreshedExpiresIn;
     }
@@ -95,7 +103,12 @@ public class MockOAuth2Auth implements OAuth2Auth {
 
     @Override
     public String endSessionURL(User user, JsonObject params) {
-        return "";
+        return endSessionURL(user);
+    }
+
+    @Override
+    public String endSessionURL(User user) {
+        return "http://" + host + ":" + port + "/";
     }
 
     @Override
