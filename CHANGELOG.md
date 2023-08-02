@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Build docker server image with dependencies and app on different layers ([PORTAL-1650](https://issue.inventage.com/browse/PORTAL-1650)).
-- *DISCLAIMER*: Websockets not working anymore in portal-gateway (affects service like portal-monitoring). Should be fixed later with: https://issue.inventage.com/browse/PORTAL-1662
 
 ### Fixed
 
