@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,10 +211,14 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
             if (mergedPolicyString.length() > 0) {
                 mergedPolicyString.append("; ");
             }
-            final String mergedValues = values.stream().reduce((resultValue, newDirectiveValue) -> resultValue + " " + newDirectiveValue).get();
-            mergedPolicyString.append(directive)
-                .append(' ')
-                .append(mergedValues);
+
+            final Optional<String> mergedValuesOptional = values.stream().reduce((resultValue, newDirectiveValue) -> resultValue + " " + newDirectiveValue);
+            if (mergedValuesOptional.isPresent()) {
+                final String mergedValues = mergedValuesOptional.get();
+                mergedPolicyString.append(directive)
+                    .append(' ')
+                    .append(mergedValues);
+            }
         });
 
         return mergedPolicyString.toString();
