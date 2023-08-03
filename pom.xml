@@ -56,6 +56,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Project dependencies -->
+            <dependency>
+                <groupId>com.inventage.portal.gateway</groupId>
+                <artifactId>config-schemas</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Other -->
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-stack-depchain</artifactId>
@@ -224,11 +232,6 @@
                 <artifactId>code-style-settings</artifactId>
                 <version>${portal-code-style-settings.version}</version>
                 <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>com.inventage.portal.helm-chart-library</groupId>
-                <artifactId>helm</artifactId>
-                <version>${portal-helm-chart-library.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

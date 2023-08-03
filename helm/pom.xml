@@ -15,6 +15,13 @@
         <chart.directory>${project.build.directory}/portal-gateway</chart.directory>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.inventage.portal.gateway</groupId>
+            <artifactId>config-schemas</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -34,6 +41,48 @@
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-config-schemas</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.inventage.portal.gateway</groupId>
+                                    <artifactId>config-schemas</artifactId>
+                                    <type>jar</type>
+                                    <includes>schema/*.json</includes>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate-static-config</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <executable>./validate-configs.sh</executable>
                         </configuration>
                     </execution>
                 </executions>

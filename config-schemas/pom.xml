@@ -28,39 +28,10 @@
             <artifactId>server</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.inventage.portal.gateway</groupId>
-            <artifactId>helm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-helm</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.inventage.portal.gateway</groupId>
-                                    <artifactId>helm</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>jar</type>
-                                    <includes>proxy-config.*/**/*</includes>
-                                    <outputDirectory>${project.build.directory}/helm</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -76,16 +47,6 @@
                             <arguments>
                                 <argument>${project.basedir}/../config-schemas/src/main/resources/schema/</argument>
                             </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>validate-static-config</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <executable>./validate-configs.sh</executable>
                         </configuration>
                     </execution>
                 </executions>
