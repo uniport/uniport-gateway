@@ -9,6 +9,11 @@
     </parent>
 
     <artifactId>helm</artifactId>
+    <packaging>helm</packaging>
+
+    <properties>
+        <chart.directory>${project.build.directory}/portal-gateway</chart.directory>
+    </properties>
 
     <build>
         <plugins>
@@ -16,28 +21,13 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>default-resources</id>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/portal-gateway-template</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                    <filtering>false</filtering>
-                                    <excludes>
-                                        <exclude>values.dev.yaml</exclude>
-                                    </excludes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>with-substitution</id>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
-                        <phase>prepare-package</phase>
+                        <phase>generate-resources</phase>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/portal-gateway</outputDirectory>
+                            <outputDirectory>${chart.directory}</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/resources</directory>
@@ -48,59 +38,16 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.inventage.portal.helm-chart-library</groupId>
-                                    <artifactId>helm</artifactId>
-                                    <outputDirectory>${project.build.directory}/portal-gateway-template/charts</outputDirectory>
-                                    <includes>portal-lib/**/*</includes>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.inventage.portal.helm-chart-library</groupId>
-                                    <artifactId>helm</artifactId>
-                                    <outputDirectory>${project.build.directory}//portal-gateway/charts</outputDirectory>
-                                    <includes>portal-lib/**/*</includes>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-jar</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <classesDirectory>${project.build.directory}/portal-gateway-template</classesDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <!-- See https://github.com/kokuwaio/helm-maven-plugin for documentation -->
                 <groupId>io.kokuwa.maven</groupId>
                 <artifactId>helm-maven-plugin</artifactId>
                 <configuration>
-                    <chartDirectory>${project.build.directory}/portal-gateway</chartDirectory>
                     <excludes>
-                        <exclude>${project.build.directory}/**/charts/*</exclude>
+                        <exclude>${project.build.directory}/**/charts/**/charts/portal-lib</exclude>
                     </excludes>
+                    <chartDirectory>${chart.directory}</chartDirectory>
                 </configuration>
             </plugin>
         </plugins>

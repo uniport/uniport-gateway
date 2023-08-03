@@ -34,6 +34,9 @@ pipeline {
         CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
         CI_REGISTRY_CREDS = credentials('portal-registry-creds')
         CI_JENKINS_TOKEN = credentials('jenkins-inventage-portal')
+
+        // Contains the credentials & remotes for the helm repositories
+        HELM_REPOSITORY_CONFIG = "${env.WORKSPACE}/helm-repositories.yaml"
     }
 
     tools {
@@ -70,6 +73,8 @@ pipeline {
 
                 // Display important environment variables
                 sh("env | sort")
+
+                addHelmRepositories("inventage-portal")
             }
         }
 
@@ -309,4 +314,14 @@ def codeQualityEvaluation() {
                     taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
             ]
     )
+}
+
+def addHelmRepositories(String credentialsId) {
+    // The names `inventage-portal-helm` & `inventage-portal-helm-staging` are referenced in scripts - be cautious when
+    // changing these names!
+
+    withCredentials([usernamePassword(credentialsId: "${credentialsId}", passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
+        sh("helm repo add inventage-portal-helm https://nexus3.inventage.com/repository/inventage-portal-helm/ --username $USER --password $PASSWORD")
+        sh("helm repo add inventage-portal-helm-staging https://nexus3.inventage.com/repository/inventage-portal-helm-staging/ --username $USER --password $PASSWORD")
+    }
 }

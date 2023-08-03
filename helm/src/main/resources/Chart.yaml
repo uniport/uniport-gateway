@@ -5,8 +5,9 @@ description: A Helm chart for configuring portal-gateway on Kubernetes
 type: application
 
 version: ${project.version}
-appVersion: ${portal-gateway.version}
+appVersion: ${project.version}
 
 dependencies:
   - name: portal-lib
-    version: "0.1.0"
+    version: "${portal-helm-chart-library.version}"
+    repository: "${portal-helm-dependencies.repository}"
