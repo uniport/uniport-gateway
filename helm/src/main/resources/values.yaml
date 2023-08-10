@@ -1,3 +1,7 @@
+global:
+  image:
+    registry: "${docker.registry}"
+
 version: ${project.version}
 
 ingress:
@@ -25,7 +29,9 @@ pod:
 
 initContainers:
   init-portal-iam:
-    image: ${docker.registry}/busybox:1.35
+    image:
+      name: busybox
+      tag: 1.35
     command:
       - "sh"
       - "-c"
@@ -34,7 +40,6 @@ initContainers:
 containers:
   portal-gateway:
     image:
-      registry: ${docker.registry}
       baseName: ${project.groupId}
       name: portal-gateway
       tag: ${project.version}
