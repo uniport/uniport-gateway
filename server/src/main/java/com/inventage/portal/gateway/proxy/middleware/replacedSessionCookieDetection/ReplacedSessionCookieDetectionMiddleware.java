@@ -46,8 +46,9 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
             ctx.next();
             return;
         }
-
+        // from here on, there is a session cookie in the incoming request
         if (requestComingFromReplacedSessionId(ctx)) {
+            // but the session cookie identifies no valid session and max number of retries not yet reached
             retryWithNewSessionIdFromBrowser(ctx);
             return;
         }

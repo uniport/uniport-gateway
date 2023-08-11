@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DetectionCookieValue {
 
+    private static final int MINUTES_IN_MILLISECONDS = 60000;
     protected static final String SPLITTER = ":";
     protected static final int MAX_RETRIES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(DetectionCookieValue.class);
@@ -49,7 +50,7 @@ public class DetectionCookieValue {
             LOGGER.warn("Counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
             return false;
         }
-        if ((System.currentTimeMillis() - lastSessionAccess >= 30 * 60 * 1000)) {
+        if (lastSessionAccess < (System.currentTimeMillis() - 30 * MINUTES_IN_MILLISECONDS)) {
             LOGGER.warn("Cookie with last session access date '{}' is outdated", lastSessionAccess);
             return false;
         }

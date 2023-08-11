@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 
 /**
  * Calculates the session lifetime based on the given session idle timeout.
+ * The session lifetime is the point in time (Unix Epoch in seconds) until the session is valid (== not expired).
  */
 public class SessionLifetimeValue {
 
