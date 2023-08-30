@@ -5,12 +5,17 @@ import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The incoming requests can be prepared by different middlewares before being routed to its final
  * destination. Every one has to implement the io.vertx.core.Handler interface.
  */
 public interface Middleware extends Handler<RoutingContext> {
+
+    Logger LOGGER = LoggerFactory.getLogger(Middleware.class);
+
     String MODIFIERS_PREFIX = "portal-gateway-middleware";
 
     String REQUEST_URI_MODIFIERS = String.format("%s-request-uri-modifiers", MODIFIERS_PREFIX);
@@ -57,5 +62,6 @@ public interface Middleware extends Handler<RoutingContext> {
             modifiers.add(modifier);
         }
         ctx.put(modifierType, modifiers);
+        LOGGER.debug("Modifier '{}' added to '{}'.", modifier, modifierType);
     }
 }

@@ -70,6 +70,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         // on response: remove cookies if present and store them in session bag
         final Handler<MultiMap> respHeadersModifier = headers -> storeCookiesInSessionBag(ctx, headers);
         this.addResponseHeaderModifier(ctx, respHeadersModifier);
+        LOGGER.debug("Added storeCookiesInSessionBag '{}' as response header modifier for '{}'", respHeadersModifier, name);
 
         ctx.next();
     }
@@ -186,6 +187,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
     private void storeCookiesInSessionBag(RoutingContext ctx, MultiMap headers) {
         final List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
         if (cookiesToSet == null || cookiesToSet.isEmpty()) {
+            LOGGER.debug("No cookies received in header.");
             return;
         }
 
@@ -204,9 +206,11 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
             }
             if (isWhitelisted(decodedCookieToSet)) {
                 // we delegate all logic for whitelisted cookies to the user agent
-                LOGGER.debug("'Passing cookie to user agent: {}'", cookieToSet);
+                LOGGER.debug("Passing cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
+            } else {
+                LOGGER.debug("Cookie removed from response: '{}'", cookieToSet);
             }
             updateSessionBag(storedCookies, decodedCookieToSet);
         }
