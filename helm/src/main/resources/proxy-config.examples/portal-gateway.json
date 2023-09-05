@@ -13,6 +13,15 @@
                     "type": "responseSessionCookieRemoval"
                 },
                 {
+                    "name": "session",
+                    "type": "session",
+                    "options": {
+                        "lifetimeCookie": true,
+                        "idleTimeoutInMinute": 30,
+                        "uriWithoutSessionTimeoutReset": "^/analytics/pmt.pmt\\?ping.*|.*_uniport-polling_.*|.*conversation/polling/v1/.*"
+                    }
+                },
+                {
                     "name": "sessionTerminate",
                     "type": "controlApi",
                     "options": {
@@ -25,15 +34,6 @@
                     "options": {
                         "action": "SESSION_RESET",
                         "iamSessionResetUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal/session_reset"
-                    }
-                },
-                {
-                    "name": "session",
-                    "type": "session",
-                    "options": {
-                        "lifetimeCookie": true,
-                        "idleTimeoutInMinute": 30,
-                        "uriWithoutSessionTimeoutReset": "^/analytics/pmt.pmt\\?ping.*|.*_uniport-polling_.*|.*conversation/polling/v1/.*"
                     }
                 },
                 {
