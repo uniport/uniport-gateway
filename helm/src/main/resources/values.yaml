@@ -63,7 +63,7 @@ containers:
       requests:
         memory: "256Mi"
       limits:
-        memory: "256Mi"
+        memory: "512Mi"
     env:
       # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
       PORTAL_GATEWAY_PUBLIC_PROTOCOL:
