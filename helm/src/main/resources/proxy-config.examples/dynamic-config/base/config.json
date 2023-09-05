@@ -6,9 +6,7 @@
                 "middlewares": [
                     "baseRedirectRegex",
                     "baseAuthBearer",
-                    "baseReplacePath",
-                    "sessionTerminate",
-                    "sessionReset"
+                    "baseReplacePath"
                 ],
                 "rule": "PathPrefix('/base')",
                 "service": "base-proxy"
