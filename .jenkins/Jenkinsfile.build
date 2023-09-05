@@ -149,7 +149,7 @@ pipeline {
 
                             curl -X GET \
                                 -u "$CI_NEXUS2_BITBUCKET_CREDS_USR:$CI_NEXUS2_BITBUCKET_CREDS_PSW" \
-                                https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh?at=refs%2Ftags%2F1.0.0 \
+                                https://git.inventage.com/projects/PORTAL/repos/portal-infrastructure/raw/kubernetes/microservices/service.sh?at=refs%2Ftags%2F1.5.0 \
                                 > service.sh
 
                             bash service.sh portal-gateway install ips dev
