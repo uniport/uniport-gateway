@@ -222,6 +222,13 @@
                             <goal>jar</goal>
                         </goals>
                         <phase>package</phase>
+                        <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                </manifestEntries>
+                            </archive>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>slim-jar</id>
