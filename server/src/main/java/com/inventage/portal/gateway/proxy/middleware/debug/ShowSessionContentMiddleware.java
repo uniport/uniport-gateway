@@ -10,7 +10,10 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +48,15 @@ public class ShowSessionContentMiddleware implements Middleware {
         ctx.end(getHtml(ctx.session()));
     }
 
-    // TODO: usage of vert.x templating for HTML generation
     private String getHtml(Session session) {
         final StringBuilder html = new StringBuilder();
 
         html.append("instance:\n").append(this.instanceName);
-        html.append("\n");
+        html.append("\n\n");
+
         html.append("session ID:\n").append(session.id());
         html.append("\n");
-        html.append("session last access (seconds since epoch:\n").append(session.lastAccessed() / 1000); // https://www.epochconverter.com/?q=ms
+        html.append("session last access (seconds since epoch):\n").append(session.lastAccessed() / 1000); // https://www.epochconverter.com/?q=ms
         html.append("\n\n");
 
         final Set<Cookie> storedCookies = session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
@@ -61,7 +64,10 @@ public class ShowSessionContentMiddleware implements Middleware {
             if (!storedCookies.isEmpty()) {
                 html.append("cookies stored in session bag (each block is one cookie):\n\n");
             }
-            for (Cookie cookie : storedCookies) {
+            final List<Cookie> sortedStoredCookies = storedCookies.stream()
+                .sorted(Comparator.comparing(Cookie::getName))
+                .collect(Collectors.toList());
+            for (Cookie cookie : sortedStoredCookies) {
                 html.append(String.join("\n", getDisplayString(cookie).replace(", ", "\n")));
                 html.append("\n\n");
             }
