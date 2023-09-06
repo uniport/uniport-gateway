@@ -13,7 +13,7 @@ USER appuser
 # In our logback configuration we use a condition based on a env var to decide if we log structured or unstructered log messages.
 # For this we rely on a library called Janino.
 # See server/src/main/resources/logback.xml.
-COPY logback-default.xml /etc/portal-gateway/default/
+COPY logback-default.xml /etc/portal-gateway/default/logback.xml
 
 ENV TZ="Europe/Zurich"
 
