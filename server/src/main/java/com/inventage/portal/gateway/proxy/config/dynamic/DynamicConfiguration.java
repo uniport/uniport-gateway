@@ -107,6 +107,13 @@ public class DynamicConfiguration {
     // language cookie
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
     public static final String MIDDLEWARE_LANGUAGE_COOKIE_NAME = "name";
+    // matomo
+    public static final String MIDDLEWARE_MATOMO = "matomo";
+    public static final String MIDDLEWARE_MATOMO_JWT_PATH_ROLES = "pathRoles";
+    public static final String MIDDLEWARE_MATOMO_JWT_PATH_GROUP = "pathGroup";
+    public static final String MIDDLEWARE_MATOMO_JWT_PATH_EMAIL = "pathEmail";
+    public static final String MIDDLEWARE_MATOMO_JWT_PATH_USERNAME = "pathUsername";
+
     // oauth2
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
@@ -223,7 +230,8 @@ public class DynamicConfiguration {
         MIDDLEWARE_SHOW_SESSION_CONTENT,
         MIDDLEWARE_OPEN_TELEMETRY,
         MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION,
-        MIDDLEWARE_CLAIM_TO_HEADER);
+        MIDDLEWARE_CLAIM_TO_HEADER,
+        MIDDLEWARE_MATOMO);
     public static final List<String> CSP_MERGE_STRATEGIES = List.of(
         MIDDLEWARE_CSP_MERGE_STRATEGY_UNION,
         MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL,
@@ -383,6 +391,14 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_CLAIM_TO_HEADER_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
 
@@ -1122,6 +1138,8 @@ public class DynamicConfiguration {
                     }
                     break;
                 }
+                case MIDDLEWARE_MATOMO:
+                    break;
                 default: {
                     return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
                 }

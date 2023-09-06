@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -  Add support to run the Portal-Gateway in cluster mode ([PORTAL-1572](https://issue.inventage.com/browse/PORTAL-1572)).
+-  Add matomo middleware for autologin feature ([PORTAL-1718](https://issue.inventage.com/browse/PORTAL-1718)).
 
 ### Changed
 

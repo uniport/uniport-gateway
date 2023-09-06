@@ -104,6 +104,10 @@
                   "reportOnly" : {
                     "type" : "boolean"
                   },
+                  "pathRoles" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
                   "timeoutInMinute" : {
                     "type" : "integer",
                     "minimum" : 0
@@ -131,6 +135,10 @@
                     "type" : "string"
                   },
                   "clientId" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "pathUsername" : {
                     "minLength" : 1,
                     "type" : "string"
                   },
@@ -177,6 +185,10 @@
                     "type" : "integer",
                     "minimum" : 0
                   },
+                  "pathGroup" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
                   "regex" : {
                     "minLength" : 1,
                     "type" : "string"
@@ -208,6 +220,10 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
+                  "pathEmail" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
                   "contentTypes" : {
                     "type" : "array",
                     "items" : {
@@ -225,7 +241,7 @@
               },
               "type" : {
                 "type" : "string",
-                "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader" ]
+                "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo" ]
               }
             },
             "required" : [ "name", "type" ]

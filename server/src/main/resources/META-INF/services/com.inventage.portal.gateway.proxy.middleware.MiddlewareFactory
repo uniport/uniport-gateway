@@ -23,3 +23,4 @@ com.inventage.portal.gateway.proxy.middleware.oauth2.foreignInitiated.PreventFor
 com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.matomo.MatomoMiddlewareFactory
