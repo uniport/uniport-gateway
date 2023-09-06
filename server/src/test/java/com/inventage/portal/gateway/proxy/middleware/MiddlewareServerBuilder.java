@@ -10,6 +10,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorizationBearer.MockOAu
 import com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiAction;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
@@ -206,8 +207,12 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new LanguageCookieMiddleware("languageCookie", LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME));
     }
 
-    public MiddlewareServerBuilder withControlApiMiddleware(String action, WebClient client) {
+    public MiddlewareServerBuilder withControlApiMiddleware(ControlApiAction action, WebClient client) {
         return withMiddleware(new ControlApiMiddleware(vertx, "controlAPI", action, client));
+    }
+
+    public MiddlewareServerBuilder withControlApiMiddleware(ControlApiAction action, String resetUri, WebClient client) {
+        return withMiddleware(new ControlApiMiddleware(vertx, "controlAPI", action, resetUri, client));
     }
 
     public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
@@ -359,9 +364,9 @@ public final class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withRoutingContextHolder(AtomicReference<RoutingContext> routingContext) {
+    public MiddlewareServerBuilder withRoutingContextHolder(AtomicReference<RoutingContext> routingContextHolder) {
         final Handler<RoutingContext> holdRoutingContext = ctx -> {
-            routingContext.set(ctx);
+            routingContextHolder.set(ctx);
             ctx.next();
         };
 

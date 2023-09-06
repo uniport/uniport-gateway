@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
-import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
@@ -36,7 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +73,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CONTROL_API = "controlApi";
     public static final String MIDDLEWARE_CONTROL_API_SESSION_RESET_URL = "iamSessionResetUrl";
     public static final String MIDDLEWARE_CONTROL_API_ACTION = "action";
+    public static final String MIDDLEWARE_CONTROL_API_ACTION_SESSION_TERMINATE = "SESSION_TERMINATE";
+    public static final String MIDDLEWARE_CONTROL_API_ACTION_SESSION_RESET = "SESSION_RESET";
     // cors
     public static final String MIDDLEWARE_CORS = "cors";
     // csp
@@ -236,6 +236,9 @@ public class DynamicConfiguration {
         MIDDLEWARE_CSP_MERGE_STRATEGY_UNION,
         MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL,
         MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL);
+    public static final List<String> MIDDLEWARE_CONTROL_API_ACTIONS = List.of(
+        MIDDLEWARE_CONTROL_API_ACTION_SESSION_TERMINATE,
+        MIDDLEWARE_CONTROL_API_ACTION_SESSION_RESET);
 
     // services
     public static final String SERVICES = "services";
@@ -292,7 +295,7 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CONTROL_API_ACTIONS.toArray())))
             .optionalProperty(MIDDLEWARE_CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
@@ -756,10 +759,8 @@ public class DynamicConfiguration {
                             String.format("%s: No control api action defined", mwType));
                     }
 
-                    if (!Objects.equals(action, ControlApiMiddleware.SESSION_TERMINATE_ACTION) &&
-                        !Objects.equals(action, ControlApiMiddleware.SESSION_RESET_ACTION)) {
-                        return Future
-                            .failedFuture(String.format("%s: Not supported control api action defined.", mwType));
+                    if (!MIDDLEWARE_CONTROL_API_ACTIONS.contains(action)) {
+                        return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
                     }
                     break;
                 }

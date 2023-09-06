@@ -88,8 +88,8 @@
                     "type" : "array"
                   },
                   "action" : {
-                    "minLength" : 1,
-                    "type" : "string"
+                    "type" : "string",
+                    "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
                   },
                   "nagHttps" : {
                     "type" : "boolean"

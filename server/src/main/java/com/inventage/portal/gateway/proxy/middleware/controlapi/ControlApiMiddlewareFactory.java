@@ -33,7 +33,8 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
 
         final String action = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION);
         final String iamSessionResetURI = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CONTROL_API_SESSION_RESET_URL);
-        return Future.succeededFuture(new ControlApiMiddleware(vertx, name, action, iamSessionResetURI, webClient));
+
+        return Future.succeededFuture(new ControlApiMiddleware(vertx, name, ControlApiAction.valueOf(action), iamSessionResetURI, webClient));
     }
 
 }

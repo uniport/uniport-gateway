@@ -80,7 +80,6 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
         }
         LOGGER.debug("Cookies in session found. Setting as cookie header.");
 
-        // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         final Set<Cookie> requestCookies = CookieUtil
             .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);

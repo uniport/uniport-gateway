@@ -35,6 +35,21 @@
                     "regex": "/base/(.*)",
                     "replacement": "/$1"
                 }
+            },
+            {
+                "name": "sessionTerminate",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_TERMINATE"
+                }
+            },
+            {
+                "name": "sessionReset",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_RESET",
+                    "iamSessionResetUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal/session_reset"
+                }
             }
         ],
         "services": [
