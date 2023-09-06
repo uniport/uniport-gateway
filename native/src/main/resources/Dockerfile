@@ -39,8 +39,8 @@ COPY --from=buildEnv /workdir/portal-gateway /usr/local/bin/portal-gateway
 # Unforuntately, Janino cannot be used with a native image build, hence we have two logback configurations for both cases.
 # To choose between the two configurations the PORTAL_GATEWAY_LOGGING_CONFIG env var can be used.
 # See: https://github.com/spring-projects/spring-boot/issues/33758
-COPY logback-structured-default.xml /etc/portal-gateway/default/
-COPY logback-unstructured-default.xml /etc/portal-gateway/default/
+COPY logback-structured-default.xml /etc/portal-gateway/logback-structured.xml
+COPY logback-unstructured-default.xml /etc/portal-gateway/logback.xml
 
 ENV TZ="Europe/Zurich"
 
