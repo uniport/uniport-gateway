@@ -1,10 +1,5 @@
-<!-- In our logback configuration we use a condition based on an env var to decide if we log structured or unstructured log messages. -->
-<!-- For this we rely on a library called Janino. -->
-<!-- See helm/src/main/resources/app-config/logback.xml. -->
-<!-- -->
-<!-- Unfortunately, Janino cannot be used with a native image build, hence we have two logback configurations for both cases. -->
-<!-- To choose between the two configurations the PORTAL_GATEWAY_LOGGING_CONFIG env var can be used. -->
-<!-- See: https://github.com/spring-projects/spring-boot/issues/33758 -->
+<!-- Default logback configuration for structured (JSON) entries included in the container image as a fallback -->
+<!-- The content of this file should be a copy of helm/src/main/resources/app-config/logback-structured.xml -->
 <configuration scan="true">
     <conversionRule conversionWord="vcl" converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
     <property name="COMMON_PATTERN" value="%date %-5level [%vcl{userId:--}/%vcl{sessionId:--}/%vcl{traceId:--}] %logger{36}:%line - %method: %msg%n" />

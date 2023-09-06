@@ -10,6 +10,11 @@ RUN groupadd --system appuser && useradd --system --gid appuser appuser
 RUN chown -R appuser /app
 USER appuser
 
+# In our logback configuration we use a condition based on a env var to decide if we log structured or unstructered log messages.
+# For this we rely on a library called Janino.
+# See server/src/main/resources/logback.xml.
+COPY logback-default.xml /etc/portal-gateway/default/
+
 ENV TZ="Europe/Zurich"
 
 # for using 50% of memory limit as max heap size 

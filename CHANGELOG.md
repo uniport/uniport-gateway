@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RoutingContext cannot be used in the Interceptors ([PORTAL-1663](https://issue.inventage.com/browse/PORTAL-1663)).
 - Middleware chain is traversed in the wrong order for responses ([PORTAL-1664](https://issue.inventage.com/browse/PORTAL-1664)).
 - CSP Middleware supports directives without values (fixes Dashboard loading in Portal-Monitoring) ([PORTAL-1667](https://issue.inventage.com/browse/PORTAL-1667)).
+- Default logback.xml added to container image ([PORTAL-1717](https://issue.inventage.com/browse/PORTAL-1717)).
 
 ## [8.1.0]-202307270944-948-1cb69438 - 2023-07-27
 

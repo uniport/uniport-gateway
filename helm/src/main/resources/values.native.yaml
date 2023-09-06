@@ -4,7 +4,7 @@ containers:
       tag: ${project.version}-native
     env:
       PORTAL_GATEWAY_LOGGING_CONFIG:
-        value: "/etc/portal-gateway/logging-config/logback-structured.xml"
+        value: "/etc/portal-gateway/logging-config/logback-structured-default.xml"
     storages:
       logging-config:
         type: configMap
@@ -25,6 +25,6 @@ configMaps:
       # To choose between the two configurations the PORTAL_GATEWAY_LOGGING_CONFIG env var can be used.
       # See: https://github.com/spring-projects/spring-boot/issues/33758
       logback-structured.xml:
-        valueFromFile: app-config/logback-structured.xml
+        valueFromFile: app-config/logback-structured-default.xml
       logback-unstructured.xml:
-        valueFromFile: app-config/logback-unstructured.xml
+        valueFromFile: app-config/logback-unstructured-default.xml
