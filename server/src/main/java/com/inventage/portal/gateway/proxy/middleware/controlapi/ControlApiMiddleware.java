@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBa
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieBag;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
@@ -214,6 +215,6 @@ public class ControlApiMiddleware implements Middleware {
     private Set<Cookie> getKeycloakCookiesFrom(Set<Cookie> cookiesInSessionBag) {
         return cookiesInSessionBag.stream()
             .filter(cookie -> cookie.getName().startsWith(KEYCOAK_COOKIE_NAME_PREFIX))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(CookieBag::new));
     }
 }
