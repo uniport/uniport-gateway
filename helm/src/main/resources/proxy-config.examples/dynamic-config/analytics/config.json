@@ -8,6 +8,7 @@
                     "analyticsOauth2",
                     "analyticsAuthBearer",
                     "analyticsBearerOnly",
+                    "analyticsMatomo",
                     "analyticsReplacePath"
                 ],
                 "rule": "PathPrefix('/analytics-admin')",
@@ -117,6 +118,10 @@
                     "regex": "/analytics/(.*)",
                     "replacement": "/$1"
                 }
+            },
+            {
+                "name": "analyticsMatomo",
+                "type": "matomo"
             }
         ],
         "services": [
