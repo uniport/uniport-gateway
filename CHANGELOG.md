@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Publishing of the chart to the maven repository has been discontinued. Please download the chart from the helm repository instead.
+- Updated `portal-helm-chart-library` to `4.5.0-202309061145-260-8c797e8`
+- Updated `code-style-settings` to `1.2.0-202308041303-1-08f26fa`
 
 ### Fixed
 

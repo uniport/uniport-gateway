@@ -49,9 +49,10 @@
         <nexus3.helm.registry.push.url>https://nexus3.inventage.com/repository</nexus3.helm.registry.push.url>
         <nexus3.helm.repository.push.id>inventage-portal-helm-staging</nexus3.helm.repository.push.id>
 
-        <portal-helm-chart-library.version>4.4.0-202307251410-244-fc44010</portal-helm-chart-library.version>
         <portal-helm-dependencies.repository>https://nexus3.inventage.com/repository/inventage-portal-helm/</portal-helm-dependencies.repository>
-        <portal-code-style-settings.version>1.0.0-202305081139-48-275c253</portal-code-style-settings.version>
+
+        <portal-helm-chart-library.version>4.5.0-202309061145-260-8c797e8</portal-helm-chart-library.version>
+        <portal-code-style-settings.version>1.2.0-202308041303-1-08f26fa</portal-code-style-settings.version>
     </properties>
 
     <dependencyManagement>
