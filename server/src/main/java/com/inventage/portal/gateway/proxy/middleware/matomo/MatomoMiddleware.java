@@ -42,7 +42,8 @@ public class MatomoMiddleware implements Middleware {
 
     @Override
     public void handle(RoutingContext ctx) {
-        final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
+        final String authorizationHeader = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
+        final String authorization = authorizationHeader.split(" ")[1];
         final JsonObject jwt = JWT.parse(authorization);
         final JsonObject payload = jwt.getJsonObject("payload");
         final String group = JsonPath.read(payload.toString(), jwtPathGroup);
