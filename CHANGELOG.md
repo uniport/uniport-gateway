@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 8.3.0-[Unreleased] - ???
+## 8.4.0-[Unreleased] - ???
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
+
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~8.3.0-202309071344-1005-8468f9f1) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.3.0-202309071344-1005-8468f9f1)
 
 ### Added
 
@@ -471,7 +475,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F8.2.0
+[unreleased]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Fheads%2Fmaster&targetBranch=refs%2Ftags%2F8.3.0
+[8.3.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F8.3.0&targetBranch=refs%2Ftags%2F8.2.0
 [8.2.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?sourceBranch=refs%2Ftags%2F8.2.0&targetBranch=refs%2Ftags%2F8.1.0
 [8.1.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F8.0.0&sourceBranch=refs%2Ftags%2F8.1.0
 [8.0.0]: https://git.inventage.com/projects/PORTAL/repos/portal-gateway/compare/commits?targetBranch=refs%2Ftags%2F7.0.2&sourceBranch=refs%2Ftags%2F8.0.0
