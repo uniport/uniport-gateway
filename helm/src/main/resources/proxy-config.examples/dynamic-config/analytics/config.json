@@ -9,6 +9,7 @@
                     "analyticsAuthBearer",
                     "analyticsBearerOnly",
                     "analyticsMatomo",
+                    "portalAnalyticsHeaders",
                     "analyticsReplacePath"
                 ],
                 "rule": "PathPrefix('/analytics-admin')",
@@ -122,6 +123,15 @@
             {
                 "name": "analyticsMatomo",
                 "type": "matomo"
+            },
+            {
+                "name": "portalAnalyticsHeaders",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "X-Forwarded-Uri": "/analytics-admin"
+                    }
+                }
             }
         ],
         "services": [
