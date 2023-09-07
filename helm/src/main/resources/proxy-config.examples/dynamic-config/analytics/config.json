@@ -94,7 +94,10 @@
                             "claimPath": "$['resource_access']['Analytics']['roles']",
                             "operator": "CONTAINS",
                             "value": [
-                                "ADMIN"
+                                "ADMIN",
+                                "SUPERUSER",
+                                "WRITE",
+                                "VIEW"
                             ]
                         }
                     ],
