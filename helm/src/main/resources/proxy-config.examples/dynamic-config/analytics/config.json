@@ -9,7 +9,7 @@
                     "analyticsAuthBearer",
                     "analyticsBearerOnly",
                     "analyticsMatomo",
-                    "portalAnalyticsHeaders",
+                    "analyticsHeaders",
                     "analyticsReplacePath"
                 ],
                 "rule": "PathPrefix('/analytics-admin')",
@@ -128,7 +128,7 @@
                 "type": "matomo"
             },
             {
-                "name": "portalAnalyticsHeaders",
+                "name": "analyticsHeaders",
                 "type": "headers",
                 "options": {
                     "customRequestHeaders": {
