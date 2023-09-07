@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Read Control API Cookie from Response ([PORTAL-1716](https://issue.inventage.com/browse/PORTAL-1716)).
 
-## [8.2.0]-202308021352-962-750876b6
+## [8.2.0]-202308021352-962-750876b6 - 2023-08-02
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~8.2.0-202308021352-962-750876b6) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.2.0-202308021352-962-750876b6)
 
@@ -353,7 +353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - OpenShift deployment removed
 
-## [2.5.0]-202110181145-223-2a0ba2a
+## [2.5.0]-202110181145-223-2a0ba2a - 2021-10-18
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~2.5.0-202110181145-223-2a0ba2a~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.5.0-202110181145-223-2a0ba2a)
 
