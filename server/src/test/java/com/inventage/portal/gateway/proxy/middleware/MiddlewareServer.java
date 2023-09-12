@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
@@ -65,6 +66,14 @@ public class MiddlewareServer {
     public void incomingRequest(HttpMethod method, String uri, RequestOptions reqOpts, Handler<HttpClientResponse> responseHandler) {
         reqOpts.setHost(host).setPort(port).setURI(uri).setMethod(method);
         createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, responseHandler);
+    }
+
+    public void incomingRequestWithProxyRequestHandler(HttpMethod method, String uri, RequestOptions reqOpts, int proxyPort, Handler<HttpServerRequest> requestHandler) {
+        reqOpts.setHost(host).setPort(port).setURI(uri).setMethod(method);
+        vertx.createHttpServer().requestHandler(requestHandler).listen(proxyPort);
+
+        createHttpClientWithRequestOptionsAndResponseHandler(testCtx, reqOpts, (responseHandler) -> {
+        });
     }
 
     private void createHttpClientWithRequestOptionsAndResponseHandler(

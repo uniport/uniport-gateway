@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.web.RoutingContext;
 import net.minidev.json.JSONArray;
+import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,10 @@ public class MatomoMiddleware implements Middleware {
     @Override
     public void handle(RoutingContext ctx) {
         final String authorizationHeader = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
+        if (authorizationHeader == null) {
+            ctx.fail(HttpStatus.SC_FORBIDDEN);
+            return;
+        }
         final String authorization = authorizationHeader.split(" ")[1];
         final JsonObject jwt = JWT.parse(authorization);
         final JsonObject payload = jwt.getJsonObject("payload");

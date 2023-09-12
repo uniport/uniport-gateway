@@ -23,6 +23,7 @@ import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.matomo.MatomoMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
@@ -234,6 +235,10 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withAuthenticationTriggerMiddleware() {
         return withMiddleware(new CheckRouteMiddleware("checkRoute"));
+    }
+
+    public MiddlewareServerBuilder withMatomoMiddleware(String jwtPathRoles, String jwtPathGroup, String jwtPathUsername, String jwtPathEmail) {
+        return withMiddleware(new MatomoMiddleware("matomo", jwtPathRoles, jwtPathGroup, jwtPathUsername, jwtPathEmail));
     }
 
     /**
