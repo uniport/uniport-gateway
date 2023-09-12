@@ -99,11 +99,6 @@
                 <artifactId>jaxb-impl</artifactId>
                 <version>4.0.3</version>
             </dependency>
-            <dependency>
-                <groupId>org.codehaus.janino</groupId>
-                <artifactId>janino</artifactId>
-                <version>3.1.10</version>
-            </dependency>
             <!-- contextual logging (like MDC) -->
             <dependency>
                 <groupId>io.reactiverse</groupId>

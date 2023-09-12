@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.inventage.portal.gateway</groupId>
         <artifactId>reactor</artifactId>
-        <version>8.2.0-SNAPSHOT</version>
+        <version>8.4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>native</artifactId>
@@ -81,14 +81,31 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
                     <outputDirectory>${docker.contextDir}</outputDirectory>
-                    <resources>
-                        <!-- copy native-image configuration -->
-                        <resource>
-                            <directory>src/main/resources</directory>
-                            <filtering>true</filtering>
-                        </resource>
-                    </resources>
                 </configuration>
+                <executions>
+                    <execution>
+                        <!-- copy native-image configuration -->
+                        <id>default-resources</id>
+                    </execution>
+                    <execution>
+                        <id>copy-logging-config</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../server/src/main/docker</directory>
+                                    <includes>
+                                        <include>logback-structured-default.xml</include>
+                                        <include>logback-unstructured-default.xml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>io.fabric8</groupId>

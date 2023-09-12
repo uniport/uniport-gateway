@@ -81,7 +81,7 @@ containers:
         value: "INFO"
         # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
       PORTAL_GATEWAY_LOGGING_CONFIG:
-        value: "/etc/portal-gateway/logging-config/logback.xml"
+        value: "/etc/portal-gateway/logging-config/logback-structured.xml"
         # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
       PORTAL_GATEWAY_CLUSTERED:
         value: true
@@ -231,5 +231,7 @@ configMaps:
   portal-gateway-logging-config:
     enabled: true
     data:
-      logback.xml:
-        valueFromFile: app-config/logback.xml
+      logback-structured.xml:
+        valueFromFile: app-config/logback-structured.xml
+      logback-unstructured.xml:
+        valueFromFile: app-config/logback-unstructured.xml

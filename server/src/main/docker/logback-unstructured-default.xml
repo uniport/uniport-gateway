@@ -1,4 +1,5 @@
-<!-- Default logback configuration for unstructured entries included in the container image as a fallback -->
+<!-- Default structured logback configuration included in the container image
+     (PortalGatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_UNSTRUCTURED_LOGGING_CONFIG_FILE_NAME) as a fallback -->
 <!-- The content of this file should be a copy of helm/src/main/resources/app-config/logback-unstructured.xml -->
 <configuration scan="true">
     <conversionRule conversionWord="vcl" converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>

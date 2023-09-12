@@ -10,10 +10,10 @@ RUN groupadd --system appuser && useradd --system --gid appuser appuser
 RUN chown -R appuser /app
 USER appuser
 
-# In our logback configuration we use a condition based on a env var to decide if we log structured or unstructered log messages.
-# For this we rely on a library called Janino.
-# Default location by defined in PortalGatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_LOGGING_CONFIG_FILE_NAME
-COPY logback-default.xml /etc/portal-gateway/logback.xml
+# Default location by defined in PortalGatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME
+# To choose between the two configurations the PORTAL_GATEWAY_LOGGING_CONFIG env var can be used.
+COPY logback-structured-default.xml /etc/portal-gateway/logback.xml
+COPY logback-unstructured-default.xml /etc/portal-gateway/logback-unstructured.xml
 
 ENV TZ="Europe/Zurich"
 

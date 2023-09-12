@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove disabled tests ([PORTAL-1731](https://issue.inventage.com/browse/PORTAL-1731)).
 - Update Step 'Dev Deployment' to use Jenkinslib method ([PORTAL-1623](https://issue.inventage.com/browse/PORTAL-1623)).
+- Do not use any conditional logic in logback configuration files ([PORTAL-1562](https://issue.inventage.com/browse/PORTAL-1562)).
 
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
 

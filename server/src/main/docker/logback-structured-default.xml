@@ -1,7 +1,10 @@
+<!-- Default structured logback configuration included in the container image
+     (PortalGatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME) as a fallback -->
+<!-- The content of this file should be a copy of helm/src/main/resources/app-config/logback-structured.xml -->
 <configuration scan="true">
     <conversionRule conversionWord="vcl" converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
 
-    <appender name="STRUCTURED_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <pattern>
@@ -25,13 +28,6 @@
         </encoder>
     </appender>
 
-    <property name="COMMON_PATTERN" value="%date %-5level [%vcl{userId:--}/%vcl{sessionId:--}/%vcl{traceId:--}] %logger{36}:%line - %method: %msg%n" />
-    <appender name="UNSTRUCTURED_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>${COMMON_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
     <!-- Failure of decoding the access token/id token because of invalid audience, issuer or signature is only reported on TRACE
     https://github.com/eclipse-vertx/vertx-auth/blob/4.3.7/vertx-auth-oauth2/src/main/java/io/vertx/ext/auth/oauth2/impl/OAuth2AuthProviderImpl.java#L606 -->
     <logger name="io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl" level="TRACE"/>
@@ -39,16 +35,7 @@
     <logger name="com.hazelcast" level="INFO"/>
     <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="DEBUG"/>
 
-    <if condition='property("PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED").equals("true")'>
-        <then>
-            <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
-                <appender-ref ref="STRUCTURED_STDOUT" />
-            </root>
-        </then>
-        <else>
-            <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
-                <appender-ref ref="UNSTRUCTURED_STDOUT" />
-            </root>
-        </else>
-    </if>
+    <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
+        <appender-ref ref="STDOUT" />
+    </root>
 </configuration>

@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway;
 
-import ch.qos.logback.classic.ClassicConstants;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import com.hazelcast.config.Config;
 import com.hazelcast.kubernetes.KubernetesProperties;
 import com.inventage.portal.gateway.core.PortalGatewayVerticle;
@@ -20,7 +22,6 @@ import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,10 +33,6 @@ import org.slf4j.LoggerFactory;
  * Custom Vert.x Launcher for the portal gateway.
  */
 public class PortalGatewayLauncher extends Launcher {
-
-    private static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
-    private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/portal-gateway";
-    private static final String DEFAULT_LOGGING_CONFIG_FILE_NAME = "logback.xml";
 
     private static final String METRICS_PORT_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PORT";
     private static final int DEFAULT_METRICS_PORT = 9090;
@@ -58,11 +55,19 @@ public class PortalGatewayLauncher extends Launcher {
      */
     public static void main(String[] args) {
         // https://logback.qos.ch/manual/configuration.html#configFileProperty
-        final Optional<Path> loggingConfigPath = getLoggingConfigPath();
-        loggingConfigPath.ifPresent(path -> System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, path.toString()));
+        final Optional<Path> loggingConfigPath = Runtime.getLoggingConfigPath();
+        loggingConfigPath.ifPresent(path -> {
+            final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.reset();
 
-        // https://vertx.io/docs/vertx-core/java/#_logging
-        System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
+            final JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(loggerContext);
+            try {
+                configurator.doConfigure(path.toString());
+            } catch (JoranException e) {
+                e.printStackTrace();
+            }
+        });
 
         logger = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
         logger.info("Portal Gateway is starting....");
@@ -72,6 +77,9 @@ public class PortalGatewayLauncher extends Launcher {
         } else {
             logger.info("No custom logback configuration file found");
         }
+
+        // https://vertx.io/docs/vertx-core/java/#_logging
+        System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
 
         final List<String> arguments = new LinkedList<String>();
         arguments.add("run");
@@ -83,39 +91,6 @@ public class PortalGatewayLauncher extends Launcher {
         new PortalGatewayLauncher().dispatch(arguments.toArray(String[]::new));
 
         logger.info("PortalGatewayLauncher started.");
-    }
-
-    /**
-     * The logback.xml for the logback configuration is taken from one of these places:
-     * 1. File pointed to by the env variable 'PORTAL_GATEWAY_LOGGING_CONFIG'
-     * 2. File pointed to by the system property 'PORTAL_GATEWAY_LOGGING_CONFIG'
-     * 3. File 'logback.xml' in '/etc/portal-gateway/logback.xml'
-     * 4. Normal configuration discovery process as configured by logback
-     */
-    private static Optional<Path> getLoggingConfigPath() {
-        // take path from env var
-        String loggingConfigFileName = System.getenv(LOGGING_CONFIG_PROPERTY);
-        if (existsAsFile(loggingConfigFileName)) {
-            return Optional.of(Path.of(loggingConfigFileName));
-        }
-
-        loggingConfigFileName = System.getProperty(LOGGING_CONFIG_PROPERTY);
-        if (existsAsFile(loggingConfigFileName)) {
-            return Optional.of(Path.of(loggingConfigFileName));
-        }
-
-        // take path from the default path
-        loggingConfigFileName = String.format("%s/%s", DEFAULT_LOGGING_CONFIG_FILE_PATH,
-            DEFAULT_LOGGING_CONFIG_FILE_NAME);
-        if (existsAsFile(loggingConfigFileName)) {
-            return Optional.of(Path.of(loggingConfigFileName));
-        }
-
-        return Optional.empty();
-    }
-
-    private static boolean existsAsFile(String fileName) {
-        return fileName != null && new File(fileName).exists();
     }
 
     @Override
