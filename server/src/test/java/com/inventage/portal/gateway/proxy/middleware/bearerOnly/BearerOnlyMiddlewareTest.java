@@ -35,7 +35,7 @@ public class BearerOnlyMiddlewareTest {
     private static final String HOST = "localhost";
     private static final String PUBLIC_KEY_PATH = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String PUBLIC_KEY_ALGORITHM = "RS256";
-    private static final JsonObject VALID_PLAYLOAD_TEMPLATE = Json.createObjectBuilder()
+    private static final JsonObject VALID_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
         .add("typ", "Bearer")
         .add("exp", 1893452400)
         .add("iat", 1627053747)
@@ -89,7 +89,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PLAYLOAD_TEMPLATE)
+        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("iss", "http://malory.issuer:1234/auth/realms/test")
             .build();
 
@@ -117,7 +117,7 @@ public class BearerOnlyMiddlewareTest {
 
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject validPayload = Json.createObjectBuilder(VALID_PLAYLOAD_TEMPLATE)
+        final JsonObject validPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("iss", additionalIssuer)
             .build();
 
@@ -144,7 +144,7 @@ public class BearerOnlyMiddlewareTest {
 
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PLAYLOAD_TEMPLATE)
+        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("iss", "http://malory.issuer:1234/auth/realms/test")
             .build();
 
@@ -166,7 +166,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     public void audienceMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PLAYLOAD_TEMPLATE)
+        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("aud", "malory-audience")
             .build();
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
@@ -190,7 +190,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     public void validWithRSA256(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PLAYLOAD_TEMPLATE);
+        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
@@ -211,7 +211,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     void fetchPublicKeysFromOIDCProvider(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PLAYLOAD_TEMPLATE);
+        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
@@ -241,7 +241,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     void fetchPublicKeysFromOIDCProviderWithFirstReqIsAuthorizedAndUnauthorizedAfterPublicKeyRefresh(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String validTokenBeforePublicKeysRefresh = TestBearerOnlyJWTProvider.signToken(VALID_PLAYLOAD_TEMPLATE);
+        final String validTokenBeforePublicKeysRefresh = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
@@ -284,7 +284,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     void fetchPublicKeysFromOIDCProviderWithPublicKeysBeingOutdated(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String token = TestBearerOnlyJWTProvider.signToken(VALID_PLAYLOAD_TEMPLATE);
+        final String token = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
@@ -318,7 +318,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     void loadPublicKeyFromConfig(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PLAYLOAD_TEMPLATE);
+        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
