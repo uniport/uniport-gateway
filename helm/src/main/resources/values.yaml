@@ -38,8 +38,6 @@ pod:
 
 strategy:
   type: RollingUpdate
-  rollingParams:
-    maxUnavailable: 1
 
 initContainers:
   init-portal-iam:
