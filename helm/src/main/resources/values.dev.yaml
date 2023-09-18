@@ -74,6 +74,7 @@ containers:
             path: dynamic-config/portal-messaging/config.json
           - key: dynamic-config..portal-monitoring..config.json
             path: dynamic-config/portal-monitoring/config.json
+        readOnly: true
 
 configMaps:
   portal-gateway-proxy-config:
