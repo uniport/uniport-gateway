@@ -13,12 +13,12 @@ public class Runtime {
 
     public static final String CLUSTERED_KEY = "PORTAL_GATEWAY_CLUSTERED";
 
-    private static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
+    public static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
+    public static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
+
     private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/portal-gateway";
     private static final String DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME = "logback.xml";
     private static final String DEFAULT_UNSTRUCTURED_LOGGING_CONFIG_FILE_NAME = "logback-unstructured.xml";
-
-    private static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Runtime.class);
 
