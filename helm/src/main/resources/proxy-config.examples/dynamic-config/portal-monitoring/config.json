@@ -92,7 +92,7 @@
                     ],
                     "publicKeysReconcilation": {
                         "enabled": true,
-                        "intervalMs": 60000
+                        "intervalMs": 3600000
                     }
                 }
             }
