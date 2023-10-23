@@ -36,6 +36,9 @@ containers:
         value: "DEBUG"
       PORTAL_GATEWAY_ANALYTICS_HOST:
         value: analytics.analytics
+      # currently Portal-Monitoring is in an own namespace in ips.inventage.dev
+      PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
+        value: "grafana-service.monitoring"
     storages:
       proxy-config:
         type: configMap
