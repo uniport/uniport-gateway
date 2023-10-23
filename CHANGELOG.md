@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update Step 'Dev Deployment' to use Jenkinslib method ([PORTAL-1623](https://issue.inventage.com/browse/PORTAL-1623)).
 - Do not use any conditional logic in logback configuration files ([PORTAL-1562](https://issue.inventage.com/browse/PORTAL-1562)).
 
+### Fixed
+
+- Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](https://issue.inventage.   com/browse/PORTAL-1824)).
+
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~8.3.0-202309071344-1005-8468f9f1) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.3.0-202309071344-1005-8468f9f1)
