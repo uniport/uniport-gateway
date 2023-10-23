@@ -154,8 +154,8 @@ pipeline {
             }
             steps {
                 registerVersionWithArchetype(
-                    component: "portal-gateway"
-                    version: "${env.PACKAGE_VERSION}",
+                    component: "portal-gateway",
+                    version: "${env.PACKAGE_VERSION}"
                 )
             }
         }
