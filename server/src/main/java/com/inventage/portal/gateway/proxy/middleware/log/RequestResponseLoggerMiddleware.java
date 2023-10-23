@@ -228,9 +228,15 @@ public class RequestResponseLoggerMiddleware implements Middleware {
     }
 
     private JsonObject decodeJWT(String jwt) {
-        final String[] chunks = jwt.split("\\.");
-        final Base64.Decoder decoder = Base64.getDecoder();
-        final String payload = new String(decoder.decode(chunks[1]));
-        return new JsonObject(payload);
+        try {
+            final String[] chunks = jwt.split("\\.");
+            final Base64.Decoder decoder = Base64.getDecoder();
+            final String payload = new String(decoder.decode(chunks[1]));
+            return new JsonObject(payload);
+        }
+        catch (IllegalArgumentException e) {
+            LOGGER.error("failed for JWT '{}' because of '{}'", jwt, e.getMessage());
+            throw e;
+        }
     }
 }
