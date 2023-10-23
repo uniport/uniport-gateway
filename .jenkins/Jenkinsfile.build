@@ -148,6 +148,18 @@ pipeline {
             }
         }
 
+        stage('Register Version with Archetype') {
+            when {
+                branch params.BRANCH_FILTER
+            }
+            steps {
+                registerVersionWithArchetype(
+                    component: "portal-gateway"
+                    version: "${env.PACKAGE_VERSION}",
+                )
+            }
+        }
+
         stage('Tag Staging Repository') {
             steps {
                 // Container Images
