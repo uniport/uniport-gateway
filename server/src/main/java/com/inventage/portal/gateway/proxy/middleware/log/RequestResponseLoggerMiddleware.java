@@ -227,11 +227,12 @@ public class RequestResponseLoggerMiddleware implements Middleware {
         return userId;
     }
 
-    private JsonObject decodeJWT(String jwt) {
+    protected JsonObject decodeJWT(String jwt) {
         try {
             final String[] chunks = jwt.split("\\.");
-            final Base64.Decoder decoder = Base64.getDecoder();
-            final String payload = new String(decoder.decode(chunks[1]));
+            // JWT: https://datatracker.ietf.org/doc/html/rfc7519#section-3
+            final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
+            final String payload = new String(urlDecoder.decode(chunks[1]));
             return new JsonObject(payload);
         }
         catch (IllegalArgumentException e) {

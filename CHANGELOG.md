@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- 
+- JWT must be decoded with base64url ([PORTAL-1838](https://issue.inventage.com/browse/PORTAL-1838)).
 
 ## [7.0.2]-202304141241-4-576b35e4 - 2023-04-17
 
