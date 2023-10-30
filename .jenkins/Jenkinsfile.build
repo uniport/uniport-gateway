@@ -155,7 +155,8 @@ pipeline {
             steps {
                 registerVersionWithArchetype(
                     component: "portal-gateway",
-                    version: "${env.PACKAGE_VERSION}"
+                    version: "${env.PACKAGE_VERSION}",
+                    action: "canary"
                 )
             }
         }

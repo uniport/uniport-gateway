@@ -170,6 +170,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Register Released Version with Archetype') {
+            when {
+                branch params.BRANCH_FILTER
+            }
+            steps {
+                registerVersionWithArchetype(
+                    component: "portal-gateway",
+                    version: "${env.PACKAGE_VERSION}",
+                    action: "release"
+                )
+            }
+        }
     }
 
     post {
