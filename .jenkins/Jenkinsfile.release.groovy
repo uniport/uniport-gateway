@@ -172,9 +172,6 @@ pipeline {
         }
 
         stage('Register Released Version with Archetype') {
-            when {
-                branch params.BRANCH_FILTER
-            }
             steps {
                 registerVersionWithArchetype(
                     component: "portal-gateway",
