@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- JWT must be decoded with base64url ([PORTAL-1838](https://issue.inventage.com/browse/PORTAL-1838)).
 - Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](https://issue.inventage.   com/browse/PORTAL-1824)).
 
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
@@ -115,6 +116,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change route ordering. `/health` route is hard-configured as first route to be considered ([PORTAL-859](https://issue.inventage.com/browse/PORTAL-859)).
 - Support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment ([PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290)).
 - Update portal-helm-chart-library to version `4.3.0-202305220818-197-8c61d10`
+
+## 7.0.3-[Unreleased] - ???
+
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???~~) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+### Fixed
+
+- JWT must be decoded with base64url ([PORTAL-1838](https://issue.inventage.com/browse/PORTAL-1838)).
 
 ## [7.0.2]-202304141241-4-576b35e4 - 2023-04-17
 
