@@ -34,7 +34,10 @@ pod:
   serviceName: portal-gateway-headless
   replicas: 2
   securityContext:
-    enabled: false
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
 
 strategy:
   type: RollingUpdate
@@ -57,7 +60,12 @@ containers:
       tag: ${project.version}
       pullPolicy: IfNotPresent
     securityContext:
-      enabled: false
+      enabled: true
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
     ports:
       http:
         port: 20000
@@ -214,6 +222,10 @@ containers:
       failureThreshold: 12
       successThreshold: 1
     storages:
+      tmp:
+        type: emptyDir
+        mountPath: /tmp
+        readOnly: false
       logging-config:
         type: configMap
         configMapName: portal-gateway-logging-config
@@ -223,6 +235,7 @@ containers:
         readOnly: true
 
 serviceAccount:
+  automountServiceAccountToken: "false"
   imagePullSecrets:
     inventage-nexus:
       name: inventage-nexus-registry
