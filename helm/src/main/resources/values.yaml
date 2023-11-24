@@ -226,6 +226,9 @@ containers:
         type: emptyDir
         mountPath: /tmp
         readOnly: false
+      file-upload-storage:
+        type: emptyDir
+        mountPath: /file-uploads
       logging-config:
         type: configMap
         configMapName: portal-gateway-logging-config
