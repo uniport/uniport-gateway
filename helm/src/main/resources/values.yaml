@@ -228,7 +228,7 @@ containers:
         readOnly: false
       file-upload-storage:
         type: emptyDir
-        mountPath: /file-uploads
+        mountPath: /app/file-uploads
       logging-config:
         type: configMap
         configMapName: portal-gateway-logging-config
