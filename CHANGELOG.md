@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JWT must be decoded with base64url ([PORTAL-1838](https://issue.inventage.com/browse/PORTAL-1838)).
 - Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](https://issue.inventage.   com/browse/PORTAL-1824)).
 
+### Added
+
+- Configure security context for pod & containers ([PORTAL-1379](https://issue.inventage.com/browse/PORTAL-1379))
+
+
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~8.3.0-202309071344-1005-8468f9f1) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.3.0-202309071344-1005-8468f9f1)
