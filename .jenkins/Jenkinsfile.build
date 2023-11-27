@@ -24,8 +24,8 @@ pipeline {
 
     parameters {
         string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
-        booleanParam(defaultValue: true, description: 'Push docker images', name: 'PUSH_DOCKER_IMAGES')
         booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
+        booleanParam(defaultValue: true, description: 'Register this build version in the archetype-inventage-portal-solution', name: 'REGISTER_VERSION_WITH_ARCHETYPE')
     }
 
     environment {
@@ -138,7 +138,7 @@ pipeline {
         stage('Deployment DEV') {
             when {
                 branch params.BRANCH_FILTER
-                expression { params.PUSH_DOCKER_IMAGES && params.DEPLOY_DEV }
+                expression { params.DEPLOY_DEV }
             }
             steps {
                 configureDevDeployment(
@@ -151,6 +151,7 @@ pipeline {
         stage('Register Version with Archetype') {
             when {
                 branch params.BRANCH_FILTER
+                expression { params.REGISTER_VERSION_WITH_ARCHETYPE }
             }
             steps {
                 registerVersionWithArchetype(
