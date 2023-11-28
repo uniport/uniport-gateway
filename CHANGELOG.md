@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 8.4.0-[Unreleased] - ???
+## 9.0.0-[Unreleased] - ???
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove disabled tests ([PORTAL-1731](https://issue.inventage.com/browse/PORTAL-1731)).
 - Update Step 'Dev Deployment' to use Jenkinslib method ([PORTAL-1623](https://issue.inventage.com/browse/PORTAL-1623)).
 - Do not use any conditional logic in logback configuration files ([PORTAL-1562](https://issue.inventage.com/browse/PORTAL-1562)).
+- **BREAKING**: configuration of security context for gateway container. Note that this is breaking due to changes in `values.yaml`. The security context is now enabled by default.
 
 ### Fixed
 
