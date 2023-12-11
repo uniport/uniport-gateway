@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * If no valid token is provided, then a '401 Unauthorized' is returned.
  * Otherwise, the request is forwarded.
  */
-public class BearerOnlyMiddleware implements Middleware {
+public class BearerOnlyMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddleware.class);
 
@@ -38,7 +39,7 @@ public class BearerOnlyMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         final String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);

@@ -1,13 +1,14 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSRFHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CSRFMiddleware implements Middleware {
+public class CSRFMiddleware extends TraceMiddleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddleware.class);
     private static final int MILLISECONDS_IN_1_MINUTE = 60000;
 
@@ -33,7 +34,7 @@ public class CSRFMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
         csrfHandler.handle(ctx);
     }

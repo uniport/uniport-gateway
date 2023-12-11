@@ -1,9 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * Returns an HTML page with information from the current session if "_session_"
  * is in the requested URL.
  */
-public class ShowSessionContentMiddleware implements Middleware {
+public class ShowSessionContentMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddleware.class);
 
@@ -37,7 +38,7 @@ public class ShowSessionContentMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         // Bail if we're not on the debug URL
         if (!ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
             ctx.next();

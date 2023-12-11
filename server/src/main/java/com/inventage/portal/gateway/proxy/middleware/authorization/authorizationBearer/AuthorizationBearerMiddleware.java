@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -26,7 +27,7 @@ public class AuthorizationBearerMiddleware extends AuthTokenMiddlewareBase {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         this.getAuthToken(ctx.session()).onSuccess(token -> {
             if (token == null || token.length() == 0) {
                 LOGGER.debug("Skipping empty token");

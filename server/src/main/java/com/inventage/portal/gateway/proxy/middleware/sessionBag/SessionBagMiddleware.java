@@ -1,8 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.Cookie;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * - The domain attribute is ignored i.e. all cookies are included in all
  * requests
  */
-public class SessionBagMiddleware implements Middleware, PlatformHandler {
+public class SessionBagMiddleware extends TraceMiddleware implements PlatformHandler {
 
     public static final String SESSION_BAG_COOKIES = "sessionBagCookies";
 
@@ -51,7 +52,7 @@ public class SessionBagMiddleware implements Middleware, PlatformHandler {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (ctx.session() == null) {

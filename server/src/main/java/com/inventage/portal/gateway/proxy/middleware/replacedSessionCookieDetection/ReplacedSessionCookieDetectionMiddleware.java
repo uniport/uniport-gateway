@@ -1,10 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * new session id.
  * See also Portal-Gateway.drawio for a visual explanation.
  */
-public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
+public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
 
     public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
@@ -38,7 +39,7 @@ public class ReplacedSessionCookieDetectionMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (requestComingFromLoggedOutUser(ctx)) {

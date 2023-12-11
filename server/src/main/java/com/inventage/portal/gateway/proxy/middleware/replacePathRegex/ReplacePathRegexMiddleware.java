@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.replacePathRegex;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import java.util.regex.Pattern;
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Replaces the URI using regex matching and replacement.
  */
-public class ReplacePathRegexMiddleware implements Middleware {
+public class ReplacePathRegexMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacePathRegexMiddleware.class);
 
@@ -25,7 +26,7 @@ public class ReplacePathRegexMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         final Handler<StringBuilder> reqUriModifier = uri -> {

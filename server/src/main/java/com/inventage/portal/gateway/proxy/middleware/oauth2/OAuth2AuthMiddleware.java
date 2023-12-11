@@ -3,10 +3,11 @@ package com.inventage.portal.gateway.proxy.middleware.oauth2;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.CONTEXTUAL_DATA_SESSION_ID;
 
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.opentelemetry.api.trace.Span;
 import io.reactiverse.contextual.logging.ContextualData;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonObject;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * The authentication can be required for the same scope (scope = "OIDC client id") or for different scopes.
  * Redirects the user if not authenticated.
  */
-public class OAuth2AuthMiddleware implements Middleware {
+public class OAuth2AuthMiddleware extends TraceMiddleware {
 
     // the following keys are used by RelyingPartyHandler
     public static final String OIDC_PARAM_STATE = "state";
@@ -173,7 +174,7 @@ public class OAuth2AuthMiddleware implements Middleware {
      * @param ctx
      */
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         final User user = ctx.user();

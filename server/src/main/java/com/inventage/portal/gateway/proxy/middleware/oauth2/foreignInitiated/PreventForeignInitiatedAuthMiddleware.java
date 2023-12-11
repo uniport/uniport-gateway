@@ -1,8 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2.foreignInitiated;
 
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  * PORTAL-1417
  */
-public class PreventForeignInitiatedAuthMiddleware implements Middleware {
+public class PreventForeignInitiatedAuthMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreventForeignInitiatedAuthMiddleware.class);
 
@@ -31,7 +32,7 @@ public class PreventForeignInitiatedAuthMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         if (isAuthenticationRequestInitiatedByForeign(ctx)) {
             LOGGER.warn("foreign authentication request detected for '{}' in '{}'", ctx.request().uri(), name);
             HttpResponder.respondWithRedirect(fallbackURI, ctx);

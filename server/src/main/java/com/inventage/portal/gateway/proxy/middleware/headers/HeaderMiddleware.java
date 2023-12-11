@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages request/response headers. It can add/remove headers on both requests and responses.
  */
-public class HeaderMiddleware implements Middleware {
+public class HeaderMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMiddleware.class);
 
@@ -30,7 +31,7 @@ public class HeaderMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         for (Entry<String, String> header : this.requestHeaders.entries()) {

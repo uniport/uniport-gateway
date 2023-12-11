@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Log every request and/or response and adds the requestId and the sessionId to
  * the contextual data.
  */
-public class RequestResponseLoggerMiddleware implements Middleware {
+public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
     public static final String CONTEXTUAL_DATA_USER_ID = "userId";
 
@@ -52,7 +53,7 @@ public class RequestResponseLoggerMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         if (isRequestIgnoredForLogging(ctx.request().uri())) {
             ctx.next();
             return;

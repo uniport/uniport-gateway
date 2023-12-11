@@ -1,8 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.contextAware.ContextAwareHttpServerRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -24,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * Proxies requests and set the FORWARDED headers.
  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling
  */
-public class ProxyMiddleware implements Middleware {
+public class ProxyMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
 
@@ -82,7 +84,7 @@ public class ProxyMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());

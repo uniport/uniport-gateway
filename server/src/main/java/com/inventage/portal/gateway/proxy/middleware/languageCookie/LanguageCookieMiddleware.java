@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
  * token is sent to the Client.
  */
-public class LanguageCookieMiddleware implements Middleware {
+public class LanguageCookieMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddleware.class);
 
@@ -27,7 +28,7 @@ public class LanguageCookieMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         Cookie cookie = ctx.request().getCookie(languageCookieName);

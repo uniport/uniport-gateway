@@ -4,7 +4,8 @@ import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddl
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME;
 import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_KEY;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.Cookie;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Middleware for customizing the session management.
  */
-public class SessionMiddleware implements Middleware {
+public class SessionMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
@@ -104,7 +105,7 @@ public class SessionMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         registerHandlerForRespondingWithSessionLifetime(ctx);

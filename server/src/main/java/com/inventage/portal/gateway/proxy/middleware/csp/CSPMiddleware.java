@@ -1,9 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.json.JsonArray;
@@ -13,7 +14,7 @@ import io.vertx.ext.web.handler.CSPHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CSPMiddleware implements Middleware {
+public class CSPMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddleware.class);
 
@@ -34,7 +35,7 @@ public class CSPMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
         final Handler<MultiMap> responseHandler = headers -> this.cspHandler.handleResponse(ctx, headers);
         this.addResponseHeaderModifier(ctx, responseHandler);

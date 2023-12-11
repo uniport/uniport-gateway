@@ -1,8 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.claimToHeader;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Middleware to set an HTTP Header with the value of a JWT claim.
  */
-public class ClaimToHeaderMiddleware implements Middleware {
+public class ClaimToHeaderMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClaimToHeaderMiddleware.class);
 
@@ -37,7 +38,7 @@ public class ClaimToHeaderMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         LOGGER.debug("Adding claim '{}' to header '{}'", claimPath, headerName);

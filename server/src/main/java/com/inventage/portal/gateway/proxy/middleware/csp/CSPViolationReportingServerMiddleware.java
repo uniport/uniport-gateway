@@ -1,7 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -12,7 +13,7 @@ import org.slf4j.event.Level;
  * Can be used as a CSP violation reporting server to be configured with the 'report-uri' or 'report-to' directive.
  * See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP#violation_report_syntax
  */
-public class CSPViolationReportingServerMiddleware implements Middleware {
+public class CSPViolationReportingServerMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPViolationReportingServerMiddleware.class);
 
@@ -25,7 +26,7 @@ public class CSPViolationReportingServerMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(final RoutingContext ctx) {
+    public void handleWithTraceSpan(final RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (!ctx.request().method().equals(HttpMethod.POST)) {

@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
@@ -26,7 +27,7 @@ public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         this.getAuthToken(ctx.session()).onSuccess(token -> {

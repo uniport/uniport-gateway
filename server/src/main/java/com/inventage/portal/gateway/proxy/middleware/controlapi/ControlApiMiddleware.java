@@ -2,11 +2,12 @@ package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
 import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieBag;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * - SESSION_RESET: resets the session by deleting all oauth2 tokens (removing all JWTs from this session)
  * and drain the session bag (removing all not keycloak related cookies).
  */
-public class ControlApiMiddleware implements Middleware {
+public class ControlApiMiddleware extends TraceMiddleware {
 
     public static final String CONTROL_COOKIE_NAME = "IPS_GW_CONTROL";
 
@@ -61,7 +62,7 @@ public class ControlApiMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if ((action.equals(ControlApiAction.SESSION_TERMINATE) || action.equals(ControlApiAction.SESSION_RESET)) && ctx.session() == null) {

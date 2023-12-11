@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.ext.web.RoutingContext;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Redirecting the client to a different location using regex matching and replacement.
  */
-public class RedirectRegexMiddleware implements Middleware {
+public class RedirectRegexMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddleware.class);
 
@@ -24,7 +25,7 @@ public class RedirectRegexMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         final String oldURI = ctx.request().uri();

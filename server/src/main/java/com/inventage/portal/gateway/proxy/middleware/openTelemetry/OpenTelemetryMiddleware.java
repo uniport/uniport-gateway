@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.openTelemetry;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.log.ContextualDataAdapter;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import io.opentelemetry.api.trace.Span;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * logging contextual data: https://reactiverse.io/reactiverse-contextual-logging/
  */
-public class OpenTelemetryMiddleware implements Middleware {
+public class OpenTelemetryMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenTelemetryMiddleware.class);
 
@@ -34,7 +34,7 @@ public class OpenTelemetryMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         final String openTelemetryTraceId = getOpenTelemetryTraceId();

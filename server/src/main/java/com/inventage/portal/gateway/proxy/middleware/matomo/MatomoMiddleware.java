@@ -1,7 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.matomo;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.jayway.jsonpath.JsonPath;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +13,7 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MatomoMiddleware implements Middleware {
+public class MatomoMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatomoMiddleware.class);
 
@@ -42,7 +43,7 @@ public class MatomoMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         final String authorizationHeader = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorizationHeader == null) {
             ctx.fail(HttpStatus.SC_FORBIDDEN);

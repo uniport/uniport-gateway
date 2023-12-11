@@ -1,7 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
-import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * {@link #sessionCookieName} specifies the name (can be configured) of the session cookie. Keep in mind that the name has to be same as
  * the cookie name in the {@link com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware}
  */
-public class ResponseSessionCookieRemovalMiddleware implements Middleware {
+public class ResponseSessionCookieRemovalMiddleware extends TraceMiddleware {
 
     private static final String REMOVE_SESSION_COOKIE_SIGNAL = "REMOVE_SESSION_COOKIE_SIGNAL";
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieRemovalMiddleware.class);
@@ -39,7 +40,7 @@ public class ResponseSessionCookieRemovalMiddleware implements Middleware {
     }
 
     @Override
-    public void handle(RoutingContext ctx) {
+    public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         // endHandler execution order: headersEndHandler -> bodyEndHandler -> endHandler
