@@ -17,6 +17,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 env.remove(StaticConfiguration.ENTRYPOINTS);
                 env.remove(StaticConfiguration.APPLICATIONS);
                 env.remove(StaticConfiguration.PROVIDERS);
-                LOGGER.debug("Environemnt variables:\n{}", env.encodePrettily());
+                LOGGER.debug("Environemnt variables:\n{}", env.stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(Object::toString)
+                    .collect(Collectors.joining("\n\t")));
 
                 final JsonObject config = substituteConfigurationVariables(env, rawConfigWithEnv);
                 final JsonArray entrypointConfigs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS, JsonArray.of());
