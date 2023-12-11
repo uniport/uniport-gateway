@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Configure security context for pod & containers ([PORTAL-1379](https://issue.inventage.com/browse/PORTAL-1379))
+- Every middleware creates its own trace span ([PORTAL-1617](https://issue.inventage.com/browse/PORTAL-1617))
 
 
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
