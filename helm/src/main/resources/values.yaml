@@ -71,6 +71,7 @@ containers:
         port: 20000
     resources:
       requests:
+        cpu: "40m"
         memory: "256Mi"
       limits:
         memory: "512Mi"
