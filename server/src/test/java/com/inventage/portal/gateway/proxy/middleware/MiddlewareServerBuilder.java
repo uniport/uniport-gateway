@@ -1,5 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
+
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
@@ -28,6 +31,7 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserCo
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
@@ -393,6 +397,10 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new ClaimToHeaderMiddleware("withClaimToMiddleware", claim, headerName));
     }
 
+    public MiddlewareServerBuilder withReplacedSessionCookieDetectionMiddleware() {
+        return withMiddleware(new ReplacedSessionCookieDetectionMiddleware("withReplacedSessionMiddleware", DEFAULT_DETECTION_COOKIE_NAME, DEFAULT_WAIT_BEFORE_RETRY_MS));
+    }
+
     public MiddlewareServer build() {
         final Handler<RoutingContext> defaultBackendMockHandler = ctx -> ctx.response().setStatusCode(200).end("ok");
         return build(defaultBackendMockHandler);
@@ -403,5 +411,4 @@ public final class MiddlewareServerBuilder {
         final HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
         return new MiddlewareServer(vertx, httpServer, host, testCtx);
     }
-
 }

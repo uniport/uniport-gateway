@@ -7,6 +7,7 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMid
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_S256;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
@@ -114,8 +115,8 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasNotSetCookieForSession() {
-        final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNull(setCookie);
+        final List<String> cookies = actual.cookies();
+        Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(DEFAULT_SESSION_COOKIE_NAME + "=")).findAny().isPresent());
         return this;
     }
 
@@ -168,6 +169,12 @@ public class AuthenticationRedirectRequestAssert
     public AuthenticationRedirectRequestAssert hasNotSetCookie(String cookieName) {
         final List<String> cookies = actual.cookies();
         Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetDetectionCookie() {
+        final List<String> cookies = actual.cookies();
+        Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(DEFAULT_DETECTION_COOKIE_NAME + "=")).findAny().isPresent());
         return this;
     }
 }
