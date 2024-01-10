@@ -136,7 +136,8 @@ public class SessionMiddleware extends TraceMiddleware {
             LOGGER.debug("Adding cookie '{}'", DEFAULT_SESSION_LIFETIME_COOKIE_NAME);
             ctx.response().addCookie(
                 Cookie.cookie(DEFAULT_SESSION_LIFETIME_COOKIE_NAME, sessionLifetime).setPath("/")
-                    .setHttpOnly(false)); // false := cookie must be accessible by client side scripts
+                    .setHttpOnly(false) // false := cookie must be accessible by client side scripts
+                    .setSameSite(CookieSameSite.STRICT)); // prevent warnings in Firefox console
         }
     }
 
