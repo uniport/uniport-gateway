@@ -204,10 +204,9 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
                 continue;
             }
             if (isWhitelisted(decodedCookieToSet)) {
-                // we delegate all logic for whitelisted cookies to the user agent
+                // we deliver whitelisted cookies also to the user agent
                 LOGGER.debug("Passing cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
-                continue;
             } else {
                 LOGGER.debug("Cookie removed from response: '{}'", cookieToSet);
             }

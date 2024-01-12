@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Store also whitelisted cookies in session bag ([PORTAL-1946](https://issue.inventage.com/browse/PORTAL-1946).
 - Added `SameSite` attribute with value `STRICT` to `uniport.session-lifetime` cookie ([PORTAL-1942](https://issue.inventage.com/browse/PORTAL-1942)).
 - Remove disabled tests ([PORTAL-1731](https://issue.inventage.com/browse/PORTAL-1731)).
 - Update Step 'Dev Deployment' to use Jenkinslib method ([PORTAL-1623](https://issue.inventage.com/browse/PORTAL-1623)).
