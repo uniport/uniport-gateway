@@ -4,9 +4,11 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuil
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
@@ -18,6 +20,8 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -205,6 +209,61 @@ public class ProxyMiddlewareTest {
             Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
             testCtx.completeNow();
         });
+    }
+
+    @Test
+    void AKKP_1003(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final int backendPort = TestUtils.findFreePort();
+
+        final AtomicReference<Integer> counter = new AtomicReference<>();
+        counter.set(0);
+        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withRoutingContextHolder(routingContext)
+            .withSessionMiddleware()
+            .withMiddleware(incrementDecrementResponseModifier(counter))
+            .withProxyMiddleware(backendPort)
+            .withBackend(vertx, backendPort, backendHandler())
+            .build().start();
+        // when
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
+            // should be 1, put is actually 0 because of bug
+            Assertions.assertEquals(1, counter.get().intValue());
+        });
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
+            Assertions.assertEquals(0, counter.get().intValue());
+            // then
+            testCtx.completeNow();
+        });
+    }
+
+    // increment and decrement a counter during request processing
+    private Handler<RoutingContext> incrementDecrementResponseModifier(AtomicReference<Integer> counter) {
+        return ctx -> {
+            List<Handler> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
+            if (modifiers == null) {
+                modifiers = new ArrayList<>();
+            }
+            // add a modifier (= ProxyInterceptor) when receiving the response from the backend
+            modifiers.add(new Handler() {
+                @Override
+                public void handle(Object event) {
+                    // decrement during outgoing response
+                    counter.set(counter.get().intValue() - 1);
+                }
+            });
+            // increment during incoming request
+            counter.set(counter.get().intValue() + 1);
+            ctx.put(Middleware.RESPONSE_HEADERS_MODIFIERS, modifiers);
+            ctx.next();
+        };
+    }
+
+    private Handler<RoutingContext> backendHandler() {
+        return ctx -> {
+            ctx.response().end();
+        };
     }
 
     private static File loadFile(String path) {
