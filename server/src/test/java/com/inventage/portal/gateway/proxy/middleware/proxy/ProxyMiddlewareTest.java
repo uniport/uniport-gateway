@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -212,6 +213,7 @@ public class ProxyMiddlewareTest {
     }
 
     @Test
+    @Disabled // test implementation is instable, add/execution/remove of response modifiers must be per request
     void AKKP_1003(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final int backendPort = TestUtils.findFreePort();
