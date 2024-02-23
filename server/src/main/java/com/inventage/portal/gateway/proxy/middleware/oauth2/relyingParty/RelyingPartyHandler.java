@@ -222,6 +222,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
         if (extraParams != null) {
             config.mergeIn(extraParams);
+            // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
         }
 
         config.put("state", state != null ? state : redirectURL);
