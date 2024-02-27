@@ -76,7 +76,7 @@ server/target/com.inventage.portal.gateway.portalgatewaylauncher -DPORTAL_GATEWA
 
 ### Produktives Environment
 
-Für den Start der produktiven Backend Systemen, kann der [Archetype](https://git.inventage.com/projects/PORTAL/repos/archetype-inventage-portal-solution) verwendet werden. Dabei müssen die Hostnamen der Backend Systemen im [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) gesetzt werden.
+Für den Start der produktiven Backend Systemen, kann der [Archetype](https://github.com/uniport/archetype-inventage-portal-solution/blob/master) verwendet werden. Dabei müssen die Hostnamen der Backend Systemen im [portal-gateway.specific.env](./docker-compose/src/main/resources/portal-gateway.specific.env) gesetzt werden
 Zum Beispiel mit einer `artifactId` von `local-portal` kann die `portal-gateway.specific.env` so aussehen:
 
 ```
