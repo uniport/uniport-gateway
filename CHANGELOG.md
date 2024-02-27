@@ -129,14 +129,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment ([PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290)).
 - Update portal-helm-chart-library to version `4.3.0-202305220818-197-8c61d10`
 
-## 9.1.0-[Unreleased] - ???
-
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
-
-## [9.0.0]-202401150956-1070-d0103604 - 2024-01-15
-
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.0.0-202401150956-1070-d0103604) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.0.0-202401150956-1070-d0103604)
-
 ### Fixed
 
 - JWT must be decoded with base64url ([PORTAL-1838](https://issue.inventage.com/browse/PORTAL-1838)).
