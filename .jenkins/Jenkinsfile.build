@@ -1,6 +1,6 @@
 library identifier: 'portal-lib@master', retriever: modernSCM(
         [$class: 'GitSCMSource',
-         remote: 'ssh://git@git.inventage.com:2048/portal/jenkinsfile-library.git',
+         remote: 'git@github.com:uniport/jenkinsfile-library.git',
         ])
 
 pipeline {
