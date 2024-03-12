@@ -79,89 +79,89 @@ containers:
       # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
       PORTAL_GATEWAY_PUBLIC_PROTOCOL:
         value: "http"
-        # PORTAL_GATEWAY_PUBLIC_HOSTNAME HTTP host name for external access
+      # PORTAL_GATEWAY_PUBLIC_HOSTNAME HTTP host name for external access
       PORTAL_GATEWAY_PUBLIC_HOSTNAME:
         value: "portal.minikube"
-        # PORTAL_GATEWAY_PUBLIC_PORT HTTP port for external access, must be the same as the exposed port
+      # PORTAL_GATEWAY_PUBLIC_PORT HTTP port for external access, must be the same as the exposed port
       PORTAL_GATEWAY_PUBLIC_PORT:
         value: "80"
-        # PORTAL_GATEWAY_LOG_LEVEL is the overall log level and can be one of TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF
+      # PORTAL_GATEWAY_LOG_LEVEL is the overall log level and can be one of TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "INFO"
-        # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
+      # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
       PORTAL_GATEWAY_LOGGING_CONFIG:
         value: "/etc/portal-gateway/logging-config/logback-structured.xml"
-        # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
+      # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
       PORTAL_GATEWAY_CLUSTERED:
         value: true
       PORTAL_GATEWAY_INSTANCE_NAME:
         valueFrom:
           fieldRef:
             fieldPath: metadata.name
-        # PORTAL_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
+      # PORTAL_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
       PORTAL_GATEWAY_PORTAL_IAM_HOST:
         value: "portal-iam"
-        # PORTAL_GATEWAY_PORTAL_IAM_PORT is the port of the portal-iam host
+      # PORTAL_GATEWAY_PORTAL_IAM_PORT is the port of the portal-iam host
       PORTAL_GATEWAY_PORTAL_IAM_PORT:
         value: "8080"
-        # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
+      # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
       PORTAL_GATEWAY_BASE_HOST:
         value: "base"
-        # PORTAL_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
+      # PORTAL_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
       PORTAL_GATEWAY_BASE_PORT:
         value: "20010"
-        # PORTAL_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
+      # PORTAL_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
       PORTAL_GATEWAY_DASHBOARD_HOST:
         value: "dashboard"
-        # PORTAL_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
+      # PORTAL_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
       PORTAL_GATEWAY_DASHBOARD_PORT:
         value: "20020"
-        # PORTAL_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
+      # PORTAL_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
       PORTAL_GATEWAY_ORGANISATION_HOST:
         value: "organisation"
-        # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
+      # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
       PORTAL_GATEWAY_ORGANISATION_PORT:
         value: "20030"
-        # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
+      # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
       PORTAL_GATEWAY_FILESTORAGE_HOST:
         value: "filestorage"
-        # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
+      # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
       PORTAL_GATEWAY_FILESTORAGE_PORT:
         value: "20090"
-        # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
+      # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
       PORTAL_GATEWAY_CONTENT_HOST:
         value: "content"
-        # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
+      # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
       PORTAL_GATEWAY_CONTENT_PORT:
         value: "20110"
-        # PORTAL_GATEWAY_CONVERSATION_HOST is the hostname for accessing Conversation microservice via HTTP
+      # PORTAL_GATEWAY_CONVERSATION_HOST is the hostname for accessing Conversation microservice via HTTP
       PORTAL_GATEWAY_CONVERSATION_HOST:
         value: "conversation"
-        # PORTAL_GATEWAY_CONVERSATION_PORT is the port for accessing Conversation microservice via HTTP
+      # PORTAL_GATEWAY_CONVERSATION_PORT is the port for accessing Conversation microservice via HTTP
       PORTAL_GATEWAY_CONVERSATION_PORT:
         value: "20120"
-        # PORTAL_GATEWAY_NOTIFICATION_HOST is the hostname for accessing Notification microservice via HTTP
+      # PORTAL_GATEWAY_NOTIFICATION_HOST is the hostname for accessing Notification microservice via HTTP
       PORTAL_GATEWAY_NOTIFICATION_HOST:
         value: "notification"
-        # PORTAL_GATEWAY_NOTIFICATION_PORT is the port for accessing Notification microservice via HTTP
+      # PORTAL_GATEWAY_NOTIFICATION_PORT is the port for accessing Notification microservice via HTTP
       PORTAL_GATEWAY_NOTIFICATION_PORT:
         value: "20060"
-        # PORTAL_GATEWAY_PORTAL_KOWL_HOST is the hostname for accessing Portal-Kowl via HTTP
+      # PORTAL_GATEWAY_PORTAL_KOWL_HOST is the hostname for accessing Portal-Kowl via HTTP
       PORTAL_GATEWAY_PORTAL_KOWL_HOST:
         value: "portal-kowl"
-        # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Content Portal-Kowl via HTTP
+      # PORTAL_GATEWAY_PORTAL_KOWL_PORT is the port for accessing Portal-Kowl via HTTP
       PORTAL_GATEWAY_PORTAL_KOWL_PORT:
         value: "8080"
-        # PORTAL_GATEWAY_PORTAL_PGWEB_HOST is the hostname for accessing the pgweb web gui via HTTP
+      # PORTAL_GATEWAY_PORTAL_PGWEB_HOST is the hostname for accessing the pgweb web gui via HTTP
       PORTAL_GATEWAY_PORTAL_PGWEB_HOST:
         value: pgweb
-        # PORTAL_GATEWAY_PORTAL_PGWEB_PORT is the port for accessing the pgweb web gui via HTTP
+      # PORTAL_GATEWAY_PORTAL_PGWEB_PORT is the port for accessing the pgweb web gui via HTTP
       PORTAL_GATEWAY_PORTAL_PGWEB_PORT:
         value: "80"
-        # PORTAL_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
+      # PORTAL_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
       PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
         value: "grafana-service"
-        # PORTAL_GATEWAY_PORTAL_GRAFANA_PORT is the port for accessing Grafana via HTTP
+      # PORTAL_GATEWAY_PORTAL_GRAFANA_PORT is the port for accessing Grafana via HTTP
       PORTAL_GATEWAY_PORTAL_GRAFANA_PORT:
         value: "3000"
       # PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY describes the path or url to the public key. this is required to verify the signature of incoming jwts.
