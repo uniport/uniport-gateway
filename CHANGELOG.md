@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Changed
+
+- Replaced Portal-Kowl with Portal-Kafka-UI on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
+
 ## [9.0.0]-202401150956-1070-d0103604 - 2024-01-15
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.0.0-202401150956-1070-d0103604) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.0.0-202401150956-1070-d0103604)

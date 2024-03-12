@@ -2,20 +2,21 @@
     "http": {
         "routers": [
             {
-                "name": "portal-kowl-proxy",
+                "name": "portal-kafka-ui-proxy",
                 "middlewares": [
-                    "portalKowlRedirectRegex",
-                    "portalKowlOauth2",
-                    "portalKowlAuthBearer",
-                    "portalKowlBearerOnly"
+                    "portalKafkaUIRedirectRegex",
+                    "portalKafkaUIReplacePath",
+                    "portalKafkaUIOauth2",
+                    "portalKafkaUIAuthBearer",
+                    "portalKafkaUIBearerOnly"
                 ],
                 "rule": "PathPrefix('/ips/portal-messaging')",
-                "service": "portal-kowl-proxy"
+                "service": "portal-kafka-ui-proxy"
             }
         ],
         "middlewares": [
             {
-                "name": "portalKowlRedirectRegex",
+                "name": "portalKafkaUIRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
                     "regex": "^(/ips/portal-messaging)$",
@@ -23,7 +24,7 @@
                 }
             },
             {
-                "name": "portalKowlReplacePath",
+                "name": "portalKafkaUIReplacePath",
                 "type": "replacePathRegex",
                 "options": {
                     "regex": "/ips/portal-messaging/(.*)",
@@ -31,7 +32,7 @@
                 }
             },
             {
-                "name": "portalKowlOauth2",
+                "name": "portalKafkaUIOauth2",
                 "type": "oauth2",
                 "options": {
                     "clientId": "Portal-Gateway",
@@ -41,14 +42,14 @@
                 }
             },
             {
-                "name": "portalKowlAuthBearer",
+                "name": "portalKafkaUIAuthBearer",
                 "type": "authorizationBearer",
                 "options": {
                     "sessionScope": "Portal-Messaging"
                 }
             },
             {
-                "name": "portalKowlBearerOnly",
+                "name": "portalKafkaUIBearerOnly",
                 "type": "bearerOnly",
                 "options": {
                     "publicKeys": [
@@ -79,11 +80,11 @@
         ],
         "services": [
             {
-                "name": "portal-kowl-proxy",
+                "name": "portal-kafka-ui-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_PORTAL_KOWL_HOST}",
-                        "port": "${PORTAL_GATEWAY_PORTAL_KOWL_PORT}"
+                        "host": "${PORTAL_GATEWAY_PORTAL_KAFKA_UI_HOST}",
+                        "port": "${PORTAL_GATEWAY_PORTAL_KAFKA_UI_PORT}"
                     }
                 ]
             }
