@@ -5,7 +5,6 @@
                 "name": "portal-kafka-ui-proxy",
                 "middlewares": [
                     "portalKafkaUIRedirectRegex",
-                    "portalKafkaUIReplacePath",
                     "portalKafkaUIOauth2",
                     "portalKafkaUIAuthBearer",
                     "portalKafkaUIBearerOnly"
@@ -21,14 +20,6 @@
                 "options": {
                     "regex": "^(/ips/portal-messaging)$",
                     "replacement": "$1/"
-                }
-            },
-            {
-                "name": "portalKafkaUIReplacePath",
-                "type": "replacePathRegex",
-                "options": {
-                    "regex": "/ips/portal-messaging/(.*)",
-                    "replacement": "/$1"
                 }
             },
             {
