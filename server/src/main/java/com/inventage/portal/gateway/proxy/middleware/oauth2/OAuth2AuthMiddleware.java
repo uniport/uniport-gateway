@@ -117,7 +117,7 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         final String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
         final String code = ctx.request().getParam(OIDC_PARAM_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
-            LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code.substring(0, 5));
+            LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code != null ? code.substring(0, 5) : null);
             ctx.addEndHandler(asyncResult -> whenTokenForCodeReceived(asyncResult, ctx, authProvider, sessionScope));
             ctx.next(); // io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl.setupCallback#route.handler(ctx -> {...})
         } else {

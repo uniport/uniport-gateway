@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Replaced Portal-Kowl with Portal-Kafka-UI on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
+- Modifying oauth2 flow --> Set prompt=none for accept headers that do not allow text/html ([PORTAL-2004](https://issue.inventage.com/browse/PORTAL-2004)).
+
 
 ## [9.0.0]-202401150956-1070-d0103604 - 2024-01-15
 

@@ -18,6 +18,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 import java.net.URI;
+import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,17 +43,17 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final Route callback;
         final JsonObject oidcParams = oidcParams(middlewareConfig);
         final String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
 
+        final List<Route> callbacks = new LinkedList<>();
+        final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
+        // PORTAL-2004: We always need a GET callback. In the case of FormPost, we need the GET callback for requests with an Accept header that does not allow text/html
+        callbacks.add(router.get(callbackPath).handler(BodyHandler.create()));
         if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
             // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
-            callback = router.post(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
-        } else {
-            callback = router.get(OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase()).handler(BodyHandler.create());
+            callbacks.add(router.post(callbackPath).handler(BodyHandler.create()));
         }
-
         final Promise<Middleware> result = Promise.promise();
         final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx,
             oAuth2Options(middlewareConfig));
@@ -84,12 +85,14 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 return;
             }
 
-            OAuth2AuthMiddleware.registerCallbackHandlers(callback, sessionScope, authProvider);
-            final String callbackURL = String.format("%s%s", publicUrl, callback.getPath());
+            for (Route callback : callbacks) {
+                OAuth2AuthMiddleware.registerCallbackHandlers(callback, sessionScope, authProvider);
+            }
+            final String callbackURL = String.format("%s%s", publicUrl, callbackPath);
 
             // PORTAL-1184 we are using a patched OAuth2AuthHandlerImpl class as OAuth2AuthHandler implementation.
             final OAuth2AuthHandler authHandler = new RelyingPartyHandler(vertx, authProvider, callbackURL)
-                .setupCallback(callback)
+                .setupCallbacks(callbacks)
                 .pkceVerifierLength(64)
                 // add the sessionScope as a OIDC scope for "aud" in JWT
                 // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience

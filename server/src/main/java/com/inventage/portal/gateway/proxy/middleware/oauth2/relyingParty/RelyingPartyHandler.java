@@ -72,7 +72,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         OPENID_SCOPES.add("phone");
         OPENID_SCOPES.add("offline");
     }
-
+    private static final List<String> ACCEPT_TEXT_HTML_TAGS = List.of("text/html", "*/*", "text/*", "*/html");
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
     private final MessageDigest sha256;
@@ -200,7 +200,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                             session.put("pkce", codeVerifier);
                         }
                     }
-                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier))));
+                    final String acceptHeader = context.request().headers().get(HttpHeaders.ACCEPT);
+                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier, acceptHeader))));
                 }
             } else {
                 // continue
@@ -217,12 +218,16 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         });
     }
 
-    private String authURI(String redirectURL, String state, String codeVerifier) {
+    private String authURI(String redirectURL, String state, String codeVerifier, String acceptHeader) {
         final JsonObject config = new JsonObject();
 
         if (extraParams != null) {
-            config.mergeIn(extraParams);
             // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
+            if (acceptHeader != null && ACCEPT_TEXT_HTML_TAGS.stream().noneMatch(acceptHeader::contains)) {
+                config.mergeIn(JsonObject.of("prompt", "none"));
+            } else {
+                config.mergeIn(extraParams);
+            }
         }
 
         config.put("state", state != null ? state : redirectURL);
@@ -287,6 +292,15 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return this;
     }
 
+    public OAuth2AuthHandler setupCallbacks(final List<Route> routes) {
+        for (Route route : routes) {
+            if (route != null) {
+                this.setupCallback(route);
+            }
+        }
+        return this;
+    }
+
     @Override
     public OAuth2AuthHandler setupCallback(final Route route) {
 
@@ -313,7 +327,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
 
         this.callback = route;
-        mountCallback();
+        mountCallback(route);
 
         // the redirect handler has been setup so we can process this
         // handler has full oauth2 support, not just basic JWT
@@ -385,7 +399,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
     }
 
-    private void mountCallback() {
+    private void mountCallback(Route callback) {
         callback.handler(ctx -> {
             // Some IdP's (e.g.: AWS Cognito) returns errors as query arguments
             final String error = ctx.request().getParam("error");
@@ -394,7 +408,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                 final int errorCode;
                 // standard error's from the Oauth2 RFC
                 switch (error) {
-                    case "invalid_token":
+                    case "invalid_token", "login_required":
                         errorCode = 401;
                         break;
                     case "insufficient_scope":
