@@ -16,6 +16,20 @@
         ],
         "middlewares": [
             {
+                "name": "notificationCSP",
+                "type": "csp",
+                "options": {
+                    "policyDirectives": [
+                        {
+                            "directive": "connect-src",
+                            "values": [
+                                "data:"
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
                 "name": "notificationRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
