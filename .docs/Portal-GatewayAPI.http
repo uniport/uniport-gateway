@@ -1,0 +1,5 @@
+
+### GET request on protected resource with accept application/json
+GET {{baseUrl}}/conversation
+Accept: application/json
+
