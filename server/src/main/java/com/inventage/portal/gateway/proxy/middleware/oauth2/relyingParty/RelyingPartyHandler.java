@@ -39,6 +39,7 @@ import io.vertx.ext.web.handler.impl.HTTPAuthorizationHandler;
 import io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl;
 import io.vertx.ext.web.handler.impl.ScopedAuthentication;
 import io.vertx.ext.web.impl.Origin;
+import io.vertx.ext.web.impl.ParsableMIMEValue;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -72,7 +73,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         OPENID_SCOPES.add("phone");
         OPENID_SCOPES.add("offline");
     }
-    private static final List<String> ACCEPT_TEXT_HTML_TAGS = List.of("text/html", "*/*", "text/*", "*/html");
+    private static final ParsableMIMEValue ACCEPT_HEADER_FOR_PROMPT_NONE = new ParsableMIMEValue(HttpHeaders.TEXT_HTML.toString()).forceParse();
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
     private final MessageDigest sha256;
@@ -223,7 +224,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
         if (extraParams != null) {
             // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
-            if (acceptHeader != null && ACCEPT_TEXT_HTML_TAGS.stream().noneMatch(acceptHeader::contains)) {
+            if (!acceptHeaderIncludesTextHTML(acceptHeader)) {
                 config.mergeIn(JsonObject.of("prompt", "none"));
             } else {
                 config.mergeIn(extraParams);
@@ -254,6 +255,20 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
 
         return authProvider.authorizeURL(config);
+    }
+
+    private boolean acceptHeaderIncludesTextHTML(String header) {
+        if (header == null) {
+            return false;
+        }
+        final String[] allMimeValues = header.split(",");
+        for (String mimeValueString : allMimeValues) {
+            final ParsableMIMEValue mimeValue = new ParsableMIMEValue(mimeValueString.trim()).forceParse();
+            if (mimeValue.isMatchedBy(ACCEPT_HEADER_FOR_PROMPT_NONE)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
