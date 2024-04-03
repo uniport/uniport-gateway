@@ -13,6 +13,14 @@
                 ],
                 "rule": "PathPrefix('/notification')",
                 "service": "notification-proxy"
+            },
+            {
+                "name": "notification-mobile-installation",
+                "middlewares": [
+                    "notificationReplacePath"
+                ],
+                "rule": "PathPrefix('/notification/mobileinstallation')",
+                "service": "notification-proxy"
             }
         ],
         "middlewares": [
