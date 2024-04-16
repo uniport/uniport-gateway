@@ -134,6 +134,7 @@ public class PortalGatewayLauncher extends Launcher {
         // See https://docs.hazelcast.com/hazelcast/latest/kubernetes/kubernetes-auto-discovery#using-kubernetes-in-dns-lookup-mode
         final Config config = new Config();
         config.setClusterName("portal-gateway-ha");
+        config.setProperty("hazelcast.logging.type", "slf4j");
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true)
             .setProperty(KubernetesProperties.SERVICE_DNS.key(), headlessServiceName);
