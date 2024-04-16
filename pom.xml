@@ -234,6 +234,7 @@
                 <version>${portal-helm-chart-library.version}</version>
             </dependency>
             <!-- needed for HA cluster until vertx-hazelcast upgrades to 5.0 -->
+            <!-- https://github.com/vert-x3/vertx-hazelcast/blob/4.4.9/pom.xml#L19 -->
             <dependency>
                 <groupId>com.hazelcast</groupId>
                 <artifactId>hazelcast-kubernetes</artifactId>

@@ -93,7 +93,7 @@ containers:
         value: "/etc/portal-gateway/logging-config/logback-structured.xml"
       # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
       PORTAL_GATEWAY_CLUSTERED:
-        value: true
+        value: "true"
       PORTAL_GATEWAY_INSTANCE_NAME:
         valueFrom:
           fieldRef:
