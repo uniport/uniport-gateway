@@ -10,7 +10,7 @@ services:
   portal-gateway:
     ports:
       http-debug:
-        port: 20099
+        port: 20009
 
 containers:
   portal-gateway:
