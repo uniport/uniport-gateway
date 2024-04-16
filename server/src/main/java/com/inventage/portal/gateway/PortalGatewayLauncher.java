@@ -40,7 +40,7 @@ public class PortalGatewayLauncher extends Launcher {
     private static final String DEFAULT_METRICS_PATH = "/metrics";
 
     private static final String HEADLESS_SERVICE_NAME_PROPERTY = "PORTAL_GATEWAY_HEADLESS_SERVICE_NAME";
-    private static final String DEFAULT_HEADLESS_SERVICE_NAME = "portal-gateway-headless";
+    private static final String DEFAULT_HEADLESS_SERVICE_NAME = "portal-gateway-headless.ips.svc.cluster.local";
 
     private static Logger logger;
 

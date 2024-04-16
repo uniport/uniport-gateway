@@ -63,6 +63,8 @@ containers:
         value: "http://portal1.localdev.me:29000/auth/realms/portal"
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
+      PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
+        value: "portal-gateway-headless.portal1.svc.cluster.local"        
 
 pod:
   replicas: 1

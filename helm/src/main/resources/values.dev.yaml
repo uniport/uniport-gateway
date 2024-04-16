@@ -34,6 +34,8 @@ containers:
         value: "true"
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
+      PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
+        value: "portal-gateway-headless.ips.svc.cluster.local"
       PORTAL_GATEWAY_ANALYTICS_HOST:
         value: analytics.analytics
       # currently Portal-Monitoring is in an own namespace in ips.inventage.dev

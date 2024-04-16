@@ -95,6 +95,8 @@ containers:
       # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
       PORTAL_GATEWAY_CLUSTERED:
         value: "true"
+      PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
+        value: "portal-gateway-headless.minikube.svc.cluster.local"
       PORTAL_GATEWAY_INSTANCE_NAME:
         valueFrom:
           fieldRef:
