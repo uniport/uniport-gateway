@@ -2,6 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Attach to Remote",
+            "type": "java",
+            "projectName": "server",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": "20009"
+        },
+        {
             "name": "Launch",
             "type": "java",
             "projectName": "server",
