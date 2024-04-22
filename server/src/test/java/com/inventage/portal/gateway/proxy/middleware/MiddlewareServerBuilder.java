@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware;
 
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
@@ -408,7 +409,12 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withReplacedSessionCookieDetectionMiddleware() {
-        return withMiddleware(new ReplacedSessionCookieDetectionMiddleware("withReplacedSessionMiddleware", DEFAULT_DETECTION_COOKIE_NAME, DEFAULT_WAIT_BEFORE_RETRY_MS));
+        return withMiddleware(
+            new ReplacedSessionCookieDetectionMiddleware(
+                "withReplacedSessionMiddleware",
+                DEFAULT_DETECTION_COOKIE_NAME,
+                DEFAULT_SESSION_COOKIE_NAME,
+                DEFAULT_WAIT_BEFORE_RETRY_MS));
     }
 
     public MiddlewareServer build() {

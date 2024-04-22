@@ -40,9 +40,8 @@ public class DetectionCookieValue {
         return String.format("%s%s%s", counter, SPLITTER, lastSessionAccess);
     }
 
-    String increment() {
+    void increment() {
         counter++;
-        return toString();
     }
 
     boolean isWithInLimit() {

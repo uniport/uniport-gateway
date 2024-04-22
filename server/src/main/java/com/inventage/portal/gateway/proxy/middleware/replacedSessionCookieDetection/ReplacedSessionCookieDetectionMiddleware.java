@@ -70,8 +70,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     }
 
     private boolean noSessionCookie(RoutingContext ctx) {
-        final Cookie uniportSession = getCookieFromHeader(ctx, sessionCookieName);
-        return uniportSession == null;
+        return getSessionCookie(ctx).isEmpty();
     }
 
     /**
@@ -99,9 +98,9 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         if (isUserInSession(ctx)) {
             return false;
         }
-        final Cookie sessionCookie = getCookieFromHeader(ctx, sessionCookieName);
-        if (sessionCookie != null) {
-            LOGGER.debug("For received session cookie value '{}'", sessionCookie.getValue());
+        final Optional<Cookie> sessionCookie = getSessionCookie(ctx);
+        if (sessionCookie.isPresent()) {
+            LOGGER.debug("For received session cookie value '{}'", sessionCookie.get().getValue());
         } else {
             LOGGER.debug("No session cookie '{}' received", this.sessionCookieName);
         }
@@ -126,8 +125,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
      * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
-        ctx.response().addCookie(
-            Cookie.cookie(this.detectionCookieName, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
+        setDetectionCookieTo(ctx.response(), Optional.of(incrementDetectionCookieValue(ctx)));
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
@@ -136,12 +134,12 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         });
     }
 
-    private String incrementDetectionCookieValue(RoutingContext ctx) {
+    private DetectionCookieValue incrementDetectionCookieValue(RoutingContext ctx) {
         final Optional<Cookie> cookie = getDetectionCookie(ctx);
         final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(cookie.get().getValue());
-        final String newValue = detectionCookieValue.increment();
-        LOGGER.debug("New value is '{}'", newValue);
-        return String.valueOf(newValue);
+        detectionCookieValue.increment();
+        LOGGER.debug("New value is '{}'", detectionCookieValue);
+        return detectionCookieValue;
     }
 
     private void responseWithDetectionCookie(RoutingContext ctx) {
@@ -155,14 +153,18 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     }
 
     private Optional<Cookie> getDetectionCookie(RoutingContext ctx) {
-        final Cookie uniportState = getCookieFromHeader(ctx, this.detectionCookieName);
-        return uniportState != null ? Optional.of(uniportState) : Optional.empty();
+        return getCookieFromHeader(ctx, this.detectionCookieName);
+    }
+
+    private Optional<Cookie> getSessionCookie(RoutingContext ctx) {
+        return getCookieFromHeader(ctx, this.sessionCookieName);
     }
 
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
-    private Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
-        return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
+    private Optional<Cookie> getCookieFromHeader(RoutingContext ctx, String cookieName) {
+        Cookie cookie = CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
             .get(cookieName);
+        return cookie != null ? Optional.of(cookie) : Optional.empty();
     }
 
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {

@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory;
 import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
@@ -13,7 +13,7 @@ public class SessionAdapter {
 
     public static String displaySessionId(RoutingContext context) {
         final Cookie cookie = context.request()
-            .getCookie(ReplacedSessionCookieDetectionMiddleware.DEFAULT_SESSION_COOKIE_NAME);
+            .getCookie(ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
         return cookie == null ? EMPTY_SESSION_DISPLAY : firstCharactersOf(SESSION_ID_DISPLAYED_LENGTH, cookie.getValue());
     }
 
