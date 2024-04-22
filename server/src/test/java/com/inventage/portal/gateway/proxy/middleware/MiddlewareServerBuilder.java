@@ -95,17 +95,19 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset, boolean withLifetimeHeader, boolean withLifetimeCookie) {
-        return withMiddleware(new SessionMiddleware(vertx, "session",
-            SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
-            withLifetimeHeader,
-            withLifetimeCookie,
-            SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
-            SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY,
-            SessionMiddlewareFactory.DEFAULT_COOKIE_SECURE,
-            SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE,
-            SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
-            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
-            uriWithoutSessionTimeoutReset));
+        return withMiddleware(
+            new SessionMiddleware(vertx, "session",
+                SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
+                withLifetimeHeader,
+                withLifetimeCookie,
+                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
+                SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY,
+                SessionMiddlewareFactory.DEFAULT_COOKIE_SECURE,
+                SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE,
+                SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
+                SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
+                uriWithoutSessionTimeoutReset,
+                SessionMiddlewareFactory.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILISECONDS));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {

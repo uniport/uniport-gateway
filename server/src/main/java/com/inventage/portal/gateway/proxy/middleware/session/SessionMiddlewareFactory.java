@@ -26,6 +26,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     public static final boolean DEFAULT_NAG_HTTPS = true;
     public static final boolean DEFAULT_SESSION_LIFETIME_HEADER = false;
     public static final boolean DEFAULT_SESSION_LIFETIME_COOKIE = false;
+    public static final int DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILISECONDS = 5 * 1000;
 
     @Override
     public String provides() {
@@ -34,25 +35,43 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final JsonObject cookie = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject());
-        final String cookieName = cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
-        final boolean cookieHttpOnly = cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, DEFAULT_COOKIE_HTTP_ONLY);
-        final boolean cookieSecure = cookie.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
-        final String cookieSameSiteValue = cookie.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, DEFAULT_COOKIE_SAME_SITE.toString());
+        final JsonObject cookieConfig = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject());
+        final String cookieName = cookieConfig.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
+        final boolean cookieHttpOnly = cookieConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, DEFAULT_COOKIE_HTTP_ONLY);
+        final boolean cookieSecure = cookieConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
+        final String cookieSameSiteValue = cookieConfig.getString(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, DEFAULT_COOKIE_SAME_SITE.toString());
         final CookieSameSite cookieSameSite = CookieSameSite.valueOf(cookieSameSiteValue.toUpperCase());
-        final int sessionIdleTimeoutInMinutes = middlewareConfig
-            .getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
-        final int sessionIdMinLength = middlewareConfig
-            .getInteger(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, DEFAULT_SESSION_ID_MINIMUM_LENGTH);
+
+        final int sessionIdleTimeoutInMinutes = middlewareConfig.getInteger(
+            DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES,
+            DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
+        final int sessionIdMinLength = middlewareConfig.getInteger(
+            DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH,
+            DEFAULT_SESSION_ID_MINIMUM_LENGTH);
         final Boolean nagHttps = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, DEFAULT_NAG_HTTPS);
         final Boolean lifetimeHeader = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_HEADER, DEFAULT_SESSION_LIFETIME_HEADER);
         final Boolean lifetimeCookie = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_SESSION_LIFETIME_COOKIE, DEFAULT_SESSION_LIFETIME_COOKIE);
-        final String pathWithoutSessionTimeoutReset = middlewareConfig
-            .getString(DynamicConfiguration.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+        final String pathWithoutSessionTimeoutReset = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+        final int clusteredSessionStoreRetryTimeoutMiliSeconds = middlewareConfig.getInteger(
+            DynamicConfiguration.MIDDLEWARE_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS,
+            DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILISECONDS);
 
         LOGGER.info("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_SESSION);
-        return Future.succeededFuture(new SessionMiddleware(vertx, name, sessionIdleTimeoutInMinutes, lifetimeHeader, lifetimeCookie, cookieName,
-            cookieHttpOnly, cookieSecure, cookieSameSite, sessionIdMinLength, nagHttps, pathWithoutSessionTimeoutReset));
+        return Future.succeededFuture(
+            new SessionMiddleware(
+                vertx,
+                name,
+                sessionIdleTimeoutInMinutes,
+                lifetimeHeader,
+                lifetimeCookie,
+                cookieName,
+                cookieHttpOnly,
+                cookieSecure,
+                cookieSameSite,
+                sessionIdMinLength,
+                nagHttps,
+                pathWithoutSessionTimeoutReset,
+                clusteredSessionStoreRetryTimeoutMiliSeconds));
     }
 }

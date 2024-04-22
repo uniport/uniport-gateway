@@ -26,7 +26,7 @@ public class SessionMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
-    private static final int MILLIS = 60000;
+    private static final int MINUTE_MILIS = 60_000;
 
     private final String name;
 
@@ -64,6 +64,8 @@ public class SessionMiddleware extends TraceMiddleware {
      *            switch if a nagging log should be written when access is not via HTTPS
      * @param uriWithoutSessionIdleTimeoutReset
      *            null or regex for specifying uri with no session timeout reset
+     * @param clusteredSessionStoreRetryTimeoutMiliSeconds
+     *            default retry time out, in ms, for a session not found in the clustered store.
      */
     public SessionMiddleware(
         Vertx vertx,
@@ -77,17 +79,18 @@ public class SessionMiddleware extends TraceMiddleware {
         CookieSameSite cookieSameSite,
         int sessionIdMinLength,
         boolean nagHttps,
-        String uriWithoutSessionIdleTimeoutReset
+        String uriWithoutSessionIdleTimeoutReset,
+        int clusteredSessionStoreRetryTimeoutMiliSeconds
     ) {
         this.name = name;
-        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MILLIS;
+        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MINUTE_MILIS;
         this.withLifetimeHeader = withLifetimeHeader;
         this.withLifetimeCookie = withLifetimeCookie;
 
         final SessionStore sessionStore;
         if (vertx.isClustered()) {
             LOGGER.info("Running clustered session store");
-            sessionStore = ClusteredSessionStore.create(vertx);
+            sessionStore = ClusteredSessionStore.create(vertx, clusteredSessionStoreRetryTimeoutMiliSeconds);
         } else {
             LOGGER.info("Running local session store");
             sessionStore = LocalSessionStore.create(vertx);

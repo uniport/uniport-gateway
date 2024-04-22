@@ -23,26 +23,14 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
-                  "responseMode" : {
-                    "type" : "string",
-                    "enum" : [ "query", "fragment", "form_post" ]
-                  },
                   "publicKeys" : {
                     "type" : "array"
-                  },
-                  "uriWithoutSessionTimeoutReset" : {
-                    "minLength" : 1,
-                    "type" : "string"
                   },
                   "claimPath" : {
                     "minLength" : 1,
                     "type" : "string"
                   },
                   "publicKeyAlgorithm" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
-                  "origin" : {
                     "minLength" : 1,
                     "type" : "string"
                   },
@@ -61,28 +49,9 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
-                  "lifetimeHeader" : {
-                    "type" : "boolean"
-                  },
                   "waitTimeInMillisecond" : {
                     "type" : "integer",
                     "minimum" : 0
-                  },
-                  "logLevel" : {
-                    "type" : "string",
-                    "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
-                  },
-                  "publicKeysReconcilation" : {
-                    "type" : "object",
-                    "properties" : {
-                      "intervalMs" : {
-                        "type" : "integer",
-                        "minimum" : 0
-                      },
-                      "enabled" : {
-                        "type" : "boolean"
-                      }
-                    }
                   },
                   "policyDirectives" : {
                     "type" : "array"
@@ -90,9 +59,6 @@
                   "action" : {
                     "type" : "string",
                     "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
-                  },
-                  "nagHttps" : {
-                    "type" : "boolean"
                   },
                   "customResponseHeaders" : {
                     "type" : "object"
@@ -104,43 +70,15 @@
                   "reportOnly" : {
                     "type" : "boolean"
                   },
-                  "pathRoles" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
                   "timeoutInMinute" : {
                     "type" : "integer",
                     "minimum" : 0
                   },
-                  "cookieName" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
-                  "discoveryUrl" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
                   "whitelistedCookies" : {
                     "type" : "array"
                   },
-                  "iamSessionResetUrl" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
                   "audience" : {
                     "type" : "array"
-                  },
-                  "headerName" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
-                  "clientId" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
-                  "pathUsername" : {
-                    "minLength" : 1,
-                    "type" : "string"
                   },
                   "cookie" : {
                     "type" : "object",
@@ -161,32 +99,11 @@
                       }
                     }
                   },
-                  "customRequestHeaders" : {
-                    "type" : "object"
-                  },
-                  "mergeStrategy" : {
-                    "type" : "string",
-                    "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
-                  },
-                  "additionalIssuers" : {
-                    "type" : "array",
-                    "items" : {
-                      "type" : "string"
-                    }
-                  },
                   "optional" : {
                     "minLength" : 1,
                     "type" : "string"
                   },
                   "uriWithoutLoggingRegex" : {
-                    "type" : "string"
-                  },
-                  "idMinimumLength" : {
-                    "type" : "integer",
-                    "minimum" : 0
-                  },
-                  "pathGroup" : {
-                    "minLength" : 1,
                     "type" : "string"
                   },
                   "regex" : {
@@ -220,6 +137,100 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
+                  "replacement" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "loggingResponseEnabled" : {
+                    "type" : "boolean"
+                  },
+                  "responseMode" : {
+                    "type" : "string",
+                    "enum" : [ "query", "fragment", "form_post" ]
+                  },
+                  "uriWithoutSessionTimeoutReset" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "origin" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "lifetimeHeader" : {
+                    "type" : "boolean"
+                  },
+                  "logLevel" : {
+                    "type" : "string",
+                    "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
+                  },
+                  "publicKeysReconcilation" : {
+                    "type" : "object",
+                    "properties" : {
+                      "intervalMs" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      },
+                      "enabled" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "nagHttps" : {
+                    "type" : "boolean"
+                  },
+                  "pathRoles" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "cookieName" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "discoveryUrl" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "iamSessionResetUrl" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "headerName" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "clientId" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "pathUsername" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
+                  "customRequestHeaders" : {
+                    "type" : "object"
+                  },
+                  "mergeStrategy" : {
+                    "type" : "string",
+                    "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
+                  },
+                  "additionalIssuers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "idMinimumLength" : {
+                    "type" : "integer",
+                    "minimum" : 0
+                  },
+                  "clusteredSessionStoreRetryTimeoutInMiliseconds" : {
+                    "type" : "integer",
+                    "minimum" : 0
+                  },
+                  "pathGroup" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
                   "pathEmail" : {
                     "minLength" : 1,
                     "type" : "string"
@@ -229,13 +240,6 @@
                     "items" : {
                       "type" : "string"
                     }
-                  },
-                  "replacement" : {
-                    "minLength" : 1,
-                    "type" : "string"
-                  },
-                  "loggingResponseEnabled" : {
-                    "type" : "boolean"
                   }
                 }
               },

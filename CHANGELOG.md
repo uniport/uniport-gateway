@@ -124,6 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Process exits with code 0 if any middleware initialization fails ([PORTAL-1016](https://issue.inventage.com/browse/PORTAL-1016)).
 - `uriWithoutLoggingRegex` option for RequestResponseLoggerMiddleware allowing selective logging of requests based on their URI ([PORTAL-1418](https://issue.inventage.com/browse/PORTAL-1418))
 - Fail build when example configs are invalid ([PORTAL-1461](https://issue.inventage.com/browse/PORTAL-1461)).
+- Make clustered session store retry timeout configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 
 ### Changed
 

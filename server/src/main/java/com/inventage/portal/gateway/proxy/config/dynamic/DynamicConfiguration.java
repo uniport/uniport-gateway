@@ -167,6 +167,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
     public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
+    // clustered session store
+    public static final String MIDDLEWARE_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS = "clusteredSessionStoreRetryTimeoutInMiliseconds";
     // show session content
     public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
     // withAuthHandler: shared by 'bearerOnly' and 'passAuthorization' middlewares
@@ -290,20 +292,25 @@ public class DynamicConfiguration {
 
     private static ObjectSchemaBuilder buildMiddlewareSchema() {
         final ObjectSchemaBuilder middlewareOptionsSchema = Schemas.objectSchema()
+            // auth bearer
             .property(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // bearer only
             .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // control api
             .property(MIDDLEWARE_CONTROL_API_ACTION, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CONTROL_API_ACTIONS.toArray())))
             .optionalProperty(MIDDLEWARE_CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // csp
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
             .property(MIDDLEWARE_CSP_MERGE_STRATEGY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
             .property(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.toArray())))
+            // csrf
             .property(MIDDLEWARE_CSRF_COOKIE, Schemas.objectSchema()
                 .property(MIDDLEWARE_CSRF_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
@@ -317,8 +324,10 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+            // headers
             .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
             .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+            // oauth2
             .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema()
@@ -329,29 +338,37 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
             .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // pass authorization
             .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // redirect regex
             .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // replaced session cookie detection
             .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+            // replace path
             .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // response session cookie removal
             .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // request/response logger
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema())
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema().items(Schemas.stringSchema()))
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, Schemas.booleanSchema())
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, Schemas.booleanSchema())
+            // session bag
             .property(MIDDLEWARE_SESSION_BAG_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
+            // session cookie
             .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema()
                 .property(MIDDLEWARE_SESSION_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, INT_MIN))
@@ -359,6 +376,7 @@ public class DynamicConfiguration {
                 .property(MIDDLEWARE_SESSION_COOKIE_SECURE, Schemas.booleanSchema())
                 .property(MIDDLEWARE_SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
                     .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray()))))
+            // session
             .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema()
@@ -368,6 +386,10 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
             .optionalProperty(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // clustered session store
+            .optionalProperty(MIDDLEWARE_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+            // withAuthHandler: shared by 'bearerOnly' and 'passAuthorization' middlewares
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
             .property(MIDDLEWARE_WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
@@ -387,14 +409,18 @@ public class DynamicConfiguration {
                 .optionalProperty(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, Schemas.booleanSchema())
                 .optionalProperty(MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, Schemas.intSchema()
                     .withKeyword(KEYWORD_INT_MIN, INT_MIN)))
+            // prevent foreign initiated authentication
             .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // claim to header
             .property(MIDDLEWARE_CLAIM_TO_HEADER_PATH, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_CLAIM_TO_HEADER_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // language cookie
             .property(MIDDLEWARE_LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // matomo
             .property(MIDDLEWARE_MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
