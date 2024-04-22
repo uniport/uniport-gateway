@@ -57,11 +57,21 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         ctx.next();
     }
 
-    private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
-        LOGGER.debug("'{}'", this.detectionCookieName);
-        response.addCookie(
-            Cookie.cookie(this.detectionCookieName, cookieValue.isPresent() ? cookieValue.get().toString() : "")
-                .setPath("/").setHttpOnly(true));
+    /**
+     * If the session cookie (uniport.session) is not received AND the state cookie (uniport.state)
+     * is received, then we assume a user as previously logged out.
+     *
+     * @param ctx
+     *            the current routing context
+     * @return true if the user is assumed as logged out
+     */
+    private boolean requestComingFromLoggedOutUser(RoutingContext ctx) {
+        return this.noSessionCookie(ctx) && getDetectionCookie(ctx).isPresent();
+    }
+
+    private boolean noSessionCookie(RoutingContext ctx) {
+        final Cookie uniportSession = getCookieFromHeader(ctx, sessionCookieName);
+        return uniportSession == null;
     }
 
     /**
@@ -77,74 +87,6 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
      */
     private boolean requestComingFromReplacedSessionId(RoutingContext ctx) {
         return noUserInSession(ctx) && isDetectionCookieValueWithInLimit(ctx);
-    }
-
-    /**
-     * If the session cookie (uniport.session) is not received AND the state cookie (uniport.state)
-     * is received, then we assume a user as previously logged out.
-     *
-     * @param ctx
-     *            the current routing context
-     * @return true if the user is assumed as logged out
-     */
-    private boolean requestComingFromLoggedOutUser(RoutingContext ctx) {
-        return this.noSessionCookie(ctx) && getDetectionCookie(ctx).isPresent();
-    }
-
-    /**
-     * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime.
-     * (Refer to Portal-Gateway.drawio for a visual explanation).
-     * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
-     */
-    private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
-        ctx.response().addCookie(
-            Cookie.cookie(this.detectionCookieName, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
-        ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
-        // delay before retry
-        ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
-            LOGGER.info("Invalid sessionId cookie for state, delayed retry for '{}' ms", this.waitBeforeRetryMs);
-            HttpResponder.respondWithRedirectForRetry(ctx);
-        });
-    }
-
-    /**
-     * @return true if our cookie-entry exists and its value is still valid.
-     *         Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
-     */
-    private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
-        final Optional<Cookie> cookie = getDetectionCookie(ctx);
-        if (cookie.isPresent()) {
-            return new DetectionCookieValue(cookie.get().getValue()).isWithInLimit();
-        }
-        return false;
-    }
-
-    private Optional<Cookie> getDetectionCookie(RoutingContext ctx) {
-        final Cookie uniportState = getCookieFromHeader(ctx, this.detectionCookieName);
-        return uniportState != null ? Optional.of(uniportState) : Optional.empty();
-    }
-
-    private String incrementDetectionCookieValue(RoutingContext ctx) {
-        final Optional<Cookie> cookie = getDetectionCookie(ctx);
-        final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(cookie.get().getValue());
-        final String newValue = detectionCookieValue.increment();
-        LOGGER.debug("New value is '{}'", newValue);
-        return String.valueOf(newValue);
-    }
-
-    private void responseWithDetectionCookie(RoutingContext ctx) {
-        if (isUserInSession(ctx)) {
-            setDetectionCookieTo(ctx.response(), Optional.of(new DetectionCookieValue()));
-        }
-    }
-
-    private boolean isUserInSession(RoutingContext ctx) {
-        return ctx.user() != null;
-    }
-
-    private boolean noSessionCookie(RoutingContext ctx) {
-        final Cookie uniportSession = getCookieFromHeader(ctx, sessionCookieName);
-        return uniportSession == null;
     }
 
     /**
@@ -166,10 +108,67 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         return true;
     }
 
+    /**
+     * @return true if our cookie-entry exists and its value is still valid.
+     *         Only authenticated users receive this cookie entry (see {@link #responseWithDetectionCookie(RoutingContext)})
+     */
+    private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
+        final Optional<Cookie> cookie = getDetectionCookie(ctx);
+        if (cookie.isPresent()) {
+            return new DetectionCookieValue(cookie.get().getValue()).isWithInLimit();
+        }
+        return false;
+    }
+
+    /**
+     * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime.
+     * (Refer to Portal-Gateway.drawio for a visual explanation).
+     * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
+     */
+    private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
+        ctx.response().addCookie(
+            Cookie.cookie(this.detectionCookieName, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
+        ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
+        // delay before retry
+        ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
+            LOGGER.info("Invalid sessionId cookie for state, delayed retry for '{}' ms", this.waitBeforeRetryMs);
+            HttpResponder.respondWithRedirectForRetry(ctx);
+        });
+    }
+
+    private String incrementDetectionCookieValue(RoutingContext ctx) {
+        final Optional<Cookie> cookie = getDetectionCookie(ctx);
+        final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(cookie.get().getValue());
+        final String newValue = detectionCookieValue.increment();
+        LOGGER.debug("New value is '{}'", newValue);
+        return String.valueOf(newValue);
+    }
+
+    private void responseWithDetectionCookie(RoutingContext ctx) {
+        if (isUserInSession(ctx)) {
+            setDetectionCookieTo(ctx.response(), Optional.of(new DetectionCookieValue()));
+        }
+    }
+
+    private boolean isUserInSession(RoutingContext ctx) {
+        return ctx.user() != null;
+    }
+
+    private Optional<Cookie> getDetectionCookie(RoutingContext ctx) {
+        final Cookie uniportState = getCookieFromHeader(ctx, this.detectionCookieName);
+        return uniportState != null ? Optional.of(uniportState) : Optional.empty();
+    }
+
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
     private Cookie getCookieFromHeader(RoutingContext ctx, String cookieName) {
         return CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
             .get(cookieName);
     }
 
+    private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
+        LOGGER.debug("'{}'", this.detectionCookieName);
+        response.addCookie(
+            Cookie.cookie(this.detectionCookieName, cookieValue.isPresent() ? cookieValue.get().toString() : "")
+                .setPath("/").setHttpOnly(true));
+    }
 }
