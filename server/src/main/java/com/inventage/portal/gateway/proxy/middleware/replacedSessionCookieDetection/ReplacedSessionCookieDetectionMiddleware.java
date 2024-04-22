@@ -162,7 +162,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
 
     // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
     private Optional<Cookie> getCookieFromHeader(RoutingContext ctx, String cookieName) {
-        Cookie cookie = CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
+        final Cookie cookie = CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
             .get(cookieName);
         return cookie != null ? Optional.of(cookie) : Optional.empty();
     }
