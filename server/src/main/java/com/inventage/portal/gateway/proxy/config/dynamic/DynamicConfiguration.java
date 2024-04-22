@@ -1106,12 +1106,12 @@ public class DynamicConfiguration {
                         final Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
                         if (cookieHttpOnly == null) {
                             LOGGER.debug(String.format("%s: Cookie HttpOnly not specified. Use default value: %s",
-                                mwType, SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY));
+                                mwType, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY));
                         }
                         final String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
                         if (cookieSameSite == null) {
                             LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s",
-                                mwType, SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE));
+                                mwType, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE));
                         } else {
                             try {
                                 CookieSameSite.valueOf(cookieSameSite);

@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public class ReplacedSessionCookieDetectionMiddlewareFactory implements MiddlewareFactory {
 
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
+    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
 
     private static final Logger LOGGER = LoggerFactory
@@ -25,15 +27,21 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String cookieName = middlewareConfig
-            .getString(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, DEFAULT_DETECTION_COOKIE_NAME);
-        final Integer waitTimeRetryInMs = middlewareConfig
-            .getInteger(DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, DEFAULT_WAIT_BEFORE_RETRY_MS);
+        final String detectionCookieName = middlewareConfig.getString(
+            DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME,
+            DEFAULT_DETECTION_COOKIE_NAME);
+        final String sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
+        final Integer waitTimeRetryInMs = middlewareConfig.getInteger(
+            DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS,
+            DEFAULT_WAIT_BEFORE_RETRY_MS);
 
         LOGGER.debug("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION);
-        return Future
-            .succeededFuture(new ReplacedSessionCookieDetectionMiddleware(name, cookieName,
+        return Future.succeededFuture(
+            new ReplacedSessionCookieDetectionMiddleware(
+                name,
+                detectionCookieName,
+                sessionCookieName,
                 waitTimeRetryInMs));
     }
 }

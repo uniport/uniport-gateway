@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
@@ -23,18 +22,18 @@ import org.slf4j.LoggerFactory;
  */
 public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
 
-    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddleware.class);
+
     private final String name;
-    private final String detectionCookieKey;
-    private final String sessionCookieKey;
+    private final String detectionCookieName;
+    private final String sessionCookieName;
     // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
 
-    public ReplacedSessionCookieDetectionMiddleware(String name, String cookieName, Integer waitBeforeRetryInMs) {
+    public ReplacedSessionCookieDetectionMiddleware(String name, String detectionCookieName, String sessionCookieName, Integer waitBeforeRetryInMs) {
         this.name = name;
-        this.detectionCookieKey = cookieName;
-        this.sessionCookieKey = DEFAULT_SESSION_COOKIE_NAME;
+        this.detectionCookieName = detectionCookieName;
+        this.sessionCookieName = sessionCookieName;
         this.waitBeforeRetryMs = waitBeforeRetryInMs;
     }
 
@@ -59,9 +58,9 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     }
 
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
-        LOGGER.debug("'{}'", this.detectionCookieKey);
+        LOGGER.debug("'{}'", this.detectionCookieName);
         response.addCookie(
-            Cookie.cookie(this.detectionCookieKey, cookieValue.isPresent() ? cookieValue.get().toString() : "")
+            Cookie.cookie(this.detectionCookieName, cookieValue.isPresent() ? cookieValue.get().toString() : "")
                 .setPath("/").setHttpOnly(true));
     }
 
@@ -99,7 +98,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {
         ctx.response().addCookie(
-            Cookie.cookie(this.detectionCookieKey, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
+            Cookie.cookie(this.detectionCookieName, incrementDetectionCookieValue(ctx)).setPath("/").setHttpOnly(true));
         ResponseSessionCookieRemovalMiddleware.addSignal(ctx);
         // delay before retry
         ctx.vertx().setTimer(this.waitBeforeRetryMs, v -> {
@@ -121,7 +120,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     }
 
     private Optional<Cookie> getDetectionCookie(RoutingContext ctx) {
-        final Cookie uniportState = getCookieFromHeader(ctx, this.detectionCookieKey);
+        final Cookie uniportState = getCookieFromHeader(ctx, this.detectionCookieName);
         return uniportState != null ? Optional.of(uniportState) : Optional.empty();
     }
 
@@ -144,7 +143,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     }
 
     private boolean noSessionCookie(RoutingContext ctx) {
-        final Cookie uniportSession = getCookieFromHeader(ctx, ReplacedSessionCookieDetectionMiddleware.DEFAULT_SESSION_COOKIE_NAME);
+        final Cookie uniportSession = getCookieFromHeader(ctx, sessionCookieName);
         return uniportSession == null;
     }
 
@@ -158,11 +157,11 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         if (isUserInSession(ctx)) {
             return false;
         }
-        final Cookie sessionCookie = getCookieFromHeader(ctx, sessionCookieKey);
+        final Cookie sessionCookie = getCookieFromHeader(ctx, sessionCookieName);
         if (sessionCookie != null) {
             LOGGER.debug("For received session cookie value '{}'", sessionCookie.getValue());
         } else {
-            LOGGER.debug("No session cookie '{}' received", this.sessionCookieKey);
+            LOGGER.debug("No session cookie '{}' received", this.sessionCookieName);
         }
         return true;
     }

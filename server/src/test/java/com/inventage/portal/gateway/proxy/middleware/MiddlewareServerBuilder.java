@@ -96,17 +96,25 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset, boolean withLifetimeHeader, boolean withLifetimeCookie) {
         return withMiddleware(
-            new SessionMiddleware(vertx, "session",
-                SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
-                withLifetimeHeader,
-                withLifetimeCookie,
-                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
-                SessionMiddlewareFactory.DEFAULT_COOKIE_HTTP_ONLY,
-                SessionMiddlewareFactory.DEFAULT_COOKIE_SECURE,
-                SessionMiddlewareFactory.DEFAULT_COOKIE_SAME_SITE,
+            new SessionMiddleware(
+                vertx,
+                "session",
                 SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
-                SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
+                SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
                 uriWithoutSessionTimeoutReset,
+                SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
+                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
+                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY,
+                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SECURE,
+                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE,
+                withLifetimeHeader,
+                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME,
+                withLifetimeCookie,
+                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_NAME,
+                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_PATH,
+                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_HTTP_ONLY,
+                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SECURE,
+                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SAME_SITE,
                 SessionMiddlewareFactory.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILISECONDS));
     }
 

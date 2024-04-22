@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.CONTEXTUAL_DATA_SESSION_ID;
+import static com.inventage.portal.gateway.proxy.middleware.openTelemetry.OpenTelemetryMiddleware.CONTEXTUAL_DATA_SESSION_ID;
 
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
