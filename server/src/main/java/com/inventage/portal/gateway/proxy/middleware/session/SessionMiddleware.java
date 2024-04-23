@@ -22,9 +22,11 @@ import org.slf4j.LoggerFactory;
  */
 public class SessionMiddleware extends TraceMiddleware {
 
+    public static final String SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY = "SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
-    private static final int MINUTE_MILIS = 60_000;
+    private static final int MINUTE_MS = 60_000;
 
     private final String name;
 
@@ -109,7 +111,7 @@ public class SessionMiddleware extends TraceMiddleware {
         int clusteredSessionStoreRetryTimeoutMiliSeconds
     ) {
         this.name = name;
-        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MINUTE_MILIS;
+        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MINUTE_MS;
         this.uriPatternForIgnoringSessionTimeoutReset = uriWithoutSessionIdleTimeoutReset == null ? null : Pattern.compile(uriWithoutSessionIdleTimeoutReset);
 
         this.withLifetimeHeader = withLifetimeHeader;
@@ -146,6 +148,7 @@ public class SessionMiddleware extends TraceMiddleware {
 
         registerHandlerForRespondingWithSessionLifetime(ctx);
         checkForSessionTimeoutReset(ctx);
+        setSessionIdleTimeoutOnRoutingContext(ctx);
 
         this.sessionHandler.handle(ctx);
     }
@@ -202,5 +205,9 @@ public class SessionMiddleware extends TraceMiddleware {
 
     protected boolean isRequestUriMatching(String requestUri) {
         return uriPatternForIgnoringSessionTimeoutReset.matcher(requestUri).matches();
+    }
+
+    private void setSessionIdleTimeoutOnRoutingContext(RoutingContext ctx) {
+        ctx.put(SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY, this.sessionIdleTimeoutInMilliSeconds);
     }
 }

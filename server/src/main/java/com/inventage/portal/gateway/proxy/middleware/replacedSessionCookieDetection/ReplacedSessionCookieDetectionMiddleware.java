@@ -3,12 +3,14 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.Session;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +44,11 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         if (requestComingFromLoggedOutUser(ctx)) {
-            setDetectionCookieTo(ctx.response(), Optional.empty());
+            ctx.response().removeCookie(detectionCookieName);
             ctx.next();
             return;
         }
-        // from here on, there is a session cookie in the incoming request
         if (requestComingFromReplacedSessionId(ctx)) {
-            // but the session cookie identifies no valid session and max number of retries not yet reached
             retryWithNewSessionIdFromBrowser(ctx);
             return;
         }
@@ -66,11 +66,23 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
      * @return true if the user is assumed as logged out
      */
     private boolean requestComingFromLoggedOutUser(RoutingContext ctx) {
-        return this.noSessionCookie(ctx) && getDetectionCookie(ctx).isPresent();
+        return isNewSession(ctx) && isDetectionCookieExpired(ctx);
     }
 
-    private boolean noSessionCookie(RoutingContext ctx) {
-        return getSessionCookie(ctx).isEmpty();
+    private boolean isNewSession(RoutingContext ctx) {
+        final Session session = ctx.session();
+        if (session == null) {
+            throw new IllegalStateException("Session is required");
+        }
+        final String sessionId = session.id();
+
+        final Optional<Cookie> sessionCookie = getSessionCookie(ctx);
+        if (sessionCookie.isEmpty()) {
+            return false;
+        }
+
+        final String sessionCookieId = sessionCookie.get().getValue();
+        return sessionCookieId != sessionId;
     }
 
     /**
@@ -119,6 +131,14 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         return false;
     }
 
+    private boolean isDetectionCookieExpired(RoutingContext ctx) {
+        final Optional<Cookie> cookie = getDetectionCookie(ctx);
+        if (cookie.isPresent()) {
+            return new DetectionCookieValue(cookie.get().getValue()).isExpired();
+        }
+        return false;
+    }
+
     /**
      * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime.
      * (Refer to Portal-Gateway.drawio for a visual explanation).
@@ -144,7 +164,12 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
 
     private void responseWithDetectionCookie(RoutingContext ctx) {
         if (isUserInSession(ctx)) {
-            setDetectionCookieTo(ctx.response(), Optional.of(new DetectionCookieValue()));
+            final Session session = ctx.session();
+            if (session == null) {
+                throw new IllegalStateException("Session is required");
+            }
+            final long sessionIdleTimeoutInMilliSeconds = ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY);
+            setDetectionCookieTo(ctx.response(), Optional.of(new DetectionCookieValue(session.lastAccessed(), sessionIdleTimeoutInMilliSeconds)));
         }
     }
 

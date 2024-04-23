@@ -14,7 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced Portal-Kowl with Portal-Kafka-UI on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
 - Modifying oauth2 flow --> Set prompt=none for accept headers that do not allow text/html ([PORTAL-2004](https://issue.inventage.com/browse/PORTAL-2004)).
 - Upgraded Vert.X from 4.4.4 to 4.4.9 ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
+- Make clustered session store retry timeout configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 
+### Fixed
+
+- Correctly detect a request with an expired session in the `replacedSessionCookieDetection` middleware ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 
 ## [9.0.0]-202401150956-1070-d0103604 - 2024-01-15
 
@@ -124,7 +128,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Process exits with code 0 if any middleware initialization fails ([PORTAL-1016](https://issue.inventage.com/browse/PORTAL-1016)).
 - `uriWithoutLoggingRegex` option for RequestResponseLoggerMiddleware allowing selective logging of requests based on their URI ([PORTAL-1418](https://issue.inventage.com/browse/PORTAL-1418))
 - Fail build when example configs are invalid ([PORTAL-1461](https://issue.inventage.com/browse/PORTAL-1461)).
-- Make clustered session store retry timeout configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 
 ### Changed
 

@@ -5,20 +5,22 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The value used in the cookie for detecting a replaced session cookie.
- * The value has the following format: <counter>:<last-session-access>
+ * The value has the following format: <counter>:<session-lifetime>
+ * The session lifetime is the point in time (Unix Epoch in seconds) until the session is valid (== not expired).
  */
 public class DetectionCookieValue {
 
-    private static final int MINUTES_IN_MILLISECONDS = 60000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DetectionCookieValue.class);
+
     protected static final String SPLITTER = ":";
     protected static final int MAX_RETRIES = 5;
-    private static final Logger LOGGER = LoggerFactory.getLogger(DetectionCookieValue.class);
-    protected int counter;
-    protected long lastSessionAccess;
 
-    DetectionCookieValue() {
+    protected int counter;
+    protected long sessionLifeTime;
+
+    DetectionCookieValue(long lastAccessed, long sessionIdleTimeoutInMilliSeconds) {
         counter = 0;
-        lastSessionAccess = System.currentTimeMillis();
+        sessionLifeTime = (lastAccessed + sessionIdleTimeoutInMilliSeconds) / 1000;
     }
 
     DetectionCookieValue(String cookieValue) {
@@ -28,16 +30,16 @@ public class DetectionCookieValue {
                 counter = Integer.parseInt(parts[0]);
             }
             if (parts.length > 1) {
-                lastSessionAccess = Long.parseLong(parts[1]);
+                sessionLifeTime = Long.parseLong(parts[1]);
             }
         } catch (Throwable t) {
-            LOGGER.warn("The received cookie value '{}' couldn't be parsed", cookieValue);
+            LOGGER.warn("Failed to parse cookie value '{}'", cookieValue);
         }
     }
 
     @Override
     public String toString() {
-        return String.format("%s%s%s", counter, SPLITTER, lastSessionAccess);
+        return String.format("%s%s%s", counter, SPLITTER, sessionLifeTime);
     }
 
     void increment() {
@@ -49,12 +51,19 @@ public class DetectionCookieValue {
             LOGGER.warn("Counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
             return false;
         }
-        if (lastSessionAccess < (System.currentTimeMillis() - 30 * MINUTES_IN_MILLISECONDS)) {
-            LOGGER.warn("Cookie with last session access date '{}' is outdated", lastSessionAccess);
+        if (isExpired()) {
             return false;
         }
         LOGGER.debug("Counter value '{}'", this);
         return true;
+    }
+
+    boolean isExpired() {
+        if (sessionLifeTime < System.currentTimeMillis() / 1000) {
+            LOGGER.warn("Cookie with session life time until '{}' is expired", sessionLifeTime);
+            return true;
+        }
+        return false;
     }
 
 }
