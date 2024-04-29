@@ -10,11 +10,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ */
 public final class JsonSchemaGenerator {
 
     private JsonSchemaGenerator() {
     }
 
+    /**
+    */
     public static void main(String[] args) throws IOException {
         String path = "";
         if (args.length >= 1 && args[0] != null) {
