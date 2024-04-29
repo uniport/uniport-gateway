@@ -13,8 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced Portal-Kowl with Portal-Kafka-UI on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
 - Modifying oauth2 flow --> Set prompt=none for accept headers that do not allow text/html ([PORTAL-2004](https://issue.inventage.com/browse/PORTAL-2004)).
-- Upgraded Vert.X from 4.4.4 to 4.4.9 ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
+- Upgraded Vert.X from `4.4.4` to `4.4.9` ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 - Make clustered session store retry timeout configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
+- Version upgrade for Portal-Code-Style-Settings to `1.4.0-202404081537-54-54f1eba`.
+- Version upgrade for Portal-Helm-Chart-Library to `4.7.0-202404231356-316-dc0a409`.
 
 ### Fixed
 

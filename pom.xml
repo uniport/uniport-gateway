@@ -50,8 +50,8 @@
 
         <portal-helm-dependencies.repository>https://nexus3.inventage.com/repository/inventage-portal-helm/</portal-helm-dependencies.repository>
 
-        <portal-helm-chart-library.version>4.5.0-202309061145-260-8c797e8</portal-helm-chart-library.version>
-        <portal-code-style-settings.version>1.2.0-202308041303-1-08f26fa</portal-code-style-settings.version>
+        <portal-helm-chart-library.version>4.7.0-202404231356-316-dc0a409</portal-helm-chart-library.version>
+        <portal-code-style-settings.version>1.4.0-202404081537-54-54f1eba</portal-code-style-settings.version>
     </properties>
 
     <dependencyManagement>

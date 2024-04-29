@@ -65,6 +65,8 @@
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
         <module name="MethodName"/>
+        <module name="MissingJavadocMethod" />
+        <module name="MissingJavadocType" />
         <module name="MissingSwitchDefault"/>
         <module name="ModifierOrder"/>
         <module name="MultipleStringLiterals">
