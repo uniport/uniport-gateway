@@ -44,6 +44,8 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
     private static final boolean DEFAULT_LOGGING_REQUEST_ENABLED = true;
     private static final boolean DEFAULT_LOGGING_RESPONSE_ENABLED = true;
 
+    /**
+    */
     public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests, List<String> contentTypesToLog, Boolean isLoggingRequestEnabled, Boolean isLoggingResponseEnabled) {
         this.name = name;
         this.uriPatternForIgnoringRequests = uriPatternForIgnoringRequests == null ? null : Pattern.compile(uriPatternForIgnoringRequests);

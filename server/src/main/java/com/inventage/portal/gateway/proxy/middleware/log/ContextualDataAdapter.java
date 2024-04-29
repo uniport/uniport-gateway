@@ -13,6 +13,8 @@ public class ContextualDataAdapter {
         throw new UnsupportedOperationException();
     }
 
+    /**
+    */
     public static void put(String key, String value) {
         if (key != null && value != null) {
             ContextualData.put(key, value);

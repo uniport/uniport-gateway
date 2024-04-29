@@ -20,6 +20,8 @@ import io.vertx.ext.web.handler.AuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
@@ -45,6 +47,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return promise.future();
     }
 
+    /**
+    */
     public void create(Vertx vertx, String name, Router router, JsonObject middlewareConfig, Handler<AsyncResult<Middleware>> handler) {
         LOGGER.debug("Creating '{}' middleware", provides());
 

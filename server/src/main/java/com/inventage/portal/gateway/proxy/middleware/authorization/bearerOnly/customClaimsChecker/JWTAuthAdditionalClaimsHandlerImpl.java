@@ -18,6 +18,8 @@ import net.minidev.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl implements JWTAuthAdditionalClaimsHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthAdditionalClaimsHandlerImpl.class);
@@ -28,6 +30,8 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
     private final List<JWTClaim> additionalJWTClaims;
     private final JWTAuthPublicKeysReconcilerHandler reconciler;
 
+    /**
+    */
     public JWTAuthAdditionalClaimsHandlerImpl(JWTAuth authProvider, JWTAuthAdditionalClaimsOptions options, JWTAuthPublicKeysReconcilerHandler reconciler) {
         super(authProvider, null);
 

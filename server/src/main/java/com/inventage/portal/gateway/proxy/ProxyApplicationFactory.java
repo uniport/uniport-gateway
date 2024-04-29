@@ -10,6 +10,8 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class ProxyApplicationFactory implements ApplicationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);

@@ -28,6 +28,8 @@ public class BearerOnlyMiddleware extends TraceMiddleware {
     private final AuthenticationHandler authHandler;
     private final boolean optional;
 
+    /**
+    */
     public BearerOnlyMiddleware(String name, AuthenticationHandler authHandler, boolean optional) {
         this.name = name;
         this.authHandler = authHandler;

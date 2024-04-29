@@ -6,6 +6,8 @@ import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+/**
+ */
 public class KubernetesServiceProviderFactory implements ProviderFactory {
 
     @Override

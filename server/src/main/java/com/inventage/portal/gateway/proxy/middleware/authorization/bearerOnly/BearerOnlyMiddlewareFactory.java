@@ -9,6 +9,8 @@ import io.vertx.ext.web.handler.AuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);

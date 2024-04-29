@@ -38,6 +38,8 @@ public class DockerContainerService {
 
     private final Record record;
 
+    /**
+    */
     public DockerContainerService(Container container) {
         containerId = container.getId();
         containerNames = Arrays.stream(container.getNames()).collect(Collectors.toList());
@@ -50,14 +52,20 @@ public class DockerContainerService {
         record = createRecord(container);
     }
 
+    /**
+    */
     public Record record() {
         return record;
     }
 
+    /**
+    */
     public String name() {
         return name;
     }
 
+    /**
+    */
     public String id() {
         return containerId;
     }

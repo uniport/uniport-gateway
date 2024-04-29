@@ -32,6 +32,8 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
 
+    /**
+     */
     public ReplacedSessionCookieDetectionMiddleware(String name, String detectionCookieName, String sessionCookieName, Integer waitBeforeRetryInMs) {
         this.name = name;
         this.detectionCookieName = detectionCookieName;

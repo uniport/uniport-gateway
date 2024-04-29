@@ -11,6 +11,8 @@ import io.vertx.ext.web.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class ReplacedSessionCookieDetectionMiddlewareFactory implements MiddlewareFactory {
 
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";

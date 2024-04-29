@@ -35,7 +35,11 @@ public interface ApplicationFactory {
      */
     Application create(Vertx vertx, JsonObject applicationConfig, JsonArray entrypointConfigs, JsonArray providerConfigs, JsonObject env);
 
+    /**
+    */
     class Loader {
+        /**
+        */
         public static ApplicationFactory getProvider(String providerId) {
             LOGGER.debug("Get application provider for '{}'", providerId);
             final Optional<ApplicationFactory> provider = ServiceLoader.load(ApplicationFactory.class).stream()

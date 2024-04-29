@@ -11,12 +11,16 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import java.util.List;
 
+/**
+ */
 public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 
     private final JWTAuthOptions config;
 
     private final List<String> additionalIssuers;
 
+    /**
+    */
     public JWTAuthMultipleIssuersProviderImpl(Vertx vertx, JWTAuthOptions config, JWTAuthMultipleIssuersOptions options) {
         super(vertx, config);
 

@@ -27,11 +27,15 @@ public class KubernetesServiceProvider extends Provider {
     private EventBus eb;
     private ServiceDiscovery kubernetesDiscovery;
 
+    /**
+    */
     public KubernetesServiceProvider(Vertx vertx, String configurationAddress) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
     }
 
+    /**
+     */
     public void start(Promise<Void> startPromise) {
         provide(startPromise);
     }
@@ -75,6 +79,8 @@ public class KubernetesServiceProvider extends Provider {
         startPromise.complete();
     }
 
+    /**
+     */
     public String toString() {
         return StaticConfiguration.PROVIDER_KUBERNETES;
     }

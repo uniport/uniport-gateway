@@ -21,6 +21,8 @@ public class CheckRouteMiddleware extends TraceMiddleware {
 
     private final String name;
 
+    /**
+    */
     public CheckRouteMiddleware(String name) {
         this.name = name;
     }

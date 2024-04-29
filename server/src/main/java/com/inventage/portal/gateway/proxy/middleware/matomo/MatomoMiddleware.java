@@ -13,6 +13,8 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class MatomoMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatomoMiddleware.class);
@@ -31,6 +33,8 @@ public class MatomoMiddleware extends TraceMiddleware {
 
     private final String jwtPathEmail;
 
+    /**
+    */
     public MatomoMiddleware(
         String name, String jwtPathRoles, String jwtPathGroup,
         String jwtPathUsername, String jwtPathEmail

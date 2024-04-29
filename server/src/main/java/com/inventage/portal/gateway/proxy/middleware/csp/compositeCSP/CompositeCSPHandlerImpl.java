@@ -42,11 +42,15 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     private boolean reportOnly;
     private final CSPMergeStrategy cspMergeStrategy;
 
+    /**
+    */
     public CompositeCSPHandlerImpl() {
         this(DEFAULT_CSP_MERGE_STRATEGY);
     }
 
-    // Modified constructor to configure the merging strategy of multiple csp policies
+    /**
+     * Modified constructor to configure the merging strategy of multiple csp policies
+     */
     public CompositeCSPHandlerImpl(CSPMergeStrategy mergeStrategy) {
         this.cspMergeStrategy = mergeStrategy;
     }
@@ -71,7 +75,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         ctx.next();
     }
 
-    /*
+    /**
      * handles responses
      * internal policies are read from the routing context, configured by previous middleware instance
      * external policies are read from Content-Security-Policy and Content-Security-Policy-Report-Only headers and merged (union)
@@ -96,6 +100,8 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         ctx.response().putHeader(reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME, effectiveCSPPolicy);
     }
 
+    /**
+    */
     @Override
     public synchronized CSPHandler setDirective(String name, String value) {
         if (name == null) {
@@ -118,6 +124,8 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return this;
     }
 
+    /**
+    */
     @Override
     public CSPHandler addDirective(String name, String value) {
         if (name == null) {
@@ -145,6 +153,8 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return this;
     }
 
+    /**
+    */
     @Override
     public CSPHandler setReportOnly(boolean reportOnly) {
         this.reportOnly = reportOnly;

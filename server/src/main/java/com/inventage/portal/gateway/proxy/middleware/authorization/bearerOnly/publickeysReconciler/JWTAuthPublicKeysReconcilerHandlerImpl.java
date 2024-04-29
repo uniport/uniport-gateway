@@ -17,6 +17,8 @@ import io.vertx.ext.web.handler.AuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeysReconcilerHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthPublicKeysReconcilerHandlerImpl.class);
@@ -34,6 +36,8 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     private long timerId;
     private boolean reconcilerStarted;
 
+    /**
+    */
     public JWTAuthPublicKeysReconcilerHandlerImpl(
         Vertx vertx, JWTAuthOptions jwtAuthOptions, JWTAuthMultipleIssuersOptions additionalIssuersOptions, JWTAuthAdditionalClaimsOptions additionalClaimsOptions,
         JsonArray publicKeySources, boolean reconcilationEnabled, long reconcilationIntervalMs
@@ -95,6 +99,8 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         }
     }
 
+    /**
+     */
     public Future<AuthenticationHandler> getOrRefreshPublicKeys() {
         LOGGER.debug("Refreshing public keys");
 

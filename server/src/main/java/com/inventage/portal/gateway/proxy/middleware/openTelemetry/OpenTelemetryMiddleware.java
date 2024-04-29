@@ -29,6 +29,8 @@ public class OpenTelemetryMiddleware extends TraceMiddleware {
 
     private final String name;
 
+    /**
+     */
     public OpenTelemetryMiddleware(String name) {
         this.name = name;
     }

@@ -24,6 +24,8 @@ public class HeaderMiddleware extends TraceMiddleware {
     private final MultiMap requestHeaders;
     private final MultiMap responseHeaders;
 
+    /**
+    */
     public HeaderMiddleware(String name, MultiMap requestHeaders, MultiMap responseHeaders) {
         this.name = name;
         this.requestHeaders = requestHeaders;

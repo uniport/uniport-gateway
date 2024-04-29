@@ -19,6 +19,8 @@ public class ReplacePathRegexMiddleware extends TraceMiddleware {
     private final Pattern pattern;
     private final String replacement;
 
+    /**
+    */
     public ReplacePathRegexMiddleware(String name, String regex, String replacement) {
         this.name = name;
         this.pattern = Pattern.compile(regex);

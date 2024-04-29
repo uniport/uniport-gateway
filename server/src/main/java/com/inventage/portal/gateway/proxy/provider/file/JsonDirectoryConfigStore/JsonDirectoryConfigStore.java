@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// Mostly copied from DirectoryConfigStore with a custom Json merge function
-// We only need to change the merge method in get(), but we cannot extend DirectoryConfigStore and overwrite get(), because the path and filesets members are private
-// https://github.com/vert-x3/vertx-config/blob/4.4.4/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
+/**
+ * Mostly copied from DirectoryConfigStore with a custom Json merge function
+ * We only need to change the merge method in get(), but we cannot extend DirectoryConfigStore and overwrite get(), because the path and filesets members are
+ * private
+ * https://github.com/vert-x3/vertx-config/blob/4.4.4/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
+ */
 public class JsonDirectoryConfigStore implements ConfigStore {
 
     private final VertxInternal vertx;
@@ -25,6 +28,8 @@ public class JsonDirectoryConfigStore implements ConfigStore {
     private final File path;
     private final List<FileSet> filesets = new ArrayList<>();
 
+    /**
+    */
     public JsonDirectoryConfigStore(Vertx vertx, JsonObject configuration) {
         this.vertx = (VertxInternal) vertx;
         final String thePath = configuration.getString("path");

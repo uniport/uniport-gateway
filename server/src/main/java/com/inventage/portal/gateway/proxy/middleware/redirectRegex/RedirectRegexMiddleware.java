@@ -18,6 +18,8 @@ public class RedirectRegexMiddleware extends TraceMiddleware {
     private final Pattern pattern;
     private final String replacement;
 
+    /**
+    */
     public RedirectRegexMiddleware(String name, String regex, String replacement) {
         this.name = name;
         this.pattern = Pattern.compile(regex);

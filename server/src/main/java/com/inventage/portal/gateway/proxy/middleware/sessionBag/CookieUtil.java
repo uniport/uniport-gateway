@@ -9,8 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ */
 public class CookieUtil {
 
+    /**
+    */
     public static Set<Cookie> fromRequestHeader(List<String> cookieEntries) {
         if (cookieEntries == null) {
             return Collections.emptySet();
@@ -22,6 +26,8 @@ public class CookieUtil {
             .collect(Collectors.toSet());
     }
 
+    /**
+    */
     public static Map<String, Cookie> cookieMapFromRequestHeader(List<String> cookieEntries) {
         final Map<String, Cookie> cookieMap = new HashMap<>();
         if (cookieEntries != null) {
@@ -32,6 +38,8 @@ public class CookieUtil {
         return cookieMap;
     }
 
+    /**
+    */
     public static Cookie fromNettyCookie(io.netty.handler.codec.http.cookie.Cookie nettyCookie) {
         return Cookie.cookie(nettyCookie.name(), nettyCookie.value())
             .setDomain(nettyCookie.domain())

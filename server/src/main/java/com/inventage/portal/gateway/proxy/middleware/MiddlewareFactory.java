@@ -18,11 +18,19 @@ public interface MiddlewareFactory {
 
     Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
+    /**
+    */
     String provides();
 
+    /**
+    */
     Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
 
+    /**
+    */
     class Loader {
+        /**
+        */
         public static MiddlewareFactory getFactory(String middlewareName) {
             LOGGER.debug("Middleware factory for '{}'", middlewareName);
             final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()

@@ -72,6 +72,8 @@ public class StaticConfiguration {
         return Validator.create(schema, options);
     }
 
+    /**
+    */
     public static ObjectSchemaBuilder buildSchema() {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
             .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
@@ -120,6 +122,8 @@ public class StaticConfiguration {
         return staticConfigBuilder;
     }
 
+    /**
+    */
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
         if (validator == null) {
             validator = buildValidator();

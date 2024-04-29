@@ -26,6 +26,8 @@ public class PreventForeignInitiatedAuthMiddleware extends TraceMiddleware {
 
     private final String fallbackURI;
 
+    /**
+    */
     public PreventForeignInitiatedAuthMiddleware(String name, String fallbackURI) {
         this.name = name;
         this.fallbackURI = fallbackURI != null ? fallbackURI : DEFAULT_REDIRECT_URI;

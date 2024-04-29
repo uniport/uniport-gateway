@@ -8,6 +8,8 @@ import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class BodyHandlerMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BodyHandlerMiddleware.class);
@@ -15,6 +17,8 @@ public class BodyHandlerMiddleware extends TraceMiddleware {
 
     private final String name;
 
+    /**
+    */
     public BodyHandlerMiddleware(
         Vertx vertx, String name
     ) {

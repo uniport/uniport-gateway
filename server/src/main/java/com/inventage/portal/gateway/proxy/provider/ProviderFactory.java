@@ -16,14 +16,22 @@ public interface ProviderFactory {
 
     Logger LOGGER = LoggerFactory.getLogger(ProviderFactory.class);
 
+    /**
+    */
     String provides();
 
+    /**
+    */
     Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env);
 
+    /**
+    */
     final class Loader {
         private Loader() {
         }
 
+        /**
+        */
         public static ProviderFactory getFactory(String providerName) {
             LOGGER.debug("Get provider factory '{}'", providerName);
             final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class).stream()

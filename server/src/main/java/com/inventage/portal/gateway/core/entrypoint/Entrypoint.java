@@ -36,6 +36,8 @@ public class Entrypoint {
     private boolean enabled;
     private Tls tls;
 
+    /**
+    */
     public Entrypoint(Vertx vertx, String name, int port, JsonArray entryMiddlewares) {
         this.vertx = vertx;
         this.name = name;
@@ -49,6 +51,8 @@ public class Entrypoint {
         }
     }
 
+    /**
+    */
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
         final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
         return configs.stream().map(object -> new JsonObject(Json.encode(object)))
@@ -58,14 +62,20 @@ public class Entrypoint {
             });
     }
 
+    /**
+    */
     public String name() {
         return name;
     }
 
+    /**
+    */
     public int port() {
         return port;
     }
 
+    /**
+    */
     public Router router() {
         if (router != null) {
             return router;
@@ -78,6 +88,8 @@ public class Entrypoint {
         return router;
     }
 
+    /**
+    */
     public void mount(Application application) {
         final Optional<Router> optionApplicationRouter = application.router();
         optionApplicationRouter.ifPresent(applicationRouter -> {
@@ -94,10 +106,14 @@ public class Entrypoint {
         });
     }
 
+    /**
+     */
     public boolean isTls() {
         return tls != null;
     }
 
+    /**
+    */
     public JksOptions jksOptions() {
         if (isTls()) {
             return tls.jksOptions();
@@ -105,10 +121,14 @@ public class Entrypoint {
         return new JksOptions();
     }
 
+    /**
+    */
     public boolean enabled() {
         return enabled && port > 0;
     }
 
+    /**
+    */
     public void disable() {
         enabled = false;
     }

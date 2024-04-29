@@ -46,10 +46,14 @@ public class ProxyMiddleware extends TraceMiddleware {
     private final String serverHost;
     private final int serverPort;
 
+    /**
+    */
     public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
         this(vertx, name, "http", serverHost, serverPort, DEFAULT_HTTPS_TRUST_ALL, DEFAULT_HTTPS_VERIFY_HOSTNAME, DEFAULT_HTTPS_TRUST_STORE_PATH, DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
     }
 
+    /**
+    */
     public ProxyMiddleware(
         Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort, Boolean httpsTrustAll,
         Boolean httpsVerifyHostname, String httpsTrustStorePath, String httpsTrustStorePassword

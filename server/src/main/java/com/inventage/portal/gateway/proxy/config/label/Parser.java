@@ -35,6 +35,8 @@ public class Parser {
     private static final List<String> VALUES_ARE_OBJECTS = List.of(SERVICE_SERVERS);
     private static final List<String> VALUES_ARE_SEPERATED_BY_COMMA = Arrays.asList(ENTRYPOINTS, MIDDLEWARES);
 
+    /**
+     */
     public static List<String> filterKeys(Map<String, Object> labels, List<String> filters) {
         final List<String> filteredKeys = new ArrayList<>();
         if (labels == null) {
@@ -59,6 +61,8 @@ public class Parser {
         return filteredKeys;
     }
 
+    /**
+    */
     public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
         try {
             final JsonObject decodedConf = decodeToJson(labels, rootName, filters);

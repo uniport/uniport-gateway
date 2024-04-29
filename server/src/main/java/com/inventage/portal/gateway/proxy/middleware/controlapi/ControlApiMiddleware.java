@@ -49,10 +49,14 @@ public class ControlApiMiddleware extends TraceMiddleware {
     private final String resetUri;
     private final WebClient webClient;
 
+    /**
+    */
     public ControlApiMiddleware(Vertx vertx, String name, final ControlApiAction action, final WebClient webClient) {
         this(vertx, name, action, null, webClient);
     }
 
+    /**
+    */
     public ControlApiMiddleware(Vertx vertx, String name, final ControlApiAction action, String resetUri, final WebClient webClient) {
         this.vertx = vertx;
         this.name = name;

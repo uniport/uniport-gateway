@@ -6,14 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.Validate;
 
+/**
+ */
 public class JWTAuthAdditionalClaimsOptions {
 
     private final List<JWTClaim> additionalClaims = new ArrayList<>();
 
+    /**
+    */
     public List<JWTClaim> getAdditionalClaims() {
         return new ArrayList<>(additionalClaims);
     }
 
+    /**
+    */
     public JWTAuthAdditionalClaimsOptions setAdditionalClaims(JsonArray claims) {
         Validate.notNull(claims, "Claims can not be null");
         if (claims != null) {
@@ -24,6 +30,8 @@ public class JWTAuthAdditionalClaimsOptions {
         return this;
     }
 
+    /**
+    */
     public JWTAuthAdditionalClaimsOptions setAdditionalClaims(List<JWTClaim> claims) {
         Validate.notNull(claims, "Claims can not be null");
         this.additionalClaims.addAll(claims);

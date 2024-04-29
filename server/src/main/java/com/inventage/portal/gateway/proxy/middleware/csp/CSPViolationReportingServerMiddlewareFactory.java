@@ -11,17 +11,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
+/**
+ */
 public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareFactory {
 
     public static final String DEFAULT_LOG_LEVEL = "WARN";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPViolationReportingServerMiddlewareFactory.class);
 
+    /**
+    */
     @Override
     public String provides() {
         return DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER;
     }
 
+    /**
+    */
     @Override
     public Future<Middleware> create(final Vertx vertx, final String name, final Router router, final JsonObject middlewareConfig) {
         final String logLevel = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, DEFAULT_LOG_LEVEL);

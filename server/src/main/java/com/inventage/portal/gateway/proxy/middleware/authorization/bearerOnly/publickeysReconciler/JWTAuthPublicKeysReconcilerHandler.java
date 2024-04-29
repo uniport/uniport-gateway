@@ -25,6 +25,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandler {
 
     String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
@@ -32,8 +34,12 @@ public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandle
     String JWK_KEYS_KEY = "keys";
     String JWK_KID = "kid";
 
+    /**
+    */
     Logger LOGGER = LoggerFactory.getLogger(JWTAuthPublicKeysReconcilerHandler.class);
 
+    /**
+    */
     static JWTAuthPublicKeysReconcilerHandler create(
         Vertx vertx,
         JWTAuthOptions jwtAuthOptions,
@@ -53,8 +59,12 @@ public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandle
             reconcilationIntervalMs);
     }
 
+    /**
+    */
     Future<AuthenticationHandler> getOrRefreshPublicKeys();
 
+    /**
+    */
     static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, JsonArray publicKeySources) {
         final Promise<JWTAuthOptions> promise = Promise.promise();
         fetchPublicKeys(vertx, publicKeySources, promise);

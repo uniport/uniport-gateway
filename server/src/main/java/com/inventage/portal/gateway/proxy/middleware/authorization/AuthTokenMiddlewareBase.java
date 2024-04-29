@@ -14,6 +14,8 @@ import io.vertx.ext.web.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;

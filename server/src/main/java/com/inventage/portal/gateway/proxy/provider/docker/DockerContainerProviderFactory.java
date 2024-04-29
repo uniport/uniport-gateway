@@ -7,6 +7,8 @@ import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.Docke
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+/**
+ */
 public class DockerContainerProviderFactory implements ProviderFactory {
 
     public static final String DEFAULT_RULE_TEMPLATE = "Host('${name}')";

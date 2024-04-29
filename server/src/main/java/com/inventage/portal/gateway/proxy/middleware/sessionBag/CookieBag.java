@@ -9,6 +9,8 @@ import io.vertx.core.shareddata.ClusterSerializable;
 import java.util.HashSet;
 import java.util.Iterator;
 
+/**
+ */
 public class CookieBag extends HashSet<Cookie> implements ClusterSerializable {
 
     private static final String NAME = "name";
@@ -20,6 +22,8 @@ public class CookieBag extends HashSet<Cookie> implements ClusterSerializable {
     private static final String HTTP_ONLY = "httpOnly";
     private static final String SAME_SITE = "sameSite";
 
+    /**
+     */
     public CookieBag() {
         // do not remove: constructor required by AbstractSession#readDataFromBuffer for ClusterSerializable
     }

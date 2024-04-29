@@ -37,6 +37,8 @@ public class FileConfigProvider extends Provider {
     private Path directory;
     private String source;
 
+    /**
+    */
     public FileConfigProvider(
         Vertx vertx, String configurationAddress, String filename, String directory,
         Boolean watch, JsonObject env

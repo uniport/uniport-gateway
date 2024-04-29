@@ -87,6 +87,8 @@ public class StateWithUri {
 
     }
 
+    /**
+    */
     public StateWithUri(String state, String uri, HttpMethod httpMethod) {
         if (state == null) {
             throw new IllegalArgumentException("Null is not a valid state value!");
@@ -97,14 +99,20 @@ public class StateWithUri {
         this.encoded = encode();
     }
 
+    /**
+    */
     public String state() {
         return state;
     }
 
+    /**
+    */
     public Optional<String> uri() {
         return uri;
     }
 
+    /**
+    */
     public Optional<String> httpMethod() {
         return method;
     }

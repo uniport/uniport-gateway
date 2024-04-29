@@ -21,6 +21,8 @@ public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
 
     private final AuthenticationHandler authHandler;
 
+    /**
+    */
     public PassAuthorizationMiddleware(Vertx vertx, String name, String sessionScope, AuthenticationHandler authHandler) {
         super(vertx, name, sessionScope);
         this.authHandler = authHandler;

@@ -10,6 +10,8 @@ import io.vertx.ext.web.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class MatomoMiddlewareFactory implements MiddlewareFactory {
     private static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";
     private static final String DEFAULT_JWT_PATH_GROUP = "$.tenant";

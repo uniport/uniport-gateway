@@ -8,6 +8,8 @@ import io.vertx.ext.web.handler.CSRFHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class CSRFMiddleware extends TraceMiddleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddleware.class);
     private static final int MILLISECONDS_IN_1_MINUTE = 60000;
@@ -15,6 +17,8 @@ public class CSRFMiddleware extends TraceMiddleware {
     private final String name;
     private final CSRFHandler csrfHandler;
 
+    /**
+    */
     public CSRFMiddleware(
         Vertx vertx, String name, String secret, String cookieName, String cookiePath,
         boolean cookieSecure,

@@ -33,10 +33,14 @@ public class OAuth2ApiWrapper implements ClusterSerializable {
     private OAuth2Options config;
     private OAuth2Auth delegate;
 
+    /**
+    */
     public OAuth2ApiWrapper() {
         // do not remove: constructor required by AbstractSession#readDataFromBuffer for ClusterSerializable
     }
 
+    /**
+    */
     public OAuth2ApiWrapper(JsonObject json) {
         this.config = new OAuth2Options(json);
     }
@@ -61,6 +65,8 @@ public class OAuth2ApiWrapper implements ClusterSerializable {
         return delegate;
     }
 
+    /**
+    */
     public JsonObject toJson() {
         return config.toJson();
     }

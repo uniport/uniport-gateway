@@ -29,6 +29,8 @@ public class JWTClaim {
             claimObject.getValue(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
     }
 
+    /**
+    */
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {
         this.path = path;
         this.operator = operator;

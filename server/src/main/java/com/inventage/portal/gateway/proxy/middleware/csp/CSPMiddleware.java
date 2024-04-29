@@ -14,6 +14,8 @@ import io.vertx.ext.web.handler.CSPHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class CSPMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddleware.class);
@@ -21,10 +23,14 @@ public class CSPMiddleware extends TraceMiddleware {
     private final String name;
     private final CompositeCSPHandler cspHandler;
 
+    /**
+     */
     public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly) {
         this(name, cspDirectives, reportOnly, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY);
     }
 
+    /**
+     */
     public CSPMiddleware(String name, JsonArray cspDirectives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
         this.name = name;
         this.cspHandler = CompositeCSPHandler.create(mergeStrategy);

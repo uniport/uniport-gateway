@@ -72,6 +72,8 @@ public class ProxyApplication implements Application {
 
     private final int providersThrottleDuration;
 
+    /**
+    */
     public ProxyApplication(Vertx vertx, String name, String entrypointName, int entrypointPort, JsonArray providerConfigs, JsonObject env) {
         this.name = name;
         this.entrypointName = entrypointName;

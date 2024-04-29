@@ -12,6 +12,8 @@ import io.vertx.ext.web.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ */
 public class CSPMiddlewareFactory implements MiddlewareFactory {
 
     public static final boolean DEFAULT_REPORT_ONLY = false;
