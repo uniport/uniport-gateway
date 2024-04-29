@@ -58,8 +58,8 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     }
 
     /**
-     * If the session cookie (uniport.session) is not received AND the state cookie (uniport.state)
-     * is received, then we assume a user as previously logged out.
+     * If the session is regenerated AND the state cookie (uniport.state)
+     * is received AND expired, then we assume a user as previously logged out.
      *
      * @param ctx
      *            the current routing context
@@ -168,7 +168,10 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
             if (session == null) {
                 throw new IllegalStateException("Session is required");
             }
-            final long sessionIdleTimeoutInMilliSeconds = ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY);
+            final Long sessionIdleTimeoutInMilliSeconds = ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY);
+            if (sessionIdleTimeoutInMilliSeconds == null) {
+                throw new IllegalStateException("Session idle timeout is required");
+            }
             setDetectionCookieTo(ctx.response(), Optional.of(new DetectionCookieValue(session.lastAccessed(), sessionIdleTimeoutInMilliSeconds)));
         }
     }

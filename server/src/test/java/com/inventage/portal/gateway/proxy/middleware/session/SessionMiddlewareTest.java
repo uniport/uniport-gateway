@@ -11,8 +11,11 @@ import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME
 
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -155,6 +158,29 @@ public class SessionMiddlewareTest {
                 Assertions.assertThat(originalCookie.get()).isEqualTo(cookie);
                 testCtx.completeNow();
             });
+    }
+
+    @Test
+    public void shouldSetSessionIdleTimeoutOnRoutingContext(Vertx vertx, VertxTestContext testCtx) {
+        // given 
+        final AtomicReference<Boolean> hasSessionIdleTimeout = new AtomicReference<>(false);
+
+        Handler<RoutingContext> checkSessionIdleTimeoutIsOnRoutingContext = ctx -> {
+            hasSessionIdleTimeout.set(ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY) != null);
+            ctx.next();
+        };
+
+        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withMiddleware(checkSessionIdleTimeoutIsOnRoutingContext)
+            .build().start();
+
+        // when
+        gateway.incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
+            // then
+            Assertions.assertThat(hasSessionIdleTimeout.get());
+            testCtx.completeNow();
+        });
     }
 
     private SharedDataSessionImpl getSharedDataSession(Vertx vertx) {

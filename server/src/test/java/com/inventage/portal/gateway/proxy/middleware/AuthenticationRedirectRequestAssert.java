@@ -17,7 +17,6 @@ import io.vertx.core.http.HttpClientResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -104,12 +103,23 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookieForSession(String withValue) {
-        final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNotNull(setCookie);
-        final String sessionCookie = valueFromSetCookie(setCookie);
-        Assertions.assertNotNull(sessionCookie);
+        final List<String> setCookies = actual.headers().getAll(HttpHeaderNames.SET_COOKIE);
+        Assertions.assertNotNull(setCookies);
+        final String sessionCookieValue = valueFromSessionSetCookie(setCookies);
+        Assertions.assertNotNull(sessionCookieValue);
         if (withValue != null) {
-            Assertions.assertEquals(withValue, sessionCookie);
+            Assertions.assertEquals(withValue, sessionCookieValue);
+        }
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName, String withValue) {
+        final List<String> setCookies = actual.headers().getAll(HttpHeaderNames.SET_COOKIE);
+        Assertions.assertNotNull(setCookies);
+        final String cookieValue = valueFromSetCookie(setCookies, cookieName);
+        Assertions.assertNotNull(cookieValue);
+        if (withValue != null) {
+            Assertions.assertEquals(withValue, cookieValue);
         }
         return this;
     }
@@ -120,14 +130,36 @@ public class AuthenticationRedirectRequestAssert
         return this;
     }
 
-    private String valueFromSetCookie(String aSetCookieHeader) {
-        return Arrays.stream(aSetCookieHeader.split(";")).filter(element -> element.startsWith(DEFAULT_SESSION_COOKIE_NAME))
-            .findFirst().orElse(null);
+    // Set-Cookie syntax:
+    // Set-Cookie: <cookie-name>=<cookie-value>; Domain=<domain-value>; Secure; HttpOnly
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+    private String valueFromSessionSetCookie(List<String> setCookieHeaders) {
+        return setCookieHeaders.stream()
+            .map(cookie -> cookie.split(";")[0])
+            .map(attribute -> {
+                String[] parts = attribute.split("=");
+                return Map.entry(parts[0], parts[1]);
+            })
+            .filter(entry -> entry.getKey().startsWith(DEFAULT_SESSION_COOKIE_NAME))
+            .map(entry -> entry.getValue())
+            .findFirst()
+            .orElse(null);
     }
 
-    private String valueFromSetCookie(String aSetCookieHeader, String cookieName) {
-        return Arrays.stream(aSetCookieHeader.split(";")).filter(element -> element.equalsIgnoreCase(cookieName))
-            .findFirst().orElse(null);
+    // Set-Cookie syntax:
+    // Set-Cookie: <cookie-name>=<cookie-value>; Domain=<domain-value>; Secure; HttpOnly
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+    private String valueFromSetCookie(List<String> setCookieHeaders, String cookieName) {
+        return setCookieHeaders.stream()
+            .map(cookie -> cookie.split(";")[0])
+            .map(attribute -> {
+                String[] parts = attribute.split("=");
+                return Map.entry(parts[0], parts[1]);
+            })
+            .filter(entry -> entry.getKey().equalsIgnoreCase(cookieName))
+            .map(entry -> entry.getValue())
+            .findFirst()
+            .orElse(null);
     }
 
     public AuthenticationRedirectRequestAssert hasStatusCode(int expectedStatusCode) {
