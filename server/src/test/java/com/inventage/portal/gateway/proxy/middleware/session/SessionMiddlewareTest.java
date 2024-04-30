@@ -72,7 +72,7 @@ public class SessionMiddlewareTest {
             // then
             assertThat(response)
                 .hasStatusCode(200)
-                .hasSetCookieForSession(null);
+                .hasSetSessionCookie(null);
             testCtx.completeNow();
         });
     }
@@ -94,7 +94,7 @@ public class SessionMiddlewareTest {
                 // then
                 assertThat(response)
                     .hasStatusCode(200)
-                    .hasSetCookieForSession(null);
+                    .hasSetSessionCookie(null);
                 testCtx.completeNow();
             });
     }

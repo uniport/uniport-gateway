@@ -29,7 +29,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
-                .hasNotSetCookieForSession();
+                .hasNotSetSessionCookie();
             testCtx.completeNow();
         });
     }
@@ -46,7 +46,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
-                .hasSetCookieForSession(null);
+                .hasSetSessionCookie(null);
             testCtx.completeNow();
         });
     }

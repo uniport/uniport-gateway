@@ -73,7 +73,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(307)
-                .hasNotSetCookieForSession();
+                .hasNotSetSessionCookie();
             testCtx.completeNow();
         });
     }
@@ -95,7 +95,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
-                .hasSetCookieForSession(null);
+                .hasSetSessionCookie(null);
             testCtx.completeNow();
         });
     }
@@ -115,7 +115,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
-                .hasSetCookieForSession(null);
+                .hasSetSessionCookie(null);
             testCtx.completeNow();
         });
     }
@@ -137,7 +137,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
-                .hasSetCookieForSession(null);
+                .hasSetSessionCookie(null);
             testCtx.completeNow();
         });
     }
@@ -159,7 +159,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
             // then
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
-                .hasSetCookieForSession(null);
+                .hasSetSessionCookie(null);
             testCtx.completeNow();
         });
     }

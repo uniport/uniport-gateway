@@ -331,7 +331,7 @@ public class OAuth2AuthMiddlewareTest {
                                     (response4) -> {
                                         assertThat(response4)
                                             .isRedirectTo("http://localhost:8080/protected2/two")
-                                            .hasSetCookieForSessionDifferentThan(
+                                            .hasSetSessionCookieDifferentThan(
                                                 sessionCookies[0]);
                                         // when
                                         // 5:
@@ -345,7 +345,7 @@ public class OAuth2AuthMiddlewareTest {
                                                 // then
                                                 assertThat(response5)
                                                     .isRedirectTo("/protected2/three")
-                                                    .hasSetCookieForSessionDifferentThan(
+                                                    .hasSetSessionCookieDifferentThan(
                                                         sessionCookies[0]);
                                                 testCtx.completeNow();
                                                 keycloakServer.closeServer();
@@ -371,8 +371,12 @@ public class OAuth2AuthMiddlewareTest {
 
     private String cookieFrom(HttpClientResponse response) {
         String set_cookie = response.getHeader(HttpHeaderNames.SET_COOKIE);
-        return Arrays.stream(set_cookie.split(";")).filter(element -> element.startsWith(DEFAULT_SESSION_COOKIE_NAME))
-            .findFirst().orElse(null);
+        return Arrays.stream(
+            set_cookie.split(";"))
+            .filter(element -> element.startsWith(DEFAULT_SESSION_COOKIE_NAME))
+            .findFirst()
+            .orElse(null);
+
     }
 
     private RequestOptions withCookie(String cookieHeaderValue) {

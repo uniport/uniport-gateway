@@ -12,13 +12,16 @@ import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddl
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
-import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpClientResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
@@ -102,64 +105,93 @@ public class AuthenticationRedirectRequestAssert
         return responseParamsMap;
     }
 
-    public AuthenticationRedirectRequestAssert hasSetCookieForSession(String withValue) {
-        final List<String> setCookies = actual.headers().getAll(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNotNull(setCookies);
-        final String sessionCookieValue = valueFromSessionSetCookie(setCookies);
-        Assertions.assertNotNull(sessionCookieValue);
-        if (withValue != null) {
-            Assertions.assertEquals(withValue, sessionCookieValue);
+    public AuthenticationRedirectRequestAssert hasSetSessionCookie() {
+        return hasSetSessionCookie(null);
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetSessionCookie(String withValue) {
+        return hasSetCookie(DEFAULT_SESSION_COOKIE_NAME, withValue);
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetSessionCookieDifferentThan(String sessionCookie) {
+        for (String cookie : actual.cookies()) {
+            Assertions.assertNotEquals(sessionCookie, cookie);
         }
         return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasNotSetSessionCookie() {
+        return hasNotSetCookie(DEFAULT_SESSION_COOKIE_NAME);
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetDetectionCookie() {
+        return hasSetDetectionCookie(null);
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetDetectionCookie(String withValue) {
+        return hasSetCookie(DEFAULT_DETECTION_COOKIE_NAME, withValue);
+    }
+
+    public AuthenticationRedirectRequestAssert hasNotSetDetectionCookie() {
+        return hasNotSetCookie(DEFAULT_DETECTION_COOKIE_NAME);
+    }
+
+    public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName) {
+        return assertSetCookie(cookieName, true);
     }
 
     public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName, String withValue) {
-        final List<String> setCookies = actual.headers().getAll(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNotNull(setCookies);
-        final String cookieValue = valueFromSetCookie(setCookies, cookieName);
-        Assertions.assertNotNull(cookieValue);
+        final List<String> cookieValues = valueFromSetCookie(actual.cookies(), cookieName);
+        Assertions.assertNotNull(cookieValues);
         if (withValue != null) {
-            Assertions.assertEquals(withValue, cookieValue);
+            Assertions.assertTrue(
+                cookieValues.stream()
+                    .anyMatch(value -> value.equals(withValue)));
         }
         return this;
     }
 
-    public AuthenticationRedirectRequestAssert hasNotSetCookieForSession() {
-        final List<String> cookies = actual.cookies();
-        Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(DEFAULT_SESSION_COOKIE_NAME + "=")).findAny().isPresent());
+    public AuthenticationRedirectRequestAssert hasNotSetCookie(String cookieName) {
+        return assertSetCookie(cookieName, false);
+    }
+
+    private AuthenticationRedirectRequestAssert assertSetCookie(String cookieName, boolean present) {
+        Assertions.assertEquals(filterSetCookies(actual.cookies(), cookieName).isEmpty(), !present);
         return this;
     }
 
-    // Set-Cookie syntax:
-    // Set-Cookie: <cookie-name>=<cookie-value>; Domain=<domain-value>; Secure; HttpOnly
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    private String valueFromSessionSetCookie(List<String> setCookieHeaders) {
-        return setCookieHeaders.stream()
-            .map(cookie -> cookie.split(";")[0])
-            .map(attribute -> {
-                String[] parts = attribute.split("=");
-                return Map.entry(parts[0], parts[1]);
-            })
-            .filter(entry -> entry.getKey().startsWith(DEFAULT_SESSION_COOKIE_NAME))
-            .map(entry -> entry.getValue())
-            .findFirst()
-            .orElse(null);
+    private List<String> valueFromSetCookie(List<String> cookieHeaders, String cookieName) {
+        Assertions.assertNotNull(cookieHeaders);
+        return filterSetCookies(cookieHeaders, cookieName).stream()
+            .map(cookie -> cookie.getValue())
+            .toList();
     }
 
-    // Set-Cookie syntax:
-    // Set-Cookie: <cookie-name>=<cookie-value>; Domain=<domain-value>; Secure; HttpOnly
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    private String valueFromSetCookie(List<String> setCookieHeaders, String cookieName) {
-        return setCookieHeaders.stream()
-            .map(cookie -> cookie.split(";")[0])
-            .map(attribute -> {
-                String[] parts = attribute.split("=");
-                return Map.entry(parts[0], parts[1]);
-            })
-            .filter(entry -> entry.getKey().equalsIgnoreCase(cookieName))
-            .map(entry -> entry.getValue())
-            .findFirst()
-            .orElse(null);
+    private List<Cookie> filterSetCookies(List<String> cookieHeaders, String cookieName) {
+        Assertions.assertNotNull(cookieHeaders);
+        return parseCookies(cookieHeaders).stream()
+            .filter(cookie -> cookie.getName().equals(cookieName))
+            .toList();
+    }
+
+    private Set<Cookie> parseCookies(List<String> cookieHeaders) {
+        if (cookieHeaders == null) {
+            return Collections.emptySet();
+        }
+        // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
+        return cookieHeaders.stream()
+            .flatMap(cookieEntry -> ServerCookieDecoder.LAX.decode(cookieEntry).stream())
+            .map(cookie -> fromNettyCookie(cookie))
+            .collect(Collectors.toSet());
+    }
+
+    private Cookie fromNettyCookie(io.netty.handler.codec.http.cookie.Cookie nettyCookie) {
+        return Cookie.cookie(nettyCookie.name(), nettyCookie.value())
+            .setDomain(nettyCookie.domain())
+            .setHttpOnly(nettyCookie.isHttpOnly())
+            .setMaxAge(nettyCookie.maxAge())
+            .setPath(nettyCookie.path())
+            .setSecure(nettyCookie.isSecure());
     }
 
     public AuthenticationRedirectRequestAssert hasStatusCode(int expectedStatusCode) {
@@ -186,27 +218,4 @@ public class AuthenticationRedirectRequestAssert
         return this;
     }
 
-    public AuthenticationRedirectRequestAssert hasSetCookieForSessionDifferentThan(String sessionCookie) {
-        final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        Assertions.assertNotEquals(sessionCookie, setCookie);
-        return this;
-    }
-
-    public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName) {
-        final List<String> cookies = actual.cookies();
-        Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
-        return this;
-    }
-
-    public AuthenticationRedirectRequestAssert hasNotSetCookie(String cookieName) {
-        final List<String> cookies = actual.cookies();
-        Assertions.assertFalse(cookies.stream().filter(cookie -> cookie.startsWith(cookieName + "=")).findAny().isPresent());
-        return this;
-    }
-
-    public AuthenticationRedirectRequestAssert hasSetDetectionCookie() {
-        final List<String> cookies = actual.cookies();
-        Assertions.assertTrue(cookies.stream().filter(cookie -> cookie.startsWith(DEFAULT_DETECTION_COOKIE_NAME + "=")).findAny().isPresent());
-        return this;
-    }
 }
