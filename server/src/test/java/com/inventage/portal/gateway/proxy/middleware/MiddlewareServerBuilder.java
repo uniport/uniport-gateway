@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
@@ -414,7 +415,8 @@ public final class MiddlewareServerBuilder {
                 "withReplacedSessionMiddleware",
                 DEFAULT_DETECTION_COOKIE_NAME,
                 DEFAULT_SESSION_COOKIE_NAME,
-                DEFAULT_WAIT_BEFORE_RETRY_MS));
+                DEFAULT_WAIT_BEFORE_RETRY_MS,
+                DEFAULT_MAX_REDIRECT_RETRIES));
     }
 
     public MiddlewareServer build() {

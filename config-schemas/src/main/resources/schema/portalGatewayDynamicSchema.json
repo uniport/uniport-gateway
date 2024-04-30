@@ -219,6 +219,10 @@
                       "type" : "string"
                     }
                   },
+                  "maxRedirectRetries" : {
+                    "type" : "integer",
+                    "minimum" : 0
+                  },
                   "idMinimumLength" : {
                     "type" : "integer",
                     "minimum" : 0

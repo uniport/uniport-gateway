@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.MAX_RETRIES;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.SPLITTER;
 
 import org.junit.jupiter.api.Assertions;
@@ -11,9 +10,12 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_default() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(System.currentTimeMillis(), 1 * 60 * 1000);
+        final int lifetime = 1 * 60 * 1000; // 1m
+        final long now = System.currentTimeMillis();
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(now, lifetime);
         // when
-        final boolean withInLimit = cookieValue.isWithInLimit();
+        final int maxRetries = 5;
+        final boolean withInLimit = cookieValue.isWithInLimit(maxRetries);
         // then
         Assertions.assertTrue(withInLimit);
     }
@@ -21,9 +23,11 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_new() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(0 + SPLITTER + System.currentTimeMillis());
+        final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(0 + SPLITTER + validTimestamp);
         // when
-        final boolean withInLimit = cookieValue.isWithInLimit();
+        final int maxRetries = 5;
+        final boolean withInLimit = cookieValue.isWithInLimit(maxRetries);
         // then
         Assertions.assertTrue(withInLimit);
     }
@@ -31,9 +35,11 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_max() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue((MAX_RETRIES - 1) + SPLITTER + System.currentTimeMillis());
+        final int maxRetries = 5;
+        final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
+        final DetectionCookieValue cookieValue = new DetectionCookieValue((maxRetries - 1) + SPLITTER + validTimestamp);
         // when
-        final boolean withInLimit = cookieValue.isWithInLimit();
+        final boolean withInLimit = cookieValue.isWithInLimit(maxRetries);
         // then
         Assertions.assertTrue(withInLimit);
     }
@@ -41,9 +47,11 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_false_counter() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(MAX_RETRIES + SPLITTER + System.currentTimeMillis());
+        final int maxRetries = 5;
+        final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(maxRetries + SPLITTER + validTimestamp);
         // when
-        final boolean withInLimit = cookieValue.isWithInLimit();
+        final boolean withInLimit = cookieValue.isWithInLimit(maxRetries);
         // then
         Assertions.assertFalse(withInLimit);
     }
@@ -51,9 +59,11 @@ public class DetectionCookieValueTest {
     @Test
     public void test_isWithInLimit_false_access() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue((MAX_RETRIES - 1) + SPLITTER + 1000);
+        final int maxRetries = 5;
+        final long expiredTimestamp = 1000;
+        final DetectionCookieValue cookieValue = new DetectionCookieValue((maxRetries - 1) + SPLITTER + expiredTimestamp);
         // when
-        final boolean withInLimit = cookieValue.isWithInLimit();
+        final boolean withInLimit = cookieValue.isWithInLimit(maxRetries);
         // then
         Assertions.assertFalse(withInLimit);
     }
@@ -61,31 +71,34 @@ public class DetectionCookieValueTest {
     @Test
     public void test_toString() {
         // given
-        final long accessTime = System.currentTimeMillis();
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + accessTime);
+        final long timestamp = System.currentTimeMillis();
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + timestamp);
         // when
         final String value = cookieValue.toString();
         // then
-        Assertions.assertEquals(1 + SPLITTER + accessTime, value);
+        Assertions.assertEquals(1 + SPLITTER + timestamp, value);
     }
 
     @Test
     public void test_contstructor_default() {
         // given
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(System.currentTimeMillis(), 1 * 60 * 1000);
+        final int lifetime = 1 * 60 * 1000; // 1m
+        final long now = System.currentTimeMillis();
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(now, lifetime);
         // when
         // then
-        Assertions.assertEquals(0, cookieValue.counter);
+        Assertions.assertEquals(0, cookieValue.retries);
+        Assertions.assertEquals((now + lifetime) / 1000, cookieValue.sessionLifeTime);
     }
 
     @Test
     public void test_contstructor_with_one() {
         // given
-        final long lifeTime = System.currentTimeMillis();
-        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + lifeTime);
+        final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
+        final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + validTimestamp);
         // when
         // then
-        Assertions.assertEquals(1, cookieValue.counter);
-        Assertions.assertEquals(lifeTime, cookieValue.sessionLifeTime);
+        Assertions.assertEquals(1, cookieValue.retries);
+        Assertions.assertEquals(validTimestamp, cookieValue.sessionLifeTime);
     }
 }

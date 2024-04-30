@@ -13,13 +13,12 @@ public class DetectionCookieValue {
     private static final Logger LOGGER = LoggerFactory.getLogger(DetectionCookieValue.class);
 
     protected static final String SPLITTER = ":";
-    protected static final int MAX_RETRIES = 5;
 
-    protected int counter;
+    protected int retries;
     protected long sessionLifeTime;
 
     DetectionCookieValue(long lastAccessed, long sessionIdleTimeoutInMilliSeconds) {
-        counter = 0;
+        retries = 0;
         sessionLifeTime = (lastAccessed + sessionIdleTimeoutInMilliSeconds) / 1000;
     }
 
@@ -27,7 +26,7 @@ public class DetectionCookieValue {
         try {
             final String[] parts = cookieValue.split(SPLITTER);
             if (parts.length > 0) {
-                counter = Integer.parseInt(parts[0]);
+                retries = Integer.parseInt(parts[0]);
             }
             if (parts.length > 1) {
                 sessionLifeTime = Long.parseLong(parts[1]);
@@ -39,16 +38,16 @@ public class DetectionCookieValue {
 
     @Override
     public String toString() {
-        return String.format("%s%s%s", counter, SPLITTER, sessionLifeTime);
+        return String.format("%s%s%s", retries, SPLITTER, sessionLifeTime);
     }
 
     void increment() {
-        counter++;
+        retries++;
     }
 
-    boolean isWithInLimit() {
-        if (counter >= MAX_RETRIES) {
-            LOGGER.warn("Counter value '{}' exceeds limit '{}'", counter, MAX_RETRIES);
+    boolean isWithInLimit(int maxRedirectRetries) {
+        if (retries >= maxRedirectRetries) {
+            LOGGER.warn("Counter value '{}' exceeds limit '{}'", retries, maxRedirectRetries);
             return false;
         }
         if (isExpired()) {

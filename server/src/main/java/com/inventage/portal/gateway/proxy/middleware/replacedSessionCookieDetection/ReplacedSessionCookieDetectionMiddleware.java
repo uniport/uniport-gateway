@@ -31,14 +31,22 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     private final String sessionCookieName;
     // wait time in ms before retry is sent to the browser
     private final int waitBeforeRetryMs;
+    private final int maxRedirectRetries;
 
     /**
      */
-    public ReplacedSessionCookieDetectionMiddleware(String name, String detectionCookieName, String sessionCookieName, Integer waitBeforeRetryInMs) {
+    public ReplacedSessionCookieDetectionMiddleware(
+        String name,
+        String detectionCookieName,
+        String sessionCookieName,
+        int waitBeforeRetryInMs,
+        int maxRedirectRetries
+    ) {
         this.name = name;
         this.detectionCookieName = detectionCookieName;
         this.sessionCookieName = sessionCookieName;
         this.waitBeforeRetryMs = waitBeforeRetryInMs;
+        this.maxRedirectRetries = maxRedirectRetries;
     }
 
     @Override
@@ -128,7 +136,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     private boolean isDetectionCookieValueWithInLimit(RoutingContext ctx) {
         final Optional<Cookie> cookie = getDetectionCookie(ctx);
         if (cookie.isPresent()) {
-            return new DetectionCookieValue(cookie.get().getValue()).isWithInLimit();
+            return new DetectionCookieValue(cookie.get().getValue()).isWithInLimit(maxRedirectRetries);
         }
         return false;
     }

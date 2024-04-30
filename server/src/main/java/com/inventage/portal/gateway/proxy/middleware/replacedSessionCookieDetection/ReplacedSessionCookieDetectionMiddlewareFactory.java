@@ -18,6 +18,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
     public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
+    public static final int DEFAULT_MAX_REDIRECT_RETRIES = 5;
 
     private static final Logger LOGGER = LoggerFactory
         .getLogger(ReplacedSessionCookieDetectionMiddlewareFactory.class);
@@ -36,6 +37,9 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
         final Integer waitTimeRetryInMs = middlewareConfig.getInteger(
             DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS,
             DEFAULT_WAIT_BEFORE_RETRY_MS);
+        final Integer maxRedirectRetries = middlewareConfig.getInteger(
+            DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES,
+            DEFAULT_MAX_REDIRECT_RETRIES);
 
         LOGGER.debug("Created '{}' middleware successfully",
             DynamicConfiguration.MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION);
@@ -44,6 +48,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
                 name,
                 detectionCookieName,
                 sessionCookieName,
-                waitTimeRetryInMs));
+                waitTimeRetryInMs,
+                maxRedirectRetries));
     }
 }

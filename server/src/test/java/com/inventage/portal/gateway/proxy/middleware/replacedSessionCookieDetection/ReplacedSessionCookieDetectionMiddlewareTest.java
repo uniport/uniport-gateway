@@ -2,9 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.MAX_RETRIES;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.SPLITTER;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 
@@ -128,7 +128,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
         long expiredTimestamp = System.currentTimeMillis() - 1000;
-        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(MAX_RETRIES - 1, expiredTimestamp));
+        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(DEFAULT_MAX_REDIRECT_RETRIES - 1, expiredTimestamp));
         MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
@@ -150,7 +150,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
         long validTimestamp = System.currentTimeMillis() + 60_000;
-        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(MAX_RETRIES, validTimestamp));
+        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(DEFAULT_MAX_REDIRECT_RETRIES, validTimestamp));
         MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()

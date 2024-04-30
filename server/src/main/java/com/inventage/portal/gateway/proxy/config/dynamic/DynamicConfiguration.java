@@ -134,6 +134,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
     public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
+    public static final String MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES = "maxRedirectRetries";
     // replace path
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX = "replacePathRegex";
     public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REGEX = "regex";
@@ -350,6 +351,8 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+            .property(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             // replace path
             .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
@@ -1018,6 +1021,13 @@ public class DynamicConfiguration {
                             return Future.failedFuture(
                                 String.format("%s: wait time for retry required to be positive", mwType));
                         }
+                    }
+                    final Integer maxRetries = mwOptions
+                        .getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+                    if (maxRetries == null) {
+                        LOGGER.debug(String.format("%s: No max retries for redirect specified. Use default value: %s",
+                            mwType,
+                            ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES));
                     }
                     final String detectionCookieName = mwOptions
                         .getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
