@@ -31,7 +31,6 @@ public class ProxyMiddleware extends TraceMiddleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
 
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
-
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
@@ -78,7 +77,7 @@ public class ProxyMiddleware extends TraceMiddleware {
             options.setTrustAll((httpsTrustAll != null) ? httpsTrustAll : DEFAULT_HTTPS_TRUST_ALL);
             options.setVerifyHost((httpsVerifyHostname != null) ? httpsVerifyHostname : DEFAULT_HTTPS_VERIFY_HOSTNAME);
             if (httpsTrustStorePath != null && httpsTrustStorePassword != null) {
-                options.setTrustStoreOptions(new JksOptions().setPath(httpsTrustStorePath).setPassword(httpsTrustStorePassword));
+                options.setTrustOptions(new JksOptions().setPath(httpsTrustStorePath).setPassword(httpsTrustStorePassword));
             }
             options.setLogActivity(LOGGER.isDebugEnabled());
             LOGGER.info("using HTTPS for host '{}'", serverHost);
@@ -92,14 +91,12 @@ public class ProxyMiddleware extends TraceMiddleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         useOrSetHeader(X_FORWARDED_PROTO, ctx.request().scheme(), ctx.request().headers());
-        useOrSetHeader(X_FORWARDED_HOST, ctx.request().host(), ctx.request().headers());
-        useOrSetHeader(X_FORWARDED_PORT, String.valueOf(
-            portFromHostValue(
-                ctx.request().headers().get(X_FORWARDED_HOST),
-                portFromHostValue(ctx.request().host(), -1))),
-            ctx.request().headers());
-        ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
+        if (ctx.request().authority() != null) {
+            useOrSetHeader(X_FORWARDED_HOST, ctx.request().authority().host(), ctx.request().headers());
+            useOrSetHeader(X_FORWARDED_PORT, String.valueOf(ctx.request().authority().port()), ctx.request().headers());
+        }
 
+        ctx.request().headers().set(HttpHeaderNames.HOST, serverHost);
         LOGGER.debug("'{}' is sending to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
         try {
             httpProxy.handle(new ContextAwareHttpServerRequest(ctx.request(), ctx));
@@ -196,27 +193,4 @@ public class ProxyMiddleware extends TraceMiddleware {
             LOGGER.debug("Set header '{}' to '{}'", headerName, headers.get(headerName));
         }
     }
-
-    private int portFromHostValue(String hostToParse, int defaultPort) {
-        if (hostToParse == null) {
-            return -1;
-        } else {
-            final int portSeparatorIdx = hostToParse.lastIndexOf(':');
-            if (portSeparatorIdx > hostToParse.lastIndexOf(']')) {
-                return parsePort(hostToParse.substring(portSeparatorIdx + 1), defaultPort);
-            } else {
-                return -1;
-            }
-        }
-    }
-
-    private int parsePort(String portToParse, int defaultPort) {
-        try {
-            return Integer.parseInt(portToParse);
-        } catch (NumberFormatException ignored) {
-            LOGGER.debug("Failed to parse a port from '{}'", portToParse);
-            return defaultPort;
-        }
-    }
-
 }

@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add a default mapping from `.well-known/apple-app-site-association` to `base` to add support for Uniport mobile feature that require Apple's [associated domains](https://developer.apple.com/documentation/xcode/supporting-associated-domains).
 
+### Changed
+
+- Upgrade the Vert.x stack from `4.4.9` to `4.5.7` ([PORTAL-2035](https://issue.inventage.com/browse/PORTAL-2035)).
+
 ## [9.1.0]-202404300852-1126-7dcb42ab - 2024-04-30
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.1.0-202404300852-1126-7dcb42ab) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.1.0-202404300852-1126-7dcb42ab)
@@ -21,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced Portal-Kowl with Portal-Kafka-UI on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
 - Modifying oauth2 flow --> Set prompt=none for accept headers that do not allow text/html ([PORTAL-2004](https://issue.inventage.com/browse/PORTAL-2004)).
-- Upgraded Vert.X from `4.4.4` to `4.4.9` ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
+- Upgrade the Vert.x stack from `4.4.4` to `4.4.9` ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 - Make clustered session store retry timeout in `session` middleware configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 - Make max redirect retries in `replacedSessionCookieDetection` middleware configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 - Version upgrade for Portal-Code-Style-Settings to `1.4.0-202404081537-54-54f1eba`.
@@ -97,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using sessionScope "Login" for /login route (instead of "Dashboard") ([PORTAL-1558](https://issue.inventage.com/browse/PORTAL-1558)).
 - Informs Keycloak on Session-Reset to delete its user state ([PORTAL-1422](https://issue.inventage.com/browse/PORTAL-1422)).
 - Upgrade to Java 17 ([PORTAL-1575](https://issue.inventage.com/browse/PORTAL-1575)).
-- Upgrade the Vert.x stack to `4.4.4` ([PORTAL-1454](https://issue.inventage.com/browse/PORTAL-1454)).
+- Upgrade the Vert.x stack from `4.3.8` to `4.4.4` ([PORTAL-1454](https://issue.inventage.com/browse/PORTAL-1454)).
 - Upgrade all plugins and dependencies to their latest version.
 - Changed user in docker containers to non-root ([PORTAL-1342](https://issue.inventage.com/browse/PORTAL-1342)).
 - Update `portal-helm-chart-library` from 4.3.0-202305220818-197-8c61d10 to 4.4.0-202307251410-244-fc44010.
@@ -189,8 +193,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **BREAKING**: docker-compose artefact is no longer provided ([PORTAL-1251](https://issue.inventage.com/browse/PORTAL-1251)).
 - **BREAKING**: the `bearerOnly` middleware expects now a key with `publicKeys` with an array containing multiple objects, each with a public key ([PORTAL-1092](https://issue.inventage.com/browse/PORTAL-1092)).
-- Updated the Vert.x stack to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
-- Updated the Vert.x stack to `4.3.8` ([PORTAL-1236](https://issue.inventage.com/browse/PORTAL-1236)).
+- Upgrade the Vert.x stack from `4.0.3` to `4.3.7` ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Upgrade the Vert.x stack from `4.3.7` to `4.3.8` ([PORTAL-1236](https://issue.inventage.com/browse/PORTAL-1236)).
 - Updated usage of `io.vertx.json.schema` to newest concepts ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `io.vertx.vertx-http-proxy` instead of our own fork ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Use `proxyInterceptor` hooks in `proxy` middleware to apply custom logic on the request and responses instead of patching them directly ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).

@@ -31,6 +31,11 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
 
+    /**
+     * Default maximum length of all headers for HTTP/1.x in bytes = {@code 10240}, i.e. 10 kilobytes
+     */
+    private static final int DEFAULT_HEADER_LIMIT = 10 * 1024;
+
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
         LOGGER.info("Portal-Gateway verticle is starting...");
@@ -109,9 +114,9 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
         if (entrypoint.port() > 0) {
             final HttpServerOptions options = new HttpServerOptions()
-                .setMaxHeaderSize(1024 * 20)
+                .setMaxHeaderSize(DEFAULT_HEADER_LIMIT)
                 .setSsl(entrypoint.isTls())
-                .setKeyStoreOptions(entrypoint.jksOptions());
+                .setKeyCertOptions(entrypoint.jksOptions());
             LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
             return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
         } else {

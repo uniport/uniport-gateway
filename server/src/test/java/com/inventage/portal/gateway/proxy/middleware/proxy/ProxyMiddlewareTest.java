@@ -16,7 +16,6 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
@@ -31,8 +30,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public class ProxyMiddlewareTest {
 
-    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     @Test
     void correctHostHeader(Vertx vertx, VertxTestContext testCtx) {
@@ -56,45 +56,40 @@ public class ProxyMiddlewareTest {
         final String host = "localhost";
         final int proxyPort = TestUtils.findFreePort();
         final int serverPort = TestUtils.findFreePort();
-        final String proxyResponse = "proxy";
         final String serverResponse = "server";
 
         final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, serverPort);
 
-        final Checkpoint proxyStarted = testCtx.checkpoint();
-        final Checkpoint serverStarted = testCtx.checkpoint();
-        final Checkpoint requestProxied = testCtx.checkpoint();
-        final Checkpoint requestServed = testCtx.checkpoint();
-        final Checkpoint responseReceived = testCtx.checkpoint();
-
         final Router router = Router.router(vertx);
-        router.route().handler(proxy).handler(ctx -> ctx.response().end(proxyResponse));
+        router.route().handler(proxy);
+
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
-            requestProxied.flag();
-        }).listen(proxyPort).onComplete(testCtx.succeeding(s -> {
-            proxyStarted.flag();
-
-            vertx.createHttpServer().requestHandler(req -> {
-                assertEquals(String.format("%s:%s", host, proxyPort), req.headers().get(X_FORWARDED_HOST));
-                assertEquals("http", req.headers().get(X_FORWARDED_PROTO));
-                req.response().end(serverResponse);
-                requestServed.flag();
-            }).listen(serverPort).onComplete(testCtx.succeeding(p -> {
-                serverStarted.flag();
-
-                vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
-                    .compose(HttpClientRequest::send)
-                    .onComplete(testCtx.succeeding(resp -> {
-                        testCtx.verify(() -> {
-                            assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
-                            responseReceived.flag();
-                        });
-                        resp.body().onComplete(testCtx.succeeding(
-                            body -> testCtx.verify(() -> assertEquals(serverResponse, body.toString()))));
+        }).listen(proxyPort)
+            .onComplete(testCtx.succeeding(s -> {
+                vertx.createHttpServer().requestHandler(req -> {
+                    testCtx.verify(() -> {
+                        assertEquals("http", req.headers().get(X_FORWARDED_PROTO));
+                        assertEquals(host, req.headers().get(X_FORWARDED_HOST));
+                        assertEquals(String.valueOf(proxyPort), req.headers().get(X_FORWARDED_PORT));
+                    });
+                    req.response().end(serverResponse);
+                }).listen(serverPort)
+                    .onComplete(testCtx.succeeding(p -> {
+                        vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
+                            .compose(HttpClientRequest::send)
+                            .onComplete(testCtx.succeeding(resp -> {
+                                testCtx.verify(() -> {
+                                    assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
+                                });
+                                resp.body()
+                                    .onComplete(testCtx.succeeding(body -> {
+                                        testCtx.verify(() -> assertEquals(serverResponse, body.toString()));
+                                        testCtx.completeNow();
+                                    }));
+                            }));
                     }));
             }));
-        }));
 
     }
 
@@ -113,7 +108,7 @@ public class ProxyMiddlewareTest {
 
         final HttpServerOptions options = new HttpServerOptions()
             .setSsl(true)
-            .setKeyStoreOptions(new JksOptions()
+            .setKeyCertOptions(new JksOptions()
                 .setPath(trustStoreFile.getPath())
                 .setPassword(trustStorePassword));
 
@@ -145,7 +140,7 @@ public class ProxyMiddlewareTest {
 
         final HttpServerOptions options = new HttpServerOptions()
             .setSsl(true)
-            .setKeyStoreOptions(new JksOptions()
+            .setKeyCertOptions(new JksOptions()
                 .setPath(file.getPath())
                 .setPassword("123456"));
 

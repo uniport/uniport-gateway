@@ -130,48 +130,43 @@ public class DockerContainerServiceImporter implements ServiceImporter {
     }
 
     synchronized void scan(Promise<Void> completion) {
-        vertx.<List<Container>>executeBlocking(future -> {
-            try {
-                future.complete(
-                    client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
-            } catch (Exception e) {
-                future.fail(e);
-            }
-        }, ar -> {
-            if (ar.failed()) {
-                if (completion != null) {
-                    completion.fail(ar.cause());
-                } else {
-                    LOGGER.warn("Failed to import services from docker", ar.cause());
-                }
-                return;
-            }
-            started = true;
-            final List<Container> running = ar.result();
-            final List<DockerContainerService> toRemove = new ArrayList<>();
-
-            // Detect lost containers
-            services.stream().filter(service -> isNotRunning(service.id(), running)).forEach(service -> {
-                unpublish(service);
-                toRemove.add(service);
-            });
-            services.removeAll(toRemove);
-
-            if (running != null) {
-                // Detect new containers
-                running.stream().filter(container -> !isKnown(container)).forEach(container -> {
-                    final DockerContainerService service = new DockerContainerService(container);
-                    if (service.record() != null) {
-                        services.add(service);
-                        publish(service);
+        vertx.<List<Container>>executeBlocking(
+            () -> client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec(),
+            ar -> {
+                if (ar.failed()) {
+                    if (completion != null) {
+                        completion.fail(ar.cause());
+                    } else {
+                        LOGGER.warn("Failed to import services from docker", ar.cause());
                     }
-                });
-            }
+                    return;
+                }
+                started = true;
+                final List<Container> running = ar.result();
+                final List<DockerContainerService> toRemove = new ArrayList<>();
 
-            if (completion != null) {
-                completion.complete();
-            }
-        });
+                // Detect lost containers
+                services.stream().filter(service -> isNotRunning(service.id(), running)).forEach(service -> {
+                    unpublish(service);
+                    toRemove.add(service);
+                });
+                services.removeAll(toRemove);
+
+                if (running != null) {
+                    // Detect new containers
+                    running.stream().filter(container -> !isKnown(container)).forEach(container -> {
+                        final DockerContainerService service = new DockerContainerService(container);
+                        if (service.record() != null) {
+                            services.add(service);
+                            publish(service);
+                        }
+                    });
+                }
+
+                if (completion != null) {
+                    completion.complete();
+                }
+            });
     }
 
     private void publish(DockerContainerService service) {

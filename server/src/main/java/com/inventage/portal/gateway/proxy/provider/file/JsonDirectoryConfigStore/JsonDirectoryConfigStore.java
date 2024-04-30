@@ -55,31 +55,29 @@ public class JsonDirectoryConfigStore implements ConfigStore {
 
     @Override
     public Future<Buffer> get() {
-        return vertx.<List<File>>executeBlocking(promise -> {
-            try {
-                promise.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-            } catch (Throwable e) {
-                promise.fail(e);
-            }
-        }).flatMap(files -> {
-            final List<Future<JsonObject>> futures = new ArrayList<>();
-            for (FileSet set : filesets) {
-                final Promise<JsonObject> promise = vertx.promise();
-                set.buildConfiguration(files, json -> {
-                    if (json.failed()) {
-                        promise.fail(json.cause());
-                    } else {
-                        promise.complete(json.result());
-                    }
-                });
-                futures.add(promise.future());
-            }
-            return Future.all(futures);
-        }).map(compositeFuture -> {
-            final JsonObject json = new JsonObject();
-            compositeFuture.<JsonObject>list().forEach(config -> this.merge(json, config));
-            return json.toBuffer();
-        });
+        return vertx.<List<File>>executeBlocking(
+            () -> FileSet.traverse(path).stream()
+                .sorted()
+                .collect(Collectors.toList()))
+            .flatMap(files -> {
+                final List<Future<JsonObject>> futures = new ArrayList<>();
+                for (FileSet set : filesets) {
+                    final Promise<JsonObject> promise = vertx.promise();
+                    set.buildConfiguration(files, json -> {
+                        if (json.failed()) {
+                            promise.fail(json.cause());
+                        } else {
+                            promise.complete(json.result());
+                        }
+                    });
+                    futures.add(promise.future());
+                }
+                return Future.all(futures);
+            }).map(compositeFuture -> {
+                final JsonObject json = new JsonObject();
+                compositeFuture.<JsonObject>list().forEach(config -> this.merge(json, config));
+                return json.toBuffer();
+            });
     }
 
     // Mostly copied from vertx JsonObject#mergeIn(JsonObject, int)
