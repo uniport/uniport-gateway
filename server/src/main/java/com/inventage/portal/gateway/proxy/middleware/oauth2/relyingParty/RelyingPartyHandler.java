@@ -20,6 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxException;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -28,6 +29,7 @@ import io.vertx.ext.auth.VertxContextPRNG;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
+import io.vertx.ext.auth.oauth2.OAuth2AuthorizationURL;
 import io.vertx.ext.auth.oauth2.OAuth2FlowType;
 import io.vertx.ext.auth.oauth2.Oauth2Credentials;
 import io.vertx.ext.web.Route;
@@ -44,20 +46,24 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class is copied from:
- * https://github.com/vert-x3/vertx-web/blob/4.4.4/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
+ * https://github.com/vert-x3/vertx-web/blob/4.5.8/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
  *
  * The following changes were made:
  * - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
  * - wrap oauth2 state parameter with StateWithUri
  * - dont implement OrderListener interface (mount callback immediately)
+ * - set prompt=none if accept headers do not allow text/html
  * 
  * @see OAuth2AuthHandlerImpl
  */
@@ -80,7 +86,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
     private final List<String> scopes;
     private final boolean openId;
-    private JsonObject extraParams;
+    private Map<String, String> extraParams;
     private String prompt;
     private int pkce = -1;
     // explicit signal that tokens are handled as bearer only (meaning, no backend server known)
@@ -134,7 +140,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
         // state copy
         if (base.extraParams != null) {
-            extraParams = base.extraParams.copy();
+            extraParams = new HashMap<String, String>(base.extraParams);
         }
         this.callback = base.callback;
         this.order = base.order;
@@ -172,7 +178,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                     if (context.request().method() != HttpMethod.GET) {
                         // we can only redirect GET requests
                         LOGGER.error("OAuth2 redirect attempt to non GET resource '{}'", context.request().uri());
-                        context.fail(405, new IllegalStateException("OAuth2 redirect attempt to non GET resource"));
+                        context.fail(405, new VertxException("OAuth2 redirect attempt to non GET resource", true));
                         return;
                     }
 
@@ -186,7 +192,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                     if (session == null) {
                         if (pkce > 0) {
                             // we can only handle PKCE with a session
-                            context.fail(500, new IllegalStateException("OAuth2 PKCE requires a session to be present"));
+                            context.fail(500, new VertxException("OAuth2 PKCE requires a session to be present", true));
                             return;
                         }
                     } else {
@@ -224,37 +230,39 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
     }
 
     private String authURI(String redirectURL, String state, String codeVerifier, String acceptHeader) {
-        final JsonObject config = new JsonObject();
+        final OAuth2AuthorizationURL config = new OAuth2AuthorizationURL();
 
         if (extraParams != null) {
             // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
             if (!acceptHeaderIncludesTextHTML(acceptHeader)) {
-                config.mergeIn(JsonObject.of("prompt", "none"));
+                config.putAdditionalParameter("prompt", "none");
             } else {
-                config.mergeIn(extraParams);
+                for (Entry<String, String> entry : extraParams.entrySet()) {
+                    config.putAdditionalParameter(entry.getKey(), entry.getValue());
+                }
             }
         }
 
-        config.put("state", state != null ? state : redirectURL);
+        config.setState(state != null ? state : redirectURL);
 
         if (callbackURL != null) {
-            config.put("redirect_uri", callbackURL.href());
+            config.setRedirectUri(callbackURL.href());
         }
 
         if (scopes.size() > 0) {
-            config.put("scopes", scopes);
+            config.setScopes(scopes);
         }
 
         if (prompt != null) {
-            config.put("prompt", prompt);
+            config.putAdditionalParameter("prompt", prompt);
         }
 
         if (codeVerifier != null) {
             synchronized (sha256) {
                 sha256.update(codeVerifier.getBytes(StandardCharsets.US_ASCII));
                 config
-                    .put("code_challenge", sha256.digest())
-                    .put("code_challenge_method", "S256");
+                    .putAdditionalParameter("code_challenge", sha256.digest().toString())
+                    .putAdditionalParameter("code_challenge_method", "S256");
             }
         }
 
@@ -275,9 +283,16 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return false;
     }
 
+    // See https://github.com/vert-x3/vertx-web/issues/2602
     @Override
     public OAuth2AuthHandler extraParams(JsonObject extraParams) {
-        this.extraParams = new JsonObject(extraParams.getMap());
+        this.extraParams = new HashMap<String, String>();
+        for (Entry<String, Object> entry : extraParams.getMap().entrySet()) {
+            if (!(entry.getValue() instanceof String)) {
+                throw new IllegalArgumentException(String.format("value for extra param '%s' must be a string", entry.getKey()));
+            }
+            this.extraParams.put(entry.getKey(), (String) entry.getValue());
+        }
         return this;
     }
 
@@ -324,7 +339,6 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
     @Override
     public OAuth2AuthHandler setupCallback(final Route route) {
-
         if (callbackURL == null) {
             // warn that the setup is probably wrong
             throw new IllegalStateException("OAuth2AuthHandler was created without a origin/callback URL");
@@ -348,7 +362,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
 
         this.callback = route;
-        mountCallback(route);
+        mountCallback();
 
         // the redirect handler has been setup so we can process this
         // handler has full oauth2 support, not just basic JWT
@@ -366,7 +380,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             final User user = ctx.user();
             if (user == null) {
                 // bad state
-                ctx.fail(403, new IllegalStateException("no user in the context"));
+                ctx.fail(403, new VertxException("no user in the context", true));
                 return;
             }
 
@@ -389,12 +403,12 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                                 (idx + scope.length() != handlerScopes.length()
                                     && handlerScopes.charAt(idx + scope.length()) != ' ')) {
                                 // invalid scope assignment
-                                ctx.fail(403, new IllegalStateException("principal scope != handler scopes. principal scope is " + scope));
+                                ctx.fail(403, new VertxException("principal scope != handler scopes. principal scope is " + scope, true));
                                 return;
                             }
                         } else {
                             // invalid scope assignment
-                            ctx.fail(403, new IllegalStateException("principal scope != handler scopes. principal scope is " + scope));
+                            ctx.fail(403, new VertxException("principal scope != handler scopes. principal scope is " + scope, true));
                             return;
                         }
                     }
@@ -420,8 +434,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
     }
 
-    private void mountCallback(Route callback) {
-        callback.handler(ctx -> {
+    private void mountCallback() {
+        this.callback.handler(ctx -> {
             // Some IdP's (e.g.: AWS Cognito) returns errors as query arguments
             final String error = ctx.request().getParam("error");
 
@@ -443,9 +457,9 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
                 final String errorDescription = ctx.request().getParam("error_description");
                 if (errorDescription != null) {
-                    ctx.fail(errorCode, new IllegalStateException(error + ": " + errorDescription));
+                    ctx.fail(errorCode, new VertxException(error + ": " + errorDescription, true));
                 } else {
-                    ctx.fail(errorCode, new IllegalStateException(error));
+                    ctx.fail(errorCode, new VertxException(error, true));
                 }
                 return;
             }
@@ -455,7 +469,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
             // code is a require value
             if (code == null) {
-                ctx.fail(400, new IllegalStateException("Missing code parameter"));
+                ctx.fail(400, new VertxException("Missing code parameter", true));
                 return;
             }
 
@@ -471,7 +485,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
 
             // state is a required field
             if (state == null) {
-                ctx.fail(400, new IllegalStateException("Missing IdP state parameter to the callback endpoint"));
+                ctx.fail(400, new VertxException("Missing IdP state parameter to the callback endpoint", true));
                 return;
             }
 
@@ -485,7 +499,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                 // if there's a state in the context they must match
                 if (!state.equals(ctxState)) {
                     // forbidden, the state is not valid (this is a replay attack)
-                    ctx.fail(401, new IllegalStateException("Invalid oauth2 state"));
+                    ctx.fail(401, new VertxException("Invalid oauth2 state", true));
                     return;
                 }
 

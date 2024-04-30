@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Mostly copied from DirectoryConfigStore with a custom Json merge function
  * We only need to change the merge method in get(), but we cannot extend DirectoryConfigStore and overwrite get(), because the path and filesets members are
  * private
- * https://github.com/vert-x3/vertx-config/blob/4.4.4/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
+ * https://github.com/vert-x3/vertx-config/blob/4.5.8/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
  */
 public class JsonDirectoryConfigStore implements ConfigStore {
 
@@ -82,7 +82,7 @@ public class JsonDirectoryConfigStore implements ConfigStore {
 
     // Mostly copied from vertx JsonObject#mergeIn(JsonObject, int)
     // The difference is on how JsonArrays are merged. This implementation creates a deduplicated concatenation of two arrays.
-    // https://github.com/eclipse-vertx/vert.x/blob/4.4.4/src/main/java/io/vertx/core/json/JsonObject.java#L1007-L1026
+    // https://github.com/eclipse-vertx/vert.x/blob/4.5.8/src/main/java/io/vertx/core/json/JsonObject.java#L1007-L1026
     private JsonObject merge(JsonObject one, JsonObject other) {
         for (Map.Entry<String, Object> e : other.getMap().entrySet()) {
             if (e.getValue() == null) {

@@ -37,7 +37,7 @@ public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 
         // Otherwise we manually check if the current jwt has one of our additional issuer included.
         // Copied from the JWTAuthProviderImpl#authenticate method.
-        // https://github.com/eclipse-vertx/vertx-auth/blob/4.4.4/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java#L146-L154
+        // https://github.com/eclipse-vertx/vertx-auth/blob/4.5.8/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java#L146-L154
         final TokenCredentials authInfo;
         try {
             // cast
@@ -48,7 +48,7 @@ public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
             return Future.failedFuture(e);
         }
 
-        final JsonObject jwt = JWT.parse(((TokenCredentials) credentials).getToken());
+        final JsonObject jwt = JWT.parse(authInfo.getToken());
         final JsonObject payload = jwt.getJsonObject("payload");
         final String jwtIssuer = payload.getString("iss");
 

@@ -81,6 +81,7 @@ public class PortalGatewayLauncher extends Launcher {
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
 
+        // TODO portal-2035: I think we need to rework this part with the vertx builder
         final List<String> arguments = new LinkedList<String>();
         arguments.add("run");
         arguments.add(PortalGatewayVerticle.class.getName());
