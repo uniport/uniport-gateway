@@ -16,11 +16,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.Session;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Assertions;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -28,16 +26,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class ReplacedSessionCookieDetectionMiddlewareTest {
     @Test
     public void shouldSetDetectionCookieOnResponse(Vertx vertx, VertxTestContext testCtx) {
-        final AtomicReference<Session> sessionHolder = new AtomicReference<>();
-        Handler<RoutingContext> extractSession = ctx -> {
-            sessionHolder.set(ctx.session());
+        final AtomicLong sessionLastAccessedHolder = new AtomicLong();
+        final Handler<RoutingContext> extractSessionLastAccessed = ctx -> {
+            // we need to do that after the middleware has accessed the session and
+            // before the session middleware accesses the session to set the cookie
+            // to get the exact same timestamp
+            ctx.addHeadersEndHandler(v -> sessionLastAccessedHolder.set(ctx.session().lastAccessed()));
             ctx.next();
         };
 
         MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
-            .withMiddleware(extractSession)
+            .withMiddleware(extractSessionLastAccessed)
             .withUser()
             .withReplacedSessionCookieDetectionMiddleware()
             .build().start();
@@ -45,12 +45,9 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
             // then
-            Session session = sessionHolder.get();
-            Assertions.assertNotNull(session);
-
-            long lastAccessed = session.lastAccessed();
-            long sessionLifetimeMs = SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE * 60 * 1000;
-            DetectionCookieValue detectionCookieValue = new DetectionCookieValue(lastAccessed, sessionLifetimeMs);
+            final long lastAccessed = sessionLastAccessedHolder.get();
+            final long sessionLifetimeMs = SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE * 60 * 1000;
+            final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(lastAccessed, sessionLifetimeMs);
 
             assertThat(outgoingResponse)
                 .hasStatusCode(200)
