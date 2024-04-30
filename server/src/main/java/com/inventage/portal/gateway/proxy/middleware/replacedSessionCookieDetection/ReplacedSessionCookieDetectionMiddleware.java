@@ -11,6 +11,7 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,17 +199,20 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         return getCookieFromHeader(ctx, this.sessionCookieName);
     }
 
-    // we can't use ctx.request().getCookie(), so we must read the HTTP header by ourselves
+    // we can't use ctx.request().cookies() (fbuetler: why not?), so we must read the HTTP header by ourselves
     private Optional<Cookie> getCookieFromHeader(RoutingContext ctx, String cookieName) {
-        final Cookie cookie = CookieUtil.cookieMapFromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE))
-            .get(cookieName);
+        final List<String> cookieHeaders = ctx.request().headers().getAll(HttpHeaders.COOKIE);
+        final Cookie cookie = CookieUtil.cookieMapFromRequestHeader(cookieHeaders).get(cookieName);
         return cookie != null ? Optional.of(cookie) : Optional.empty();
     }
 
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {
         LOGGER.debug("'{}'", this.detectionCookieName);
         response.addCookie(
-            Cookie.cookie(this.detectionCookieName, cookieValue.isPresent() ? cookieValue.get().toString() : "")
-                .setPath("/").setHttpOnly(true));
+            Cookie.cookie(
+                this.detectionCookieName,
+                cookieValue.isPresent() ? cookieValue.get().toString() : "")
+                .setPath("/")
+                .setHttpOnly(true));
     }
 }
