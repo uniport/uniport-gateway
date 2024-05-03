@@ -3,7 +3,7 @@
 
 set -Eeo pipefail
 
-declare -r NODE_IMAGE=node:18-alpine
+declare -r NODE_IMAGE=node:20-alpine
 
 if [ -n "$MINIKUBE_ACTIVE_DOCKERD" ]
 then
