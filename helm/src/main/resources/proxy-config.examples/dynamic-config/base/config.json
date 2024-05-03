@@ -12,6 +12,14 @@
                 ],
                 "rule": "PathPrefix('/base')",
                 "service": "base-proxy"
+            },
+            {
+                "name": "apple-app-site-association",
+                "middlewares": [
+                    "baseAppleAppSiteHeaders"
+                ],
+                "rule": "Path('/.well-known/apple-app-site-association')",
+                "service": "base-proxy"
             }
         ],
         "middlewares": [
@@ -51,6 +59,16 @@
                 "options": {
                     "action": "SESSION_RESET",
                     "iamSessionResetUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal/session_reset"
+                }
+            },
+            {
+                "name": "baseAppleAppSiteHeaders",
+                "type": "headers",
+                "options": {
+                    "customResponseHeaders": {
+                        "Content-Type": "application/json",
+                        "Cache-Control": "no-cache"
+                    }
                 }
             }
         ],

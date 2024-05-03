@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Add a default mapping from `.well-known/apple-app-site-association` to `base` to add support for Uniport mobile feature that require Apple's [associated domains](https://developer.apple.com/documentation/xcode/supporting-associated-domains).
+
 ## [9.1.0]-202404300852-1126-7dcb42ab - 2024-04-30
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.1.0-202404300852-1126-7dcb42ab) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.1.0-202404300852-1126-7dcb42ab)
