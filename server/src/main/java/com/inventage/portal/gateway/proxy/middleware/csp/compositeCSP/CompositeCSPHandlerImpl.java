@@ -21,6 +21,10 @@ import org.slf4j.LoggerFactory;
  *
  * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web
  * https://github.com/vert-x3/vertx-web/blob/4.5.8/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/CSPHandlerImpl.java
+ * 
+ * The following changes were made:
+ * - no default directive
+ * - handleResponse added
  */
 public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
 
@@ -29,7 +33,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     private static final String CSP_PREVIOUS_POLICY_KEY = "CSP_POLICY";
     private static final String CSP_PREVIOUS_RESPONSE_POLICY_KEY = "RESPONSE_CSP_POLICY";
 
-    private static final CSPMergeStrategy DEFAULT_CSP_MERGE_STRATEGY = CSPMergeStrategy.UNION;
     private static final List<String> MUST_BE_QUOTED = Arrays.asList(
         "none",
         "self",
@@ -43,12 +46,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     private boolean reportOnly;
 
     private final CSPMergeStrategy cspMergeStrategy;
-
-    /**
-    */
-    public CompositeCSPHandlerImpl() {
-        this(DEFAULT_CSP_MERGE_STRATEGY);
-    }
 
     /**
      * Modified constructor to configure the merging strategy of multiple csp policies
@@ -150,10 +147,8 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         final String effectiveCSPPolicy = unitePolicies(Arrays.asList(previousPolicy, currentPolicy));
 
         if (effectiveCSPPolicy.length() != 0) {
-            final String cspHeaderName = reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME;
-            ctx.response().putHeader(cspHeaderName, effectiveCSPPolicy);
-
             ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
+            setPolicyOnResponse(ctx, effectiveCSPPolicy);
         }
         ctx.next();
     }
@@ -179,8 +174,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
             effectiveCSPPolicy = mergePolicies(effectiveCSPPolicy, previousResponsePolicy, CSPMergeStrategy.UNION);
         }
         ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
-
-        ctx.response().putHeader(reportOnly ? CSP_REPORT_ONLY_HEADER_NAME : CSP_HEADER_NAME, effectiveCSPPolicy);
+        setPolicyOnResponse(ctx, effectiveCSPPolicy);
     }
 
     private String mergePolicies(String internal, String external, CSPMergeStrategy strategy) {
@@ -257,4 +251,19 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return directives;
     }
 
+    private void setPolicyOnResponse(RoutingContext ctx, String policyString) {
+        if (policyString.length() == 0) {
+            return;
+        }
+
+        if (reportOnly) {
+            if (!policy.containsKey("report-uri") && !policy.containsKey("report-to")) {
+                throw new IllegalStateException("Please disable CSP reportOnly or add a report-uri/report-to policy.");
+            } else {
+                ctx.response().putHeader(CSP_REPORT_ONLY_HEADER_NAME, policyString);
+            }
+        } else {
+            ctx.response().putHeader(CSP_HEADER_NAME, policyString);
+        }
+    }
 }
