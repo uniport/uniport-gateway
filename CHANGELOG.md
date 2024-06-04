@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upgrade the Vert.x stack from `4.4.9` to `4.5.7` ([PORTAL-2035](https://issue.inventage.com/browse/PORTAL-2035)).
+- Upgrade the Vert.x stack from `4.4.9` to `4.5.8` ([PORTAL-2035](https://issue.inventage.com/browse/PORTAL-2035)).
 
 ## [9.1.0]-202404300852-1126-7dcb42ab - 2024-04-30
 
