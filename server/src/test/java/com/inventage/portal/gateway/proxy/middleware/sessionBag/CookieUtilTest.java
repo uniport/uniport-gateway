@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
 import io.vertx.core.http.Cookie;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -9,11 +10,20 @@ import org.junit.jupiter.api.Test;
 public class CookieUtilTest {
 
     @Test
+    public void testCookieMapNull() {
+        // given
+        // when
+        final Map<String, Cookie> cookieMap = CookieUtil.cookieMapFromRequestHeader(null);
+        // then
+        Assertions.assertTrue(cookieMap.isEmpty());
+    }
+
+    @Test
     public void testCookieMapNullString() {
         // given
         final String cookieHeader = null;
         // when
-        final Map<String, Cookie> cookieMap = CookieUtil.cookieMapFromRequestHeader(null);
+        final Map<String, Cookie> cookieMap = CookieUtil.cookieMapFromRequestHeader(Arrays.asList(cookieHeader));
         // then
         Assertions.assertTrue(cookieMap.isEmpty());
     }

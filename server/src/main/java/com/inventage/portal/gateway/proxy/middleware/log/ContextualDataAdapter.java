@@ -5,12 +5,9 @@ import io.reactiverse.contextual.logging.ContextualData;
 /**
  *
  */
-public class ContextualDataAdapter {
+public final class ContextualDataAdapter {
 
-    // CheckStyle: Utility classes should not have a public or default constructor.
-    protected ContextualDataAdapter() {
-        // prevents calls from subclass
-        throw new UnsupportedOperationException();
+    private ContextualDataAdapter() {
     }
 
     /**

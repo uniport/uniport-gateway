@@ -21,6 +21,7 @@ public class CookieUtil {
         }
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         return cookieHeaders.stream()
+            .filter(s -> s != null)
             .flatMap(cookieEntry -> ServerCookieDecoder.LAX.decode(cookieEntry).stream())
             .map(cookie -> CookieUtil.fromNettyCookie(cookie))
             .collect(Collectors.toSet());

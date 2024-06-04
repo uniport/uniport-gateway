@@ -57,7 +57,7 @@ public class StateWithUriTest {
         // given
         // when
         try {
-            final StateWithUri stateWithUri = new StateWithUri(null, null);
+            new StateWithUri(null, null);
             Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // then
@@ -70,7 +70,7 @@ public class StateWithUriTest {
         // given
         // when
         try {
-            final StateWithUri stateWithUri = new StateWithUri(null, null, null);
+            new StateWithUri(null, null, null);
             Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // then
@@ -158,7 +158,7 @@ public class StateWithUriTest {
         // given
         // when
         try {
-            final StateWithUri stateWithUri = new StateWithUri(null);
+            new StateWithUri(null);
             Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // then

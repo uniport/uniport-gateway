@@ -8,8 +8,6 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <pre>
@@ -27,8 +25,6 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 public class OAuth2ApiWrapper implements ClusterSerializable {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2ApiWrapper.class);
 
     private OAuth2Options config;
     private OAuth2Auth delegate;
