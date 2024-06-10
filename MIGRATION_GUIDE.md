@@ -1,5 +1,23 @@
 # Migration Guide
 
+## `9.*.*` -> `9.3.*`
+
+### Clustered Portal-Gateway
+
+With the upgrade to vertx 4.5.8, the hazelcast version was updated from 4.2 to 5.3. In general, the updated Portal-Gateway instance can be deployed in a rolling
+update. However, if the following error message appears, stop all instance and start them again. **Caution**: This clears the session store.
+
+```json
+{
+  "timestamp": "2024-06-04 15:19:48,242",
+  "level": "ERROR",
+  "logger": "com.hazelcast.security",
+  "line": "69",
+  "method": "log",
+  "message": "[10.244.4.210]:5701 [portal-gateway-ha] [5.3.5] Reason of failure for node join: Joining node's version 5.3.5 is not compatible with cluster version 4.2 [...]",
+}
+```
+
 ## `7.*.*` -> `8.*.*`
 
 ### Session cookie

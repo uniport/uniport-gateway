@@ -1,0 +1,8 @@
+{
+    "feature": {
+        "env": true,
+        "fs": "read",
+        "network": true
+    },
+    "kubeconfig": "~/.kube/macduff/macduff"
+}
