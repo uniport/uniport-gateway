@@ -48,7 +48,9 @@
         <nexus3.helm.registry.push.url>https://nexus3.inventage.com/repository</nexus3.helm.registry.push.url>
         <nexus3.helm.repository.push.id>inventage-portal-helm-staging</nexus3.helm.repository.push.id>
 
+        <!-- Note: If you switch between staged & releases versions, you will need to change the property `portal-helm-dependencies.repository` -->
         <portal-helm-dependencies.repository>https://nexus3.inventage.com/repository/inventage-portal-helm/</portal-helm-dependencies.repository>
+        <!-- <portal-helm-dependencies.repository>https://nexus3.inventage.com/repository/inventage-portal-helm-staging/</portal-helm-dependencies.repository> -->
 
         <portal-helm-chart-library.version>4.7.0-202404231356-316-dc0a409</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.4.0-202404081537-54-54f1eba</portal-code-style-settings.version>
