@@ -85,6 +85,27 @@
                             <executable>./validate-configs.sh</executable>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-value-schema-json</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <!-- has to run after helm:lint (bound to process-resources) -->
+                        <phase>process-test-resources</phase>
+                        <configuration>
+                            <executable>tar</executable>
+                            <workingDirectory>${chart.directory}</workingDirectory>
+                            <arguments>
+                                <argument>--extract</argument>
+                                <argument>--verbose</argument>
+                                <argument>--file</argument>
+                                <argument>charts/portal-lib-${portal-helm-chart-library.version}.tgz</argument>
+                                <argument>--strip-components</argument>
+                                <argument>1</argument>
+                                <argument>portal-lib/values.schema.json</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
