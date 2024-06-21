@@ -22,5 +22,12 @@
         </server>
     </servers>
     <interactiveMode>false</interactiveMode>
-
+    <mirrors>
+        <mirror>
+            <id>inventage-portal-group</id>
+            <name>Inventage Central</name>
+            <url>https://nexus3.inventage.com/repository/inventage-portal-maven-group</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
 </settings>
