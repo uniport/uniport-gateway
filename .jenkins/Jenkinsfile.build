@@ -98,10 +98,6 @@ pipeline {
                         'clean',
                         'deploy'
                     )
-
-                    script {
-                        env.STAGING_REPOSITORY_ID = util.stagingRepositoryId('./target/nexus-staging/staging/2784e0aacf5060.properties')
-                    }
                 }
             }
         }
