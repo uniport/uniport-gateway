@@ -17,7 +17,7 @@
     <distributionManagement>
         <repository>
             <id>inventage-portal-group</id>
-            <url>hhttps://nexus3.inventage.com/repository/inventage-portal-maven-staging/</url>
+            <url>https://nexus3.inventage.com/repository/inventage-portal-maven-staging/</url>
         </repository>
     </distributionManagement>
 
