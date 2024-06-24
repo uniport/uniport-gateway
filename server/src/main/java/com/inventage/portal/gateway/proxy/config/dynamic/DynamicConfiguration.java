@@ -267,7 +267,8 @@ public class DynamicConfiguration {
     private static final int INT_MIN = 0;
     private static final String KEYWORD_TYPE = "type";
     private static final String KEYWORD_PATTERN = "pattern";
-    private static final JsonArray INT_OR_STRING_TYPE = JsonArray.of("integer", "string");
+    private static final String INT_TYPE = "integer";
+    private static final String STRING_TYPE = "string";
     private static final String ENV_VARIABLE_PATTERN_STRING_TO_INT = "^\\$\\{.*\\}$";
 
     private static Validator buildValidator() {
@@ -451,9 +452,11 @@ public class DynamicConfiguration {
                     .optionalProperty(SERVICE_SERVER_PROTOCOL, Schemas.stringSchema())
                     .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema())
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
-                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.schema()
-                        .withKeyword(KEYWORD_TYPE, INT_OR_STRING_TYPE)
-                        .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT))
+                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(Schemas.schema()
+                        .withKeyword(KEYWORD_TYPE, INT_TYPE),
+                        Schemas.schema()
+                            .withKeyword(KEYWORD_TYPE, STRING_TYPE)
+                            .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT)))
                     .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
         return serviceSchema;

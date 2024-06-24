@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade the Vert.x stack from `4.4.9` to `4.5.8` ([PORTAL-2035](https://issue.inventage.com/browse/PORTAL-2035)).
 
+### Fixed
+
+- Allow all port fields to be defined as either an `integer` type or `string` with the environment variable pattern ([PORTAL-2111](https://issue.inventage.com/browse/PORTAL-2111)).
+
 ## [9.1.0]-202404300852-1126-7dcb42ab - 2024-04-30
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.1.0-202404300852-1126-7dcb42ab) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.1.0-202404300852-1126-7dcb42ab)
