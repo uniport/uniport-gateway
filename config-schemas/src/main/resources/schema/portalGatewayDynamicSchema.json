@@ -271,8 +271,12 @@
                       "type" : "string"
                     },
                     "port" : {
-                      "pattern" : "^\\$\\{.*\\}$",
-                      "type" : [ "integer", "string" ]
+                      "anyOf" : [ {
+                        "type" : "integer"
+                      }, {
+                        "pattern" : "^\\$\\{.*\\}$",
+                        "type" : "string"
+                      } ]
                     },
                     "host" : {
                       "type" : "string"

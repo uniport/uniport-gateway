@@ -261,8 +261,12 @@
             }
           },
           "port" : {
-            "pattern" : "^\\$\\{.*\\}$",
-            "type" : [ "integer", "string" ]
+            "anyOf" : [ {
+              "type" : "integer"
+            }, {
+              "pattern" : "^\\$\\{.*\\}$",
+              "type" : "string"
+            } ]
           },
           "name" : {
             "minLength" : 1,
