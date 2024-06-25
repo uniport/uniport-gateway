@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public class EntryMiddlewareTest {
     static final String HOST = "localhost";
+    static final String ENTRYPOINT_PREFIX = "http";
 
     private HttpServer proxy;
     private HttpServer server;
@@ -64,7 +65,7 @@ public class EntryMiddlewareTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, "http", HOST, String.format("%d", proxyPort));
+        routerFactory = new RouterFactory(vertx, "http", HOST, String.format("%d", proxyPort), ENTRYPOINT_PREFIX + proxyPort);
     }
 
     @AfterEach
@@ -81,7 +82,7 @@ public class EntryMiddlewareTest {
     @Test
     void entryRedirectMiddlewareRunsOnAllRoutes(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final String entryPointIdentifier = "http" + proxyPort;
+        final String entryPointIdentifier = ENTRYPOINT_PREFIX + proxyPort;
         final String expectedRedirect = "/to/some/page";
 
         final Map<String, JsonObject> configuration = oneEntryRedirectMiddlewareTwoRoutesConfiguration(entryPointIdentifier,
@@ -143,9 +144,9 @@ public class EntryMiddlewareTest {
     ) {
         final JsonObject dynamicConfig = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares()),
+                TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares(), TestUtils.withRouterEntrypoints(entryPointIdentifier)),
                 TestUtils.withRouter("foo2", TestUtils.withRouterService("bar"),
-                    TestUtils.withRouterRule("Path('/pathB')"), TestUtils.withRouterMiddlewares())),
+                    TestUtils.withRouterRule("Path('/pathB')"), TestUtils.withRouterMiddlewares(), TestUtils.withRouterEntrypoints(entryPointIdentifier))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(HOST, serverPort)))));
 

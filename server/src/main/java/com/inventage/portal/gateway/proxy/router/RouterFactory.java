@@ -53,14 +53,16 @@ public class RouterFactory {
     private final String publicProtocol;
     private final String publicHostname;
     private final String publicPort;
+    private final String entrypointName;
 
     /**
     */
-    public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort) {
+    public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort, String entrypointName) {
         this.vertx = vertx;
         this.publicProtocol = publicProtocol;
         this.publicHostname = publicHostname;
         this.publicPort = publicPort;
+        this.entrypointName = entrypointName;
     }
 
     /**
@@ -70,6 +72,7 @@ public class RouterFactory {
         this.publicProtocol = other.publicProtocol;
         this.publicHostname = other.publicHostname;
         this.publicPort = other.publicPort;
+        this.entrypointName = other.entrypointName;
     }
 
     /**
@@ -93,6 +96,25 @@ public class RouterFactory {
         final List<Future<Router>> subRouterFutures = new ArrayList<>();
         for (int i = 0; i < routers.size(); i++) {
             final JsonObject routerConfig = routers.getJsonObject(i);
+
+            final JsonArray routerEntrypointNamesJson = routerConfig.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
+            if (routerEntrypointNamesJson == null) {
+                final String errMsg = "Router has no entrypoints";
+                handler.handle(Future.failedFuture(errMsg));
+
+                //Fast-failing
+                vertx.close().onComplete(event -> {
+                    LOGGER.error("Gateway is shutting down '{}'", errMsg);
+                });
+                return;
+            }
+
+            @SuppressWarnings("unchecked")
+            final List<String> routerEntrypointNames = (List<String>) routerEntrypointNamesJson.getList();
+            if (!routerEntrypointNames.contains(entrypointName)) {
+                continue;
+            }
+
             subRouterFutures.add(createSubRouter(routerConfig, middlewares, services));
         }
 

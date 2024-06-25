@@ -120,7 +120,7 @@ public class ProxyApplication implements Application {
         final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, configurationAddress,
             this.providersThrottleDuration, Collections.singletonList(this.entrypointName));
 
-        final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort);
+        final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort, entrypointName);
 
         watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
 

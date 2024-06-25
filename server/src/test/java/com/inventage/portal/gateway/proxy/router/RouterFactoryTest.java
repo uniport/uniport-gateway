@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class RouterFactoryTest {
 
     static final String host = "localhost";
+    static final String entrypointName = "test";
 
     private HttpServer proxy;
     private HttpServer server;
@@ -87,7 +88,7 @@ public class RouterFactoryTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, "http", host, String.format("%d", proxyPort));
+        routerFactory = new RouterFactory(vertx, "http", host, String.format("%d", proxyPort), entrypointName);
     }
 
     @AfterEach
@@ -100,7 +101,7 @@ public class RouterFactoryTest {
     public void configWithService(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/path')"))),
+                TestUtils.withRouterRule("Path('/path')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -116,7 +117,7 @@ public class RouterFactoryTest {
     public void configWithServiceAndMoreComplexPathSyntax(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/.well-known/any-path')"))),
+                TestUtils.withRouterRule("Path('/.well-known/any-path')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -145,7 +146,8 @@ public class RouterFactoryTest {
     public void configWithRedirectMiddleware(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/path')"), TestUtils.withRouterMiddlewares("redirect"))),
+                TestUtils.withRouterRule("Path('/path')"), TestUtils.withRouterMiddlewares("redirect"),
+                TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withMiddlewares(TestUtils.withMiddleware("redirect", "redirectRegex",
                 TestUtils.withMiddlewareOpts(
                     new JsonObject().put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX, ".*").put(
@@ -165,7 +167,7 @@ public class RouterFactoryTest {
     public void healthyHealthCheck(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/path')"))),
+                TestUtils.withRouterRule("Path('/path')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -181,7 +183,7 @@ public class RouterFactoryTest {
     public void hostRule(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Host('localhost')"))),
+                TestUtils.withRouterRule("Host('localhost')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -200,9 +202,9 @@ public class RouterFactoryTest {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(
                 TestUtils.withRouter("shortPath", TestUtils.withRouterService("bar"),
-                    TestUtils.withRouterRule("Path('/path')")),
+                    TestUtils.withRouterRule("Path('/path')"), TestUtils.withRouterEntrypoints(entrypointName)),
                 TestUtils.withRouter("longPath", TestUtils.withRouterService("bar"),
-                    TestUtils.withRouterRule("Path('/path/long')"))),
+                    TestUtils.withRouterRule("Path('/path/long')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -220,7 +222,7 @@ public class RouterFactoryTest {
     public void pathPrefixRule(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("PathPrefix('/path')"))),
+                TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -238,7 +240,7 @@ public class RouterFactoryTest {
     public void pathPrefixRuleWithMoreComplexPathPrefixSyntax(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("PathPrefix('/.well-known/any-path')"))),
+                TestUtils.withRouterRule("PathPrefix('/.well-known/any-path')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -256,7 +258,7 @@ public class RouterFactoryTest {
     public void unknownRule(Vertx vertx, VertxTestContext testCtx) {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("unknownRule('blub')"))),
+                TestUtils.withRouterRule("unknownRule('blub')"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
@@ -273,9 +275,9 @@ public class RouterFactoryTest {
                 TestUtils
                     .withRouters(
                         TestUtils.withRouter("shortPath", TestUtils.withRouterService("noServer"),
-                            TestUtils.withRouterRule("PathPrefix('/path')")),
+                            TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterEntrypoints(entrypointName)),
                         TestUtils.withRouter("longPath", TestUtils.withRouterService("bar"),
-                            TestUtils.withRouterRule("PathPrefix('/path/long')"))),
+                            TestUtils.withRouterRule("PathPrefix('/path/long')"), TestUtils.withRouterEntrypoints(entrypointName))),
                 TestUtils.withServices(
                     TestUtils.withService("bar",
                         TestUtils.withServers(TestUtils.withServer(host, serverPort))),
@@ -295,10 +297,11 @@ public class RouterFactoryTest {
         JsonObject config = TestUtils
             .buildConfiguration(
                 TestUtils.withRouters(TestUtils.withRouter("shortPath", TestUtils.withRouterService("bar"),
-                    TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100)),
+                    TestUtils.withRouterRule("PathPrefix('/path')"), TestUtils.withRouterPriority(100),
+                    TestUtils.withRouterEntrypoints(entrypointName)),
                     TestUtils
                         .withRouter("longPath", TestUtils.withRouterService("noServer"),
-                            TestUtils.withRouterRule("PathPrefix('/path/long')"))),
+                            TestUtils.withRouterRule("PathPrefix('/path/long')"), TestUtils.withRouterEntrypoints(entrypointName))),
                 TestUtils.withServices(
                     TestUtils.withService("bar",
                         TestUtils.withServers(TestUtils.withServer(host, serverPort))),
@@ -318,7 +321,7 @@ public class RouterFactoryTest {
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
                 TestUtils.withRouterRule("Path('/path')"),
-                TestUtils.withRouterMiddlewares("unknownMiddleware"))),
+                TestUtils.withRouterMiddlewares("unknownMiddleware"), TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withMiddlewares(TestUtils.withMiddleware("unknownMiddleware", "unknownMiddleware",
                 TestUtils.withMiddlewareOpts(new JsonObject()))),
             TestUtils.withServices(
