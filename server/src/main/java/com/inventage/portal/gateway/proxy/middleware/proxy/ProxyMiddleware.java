@@ -35,6 +35,8 @@ public class ProxyMiddleware extends TraceMiddleware {
     private static final CharSequence X_FORWARDED_PROTO = HttpHeaders.createOptimized("x-forwarded-proto");
     private static final CharSequence X_FORWARDED_PORT = HttpHeaders.createOptimized("x-forwarded-port");
 
+    private static final String HTTPS = "https";
+
     private static final boolean DEFAULT_HTTPS_TRUST_ALL = true;
     private static final boolean DEFAULT_HTTPS_VERIFY_HOSTNAME = false;
     private static final String DEFAULT_HTTPS_TRUST_STORE_PATH = "";
@@ -49,21 +51,45 @@ public class ProxyMiddleware extends TraceMiddleware {
     /**
     */
     public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
-        this(vertx, name, "http", serverHost, serverPort, DEFAULT_HTTPS_TRUST_ALL, DEFAULT_HTTPS_VERIFY_HOSTNAME, DEFAULT_HTTPS_TRUST_STORE_PATH, DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
+        this(
+            vertx,
+            name,
+            "http",
+            serverHost,
+            serverPort,
+            DEFAULT_HTTPS_TRUST_ALL,
+            DEFAULT_HTTPS_VERIFY_HOSTNAME,
+            DEFAULT_HTTPS_TRUST_STORE_PATH,
+            DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
     }
 
     /**
     */
     public ProxyMiddleware(
-        Vertx vertx, String name, String serverProtocol, String serverHost, int serverPort, Boolean httpsTrustAll,
-        Boolean httpsVerifyHostname, String httpsTrustStorePath, String httpsTrustStorePassword
+        Vertx vertx,
+        String name,
+        String serverProtocol,
+        String serverHost,
+        int serverPort,
+        Boolean httpsTrustAll,
+        Boolean httpsVerifyHostname,
+        String httpsTrustStorePath,
+        String httpsTrustStorePassword
     ) {
         this.name = name;
-
-        httpProxy = HttpProxy.reverseProxy(createHttpClient(serverProtocol, serverHost, httpsTrustAll, httpsVerifyHostname, httpsTrustStorePath, httpsTrustStorePassword, vertx));
-        httpProxy.origin(serverPort, serverHost);
         this.serverHost = serverHost;
         this.serverPort = serverPort;
+
+        httpProxy = HttpProxy.reverseProxy(
+            createHttpClient(
+                serverProtocol,
+                serverHost,
+                httpsTrustAll,
+                httpsVerifyHostname,
+                httpsTrustStorePath,
+                httpsTrustStorePassword,
+                vertx));
+        httpProxy.origin(serverPort, serverHost);
 
         lowercaseHostHeader(httpProxy);
         setHostHeader(httpProxy);
@@ -72,11 +98,16 @@ public class ProxyMiddleware extends TraceMiddleware {
     }
 
     protected HttpClient createHttpClient(
-        String serverProtocol, String serverHost, Boolean httpsTrustAll, Boolean httpsVerifyHostname,
-        String httpsTrustStorePath, String httpsTrustStorePassword, Vertx vertx
+        String serverProtocol,
+        String serverHost,
+        Boolean httpsTrustAll,
+        Boolean httpsVerifyHostname,
+        String httpsTrustStorePath,
+        String httpsTrustStorePassword,
+        Vertx vertx
     ) {
         final HttpClientOptions options = new HttpClientOptions();
-        if ("https".equalsIgnoreCase(serverProtocol)) {
+        if (HTTPS.equalsIgnoreCase(serverProtocol)) {
             options.setSsl(true);
             options.setTrustAll((httpsTrustAll != null) ? httpsTrustAll : DEFAULT_HTTPS_TRUST_ALL);
             options.setVerifyHost((httpsVerifyHostname != null) ? httpsVerifyHostname : DEFAULT_HTTPS_VERIFY_HOSTNAME);
@@ -186,19 +217,20 @@ public class ProxyMiddleware extends TraceMiddleware {
         });
     }
 
+    /**
+     * Generally, the requests or responses should be modified by the repective middleware itself.
+     * However, some operations are not possible on a HttpServerRequest, such as changing the request's path.
+     * Similarly for some operations on the response, like operations on response headers.
+     * To circumvent this, we do that here in the proxy middleware.
+     * 
+     * @param proxy
+     */
     protected void applyModifiers(HttpProxy proxy) {
         proxy.addInterceptor(new ProxyInterceptor() {
             @Override
             public Future<ProxyResponse> handleProxyRequest(ProxyContext proxyContext) {
                 final ProxyRequest incomingRequest = proxyContext.request();
-                if (!(incomingRequest.proxiedRequest() instanceof ContextAwareHttpServerRequest)) {
-                    final String errMsg = "request has to be of type ContextAwareHttpServerRequest";
-                    LOGGER.error(errMsg);
-                    throw new IllegalStateException(errMsg);
-                }
-
-                final ContextAwareHttpServerRequest contextAwareRequest = (ContextAwareHttpServerRequest) incomingRequest.proxiedRequest();
-                final RoutingContext ctx = contextAwareRequest.routingContext();
+                final RoutingContext ctx = getContextFromRequest(proxyContext);
 
                 // modify URI
                 final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
@@ -213,23 +245,15 @@ public class ProxyMiddleware extends TraceMiddleware {
                 }
                 incomingRequest.setURI(uri.toString());
 
-                // Continue the interception chain
+                // continue the interception chain
                 return proxyContext.sendRequest();
             }
 
             @Override
             public Future<Void> handleProxyResponse(ProxyContext proxyContext) {
-                final ProxyRequest proxiedRequest = proxyContext.request();
-                if (!(proxiedRequest.proxiedRequest() instanceof ContextAwareHttpServerRequest)) {
-                    final String errMsg = "request has to be of type ContextAwareHttpServerRequest";
-                    LOGGER.error(errMsg);
-                    throw new IllegalStateException(errMsg);
-                }
-
-                final ContextAwareHttpServerRequest incomingRequest = (ContextAwareHttpServerRequest) proxiedRequest.proxiedRequest();
-                final RoutingContext ctx = incomingRequest.routingContext();
-
+                final RoutingContext ctx = getContextFromRequest(proxyContext);
                 final ProxyResponse outgoingResponse = proxyContext.response();
+
                 // modify headers
                 final List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
                 if (modifiers != null) {
@@ -238,9 +262,29 @@ public class ProxyMiddleware extends TraceMiddleware {
                     }
                 }
 
-                // Continue the interception chain
+                // continue the interception chain
                 return proxyContext.sendResponse();
             }
         });
+    }
+
+    /**
+     * Before handing the request to the vertx-http-proxy, we wrapped in into {@code ContextAwareHttpServerRequest} to access
+     * the {@code RoutingContext} in the vertx-http-proxy interceptors.
+     * So we need to unwrap it again.
+     * 
+     * @param proxyContext
+     * @return
+     */
+    private RoutingContext getContextFromRequest(ProxyContext proxyContext) {
+        final ProxyRequest incomingRequest = proxyContext.request();
+        if (!(incomingRequest.proxiedRequest() instanceof ContextAwareHttpServerRequest)) {
+            final String errMsg = "request has to be of type ContextAwareHttpServerRequest";
+            LOGGER.error(errMsg);
+            throw new IllegalStateException(errMsg);
+        }
+
+        final ContextAwareHttpServerRequest contextAwareRequest = (ContextAwareHttpServerRequest) incomingRequest.proxiedRequest();
+        return contextAwareRequest.routingContext();
     }
 }
