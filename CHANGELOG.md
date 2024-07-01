@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Allow all port fields to be defined as either an `integer` type or `string` with the environment variable pattern ([PORTAL-2111](https://issue.inventage.com/browse/PORTAL-2111)).
+- Make vertx-http-proxy set the host header correctly ([PORTAL-2113](https://issue.inventage.com/browse/PORTAL-2113)).
 
 ## [9.1.0]-202404300852-1126-7dcb42ab - 2024-04-30
 
