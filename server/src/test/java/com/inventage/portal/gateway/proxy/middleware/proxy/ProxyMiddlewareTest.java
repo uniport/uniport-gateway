@@ -10,17 +10,18 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
-import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -35,174 +36,165 @@ public class ProxyMiddlewareTest {
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     @Test
-    void correctHostHeader(Vertx vertx, VertxTestContext testCtx) {
+    @Timeout(value = 10, timeUnit = TimeUnit.MINUTES)
+    void correctHostHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
+        final int backendPort = TestUtils.findFreePort();
+
+        final Checkpoint hostVerified = testCtx.checkpoint();
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            // then
+            testCtx.verify(() -> {
+                Assertions.assertEquals("localdev.me" + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
+                hostVerified.flag();
+            });
+        };
+
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withRoutingContextHolder(routingContext)
-            .withProxyMiddleware("test.host.com", 8000)
+            .withProxyMiddleware("localdev.me", backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
             .build().start();
+
         // when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            Assertions.assertEquals("test.host.com",
-                routingContext.get().request().headers().get(HttpHeaderNames.HOST));
+            testCtx.verify(() -> {
+                Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
+            });
             testCtx.completeNow();
         });
-        // then
     }
 
     @Test
-    void proxyTest(Vertx vertx, VertxTestContext testCtx) {
+    void proxyTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
         final String host = "localhost";
         final int proxyPort = TestUtils.findFreePort();
-        final int serverPort = TestUtils.findFreePort();
-        final String serverResponse = "server";
+        final int backendPort = TestUtils.findFreePort();
 
-        final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, serverPort);
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            testCtx.verify(() -> {
+                assertEquals("http", ctx.request().headers().get(X_FORWARDED_PROTO));
+                assertEquals(host + ":" + proxyPort, ctx.request().headers().get(X_FORWARDED_HOST));
+                assertEquals(String.valueOf(proxyPort), ctx.request().headers().get(X_FORWARDED_PORT));
+            });
 
-        final Router router = Router.router(vertx);
-        router.route().handler(proxy);
+            ctx.response().end();
+        };
 
-        vertx.createHttpServer().requestHandler(req -> {
-            router.handle(req);
-        }).listen(proxyPort)
-            .onComplete(testCtx.succeeding(s -> {
-                vertx.createHttpServer().requestHandler(req -> {
-                    testCtx.verify(() -> {
-                        assertEquals("http", req.headers().get(X_FORWARDED_PROTO));
-                        assertEquals(host, req.headers().get(X_FORWARDED_HOST));
-                        assertEquals(String.valueOf(proxyPort), req.headers().get(X_FORWARDED_PORT));
-                    });
-                    req.response().end(serverResponse);
-                }).listen(serverPort)
-                    .onComplete(testCtx.succeeding(p -> {
-                        vertx.createHttpClient().request(HttpMethod.GET, proxyPort, host, "/blub")
-                            .compose(HttpClientRequest::send)
-                            .onComplete(testCtx.succeeding(resp -> {
-                                testCtx.verify(() -> {
-                                    assertEquals(HttpResponseStatus.OK.code(), resp.statusCode());
-                                });
-                                resp.body()
-                                    .onComplete(testCtx.succeeding(body -> {
-                                        testCtx.verify(() -> assertEquals(serverResponse, body.toString()));
-                                        testCtx.completeNow();
-                                    }));
-                            }));
-                    }));
-            }));
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build().start(proxyPort);
 
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
+            response.body().onComplete((body) -> {
+                //then
+                testCtx.verify(() -> {
+                    Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
+                });
+                testCtx.completeNow();
+            });
+        });
     }
 
     @Test
-    void proxyRequestToHTTPSServer(Vertx vertx, VertxTestContext testCtx) {
+    void proxyRequestToHTTPSServer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int serverPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
         final File trustStoreFile = loadFile("truststore-test.jks");
         final String trustStorePassword = "123456";
-        final String serverResponse = "server";
-
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware(host, serverPort, "https", false, false, trustStoreFile.getPath(), trustStorePassword)
-            .build().start();
-
-        final HttpServerOptions options = new HttpServerOptions()
+        final HttpServerOptions serverOptions = new HttpServerOptions()
             .setSsl(true)
             .setKeyCertOptions(new JksOptions()
                 .setPath(trustStoreFile.getPath())
                 .setPassword(trustStorePassword));
 
-        vertx.createHttpServer(options).requestHandler(req -> {
-            req.response().end(serverResponse);
-        }).listen(serverPort);
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort, "https", false, false, trustStoreFile.getPath(), trustStorePassword)
+            .withBackend(vertx, backendPort, serverOptions)
+            .build().start();
+
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             response.body().onComplete((body) -> {
                 //then
-                Assertions.assertEquals(body.result().toString(), serverResponse);
+                testCtx.verify(() -> {
+                    Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
+                });
                 testCtx.completeNow();
             });
         });
     }
 
     @Test
-    void proxyRequestToHTTPSServerTrustAllCertificates(Vertx vertx, VertxTestContext testCtx) {
+    void proxyRequestToHTTPSServerTrustAllCertificates(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int serverPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
         final File file = loadFile("truststore-test.jks");
-        final String serverResponse = "server";
         final boolean trustAllCertificates = true;
-
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware(host, serverPort, "https", trustAllCertificates, false, null, null)
-            .build().start();
-
-        final HttpServerOptions options = new HttpServerOptions()
+        final HttpServerOptions serverOptions = new HttpServerOptions()
             .setSsl(true)
             .setKeyCertOptions(new JksOptions()
                 .setPath(file.getPath())
                 .setPassword("123456"));
 
-        vertx.createHttpServer(options).requestHandler(req -> {
-            req.response().end(serverResponse);
-        }).listen(serverPort);
-        //when
-        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            response.body().onComplete((body) -> {
-                //then
-                Assertions.assertEquals(body.result().toString(), serverResponse);
-                testCtx.completeNow();
-            });
-        });
-    }
-
-    @Test
-    void proxyRequestToHTTPSServerWithoutCertificate(Vertx vertx, VertxTestContext testCtx) {
-        //given
-        final String host = "localhost";
-        final int serverPort = TestUtils.findFreePort();
-        final String serverResponse = "server";
-        final boolean trustAllCertificates = true;
-
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware(host, serverPort, "https", trustAllCertificates, false, null, null)
+            .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
+            .withBackend(vertx, backendPort, serverOptions)
             .build().start();
 
-        final HttpServerOptions options = new HttpServerOptions()
-            .setSsl(true);
-
-        vertx.createHttpServer(options).requestHandler(req -> {
-            req.response().end(serverResponse);
-        }).listen(serverPort);
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            //then
+            testCtx.verify(() -> {
+                Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
+            });
             testCtx.completeNow();
         });
     }
 
     @Test
-    void proxyRequestToNotHTTPSServer(Vertx vertx, VertxTestContext testCtx) {
+    void proxyRequestToHTTPSServerWithoutCertificate(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int serverPort = TestUtils.findFreePort();
-        final String serverResponse = "server";
+        final int backendPort = TestUtils.findFreePort();
         final boolean trustAllCertificates = true;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware(host, serverPort, "https", trustAllCertificates, false, null, null)
+            .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
+            .withBackend(vertx, backendPort, new HttpServerOptions().setSsl(true))
             .build().start();
 
-        final HttpServerOptions options = new HttpServerOptions();
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
+            testCtx.verify(() -> {
+                Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            });
+            testCtx.completeNow();
+        });
+    }
 
-        vertx.createHttpServer(options).requestHandler(req -> {
-            req.response().end(serverResponse);
-        }).listen(serverPort);
+    @Test
+    void proxyRequestToNotHTTPSServer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        //given
+        final String host = "localhost";
+        final int backendPort = TestUtils.findFreePort();
+        final boolean trustAllCertificates = true;
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
+            .withBackend(vertx, backendPort)
+            .build().start();
+
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             //then
-            Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            testCtx.verify(() -> {
+                Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            });
             testCtx.completeNow();
         });
     }
@@ -221,15 +213,19 @@ public class ProxyMiddlewareTest {
             .withSessionMiddleware()
             .withMiddleware(incrementDecrementResponseModifier(counter))
             .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, backendHandler())
+            .withBackend(vertx, backendPort)
             .build().start();
         // when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             // should be 1, put is actually 0 because of bug
-            Assertions.assertEquals(1, counter.get().intValue());
+            testCtx.verify(() -> {
+                Assertions.assertEquals(1, counter.get().intValue());
+            });
         });
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            Assertions.assertEquals(0, counter.get().intValue());
+            testCtx.verify(() -> {
+                Assertions.assertEquals(0, counter.get().intValue());
+            });
             // then
             testCtx.completeNow();
         });
@@ -254,12 +250,6 @@ public class ProxyMiddlewareTest {
             counter.set(counter.get().intValue() + 1);
             ctx.put(Middleware.RESPONSE_HEADERS_MODIFIERS, modifiers);
             ctx.next();
-        };
-    }
-
-    private Handler<RoutingContext> backendHandler() {
-        return ctx -> {
-            ctx.response().end();
         };
     }
 

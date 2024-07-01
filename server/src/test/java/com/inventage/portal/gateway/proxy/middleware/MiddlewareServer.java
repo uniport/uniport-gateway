@@ -22,20 +22,25 @@ public class MiddlewareServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MiddlewareServer.class);
 
     private final Vertx vertx;
-    private final HttpServer httpServer;
-    private final int port;
-    private final String host;
     private final VertxTestContext testCtx;
+    private final HttpServer httpServer;
+    private final String host;
+    private int port;
 
     public MiddlewareServer(Vertx vertx, HttpServer httpServer, String host, VertxTestContext testCtx) {
-        this.port = TestUtils.findFreePort();
         this.vertx = vertx;
+        this.testCtx = testCtx;
         this.httpServer = httpServer;
         this.host = host;
-        this.testCtx = testCtx;
     }
 
     public MiddlewareServer start() {
+        final int port = TestUtils.findFreePort();
+        return start(port);
+    }
+
+    public MiddlewareServer start(int port) {
+        this.port = port;
         final Future<HttpServer> httpServerFuture = httpServer.listen(port, host);
         try {
             awaitComplete(httpServerFuture);

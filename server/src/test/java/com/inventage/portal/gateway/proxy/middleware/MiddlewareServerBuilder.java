@@ -43,6 +43,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -321,14 +322,23 @@ public final class MiddlewareServerBuilder {
         return withBackend(vertx, port, defaultHandler);
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler)
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, HttpServerOptions serverOptions) throws InterruptedException {
+        final Handler<RoutingContext> defaultHandler = ctx -> ctx.response().end();
+        return withBackend(vertx, port, serverOptions, defaultHandler);
+    }
+
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler) throws InterruptedException {
+        return withBackend(vertx, port, new HttpServerOptions(), handler);
+    }
+
+    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, HttpServerOptions serverOptions, Handler<RoutingContext> handler)
         throws InterruptedException {
         final VertxTestContext testContext = new VertxTestContext();
         final Router serviceRouter = Router.router(vertx);
 
         serviceRouter.route().handler(handler);
 
-        vertx.createHttpServer().requestHandler(serviceRouter).listen(port)
+        vertx.createHttpServer(serverOptions).requestHandler(serviceRouter).listen(port)
             .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
@@ -425,7 +435,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServer build(Handler<RoutingContext> backendMockHandler) {
-        router.route().handler(ctx -> ctx.response().setStatusCode(200).end("ok"));
+        router.route().handler(backendMockHandler);
         final HttpServer httpServer = vertx.createHttpServer().requestHandler(router);
         return new MiddlewareServer(vertx, httpServer, host, testCtx);
     }
