@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -119,7 +120,13 @@ public class HeaderMiddlewareTest {
         vertx.createHttpServer().requestHandler(serviceRouter).listen(servicePort).onComplete(testCtx.succeeding(s -> {
             serviceStarted.flag();
 
-            ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", host, servicePort);
+            ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy",
+                host, servicePort,
+                ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
 
             Router router = Router.router(vertx);
             router.route().handler(header).handler(proxy);

@@ -37,11 +37,6 @@ public class ProxyMiddleware extends TraceMiddleware {
 
     private static final String HTTPS = "https";
 
-    private static final boolean DEFAULT_HTTPS_TRUST_ALL = true;
-    private static final boolean DEFAULT_HTTPS_VERIFY_HOSTNAME = false;
-    private static final String DEFAULT_HTTPS_TRUST_STORE_PATH = "";
-    private static final String DEFAULT_HTTPS_TRUST_STORE_PASSWORD = "";
-
     private final HttpProxy httpProxy;
 
     private final String name;
@@ -50,27 +45,12 @@ public class ProxyMiddleware extends TraceMiddleware {
 
     /**
     */
-    public ProxyMiddleware(Vertx vertx, String name, String serverHost, int serverPort) {
-        this(
-            vertx,
-            name,
-            "http",
-            serverHost,
-            serverPort,
-            DEFAULT_HTTPS_TRUST_ALL,
-            DEFAULT_HTTPS_VERIFY_HOSTNAME,
-            DEFAULT_HTTPS_TRUST_STORE_PATH,
-            DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
-    }
-
-    /**
-    */
     public ProxyMiddleware(
         Vertx vertx,
         String name,
-        String serverProtocol,
         String serverHost,
         int serverPort,
+        String serverProtocol,
         Boolean httpsTrustAll,
         Boolean httpsVerifyHostname,
         String httpsTrustStorePath,
@@ -109,10 +89,13 @@ public class ProxyMiddleware extends TraceMiddleware {
         final HttpClientOptions options = new HttpClientOptions();
         if (HTTPS.equalsIgnoreCase(serverProtocol)) {
             options.setSsl(true);
-            options.setTrustAll((httpsTrustAll != null) ? httpsTrustAll : DEFAULT_HTTPS_TRUST_ALL);
-            options.setVerifyHost((httpsVerifyHostname != null) ? httpsVerifyHostname : DEFAULT_HTTPS_VERIFY_HOSTNAME);
+            options.setTrustAll(httpsTrustAll);
+            options.setVerifyHost(httpsVerifyHostname);
             if (httpsTrustStorePath != null && httpsTrustStorePassword != null) {
-                options.setTrustOptions(new JksOptions().setPath(httpsTrustStorePath).setPassword(httpsTrustStorePassword));
+                options.setTrustOptions(
+                    new JksOptions()
+                        .setPath(httpsTrustStorePath)
+                        .setPassword(httpsTrustStorePassword));
             }
             options.setLogActivity(LOGGER.isDebugEnabled());
             LOGGER.info("using HTTPS for host '{}'", serverHost);

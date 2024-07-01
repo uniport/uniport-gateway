@@ -16,6 +16,12 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
 
+    public static final String DEFAULT_SERVER_PROTOCOL = "http";
+    public static final boolean DEFAULT_HTTPS_TRUST_ALL = true;
+    public static final boolean DEFAULT_HTTPS_VERIFY_HOSTNAME = false;
+    public static final String DEFAULT_HTTPS_TRUST_STORE_PATH = null;
+    public static final String DEFAULT_HTTPS_TRUST_STORE_PASSWORD = null;
+
     private static final String MIDDLEWARE_PROXY = "proxy";
 
     @Override
@@ -26,17 +32,38 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject serviceConfig) {
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_PROXY);
+
+        final String serverProtocol = serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_PROTOCOL, DEFAULT_SERVER_PROTOCOL);
+        Boolean trustAll = null;
+        Boolean verifyHost = null;
+        String storePath = null;
+        String storePassword = null;
+
         final JsonObject httpsOptions = serviceConfig.getJsonObject(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS);
-        final Boolean trustAll = httpsOptions == null ? null : httpsOptions.getBoolean(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL);
-        final Boolean verifyHost = httpsOptions == null ? null : httpsOptions.getBoolean(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME);
-        final String storePath = httpsOptions == null ? null : httpsOptions.getString(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH);
-        final String storePassword = httpsOptions == null ? null : httpsOptions.getString(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD);
+        if (httpsOptions != null) {
+            trustAll = httpsOptions.getBoolean(
+                DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
+                DEFAULT_HTTPS_TRUST_ALL);
+            verifyHost = httpsOptions.getBoolean(
+                DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
+                DEFAULT_HTTPS_VERIFY_HOSTNAME);
+            storePath = httpsOptions.getString(
+                DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
+                DEFAULT_HTTPS_TRUST_STORE_PATH);
+            storePassword = httpsOptions.getString(
+                DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
+                DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
+        }
+
         return Future.succeededFuture(
             new ProxyMiddleware(vertx,
                 name,
-                serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_PROTOCOL),
                 serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_HOST),
                 serviceConfig.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT),
-                trustAll, verifyHost, storePath, storePassword));
+                serverProtocol,
+                trustAll,
+                verifyHost,
+                storePath,
+                storePassword));
     }
 }

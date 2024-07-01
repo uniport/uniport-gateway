@@ -32,6 +32,7 @@ import com.inventage.portal.gateway.proxy.middleware.matomo.MatomoMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
@@ -310,11 +311,17 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port) {
-        return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port));
+        return withMiddleware(new ProxyMiddleware(vertx, "proxy",
+            host, port,
+            ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
+            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
+            ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
+            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
+            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD));
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port, String serverProtocol, boolean httpsTrustAll, boolean verifyHost, String httpsTrustStorePath, String httpsTrustStorePassword) {
-        return withMiddleware(new ProxyMiddleware(vertx, "proxy", serverProtocol, host, port, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword));
+        return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port, serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword));
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {

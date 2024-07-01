@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -256,7 +257,14 @@ public class SessionBagMiddlewareTest {
             final SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(SESSION_COOKIE_NAME);
             final SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies,
                 "uniport.session");
-            final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy", HOST, servicePort);
+            final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy",
+                HOST, servicePort,
+                ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
+
             final Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);
 
