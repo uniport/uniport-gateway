@@ -34,10 +34,10 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
         LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_PROXY);
 
         final String serverProtocol = serviceConfig.getString(DynamicConfiguration.SERVICE_SERVER_PROTOCOL, DEFAULT_SERVER_PROTOCOL);
-        Boolean trustAll = null;
-        Boolean verifyHost = null;
-        String storePath = null;
-        String storePassword = null;
+        Boolean trustAll = DEFAULT_HTTPS_TRUST_ALL;
+        Boolean verifyHost = DEFAULT_HTTPS_VERIFY_HOSTNAME;
+        String storePath = DEFAULT_HTTPS_TRUST_STORE_PATH;
+        String storePassword = DEFAULT_HTTPS_TRUST_STORE_PASSWORD;
 
         final JsonObject httpsOptions = serviceConfig.getJsonObject(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS);
         if (httpsOptions != null) {
