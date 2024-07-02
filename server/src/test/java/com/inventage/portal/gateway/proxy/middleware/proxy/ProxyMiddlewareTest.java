@@ -12,6 +12,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
@@ -93,6 +94,46 @@ public class ProxyMiddlewareTest {
                 testCtx.completeNow();
             });
         });
+    }
+
+    @Test
+    void proxyPreserveXForwardedHeadersTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String host = "localhost";
+        final int proxyPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
+
+        final String proto = "foo";
+        final String port = String.valueOf(1234);
+
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            testCtx.verify(() -> {
+                assertEquals(proto, ctx.request().headers().get(X_FORWARDED_PROTO));
+                assertEquals(port, ctx.request().headers().get(X_FORWARDED_PORT));
+            });
+
+            ctx.response().end();
+        };
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build().start(proxyPort);
+
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/",
+            new RequestOptions()
+                .addHeader(X_FORWARDED_PROTO, proto)
+                .addHeader(X_FORWARDED_PORT, port),
+            response -> {
+                response.body().onComplete((body) -> {
+                    //then
+                    testCtx.verify(() -> {
+                        Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
+                    });
+                    testCtx.completeNow();
+                });
+            });
     }
 
     @Test

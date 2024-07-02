@@ -185,19 +185,38 @@ public class ProxyMiddleware extends TraceMiddleware {
 
                 final String proto = request.scheme();
                 LOGGER.debug("setting the '{}' header to '{}'", X_FORWARDED_PROTO, proto);
-                incomingRequest.putHeader(X_FORWARDED_PROTO, proto);
+                useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PROTO, proto);
 
                 if (request.authority() != null) {
                     final int port = request.authority().port();
                     if (port > 0) {
                         LOGGER.debug("setting the '{}' header to '{}'", X_FORWARDED_PORT, port);
-                        incomingRequest.putHeader(X_FORWARDED_PORT, String.valueOf(port));
+                        useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PORT, String.valueOf(port));
                     }
                 }
 
                 return proxyContext.sendRequest();
             }
         });
+    }
+
+    /**
+     * Generally, x-forwarded header should be extended. But apparently, hosts like keycloak refuse to serve
+     * traffic that has 'http' in its 'x-forwarded-proto' header. As the portal-gateway is running behind and
+     * ingress, that terminates TLS, the public protocol is always 'https', but the ingress talks plain 'http'
+     * with the portal-gateway.
+     * 
+     * @param headers
+     * @param headerName
+     * @param headerValue
+     */
+    private void useOrSetHeader(MultiMap headers, CharSequence headerName, String headerValue) {
+        if (headers.contains(headerName)) { // use
+            LOGGER.debug("using provided header '{}' with '{}'", headerName, headers.get(headerName));
+        } else { // set
+            LOGGER.debug("setting header '{}' to '{}'", headerName, headers.get(headerName));
+            headers.set(headerName, headerValue);
+        }
     }
 
     /**
