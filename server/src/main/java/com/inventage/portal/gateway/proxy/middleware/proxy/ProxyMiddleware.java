@@ -184,13 +184,11 @@ public class ProxyMiddleware extends TraceMiddleware {
                 final HttpServerRequest request = incomingRequest.proxiedRequest();
 
                 final String proto = request.scheme();
-                LOGGER.debug("setting the '{}' header to '{}'", X_FORWARDED_PROTO, proto);
                 useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PROTO, proto);
 
                 if (request.authority() != null) {
                     final int port = request.authority().port();
                     if (port > 0) {
-                        LOGGER.debug("setting the '{}' header to '{}'", X_FORWARDED_PORT, port);
                         useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PORT, String.valueOf(port));
                     }
                 }
