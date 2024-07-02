@@ -15,13 +15,11 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
-import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +34,6 @@ public class ProxyMiddlewareTest {
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.MINUTES)
     void correctHostHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final int backendPort = TestUtils.findFreePort();
