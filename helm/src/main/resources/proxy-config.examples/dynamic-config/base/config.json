@@ -16,9 +16,17 @@
             {
                 "name": "apple-app-site-association",
                 "middlewares": [
-                    "baseAppleAppSiteHeaders"
+                    "applicationJsonNoCacheHeaders"
                 ],
                 "rule": "Path('/.well-known/apple-app-site-association')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "android-assetlinks",
+                "middlewares": [
+                    "applicationJsonNoCacheHeaders"
+                ],
+                "rule": "Path('/.well-known/assetlinks.json')",
                 "service": "base-proxy"
             }
         ],
@@ -62,7 +70,7 @@
                 }
             },
             {
-                "name": "baseAppleAppSiteHeaders",
+                "name": "applicationJsonNoCacheHeaders",
                 "type": "headers",
                 "options": {
                     "customResponseHeaders": {
