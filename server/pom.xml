@@ -12,6 +12,7 @@
 
     <properties>
         <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
