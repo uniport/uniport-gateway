@@ -24,6 +24,8 @@ CI_HOST="ci.inventage.com"
 CI_GROUP="Inventage Portal"
 CI_MULTIBRANCH_NAME="Build"
 
+Z40=0000000000000000000000000000000000000000
+
 declare -A REPO_TO_BUILD_NAME
 REPO_TO_BUILD_NAME["analytics"]="Analytics"
 REPO_TO_BUILD_NAME["antivirus"]="Antivirus"
@@ -77,6 +79,11 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     # but we are not interested in a particular commit, hence we just read the first
     break
 done
+
+if [ "$local_sha" = $Z40 ]; then
+    echo "[git pre-push hook] Deleting reference! Can't print build job URL."
+    exit 0 # still exit normally to proceed with the push
+fi
 
 if [ -z "${REMOTE_BRANCH}" ]; then
     echo "[git pre-push hook] No new commits! Can't print build job URL."
