@@ -57,7 +57,7 @@
             For convenience, both variants are configured here, one in a comment.
         -->
         <portal-helm-chart-library.version>4.8.0-202407091055-333-ce6787b</portal-helm-chart-library.version>
-        <portal-code-style-settings.version>1.4.0-202404081537-54-54f1eba</portal-code-style-settings.version>
+        <portal-code-style-settings.version>1.6.0-202407091439-88-15b9984</portal-code-style-settings.version>
     </properties>
 
     <dependencyManagement>
@@ -627,6 +627,7 @@
                 <configuration>
                     <installHooks>
                         <pre-commit>.code-style-settings/hooks/pre-commit</pre-commit>
+                        <pre-push>.code-style-settings/hooks/pre-push</pre-push>
                     </installHooks>
                 </configuration>
                 <executions>

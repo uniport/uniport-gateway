@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <!-- See https://checkstyle.sourceforge.io/checks.html -->
 <module name="Checker">
@@ -33,7 +34,8 @@
             <property name="tokens" value="LITERAL_CATCH,LITERAL_ELSE,LITERAL_IF"/>
         </module>
         <module name="EmptyBlock">
-            <property name="tokens" value="LITERAL_DO,LITERAL_FINALLY,LITERAL_FOR,LITERAL_TRY,LITERAL_WHILE,STATIC_INIT"/>
+            <property name="tokens"
+                      value="LITERAL_DO,LITERAL_FINALLY,LITERAL_FOR,LITERAL_TRY,LITERAL_WHILE,STATIC_INIT"/>
         </module>
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
@@ -59,14 +61,19 @@
         </module>
         <module name="JavadocType">
             <property name="scope" value="protected"/>
-            <property name="allowMissingParamTags" value="true" />
+            <property name="allowMissingParamTags" value="true"/>
         </module>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
         <module name="MethodName"/>
-        <module name="MissingJavadocMethod" />
-        <module name="MissingJavadocType" />
+        <module name="MissingJavadocMethod">
+            <property name="allowMissingPropertyJavadoc" value="true"/>
+        </module>
+        <module name="MissingJavadocMethodCheck">
+            <property name="allowMissingPropertyJavadoc" value="true"/>
+        </module>
+        <module name="MissingJavadocType"/>
         <module name="MissingSwitchDefault"/>
         <module name="ModifierOrder"/>
         <module name="MultipleStringLiterals">

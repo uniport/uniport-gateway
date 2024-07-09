@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CheckStyle-IDEA" serialisationVersion="2">
-    <checkstyleVersion>10.7.0</checkstyleVersion>
-    <scanScope>JavaOnly</scanScope>
+    <checkstyleVersion>10.16.0</checkstyleVersion>
+    <scanScope>JavaOnlyWithTests</scanScope>
     <option name="thirdPartyClasspath" />
     <option name="activeLocationIds">
       <option value="bundled-portal-checks" />
     </option>
     <option name="locations">
       <list>
-        <ConfigurationLocation id="bundled-portal-checks" type="PROJECT_RELATIVE" scope="All" description="Custom">$PROJECT_DIR$/.code-style-settings/checkstyle/config.xml</ConfigurationLocation>
+        <ConfigurationLocation id="bundled-sun-checks" type="BUNDLED" scope="All" description="Sun Checks">(bundled)</ConfigurationLocation>
+        <ConfigurationLocation id="bundled-google-checks" type="BUNDLED" scope="All" description="Google Checks">(bundled)</ConfigurationLocation>
+        <ConfigurationLocation id="bundled-portal-checks" type="PROJECT_RELATIVE" scope="All" description="Uniport">$PROJECT_DIR$/.code-style-settings/checkstyle/config.xml</ConfigurationLocation>
       </list>
     </option>
   </component>

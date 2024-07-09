@@ -1,0 +1,90 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+# An hook script to print the link to the build. Called by "git
+# push" after it has checked the remote status, but before anything has been
+# pushed. If this script exits with a non-zero status nothing will be pushed.
+#
+# This hook is called with the following parameters:
+#
+# $1 -- Name of the remote to which the push is being done
+# $2 -- URL to which the push is being done
+#
+# If pushing without using a named remote those arguments will be equal.
+#
+# Information about the commits which are being pushed is supplied as lines to
+# the standard input in the form:
+#
+#   <local ref> <local sha1> <remote ref> <remote sha1>
+
+echo "[git pre-push hook] Running build job URL generation."
+
+CI_HOST="ci.inventage.com"
+CI_GROUP="Inventage Portal"
+CI_MULTIBRANCH_NAME="Build"
+
+declare -A REPO_TO_BUILD_NAME
+REPO_TO_BUILD_NAME["analytics"]="Analytics"
+REPO_TO_BUILD_NAME["antivirus"]="Antivirus"
+REPO_TO_BUILD_NAME["archetype-inventage-portal-solution"]="Archetype Inventage Portal Solution"
+REPO_TO_BUILD_NAME["archetype-portal-hasura-quarkus-postgres"]="Archetype Microservice"
+REPO_TO_BUILD_NAME["base"]="Base"
+REPO_TO_BUILD_NAME["code-style-settings"]="Code-Style-Settings"
+REPO_TO_BUILD_NAME["content"]="Content"
+REPO_TO_BUILD_NAME["conversation"]="Conversation"
+REPO_TO_BUILD_NAME["dashboard"]="Dashboard"
+REPO_TO_BUILD_NAME["filestorage"]="FileStorage"
+REPO_TO_BUILD_NAME["notification"]="Notification"
+REPO_TO_BUILD_NAME["organisation"]="Organisation"
+REPO_TO_BUILD_NAME["portal-database"]="Portal Database"
+REPO_TO_BUILD_NAME["portal-gateway"]="Portal Gateway"
+REPO_TO_BUILD_NAME["portal-helm-chart-library"]="Portal Helm Chart Library"
+REPO_TO_BUILD_NAME["portal-iam"]="Portal IAM"
+REPO_TO_BUILD_NAME["portal-messaging"]="Portal Messaging"
+REPO_TO_BUILD_NAME["portal-monitoring"]="Portal Monitoring"
+REPO_TO_BUILD_NAME["portal-secrets"]="Portal Secrets"
+REPO_TO_BUILD_NAME["sms"]="SMS"
+REPO_TO_BUILD_NAME["template"]="Template"
+
+# shellcheck disable=SC2034
+REMOTE="$1"
+URL="$2"
+
+# extract host
+HOST=${URL#*@}   # chop off the beginning until the first '@'
+HOST=${HOST%%:*} # chop off everything after the first ':'
+
+# extract org
+ORG=${URL#*:}  # chop off the beginning until the first ':'
+ORG=${ORG%%/*} # chop off everything after the first '/'
+
+# extract repo
+REPO=${URL#*/}   # chop off the beginning until the first '/'
+REPO=${REPO%%.*} # chop off the beginning until the first '.'
+
+BUILD_NAME="${REPO_TO_BUILD_NAME[$REPO]}"
+if [ -z "${BUILD_NAME}" ]; then
+    echo "[git pre-push hook] Unknown repository '$REPO'! Can't print build job URL."
+    exit 0 # still exit normally to proceed with the push
+fi
+
+REMOTE_BRANCH=""
+# shellcheck disable=SC2034
+while read -r local_ref local_sha remote_ref remote_sha; do
+    REMOTE_BRANCH=${remote_ref#*/*/} # get the part after the second '/'
+    # if multiple commits are being pushed, we'd receive this line multiple times,
+    # but we are not interested in a particular commit, hence we just read the first
+    break
+done
+
+if [ -z "${REMOTE_BRANCH}" ]; then
+    echo "[git pre-push hook] No new commits! Can't print build job URL."
+    exit 0 # still exit normally to proceed with the push
+fi
+
+echo "[git pre-push hook] Build job URL:"
+echo -n "    " # intend the following line
+echo "https://$CI_HOST/job/$CI_GROUP/job/$BUILD_NAME/job/$CI_MULTIBRANCH_NAME/job/$REMOTE_BRANCH/" | sed "s/\s/%20/g"
+
+exit 0
