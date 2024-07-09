@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Upgrade the Vert.x stack from `4.4.9` to `4.5.8` ([PORTAL-2035](https://issue.inventage.com/browse/PORTAL-2035)).
+- Use umbrella template to include all templates provided by the `portal-helm-chart-lib` ([PORTAL-2127](https://issue.inventage.com/browse/PORTAL-2127)).
 
 ### Fixed
 

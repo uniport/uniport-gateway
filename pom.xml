@@ -56,7 +56,7 @@
             to point to the staging version or the released version.
             For convenience, both variants are configured here, one in a comment.
         -->
-        <portal-helm-chart-library.version>4.8.0-202407081141-6-ce6787b</portal-helm-chart-library.version>
+        <portal-helm-chart-library.version>4.8.0-202407091055-333-ce6787b</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.4.0-202404081537-54-54f1eba</portal-code-style-settings.version>
     </properties>
 

@@ -1,7 +1,1 @@
-{{- include "portal-lib.configMap" . }}
-{{- include "portal-lib.deployment" . }}
-{{- include "portal-lib.ingress" . }}
-{{- include "portal-lib.secret" . }}
-{{- include "portal-lib.service" . }}
-{{- include "portal-lib.serviceAccount" . }}
-{{- include "portal-lib.statefulset" . }}
+{{- include "portal-lib.umbrella" . }}
