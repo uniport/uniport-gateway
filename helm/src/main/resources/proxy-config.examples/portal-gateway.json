@@ -58,6 +58,14 @@
                                 "path": "/auth/realms/portal/"
                             },
                             {
+                                "name": "AUTH_SESSION_ID",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "AUTH_SESSION_ID_LEGACY",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
                                 "name": "uniport.language",
                                 "path": "/"
                             },
