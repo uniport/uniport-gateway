@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This script checks if the json files used in the helm chart is valid according to their corresponding schemas.
 
 set -Eeo pipefail
