@@ -64,7 +64,7 @@ containers:
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
       PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
-        value: "portal-gateway-headless.portal1.svc.cluster.local"        
+        value: "portal-gateway-headless.portal1.svc.cluster.local"
 
 pod:
   replicas: 1
