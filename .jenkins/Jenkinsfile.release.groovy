@@ -3,15 +3,15 @@ library identifier: 'portal-jenkinsfile-library@0.2.0', retriever: modernSCM([
 ])
 
 releasePipeline(
-        releaseMvnArtifacts: true,
-        releaseHelmCharts: true,
-        releaseNpmPackages: false,
-        releaseContainerImages: true,
-        createGitTag: true,
-        bumpVersion: true,
-        updateChangelog: true,
-        createJiraRelease: true,
-        jiraReleasePrefix: "Portal-Gateway",
-        registerVersionWithArchetype: true,
-        registerVersionWithArchetypeComponentName: "portal-gateway"
+    releaseMvnArtifacts: true,
+    releaseHelmCharts: true,
+    releaseNpmPackages: false,
+    releaseContainerImages: true,
+    createGitTag: true,
+    bumpVersion: true,
+    updateChangelog: true,
+    createJiraRelease: true,
+    jiraReleasePrefix: "Portal-Gateway",
+    registerVersionWithArchetype: true,
+    registerVersionWithArchetypeComponentName: "portal-gateway"
 )

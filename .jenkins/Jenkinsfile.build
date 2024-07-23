@@ -11,7 +11,7 @@ pipeline {
 
     triggers {
         // every sunday between 3am and 5am (https://www.jenkins.io/doc/book/pipeline/syntax/)
-        cron(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'main' ? 'H H(3-5) * * 7' : '')
+        cron(env.BRANCH_NAME ==~ /master|main/ ? 'H H(3-5) * * 7' : '')
     }
 
     options {
@@ -28,14 +28,17 @@ pipeline {
     }
 
     environment {
-        LINE_SEPARATOR = '================================================================================'
-        IQ_SERVER_CREDENTIALS_ID = 'portal-registry-creds'
-        CI_NEXUS2_BITBUCKET_CREDS = credentials('inventage-portal')
-        CI_REGISTRY_CREDS = credentials('portal-registry-creds')
+        // read username/password from the Jenkins Credentials and store them in 3 env variables
+        // @see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
+        CI_AUTH_CREDENTIALS_ID = 'inventage-portal'
+        CI_AUTH = credentials('inventage-portal')
         CI_JENKINS_TOKEN = credentials('jenkins-inventage-portal')
 
-        // Contains the credentials & remotes for the helm repositories
-        HELM_REPOSITORY_CONFIG = "${env.WORKSPACE}/helm-repositories.yaml"
+        DOCKER_CONFIG_DIRECTORY = "${env.WORKSPACE}/.docker"
+        HELM_REGISTRY = 'https://nexus3.inventage.com/repository/inventage-portal-helm'
+        HELM_STAGING_REGISTRY = 'https://nexus3.inventage.com/repository/inventage-portal-helm-staging/'
+        HELM_REPOSITORY_CONFIG = "${env.WORKSPACE}/.helm-repositories.yaml"
+        NOTIFICATIONS_RECIPIENT_CONFIG_MAP_NAME = "default-email-recipients"
     }
 
     tools {
@@ -47,33 +50,53 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    Map checkoutCfg = checkout([
-                        $class           : 'GitSCM',
-                        branches         : scm.branches,
-                        extensions       : scm.extensions + [[$class: 'CleanBeforeCheckout']],
-                        userRemoteConfigs: scm.userRemoteConfigs
-                    ])
-                    env.GIT_URL = checkoutCfg.GIT_URL
-                    env.GIT_BRANCH_NAME = checkoutCfg.GIT_BRANCH
-                    echo "--> Building from remote: ${env.GIT_URL} on branch ${env.GIT_BRANCH_NAME}"
+                    Map checkoutConfig = checkoutGitRepoBranch()
+                    env.GIT_BRANCH_NAME = checkoutConfig.GIT_BRANCH
                 }
 
                 // Change the snapshot version in all pom.xml files to a release candidate version
                 updateVersion()
 
                 // Set environment variables from pom.xml
-                setPackageEnvironmentVariables()
-
-                // Update build information in Jenkins
                 script {
-                    currentBuild.displayName = "Build: #${env.BUILD_NUMBER}"
-                    currentBuild.description = "Version: ${env.PACKAGE_VERSION}"
+                    env.PACKAGE_GROUP_ID = readMvnPomVariable(variableName: "groupId")
+                    env.PACKAGE_ARTIFACT_ID = readMvnPomVariable(variableName: "artifactId")
+                    env.PACKAGE_VERSION = readMvnPomVariable(variableName: "version")
+
+                    env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
+                    env.PROMOTION_TAG_DOCKER = "${env.PROMOTION_TAG}_docker"
+                    env.PROMOTION_TAG_HELM = "${env.PROMOTION_TAG}_helm"
+                    env.PROMOTION_TAG_MVN = "${env.PROMOTION_TAG}_mvn"
+                    env.PROMOTION_TAG_NPM = "${env.PROMOTION_TAG}_npm"
+
+                    env.DOCKER_REGISTRY = readMvnPomVariable(variableName: "docker.registry")
+
+                    env.NOTIFICATIONS_RECIPIENT = getNotificationsRecipient(
+                        notificationRecipientsConfigMapName: "${env.NOTIFICATIONS_RECIPIENT_CONFIG_MAP_NAME}"
+                    )
                 }
 
-                // Display important environment variables
-                sh("env | sort")
+                // Update build information in Jenkins
+                updateJenkinsBuildInformation(
+                    buildNumber: "${env.BUILD_NUMBER}",
+                    version: "${env.PACKAGE_VERSION}"
+                )
 
-                addHelmRepositories("inventage-portal")
+                // Display important environment variables
+                printEnvVars()
+
+                // The names `inventage-portal-helm` & `inventage-portal-helm-staging` are referenced in scripts -
+                // be cautious when changing these names!
+                addHelmChartRepository(
+                    repositoryName: "inventage-portal-helm",
+                    repositoryURL: "${env.HELM_REGISTRY}",
+                    credentialsId: "inventage-portal"
+                )
+                addHelmChartRepository(
+                    repositoryName: "inventage-portal-helm-staging",
+                    repositoryURL: "${env.HELM_STAGING_REGISTRY}",
+                    credentialsId: "inventage-portal"
+                )
             }
         }
 
@@ -86,16 +109,15 @@ pipeline {
             steps {
                 sh 'mvn help:system'
 
-                withDockerRegistry(credentialsId: 'portal-registry-creds', url: "https://${DOCKER_REGISTRY}") {
+                withDockerRegistry(credentialsId: "${env.CI_AUTH_CREDENTIALS_ID}", url: "https://${env.DOCKER_REGISTRY}") {
                     mvn(
                         settings: '.jenkins/settings.xml',
-                        profiles: 'jenkins,!local',
+                        profiles: '!local,jenkins',
                         properties: [
-                            'java.io.tmpdir': WORKSPACE,
-                            'multiArchBuild': true
+                            'java.io.tmpdir': "${env.WORKSPACE}",
+                            'multiArchBuild': true,
                         ],
-                        'clean',
-                        'deploy'
+                        'clean', 'deploy'
                     )
                 }
             }
@@ -104,28 +126,23 @@ pipeline {
         stage('Analysis') {
             steps {
                 parallel(
-                        'Test Evaluation': {
-                            junit testResults: '**/target/surefire-reports/TEST-*.xml'
-                        },
-                        'IQ Evaluation': {
-                            iqEvaluation('inventage-portal-gateway', 'build', '**/target/bom.xml')
-                        },
-                        'Code Quality': {
-                            codeQualityEvaluation()
-                        },
-                        'Generated Code Check': {
-                            script {
-                                def git_status_output = sh(returnStdout: true, script: "git status --porcelain --untracked-files=no").trim()
-                                git_status_output.readLines().each { line ->
-                                    echo "${line}"
-                                    if (!(line ==~ '.*pom\\.xml$')) {
-                                        echo "${git_status_output}"
-                                        sh("git diff")
-                                        error("You have uncommited generated code!")
-                                    }
-                                }
-                            }
-                        }
+                    "Test Evaluation": {
+                        junit testResults: '**/target/surefire-reports/TEST-*.xml'
+                    },
+                    "IQ Evaluation": {
+                        iqEvaluation(
+                            application: 'inventage-portal-gateway',
+                            stage: 'build',
+                            credentialsId: "${env.CI_AUTH_CREDENTIALS_ID}",
+                            scanPatterns: ['**/target/bom.xml']
+                        )
+                    },
+                    "Code Quality": {
+                        codeQualityEvaluation()
+                    },
+                    'Generated Code Check': {
+                        noGeneratedCode()
+                    }
                 )
             }
         }
@@ -160,19 +177,26 @@ pipeline {
         stage('Tag Staging Repository') {
             steps {
                 // Container Images
-                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG_DOCKER}"
-                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG_DOCKER}"
-                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-docker-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}*"]], tagName: "${env.PROMOTION_TAG_DOCKER}"
-
+                tagStagingArtifacts(
+                    nexusInstanceId: 'nexus3.inventage.com',
+                    nexusRepository: 'inventage-portal-docker-staging',
+                    artifactVersion: "${env.PACKAGE_VERSION}",
+                    promotionTagName: "${env.PROMOTION_TAG_DOCKER}"
+                )
                 // Helm Charts
-                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG_HELM}"
-                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG_HELM}"
-                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-helm-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG_HELM}"
-
-                // Maven
-                echo "Create Nexus3 Tag: ${env.PROMOTION_TAG_MVN}"
-                createTag nexusInstanceId: 'nexus3.inventage.com', tagName: "${env.PROMOTION_TAG_MVN}"
-                associateTag nexusInstanceId: 'nexus3.inventage.com', search: [[key: 'repository', value: 'inventage-portal-maven-staging'], [key: 'version', value: "${env.PACKAGE_VERSION}"]], tagName: "${env.PROMOTION_TAG_MVN}"
+                tagStagingArtifacts(
+                    nexusInstanceId: 'nexus3.inventage.com',
+                    nexusRepository: 'inventage-portal-helm-staging',
+                    artifactVersion: "${env.PACKAGE_VERSION}",
+                    promotionTagName: "${env.PROMOTION_TAG_HELM}"
+                )
+                // Maven artifacts
+                tagStagingArtifacts(
+                    nexusInstanceId: 'nexus3.inventage.com',
+                    nexusRepository: 'inventage-portal-maven-staging',
+                    artifactVersion: "${env.PACKAGE_VERSION}",
+                    promotionTagName: "${env.PROMOTION_TAG_MVN}"
+                )
             }
         }
 
@@ -182,13 +206,11 @@ pipeline {
                     def params = [
                         "GIT_RELEASE_BRANCH_NAME": "${env.GIT_BRANCH_NAME}",
                         "NOTIFICATIONS_RECIPIENT": "${env.NOTIFICATIONS_RECIPIENT}",
-                        "PROMOTION_TAG": "${env.PROMOTION_TAG}",
-                        "PROMOTION_TAG_HELM": "${env.PROMOTION_TAG_HELM}",
-                        "PROMOTION_TAG_DOCKER": "${env.PROMOTION_TAG_DOCKER}",
-                        "PROMOTION_TAG_NPM": "",
-                        "PROMOTION_TAG_MVN": "${env.PROMOTION_TAG_MVN}",
                         "PACKAGE_VERSION": "${env.PACKAGE_VERSION}",
-                        "STAGING_REPOSITORY_ID": "${env.STAGING_REPOSITORY_ID}",
+                        "PROMOTION_TAG_DOCKER": "${env.PROMOTION_TAG_DOCKER}",
+                        "PROMOTION_TAG_HELM": "${env.PROMOTION_TAG_HELM}",
+                        "PROMOTION_TAG_MVN": "${env.PROMOTION_TAG_MVN}",
+                        "PROMOTION_TAG_NPM": "",
                         "UPSTREAM_BUILD_URL": "${env.BUILD_URL}"
                     ]
 
@@ -198,7 +220,7 @@ pipeline {
                             queryParams: params
                     )
 
-                    currentBuild.description = currentBuild.description + "<br /><a href=\"${releaseJobUrl}\" target=\"_blank\">Release</a>"
+                    addJenkinsReleaseJobURL(releaseJobURL: releaseJobUrl)
                 }
             }
         }
@@ -206,126 +228,7 @@ pipeline {
 
     post {
         always {
-            configFileProvider([configFile(fileId: 'default-email-recipients', variable: 'DEFAULT_EMAIL_RECIPIENTS')]) {
-                script {
-                    portal.sendNotifications(DEFAULT_EMAIL_RECIPIENTS)
-                }
-            }
+            sendNotifications(recipients: "${env.NOTIFICATIONS_RECIPIENT}")
         }
-    }
-}
-
-/**
- * Sets the appropriate version in `pom.xml`.
- */
-void updateVersion() {
-    String versionSuffix = portal.getVersionSuffix()
-    portal.updateVersion(versionSuffix)
-}
-
-/**
- * Sets important values defined in reactor pom.xml as environment variables.
- */
-void setPackageEnvironmentVariables() {
-    // @see https://jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#readmavenpom-read-a-maven-project-file
-    // @see http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html
-    def pom = readMavenPom file: 'pom.xml'
-
-    env.PACKAGE_VERSION = pom.version
-    env.PACKAGE_GROUP_ID = pom.groupId
-    env.PACKAGE_ARTIFACT_ID = pom.artifactId
-    env.DOCKER_REGISTRY = pom.properties['docker.registry']
-    env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
-    env.PROMOTION_TAG_DOCKER = "${env.PROMOTION_TAG}_docker"
-    env.PROMOTION_TAG_HELM = "${env.PROMOTION_TAG}_helm"
-    env.PROMOTION_TAG_MVN = "${env.PROMOTION_TAG}_mvn"
-    env.PROMOTION_TAG_NPM = "${env.PROMOTION_TAG}_npm"
-    env.PROMOTION_REPO_NAME = pom.properties['docker.promotion.repository.name']
-}
-
-def mvn(Map options = [:], CharSequence... goals) {
-    util.mvn(options, goals)
-}
-
-def iqEvaluation(application, stage, String... scanPatterns) {
-    def patterns = []
-    for (String scanPattern : scanPatterns) {
-        patterns.add([scanPattern: scanPattern])
-    }
-
-    nexusPolicyEvaluation failBuildOnNetworkError: false, iqApplication: application, iqScanPatterns: patterns, iqStage: stage, jobCredentialsId: "${env.IQ_SERVER_CREDENTIALS_ID}"
-}
-
-/**
- * Using Warnings Next Generation Plugin
- *
- * @link https://www.jenkins.io/doc/pipeline/steps/warnings-ng/
- * @link https://github.com/jenkinsci/warnings-ng-plugin/tree/master/doc
- *
- * @return
- */
-def codeQualityEvaluation() {
-    mvn(
-            settings: '.jenkins/settings.xml',
-            profiles: '!local',
-            properties: [
-                    'java.io.tmpdir': WORKSPACE
-            ],
-            'spotless:check checkstyle:check spotbugs:check'
-    )
-
-    recordIssues(
-            sourceCodeEncoding: 'UTF-8',
-            tools: [
-                    mavenConsole(reportEncoding: 'UTF-8')
-            ]
-    )
-
-    recordIssues(
-            healthy: 1,
-            unhealthy: 10,
-            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-            sourceCodeEncoding: 'UTF-8',
-            tools: [
-                    java(reportEncoding: 'UTF-8')
-            ]
-    )
-
-    recordIssues(
-            healthy: 1,
-            unhealthy: 10,
-            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]],
-            sourceCodeEncoding: 'UTF-8',
-            tools: [
-                    checkStyle(reportEncoding: 'UTF-8')
-            ]
-    )
-
-    recordIssues(
-            qualityGates: [
-                    [threshold: 1, type: 'TOTAL_NORMAL', unstable: true],
-                    [threshold: 1, type: 'TOTAL_HIGH', unstable: true],
-            ],
-            sourceCodeEncoding: 'UTF-8',
-            tools: [
-                    spotBugs(reportEncoding: 'UTF-8', useRankAsPriority: true)
-            ]
-    )
-
-    recordIssues(
-            sourceCodeEncoding: 'UTF-8',
-            tools: [
-                    taskScanner(includePattern: '**/*.java', normalTags: 'TODO,FIXME')
-            ]
-    )
-}
-
-def addHelmRepositories(String credentialsId) {
-    // The names `inventage-portal-helm` & `inventage-portal-helm-staging` are referenced in scripts - be cautious when
-    // changing these names!
-
-    withCredentials([usernamePassword(credentialsId: "${credentialsId}", passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
-        sh("helm repo add inventage-portal-helm https://nexus3.inventage.com/repository/inventage-portal-helm/ --username $USER --password $PASSWORD")
-        sh("helm repo add inventage-portal-helm-staging https://nexus3.inventage.com/repository/inventage-portal-helm-staging/ --username $USER --password $PASSWORD")
     }
 }
