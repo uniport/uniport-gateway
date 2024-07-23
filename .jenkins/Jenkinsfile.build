@@ -2,233 +2,38 @@ library identifier: 'portal-jenkinsfile-library@0.2.0', retriever: modernSCM([
     $class: 'GitSCMSource', remote: 'git@github.com:uniport/jenkinsfile-library.git',
 ])
 
-pipeline {
-    agent {
-        node {
-            label 'java17 && docker && !northport'
-        }
-    }
-
-    triggers {
-        // every sunday between 3am and 5am (https://www.jenkins.io/doc/book/pipeline/syntax/)
-        cron(env.BRANCH_NAME ==~ /master|main/ ? 'H H(3-5) * * 7' : '')
-    }
-
-    options {
-        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '20'))
-        timeout(time: 360, unit: 'MINUTES')
-        ansiColor('xterm')
-        skipDefaultCheckout()
-    }
-
-    parameters {
-        string(defaultValue: 'master', description: 'Branch name filter to push docker images', name: 'BRANCH_FILTER')
-        booleanParam(defaultValue: true, description: 'Deploy this build to DEV', name: 'DEPLOY_DEV')
-        booleanParam(defaultValue: true, description: 'Register this build version in the archetype-inventage-portal-solution', name: 'REGISTER_VERSION_WITH_ARCHETYPE')
-    }
-
-    environment {
-        // read username/password from the Jenkins Credentials and store them in 3 env variables
-        // @see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
-        CI_AUTH_CREDENTIALS_ID = 'inventage-portal'
-        CI_AUTH = credentials('inventage-portal')
-        CI_JENKINS_TOKEN = credentials('jenkins-inventage-portal')
-
-        DOCKER_CONFIG_DIRECTORY = "${env.WORKSPACE}/.docker"
-        HELM_REGISTRY = 'https://nexus3.inventage.com/repository/inventage-portal-helm'
-        HELM_STAGING_REGISTRY = 'https://nexus3.inventage.com/repository/inventage-portal-helm-staging/'
-        HELM_REPOSITORY_CONFIG = "${env.WORKSPACE}/.helm-repositories.yaml"
-        NOTIFICATIONS_RECIPIENT_CONFIG_MAP_NAME = "default-email-recipients"
-    }
-
-    tools {
-        maven 'maven-release-latest'
-        jdk 'OpenJDK-17'
-    }
-
-    stages {
-        stage('Initialize') {
-            steps {
-                script {
-                    Map checkoutConfig = checkoutGitRepoBranch()
-                    env.GIT_BRANCH_NAME = checkoutConfig.GIT_BRANCH
-                }
-
-                // Change the snapshot version in all pom.xml files to a release candidate version
-                updateVersion()
-
-                // Set environment variables from pom.xml
-                script {
-                    env.PACKAGE_GROUP_ID = readMvnPomVariable(variableName: "groupId")
-                    env.PACKAGE_ARTIFACT_ID = readMvnPomVariable(variableName: "artifactId")
-                    env.PACKAGE_VERSION = readMvnPomVariable(variableName: "version")
-
-                    env.PROMOTION_TAG = "${env.PACKAGE_GROUP_ID}_${env.PACKAGE_VERSION}"
-                    env.PROMOTION_TAG_DOCKER = "${env.PROMOTION_TAG}_docker"
-                    env.PROMOTION_TAG_HELM = "${env.PROMOTION_TAG}_helm"
-                    env.PROMOTION_TAG_MVN = "${env.PROMOTION_TAG}_mvn"
-                    env.PROMOTION_TAG_NPM = "${env.PROMOTION_TAG}_npm"
-
-                    env.DOCKER_REGISTRY = readMvnPomVariable(variableName: "docker.registry")
-
-                    env.NOTIFICATIONS_RECIPIENT = getNotificationsRecipient(
-                        notificationRecipientsConfigMapName: "${env.NOTIFICATIONS_RECIPIENT_CONFIG_MAP_NAME}"
-                    )
-                }
-
-                // Update build information in Jenkins
-                updateJenkinsBuildInformation(
-                    buildNumber: "${env.BUILD_NUMBER}",
-                    version: "${env.PACKAGE_VERSION}"
-                )
-
-                // Display important environment variables
-                printEnvVars()
-
-                // The names `inventage-portal-helm` & `inventage-portal-helm-staging` are referenced in scripts -
-                // be cautious when changing these names!
-                addHelmChartRepository(
-                    repositoryName: "inventage-portal-helm",
-                    repositoryURL: "${env.HELM_REGISTRY}",
-                    credentialsId: "inventage-portal"
-                )
-                addHelmChartRepository(
-                    repositoryName: "inventage-portal-helm-staging",
-                    repositoryURL: "${env.HELM_STAGING_REGISTRY}",
-                    credentialsId: "inventage-portal"
-                )
-            }
-        }
-
-        stage('Build') {
-            // Use the local docker host for building the container image
-            environment {
-                DOCKER_HOST = 'unix:///var/run/docker.sock'
-            }
-
-            steps {
-                sh 'mvn help:system'
-
-                withDockerRegistry(credentialsId: "${env.CI_AUTH_CREDENTIALS_ID}", url: "https://${env.DOCKER_REGISTRY}") {
-                    mvn(
-                        settings: '.jenkins/settings.xml',
-                        profiles: '!local,jenkins',
-                        properties: [
-                            'java.io.tmpdir': "${env.WORKSPACE}",
-                            'multiArchBuild': true,
-                        ],
-                        'clean', 'deploy'
-                    )
-                }
-            }
-        }
-
-        stage('Analysis') {
-            steps {
-                parallel(
-                    "Test Evaluation": {
-                        junit testResults: '**/target/surefire-reports/TEST-*.xml'
-                    },
-                    "IQ Evaluation": {
-                        iqEvaluation(
-                            application: 'inventage-portal-gateway',
-                            stage: 'build',
-                            credentialsId: "${env.CI_AUTH_CREDENTIALS_ID}",
-                            scanPatterns: ['**/target/bom.xml']
-                        )
-                    },
-                    "Code Quality": {
-                        codeQualityEvaluation()
-                    },
-                    'Generated Code Check': {
-                        noGeneratedCode()
-                    }
-                )
-            }
-        }
-
-        stage('Deployment DEV') {
-            when {
-                branch params.BRANCH_FILTER
-                expression { params.DEPLOY_DEV }
-            }
-            steps {
-                configureDevDeployment(
-                    version: "${env.PACKAGE_VERSION}",
-                    servicename: "gateway"
-                )
-            }
-        }
-
-        stage('Register Version with Archetype') {
-            when {
-                branch params.BRANCH_FILTER
-                expression { params.REGISTER_VERSION_WITH_ARCHETYPE }
-            }
-            steps {
-                registerVersionWithArchetype(
-                    component: "portal-gateway",
-                    version: "${env.PACKAGE_VERSION}",
-                    action: "snapshot"
-                )
-            }
-        }
-
-        stage('Tag Staging Repository') {
-            steps {
-                // Container Images
-                tagStagingArtifacts(
-                    nexusInstanceId: 'nexus3.inventage.com',
-                    nexusRepository: 'inventage-portal-docker-staging',
-                    artifactVersion: "${env.PACKAGE_VERSION}",
-                    promotionTagName: "${env.PROMOTION_TAG_DOCKER}"
-                )
-                // Helm Charts
-                tagStagingArtifacts(
-                    nexusInstanceId: 'nexus3.inventage.com',
-                    nexusRepository: 'inventage-portal-helm-staging',
-                    artifactVersion: "${env.PACKAGE_VERSION}",
-                    promotionTagName: "${env.PROMOTION_TAG_HELM}"
-                )
-                // Maven artifacts
-                tagStagingArtifacts(
-                    nexusInstanceId: 'nexus3.inventage.com',
-                    nexusRepository: 'inventage-portal-maven-staging',
-                    artifactVersion: "${env.PACKAGE_VERSION}",
-                    promotionTagName: "${env.PROMOTION_TAG_MVN}"
-                )
-            }
-        }
-
-        stage('Register Release Link') {
-            steps {
-                script {
-                    def params = [
-                        "GIT_RELEASE_BRANCH_NAME": "${env.GIT_BRANCH_NAME}",
-                        "NOTIFICATIONS_RECIPIENT": "${env.NOTIFICATIONS_RECIPIENT}",
-                        "PACKAGE_VERSION": "${env.PACKAGE_VERSION}",
-                        "PROMOTION_TAG_DOCKER": "${env.PROMOTION_TAG_DOCKER}",
-                        "PROMOTION_TAG_HELM": "${env.PROMOTION_TAG_HELM}",
-                        "PROMOTION_TAG_MVN": "${env.PROMOTION_TAG_MVN}",
-                        "PROMOTION_TAG_NPM": "",
-                        "UPSTREAM_BUILD_URL": "${env.BUILD_URL}"
-                    ]
-
-                    String releaseJobUrl = releaseJobUrl(
-                            jobUrl: "${env.JOB_URL}",
-                            authToken: "${env.CI_JENKINS_TOKEN}",
-                            queryParams: params
-                    )
-
-                    addJenkinsReleaseJobURL(releaseJobURL: releaseJobUrl)
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            sendNotifications(recipients: "${env.NOTIFICATIONS_RECIPIENT}")
-        }
-    }
-}
+buildPipeline(
+    // jenkins
+    nodeLabels: "java17 && docker && !northport",
+    defaultBranch: "master",
+    buildTimeoutMinutes: 60,
+    notificationRecipientsConfigMapName: "default-email-recipients",
+    // initialize
+    initializeDocker: true,
+    initializeHelm: true,
+    initializeNPM: false,
+    // build
+    mavenProfiles: "!local,jenkins",
+    // analysis
+    enableTestEvaluation: true,
+    testEvaluationResults: "**/target/surefire-reports/TEST-*.xml",
+    enableIQEvaluation: true,
+    iqEvaluationApplicationName: "inventage-portal-gateway",
+    iqEvaluationScanPatterns: ["**/target/bom.xml"],
+    enableCodeQualityEvaluation: true,
+    enableNoGeneratedCodeCheck: true,
+    // deployment
+    enableDevDelployment: true,
+    devDeploymentServiceName: "gateway",
+    // register with archetype
+    enableArchetypeRegistration: true,
+    archetypeComponentName: "portal-gateway",
+    // tag staging artifacts
+    tagStagingArtifactsDocker: true,
+    tagStagingArtifactsHelm: true,
+    tagStagingArtifactsMvn: true,
+    tagStagingArtifactsNPM: false,
+    // post
+    publishFrontendTestCoverageReport: false,
+    publishFrontendTestCoverageReportDir: ""
+)
