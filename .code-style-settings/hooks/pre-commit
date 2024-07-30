@@ -9,5 +9,6 @@ set -Eeuo pipefail
 
 echo '[git pre-commit hook] running spotless and checkstyle checks'
 
-mvn spotless:check \
+mvn initialize \
+    spotless:check \
     checkstyle:check
