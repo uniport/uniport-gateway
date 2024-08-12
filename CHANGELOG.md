@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade the Vert.x stack from `4.4.9` to `4.5.8` ([PORTAL-2035](https://issue.inventage.com/browse/PORTAL-2035)).
 - Use umbrella template to include all templates provided by the `portal-helm-chart-lib` ([PORTAL-2127](https://issue.inventage.com/browse/PORTAL-2127)).
 - Use `!/usr/bin/env bash` as shebang in scripts to use the default interpreter in the environment ([PORTAL-2151](https://issue.inventage.com/browse/PORTAL-2151)).
+- Upgrade the portal-helm-chart-library to `4.8.0-202408121024-348-6564893`.
 
 ### Fixed
 
