@@ -142,8 +142,10 @@ public class Entrypoint {
 
         Future.all(entryMiddlewaresFuture).onSuccess(cf -> {
             entryMiddlewaresFuture
-                .forEach(mf -> router.route().setName("entry middleware")
-                    .handler((Handler<RoutingContext>) mf.result()));
+                .forEach(mf -> {
+                    final Middleware middleware = mf.result();
+                    router.route().setName(middleware.getClass().getSimpleName()).handler((Handler<RoutingContext>) middleware);
+                });
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(err -> {
             vertx.close().onComplete(event -> {
