@@ -33,6 +33,8 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
     public static final String OIDC_PARAM_PKCE = "pkce";
     public static final String OIDC_PARAM_CODE = "code";
 
+    public static final String SINGLE_SIGN_ON_SID = "sso-sid";
+
     // prefix of the key for storing the oauth2 states in the session as a JSON structure
     private static final String PREFIX_STATE = "oauth2_state_";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
@@ -166,12 +168,21 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
                 // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User objects together.
                 // However, it is marked as deprecated, and therefore we use our own glue.
                 AuthenticationUserContext.of(authProvider, ctx.user()).toSessionAtScope(ctx.session(), sessionScope);
+                storeKeycloakSID(ctx);
             }
         }
         if (asyncResult.failed()) {
             LOGGER.warn("End handler failed '{}'", asyncResult.cause());
         }
         OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
+    }
+
+    private static void storeKeycloakSID(final RoutingContext ctx) {
+        ctx.user().attributes().stream()
+            .filter(attr -> "idToken".equals(attr.getKey()))
+            .map(attr -> (JsonObject) attr.getValue())
+            .map(json -> json.getString("sid"))
+            .forEach(sid -> ctx.session().put(SINGLE_SIGN_ON_SID, sid));
     }
 
     /**

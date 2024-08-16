@@ -9,11 +9,13 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,7 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     private final JWTAuthMultipleIssuersOptions additionalIssuersOptions;
     private final JWTAuthAdditionalClaimsOptions additionalClaimsOptions;
 
+    private JWTAuthOptions jwtAuthOptions;
     private AuthenticationHandler authHandler;
     private long timerId;
     private boolean reconcilerStarted;
@@ -43,6 +46,7 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         JsonArray publicKeySources, boolean reconcilationEnabled, long reconcilationIntervalMs
     ) {
         this.vertx = vertx;
+        this.jwtAuthOptions = jwtAuthOptions;
         this.jwtOptions = jwtAuthOptions.getJWTOptions();
         this.additionalIssuersOptions = additionalIssuersOptions;
         this.additionalClaimsOptions = additionalClaimsOptions;
@@ -107,6 +111,7 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         final Promise<AuthenticationHandler> promise = Promise.promise();
         JWTAuthPublicKeysReconcilerHandler.fetchPublicKeys(this.vertx, this.publicKeySources)
             .onSuccess(authOptions -> {
+                this.jwtAuthOptions = authOptions;
                 this.authHandler = createAuthHandlerWithFreshPublicKeys(authOptions);
                 LOGGER.debug("Refreshed public keys");
                 promise.complete(this);
@@ -122,5 +127,14 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         }
 
         return promise.future();
+    }
+
+    @Override
+    public List<JsonObject> getJwks() {
+        return this.jwtAuthOptions.getJwks();
+    }
+
+    protected JWTAuthOptions getJWTAuthOptions() {
+        return this.jwtAuthOptions;
     }
 }

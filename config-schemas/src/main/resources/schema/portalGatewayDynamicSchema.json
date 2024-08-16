@@ -249,7 +249,7 @@
               },
               "type" : {
                 "type" : "string",
-                "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo" ]
+                "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo", "backChannelLogout" ]
               }
             },
             "required" : [ "name", "type" ]

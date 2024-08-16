@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.SINGLE_SIGN_ON_SID;
+
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
@@ -54,18 +56,20 @@ public class ShowSessionContentMiddleware extends TraceMiddleware {
     private String getHtml(Session session) {
         final StringBuilder html = new StringBuilder();
 
-        html.append("instance:\n").append(this.instanceName);
+        html.append("Instance: ").append(this.instanceName);
         html.append("\n\n");
 
-        html.append("session ID:\n").append(session.id());
+        html.append("Session ID: ").append(session.id());
         html.append("\n");
-        html.append("session last access (seconds since epoch):\n").append(session.lastAccessed() / 1000); // https://www.epochconverter.com/?q=ms
+        html.append("Session last access (seconds since epoch): ").append(session.lastAccessed() / 1000); // https://www.epochconverter.com/?q=ms
+        html.append("\n");
+        html.append("SSO SID: ").append("" + session.get(SINGLE_SIGN_ON_SID));
         html.append("\n\n");
 
         final Set<Cookie> storedCookies = session.get(SessionBagMiddleware.SESSION_BAG_COOKIES);
         if (storedCookies != null) {
             if (!storedCookies.isEmpty()) {
-                html.append("cookies stored in session bag (each block is one cookie):\n\n");
+                html.append("Cookies stored in session bag (each block is one cookie):\n\n");
             }
             final List<Cookie> sortedStoredCookies = storedCookies.stream()
                 .sorted(Comparator.comparing(Cookie::getName))

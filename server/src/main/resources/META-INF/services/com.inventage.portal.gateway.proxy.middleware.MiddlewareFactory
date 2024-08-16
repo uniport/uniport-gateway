@@ -24,3 +24,4 @@ com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddlew
 com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddlewareFactory
 com.inventage.portal.gateway.proxy.middleware.matomo.MatomoMiddlewareFactory
+com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddlewareFactory

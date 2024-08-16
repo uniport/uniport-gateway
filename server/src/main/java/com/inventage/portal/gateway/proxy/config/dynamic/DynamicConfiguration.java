@@ -199,6 +199,9 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CLAIM_TO_HEADER = "claimToHeader";
     public static final String MIDDLEWARE_CLAIM_TO_HEADER_PATH = "claimPath";
     public static final String MIDDLEWARE_CLAIM_TO_HEADER_NAME = "headerName";
+    // back channel logout
+    public static final String MIDDLEWARE_BACK_CHANNEL_LOGOUT = "backChannelLogout";
+    public static final String MIDDLEWARE_BACK_CHANNEL_LOGOUT_NAME = "name";
 
     // option enumerations of various middlewares
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
@@ -234,7 +237,8 @@ public class DynamicConfiguration {
         MIDDLEWARE_OPEN_TELEMETRY,
         MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION,
         MIDDLEWARE_CLAIM_TO_HEADER,
-        MIDDLEWARE_MATOMO);
+        MIDDLEWARE_MATOMO,
+        MIDDLEWARE_BACK_CHANNEL_LOGOUT);
     public static final List<String> CSP_MERGE_STRATEGIES = List.of(
         MIDDLEWARE_CSP_MERGE_STRATEGY_UNION,
         MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL,
@@ -363,6 +367,7 @@ public class DynamicConfiguration {
             // response session cookie removal
             .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_BACK_CHANNEL_LOGOUT_NAME, Schemas.stringSchema())
             // request/response logger
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema())
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema().items(Schemas.stringSchema()))
@@ -1194,6 +1199,13 @@ public class DynamicConfiguration {
                 }
                 case MIDDLEWARE_MATOMO:
                     break;
+                case MIDDLEWARE_BACK_CHANNEL_LOGOUT: {
+                    final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                    if (validationResult != null) {
+                        return validationResult;
+                    }
+                    break;
+                }
                 default: {
                     return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
                 }

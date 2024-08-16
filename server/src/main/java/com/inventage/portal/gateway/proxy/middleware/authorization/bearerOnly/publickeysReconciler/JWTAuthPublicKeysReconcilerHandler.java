@@ -64,6 +64,15 @@ public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandle
     Future<AuthenticationHandler> getOrRefreshPublicKeys();
 
     /**
+     * Get the JSON web keys.
+     *
+     * see https://openid.net/specs/draft-jones-json-web-key-03.html
+     * 
+     * @return a list of JSON web keys as JSON data structure
+     */
+    List<JsonObject> getJwks();
+
+    /**
     */
     static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, JsonArray publicKeySources) {
         final Promise<JWTAuthOptions> promise = Promise.promise();

@@ -39,6 +39,8 @@ import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.Respo
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -434,6 +436,14 @@ public final class MiddlewareServerBuilder {
                 DEFAULT_SESSION_COOKIE_NAME,
                 DEFAULT_WAIT_BEFORE_RETRY_MS,
                 DEFAULT_MAX_REDIRECT_RETRIES));
+    }
+
+    public MiddlewareServerBuilder withBackChannelLogoutMiddleware() {
+        return withMiddleware(
+            new BackChannelLogoutMiddleware(
+                this.vertx,
+                "withBackChannelLogoutMiddleware",
+                BackChannelLogoutMiddlewareFactory.DEFAULT_SESSION_BACKCHANNELLOGOUT_PATH));
     }
 
     public MiddlewareServer build() {

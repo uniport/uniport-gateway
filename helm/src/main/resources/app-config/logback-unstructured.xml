@@ -13,7 +13,7 @@
     <logger name="io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl" level="TRACE"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="com.hazelcast" level="INFO"/>
-    <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="DEBUG"/>
+    <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="TRACE"/>
 
     <!-- Set to warn, we are only interested if this fails -->
     <logger name="com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandlerImpl" level="WARN" />
