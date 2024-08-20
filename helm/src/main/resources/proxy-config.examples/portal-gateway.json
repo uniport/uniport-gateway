@@ -22,26 +22,6 @@
                     }
                 },
                 {
-                    "name": "backChannelLogout",
-                    "type": "backChannelLogout",
-                    "options": {
-                        "publicKeys": [
-                            {
-                                "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
-                            }
-                        ],
-                        "audience": [
-                            "Portal-Gateway"
-                        ],
-                        "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-                        "optional": "true",
-                        "publicKeysReconcilation": {
-                            "enabled": true,
-                            "intervalMs": 3600000
-                        }
-                    }
-                },
-                {
                     "name": "requestResponseLogger",
                     "type": "requestResponseLogger",
                     "options": {
