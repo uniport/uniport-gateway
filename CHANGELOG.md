@@ -7,13 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 9.2.0-[Unreleased] - ???
 
-[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
 ### Added
 
 - Add a default mapping from `.well-known/apple-app-site-association` to `base` to add support for Uniport mobile feature that require Apple's [associated domains](https://developer.apple.com/documentation/xcode/supporting-associated-domains).
-- Extracing helm values json schema from `portal-helm-chart-library` to automatically be applied to values files ([PORTAL-1467](https://issue.inventage.com/browse/PORTAL-1467)).
-- Support for back channel logout as triggered by Keycloak ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
+- Extracting helm values json schema from `portal-helm-chart-library` to automatically be applied to values files ([PORTAL-1467](https://issue.inventage.com/browse/PORTAL-1467)).
 
 ### Changed
 
