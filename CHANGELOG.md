@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file. The changes
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 9.2.0-[Unreleased] - ???
+## 9.3.0-[Unreleased] - ???
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+[Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+
+## [9.2.0]-202408231733-1183-1f523dcd - 2024-08-23
+
+[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.2.0-202408231733-1183-1f523dcd)
 
 ### Added
 
@@ -537,7 +541,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://issue.inventage.com/browse/PORTAL-89)).
 
-[unreleased]: https://github.com/uniport/portal-gateway/compare/9.1.0...master
+[unreleased]: https://github.com/uniport/portal-gateway/compare/9.2.0...master
+[9.2.0]: https://github.com/uniport/portal-gateway/compare/9.1.0...9.2.0
 [9.1.0]: https://github.com/uniport/portal-gateway/compare/9.0.0...9.1.0
 [9.0.0]: https://github.com/uniport/portal-gateway/compare/8.3.0...9.0.0
 [8.3.0]: https://github.com/uniport/portal-gateway/compare/8.2.0...8.3.0
