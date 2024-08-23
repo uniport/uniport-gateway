@@ -61,7 +61,7 @@
             For convenience, both variants are configured here, one in a comment.
         -->
         <portal-helm-chart-library.version>4.8.0-202408121024-348-6564893</portal-helm-chart-library.version>
-        <portal-code-style-settings.version>1.6.0-202407291745-101-0edff75</portal-code-style-settings.version>
+        <portal-code-style-settings.version>1.6.0-202408121127-104-1154cd4</portal-code-style-settings.version>
     </properties>
 
     <dependencyManagement>
