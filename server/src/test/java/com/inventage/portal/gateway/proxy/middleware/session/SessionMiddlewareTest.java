@@ -38,7 +38,7 @@ public class SessionMiddlewareTest {
         // when
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
-            assertThat(response)
+            assertThat(testCtx, response)
                 .hasSetCookie(DEFAULT_SESSION_LIFETIME_COOKIE_NAME);
             testCtx.completeNow();
         });
@@ -53,7 +53,7 @@ public class SessionMiddlewareTest {
         // when
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
-            assertThat(response)
+            assertThat(testCtx, response)
                 .hasHeader(DEFAULT_SESSION_LIFETIME_HEADER_NAME)
                 .hasNotSetCookie(DEFAULT_SESSION_LIFETIME_COOKIE_NAME);
             testCtx.completeNow();
@@ -70,7 +70,7 @@ public class SessionMiddlewareTest {
         // when
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
-            assertThat(response)
+            assertThat(testCtx, response)
                 .hasStatusCode(200)
                 .hasSetSessionCookie(null);
             testCtx.completeNow();
@@ -86,13 +86,13 @@ public class SessionMiddlewareTest {
         // when
         browser.request(GET, "/request1")
             .thenCompose(response -> {
-                assertThat(response).hasStatusCode(200);
+                assertThat(testCtx, response).hasStatusCode(200);
                 return browser.request(GET, "/request2");
             })
             .thenCompose(response -> browser.request(POST, "/request3"))
             .whenComplete((response, error) -> {
                 // then
-                assertThat(response)
+                assertThat(testCtx, response)
                     .hasStatusCode(200)
                     .hasSetSessionCookie(null);
                 testCtx.completeNow();
@@ -112,7 +112,7 @@ public class SessionMiddlewareTest {
         // when
         browser.request(GET, "/request1")
             .whenComplete((response, error) -> {
-                assertThat(response).hasStatusCode(200);
+                assertThat(testCtx, response).hasStatusCode(200);
                 vertx.getOrCreateContext();
                 SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 sessionId.add(sharedDataSession.id());
@@ -124,7 +124,7 @@ public class SessionMiddlewareTest {
             })
             .whenComplete((response, error) -> {
                 // then
-                assertThat(response).hasStatusCode(200);
+                assertThat(testCtx, response).hasStatusCode(200);
                 vertx.getOrCreateContext();
                 SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 Assertions.assertThat(sharedDataSession.id()).isEqualTo(sessionId.get(0));

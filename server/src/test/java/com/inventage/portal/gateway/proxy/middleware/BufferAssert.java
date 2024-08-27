@@ -1,27 +1,29 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.junit5.VertxTestContext;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractAssert;
-import org.junit.jupiter.api.Assertions;
 
 public class BufferAssert extends AbstractAssert<BufferAssert, Buffer> {
 
+    final VertxTestContext testContext;
     final Map<String, String> body;
 
-    protected BufferAssert(Buffer actual) {
+    protected BufferAssert(VertxTestContext testContext, Buffer actual) {
         super(actual, BufferAssert.class);
+        this.testContext = testContext;
         body = extractParametersFromBody(actual.toString());
     }
 
-    public static BufferAssert assertThat(Buffer actual) {
-        return new BufferAssert(actual);
+    public static BufferAssert assertThat(VertxTestContext testContext, Buffer actual) {
+        return new BufferAssert(testContext, actual);
     }
 
     public BufferAssert hasKeyValue(String key, String expectedValue) {
-        Assertions.assertEquals(expectedValue, body.get(key));
+        VertxAssertions.assertEquals(testContext, expectedValue, body.get(key));
         return this;
     }
 

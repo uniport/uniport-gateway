@@ -1,8 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.Cookie;
@@ -40,11 +38,11 @@ public class CookieBagTest {
         actualCookieBag.readFromBuffer(0, buffer);
 
         // then
-        assertEquals(cookieBag.size(), actualCookieBag.size(),
+        VertxAssertions.assertEquals(testCtx, cookieBag.size(), actualCookieBag.size(),
             String.format("Serialized and deserialized cookie bag size is not equal to original."));
-        assertTrue(hasAtLeastTheSameCookies(cookieBag, actualCookieBag),
+        VertxAssertions.assertTrue(testCtx, hasAtLeastTheSameCookies(cookieBag, actualCookieBag),
             "Serialized and deserialized cookie bag is missing some cookies.");
-        assertTrue(hasAtLeastTheSameCookies(actualCookieBag, cookieBag),
+        VertxAssertions.assertTrue(testCtx, hasAtLeastTheSameCookies(actualCookieBag, cookieBag),
             "Serialized and deserialized cookie bag is missing some cookies.");
 
         testCtx.completeNow();

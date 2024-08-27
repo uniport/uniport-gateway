@@ -1,10 +1,9 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.ProxyApplication;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -105,13 +104,13 @@ public class EntryMiddlewareTest {
             //when
             doRequest(vertx, testCtx, optA, responsePathA -> {
                 //then
-                assertEquals(HttpResponseStatus.FOUND.code(), responsePathA.statusCode(), "unexpected status code");
-                assertEquals(expectedRedirect, responsePathA.headers().get("location"));
+                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.FOUND.code(), responsePathA.statusCode(), "unexpected status code");
+                VertxAssertions.assertEquals(testCtx, expectedRedirect, responsePathA.headers().get("location"));
             });
             doRequest(vertx, testCtx, optB, responsePathB -> {
                 //then
-                assertEquals(HttpResponseStatus.FOUND.code(), responsePathB.statusCode(), "unexpected status code");
-                assertEquals(expectedRedirect, responsePathB.headers().get("location"));
+                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.FOUND.code(), responsePathB.statusCode(), "unexpected status code");
+                VertxAssertions.assertEquals(testCtx, expectedRedirect, responsePathB.headers().get("location"));
             });
 
             testCtx.completeNow();

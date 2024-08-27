@@ -37,7 +37,7 @@ public class CheckRouteMiddlewareTest {
         // when
         browser.request(GET, uri).whenComplete((response, error) -> {
             // then
-            assertThat(response)
+            assertThat(testCtx, response)
                 .hasStatusCode(202);
             testCtx.completeNow();
         });
@@ -56,7 +56,7 @@ public class CheckRouteMiddlewareTest {
         // when
         browser.request(GET, "/not-a-check-route-path").whenComplete((response, error) -> {
             // then
-            assertThat(response)
+            assertThat(testCtx, response)
                 .hasStatusCode(200);
             testCtx.completeNow();
         });

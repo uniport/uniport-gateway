@@ -121,8 +121,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     private JsonObject oidcParams(JsonObject middlewareConfig) {
         // PORTAL-1196: value for "response_mode" must be configurable
         final String responseMode = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_RESPONSE_MODE);
-        final JsonObject oidcParams = new JsonObject().put(OIDC_RESPONSE_MODE,
-            responseMode == null ? OIDC_RESPONSE_MODE_DEFAULT : responseMode);
+        final JsonObject oidcParams = new JsonObject()
+            .put(OIDC_RESPONSE_MODE, responseMode == null ? OIDC_RESPONSE_MODE_DEFAULT : responseMode);
         return oidcParams;
     }
 

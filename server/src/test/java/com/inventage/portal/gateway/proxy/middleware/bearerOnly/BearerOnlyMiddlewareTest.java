@@ -8,6 +8,7 @@ import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
@@ -78,7 +79,7 @@ public class BearerOnlyMiddlewareTest {
                 new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(invalidSignatureToken)),
                 (resp) -> {
                     // then
-                    assertEquals(401, resp.statusCode(), "unexpected status code");
+                    VertxAssertions.assertEquals(testCtx, 401, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -216,7 +217,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        final KeycloakServer keycloakServer = new KeycloakServer(vertx, "localhost")
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
 
         final JsonArray publicKeys = new JsonArray()
@@ -246,7 +247,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        final KeycloakServer keycloakServer = new KeycloakServer(vertx, "localhost")
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
 
         final JsonArray publicKeys = new JsonArray()
@@ -289,7 +290,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        final KeycloakServer keycloakServer = new KeycloakServer(vertx, "localhost")
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
         keycloakServer.serveInvalidPublicKeys(); // make the token invalid
 
@@ -353,8 +354,7 @@ public class BearerOnlyMiddlewareTest {
     private JWTAuth jwtAuthWithAdditionalIssuers(Vertx vertx, String expectedIssuer, List<String> expectedAudience, JsonArray additionalIssuers) {
         String publicKeyRS256 = null;
         try {
-            publicKeyRS256 = Resources.toString(Resources.getResource(PUBLIC_KEY_PATH),
-                StandardCharsets.UTF_8);
+            publicKeyRS256 = Resources.toString(Resources.getResource(PUBLIC_KEY_PATH), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -61,6 +61,7 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.event.Level;
@@ -270,13 +271,13 @@ public final class MiddlewareServerBuilder {
      */
     public MiddlewareServerBuilder withOAuth2AuthMiddlewareForScope(KeycloakServer mockKeycloakServer, String scope) {
         try {
-            withOAuth2AuthMiddleware(mockKeycloakServer.getOAuth2AuthConfig(scope), scope);
+            return withOAuth2AuthMiddleware(mockKeycloakServer.getOAuth2AuthConfig(scope), scope);
         } catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
             }
             if (testCtx != null) {
-                testCtx.completeNow();
+                testCtx.failNow(t);
             }
         }
         return this;
@@ -289,18 +290,22 @@ public final class MiddlewareServerBuilder {
     private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) {
         final OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         final Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
-        final int atMost = 20;
-        int counter = 0;
-        while (!middlewareFuture.isComplete() && atMost > counter) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            counter++;
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        middlewareFuture.onComplete(fut -> {
+            latch.countDown();
+        });
+        try {
+            latch.await(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("OAuth2Auth Middleware timed out to be instantiated");
         }
-        if (middlewareFuture.failed() || counter >= atMost) {
-            throw new IllegalStateException("OAuth2Auth Middleware could not be instantiated");
+
+        if (middlewareFuture.failed()) {
+            throw new IllegalStateException("OAuth2Auth Middleware failed to be instantiated", middlewareFuture.cause());
+        }
+        if (middlewareFuture.result() == null) {
+            throw new IllegalStateException("OAuth2Auth Middleware failed to be instantiated and is null");
         }
         if (scope == null) {
             return withMiddleware(middlewareFuture.result());

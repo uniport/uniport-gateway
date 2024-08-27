@@ -27,7 +27,7 @@ public class CorsMiddlewareTest {
         // when
         portalGateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
             // then
-            assertThat(resp).hasStatusCode(200);
+            assertThat(testCtx, resp).hasStatusCode(200);
             testCtx.completeNow();
         });
     }
@@ -42,7 +42,7 @@ public class CorsMiddlewareTest {
                 new RequestOptions().addHeader(ORIGIN, "http://portal.minikube"),
                 (resp) -> {
                     // then
-                    assertThat(resp)
+                    assertThat(testCtx, resp)
                         .hasStatusCode(200)
                         .hasHeader(ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "http://portal.minikube");
                     testCtx.completeNow();
@@ -59,7 +59,7 @@ public class CorsMiddlewareTest {
                 new RequestOptions().addHeader(ORIGIN, "http://other.com"),
                 (resp) -> {
                     // then
-                    assertThat(resp)
+                    assertThat(testCtx, resp)
                         .hasStatusCode(200)
                         .hasHeader(ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*");
                     testCtx.completeNow();
@@ -76,7 +76,7 @@ public class CorsMiddlewareTest {
                 new RequestOptions().addHeader(ORIGIN, "http://bad.com"),
                 (resp) -> {
                     // then
-                    assertThat(resp).hasStatusCode(403);
+                    assertThat(testCtx, resp).hasStatusCode(403);
                     testCtx.completeNow();
                 });
     }
@@ -89,7 +89,7 @@ public class CorsMiddlewareTest {
             // when
             .incomingRequest(HttpMethod.GET, "/", (resp) -> {
                 // then
-                assertThat(resp).hasStatusCode(200);
+                assertThat(testCtx, resp).hasStatusCode(200);
                 testCtx.completeNow();
             });
     }

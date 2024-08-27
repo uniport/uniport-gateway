@@ -6,7 +6,6 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.Random;
 import java.util.concurrent.CompletionStage;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +25,9 @@ public class CompletionStageTest {
             .thenCompose(s -> asyncToUpperCase(s, vertx))
             .whenComplete((result, error) -> {
                 if (error == null) {
-                    Assertions.assertEquals("HELLO", result);
+                    VertxAssertions.assertEquals(testContext, "HELLO", result);
                 } else {
-                    Assertions.fail(error);
+                    VertxAssertions.fail(testContext, error);
                 }
                 testContext.completeNow();
             });

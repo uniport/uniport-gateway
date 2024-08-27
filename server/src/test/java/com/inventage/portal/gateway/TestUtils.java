@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
-import org.junit.jupiter.api.Assertions;
 
 public class TestUtils {
     /**
@@ -271,7 +270,9 @@ public class TestUtils {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        Assertions.assertNotNull(responseParamsList);
+        if (responseParamsList == null) {
+            throw new IllegalStateException("cannot be null");
+        }
         Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
             entry -> entry.getName(), entry -> entry.getValue()));
 

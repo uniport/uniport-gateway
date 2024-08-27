@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuil
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -15,7 +16,6 @@ import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
 import java.util.List;
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -71,15 +71,15 @@ class MatomoMiddlewareTest {
             final String role = headers.get(HEADER_MATOMO_ROLE);
             final String group = headers.get(HEADER_MATOMO_GROUP);
 
-            Assertions.assertNotNull(username, "Following entry expected to be included in request header: " + HEADER_MATOMO_USERNAME);
-            Assertions.assertNotNull(email, "Following entry expected to be included in request header: " + HEADER_MATOMO_EMAIL);
-            Assertions.assertNotNull(role, "Following entry expected to be included in request header: " + HEADER_MATOMO_ROLE);
-            Assertions.assertNotNull(group, "Following entry expected to be included in request header: " + HEADER_MATOMO_GROUP);
+            VertxAssertions.assertNotNull(testCtx, username, "Following entry expected to be included in request header: " + HEADER_MATOMO_USERNAME);
+            VertxAssertions.assertNotNull(testCtx, email, "Following entry expected to be included in request header: " + HEADER_MATOMO_EMAIL);
+            VertxAssertions.assertNotNull(testCtx, role, "Following entry expected to be included in request header: " + HEADER_MATOMO_ROLE);
+            VertxAssertions.assertNotNull(testCtx, group, "Following entry expected to be included in request header: " + HEADER_MATOMO_GROUP);
 
-            Assertions.assertEquals("ips", username);
-            Assertions.assertEquals("ips@inventage.com", email);
-            Assertions.assertEquals("Admin", role);
-            Assertions.assertEquals("portal", group);
+            VertxAssertions.assertEquals(testCtx, "ips", username);
+            VertxAssertions.assertEquals(testCtx, "ips@inventage.com", email);
+            VertxAssertions.assertEquals(testCtx, "Admin", role);
+            VertxAssertions.assertEquals(testCtx, "portal", group);
 
             testCtx.completeNow();
         });
@@ -116,8 +116,8 @@ class MatomoMiddlewareTest {
             final MultiMap headers = response.headers();
             final String role = headers.get(HEADER_MATOMO_ROLE);
 
-            Assertions.assertNotNull(role, "Following entry expected to be included in request header: " + HEADER_MATOMO_ROLE);
-            Assertions.assertNotEquals(selfSetRole, role);
+            VertxAssertions.assertNotNull(testCtx, role, "Following entry expected to be included in request header: " + HEADER_MATOMO_ROLE);
+            VertxAssertions.assertNotEquals(testCtx, selfSetRole, role);
 
             testCtx.completeNow();
         });
@@ -141,7 +141,7 @@ class MatomoMiddlewareTest {
         }).listen(port);
 
         gateway.incomingRequest(HttpMethod.GET, "/", requestOptions, response -> {
-            Assertions.assertEquals(HttpStatus.SC_FORBIDDEN, response.statusCode());
+            VertxAssertions.assertEquals(testCtx, HttpStatus.SC_FORBIDDEN, response.statusCode());
             testCtx.completeNow();
         });
 

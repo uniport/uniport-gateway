@@ -1,11 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -36,7 +35,7 @@ public class MiddlewareChainTest {
         // then
         final Handler<RoutingContext> incomingPathCheckHandler = ctx -> {
             final String actualPath = ctx.request().path();
-            assertTrue(actualPath.equals(expectedPath), String.format("request path sould be set to '%s', got '%s'", expectedPath, actualPath));
+            VertxAssertions.assertTrue(testContext, actualPath.equals(expectedPath), String.format("request path sould be set to '%s', got '%s'", expectedPath, actualPath));
             checkedPath.flag();
         };
 
@@ -74,7 +73,7 @@ public class MiddlewareChainTest {
             final String actualHeaderValue = headers.get(headerName);
 
             // then
-            assertTrue(actualHeaderValue.equals(expectedHeaderValue),
+            VertxAssertions.assertTrue(testContext, actualHeaderValue.equals(expectedHeaderValue),
                 String.format("'%s' header should be set to '%s', got '%s'", headerName, expectedHeaderValue, actualHeaderValue));
             testContext.completeNow();
         });
@@ -102,7 +101,7 @@ public class MiddlewareChainTest {
             final String testHeader = headers.get(headerName);
 
             // then
-            assertNull(testHeader, String.format("'%s' header should not be set", headerName));
+            VertxAssertions.assertNull(testContext, testHeader, String.format("'%s' header should not be set", headerName));
             testContext.completeNow();
         });
     }

@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,10 +41,8 @@ public class ProxyMiddlewareTest {
         final Checkpoint hostVerified = testCtx.checkpoint();
         final Handler<RoutingContext> backendHandler = ctx -> {
             // then
-            testCtx.verify(() -> {
-                Assertions.assertEquals("localdev.me" + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
-                hostVerified.flag();
-            });
+            VertxAssertions.assertEquals(testCtx, "localdev.me" + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
+            hostVerified.flag();
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
@@ -55,9 +52,7 @@ public class ProxyMiddlewareTest {
 
         // when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            testCtx.verify(() -> {
-                Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
-            });
+            VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
             testCtx.completeNow();
         });
     }
@@ -70,11 +65,9 @@ public class ProxyMiddlewareTest {
         final int backendPort = TestUtils.findFreePort();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
-            testCtx.verify(() -> {
-                assertEquals("http", ctx.request().headers().get(X_FORWARDED_PROTO));
-                assertEquals(host + ":" + proxyPort, ctx.request().headers().get(X_FORWARDED_HOST));
-                assertEquals(String.valueOf(proxyPort), ctx.request().headers().get(X_FORWARDED_PORT));
-            });
+            VertxAssertions.assertEquals(testCtx, "http", ctx.request().headers().get(X_FORWARDED_PROTO));
+            VertxAssertions.assertEquals(testCtx, host + ":" + proxyPort, ctx.request().headers().get(X_FORWARDED_HOST));
+            VertxAssertions.assertEquals(testCtx, String.valueOf(proxyPort), ctx.request().headers().get(X_FORWARDED_PORT));
 
             ctx.response().end();
         };
@@ -88,9 +81,7 @@ public class ProxyMiddlewareTest {
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             response.body().onComplete((body) -> {
                 //then
-                testCtx.verify(() -> {
-                    Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
-                });
+                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
                 testCtx.completeNow();
             });
         });
@@ -107,10 +98,8 @@ public class ProxyMiddlewareTest {
         final String port = String.valueOf(1234);
 
         final Handler<RoutingContext> backendHandler = ctx -> {
-            testCtx.verify(() -> {
-                assertEquals(proto, ctx.request().headers().get(X_FORWARDED_PROTO));
-                assertEquals(port, ctx.request().headers().get(X_FORWARDED_PORT));
-            });
+            VertxAssertions.assertEquals(testCtx, proto, ctx.request().headers().get(X_FORWARDED_PROTO));
+            VertxAssertions.assertEquals(testCtx, port, ctx.request().headers().get(X_FORWARDED_PORT));
 
             ctx.response().end();
         };
@@ -128,9 +117,7 @@ public class ProxyMiddlewareTest {
             response -> {
                 response.body().onComplete((body) -> {
                     //then
-                    testCtx.verify(() -> {
-                        Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
-                    });
+                    VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
                     testCtx.completeNow();
                 });
             });
@@ -158,9 +145,7 @@ public class ProxyMiddlewareTest {
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             response.body().onComplete((body) -> {
                 //then
-                testCtx.verify(() -> {
-                    Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
-                });
+                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
                 testCtx.completeNow();
             });
         });
@@ -187,9 +172,7 @@ public class ProxyMiddlewareTest {
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             //then
-            testCtx.verify(() -> {
-                Assertions.assertEquals(HttpResponseStatus.OK.code(), response.statusCode());
-            });
+            VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
             testCtx.completeNow();
         });
     }
@@ -208,9 +191,7 @@ public class ProxyMiddlewareTest {
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            testCtx.verify(() -> {
-                Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
-            });
+            VertxAssertions.assertEquals(testCtx, response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
             testCtx.completeNow();
         });
     }
@@ -230,9 +211,7 @@ public class ProxyMiddlewareTest {
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             //then
-            testCtx.verify(() -> {
-                Assertions.assertEquals(response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
-            });
+            VertxAssertions.assertEquals(testCtx, response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
             testCtx.completeNow();
         });
     }
@@ -256,14 +235,10 @@ public class ProxyMiddlewareTest {
         // when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             // should be 1, put is actually 0 because of bug
-            testCtx.verify(() -> {
-                Assertions.assertEquals(1, counter.get().intValue());
-            });
+            VertxAssertions.assertEquals(testCtx, 1, counter.get().intValue());
         });
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            testCtx.verify(() -> {
-                Assertions.assertEquals(0, counter.get().intValue());
-            });
+            VertxAssertions.assertEquals(testCtx, 0, counter.get().intValue());
             // then
             testCtx.completeNow();
         });

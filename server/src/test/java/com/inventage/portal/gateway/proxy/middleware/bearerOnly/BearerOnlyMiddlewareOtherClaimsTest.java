@@ -2,9 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.io.Resources;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaim;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
@@ -99,7 +99,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                 bearer(validToken)), (resp) -> {
                     // then
-                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    VertxAssertions.assertEquals(testCtx, 200, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -126,7 +126,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                 bearer(validToken)), (resp) -> {
                     // then
-                    assertEquals(200, resp.statusCode(), "unexpected status code");
+                    VertxAssertions.assertEquals(testCtx, 200, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -157,7 +157,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                 bearer(invalidStringToken)), (resp) -> {
                     // then
-                    assertEquals(403, resp.statusCode(), "unexpected status code");
+                    VertxAssertions.assertEquals(testCtx, 403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -186,7 +186,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                 bearer(invalidToken)), (resp) -> {
                     // then
-                    assertEquals(403, resp.statusCode(), "unexpected status code");
+                    VertxAssertions.assertEquals(testCtx, 403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }
@@ -221,7 +221,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION,
                 bearer(invalidToken)), (resp) -> {
                     // then
-                    assertEquals(403, resp.statusCode(), "unexpected status code");
+                    VertxAssertions.assertEquals(testCtx, 403, resp.statusCode(), "unexpected status code");
                     testCtx.completeNow();
                 });
     }

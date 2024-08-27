@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuil
 import static io.vertx.core.http.HttpMethod.GET;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -12,7 +13,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -34,7 +34,7 @@ public class ClaimToHeaderMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            Assertions.assertEquals("ab159413-8924-4f10-8db1-1794f431e72b", routingContext.get().request().headers().get("X-Uniport-Tenant"));
+            VertxAssertions.assertEquals(testCtx, "ab159413-8924-4f10-8db1-1794f431e72b", routingContext.get().request().headers().get("X-Uniport-Tenant"));
             testCtx.completeNow();
         });
     }
@@ -54,7 +54,7 @@ public class ClaimToHeaderMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            Assertions.assertEquals("ab159413-8924-4f10-8db1-1794f431e72b", routingContext.get().request().headers().get("X-Uniport-Tenant"));
+            VertxAssertions.assertEquals(testCtx, "ab159413-8924-4f10-8db1-1794f431e72b", routingContext.get().request().headers().get("X-Uniport-Tenant"));
             testCtx.completeNow();
         });
     }
@@ -74,7 +74,7 @@ public class ClaimToHeaderMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            Assertions.assertEquals("[\"KEYCLOAK\"]", routingContext.get().request().headers().get("roles"));
+            VertxAssertions.assertEquals(testCtx, "[\"KEYCLOAK\"]", routingContext.get().request().headers().get("roles"));
             testCtx.completeNow();
         });
     }
@@ -92,7 +92,7 @@ public class ClaimToHeaderMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            Assertions.assertFalse(routingContext.get().request().headers().contains("X-Uniport-Tenant"));
+            VertxAssertions.assertFalse(testCtx, routingContext.get().request().headers().contains("X-Uniport-Tenant"));
             testCtx.completeNow();
         });
     }
@@ -111,7 +111,7 @@ public class ClaimToHeaderMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            Assertions.assertFalse(routingContext.get().request().headers().contains("X-Uniport-Tenant"));
+            VertxAssertions.assertFalse(testCtx, routingContext.get().request().headers().contains("X-Uniport-Tenant"));
             testCtx.completeNow();
         });
     }
@@ -130,7 +130,7 @@ public class ClaimToHeaderMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            Assertions.assertFalse(routingContext.get().request().headers().contains("X-Uniport-Tenant"));
+            VertxAssertions.assertFalse(testCtx, routingContext.get().request().headers().contains("X-Uniport-Tenant"));
             testCtx.completeNow();
         });
     }

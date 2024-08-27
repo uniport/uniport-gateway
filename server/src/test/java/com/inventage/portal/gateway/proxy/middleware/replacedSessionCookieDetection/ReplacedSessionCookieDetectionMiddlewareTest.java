@@ -49,7 +49,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
             final long sessionLifetimeMs = SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE * 60 * 1000;
             final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(lastAccessed, sessionLifetimeMs);
 
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasSetCookie(DEFAULT_DETECTION_COOKIE_NAME, detectionCookieValue.toString());
             testCtx.completeNow();
@@ -71,7 +71,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(307)
                 .hasNotSetSessionCookie();
             testCtx.completeNow();
@@ -93,7 +93,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasSetSessionCookie(null);
             testCtx.completeNow();
@@ -113,7 +113,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasSetSessionCookie(null);
             testCtx.completeNow();
@@ -135,7 +135,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasSetSessionCookie(null);
             testCtx.completeNow();
@@ -157,7 +157,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasSetSessionCookie(null);
             testCtx.completeNow();

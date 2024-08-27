@@ -6,6 +6,7 @@ import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBa
 import static io.vertx.core.http.HttpMethod.GET;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiAction;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
@@ -26,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -72,17 +72,17 @@ public class ControlApiMiddlewareTest {
             // when
             .incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
                 // then
-                assertSessionTermination(outgoingResponse, routingContextHolder.get());
+                assertSessionTermination(testCtx, outgoingResponse, routingContextHolder.get());
                 responseReceived.flag();
             });
     }
 
-    private void assertSessionTermination(HttpClientResponse outgoingResponse, RoutingContext routingContext) {
-        Assertions.assertTrue(routingContext.session().isDestroyed(), "session should be destroyed");
-        Assertions.assertTrue(routingContext.session().data().isEmpty(), "all data should be deleted from session");
+    private void assertSessionTermination(VertxTestContext testCtx, HttpClientResponse outgoingResponse, RoutingContext routingContext) {
+        VertxAssertions.assertTrue(testCtx, routingContext.session().isDestroyed(), "session should be destroyed");
+        VertxAssertions.assertTrue(testCtx, routingContext.session().data().isEmpty(), "all data should be deleted from session");
 
-        Assertions.assertEquals(200, outgoingResponse.statusCode(), "status code should be 200");
-        Assertions.assertFalse(
+        VertxAssertions.assertEquals(testCtx, 200, outgoingResponse.statusCode(), "status code should be 200");
+        VertxAssertions.assertFalse(testCtx,
             outgoingResponse.headers().getAll(HttpHeaders.SET_COOKIE.toString()).stream()
                 .map(cookie -> ClientCookieDecoder.STRICT.decode(cookie))
                 .anyMatch(cookie -> cookie.name().equals(CONTROL_COOKIE_NAME)),
@@ -107,7 +107,8 @@ public class ControlApiMiddlewareTest {
         final int sessionResetPort = TestUtils.findFreePort();
         vertx.createHttpServer()
             .requestHandler(req -> {
-                Assertions.assertTrue(
+                VertxAssertions.assertTrue(
+                    testCtx,
                     req.headers().getAll(HttpHeaders.COOKIE).stream()
                         .map(cookie -> ClientCookieDecoder.STRICT.decode(cookie))
                         .anyMatch(cookie -> cookie.name().equals(keycloakIdentityCookie.getName()) && cookie.value().equals(keycloakIdentityCookie.getValue())),
@@ -131,27 +132,27 @@ public class ControlApiMiddlewareTest {
             // when
             .incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
                 // then
-                assertSessionReset(outgoingResponse, routingContextHolder.get(), keycloakTestCookie);
+                assertSessionReset(testCtx, outgoingResponse, routingContextHolder.get(), keycloakTestCookie);
                 responseReceived.flag();
             });
     }
 
-    private void assertSessionReset(HttpClientResponse outgoingResponse, RoutingContext routingContext, Cookie keycloakCookie) {
-        Assertions.assertFalse(routingContext.session().isDestroyed(), "session should not be destroyed");
-        Assertions.assertTrue(AuthenticationUserContext.all(routingContext.session()).size() == 0,
+    private void assertSessionReset(VertxTestContext testCtx, HttpClientResponse outgoingResponse, RoutingContext routingContext, Cookie keycloakCookie) {
+        VertxAssertions.assertFalse(testCtx, routingContext.session().isDestroyed(), "session should not be destroyed");
+        VertxAssertions.assertTrue(testCtx, AuthenticationUserContext.all(routingContext.session()).size() == 0,
             "there should be no oauth2 tokens in the session");
 
-        Assertions.assertEquals(200, outgoingResponse.statusCode(), "status code should be 200");
-        Assertions.assertFalse(
+        VertxAssertions.assertEquals(testCtx, 200, outgoingResponse.statusCode(), "status code should be 200");
+        VertxAssertions.assertFalse(testCtx,
             outgoingResponse.headers().getAll(HttpHeaders.SET_COOKIE.toString()).stream()
                 .map(cookie -> ClientCookieDecoder.STRICT.decode(cookie))
                 .anyMatch(cookie -> cookie.name().equals(CONTROL_COOKIE_NAME)),
             "control cookie should not appear in the response)");
 
         final Set<Cookie> cookiesInContext = routingContext.session().get(SESSION_BAG_COOKIES);
-        Assertions.assertEquals(2, cookiesInContext.size(),
+        VertxAssertions.assertEquals(testCtx, 2, cookiesInContext.size(),
             "there should be only one cookie in the session bag");
-        Assertions.assertTrue(cookiesInContext.stream().anyMatch(cookie -> cookie.getName().startsWith("KEYCLOAK_")),
+        VertxAssertions.assertTrue(testCtx, cookiesInContext.stream().anyMatch(cookie -> cookie.getName().startsWith("KEYCLOAK_")),
             "there should be the test keycloak cookie in the session bag");
     }
 

@@ -27,7 +27,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasNotSetSessionCookie();
             testCtx.completeNow();
@@ -44,7 +44,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // then
-            assertThat(outgoingResponse)
+            assertThat(testCtx, outgoingResponse)
                 .hasStatusCode(200)
                 .hasSetSessionCookie(null);
             testCtx.completeNow();

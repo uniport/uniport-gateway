@@ -1,8 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -73,8 +72,8 @@ public class RedirectRegexMiddlewareTest {
 
             vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", URL).compose(req -> req.send())
                 .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
-                    assertEquals(expectedStatusCode, resp.statusCode(), failureMsg);
-                    assertEquals(expectedURL, resp.headers().get(HttpHeaders.LOCATION), failureMsg);
+                    VertxAssertions.assertEquals(testCtx, expectedStatusCode, resp.statusCode(), failureMsg);
+                    VertxAssertions.assertEquals(testCtx, expectedURL, resp.headers().get(HttpHeaders.LOCATION), failureMsg);
                     responsesReceived.flag();
                 })));
         }));

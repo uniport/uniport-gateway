@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuil
 import static com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -12,7 +13,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -35,11 +35,11 @@ public class LanguageCookieMiddlewareTest {
             // when
             .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (incomingResponse) -> {
                 // then
-                Assertions.assertTrue(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
+                VertxAssertions.assertTrue(testCtx, routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
                     "request should contain accept language");
-                Assertions.assertEquals("de", routingContext.get().request().getHeader(HttpHeaders.ACCEPT_LANGUAGE),
+                VertxAssertions.assertEquals(testCtx, "de", routingContext.get().request().getHeader(HttpHeaders.ACCEPT_LANGUAGE),
                     "accept-language header should be set to 'de'");
-                Assertions.assertNotNull(routingContext.get().request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME),
+                VertxAssertions.assertNotNull(testCtx, routingContext.get().request().getCookie(DEFAULT_LANGUAGE_COOKIE_NAME),
                     "request should contain IPS language cookie.");
                 testCtx.completeNow();
             });
@@ -57,9 +57,9 @@ public class LanguageCookieMiddlewareTest {
             // when
             .incomingRequest(GET, "/", (incomingResponse) -> {
                 // then
-                Assertions.assertFalse(routingContext.get().request().headers().contains(DEFAULT_LANGUAGE_COOKIE_NAME),
+                VertxAssertions.assertFalse(testCtx, routingContext.get().request().headers().contains(DEFAULT_LANGUAGE_COOKIE_NAME),
                     "response should not contain IPS language cookie.");
-                Assertions.assertFalse(routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
+                VertxAssertions.assertFalse(testCtx, routingContext.get().request().headers().contains(HttpHeaders.ACCEPT_LANGUAGE),
                     "response should not contain accept language");
                 testCtx.completeNow();
             });

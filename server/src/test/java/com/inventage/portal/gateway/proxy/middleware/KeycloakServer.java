@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxTestContext;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -20,6 +21,7 @@ public class KeycloakServer {
     private static final String EMPTY_STRING = "";
     private static final String OPENID_DISCOVERY_PATH = "/.well-known/openid-configuration";
     private static final String TEST_REALM_PATH = "/auth/realms/test";
+    private static final String ISSUER_KEY = "issuer";
     private static final String AUTHORIZATION_ENDPOINT_KEY = "authorization_endpoint";
     private static final String TOKEN_ENDPOINT_KEY = "token_endpoint";
     private static final String TOKEN_ENDPOINT_PATH = "/protocol/openid-connect/token";
@@ -49,31 +51,35 @@ public class KeycloakServer {
     private static final String ALTERNATIVE_RANDOM_JWK_PUBLIC_EXPONENT = "AQAB";
 
     private final Vertx vertx;
+    private final VertxTestContext testCtx;
     private final String host;
     private final int port;
     private HttpServer server;
     private boolean serveValidPublicKeys = true;
 
-    public KeycloakServer(Vertx vertx) {
-        this(vertx, "localhost", TestUtils.findFreePort());
+    public KeycloakServer(Vertx vertx, VertxTestContext testCtx) {
+        this(vertx, testCtx, "localhost", TestUtils.findFreePort());
     }
 
-    public KeycloakServer(Vertx vertx, String host) {
-        this(vertx, host, TestUtils.findFreePort());
+    public KeycloakServer(Vertx vertx, VertxTestContext testCtx, String host) {
+        this(vertx, testCtx, host, TestUtils.findFreePort());
     }
 
-    public KeycloakServer(Vertx vertx, String host, int port) {
+    public KeycloakServer(Vertx vertx, VertxTestContext testCtx, String host, int port) {
         this.vertx = vertx;
+        this.testCtx = testCtx;
         this.host = host;
         this.port = port;
     }
 
     public final void startServerWithCustomHandler(Handler<HttpServerRequest> handler) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        this.server = vertx.createHttpServer().requestHandler(handler)
+        this.server = vertx
+            .createHttpServer()
+            .requestHandler(handler)
             .listen(this.port, this.host, ready -> {
                 if (ready.failed()) {
-                    throw new RuntimeException(ready.cause());
+                    testCtx.failNow(ready.cause());
                 }
                 // ready
                 latch.countDown();
@@ -211,9 +217,10 @@ public class KeycloakServer {
     }
 
     private JsonObject getDefaultDiscoveryResponse() {
-        final JsonObject discoveryResponse = new JsonObject();
-        discoveryResponse.put(AUTHORIZATION_ENDPOINT_KEY, this.getDefaultDiscoveryUrl());
-        discoveryResponse.put(TOKEN_ENDPOINT_KEY, this.getDefaultDiscoveryUrl() + TOKEN_ENDPOINT_PATH);
+        final JsonObject discoveryResponse = new JsonObject()
+            .put(ISSUER_KEY, this.getDefaultDiscoveryUrl())
+            .put(AUTHORIZATION_ENDPOINT_KEY, this.getDefaultDiscoveryUrl())
+            .put(TOKEN_ENDPOINT_KEY, this.getDefaultDiscoveryUrl() + TOKEN_ENDPOINT_PATH);
         return discoveryResponse;
     }
 

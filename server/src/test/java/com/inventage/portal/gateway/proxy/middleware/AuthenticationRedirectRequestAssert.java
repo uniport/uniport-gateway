@@ -15,6 +15,7 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWi
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.junit5.VertxTestContext;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.assertj.core.api.AbstractAssert;
-import org.junit.jupiter.api.Assertions;
 
 /**
  * Custom assertion class for authentication redirect request of a relying party (RP).
@@ -36,19 +36,25 @@ import org.junit.jupiter.api.Assertions;
 public class AuthenticationRedirectRequestAssert
     extends AbstractAssert<AuthenticationRedirectRequestAssert, HttpClientResponse> {
 
-    public AuthenticationRedirectRequestAssert(HttpClientResponse actual) {
+    final VertxTestContext testCtx;
+
+    public AuthenticationRedirectRequestAssert(VertxTestContext testCtx, HttpClientResponse actual) {
         super(actual, AuthenticationRedirectRequestAssert.class);
+        this.testCtx = testCtx;
     }
 
-    public static AuthenticationRedirectRequestAssert assertThat(HttpClientResponse actual) {
-        return new AuthenticationRedirectRequestAssert(actual);
+    public static AuthenticationRedirectRequestAssert assertThat(VertxTestContext testCtx, HttpClientResponse actual) {
+        return new AuthenticationRedirectRequestAssert(testCtx, actual);
     }
 
     public AuthenticationRedirectRequestAssert isRedirectTo(String expectedLocation) {
-        Assertions.assertTrue(String.valueOf(actual.statusCode()).startsWith("3"),
+        VertxAssertions.assertTrue(
+            testCtx,
+            String.valueOf(actual.statusCode()).startsWith("3"),
             "Redirect status code expected, but was: " + actual.statusCode());
+
         final String location = actual.getHeader(LOCATION);
-        Assertions.assertEquals(expectedLocation, location);
+        VertxAssertions.assertEquals(testCtx, expectedLocation, location);
         return this;
     }
 
@@ -59,12 +65,10 @@ public class AuthenticationRedirectRequestAssert
     public AuthenticationRedirectRequestAssert isValidAuthenticationRequest(
         Map<String, String> expectedLocationParameters
     ) {
-        // final String setCookie = actual.getHeader(HttpHeaderNames.SET_COOKIE);
-        // Assertions.assertNull(setCookie);
         final String location = actual.getHeader(LOCATION);
-        Assertions.assertNotNull(location, "No 'location' header found in response");
+        VertxAssertions.assertNotNull(testCtx, location, "No 'location' header found in response");
         final Map<String, String> locationParameters = extractParametersFromHeader(location);
-        Assertions.assertNotNull(locationParameters);
+        VertxAssertions.assertNotNull(testCtx, locationParameters);
         if (expectedLocationParameters != null) {
             expectedLocationParameters.entrySet().stream()
                 .filter(entry -> locationParameters.containsKey(entry.getKey())).findAny()
@@ -76,29 +80,33 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert isUsingFormPost() {
         final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
-        Assertions.assertEquals(locationParameters.get(OIDC_RESPONSE_MODE), OIDC_RESPONSE_MODE_DEFAULT);
+        VertxAssertions.assertEquals(testCtx, OIDC_RESPONSE_MODE_DEFAULT, locationParameters.get(OIDC_RESPONSE_MODE));
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasPKCE() {
         final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
 
-        Assertions.assertNotNull(locationParameters.get(CODE_CHALLENGE));
-        Assertions.assertNotNull(locationParameters.get(CODE_CHALLENGE_METHOD));
-        Assertions.assertEquals(PKCE_METHOD_S256, locationParameters.get(CODE_CHALLENGE_METHOD));
-        Assertions.assertNotEquals(PKCE_METHOD_PLAIN, locationParameters.get(CODE_CHALLENGE_METHOD));
+        VertxAssertions.assertNotNull(testCtx, locationParameters.get(CODE_CHALLENGE));
+        VertxAssertions.assertNotNull(testCtx, locationParameters.get(CODE_CHALLENGE_METHOD));
+        VertxAssertions.assertEquals(testCtx, PKCE_METHOD_S256, locationParameters.get(CODE_CHALLENGE_METHOD));
+        VertxAssertions.assertNotEquals(testCtx, PKCE_METHOD_PLAIN, locationParameters.get(CODE_CHALLENGE_METHOD));
 
         return this;
     }
 
     private Map<String, String> extractParametersFromHeader(String header) {
+        if (header == null) {
+            throw new IllegalArgumentException("header is null");
+        }
+
         List<NameValuePair> responseParamsList = null;
         try {
             responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        Assertions.assertNotNull(responseParamsList);
+        VertxAssertions.assertNotNull(testCtx, responseParamsList);
         final Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
             entry -> entry.getName(), entry -> entry.getValue()));
 
@@ -115,7 +123,7 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert hasSetSessionCookieDifferentThan(String sessionCookie) {
         for (String cookie : actual.cookies()) {
-            Assertions.assertNotEquals(sessionCookie, cookie);
+            VertxAssertions.assertNotEquals(testCtx, sessionCookie, cookie);
         }
         return this;
     }
@@ -142,11 +150,9 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert hasSetCookie(String cookieName, String withValue) {
         final List<String> cookieValues = valueFromSetCookie(actual.cookies(), cookieName);
-        Assertions.assertNotNull(cookieValues);
+        VertxAssertions.assertNotNull(testCtx, cookieValues);
         if (withValue != null) {
-            Assertions.assertTrue(
-                cookieValues.stream()
-                    .anyMatch(value -> value.equals(withValue)));
+            VertxAssertions.assertTrue(testCtx, cookieValues.stream().anyMatch(value -> value.equals(withValue)));
         }
         return this;
     }
@@ -156,19 +162,19 @@ public class AuthenticationRedirectRequestAssert
     }
 
     private AuthenticationRedirectRequestAssert assertSetCookie(String cookieName, boolean present) {
-        Assertions.assertEquals(filterSetCookies(actual.cookies(), cookieName).isEmpty(), !present);
+        VertxAssertions.assertEquals(testCtx, filterSetCookies(actual.cookies(), cookieName).isEmpty(), !present);
         return this;
     }
 
     private List<String> valueFromSetCookie(List<String> cookieHeaders, String cookieName) {
-        Assertions.assertNotNull(cookieHeaders);
+        VertxAssertions.assertNotNull(testCtx, cookieHeaders);
         return filterSetCookies(cookieHeaders, cookieName).stream()
             .map(cookie -> cookie.getValue())
             .toList();
     }
 
     private List<Cookie> filterSetCookies(List<String> cookieHeaders, String cookieName) {
-        Assertions.assertNotNull(cookieHeaders);
+        VertxAssertions.assertNotNull(testCtx, cookieHeaders);
         return parseCookies(cookieHeaders).stream()
             .filter(cookie -> cookie.getName().equals(cookieName))
             .toList();
@@ -195,27 +201,26 @@ public class AuthenticationRedirectRequestAssert
     }
 
     public AuthenticationRedirectRequestAssert hasStatusCode(int expectedStatusCode) {
-        Assertions.assertEquals(expectedStatusCode, actual.statusCode());
+        VertxAssertions.assertEquals(testCtx, expectedStatusCode, actual.statusCode());
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader) {
         final String value = actual.getHeader(expectedHeader);
-        Assertions.assertNotNull(value);
+        VertxAssertions.assertNotNull(testCtx, value);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader, String expectedValue) {
         final String value = actual.getHeader(expectedHeader);
-        Assertions.assertEquals(expectedValue, value);
+        VertxAssertions.assertEquals(testCtx, expectedValue, value);
         return this;
     }
 
     public AuthenticationRedirectRequestAssert hasStateWithUri(String expectedUriInStateParameter) {
         final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
-        Assertions.assertEquals(expectedUriInStateParameter,
+        VertxAssertions.assertEquals(testCtx, expectedUriInStateParameter,
             new StateWithUri(locationParameters.get(OIDC_PARAM_STATE)).uri().orElse(null));
         return this;
     }
-
 }

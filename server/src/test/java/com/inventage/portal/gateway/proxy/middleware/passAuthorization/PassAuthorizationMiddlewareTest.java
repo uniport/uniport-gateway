@@ -2,9 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.passAuthorization;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -32,7 +31,7 @@ public class PassAuthorizationMiddlewareTest {
             .start()
             .incomingRequest(GET, "/", (resp) -> {
                 // then
-                assertEquals(401, resp.statusCode(), "unexpected status code");
+                VertxAssertions.assertEquals(testCtx, 401, resp.statusCode(), "unexpected status code");
                 testCtx.completeNow();
             });
 
@@ -44,11 +43,12 @@ public class PassAuthorizationMiddlewareTest {
         portalGateway(vertx, host, testCtx)
             .withSessionMiddleware()
             .withMockOAuth2Middleware("unauthorizedAuthHeader")
-            .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "authorizedAuthHeader")).build()
+            .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "authorizedAuthHeader"))
+            .build()
             .start()
             .incomingRequest(GET, "/", (resp) -> {
                 // then
-                assertEquals(401, resp.statusCode(), "unexpected status code");
+                VertxAssertions.assertEquals(testCtx, 401, resp.statusCode(), "unexpected status code");
                 testCtx.completeNow();
             });
 
@@ -74,9 +74,9 @@ public class PassAuthorizationMiddlewareTest {
             .start()
             .incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (resp) -> {
                 // then
-                assertEquals(200, resp.statusCode(), "unexpected status code");
-                assertTrue(routingContext.get().request().headers().contains(HttpHeaders.AUTHORIZATION));
-                assertEquals(routingContext.get().request().getHeader(HttpHeaders.AUTHORIZATION), externalAuthHeader);
+                VertxAssertions.assertEquals(testCtx, 200, resp.statusCode(), "unexpected status code");
+                VertxAssertions.assertTrue(testCtx, routingContext.get().request().headers().contains(HttpHeaders.AUTHORIZATION));
+                VertxAssertions.assertEquals(testCtx, routingContext.get().request().getHeader(HttpHeaders.AUTHORIZATION), externalAuthHeader);
                 testCtx.completeNow();
             });
 

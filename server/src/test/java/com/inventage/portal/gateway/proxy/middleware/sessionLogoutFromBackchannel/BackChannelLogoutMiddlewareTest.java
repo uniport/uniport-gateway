@@ -12,6 +12,7 @@ import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -33,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -81,7 +81,7 @@ public class BackChannelLogoutMiddlewareTest {
         browser.request(GET, "/some-path")
             .whenComplete((response, error) -> {
                 testCtx.verify(() -> {
-                    assertThat(response)
+                    assertThat(testCtx, response)
                         .hasStatusCode(200)
                         .hasSetSessionCookie();
                 });
@@ -110,7 +110,7 @@ public class BackChannelLogoutMiddlewareTest {
                     .whenComplete((response2, error2) -> {
                         // then
                         testCtx.verify(() -> {
-                            assertThat(response2)
+                            assertThat(testCtx, response2)
                                 .hasStatusCode(200)
                                 .hasSetSessionCookieDifferentThan(cookie.get(0));
 
@@ -118,7 +118,7 @@ public class BackChannelLogoutMiddlewareTest {
                             ssoSIDToInternalSIDMap(vertx)
                                 .compose(map -> map.get(SSO_SID))
                                 .onComplete(testCtx.succeeding(internalSID -> {
-                                    Assertions.assertNull(internalSID);
+                                    VertxAssertions.assertNull(testCtx, internalSID);
                                     testCtx.completeNow();
                                 }));
                         });
@@ -167,7 +167,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "a=b", (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -189,7 +189,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "logout_token=" + signedLogoutTokenWithoutSubClaim, (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -211,7 +211,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "logout_token=" + signedLogoutTokenWithoutSidClaim, (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -233,7 +233,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "logout_token=" + signedLogoutTokenWithoutEventsClaim, (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -256,7 +256,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "logout_token=" + signedLogoutTokenWithIncorrectEventsClaimValue, (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(500));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(500));
             testCtx.completeNow();
         });
     }
@@ -281,7 +281,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "logout_token=" + signedLogoutTokenWithIncorrectEventsClaim, (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -303,7 +303,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "logout_token=" + signedLogoutTokenWithNonceClaim, (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -320,7 +320,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
         gateway.incomingRequest(GET, "/backchannellogout", requestOptions, "", (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
@@ -337,7 +337,7 @@ public class BackChannelLogoutMiddlewareTest {
         final RequestOptions requestOptions = new RequestOptions().addHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
         gateway.incomingRequest(POST, "/backchannellogout", requestOptions, "", (outgoingResponse) -> {
             // then
-            testCtx.verify(() -> assertThat(outgoingResponse).hasStatusCode(400));
+            testCtx.verify(() -> assertThat(testCtx, outgoingResponse).hasStatusCode(400));
             testCtx.completeNow();
         });
     }
