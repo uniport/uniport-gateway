@@ -183,6 +183,29 @@ public class SessionMiddlewareTest {
         });
     }
 
+    @Test
+    public void shouldSetSessionStoreOnRoutingContext(Vertx vertx, VertxTestContext testCtx) {
+        // given 
+        final AtomicReference<Boolean> hasSessionStore = new AtomicReference<>(false);
+
+        Handler<RoutingContext> checkSessionStoreIsOnRoutingContext = ctx -> {
+            hasSessionStore.set(ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_SESSION_STORE_KEY) != null);
+            ctx.next();
+        };
+
+        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withMiddleware(checkSessionStoreIsOnRoutingContext)
+            .build().start();
+
+        // when
+        gateway.incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
+            // then
+            Assertions.assertThat(hasSessionStore.get());
+            testCtx.completeNow();
+        });
+    }
+
     private SharedDataSessionImpl getSharedDataSession(Vertx vertx) {
         return vertx.sharedData().getLocalMap(DEFAULT_SESSION_MAP_NAME)
             .values()

@@ -12,6 +12,7 @@ import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import java.util.List;
 
 /**
+ * https://github.com/eclipse-vertx/vertx-auth/blob/4.5.8/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java
  */
 public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 

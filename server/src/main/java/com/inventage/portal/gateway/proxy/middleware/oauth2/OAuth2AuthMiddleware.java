@@ -10,7 +10,10 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.opentelemetry.api.trace.Span;
 import io.reactiverse.contextual.logging.ContextualData;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Route;
@@ -26,6 +29,8 @@ import org.slf4j.LoggerFactory;
  * Redirects the user if not authenticated.
  */
 public class OAuth2AuthMiddleware extends TraceMiddleware {
+
+    public static final String SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY = "uniport.sso-sid-to-internal-sid-map";
 
     // the following keys are used by RelyingPartyHandler
     public static final String OIDC_PARAM_STATE = "state";
@@ -45,7 +50,7 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
 
     /**
     */
-    public OAuth2AuthMiddleware(String name, AuthenticationHandler authHandler, String sessionScope) {
+    public OAuth2AuthMiddleware(Vertx vertx, String name, AuthenticationHandler authHandler, String sessionScope) {
         LOGGER.debug("For session scope '{}'", sessionScope);
         this.name = name;
         this.authHandler = authHandler;
@@ -103,8 +108,8 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         return ctx.session().get(PREFIX_STATE + requestState) != null;
     }
 
-    protected static void registerCallbackHandlers(Route callback, String sessionScope, OAuth2Auth authProvider) {
-        callback.handler(ctx -> whenAuthenticationResponseReceived(ctx, sessionScope, authProvider));
+    protected static void registerCallbackHandlers(Vertx vertx, Route callback, String sessionScope, OAuth2Auth authProvider) {
+        callback.handler(ctx -> whenAuthenticationResponseReceived(vertx, ctx, sessionScope, authProvider));
         callback.failureHandler(ctx -> {
             // PORTAL-1184: retry with initial uri
             LOGGER.warn("Processing failed for state '{}' caused by '{}'", ctx.request().getParam(OIDC_PARAM_STATE),
@@ -116,6 +121,7 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
 
     // this method is called when the IAM finishs the authentication flow and sends a redirect (callback) with the code
     private static void whenAuthenticationResponseReceived(
+        Vertx vertx,
         RoutingContext ctx,
         String sessionScope,
         OAuth2Auth authProvider
@@ -124,7 +130,7 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         final String code = ctx.request().getParam(OIDC_PARAM_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
             LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code != null ? code.substring(0, 5) : null);
-            ctx.addEndHandler(asyncResult -> whenTokenForCodeReceived(asyncResult, ctx, authProvider, sessionScope));
+            ctx.addEndHandler(asyncResult -> whenTokenForCodeReceived(vertx, asyncResult, ctx, authProvider, sessionScope));
             ctx.next(); // io.vertx.ext.web.handler.impl.OAuth2AuthHandlerImpl.setupCallback#route.handler(ctx -> {...})
         } else {
             LOGGER.info("failed because state '{}' wasn't found in session", stateParameter);
@@ -155,7 +161,9 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
     }
 
     private static void whenTokenForCodeReceived(
-        AsyncResult<Void> asyncResult, RoutingContext ctx,
+        Vertx vertx,
+        AsyncResult<Void> asyncResult,
+        RoutingContext ctx,
         OAuth2Auth authProvider,
         String sessionScope
     ) {
@@ -168,7 +176,7 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
                 // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User objects together.
                 // However, it is marked as deprecated, and therefore we use our own glue.
                 AuthenticationUserContext.of(authProvider, ctx.user()).toSessionAtScope(ctx.session(), sessionScope);
-                storeKeycloakSID(ctx);
+                storeKeycloakSID(vertx, ctx);
             }
         }
         if (asyncResult.failed()) {
@@ -177,12 +185,20 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
     }
 
-    private static void storeKeycloakSID(final RoutingContext ctx) {
+    private static void storeKeycloakSID(Vertx vertx, final RoutingContext ctx) {
+        final String internalSessionID = ctx.session().id();
         ctx.user().attributes().stream()
             .filter(attr -> "idToken".equals(attr.getKey()))
             .map(attr -> (JsonObject) attr.getValue())
             .map(json -> json.getString("sid"))
-            .forEach(sid -> ctx.session().put(SINGLE_SIGN_ON_SID, sid));
+            .forEach(sid -> {
+                ctx.session().put(SINGLE_SIGN_ON_SID, sid);
+                keycloakSIDtoInternalSIDAsyncMap(vertx).compose(map -> map.put(sid, internalSessionID));
+            });
+    }
+
+    private static Future<AsyncMap<String, String>> keycloakSIDtoInternalSIDAsyncMap(Vertx vertx) {
+        return vertx.sharedData().getAsyncMap(SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY);
     }
 
     /**

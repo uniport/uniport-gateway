@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Support for back channel logout as triggered by Keycloak ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
+
 ## [9.2.0]-202408231733-1183-1f523dcd - 2024-08-23
 
 [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.2.0-202408231733-1183-1f523dcd)

@@ -145,7 +145,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                     .map(entrypointConfig -> new Entrypoint(vertx,
                         entrypointConfig.getString(StaticConfiguration.ENTRYPOINT_NAME),
                         entrypointConfig.getInteger(StaticConfiguration.ENTRYPOINT_PORT),
-                        entrypointConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES).copy()))
+                        entrypointConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, JsonArray.of()).copy()))
                     .forEach(entrypoints::add);
             }
             return entrypoints;

@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import io.vertx.core.AsyncResult;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  */
-public interface JWTAuthPublicKeysReconcilerHandler extends AuthenticationHandler {
+public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHandler {
 
     String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
     String JWKS_URI_KEY = "jwks_uri";

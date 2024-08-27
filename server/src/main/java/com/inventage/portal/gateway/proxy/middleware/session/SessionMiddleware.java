@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class SessionMiddleware extends TraceMiddleware {
 
     public static final String SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY = "SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS";
+    public static final String SESSION_MIDDLEWARE_SESSION_STORE_KEY = "SESSION_MIDDLEWARE_SESSION_STORE";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
@@ -42,6 +43,7 @@ public class SessionMiddleware extends TraceMiddleware {
     private final CookieSameSite lifetimeCookieSameSite;
 
     private final Handler<RoutingContext> sessionHandler;
+    private final SessionStore sessionStore;
 
     private final Pattern uriPatternForIgnoringSessionTimeoutReset;
 
@@ -123,7 +125,6 @@ public class SessionMiddleware extends TraceMiddleware {
         this.lifetimeCookieSecure = lifetimeCookieSecure;
         this.lifetimeCookieSameSite = lifetimeCookieSameSite;
 
-        final SessionStore sessionStore;
         if (vertx.isClustered()) {
             LOGGER.info("Running clustered session store");
             sessionStore = ClusteredSessionStore.create(vertx, clusteredSessionStoreRetryTimeoutMiliSeconds);
@@ -149,6 +150,7 @@ public class SessionMiddleware extends TraceMiddleware {
         registerHandlerForRespondingWithSessionLifetime(ctx);
         checkForSessionTimeoutReset(ctx);
         setSessionIdleTimeoutOnRoutingContext(ctx);
+        setSessionStoreOnRoutingContext(ctx);
 
         this.sessionHandler.handle(ctx);
     }
@@ -209,5 +211,15 @@ public class SessionMiddleware extends TraceMiddleware {
 
     private void setSessionIdleTimeoutOnRoutingContext(RoutingContext ctx) {
         ctx.put(SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY, this.sessionIdleTimeoutInMilliSeconds);
+    }
+
+    /**
+     * Make the session store available on the context for upcoming middleware to access sessions.
+     * 
+     * @param ctx
+     *            current routing context
+     */
+    private void setSessionStoreOnRoutingContext(RoutingContext ctx) {
+        ctx.put(SESSION_MIDDLEWARE_SESSION_STORE_KEY, this.sessionStore);
     }
 }

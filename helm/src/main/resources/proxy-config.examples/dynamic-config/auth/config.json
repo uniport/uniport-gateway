@@ -20,11 +20,20 @@
                 "service": "base-proxy"
             },
             {
-                "name": "logout",
+                "name": "frontChannelLogout",
                 "middlewares": [
                     "logoutRedirectRegex"
                 ],
                 "rule": "PathPrefix('/logout')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "backChannelLogout",
+                "middlewares": [
+                    "logoutRedirectRegex",
+                    "backChannelLogout"
+                ],
+                "rule": "PathPrefix('/backchannellogout')",
                 "service": "base-proxy"
             }
         ],
@@ -65,6 +74,25 @@
                 "options": {
                     "regex": "^/logout(.*)$",
                     "replacement": "/base/service/logout$1"
+                }
+            },
+            {
+                "name": "backChannelLogout",
+                "type": "backChannelLogout",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
+                    ],
+                    "audience": [
+                        "Portal-Gateway"
+                    ],
+                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "publicKeysReconcilation": {
+                        "enabled": true,
+                        "intervalMs": 3600000
+                    }
                 }
             }
         ],

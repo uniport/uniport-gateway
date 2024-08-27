@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
+import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     }
 
     @Override
-    protected Middleware create(Vertx vertx, String name, JWTAuthPublicKeysReconcilerHandler authHandler, JsonObject middlewareConfig) {
+    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig) {
         final String optionalStr = middlewareConfig.getString(
             DynamicConfiguration.MIDDLEWARE_BEARER_ONLY_OPTIONAL,
             "false");

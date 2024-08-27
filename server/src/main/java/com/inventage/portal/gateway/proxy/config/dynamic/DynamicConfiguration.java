@@ -113,7 +113,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_MATOMO_JWT_PATH_GROUP = "pathGroup";
     public static final String MIDDLEWARE_MATOMO_JWT_PATH_EMAIL = "pathEmail";
     public static final String MIDDLEWARE_MATOMO_JWT_PATH_USERNAME = "pathUsername";
-
     // oauth2
     public static final String MIDDLEWARE_OAUTH2 = "oauth2";
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
@@ -201,7 +200,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CLAIM_TO_HEADER_NAME = "headerName";
     // back channel logout
     public static final String MIDDLEWARE_BACK_CHANNEL_LOGOUT = "backChannelLogout";
-    public static final String MIDDLEWARE_BACK_CHANNEL_LOGOUT_NAME = "name";
 
     // option enumerations of various middlewares
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
@@ -367,7 +365,6 @@ public class DynamicConfiguration {
             // response session cookie removal
             .property(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MIDDLEWARE_BACK_CHANNEL_LOGOUT_NAME, Schemas.stringSchema())
             // request/response logger
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema())
             .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema().items(Schemas.stringSchema()))

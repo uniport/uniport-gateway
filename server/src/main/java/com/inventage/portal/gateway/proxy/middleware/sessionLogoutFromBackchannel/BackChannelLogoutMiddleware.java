@@ -1,23 +1,28 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel;
 
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY;
+import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware.SESSION_MIDDLEWARE_SESSION_STORE_KEY;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.vertx.core.http.HttpHeaders.APPLICATION_X_WWW_FORM_URLENCODED;
 
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import io.opentelemetry.api.trace.Span;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
+import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.auth.impl.jose.JWK;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.Session;
-import java.time.Instant;
+import io.vertx.ext.web.sstore.SessionStore;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,17 +39,18 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackChannelLogoutMiddleware.class);
 
-    protected static final String SHARED_DATA_KEY_SESSIONS = "uniport.logged-out-sso-sessions";
-    protected static final String SHARED_DATA_KEY_USERS = "uniport.logged-out-users";
+    private static final String LOGOUT_TOKEN_PREFIX = "logout_token=";
+    private static final String SUB_KEY = "sub";
+    private static final String SID_KEY = "sid";
+    private static final String EVENTS_KEY = "events";
+    private static final String EVENTS_BACKCHANNEL_LOGOUT_KEY = "http://schemas.openid.net/event/backchannel-logout";
+    private static final String NONCE_KEY = "nonce";
 
-    private final Vertx vertx;
     private final String name;
-    private final String backChannelLogoutPath;
-    private final LocalMap<String /*sso id*/, String /*subject*/> loggedOutSSOSessionMap;
-    private final LocalMap<String /*subject*/, Instant /*before*/> loggedOutUserMap;
-    //    private final AuthenticationHandler authHandler;
 
     private final JWT jwt;
+    // contains mappings from SSO session ID to internal session ID
+    private AsyncMap<String, String> sessionIDMap;
 
     /**
      * Constructor.
@@ -56,21 +62,19 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
      * @param backChannelLogoutPath
      *            the URI path, which should be used as the backchannel logout request
      */
-    public BackChannelLogoutMiddleware(Vertx vertx, String name, String backChannelLogoutPath) {
-        this.vertx = vertx;
+    public BackChannelLogoutMiddleware(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler) {
         this.name = name;
-        this.backChannelLogoutPath = backChannelLogoutPath;
-        this.loggedOutSSOSessionMap = this.backChannelLogoutPath != null ? vertx.sharedData().getLocalMap(SHARED_DATA_KEY_SESSIONS) : null;
-        this.loggedOutUserMap = this.backChannelLogoutPath != null ? vertx.sharedData().getLocalMap(SHARED_DATA_KEY_USERS) : null;
-        this.jwt = new JWT(); //initJWT(authHandler.getJwks());
-        //        this.authHandler = authHandler;
+
+        this.jwt = initJWT(authHandler.getJwks());
+        vertx.sharedData().<String, String>getAsyncMap(SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY)
+            .onSuccess(sidMap -> this.sessionIDMap = sidMap);
     }
 
     private JWT initJWT(final List<JsonObject> jwks) {
         final JWT jwt = new JWT();
         for (JsonObject jwk : jwks) {
             try {
-                jwt.addJWK(new JWK((JsonObject) jwk));
+                jwt.addJWK(new JWK(jwk));
             } catch (Exception e) {
                 LOGGER.warn("Unsupported JWK", e);
             }
@@ -80,78 +84,147 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
 
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
-        if (!isBackChannelLogoutUri(ctx.request().uri())) {
-            checkForLoggedOutSSOSession(ctx);
-            ctx.next();
+        LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
+        if (!isBackChannelLogoutRequest(ctx.request())) {
+            LOGGER.warn("invalid back channel logout request");
+            HttpResponder.respondWithStatusCode(BAD_REQUEST, ctx);
             return;
         }
-        if (!isBackChannelLogoutRequest(ctx.request())) {
-            LOGGER.warn("handleWithTraceSpan: invalid back channel logout request in '{}'", name);
-            HttpResponder.respondWithStatusCode(BAD_REQUEST, ctx);
-        }
-        storeLoggedOutSsoSID(ctx);
-        ctx.end();
-    }
 
-    private boolean isBackChannelLogoutUri(final String uri) {
-        return backChannelLogoutPath != null
-            && backChannelLogoutPath.equals(uri);
+        handleBackChannelLogoutRequest(ctx);
     }
 
     protected boolean isBackChannelLogoutRequest(final HttpServerRequest request) {
-        return backChannelLogoutPath != null
-            && backChannelLogoutPath.equals(request.uri())
-            && HttpMethod.POST.equals(request.method())
+        return HttpMethod.POST.equals(request.method())
             && APPLICATION_X_WWW_FORM_URLENCODED.toString().equals(request.getHeader(HttpHeaders.CONTENT_TYPE));
     }
 
-    protected void checkForLoggedOutSSOSession(final RoutingContext ctx) {
-        if (loggedOutSSOSessionMap != null && !loggedOutSSOSessionMap.isEmpty() && ctx.session() != null) {
-            final String ssoId = getSsoId(ctx.session());
-            if (isSessionMarkedAsLoggedOut(ssoId)) {
-                LOGGER.info("checkForLoggedOutSSOSession: invalidated SSO session detected with id '{}' in '{}'", ssoId, name);
-                ctx.session().destroy();
-                loggedOutSSOSessionMap.remove(ssoId);
-            }
-        }
-    }
-
-    private boolean isSessionMarkedAsLoggedOut(String ssoId) {
-        return ssoId != null && loggedOutSSOSessionMap.containsKey(ssoId);
-    }
-
-    private String getSsoId(final Session session) {
-        return session.get(OAuth2AuthMiddleware.SINGLE_SIGN_ON_SID);
-    }
-
-    protected void storeLoggedOutSsoSID(final RoutingContext ctx) {
-        ctx.request().body().onSuccess(body -> {
-            if (body != null) {
-                final String bodyContent = body.toString();
-                // https://openid.net/specs/openid-connect-backchannel-1_0.html#BCRequest
-                if (bodyContent.startsWith("logout_token=")) {
-                    try {
-                        // jwt.parse := read, jwt.decode := read & verify
-                        final JsonObject logoutToken = this.jwt.parse(bodyContent.substring("logout_token=".length()));
-                        final JsonObject payload = logoutToken.getJsonObject("payload");
-                        final String sub = payload.getString("sub");
-                        final String sid = payload.getString("sid");
-                        if (sid == null || sid.isEmpty()) {
-                            loggedOutUserMap.put(sub, Instant.now());
-                        } else {
-                            loggedOutSSOSessionMap.put(sid, sub);
-                        }
-                        LOGGER.debug("storeLoggedOutSsoSID: '{}' for sub '{}' in '{}'", sid, sub, name);
-                    } catch (Exception e) {
-                        LOGGER.warn("storeLoggedOutSsoSID: ", e);
-                    }
+    protected void handleBackChannelLogoutRequest(RoutingContext ctx) {
+        readRequestBody(ctx)
+            .compose(body -> parseAndVerifyLogoutToken(body))
+            .compose(logoutToken -> getSsoSID(logoutToken))
+            .compose(ssoSID -> aggregateWithInternalSID(ssoSID))
+            .compose(sidPair -> destroyInternalSession(ctx, sidPair))
+            .onSuccess(v -> {
+                ctx.end();
+            })
+            .onFailure(err -> {
+                LOGGER.warn("failed to handle back channel logout request: {}", err);
+                if (err instanceof IllegalArgumentException) {
+                    HttpResponder.respondWithStatusCode(BAD_REQUEST, ctx);
                 } else {
-                    LOGGER.warn("storeLoggedOutSsoSID: 'logout_token' key not found in body: '{}'", bodyContent);
+                    HttpResponder.respondWithStatusCode(INTERNAL_SERVER_ERROR, ctx);
                 }
-            }
-        }).onFailure(error -> {
-            LOGGER.debug("getLogoutTokenFromRequest: no logout token found in request");
+            });
+    }
+
+    protected Future<Buffer> readRequestBody(RoutingContext ctx) {
+        return ctx.request().body();
+    }
+
+    protected Future<JsonObject> parseAndVerifyLogoutToken(Buffer body) {
+        if (body == null) {
+            return Future.failedFuture(new IllegalArgumentException("back channel logout request has no body"));
+        }
+
+        final String bodyContent = body.toString();
+        // https://openid.net/specs/openid-connect-backchannel-1_0.html#BCRequest
+        if (!bodyContent.startsWith(LOGOUT_TOKEN_PREFIX)) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'logout_token' key not found in body: '%s'", bodyContent)));
+        }
+
+        // Validate logout token according to:
+        // https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
+
+        // 1. If the Logout Token is encrypted, decrypt it using the keys and algorithms that the Client specified during Registration that the OP 
+        //    was to use to encrypt ID Tokens. If ID Token encryption was negotiated with the OP at Registration time and the Logout Token is not 
+        //    encrypted, the RP SHOULD reject it. 
+        // 2. Validate the Logout Token signature in the same way that an ID Token signature is validated, with the following refinements.
+        // 3. Validate the alg (algorithm) Header Parameter in the same way it is validated for ID Tokens. Like ID Tokens, selection of the algorithm 
+        //    used is governed by the id_token_signing_alg_values_supported Discovery parameter and the id_token_signed_response_alg Registration 
+        //    parameter when they are used; otherwise, the value SHOULD be the default of RS256. Additionally, an alg with the value none MUST NOT 
+        //    be used for Logout Tokens.
+        // 4. Validate the iss, aud, iat, and exp Claims in the same way they are validated in ID Tokens. 
+        final JsonObject logoutToken;
+        try {
+            // jwt.decode := read & verify
+            logoutToken = this.jwt.decode(bodyContent.substring(LOGOUT_TOKEN_PREFIX.length()));
+        } catch (Exception e) {
+            return Future.failedFuture(e);
+        }
+
+        // 5.  Verify that the Logout Token contains a sub Claim, a sid Claim, or both.
+        if (!logoutToken.containsKey(SUB_KEY)) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'%s' claim not found in logout token: '%s'", SUB_KEY, logoutToken)));
+        }
+        if (!logoutToken.containsKey(SID_KEY)) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'%s' claim not found in logout token: '%s'", SID_KEY, logoutToken)));
+        }
+
+        // 6.  Verify that the Logout Token contains an events Claim whose value is JSON object containing the member name http://schemas.openid.net/event/backchannel-logout.
+        final JsonObject events = logoutToken.getJsonObject(EVENTS_KEY);
+        if (events == null || events.isEmpty()) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'%s' claim not found in logout token: '%s'", EVENTS_KEY, logoutToken)));
+        }
+        if (!events.containsKey(EVENTS_BACKCHANNEL_LOGOUT_KEY)) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'%s' key not found in '%s' claim: '%s'", EVENTS_BACKCHANNEL_LOGOUT_KEY, EVENTS_KEY, logoutToken)));
+        }
+
+        // 7.  Verify that the Logout Token does not contain a nonce Claim.
+        if (logoutToken.containsKey(NONCE_KEY)) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("forbidden '%s' claim found in logout token: '%s'", NONCE_KEY, logoutToken)));
+        }
+
+        // 8.  (OMITTED) Optionally verify that another Logout Token with the same jti value has not been recently received.
+        // 9.  (OMITTED) Optionally verify that the iss Logout Token Claim matches the iss Claim in an ID Token issued for the current session or a recent session of this RP with the OP.
+        // 10. (OMITTED) Optionally verify that any sub Logout Token Claim matches the sub Claim in an ID Token issued for the current session or a recent session of this RP with the OP.
+        // 11. (OMITTED) Optionally verify that any sid Logout Token Claim matches the sid Claim in an ID Token issued for the current session or a recent session of this RP with the OP.         
+
+        LOGGER.debug("validated logout request successfully");
+        return Future.succeededFuture(logoutToken);
+    }
+
+    protected Future<String> getSsoSID(JsonObject logoutToken) {
+        final String sub = logoutToken.getString(SUB_KEY);
+        if (sub == null || sub.isEmpty()) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'%s' claim not found in logout token: '%s'", SUB_KEY, logoutToken)));
+        }
+
+        final String sid = logoutToken.getString(SID_KEY);
+        if (sid == null || sid.isEmpty()) {
+            return Future.failedFuture(new IllegalArgumentException(String.format("'%s' claim not found in logout token: '%s'", SID_KEY, logoutToken)));
+        }
+
+        LOGGER.debug("logging out session '{}' for subject '{}'", sid, sub);
+        return Future.succeededFuture(sid);
+    }
+
+    protected Future<SimpleEntry<String, String>> aggregateWithInternalSID(String ssoSID) {
+        return sessionIDMap.get(ssoSID)
+            .compose(internalSID -> {
+                if (internalSID == null || internalSID.isEmpty()) {
+                    return Future.failedFuture(new IllegalStateException(String.format("no mapping found for the ssoID ''", ssoSID)));
+                }
+
+                LOGGER.debug("resolved SSO sesion ID '{}' to internal session ID '{}'", ssoSID, internalSID);
+                return Future.succeededFuture(new SimpleEntry<String, String>(ssoSID, internalSID));
+            });
+    }
+
+    protected Future<Void> destroyInternalSession(RoutingContext ctx, SimpleEntry<String, String> sidPair) {
+        final String ssoSID = sidPair.getKey();
+        final String internalSID = sidPair.getValue();
+        final SessionStore sessionStore = ctx.get(SESSION_MIDDLEWARE_SESSION_STORE_KEY);
+
+        if (sessionStore == null) {
+            return Future.failedFuture(new IllegalStateException("no session store passed on the routing context (session handler has to run before this middleware)"));
+        }
+
+        return sessionStore.get(internalSID).compose(session -> {
+            session.destroy();
+            LOGGER.debug("destroyed session with ID '{}'", internalSID);
+            return sessionIDMap.remove(ssoSID).mapEmpty();
         });
     }
-
 }

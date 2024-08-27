@@ -40,7 +40,7 @@ import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.MockJWKAuthHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -52,6 +52,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -438,12 +439,13 @@ public final class MiddlewareServerBuilder {
                 DEFAULT_MAX_REDIRECT_RETRIES));
     }
 
-    public MiddlewareServerBuilder withBackChannelLogoutMiddleware() {
-        return withMiddleware(
+    public MiddlewareServerBuilder withBackChannelLogoutMiddleware(String path, JWTAuthOptions jwtAuthOptions) {
+        return withMiddlewareOnPath(
             new BackChannelLogoutMiddleware(
                 this.vertx,
                 "withBackChannelLogoutMiddleware",
-                BackChannelLogoutMiddlewareFactory.DEFAULT_SESSION_BACKCHANNELLOGOUT_PATH));
+                new MockJWKAuthHandler(jwtAuthOptions)),
+            path);
     }
 
     public MiddlewareServer build() {

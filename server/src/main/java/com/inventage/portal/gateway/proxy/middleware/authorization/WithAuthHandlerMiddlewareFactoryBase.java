@@ -38,7 +38,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
      *            The config for the middleware
      * @return Your {@link Middleware}
      */
-    protected abstract Middleware create(Vertx vertx, String name, JWTAuthPublicKeysReconcilerHandler authHandler, JsonObject middlewareConfig);
+    protected abstract Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig);
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {

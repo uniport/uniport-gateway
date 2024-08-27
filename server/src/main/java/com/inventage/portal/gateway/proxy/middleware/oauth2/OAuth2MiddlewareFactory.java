@@ -86,7 +86,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             }
 
             for (Route callback : callbacks) {
-                OAuth2AuthMiddleware.registerCallbackHandlers(callback, sessionScope, authProvider);
+                OAuth2AuthMiddleware.registerCallbackHandlers(vertx, callback, sessionScope, authProvider);
             }
             final String callbackURL = String.format("%s%s", publicUrl, callbackPath);
 
@@ -99,7 +99,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .withScopes(List.of(OIDC_SCOPE, sessionScope))
                 .extraParams(oidcParams);
 
-            result.complete(new OAuth2AuthMiddleware(name, authHandler, sessionScope));
+            result.complete(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
         }).onFailure(err -> {
             LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'",

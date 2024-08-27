@@ -71,9 +71,9 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     }
 
     private AuthenticationHandler createAuthHandlerWithFreshPublicKeys(JWTAuthOptions authOpts) {
-        final JWTAuthOptions authConfig = new JWTAuthOptions(authOpts).setJWTOptions(jwtOptions);
+        final JWTAuthOptions authOptions = new JWTAuthOptions(authOpts).setJWTOptions(jwtOptions);
 
-        final JWTAuth authProvider = JWTAuthMultipleIssuersProvider.create(this.vertx, authConfig, this.additionalIssuersOptions);
+        final JWTAuth authProvider = JWTAuthMultipleIssuersProvider.create(this.vertx, authOptions, this.additionalIssuersOptions);
         final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider, additionalClaimsOptions, this);
 
         return authHandler;
