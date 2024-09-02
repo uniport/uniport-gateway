@@ -163,7 +163,7 @@ containers:
         value: "80"
       # PORTAL_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
       PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
-        value: "portal-monitoring-grafana-operator-grafana-service.monitoring.svc.cluster.local"
+        value: "grafana-grafana-operator-grafana-service.monitoring.svc.cluster.local"
       # PORTAL_GATEWAY_PORTAL_GRAFANA_PORT is the port for accessing Grafana via HTTP
       PORTAL_GATEWAY_PORTAL_GRAFANA_PORT:
         value: "3000"
