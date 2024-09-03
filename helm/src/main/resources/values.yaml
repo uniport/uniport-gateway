@@ -247,6 +247,14 @@ serviceAccount:
     inventage-nexus:
       name: inventage-nexus-registry
 
+# Configure service monitor installation.
+serviceMonitor:
+  # Disabled by default, requires presence of the prometheus CRDs.
+  enabled: false
+  endpoints:
+    - port: metrics
+      interval: 15s
+
 configMaps:
   portal-gateway-logging-config:
     enabled: true

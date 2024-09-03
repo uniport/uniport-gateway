@@ -20,6 +20,9 @@ services:
       http-debug:
         port: 20009
 
+serviceMonitor:
+  enabled: true
+
 containers:
   portal-gateway:
     env:
