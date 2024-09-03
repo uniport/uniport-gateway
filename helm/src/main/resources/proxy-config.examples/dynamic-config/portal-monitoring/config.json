@@ -13,9 +13,67 @@
                 ],
                 "rule": "PathPrefix('/ips/portal-monitoring')",
                 "service": "portal-grafana-proxy"
+            },
+            {
+                "name": "prometheus-proxy",
+                "middlewares": [
+                    "prometheusRedirect",
+                    "portalGrafanaOauth2",
+                    "portalGrafanaAuthBearer",
+                    "portalGrafanaBearerOnly",
+                    "portalGrafanaHeaders",
+                    "prometheusRewritePath"
+                ],
+                "rule": "PathPrefix('/ips/prometheus')",
+                "service": "prometheus-proxy"
+            },
+            {
+                "name": "alertmanager-proxy",
+                "middlewares": [
+                    "alertmanagerRedirect",
+                    "portalGrafanaOauth2",
+                    "portalGrafanaAuthBearer",
+                    "portalGrafanaBearerOnly",
+                    "portalGrafanaHeaders",
+                    "alertmanagerRewritePath"
+                ],
+                "rule": "PathPrefix('/ips/alertmanager')",
+                "service": "alertmanager-proxy"
             }
         ],
         "middlewares": [
+            {
+                "name": "prometheusRedirect",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/prometheus)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "prometheusRewritePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "^/ips/prometheus/(.*)$",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "alertmanagerRedirect",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/alertmanager)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "alertmanagerRewritePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "^/ips/alertmanager/(.*)$",
+                    "replacement": "/$1"
+                }
+            },
             {
                 "name": "portalGrafanaCSP",
                 "type": "csp",
@@ -104,6 +162,24 @@
                     {
                         "host": "${PORTAL_GATEWAY_PORTAL_GRAFANA_HOST}",
                         "port": "${PORTAL_GATEWAY_PORTAL_GRAFANA_PORT}"
+                    }
+                ]
+            },
+            {
+                "name": "prometheus-proxy",
+                "servers": [
+                    {
+                        "host": "${PROMETHEUS_HOST}",
+                        "port": "${PROMETHEUS_PORT}"
+                    }
+                ]
+            },
+            {
+                "name": "alertmanager-proxy",
+                "servers": [
+                    {
+                        "host": "${ALERTMANAGER_HOST}",
+                        "port": "${ALERTMANAGER_PORT}"
                     }
                 ]
             }

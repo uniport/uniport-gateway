@@ -77,6 +77,18 @@ containers:
       limits:
         memory: "512Mi"
     env:
+      # Hostname for proxying alertmanager
+      ALERTMANAGER_HOST:
+        value: alertmanager-operated.monitoring.svc.cluster.local
+      # Port for proxying the alertmanager
+      ALERTMANAGER_PORT:
+        value: "9093"
+      # Hostname for proxying prometheus
+      PROMETHEUS_HOST:
+        value: prometheus-operated.monitoring.svc.cluster.local
+      # Hostname for proxying prometheus
+      PROMETHEUS_PORT:
+        value: "9090"
       # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
       PORTAL_GATEWAY_PUBLIC_PROTOCOL:
         value: "http"
