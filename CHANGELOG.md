@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for back channel logout as triggered by Keycloak ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
 - Additional routes to access Prometheus & Alertmanager  ([PORTAL-1758](https://issue.inventage.com/browse/PORTAL-1758)).
 
+### Changed
+
+- Remove hardcoded client-id & client-secret configuration for the OIDC client in the example config files. The client-id & client-secret 
+  configuration for the OIDC client used by the gateway is now expected in the environment variables `PORTAL_GATEWAY_CLIENT_ID` and `PORTAL_GATEWAY_CLIENT_SECRET`.
+
 ## [9.2.0]-202408231733-1183-1f523dcd - 2024-08-23
 
 [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.2.0-202408231733-1183-1f523dcd)
