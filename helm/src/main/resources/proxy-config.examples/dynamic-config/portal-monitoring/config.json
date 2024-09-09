@@ -112,8 +112,8 @@
                 "name": "portalGrafanaOauth2",
                 "type": "oauth2",
                 "options": {
-                    "clientId": "Portal-Gateway",
-                    "clientSecret": "Portal-Gateway!",
+                    "clientId": "${PORTAL_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${PORTAL_GATEWAY_CLIENT_SECRET}",
                     "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Portal-Monitoring"
                 }

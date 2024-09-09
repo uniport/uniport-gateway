@@ -207,6 +207,18 @@ containers:
         value: analytics
       PORTAL_GATEWAY_ANALYTICS_PORT:
         value: "80"
+      # ID of the oauth/oidc client to be used in this gateway instance.
+      PORTAL_GATEWAY_CLIENT_ID:
+        valueFrom:
+          secretKeyRef:
+            name: gateway-oauth-config
+            key: client-id
+      # Client secret of the oauth/oidc client to be used in this gateway instance.
+      PORTAL_GATEWAY_CLIENT_SECRET:
+        valueFrom:
+          secretKeyRef:
+            name: gateway-oauth-config
+            key: client-secret
     livenessProbe:
       enabled: true
       httpGet:
