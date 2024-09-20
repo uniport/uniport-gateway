@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove hardcoded client-id & client-secret configuration for the OIDC client in the example config files. The client-id & client-secret 
   configuration for the OIDC client used by the gateway is now expected in the environment variables `PORTAL_GATEWAY_CLIENT_ID` and `PORTAL_GATEWAY_CLIENT_SECRET`.
 
+### Fixed
+
+- Fixed a bug where using multiple entrypoints were not working properly ([PORTAL-2116](https://issue.inventage.com/browse/PORTAL-2116)).
+
 ## [9.2.0]-202408231733-1183-1f523dcd - 2024-08-23
 
 [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.2.0-202408231733-1183-1f523dcd)
