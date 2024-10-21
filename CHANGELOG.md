@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Fixed
+
+- Use fresh public keys to verify the logout token in the back channel logout ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
+
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.3.0-202410161127-1201-84e80ee2) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.3.0-202410161127-1201-84e80ee2)
@@ -20,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Remove hardcoded client-id & client-secret configuration for the OIDC client in the example config files. The client-id & client-secret 
+- Remove hardcoded client-id & client-secret configuration for the OIDC client in the example config files. The client-id & client-secret
   configuration for the OIDC client used by the gateway is now expected in the environment variables `PORTAL_GATEWAY_CLIENT_ID` and `PORTAL_GATEWAY_CLIENT_SECRET`.
 
 ### Fixed
