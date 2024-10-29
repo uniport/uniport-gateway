@@ -9,6 +9,7 @@ import static io.vertx.core.http.HttpHeaders.APPLICATION_X_WWW_FORM_URLENCODED;
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
+import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -219,7 +220,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
         return sessionStore.get(internalSID).compose(session -> {
             LOGGER.debug("Loaded session from session store");
             session.destroy();
-            LOGGER.debug("destroyed session with ID '{}'", internalSID);
+            LOGGER.debug("destroyed session with ID '{}...'", SessionAdapter.displaySessionId(session));
             return sessionIDMap.remove(ssoSID).mapEmpty();
         });
     }
