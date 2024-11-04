@@ -55,8 +55,6 @@ public class RouterFactory {
     private final String publicPort;
     private final String entrypointName;
 
-    /**
-    */
     public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort, String entrypointName) {
         this.vertx = vertx;
         this.publicProtocol = publicProtocol;
@@ -65,8 +63,6 @@ public class RouterFactory {
         this.entrypointName = entrypointName;
     }
 
-    /**
-    */
     public RouterFactory(RouterFactory other) {
         this.vertx = other.vertx;
         this.publicProtocol = other.publicProtocol;
@@ -75,8 +71,6 @@ public class RouterFactory {
         this.entrypointName = other.entrypointName;
     }
 
-    /**
-    */
     public Future<Router> createRouter(JsonObject dynamicConfig) {
         final Promise<Router> promise = Promise.promise();
         createRouter(dynamicConfig, promise);

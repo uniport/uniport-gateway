@@ -20,8 +20,6 @@ public class CSPViolationReportingServerMiddleware extends TraceMiddleware {
     private final String name;
     private final Level level;
 
-    /**
-    */
     public CSPViolationReportingServerMiddleware(final String name, final Level level) {
         this.name = name;
         this.level = level;

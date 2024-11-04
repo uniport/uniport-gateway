@@ -28,8 +28,6 @@ public class ProviderAggregator extends Provider {
     private final JsonArray providerConfigs;
     private final JsonObject env;
 
-    /**
-    */
     public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providerConfigs, JsonObject env) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;

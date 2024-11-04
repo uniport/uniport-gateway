@@ -32,19 +32,13 @@ public interface CompositeCSPHandler extends CSPHandler {
     String REPORT_URI = "report-uri";
     String REPORT_TO = "report-to";
 
-    /**
-    */
     static CompositeCSPHandler create() {
         return new CompositeCSPHandlerImpl(DEFAULT_CSP_MERGE_STRATEGY);
     }
 
-    /**
-    */
     static CompositeCSPHandler create(CSPMergeStrategy mergeStrategy) {
         return new CompositeCSPHandlerImpl(mergeStrategy);
     }
 
-    /**
-    */
     void handleResponse(RoutingContext ctx, MultiMap headers);
 }

@@ -61,8 +61,6 @@ public class Parser {
         return filteredKeys;
     }
 
-    /**
-    */
     public static JsonObject decode(Map<String, Object> labels, String rootName, List<String> filters) {
         try {
             final JsonObject decodedConf = decodeToJson(labels, rootName, filters);

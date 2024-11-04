@@ -54,8 +54,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         this.cspMergeStrategy = mergeStrategy;
     }
 
-    /**
-    */
     @Override
     public synchronized CSPHandler setDirective(String name, String value) {
         if (name == null) {
@@ -78,8 +76,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return this;
     }
 
-    /**
-    */
     @Override
     public CSPHandler addDirective(String name, String value) {
         if (name == null) {
@@ -107,8 +103,6 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return this;
     }
 
-    /**
-    */
     @Override
     public CSPHandler setReportOnly(boolean reportOnly) {
         this.reportOnly = reportOnly;

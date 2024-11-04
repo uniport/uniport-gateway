@@ -47,8 +47,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return promise.future();
     }
 
-    /**
-    */
     public void create(Vertx vertx, String name, Router router, JsonObject middlewareConfig, Handler<AsyncResult<Middleware>> handler) {
         LOGGER.debug("Creating '{}' middleware", provides());
 

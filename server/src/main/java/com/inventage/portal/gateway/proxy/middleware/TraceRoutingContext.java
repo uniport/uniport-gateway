@@ -37,8 +37,6 @@ public class TraceRoutingContext implements RoutingContextInternal {
     private final RoutingContextInternal ctx;
     private final Span span;
 
-    /**
-    */
     public TraceRoutingContext(RoutingContext ctx, Span span) {
         Objects.requireNonNull(ctx);
         Objects.requireNonNull(span);

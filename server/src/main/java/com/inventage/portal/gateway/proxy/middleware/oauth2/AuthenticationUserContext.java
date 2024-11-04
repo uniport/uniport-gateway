@@ -35,8 +35,6 @@ public class AuthenticationUserContext implements ClusterSerializable {
     private User user;
     private String sessionScope;
 
-    /**
-    */
     public AuthenticationUserContext() {
         // do not remove: constructor required by AbstractSession#readDataFromBuffer for ClusterSerializable
     }
@@ -51,8 +49,6 @@ public class AuthenticationUserContext implements ClusterSerializable {
         this.sessionScope = sessionScope;
     }
 
-    /**
-    */
     public static AuthenticationUserContext of(OAuth2Auth authenticationProvider, User user) {
         Objects.requireNonNull(authenticationProvider);
         Objects.requireNonNull(user);
@@ -64,8 +60,6 @@ public class AuthenticationUserContext implements ClusterSerializable {
         return new AuthenticationUserContext(authenticationProvider, user, "");
     }
 
-    /**
-    */
     public static List<AuthenticationUserContext> all(Session session) {
         final List<AuthenticationUserContext> authContexts = new LinkedList<>();
         for (String key : session.data().keySet()) {
@@ -78,8 +72,6 @@ public class AuthenticationUserContext implements ClusterSerializable {
         return authContexts;
     }
 
-    /**
-    */
     public static Optional<AuthenticationUserContext> fromSessionAtAnyScope(Session session) {
         for (String key : session.data().keySet()) {
             if (!key.endsWith(SESSION_SCOPE_SUFFIX)) {
@@ -90,16 +82,12 @@ public class AuthenticationUserContext implements ClusterSerializable {
         return Optional.empty();
     }
 
-    /**
-    */
     public static Optional<AuthenticationUserContext> fromSessionAtScope(Session session, String sessionScope) {
         final String key = String.format("%s%s", sessionScope, SESSION_SCOPE_SUFFIX);
         final AuthenticationUserContext authContext = (AuthenticationUserContext) session.data().get(key);
         return authContext != null ? Optional.of(authContext) : Optional.empty();
     }
 
-    /**
-    */
     public static void deleteAll(Session session) {
         session.data().keySet().stream()
             .filter(key -> key.endsWith(SESSION_SCOPE_SUFFIX))
@@ -107,46 +95,32 @@ public class AuthenticationUserContext implements ClusterSerializable {
             .collect(Collectors.toList());
     }
 
-    /**
-    */
     public AuthenticationUserContext toSessionAtScope(Session session, String sessionScope) {
         this.sessionScope = sessionScope;
         session.put(String.format("%s%s", sessionScope, SESSION_SCOPE_SUFFIX), this);
         return this;
     }
 
-    /**
-    */
     public OAuth2Auth getAuthenticationProvider(Vertx vertx) {
         return this.authenticationProvider.getDelegate(vertx);
     }
 
-    /**
-    */
     public User getUser() {
         return this.user;
     }
 
-    /**
-    */
     public JsonObject getPrincipal() {
         return getUser().principal();
     }
 
-    /**
-    */
     public String getIdToken() {
         return getPrincipal().getString("id_token");
     }
 
-    /**
-    */
     public String getAccessToken() {
         return getPrincipal().getString("access_token");
     }
 
-    /**
-    */
     public String getSessionScope() {
         return this.sessionScope;
     }

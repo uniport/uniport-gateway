@@ -22,8 +22,6 @@ public class LanguageCookieMiddleware extends TraceMiddleware {
 
     private final String languageCookieName;
 
-    /**
-    */
     public LanguageCookieMiddleware(String name, String languageCookieName) {
         this.name = name;
         this.languageCookieName = languageCookieName;

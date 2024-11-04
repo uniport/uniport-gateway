@@ -27,8 +27,6 @@ public class KubernetesServiceProvider extends Provider {
     private EventBus eb;
     private ServiceDiscovery kubernetesDiscovery;
 
-    /**
-    */
     public KubernetesServiceProvider(Vertx vertx, String configurationAddress) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;

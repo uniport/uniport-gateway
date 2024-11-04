@@ -33,8 +33,6 @@ public class MatomoMiddleware extends TraceMiddleware {
 
     private final String jwtPathEmail;
 
-    /**
-    */
     public MatomoMiddleware(
         String name, String jwtPathRoles, String jwtPathGroup,
         String jwtPathUsername, String jwtPathEmail

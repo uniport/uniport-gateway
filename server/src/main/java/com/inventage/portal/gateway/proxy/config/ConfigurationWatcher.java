@@ -47,8 +47,6 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private long timerId;
     private List<Listener> configurationListeners;
 
-    /**
-    */
     public ConfigurationWatcher(
         Vertx vertx, Provider provider, String configurationAddress,
         int providersThrottleIntervalMs, List<String> defaultEntrypoints
@@ -215,8 +213,6 @@ public class ConfigurationWatcher extends AbstractVerticle {
         stopPromise.complete();
     }
 
-    /**
-    */
     public void addListener(Listener listener) {
         LOGGER.debug("Adding listener '{}'", listener);
         if (this.configurationListeners == null) {

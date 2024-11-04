@@ -8,8 +8,7 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 /**
  */
 public interface JWTAuthMultipleIssuersProvider extends AuthenticationProvider {
-    /**
-    */
+
     static JWTAuth create(Vertx vertx, JWTAuthOptions config) {
         return create(vertx, config, null);
     }

@@ -39,8 +39,6 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     private long timerId;
     private boolean reconcilerStarted;
 
-    /**
-    */
     public JWTAuthPublicKeysReconcilerHandlerImpl(
         Vertx vertx, JWTAuthOptions jwtAuthOptions, JWTAuthMultipleIssuersOptions additionalIssuersOptions, JWTAuthAdditionalClaimsOptions additionalClaimsOptions,
         JsonArray publicKeySources, boolean reconcilationEnabled, long reconcilationIntervalMs

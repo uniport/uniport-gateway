@@ -26,8 +26,6 @@ public class ResponseSessionCookieRemovalMiddleware extends TraceMiddleware {
     private final String name;
     private final String sessionCookieName;
 
-    /**
-    */
     public ResponseSessionCookieRemovalMiddleware(String name, String sessionCookieName) {
         this.name = name;
         this.sessionCookieName = (sessionCookieName == null) ? SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME

@@ -48,8 +48,6 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
     private final AuthenticationHandler authHandler;
     private final String sessionScope;
 
-    /**
-    */
     public OAuth2AuthMiddleware(Vertx vertx, String name, AuthenticationHandler authHandler, String sessionScope) {
         LOGGER.debug("For session scope '{}'", sessionScope);
         this.name = name;
@@ -101,8 +99,6 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         }
     }
 
-    /**
-    */
     public static boolean isStateForPendingAuth(RoutingContext ctx) {
         final String requestState = ctx.request().getParam(OIDC_PARAM_STATE);
         return ctx.session().get(PREFIX_STATE + requestState) != null;

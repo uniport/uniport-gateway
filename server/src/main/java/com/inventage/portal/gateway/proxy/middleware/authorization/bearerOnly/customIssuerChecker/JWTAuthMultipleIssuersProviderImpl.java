@@ -20,8 +20,6 @@ public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 
     private final List<String> additionalIssuers;
 
-    /**
-    */
     public JWTAuthMultipleIssuersProviderImpl(Vertx vertx, JWTAuthOptions config, JWTAuthMultipleIssuersOptions options) {
         super(vertx, config);
 

@@ -31,8 +31,6 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
         return this.create(vertx, name, middlewareOptions);
     }
 
-    /**
-    */
     public Future<Middleware> create(Vertx vertx, String name, JsonObject middlewareOptions) {
         final JsonArray whitelistedCookies = middlewareOptions
             .getJsonArray(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);

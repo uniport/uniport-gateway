@@ -476,14 +476,10 @@ public class DynamicConfiguration {
         return httpSchema;
     }
 
-    /**
-    */
     public static ObjectSchemaBuilder getBuildMiddlewareSchema() {
         return buildMiddlewareSchema();
     }
 
-    /**
-    */
     public static JsonObject buildDefaultConfiguration() {
         final JsonObject config = new JsonObject();
 
@@ -498,8 +494,6 @@ public class DynamicConfiguration {
         return config;
     }
 
-    /**
-    */
     public static boolean isEmptyConfiguration(JsonObject config) {
         if (config == null) {
             return true;
@@ -607,8 +601,6 @@ public class DynamicConfiguration {
         return mergedConfig;
     }
 
-    /**
-    */
     public static JsonObject getObjByKeyWithValue(JsonArray jsonArr, String key, String value) {
         if (jsonArr == null) {
             return null;
@@ -631,8 +623,6 @@ public class DynamicConfiguration {
         return null;
     }
 
-    /**
-    */
     public static ObjectSchemaBuilder buildSchema() {
         final ObjectSchemaBuilder routerSchema = buildRouterSchema();
         final ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
@@ -757,8 +747,6 @@ public class DynamicConfiguration {
         return Future.succeededFuture();
     }
 
-    /**
-    */
     public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
         final JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
         if (mws == null || mws.size() == 0) {

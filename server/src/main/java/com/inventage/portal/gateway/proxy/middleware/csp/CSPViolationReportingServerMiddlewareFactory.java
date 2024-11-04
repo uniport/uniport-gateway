@@ -19,15 +19,11 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPViolationReportingServerMiddlewareFactory.class);
 
-    /**
-    */
     @Override
     public String provides() {
         return DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER;
     }
 
-    /**
-    */
     @Override
     public Future<Middleware> create(final Vertx vertx, final String name, final Router router, final JsonObject middlewareConfig) {
         final String logLevel = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, DEFAULT_LOG_LEVEL);

@@ -96,14 +96,10 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
     private int order = -1;
     private Route callback;
 
-    /**
-    */
     public RelyingPartyHandler(Vertx vertx, OAuth2Auth authProvider, String callbackURL) {
         this(vertx, authProvider, callbackURL, null);
     }
 
-    /**
-    */
     public RelyingPartyHandler(Vertx vertx, OAuth2Auth authProvider, String callbackURL, String realm) {
         super(authProvider, Type.BEARER, realm);
         // get a reference to the prng
@@ -330,8 +326,6 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return this;
     }
 
-    /**
-    */
     public OAuth2AuthHandler setupCallbacks(final List<Route> routes) {
         for (Route route : routes) {
             if (route != null) {

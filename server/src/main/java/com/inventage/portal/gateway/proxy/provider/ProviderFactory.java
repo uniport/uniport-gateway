@@ -16,16 +16,10 @@ public interface ProviderFactory {
 
     Logger LOGGER = LoggerFactory.getLogger(ProviderFactory.class);
 
-    /**
-    */
     String provides();
 
-    /**
-    */
     Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env);
 
-    /**
-    */
     final class Loader {
         private Loader() {
         }

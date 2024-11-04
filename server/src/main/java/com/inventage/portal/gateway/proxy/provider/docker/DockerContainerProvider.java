@@ -49,8 +49,6 @@ public class DockerContainerProvider extends Provider {
     private final Map<String, JsonObject> configurations = new HashMap<>();
     private ServiceDiscovery dockerDiscovery;
 
-    /**
-    */
     public DockerContainerProvider(
         Vertx vertx, String configurationAddress, ServiceImporter serviceImporter,
         JsonObject serviceImporterConfiguration, Boolean exposedByDefault, String network, String defaultRule,
@@ -98,8 +96,6 @@ public class DockerContainerProvider extends Provider {
         startPromise.complete();
     }
 
-    /**
-    */
     public String toString() {
         return StaticConfiguration.PROVIDER_DOCKER;
     }

@@ -22,8 +22,6 @@ public class AuthorizationBearerMiddleware extends AuthTokenMiddlewareBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddleware.class);
 
-    /**
-    */
     public AuthorizationBearerMiddleware(Vertx vertx, String name, String sessionScope) {
         super(vertx, name, sessionScope);
     }

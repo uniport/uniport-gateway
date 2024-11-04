@@ -17,8 +17,6 @@ public class BodyHandlerMiddleware extends TraceMiddleware {
 
     private final String name;
 
-    /**
-    */
     public BodyHandlerMiddleware(
         Vertx vertx, String name
     ) {

@@ -8,8 +8,6 @@ public class SessionLifetimeValue {
 
     private final long sessionLifeTime;
 
-    /**
-    */
     public SessionLifetimeValue(Long lastAccessed, Long sessionIdleTimeoutInMilliSeconds) {
         sessionLifeTime = (lastAccessed + sessionIdleTimeoutInMilliSeconds) / 1000;
     }

@@ -19,8 +19,6 @@ public class RouterSwitchListener implements Listener {
     private final Router router;
     private final RouterFactory routerFactory;
 
-    /**
-    */
     public RouterSwitchListener(Router router, RouterFactory routerFactory) {
         this.router = router;
         this.routerFactory = new RouterFactory(routerFactory);
@@ -35,8 +33,6 @@ public class RouterSwitchListener implements Listener {
 
     }
 
-    /**
-    */
     public String toString() {
         return NAME;
     }

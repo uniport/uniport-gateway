@@ -35,12 +35,8 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
     String JWK_KEYS_KEY = "keys";
     String JWK_KID = "kid";
 
-    /**
-    */
     Logger LOGGER = LoggerFactory.getLogger(JWTAuthPublicKeysReconcilerHandler.class);
 
-    /**
-    */
     static JWTAuthPublicKeysReconcilerHandler create(
         Vertx vertx,
         JWTAuthOptions jwtAuthOptions,
@@ -60,8 +56,6 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
             reconcilationIntervalMs);
     }
 
-    /**
-    */
     Future<AuthenticationHandler> getOrRefreshPublicKeys();
 
     /**
@@ -73,8 +67,6 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
      */
     List<JsonObject> getJwks();
 
-    /**
-    */
     static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, JsonArray publicKeySources) {
         final Promise<JWTAuthOptions> promise = Promise.promise();
         fetchPublicKeys(vertx, publicKeySources, promise);

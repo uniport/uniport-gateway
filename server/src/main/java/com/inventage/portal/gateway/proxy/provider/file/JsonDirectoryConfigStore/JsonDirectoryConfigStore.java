@@ -28,8 +28,6 @@ public class JsonDirectoryConfigStore implements ConfigStore {
     private final File path;
     private final List<FileSet> filesets = new ArrayList<>();
 
-    /**
-    */
     public JsonDirectoryConfigStore(Vertx vertx, JsonObject configuration) {
         this.vertx = (VertxInternal) vertx;
         final String thePath = configuration.getString("path");

@@ -14,8 +14,6 @@ public class TraceMiddleware implements Middleware {
 
     private final Tracer tracer;
 
-    /**
-    */
     public TraceMiddleware() {
         this.tracer = GlobalOpenTelemetry.getTracer(TraceMiddleware.class.getName());
     }

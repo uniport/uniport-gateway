@@ -34,8 +34,6 @@ public class ShowSessionContentMiddleware extends TraceMiddleware {
     private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
     private static final String DEFAULT_INSTANCE_NAME = "unknown";
 
-    /**
-    */
     public ShowSessionContentMiddleware(String name) {
         this.name = name;
         this.instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);

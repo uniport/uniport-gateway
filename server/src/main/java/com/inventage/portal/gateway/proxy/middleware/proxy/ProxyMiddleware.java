@@ -43,8 +43,6 @@ public class ProxyMiddleware extends TraceMiddleware {
     private final String serverHost;
     private final int serverPort;
 
-    /**
-    */
     public ProxyMiddleware(
         Vertx vertx,
         String name,

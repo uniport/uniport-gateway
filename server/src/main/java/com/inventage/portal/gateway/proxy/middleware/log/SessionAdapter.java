@@ -21,8 +21,6 @@ public class SessionAdapter {
         return cookie == null ? EMPTY_SESSION_DISPLAY : firstCharactersOf(SESSION_ID_DISPLAYED_LENGTH, cookie.getValue());
     }
 
-    /**
-    */
     public static String displaySessionId(Session session) {
         return session == null ? EMPTY_SESSION_DISPLAY : firstCharactersOf(SESSION_ID_DISPLAYED_LENGTH, session.id());
     }

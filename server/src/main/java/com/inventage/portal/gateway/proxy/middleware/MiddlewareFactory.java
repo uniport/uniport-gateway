@@ -18,16 +18,10 @@ public interface MiddlewareFactory {
 
     Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
-    /**
-    */
     String provides();
 
-    /**
-    */
     Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
 
-    /**
-    */
     class Loader {
         /**
         */

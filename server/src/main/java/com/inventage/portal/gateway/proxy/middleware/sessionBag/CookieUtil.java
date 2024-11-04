@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
  */
 public class CookieUtil {
 
-    /**
-    */
     public static Set<Cookie> fromRequestHeader(List<String> cookieHeaders) {
         if (cookieHeaders == null) {
             return Collections.emptySet();
@@ -27,8 +25,6 @@ public class CookieUtil {
             .collect(Collectors.toSet());
     }
 
-    /**
-    */
     public static Map<String, Cookie> cookieMapFromRequestHeader(List<String> cookieHeaders) {
         return fromRequestHeader(cookieHeaders).stream()
             .collect(Collectors.toMap(
@@ -37,8 +33,6 @@ public class CookieUtil {
                 (existing, replacement) -> existing));
     }
 
-    /**
-    */
     public static Cookie fromNettyCookie(io.netty.handler.codec.http.cookie.Cookie nettyCookie) {
         return Cookie.cookie(nettyCookie.name(), nettyCookie.value())
             .setDomain(nettyCookie.domain())

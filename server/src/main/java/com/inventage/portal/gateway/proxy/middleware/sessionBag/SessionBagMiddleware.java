@@ -45,8 +45,6 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     private final JsonArray whitelistedCookies;
     private final String sessionCookieName;
 
-    /**
-    */
     public SessionBagMiddleware(String name, JsonArray whitelistedCookies, String sessionCookieName) {
         this.name = name;
         this.whitelistedCookies = new JsonArray(whitelistedCookies.getList());

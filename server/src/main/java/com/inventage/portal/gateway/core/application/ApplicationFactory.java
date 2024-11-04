@@ -35,8 +35,6 @@ public interface ApplicationFactory {
      */
     Application create(Vertx vertx, JsonObject applicationConfig, JsonArray entrypointConfigs, JsonArray providerConfigs, JsonObject env);
 
-    /**
-    */
     class Loader {
         /**
         */

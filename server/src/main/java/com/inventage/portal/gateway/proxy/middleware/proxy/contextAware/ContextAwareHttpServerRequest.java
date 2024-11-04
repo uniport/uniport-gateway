@@ -11,8 +11,6 @@ public class ContextAwareHttpServerRequest extends HttpServerRequestWrapper {
 
     private RoutingContext ctx;
 
-    /**
-    */
     public ContextAwareHttpServerRequest(HttpServerRequest request, RoutingContext ctx) {
         super((HttpServerRequestInternal) request);
         this.ctx = ctx;

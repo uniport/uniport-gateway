@@ -30,8 +30,6 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
     private final List<JWTClaim> additionalJWTClaims;
     private final JWTAuthPublicKeysReconcilerHandler reconciler;
 
-    /**
-    */
     public JWTAuthAdditionalClaimsHandlerImpl(JWTAuth authProvider, JWTAuthAdditionalClaimsOptions options, JWTAuthPublicKeysReconcilerHandler reconciler) {
         super(authProvider, null);
 

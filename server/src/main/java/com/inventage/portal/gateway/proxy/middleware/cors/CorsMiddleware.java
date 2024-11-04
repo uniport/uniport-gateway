@@ -19,8 +19,6 @@ public class CorsMiddleware extends TraceMiddleware {
     private final String name;
     private final CorsHandler corsHandler;
 
-    /**
-    */
     public CorsMiddleware(String name, String allowedOrigin) {
         this.name = name;
         this.corsHandler = CorsHandler.create().addOrigin(allowedOrigin);

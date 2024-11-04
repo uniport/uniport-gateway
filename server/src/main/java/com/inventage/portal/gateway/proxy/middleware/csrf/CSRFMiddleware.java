@@ -17,8 +17,6 @@ public class CSRFMiddleware extends TraceMiddleware {
     private final String name;
     private final CSRFHandler csrfHandler;
 
-    /**
-    */
     public CSRFMiddleware(
         Vertx vertx, String name, String secret, String cookieName, String cookiePath,
         boolean cookieSecure,
