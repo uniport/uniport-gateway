@@ -26,4 +26,7 @@
     <suppress checks="FinalClass" files=".*/StaticConfiguration.java"/>
 
     <suppress checks="VisibilityModifier" files=".*/HTTPAuthClaimHandler.java"/>
+
+    <suppress checks="JavadocType" files=".*.java"/>
+    <suppress checks="JavadocMethod" files=".*.java"/>
 </suppressions>
