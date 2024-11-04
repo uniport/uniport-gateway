@@ -49,7 +49,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
 
     private final String name;
 
-    private final JWKAccessibleAuthHandler authHandler;
+    private final JWKAccessibleAuthHandler jwkFetcher;
     // contains mappings from SSO session ID to internal session ID
     private AsyncMap<String, String> sessionIDMap;
 
@@ -65,7 +65,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
      */
     public BackChannelLogoutMiddleware(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler) {
         this.name = name;
-        this.authHandler = authHandler;
+        this.jwkFetcher = authHandler;
 
         vertx.sharedData().<String, String>getAsyncMap(SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY)
             .onSuccess(sidMap -> this.sessionIDMap = sidMap);
@@ -99,7 +99,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
                 ctx.end();
             })
             .onFailure(err -> {
-                LOGGER.warn("failed to handle back channel logout request: {}", err);
+                LOGGER.warn("failed to handle back channel logout request", err);
                 if (err instanceof IllegalArgumentException) {
                     HttpResponder.respondWithStatusCode(BAD_REQUEST, ctx);
                 } else {
@@ -123,7 +123,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
             return Future.failedFuture(new IllegalArgumentException(String.format("'logout_token' key not found in body: '%s'", bodyContent)));
         }
 
-        final JWT jwt = initJWT(authHandler.getJwks());
+        final JWT jwt = initJWT(jwkFetcher.getJwks());
         LOGGER.debug("Loaded verifying JWKs");
 
         // Validate logout token according to:
@@ -200,10 +200,10 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
         return sessionIDMap.get(ssoSID)
             .compose(internalSID -> {
                 if (internalSID == null || internalSID.isEmpty()) {
-                    return Future.failedFuture(new IllegalStateException(String.format("no mapping found for the ssoID ''", ssoSID)));
+                    return Future.failedFuture(new IllegalStateException(String.format("no mapping found for the ssoID '%s'", ssoSID)));
                 }
 
-                LOGGER.debug("resolved SSO sesion ID '{}' to internal session ID '{}'", ssoSID, internalSID);
+                LOGGER.debug("resolved SSO sesion ID '{}' to internal session ID '{}'", ssoSID, SessionAdapter.displaySessionId(internalSID));
                 return Future.succeededFuture(new SimpleEntry<String, String>(ssoSID, internalSID));
             });
     }
@@ -233,9 +233,9 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
                 final JWK jwk = new JWK(rawJWK);
                 jwt.addJWK(jwk);
                 added = true;
-                LOGGER.debug(String.format("Added JWK with: alg '%s', kid '%s'", jwk.getAlgorithm(), jwk.getId()));
+                LOGGER.debug("Added JWK with: alg '{}', kid '{}'", jwk.getAlgorithm(), jwk.getId());
             } catch (Exception e) {
-                LOGGER.warn("Unsupported JWK", e);
+                LOGGER.warn("Unsupported JWK '{}'", e.getMessage());
             }
         }
         if (!added) {

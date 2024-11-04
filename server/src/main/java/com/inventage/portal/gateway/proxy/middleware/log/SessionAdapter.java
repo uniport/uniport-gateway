@@ -27,6 +27,10 @@ public class SessionAdapter {
         return session == null ? EMPTY_SESSION_DISPLAY : firstCharactersOf(SESSION_ID_DISPLAYED_LENGTH, session.id());
     }
 
+    public static String displaySessionId(String sessionID) {
+        return sessionID == null ? EMPTY_SESSION_DISPLAY : firstCharactersOf(SESSION_ID_DISPLAYED_LENGTH, sessionID);
+    }
+
     protected static String firstCharactersOf(int displayLength, String string) {
         if (string != null && string.length() > displayLength) {
             return string.substring(0, displayLength);
