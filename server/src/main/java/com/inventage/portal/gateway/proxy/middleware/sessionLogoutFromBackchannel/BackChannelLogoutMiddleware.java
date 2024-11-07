@@ -216,11 +216,8 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
             return Future.failedFuture(new IllegalStateException("no session store passed on the routing context (session handler has to run before this middleware)"));
         }
         LOGGER.debug("Loaded session store");
-
-        return sessionStore.get(internalSID).compose(session -> {
-            LOGGER.debug("Loaded session from session store");
-            session.destroy();
-            LOGGER.debug("destroyed session with ID '{}...'", SessionAdapter.displaySessionId(session));
+        return sessionStore.delete(internalSID).compose(session -> {
+            LOGGER.debug("Removed session '{}' from session store", SessionAdapter.displaySessionId(internalSID));
             return sessionIDMap.remove(ssoSID).mapEmpty();
         });
     }
