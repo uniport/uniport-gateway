@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Use fresh public keys to verify the logout token in the back channel logout ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
+- On back channel logout, remove session directly from the session store, instead of destroying it to invalidat it immediately ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
+- Dont forward the session cookie to the backend service ([PORTAL-2119](https://issue.inventage.com/browse/PORTAL-2119)).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
@@ -85,13 +87,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - JWT must be decoded with base64url ([PORTAL-1838](https://issue.inventage.com/browse/PORTAL-1838)).
-- Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](https://issue.inventage.   com/browse/PORTAL-1824)).
+- Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](<https://issue.inventage>.   com/browse/PORTAL-1824)).
 
 ### Added
 
 - Configure security context for pod & containers ([PORTAL-1379](https://issue.inventage.com/browse/PORTAL-1379))
 - Every middleware creates its own trace span ([PORTAL-1617](https://issue.inventage.com/browse/PORTAL-1617))
-
 
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
 
@@ -99,8 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--  Add support to run the Portal-Gateway in cluster mode ([PORTAL-1572](https://issue.inventage.com/browse/PORTAL-1572)).
--  Add matomo middleware for autologin feature ([PORTAL-1718](https://issue.inventage.com/browse/PORTAL-1718)).
+- Add support to run the Portal-Gateway in cluster mode ([PORTAL-1572](https://issue.inventage.com/browse/PORTAL-1572)).
+- Add matomo middleware for autologin feature ([PORTAL-1718](https://issue.inventage.com/browse/PORTAL-1718)).
 
 ### Changed
 

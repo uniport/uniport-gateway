@@ -19,6 +19,7 @@ public interface Middleware extends Handler<RoutingContext> {
     String MODIFIERS_PREFIX = "portal-gateway-middleware";
 
     String REQUEST_URI_MODIFIERS = String.format("%s-request-uri-modifiers", MODIFIERS_PREFIX);
+    String REQUEST_HEADERS_MODIFIERS = String.format("%s-request-headers-modifiers", MODIFIERS_PREFIX);
     String RESPONSE_HEADERS_MODIFIERS = String.format("%s-response-headers-modifiers", MODIFIERS_PREFIX);
 
     /**
@@ -29,6 +30,16 @@ public interface Middleware extends Handler<RoutingContext> {
      */
     default void addRequestURIModifier(RoutingContext ctx, Handler<StringBuilder> modifier) {
         appendModifier(ctx, modifier, REQUEST_URI_MODIFIERS);
+    }
+
+    /**
+     * @param ctx
+     *            current request context
+     * @param modifier
+     *            to be applied when processing the incoming request headers just before sending it to the backend service
+     */
+    default void addRequestHeadersModifier(RoutingContext ctx, Handler<MultiMap> modifier) {
+        appendModifier(ctx, modifier, REQUEST_HEADERS_MODIFIERS);
     }
 
     /**

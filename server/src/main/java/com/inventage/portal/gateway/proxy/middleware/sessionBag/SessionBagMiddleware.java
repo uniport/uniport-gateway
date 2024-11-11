@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.opentelemetry.api.trace.Span;
-import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
@@ -61,52 +60,45 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
             return;
         }
 
-        // on request: set cookie from session bag if present
-        final String cookieHeaderValue = loadCookiesFromSessionBag(ctx);
+        // load request cookies
+        final Set<Cookie> requestCookies = CookieUtil
+            .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+        ctx.request().headers().remove(HttpHeaders.COOKIE);
+
+        requestCookies.removeIf(cookie -> isSessionCookie(cookie));
+
+        // on incoming request: set cookie from session bag if present
+        final String cookieHeaderValue = loadCookiesFromSessionBag(ctx, requestCookies);
         if (cookieHeaderValue != null && !cookieHeaderValue.isEmpty()) {
             ctx.request().headers().add(HttpHeaders.COOKIE.toString(), cookieHeaderValue);
         }
 
-        // on response: remove cookies if present and store them in session bag
-        final Handler<MultiMap> respHeadersModifier = headers -> storeCookiesInSessionBag(ctx, headers);
-        this.addResponseHeaderModifier(ctx, respHeadersModifier);
-        LOGGER.debug("Added storeCookiesInSessionBag '{}' as response header modifier for '{}'", respHeadersModifier, name);
+        // on outgoing response: remove cookies if present and store them in session bag
+        this.addResponseHeaderModifier(ctx, headers -> storeCookiesInSessionBag(ctx, headers));
+        LOGGER.debug("{}: Added storeCookiesInSessionBag as response header modifier", name);
 
         ctx.next();
     }
 
-    private String loadCookiesFromSessionBag(RoutingContext ctx) {
+    private String loadCookiesFromSessionBag(RoutingContext ctx, Set<Cookie> requestCookies) {
         if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             return null;
         }
         LOGGER.debug("Cookies in session found. Setting as cookie header.");
 
-        final Set<Cookie> requestCookies = CookieUtil
-            .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
-        ctx.request().headers().remove(HttpHeaders.COOKIE);
-
+        // load stored cookies from session bag
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-        String cookieHeaderValue = encodeMatchingCookies(ctx, storedCookies);
+        final String cookieHeaderValue = encodeMatchingCookies(storedCookies, ctx.request().path(), ctx.request().isSSL());
 
-        // check for conflicting request and stored cookies
-        // stored cookie have precedence to avoid cookie injection
-        for (Cookie requestCookie : requestCookies) {
-            if (this.containsCookie(storedCookies, requestCookie, ctx.request().path()) != null) {
-                LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
-                continue;
-            }
-            cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, String.format("%s=%s", requestCookie.getName(), requestCookie.getValue()));
-        }
-
-        return cookieHeaderValue;
+        return appendEncodedConflictfreeCookies(ctx.request().path(), cookieHeaderValue, requestCookies, storedCookies);
     }
 
-    private String encodeMatchingCookies(RoutingContext ctx, Set<Cookie> storedCookies) {
+    private String encodeMatchingCookies(Set<Cookie> storedCookies, String path, boolean isSSL) {
         final List<String> encodedStoredCookies = new ArrayList<>();
         for (Cookie storedCookie : storedCookies) {
-            if (cookieMatchesRequest(storedCookie, ctx.request().isSSL(), ctx.request().path())) {
-                LOGGER.debug("Add cookie '{}' to request", storedCookie.getName());
-                encodedStoredCookies.add(String.format("%s=%s", storedCookie.getName(), storedCookie.getValue()));
+            if (cookieMatchesRequest(storedCookie, isSSL, path)) {
+                LOGGER.debug("Adding cookie '{}' to request", storedCookie.getName());
+                encodedStoredCookies.add(encodeCooke(storedCookie.getName(), storedCookie.getValue()));
             }
         }
         return String.join(COOKIE_DELIMITER, encodedStoredCookies);
@@ -183,6 +175,25 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         return Pattern.compile(regex).matcher(requestPath).matches();
     }
 
+    /**
+     * check for conflicting request and stored cookies
+     * stored cookie have precedence to avoid cookie injection
+     */
+    private String appendEncodedConflictfreeCookies(String path, String cookieHeaderValue, Set<Cookie> requestCookies, Set<Cookie> storedCookies) {
+        for (Cookie requestCookie : requestCookies) {
+            if (this.containsCookie(storedCookies, requestCookie, path) != null) {
+                LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
+                continue;
+            }
+            cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, encodeCooke(requestCookie.getName(), requestCookie.getValue()));
+        }
+        return cookieHeaderValue;
+    }
+
+    private String encodeCooke(String name, String value) {
+        return String.format("%s=%s", name, value);
+    }
+
     private void storeCookiesInSessionBag(RoutingContext ctx, MultiMap headers) {
         final List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
         if (cookiesToSet == null || cookiesToSet.isEmpty()) {
@@ -200,11 +211,12 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
 
         for (String cookieToSet : cookiesToSet) {
             final Cookie decodedCookieToSet = CookieUtil.fromNettyCookie(ClientCookieDecoder.STRICT.decode(cookieToSet));
-            if (decodedCookieToSet.getName().equals(sessionCookieName)) {
+            if (isSessionCookie(decodedCookieToSet)) {
+                // special-case: session cookie should always be passed to the user-agent
                 continue;
             }
             if (isWhitelisted(decodedCookieToSet)) {
-                // we delegate all logic for whitelisted cookies to the user agent
+                // whitelisted cookie are passed to the user-agent
                 LOGGER.debug("Passing cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
@@ -288,4 +300,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         return false;
     }
 
+    private boolean isSessionCookie(Cookie cookie) {
+        return cookie.getName().equals(sessionCookieName);
+    }
 }

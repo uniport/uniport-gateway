@@ -232,16 +232,24 @@ public class ProxyMiddleware extends TraceMiddleware {
 
                 // modify URI
                 final StringBuilder uri = new StringBuilder(incomingRequest.getURI());
-                final List<Handler<StringBuilder>> modifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
-                if (modifiers != null) {
-                    if (modifiers.size() > 1) {
-                        LOGGER.warn("Multiple URI modifiers declared: {} (total {})", modifiers, modifiers.size());
+                final List<Handler<StringBuilder>> uriModifiers = ctx.get(Middleware.REQUEST_URI_MODIFIERS);
+                if (uriModifiers != null) {
+                    if (uriModifiers.size() > 1) {
+                        LOGGER.warn("Multiple URI modifiers declared: {} (total {})", uriModifiers, uriModifiers.size());
                     }
-                    for (Handler<StringBuilder> modifier : modifiers) {
+                    for (Handler<StringBuilder> modifier : uriModifiers) {
                         modifier.handle(uri);
                     }
                 }
                 incomingRequest.setURI(uri.toString());
+
+                // modify headers
+                final List<Handler<MultiMap>> headerModifiers = ctx.get(Middleware.REQUEST_HEADERS_MODIFIERS);
+                if (headerModifiers != null) {
+                    for (Handler<MultiMap> modifier : headerModifiers) {
+                        modifier.handle(incomingRequest.headers());
+                    }
+                }
 
                 // continue the interception chain
                 return proxyContext.sendRequest();
