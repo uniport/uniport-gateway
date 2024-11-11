@@ -16,6 +16,14 @@
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/main/config/portal-gateway.specific.env",
             "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
+        },
+        {
+            "name": "Launch (standalone)",
+            "type": "java",
+            "projectName": "server",
+            "request": "launch",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/keycloak/portal-gateway.env",
+            "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
         }
     ]
 }

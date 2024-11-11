@@ -1,0 +1,561 @@
+{
+    "id": "testrealm",
+    "realm": "testrealm",
+    "enabled": true,
+    "registrationAllowed": true,
+    "adminEventsEnabled": true,
+    "adminEventsDetailsEnabled": true,
+    "eventsEnabled": true,
+    "eventsExpiration": 259200,
+    "enabledEventTypes": [
+        "AUTHREQID_TO_TOKEN",
+        "AUTHREQID_TO_TOKEN_ERROR",
+        "CLIENT_DELETE",
+        "CLIENT_DELETE_ERROR",
+        "CLIENT_INFO",
+        "CLIENT_INFO_ERROR",
+        "CLIENT_INITIATED_ACCOUNT_LINKING",
+        "CLIENT_INITIATED_ACCOUNT_LINKING_ERROR",
+        "CLIENT_LOGIN",
+        "CLIENT_LOGIN_ERROR",
+        "CLIENT_REGISTER",
+        "CLIENT_REGISTER_ERROR",
+        "CLIENT_UPDATE",
+        "CLIENT_UPDATE_ERROR",
+        "CODE_TO_TOKEN",
+        "CODE_TO_TOKEN_ERROR",
+        "CUSTOM_REQUIRED_ACTION",
+        "CUSTOM_REQUIRED_ACTION_ERROR",
+        "DELETE_ACCOUNT",
+        "DELETE_ACCOUNT_ERROR",
+        "EXECUTE_ACTIONS",
+        "EXECUTE_ACTIONS_ERROR",
+        "EXECUTE_ACTION_TOKEN",
+        "EXECUTE_ACTION_TOKEN_ERROR",
+        "FEDERATED_IDENTITY_LINK",
+        "FEDERATED_IDENTITY_LINK_ERROR",
+        "GRANT_CONSENT",
+        "GRANT_CONSENT_ERROR",
+        "IDENTITY_PROVIDER_FIRST_LOGIN",
+        "IDENTITY_PROVIDER_FIRST_LOGIN_ERROR",
+        "IDENTITY_PROVIDER_LINK_ACCOUNT",
+        "IDENTITY_PROVIDER_LINK_ACCOUNT_ERROR",
+        "IDENTITY_PROVIDER_LOGIN",
+        "IDENTITY_PROVIDER_LOGIN_ERROR",
+        "IDENTITY_PROVIDER_POST_LOGIN",
+        "IDENTITY_PROVIDER_POST_LOGIN_ERROR",
+        "IDENTITY_PROVIDER_RESPONSE",
+        "IDENTITY_PROVIDER_RESPONSE_ERROR",
+        "IDENTITY_PROVIDER_RETRIEVE_TOKEN",
+        "IDENTITY_PROVIDER_RETRIEVE_TOKEN_ERROR",
+        "IMPERSONATE",
+        "IMPERSONATE_ERROR",
+        "INTROSPECT_TOKEN",
+        "INTROSPECT_TOKEN_ERROR",
+        "INVALID_SIGNATURE",
+        "INVALID_SIGNATURE_ERROR",
+        "LOGIN",
+        "LOGIN_ERROR",
+        "LOGOUT",
+        "LOGOUT_ERROR",
+        "OAUTH2_DEVICE_AUTH",
+        "OAUTH2_DEVICE_AUTH_ERROR",
+        "OAUTH2_DEVICE_CODE_TO_TOKEN",
+        "OAUTH2_DEVICE_CODE_TO_TOKEN_ERROR",
+        "OAUTH2_DEVICE_VERIFY_USER_CODE",
+        "OAUTH2_DEVICE_VERIFY_USER_CODE_ERROR",
+        "OAUTH2_EXTENSION_GRANT",
+        "OAUTH2_EXTENSION_GRANT_ERROR",
+        "PERMISSION_TOKEN",
+        "PERMISSION_TOKEN_ERROR",
+        "PUSHED_AUTHORIZATION_REQUEST",
+        "PUSHED_AUTHORIZATION_REQUEST_ERROR",
+        "REFRESH_TOKEN",
+        "REFRESH_TOKEN_ERROR",
+        "REGISTER",
+        "REGISTER_ERROR",
+        "REGISTER_NODE",
+        "REGISTER_NODE_ERROR",
+        "REMOVE_FEDERATED_IDENTITY",
+        "REMOVE_FEDERATED_IDENTITY_ERROR",
+        "REMOVE_TOTP",
+        "REMOVE_TOTP_ERROR",
+        "RESET_PASSWORD",
+        "RESET_PASSWORD_ERROR",
+        "RESTART_AUTHENTICATION",
+        "RESTART_AUTHENTICATION_ERROR",
+        "REVOKE_GRANT",
+        "REVOKE_GRANT_ERROR",
+        "SEND_IDENTITY_PROVIDER_LINK",
+        "SEND_IDENTITY_PROVIDER_LINK_ERROR",
+        "SEND_RESET_PASSWORD",
+        "SEND_RESET_PASSWORD_ERROR",
+        "SEND_VERIFY_EMAIL",
+        "SEND_VERIFY_EMAIL_ERROR",
+        "TOKEN_EXCHANGE",
+        "TOKEN_EXCHANGE_ERROR",
+        "UNREGISTER_NODE",
+        "UNREGISTER_NODE_ERROR",
+        "UPDATE_CONSENT",
+        "UPDATE_CONSENT_ERROR",
+        "UPDATE_EMAIL",
+        "UPDATE_EMAIL_ERROR",
+        "UPDATE_PASSWORD",
+        "UPDATE_PASSWORD_ERROR",
+        "UPDATE_PROFILE",
+        "UPDATE_PROFILE_ERROR",
+        "UPDATE_TOTP",
+        "UPDATE_TOTP_ERROR",
+        "USER_DISABLED_BY_PERMANENT_LOCKOUT",
+        "USER_DISABLED_BY_PERMANENT_LOCKOUT_ERROR",
+        "USER_DISABLED_BY_TEMPORARY_LOCKOUT",
+        "USER_DISABLED_BY_TEMPORARY_LOCKOUT_ERROR",
+        "USER_INFO_REQUEST",
+        "USER_INFO_REQUEST_ERROR",
+        "VALIDATE_ACCESS_TOKEN",
+        "VALIDATE_ACCESS_TOKEN_ERROR",
+        "VERIFY_EMAIL",
+        "VERIFY_EMAIL_ERROR",
+        "VERIFY_PROFILE",
+        "VERIFY_PROFILE_ERROR"
+    ],
+    "browserFlow": "browser3",
+    "authenticationFlows": [
+        {
+            "alias": "browser3",
+            "description": "browser based authentication",
+            "providerId": "basic-flow",
+            "topLevel": true,
+            "builtIn": false,
+            "authenticationExecutions": [
+                {
+                    "authenticator": "auth-cookie",
+                    "authenticatorFlow": false,
+                    "requirement": "ALTERNATIVE",
+                    "priority": 10,
+                    "autheticatorFlow": false,
+                    "userSetupAllowed": false
+                },
+                {
+                    "authenticator": "auth-spnego",
+                    "authenticatorFlow": false,
+                    "requirement": "DISABLED",
+                    "priority": 20,
+                    "autheticatorFlow": false,
+                    "userSetupAllowed": false
+                },
+                {
+                    "authenticator": "identity-provider-redirector",
+                    "authenticatorFlow": false,
+                    "requirement": "ALTERNATIVE",
+                    "priority": 25,
+                    "autheticatorFlow": false,
+                    "userSetupAllowed": false
+                },
+                {
+                    "authenticatorFlow": true,
+                    "requirement": "ALTERNATIVE",
+                    "priority": 30,
+                    "autheticatorFlow": true,
+                    "flowAlias": "browser3 forms",
+                    "userSetupAllowed": false
+                }
+            ]
+        },
+        {
+            "alias": "browser3 forms",
+            "description": "Username, password, otp and other auth forms.",
+            "providerId": "basic-flow",
+            "topLevel": false,
+            "builtIn": false,
+            "authenticationExecutions": [
+                {
+                    "authenticator": "auth-username-password-form",
+                    "authenticatorFlow": false,
+                    "requirement": "REQUIRED",
+                    "priority": 10,
+                    "autheticatorFlow": false,
+                    "userSetupAllowed": false
+                },
+                {
+                    "authenticatorFlow": true,
+                    "requirement": "CONDITIONAL",
+                    "priority": 20,
+                    "autheticatorFlow": true,
+                    "flowAlias": "browser3 Browser - Conditional OTP",
+                    "userSetupAllowed": false
+                }
+            ]
+        },
+        {
+            "alias": "browser3 Browser - Conditional OTP",
+            "description": "Flow to determine if the OTP is required for the authentication",
+            "providerId": "basic-flow",
+            "topLevel": false,
+            "builtIn": false,
+            "authenticationExecutions": [
+                {
+                    "authenticator": "conditional-user-configured",
+                    "authenticatorFlow": false,
+                    "requirement": "REQUIRED",
+                    "priority": 10,
+                    "autheticatorFlow": false,
+                    "userSetupAllowed": false
+                },
+                {
+                    "authenticator": "auth-otp-form",
+                    "authenticatorFlow": false,
+                    "requirement": "REQUIRED",
+                    "priority": 20,
+                    "autheticatorFlow": false,
+                    "userSetupAllowed": false
+                }
+            ]
+        }
+    ],
+    "clients": [
+        {
+            "clientId": "testclient",
+            "name": "Uniport Gateway Test Client",
+            "description": "",
+            "rootUrl": "",
+            "adminUrl": "",
+            "baseUrl": "https://uniport-gateway.polaris.nimbusplane.io",
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "secret": "$(env:TESTCLIENT_CLIENT_SECRET)",
+            "redirectUris": [
+                "https://uniport-gateway.polaris.nimbusplane.io/*"
+            ],
+            "webOrigins": [
+                "https://uniport-gateway.polaris.nimbusplane.io"
+            ],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "serviceAccountsEnabled": false,
+            "publicClient": false,
+            "frontchannelLogout": true,
+            "protocol": "openid-connect",
+            "attributes": {
+                "oidc.ciba.grant.enabled": "false",
+                "display.on.consent.screen": "false",
+                "oauth2.device.authorization.grant.enabled": "false",
+                "backchannel.logout.session.required": "true",
+                "backchannel.logout.revoke.offline.tokens": "false"
+            },
+            "authenticationFlowBindingOverrides": {},
+            "fullScopeAllowed": true,
+            "nodeReRegistrationTimeout": -1,
+            "defaultClientScopes": [
+                "web-origins",
+                "acr",
+                "roles",
+                "profile",
+                "email"
+            ],
+            "optionalClientScopes": [
+                "address",
+                "phone",
+                "offline_access",
+                "microprofile-jwt",
+                "whoami1",
+                "whoami2",
+                "whoami3"
+            ]
+        },
+        {
+            "clientId": "whoami1",
+            "name": "Whoami1",
+            "description": "",
+            "rootUrl": "",
+            "adminUrl": "",
+            "baseUrl": "",
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "redirectUris": [
+                "/*"
+            ],
+            "webOrigins": [
+                "/*"
+            ],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": false,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "serviceAccountsEnabled": false,
+            "publicClient": true,
+            "frontchannelLogout": true,
+            "protocol": "openid-connect",
+            "attributes": {
+                "oidc.ciba.grant.enabled": "false",
+                "backchannel.logout.session.required": "true",
+                "oauth2.device.authorization.grant.enabled": "false",
+                "backchannel.logout.revoke.offline.tokens": "false"
+            },
+            "authenticationFlowBindingOverrides": {},
+            "fullScopeAllowed": true,
+            "nodeReRegistrationTimeout": -1,
+            "defaultClientScopes": [
+                "web-origins",
+                "acr",
+                "roles",
+                "profile",
+                "basic",
+                "email"
+            ],
+            "optionalClientScopes": [
+                "address",
+                "phone",
+                "offline_access",
+                "microprofile-jwt"
+            ]
+        },
+        {
+            "clientId": "whoami2",
+            "name": "Whoami2",
+            "description": "",
+            "rootUrl": "",
+            "adminUrl": "",
+            "baseUrl": "",
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "redirectUris": [
+                "/*"
+            ],
+            "webOrigins": [
+                "/*"
+            ],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": false,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "serviceAccountsEnabled": false,
+            "publicClient": true,
+            "frontchannelLogout": true,
+            "protocol": "openid-connect",
+            "attributes": {
+                "oidc.ciba.grant.enabled": "false",
+                "backchannel.logout.session.required": "true",
+                "oauth2.device.authorization.grant.enabled": "false",
+                "backchannel.logout.revoke.offline.tokens": "false"
+            },
+            "authenticationFlowBindingOverrides": {},
+            "fullScopeAllowed": true,
+            "nodeReRegistrationTimeout": -1,
+            "defaultClientScopes": [
+                "web-origins",
+                "acr",
+                "roles",
+                "profile",
+                "basic",
+                "email"
+            ],
+            "optionalClientScopes": [
+                "address",
+                "phone",
+                "offline_access",
+                "microprofile-jwt"
+            ]
+        },
+        {
+            "clientId": "whoami3",
+            "name": "Whoami3",
+            "description": "",
+            "rootUrl": "",
+            "adminUrl": "",
+            "baseUrl": "",
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "redirectUris": [
+                "/*"
+            ],
+            "webOrigins": [
+                "/*"
+            ],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": false,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "serviceAccountsEnabled": false,
+            "publicClient": true,
+            "frontchannelLogout": true,
+            "protocol": "openid-connect",
+            "attributes": {
+                "oidc.ciba.grant.enabled": "false",
+                "backchannel.logout.session.required": "true",
+                "oauth2.device.authorization.grant.enabled": "false",
+                "backchannel.logout.revoke.offline.tokens": "false"
+            },
+            "authenticationFlowBindingOverrides": {},
+            "fullScopeAllowed": true,
+            "nodeReRegistrationTimeout": -1,
+            "defaultClientScopes": [
+                "web-origins",
+                "acr",
+                "roles",
+                "profile",
+                "basic",
+                "email"
+            ],
+            "optionalClientScopes": [
+                "address",
+                "phone",
+                "offline_access",
+                "microprofile-jwt"
+            ]
+        }
+    ],
+    "clientScopes": [
+        {
+            "name": "whoami1",
+            "description": "Whoami1",
+            "protocol": "openid-connect",
+            "attributes": {
+                "include.in.token.scope": "true",
+                "display.on.consent.screen": "false",
+                "gui.order": "",
+                "consent.screen.text": ""
+            },
+            "protocolMappers": [
+                {
+                    "name": "Audience Whoami1",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "whoami1",
+                        "id.token.claim": "false",
+                        "lightweight.claim": "false",
+                        "access.token.claim": "true",
+                        "introspection.token.claim": "true"
+                    }
+                },
+                {
+                    "name": "Audience Testclient",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "testclient",
+                        "id.token.claim": "false",
+                        "lightweight.claim": "false",
+                        "access.token.claim": "true",
+                        "introspection.token.claim": "true"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "whoami2",
+            "description": "Whoami2",
+            "protocol": "openid-connect",
+            "attributes": {
+                "include.in.token.scope": "true",
+                "display.on.consent.screen": "false",
+                "gui.order": "",
+                "consent.screen.text": ""
+            },
+            "protocolMappers": [
+                {
+                    "name": "Audience Testclient",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "testclient",
+                        "id.token.claim": "false",
+                        "lightweight.claim": "false",
+                        "access.token.claim": "true",
+                        "introspection.token.claim": "true"
+                    }
+                },
+                {
+                    "name": "Audience Whoami2",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "whoami2",
+                        "id.token.claim": "false",
+                        "lightweight.claim": "false",
+                        "access.token.claim": "true",
+                        "introspection.token.claim": "true"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "whoami3",
+            "description": "Whoami3",
+            "protocol": "openid-connect",
+            "attributes": {
+                "include.in.token.scope": "true",
+                "display.on.consent.screen": "false",
+                "gui.order": "",
+                "consent.screen.text": ""
+            },
+            "protocolMappers": [
+                {
+                    "name": "Audience Whoami3",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "whoami3",
+                        "id.token.claim": "false",
+                        "lightweight.claim": "false",
+                        "access.token.claim": "true",
+                        "introspection.token.claim": "true"
+                    }
+                },
+                {
+                    "name": "Audience Testclient",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "testclient",
+                        "id.token.claim": "false",
+                        "lightweight.claim": "false",
+                        "access.token.claim": "true",
+                        "introspection.token.claim": "true"
+                    }
+                }
+            ]
+        }
+    ],
+    "users": [
+        {
+            "username": "user1@example1.com",
+            "enabled": true,
+            "email": "user1@example1.com",
+            "firstName": "User",
+            "lastName": "One",
+            "credentials": [
+                {
+                    "type": "password",
+                    "userLabel": "initial",
+                    "value": "user1..."
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,128 @@
+version: "3"
+
+services:
+  portal-gateway:
+    image: docker-registry.inventage.com:10094/com.inventage.portal.gateway.portal-gateway:9.3.0-202410161127-1201-84e80ee2
+    restart: on-failure
+    expose:
+      - "20000"
+    ports:
+      - "20000:20000"
+    environment:
+      # general
+      development: "true"
+      PORTAL_GATEWAY_JSON: /etc/portal-gateway/keycloak/portal-gateway.json
+      # logging
+      PORTAL_GATEWAY_LOG_LEVEL: DEBUG
+      # public info
+      PORTAL_GATEWAY_PUBLIC_PROTOCOL: http
+      PORTAL_GATEWAY_PUBLIC_HOSTNAME: localhost
+      PORTAL_GATEWAY_PUBLIC_PORT: 20000
+      # tracing & metrics
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+    volumes:
+      - type: bind
+        source: ./config
+        target: /etc/portal-gateway/keycloak
+    networks:
+      - portal-gateway
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    command:
+      - start-dev
+      - --import-realm
+    restart: on-failure
+    expose:
+      - "8080"
+      - "9000"
+    ports:
+      - "8080:8080"
+    environment:
+      # telemetry
+      KC_LOG_LEVEL: DEBUG
+      KC_HEALTH_ENABLED: "true"
+      # bootstrap user
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: admin
+      # db
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      # proxy
+      KC_PROXY: edge
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_RELATIVE_PATH: /auth/
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+    volumes:
+      - type: bind
+        source: ./realm-testrealm.json
+        target: /opt/keycloak/data/import/realm-testrealm.json
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3; if [ $$? -eq 0 ]; then echo \"Success\"; exit 0; else echo \"Failed\"; exit 1; fi"]
+      start_period: 30s
+      timeout: 5s
+      interval: 15s
+      retries: 20 # importing realm may take quite some time
+    networks:
+      - portal-gateway
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    restart: on-failure
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - type: bind
+        source: ./init-db.sh
+        target: /docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      start_period: 5s
+      timeout: 3s
+      interval: 10s
+      retries: 5
+    networks:
+      - portal-gateway
+
+  whoami1:
+    image: traefik/whoami
+    expose:
+      - "80"
+    networks:
+      - portal-gateway
+
+  whoami2:
+    image: traefik/whoami
+    expose:
+      - "80"
+    networks:
+      - portal-gateway
+
+  whoami3:
+    image: traefik/whoami
+    expose:
+      - "80"
+    networks:
+      - portal-gateway
+
+networks:
+  portal-gateway:
+    name: portal-gateway-standalone
+
+volumes:
+  postgres-data:

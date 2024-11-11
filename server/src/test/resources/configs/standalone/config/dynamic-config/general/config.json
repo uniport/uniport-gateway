@@ -1,0 +1,134 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "auth",
+                "rule": "PathPrefix('/auth')",
+                "service": "iam"
+            },
+            {
+                "name": "root",
+                "rule": "Path('/')",
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami1",
+                "rule": "Path('/whoami1')",
+                "middlewares": [
+                    "whoami1AuthBearer"
+                ],
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami2",
+                "rule": "Path('/whoami2')",
+                "middlewares": [
+                    "whoami2Oauth",
+                    "whoami2AuthBearer"
+                ],
+                "service": "whoami2"
+            },
+            {
+                "name": "whoami3",
+                "rule": "Path('/whoami3')",
+                "middlewares": [
+                    "whoami3Oauth",
+                    "whoami3AuthBearer"
+                ],
+                "service": "whoami3"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootRedirectregex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/whoami1"
+                }
+            },
+            {
+                "name": "whoami2Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami3Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "sessionScope": "whoami3"
+                }
+            },
+            {
+                "name": "whoami1AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami2AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami3AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami3"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami1",
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "whoami2",
+                "servers": [
+                    {
+                        "host": "whoami2",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "whoami3",
+                "servers": [
+                    {
+                        "host": "whoami3",
+                        "port": "80"
+                    }
+                ]
+            },
+            {
+                "name": "iam",
+                "servers": [
+                    {
+                        "host": "keycloak",
+                        "port": "8080"
+                    }
+                ]
+            }
+        ]
+    }
+}
