@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages the authentication bearer. If the user is authenticated it provides either an ID token or
- * an access token as defined in the sessionScope. Access tokens are only provided if the
- * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
- * token is sent to the Client.
+ * Sets the 'accept-language' based on the language cookie value
  */
 public class LanguageCookieMiddleware extends TraceMiddleware {
 
@@ -33,16 +30,14 @@ public class LanguageCookieMiddleware extends TraceMiddleware {
 
         Cookie cookie = ctx.request().getCookie(languageCookieName);
 
-        // backward compatibility because of cookie name change (https://issue.inventage.com/browse/PORTAL-718)
+        // DEPRECATED: backward compatibility because of cookie name change (https://issue.inventage.com/browse/PORTAL-718)
         if (cookie == null) {
             cookie = ctx.request().getCookie("ips.language"); // support for old cookie name
         }
 
         if (cookie != null) {
-            LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", languageCookieName,
-                cookie.getValue());
-            ctx.request().headers().remove(HttpHeaders.ACCEPT_LANGUAGE);
-            ctx.request().headers().add(HttpHeaders.ACCEPT_LANGUAGE, cookie.getValue());
+            LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", languageCookieName, cookie.getValue());
+            ctx.request().headers().set(HttpHeaders.ACCEPT_LANGUAGE, cookie.getValue());
         }
 
         ctx.next();

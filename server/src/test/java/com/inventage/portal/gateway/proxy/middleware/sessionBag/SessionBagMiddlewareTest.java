@@ -60,7 +60,7 @@ public class SessionBagMiddlewareTest {
                 isFirstReq.set(false);
             }
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
@@ -89,7 +89,7 @@ public class SessionBagMiddlewareTest {
                 });
             }
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
@@ -115,7 +115,7 @@ public class SessionBagMiddlewareTest {
                 ctx.response().addCookie(followUpCookie);
             }
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
@@ -141,7 +141,7 @@ public class SessionBagMiddlewareTest {
                 ctx.response().addCookie(expiredCookie);
             }
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
@@ -173,7 +173,7 @@ public class SessionBagMiddlewareTest {
                 isFirstReq.set(false);
             }
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             testCtx.verify(() -> {
                 boolean foundMasterRealmCookie = false;
                 for (String respCookie : resp.cookies()) {
@@ -222,7 +222,7 @@ public class SessionBagMiddlewareTest {
                 });
             }
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(storedCookie)));
         }, new ArrayList<Cookie>(Collections.singletonList(reqCookie)), resp -> {
@@ -243,7 +243,7 @@ public class SessionBagMiddlewareTest {
                 assertNull(ctx.request().getCookie(SESSION_COOKIE_NAME), errMsg);
             });
             ctx.response().end();
-        }, null, resp -> {
+        }, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp, null);
         }, null, resp -> {
             expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp, null);
@@ -252,7 +252,7 @@ public class SessionBagMiddlewareTest {
 
     void testHarness(
         Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, JsonArray whitelistedCookies,
-        Handler<RoutingContext> serverReqHandler, List<Cookie> reqCookies, Handler<HttpClientResponse> respHandler,
+        Handler<RoutingContext> serverReqHandler, Handler<HttpClientResponse> respHandler,
         List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler
     ) {
         final int port = TestUtils.findFreePort();
@@ -351,10 +351,8 @@ public class SessionBagMiddlewareTest {
     ) {
         testCtx.verify(() -> {
             Cookie sessionCookie = null;
-            final List<Cookie> decodedRespCookies = new ArrayList<>();
             for (String respCookie : resp.cookies()) {
                 final Cookie decodedRespCookie = CookieUtil.fromNettyCookie(ClientCookieDecoder.STRICT.decode(respCookie));
-                decodedRespCookies.add(decodedRespCookie);
 
                 // only session cookie and whitelisted cookies are passed
                 if (decodedRespCookie.getName().equals(SESSION_COOKIE_NAME)) {
@@ -375,7 +373,6 @@ public class SessionBagMiddlewareTest {
             if (sessionId.get() == null || sessionId.get().isEmpty()) {
                 assertNotNull(sessionCookie, String.format("%s: No session cookie returned.", errMsg));
                 sessionId.set(sessionCookie.getValue());
-                assertEquals(SESSION_COOKIE_NAME, sessionCookie.getName(), String.format("%s: Wrong cookie name", errMsg));
             }
 
             // check if cookies are stored in session
