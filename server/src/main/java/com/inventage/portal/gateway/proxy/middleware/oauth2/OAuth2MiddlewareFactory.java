@@ -18,6 +18,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -45,18 +46,21 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final JsonObject oidcParams = oidcParams(middlewareConfig);
         final String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+        final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, true);
 
         final List<Route> callbacks = new LinkedList<>();
         final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
+
         // PORTAL-2004: We always need a GET callback. In the case of FormPost, we need the GET callback for requests with an Accept header that does not allow text/html
         callbacks.add(router.get(callbackPath).handler(BodyHandler.create()));
+
         if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
             // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
             callbacks.add(router.post(callbackPath).handler(BodyHandler.create()));
         }
+
         final Promise<Middleware> result = Promise.promise();
-        final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx,
-            oAuth2Options(middlewareConfig));
+        final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig));
         keycloakDiscoveryFuture.onSuccess(authProvider -> {
             LOGGER.debug("Successfully completed Keycloak discovery");
 
@@ -64,25 +68,16 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             // in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
             // configuration
             final String publicUrl = getPublicURL(middlewareConfig);
-            try {
-                final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
 
-                // patch issuer
-                final URI issuerPath = new URI(keycloakOAuth2Options.getJWTOptions().getIssuer());
-                final String newIssuerPath = patchPath(publicUrl, issuerPath);
-                keycloakOAuth2Options.getJWTOptions().setIssuer(newIssuerPath);
-                LOGGER.debug("patched issuer: {} -> {}", issuerPath, newIssuerPath);
-
-                // patch authorization_endpoint
-                final URI authorizationPath = new URI(keycloakOAuth2Options.getAuthorizationPath());
-                final String newAuthorizationPath = patchPath(publicUrl, authorizationPath);
-                keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
-                LOGGER.debug("patched authorization endpoint: {} -> {}", authorizationPath, newAuthorizationPath);
-            } catch (Exception err) {
-                LOGGER.warn("Failed to create OAuth2 Middleware due to failed authorization path patching: '{}'",
-                    err.getMessage());
-                result.fail("Failed to patch authorization path: '" + err.getMessage() + "'");
-                return;
+            if (proxyAuthenticationFlow) {
+                try {
+                    patchPublicKeycloakURIs(authProvider, publicUrl);
+                } catch (URISyntaxException err) {
+                    LOGGER.warn("Failed to create OAuth2 Middleware due to failed authorization path patching: '{}'",
+                        err.getMessage());
+                    result.fail("Failed to patch authorization path: '" + err.getMessage() + "'");
+                    return;
+                }
             }
 
             for (Route callback : callbacks) {
@@ -102,8 +97,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             result.complete(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
         }).onFailure(err -> {
-            LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'",
-                err.getMessage());
+            LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'", err.getMessage());
             result.fail("Failed to create OAuth2 Middleware '" + err.getMessage() + "'");
         });
 
@@ -153,6 +147,29 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             throw new IllegalArgumentException("missing key in config: '" + key + "'");
         }
         return value;
+    }
+
+    /**
+     * By patching the issuer and the authorization path, ensure that Keycloak is only visible from the outside as runing behind the portal-gateway.
+     * 
+     * @param authProvider
+     * @param publicUrl
+     * @throws URISyntaxException
+     */
+    private void patchPublicKeycloakURIs(OAuth2Auth authProvider, String publicUrl) throws URISyntaxException {
+        final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
+
+        // patch issuer
+        final URI issuerPath = new URI(keycloakOAuth2Options.getJWTOptions().getIssuer());
+        final String newIssuerPath = patchPath(publicUrl, issuerPath);
+        keycloakOAuth2Options.getJWTOptions().setIssuer(newIssuerPath);
+        LOGGER.debug("patched issuer: {} -> {}", issuerPath, newIssuerPath);
+
+        // patch authorization_endpoint
+        final URI authorizationPath = new URI(keycloakOAuth2Options.getAuthorizationPath());
+        final String newAuthorizationPath = patchPath(publicUrl, authorizationPath);
+        keycloakOAuth2Options.setAuthorizationPath(newAuthorizationPath);
+        LOGGER.debug("patched authorization endpoint: {} -> {}", authorizationPath, newAuthorizationPath);
     }
 
 }

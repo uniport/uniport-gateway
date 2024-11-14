@@ -37,6 +37,9 @@
                   "lifetimeCookie" : {
                     "type" : "boolean"
                   },
+                  "proxyAuthenticationFlow" : {
+                    "type" : "boolean"
+                  },
                   "publicKey" : {
                     "minLength" : 1,
                     "type" : "string"

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Added
+
+- Added option to configure if the authentication request, triggered by a `oauth2` middleware, should be executed via the portal-gateway ([PORTAL-2301](https://issue.inventage.com/browse/PORTAL-2301)).
+
 ### Fixed
 
 - Use fresh public keys to verify the logout token in the back channel logout ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).

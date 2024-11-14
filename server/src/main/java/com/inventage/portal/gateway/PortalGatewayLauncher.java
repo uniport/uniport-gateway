@@ -109,8 +109,8 @@ public class PortalGatewayLauncher extends Launcher {
             .setEnabled(true));
 
         if (Runtime.isDevelopment()) {
-            // increase the max event loop time to 10 min (default is 2000000000 ns = 2s) to omit thread blocking warnings
-            options.setMaxEventLoopExecuteTime(600000000000L);
+            // increase the max event loop time to 10 min (default is 2_000_000_000 ns = 2s) to omit thread blocking warnings
+            options.setMaxEventLoopExecuteTime(600_000_000_000L);
         }
     }
 

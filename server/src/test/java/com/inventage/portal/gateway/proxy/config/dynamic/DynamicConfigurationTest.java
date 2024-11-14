@@ -308,15 +308,12 @@ public class DynamicConfigurationTest {
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
                         DynamicConfiguration.MIDDLEWARE_OAUTH2)
                     .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID,
-                            "foo")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET,
-                                "bar")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL,
-                                "localhost:1234")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE,
-                                "blub")))));
+                        new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, "foo")
+                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, "bar")
+                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, "localhost:1234")
+                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "blub")
+                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
 
         final JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,

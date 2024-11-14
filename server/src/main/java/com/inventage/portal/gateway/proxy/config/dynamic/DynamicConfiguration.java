@@ -122,6 +122,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_RESPONSE_MODE = "responseMode";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
+    public static final String MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW = "proxyAuthenticationFlow";
     // path authorization
     public static final String MIDDLEWARE_PASS_AUTHORIZATION = "passAuthorization";
     public static final String MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE = "sessionScope";
@@ -342,6 +343,7 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
             .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
             // pass authorization
             .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
