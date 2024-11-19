@@ -18,11 +18,19 @@
             "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
         },
         {
-            "name": "Launch (standalone)",
+            "name": "Launch (standalone auth)",
             "type": "java",
             "projectName": "server",
             "request": "launch",
-            "envFile": "${workspaceFolder}/server/src/test/resources/configs/keycloak/portal-gateway.env",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/standalone-auth/portal-gateway.env",
+            "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
+        },
+        {
+            "name": "Launch (simple)",
+            "type": "java",
+            "projectName": "server",
+            "request": "launch",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/simple/portal-gateway.env",
             "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
         }
     ]

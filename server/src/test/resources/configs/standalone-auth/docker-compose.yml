@@ -1,36 +1,6 @@
 version: "3"
 
 services:
-  portal-gateway:
-    image: docker-registry.inventage.com:10094/com.inventage.portal.gateway.portal-gateway:9.3.0-202410161127-1201-84e80ee2
-    restart: on-failure
-    expose:
-      - "20000"
-    ports:
-      - "20000:20000"
-    environment:
-      # general
-      development: "true"
-      PORTAL_GATEWAY_JSON: /etc/portal-gateway/keycloak/portal-gateway.json
-      # logging
-      PORTAL_GATEWAY_LOG_LEVEL: DEBUG
-      # public info
-      PORTAL_GATEWAY_PUBLIC_PROTOCOL: http
-      PORTAL_GATEWAY_PUBLIC_HOSTNAME: localhost
-      PORTAL_GATEWAY_PUBLIC_PORT: 20000
-      # tracing & metrics
-      OTEL_TRACES_EXPORTER: none
-      OTEL_METRICS_EXPORTER: none
-    volumes:
-      - type: bind
-        source: ./config
-        target: /etc/portal-gateway/keycloak
-    networks:
-      - portal-gateway
-    depends_on:
-      keycloak:
-        condition: service_healthy
-
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.6
     command:
@@ -103,6 +73,8 @@ services:
     image: traefik/whoami
     expose:
       - "80"
+    ports:
+      - "8081:80"
     networks:
       - portal-gateway
 
@@ -110,6 +82,8 @@ services:
     image: traefik/whoami
     expose:
       - "80"
+    ports:
+      - "8082:80"
     networks:
       - portal-gateway
 
@@ -117,6 +91,8 @@ services:
     image: traefik/whoami
     expose:
       - "80"
+    ports:
+      - "8083:80"
     networks:
       - portal-gateway
 

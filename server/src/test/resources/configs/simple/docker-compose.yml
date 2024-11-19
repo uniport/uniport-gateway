@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  whoami1:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8081:80"
+    networks:
+      - portal-gateway-whoami
+  whoami2:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8082:80"
+    networks:
+      - portal-gateway-whoami
+
+networks:
+  portal-gateway-whoami:
+      name: portal-gateway-whoami
