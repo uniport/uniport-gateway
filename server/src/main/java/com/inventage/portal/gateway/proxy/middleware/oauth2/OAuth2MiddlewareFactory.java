@@ -6,6 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
- * follow up requests are routed through this application as well.
+ * follow up requests are routed through this application as well, if configured.
  */
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
@@ -34,6 +35,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public static final String OIDC_RESPONSE_MODE_DEFAULT = "form_post";
 
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
+    private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
@@ -59,9 +61,54 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             callbacks.add(router.post(callbackPath).handler(BodyHandler.create()));
         }
 
-        final Promise<Middleware> result = Promise.promise();
+        final Promise<Middleware> promise = Promise.promise();
         final Future<OAuth2Auth> keycloakDiscoveryFuture = KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig));
-        keycloakDiscoveryFuture.onSuccess(authProvider -> {
+        keycloakDiscoveryFuture
+            .onSuccess(createMiddleware(vertx, name, middlewareConfig, proxyAuthenticationFlow, callbacks, callbackPath, sessionScope, oidcParams, promise))
+            .onFailure(err -> {
+                LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'", err.getMessage());
+                promise.fail("Failed to create OAuth2 Middleware '" + err.getMessage() + "'");
+            });
+
+        return promise.future();
+    }
+
+    protected String patchPath(String publicUrl, URI keycloakUrl) {
+        return String.format("%s%s", publicUrl, keycloakUrl.getPath());
+    }
+
+    private JsonObject oidcParams(JsonObject middlewareConfig) {
+        // PORTAL-1196: value for "response_mode" must be configurable
+        final String responseMode = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_RESPONSE_MODE);
+        final JsonObject oidcParams = new JsonObject()
+            .put(OIDC_RESPONSE_MODE, responseMode == null ? OIDC_RESPONSE_MODE_DEFAULT : responseMode);
+        return oidcParams;
+    }
+
+    private boolean isFormPost(String aResponseMode) {
+        return OIDC_RESPONSE_MODE_DEFAULT.equals(aResponseMode);
+    }
+
+    private OAuth2Options oAuth2Options(JsonObject middlewareConfig) {
+        return new OAuth2Options()
+            .setClientId(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
+            .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
+            .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
+            .setValidateIssuer(false);
+    }
+
+    private Handler<OAuth2Auth> createMiddleware(
+        Vertx vertx,
+        String name,
+        JsonObject middlewareConfig,
+        boolean proxyAuthenticationFlow,
+        List<Route> callbacks,
+        String callbackPath,
+        String sessionScope,
+        JsonObject oidcParams,
+        Promise<Middleware> promise
+    ) {
+        return authProvider -> {
             LOGGER.debug("Successfully completed Keycloak discovery");
 
             // the protocol, hostname or port can be different from what the portal-gateway knows, therefore
@@ -75,7 +122,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 } catch (URISyntaxException err) {
                     LOGGER.warn("Failed to create OAuth2 Middleware due to failed authorization path patching: '{}'",
                         err.getMessage());
-                    result.fail("Failed to patch authorization path: '" + err.getMessage() + "'");
+                    promise.fail("Failed to patch authorization path: '" + err.getMessage() + "'");
                     return;
                 }
             }
@@ -88,44 +135,15 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             // PORTAL-1184 we are using a patched OAuth2AuthHandlerImpl class as OAuth2AuthHandler implementation.
             final OAuth2AuthHandler authHandler = new RelyingPartyHandler(vertx, authProvider, callbackURL)
                 .setupCallbacks(callbacks)
-                .pkceVerifierLength(64)
+                .pkceVerifierLength(OAUTH2_PKCE_VERIFIER_LENGTH)
                 // add the sessionScope as a OIDC scope for "aud" in JWT
                 // see https://www.keycloak.org/docs/latest/server_admin/index.html#_audience
                 .withScopes(List.of(OIDC_SCOPE, sessionScope))
                 .extraParams(oidcParams);
 
-            result.complete(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
+            promise.complete(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
             LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
-        }).onFailure(err -> {
-            LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'", err.getMessage());
-            result.fail("Failed to create OAuth2 Middleware '" + err.getMessage() + "'");
-        });
-
-        return result.future();
-    }
-
-    protected String patchPath(String publicUrl, URI keycloakUrl) {
-        return String.format("%s%s", publicUrl, keycloakUrl.getPath());
-    }
-
-    private boolean isFormPost(String aResponseMode) {
-        return OIDC_RESPONSE_MODE_DEFAULT.equals(aResponseMode);
-    }
-
-    private JsonObject oidcParams(JsonObject middlewareConfig) {
-        // PORTAL-1196: value for "response_mode" must be configurable
-        final String responseMode = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_RESPONSE_MODE);
-        final JsonObject oidcParams = new JsonObject()
-            .put(OIDC_RESPONSE_MODE, responseMode == null ? OIDC_RESPONSE_MODE_DEFAULT : responseMode);
-        return oidcParams;
-    }
-
-    private OAuth2Options oAuth2Options(JsonObject middlewareConfig) {
-        return new OAuth2Options()
-            .setClientId(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
-            .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
-            .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
-            .setValidateIssuer(false);
+        };
     }
 
     private String getPublicURL(JsonObject middlewareConfig) {
