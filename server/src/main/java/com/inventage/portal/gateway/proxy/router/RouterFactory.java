@@ -283,6 +283,13 @@ public class RouterFactory {
             return priorityB - priorityA;
         });
 
+        LOGGER.debug("Routing requests in the following order:");
+        for (JsonObject r : routerList) {
+            LOGGER.debug("Router '{}': rule '{}', priority '{}'",
+                r.getString(DynamicConfiguration.ROUTER_NAME),
+                r.getString(DynamicConfiguration.ROUTER_RULE),
+                r.getInteger(DynamicConfiguration.ROUTER_PRIORITY) != null ? r.getInteger(DynamicConfiguration.ROUTER_PRIORITY) : r.getString(DynamicConfiguration.ROUTER_RULE).length());
+        }
     }
 
     private RoutingRule path(String path) {
