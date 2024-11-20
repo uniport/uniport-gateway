@@ -54,11 +54,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
 
         // PORTAL-2004: We always need a GET callback. In the case of FormPost, we need the GET callback for requests with an Accept header that does not allow text/html
-        callbacks.add(router.get(callbackPath).handler(BodyHandler.create()));
+        callbacks.add(router.get(callbackPath).setName("callback GET").handler(BodyHandler.create()));
 
         if (isFormPost(oidcParams.getString(OIDC_RESPONSE_MODE))) {
             // PORTAL-513: Forces the OIDC Provider to send the authorization code in the body
-            callbacks.add(router.post(callbackPath).handler(BodyHandler.create()));
+            callbacks.add(router.post(callbackPath).setName("callback POST").handler(BodyHandler.create()));
         }
 
         final Promise<Middleware> promise = Promise.promise();

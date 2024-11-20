@@ -40,7 +40,7 @@ public class RouterSwitchListener implements Listener {
     private void setSubRouter(Router subRouter) {
         // TODO might this create a connection gap?
         this.router.clear();
-        this.router.route("/*").setName("listener").subRouter(subRouter);
+        this.router.route("/*").setName("router switch listener").subRouter(subRouter);
     }
 
 }
