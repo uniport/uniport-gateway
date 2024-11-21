@@ -15,6 +15,7 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.ClusteredSessionStore;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -202,6 +203,8 @@ public class SessionMiddleware extends TraceMiddleware {
         final List<CharSequence> filteredCookies = headers
             .getAll(HttpHeaders.COOKIE)
             .stream()
+            .flatMap(c -> Arrays.asList(c.split(";")).stream()) // cookie header may be a list
+            .map(c -> c.trim())
             .filter(c -> !c.startsWith(sessionCookieName + "="))
             .collect(Collectors.toList());
         headers.set(HttpHeaders.COOKIE, filteredCookies);

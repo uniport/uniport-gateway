@@ -8,14 +8,12 @@ import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddl
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
@@ -24,13 +22,20 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
 public class SessionMiddlewareTest {
@@ -212,12 +217,58 @@ public class SessionMiddlewareTest {
         });
     }
 
-    @Test
-    void sessionCookieIsNotPassedToTheBackendService(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    private static Entry<Set<Function<String, String>>, Set<String>> entry(Set<Function<String, String>> a, Set<String> b) {
+        return new AbstractMap.SimpleEntry<Set<Function<String, String>>, Set<String>>(a, b);
+    }
+
+    private static Stream<Entry<Set<Function<String, String>>, Set<String>>> provideCookieHeaders() {
+        return Stream.of(
+            entry(
+                // only the session cookie
+                Set.of(sc -> sc), // input, each element is a cookie header value
+                Set.of() // expected, element line is an expected cookie
+            ),
+            entry(
+                // session cookie and another cookie in separate headers
+                Set.of(
+                    sc -> "foo=canttouchthis",
+                    sc -> sc),
+                Set.of("foo") //
+            ),
+            entry(
+                // session cookie and other cookies in separate headers
+                Set.of(
+                    sc -> "foo=canttouchthis",
+                    sc -> "bar=orthat",
+                    sc -> sc),
+                Set.of("foo", "bar") //
+            ),
+            entry(
+                // session cookie and another cookie in the same header (pre)
+                Set.of(sc -> String.join("; ", sc, "foo=canttouchthis")),
+                Set.of("foo") //
+            ),
+            entry(
+                // session cookie and another cookie in the same header (post)
+                Set.of(sc -> String.join("; ", "foo=canttouchthis", sc)),
+                Set.of("foo") //
+            ),
+            entry(
+                // session cookie and another cookie in the same header (middle)
+                Set.of(sc -> String.join("; ", "foo=canttouchthis", sc, "bar=orthat")),
+                Set.of("foo", "bar") //
+            ) //
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideCookieHeaders")
+    void sessionCookieIsNotPassedToTheBackendService(Entry<Set<Function<String, String>>, Set<String>> arg, Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
+        final Set<Function<String, String>> cookieHeaders = arg.getKey();
+        final Set<String> expectedCookies = arg.getValue();
         final AtomicInteger reqCount = new AtomicInteger();
         final int backendPort = TestUtils.findFreePort();
-        final String dummyCookie = "dummy=canttouchthis";
 
         Handler<RoutingContext> backendHandler = ctx -> {
             final int rc = reqCount.incrementAndGet();
@@ -225,8 +276,6 @@ public class SessionMiddlewareTest {
             testCtx.verify(() -> {
                 assertNull(ctx.request().getCookie(DEFAULT_SESSION_COOKIE_NAME),
                     String.format("session cookie was passed to the backend on the %d. request", rc));
-                assertNotNull(ctx.request().getCookie("dummy"),
-                    "colateral damage: other cookie than session cookie was removed from request");
             });
             ctx.response().setStatusCode(200).end("ok");
         };
@@ -237,18 +286,31 @@ public class SessionMiddlewareTest {
             .withBackend(vertx, backendPort, backendHandler)
             .build().start();
 
+        final String emptySessionCookie = "";
+        final RequestOptions reqOpts1 = new RequestOptions();
+        for (Function<String, String> f : cookieHeaders) {
+            final String cookieHeaderValue = f.apply(emptySessionCookie);
+            if (cookieHeaderValue.length() != 0) {
+                reqOpts1.addHeader(HttpHeaders.COOKIE, f.apply(emptySessionCookie));
+            }
+        }
+
         // when
         // obtain session cookie
-        gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.COOKIE, dummyCookie), (outgoingResponse) -> {
-            final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-            for (String respCookie : outgoingResponse.cookies()) {
-                headers.add(HttpHeaders.COOKIE, respCookie);
+        gateway.incomingRequest(GET, "/", reqOpts1, (outgoingResponse) -> {
+            final String sessionCookie = outgoingResponse.cookies().stream()
+                .filter(c -> c.startsWith(DEFAULT_SESSION_COOKIE_NAME))
+                .map(c -> c.split(";")[0])
+                .findFirst()
+                .orElseThrow();
+
+            final RequestOptions reqOpts2 = new RequestOptions();
+            for (Function<String, String> f : cookieHeaders) {
+                reqOpts2.addHeader(HttpHeaders.COOKIE, f.apply(sessionCookie));
             }
-            headers.add(HttpHeaders.COOKIE, "dummy=canttouchthis");
 
             // send session cookie
-            final RequestOptions opts = new RequestOptions().setHeaders(headers);
-            gateway.incomingRequest(GET, "/", opts, (outgoingResponse2) -> {
+            gateway.incomingRequest(GET, "/", reqOpts2, (outgoingResponse2) -> {
                 testCtx.completeNow();
             });
         });
