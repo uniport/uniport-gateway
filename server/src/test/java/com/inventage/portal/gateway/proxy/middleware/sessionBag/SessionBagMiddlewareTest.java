@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
@@ -230,24 +229,6 @@ public class SessionBagMiddlewareTest {
                 new ArrayList<Cookie>(Collections.singletonList(storedCookie)));
         });
 
-    }
-
-    @Test
-    void sessionCookieIsNotPassedToTheBackendService(Vertx vertx, VertxTestContext testCtx) {
-        final String errMsg = "'test session cookie is not passed to the backend service' failed.";
-        final SessionStore sessionStore = LocalSessionStore.create(vertx);
-        final AtomicReference<String> sessionId = new AtomicReference<>();
-
-        testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
-            testCtx.verify(() -> {
-                assertNull(ctx.request().getCookie(SESSION_COOKIE_NAME), errMsg);
-            });
-            ctx.response().end();
-        }, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp, null);
-        }, null, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp, null);
-        });
     }
 
     void testHarness(

@@ -5,15 +5,19 @@ import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_K
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.ClusteredSessionStore;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +35,12 @@ public class SessionMiddleware extends TraceMiddleware {
 
     private final String name;
 
+    private final String sessionCookieName;
     private final long sessionIdleTimeoutInMilliSeconds;
 
     private final boolean withLifetimeHeader;
     private final String lifetimeHeaderName;
+
     private final boolean withLifetimeCookie;
     private final String lifetimeCookieName;
     private final String lifetimeCookiePath;
@@ -115,9 +121,11 @@ public class SessionMiddleware extends TraceMiddleware {
         this.name = name;
         this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MINUTE_MS;
         this.uriPatternForIgnoringSessionTimeoutReset = uriWithoutSessionIdleTimeoutReset == null ? null : Pattern.compile(uriWithoutSessionIdleTimeoutReset);
+        this.sessionCookieName = sessionCookieName;
 
         this.withLifetimeHeader = withLifetimeHeader;
         this.lifetimeHeaderName = lifetimeHeaderName;
+
         this.withLifetimeCookie = withLifetimeCookie;
         this.lifetimeCookieName = lifetimeCookieName;
         this.lifetimeCookiePath = lifetimeCookiePath;
@@ -135,7 +143,7 @@ public class SessionMiddleware extends TraceMiddleware {
 
         sessionHandler = SessionHandler.create(sessionStore)
             .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
-            .setSessionCookieName(sessionCookieName)
+            .setSessionCookieName(this.sessionCookieName)
             .setCookieHttpOnlyFlag(sessionCookieHttpOnly)
             .setCookieSecureFlag(sessionCookieSecure)
             .setCookieSameSite(sessionCookieSameSite)
@@ -148,6 +156,7 @@ public class SessionMiddleware extends TraceMiddleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         registerHandlerForRespondingWithSessionLifetime(ctx);
+        registerHandlerToRemoveSessionCookieFromRequestBeforeProxying(ctx);
         checkForSessionTimeoutReset(ctx);
         setSessionIdleTimeoutOnRoutingContext(ctx);
         setSessionStoreOnRoutingContext(ctx);
@@ -182,6 +191,20 @@ public class SessionMiddleware extends TraceMiddleware {
                     .setSecure(this.lifetimeCookieSecure)
                     .setSameSite(this.lifetimeCookieSameSite));
         }
+    }
+
+    private void registerHandlerToRemoveSessionCookieFromRequestBeforeProxying(RoutingContext ctx) {
+        this.addRequestHeadersModifier(ctx, headers -> removeSessionCookieFromRequestBeforeProxying(headers));
+        LOGGER.debug("{}: Added removeSessionCookieFromRequestBeforeProxying as request header modifier", name);
+    }
+
+    private void removeSessionCookieFromRequestBeforeProxying(MultiMap headers) {
+        final List<CharSequence> filteredCookies = headers
+            .getAll(HttpHeaders.COOKIE)
+            .stream()
+            .filter(c -> !c.startsWith(sessionCookieName + "="))
+            .collect(Collectors.toList());
+        headers.set(HttpHeaders.COOKIE, filteredCookies);
     }
 
     /**

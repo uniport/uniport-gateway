@@ -65,8 +65,6 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
             .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
-        requestCookies.removeIf(cookie -> isSessionCookie(cookie));
-
         // on incoming request: set cookie from session bag if present
         final String cookieHeaderValue = loadCookiesFromSessionBag(ctx, requestCookies);
         if (cookieHeaderValue != null && !cookieHeaderValue.isEmpty()) {

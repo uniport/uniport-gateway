@@ -8,11 +8,16 @@ import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddl
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.RoutingContext;
@@ -21,6 +26,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -203,6 +209,48 @@ public class SessionMiddlewareTest {
             // then
             Assertions.assertThat(hasSessionStore.get());
             testCtx.completeNow();
+        });
+    }
+
+    @Test
+    void sessionCookieIsNotPassedToTheBackendService(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final AtomicInteger reqCount = new AtomicInteger();
+        final int backendPort = TestUtils.findFreePort();
+        final String dummyCookie = "dummy=canttouchthis";
+
+        Handler<RoutingContext> backendHandler = ctx -> {
+            final int rc = reqCount.incrementAndGet();
+            // then
+            testCtx.verify(() -> {
+                assertNull(ctx.request().getCookie(DEFAULT_SESSION_COOKIE_NAME),
+                    String.format("session cookie was passed to the backend on the %d. request", rc));
+                assertNotNull(ctx.request().getCookie("dummy"),
+                    "colateral damage: other cookie than session cookie was removed from request");
+            });
+            ctx.response().setStatusCode(200).end("ok");
+        };
+
+        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withProxyMiddleware(backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build().start();
+
+        // when
+        // obtain session cookie
+        gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.COOKIE, dummyCookie), (outgoingResponse) -> {
+            final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+            for (String respCookie : outgoingResponse.cookies()) {
+                headers.add(HttpHeaders.COOKIE, respCookie);
+            }
+            headers.add(HttpHeaders.COOKIE, "dummy=canttouchthis");
+
+            // send session cookie
+            final RequestOptions opts = new RequestOptions().setHeaders(headers);
+            gateway.incomingRequest(GET, "/", opts, (outgoingResponse2) -> {
+                testCtx.completeNow();
+            });
         });
     }
 

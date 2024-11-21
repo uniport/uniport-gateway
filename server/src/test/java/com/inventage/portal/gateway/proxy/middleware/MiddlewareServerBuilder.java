@@ -353,7 +353,9 @@ public final class MiddlewareServerBuilder {
 
         serviceRouter.route().handler(handler);
 
-        vertx.createHttpServer(serverOptions).requestHandler(serviceRouter).listen(port)
+        vertx.createHttpServer(serverOptions)
+            .requestHandler(serviceRouter)
+            .listen(port)
             .onComplete(testContext.succeedingThenComplete());
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
