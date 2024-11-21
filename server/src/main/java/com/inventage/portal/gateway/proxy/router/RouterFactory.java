@@ -159,7 +159,7 @@ public class RouterFactory {
             handler.handle(Future.failedFuture(errMsg));
             return;
         }
-        final Route route = routingRule.apply(router);
+        final Route route = routingRule.apply(router).last();
 
         final List<Future<Middleware>> middlewareFutures = new ArrayList<>();
 
