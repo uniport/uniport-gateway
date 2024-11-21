@@ -147,6 +147,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     private String getPublicURL(JsonObject middlewareConfig) {
+        if (middlewareConfig.containsKey(DynamicConfiguration.MIDDLEWARE_OAUTH2_PUBLIC_URL)) {
+            return middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_PUBLIC_URL);
+        }
+
         String publicUrl = String.format("%s://%s",
             getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PROTOCOL_KEY),
             getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_HOSTNAME_KEY));

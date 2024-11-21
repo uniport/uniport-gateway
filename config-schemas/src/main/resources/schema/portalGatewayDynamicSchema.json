@@ -238,6 +238,10 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
+                  "publicUrl" : {
+                    "minLength" : 1,
+                    "type" : "string"
+                  },
                   "pathEmail" : {
                     "minLength" : 1,
                     "type" : "string"
