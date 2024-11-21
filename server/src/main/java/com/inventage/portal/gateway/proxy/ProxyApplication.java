@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy;
 
+import com.inventage.portal.gateway.GatewayRouter;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
@@ -60,7 +61,7 @@ public class ProxyApplication implements Application {
     /**
      * the router on which the routes for this application will be added
      */
-    private final Router router;
+    private final GatewayRouter router;
 
     /**
      * the providers that should be launched for this application to retrieve the dynamic
@@ -75,7 +76,7 @@ public class ProxyApplication implements Application {
     public ProxyApplication(Vertx vertx, String name, String entrypointName, int entrypointPort, JsonArray providerConfigs, JsonObject env) {
         this.name = name;
         this.entrypointName = entrypointName;
-        this.router = Router.router(vertx);
+        this.router = GatewayRouter.router(vertx, String.format("application %s", name));
 
         this.providerConfigs = providerConfigs.copy();
         this.providersThrottleDuration = env.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);

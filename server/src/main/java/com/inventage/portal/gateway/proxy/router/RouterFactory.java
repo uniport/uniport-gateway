@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.router;
 
+import com.inventage.portal.gateway.GatewayRouter;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
@@ -112,7 +113,7 @@ public class RouterFactory {
             subRouterFutures.add(createSubRouter(routerConfig, middlewares, services));
         }
 
-        final Router router = Router.router(this.vertx);
+        final GatewayRouter router = GatewayRouter.router(this.vertx, "root");
 
         // has to be first route, so no other paths are shadowing it
         addHealthRoute(router);
@@ -122,7 +123,8 @@ public class RouterFactory {
         Future.join(subRouterFutures).onComplete(ar -> {
             subRouterFutures.forEach(srf -> {
                 if (srf.succeeded()) {
-                    router.route("/*").setName("router").subRouter((Router) srf.result());
+                    final Router subRouter = srf.result();
+                    router.mountSubRouter("/", subRouter);
                 } else {
                     handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
@@ -148,8 +150,8 @@ public class RouterFactory {
         JsonObject routerConfig, JsonArray middlewares, JsonArray services,
         Handler<AsyncResult<Router>> handler
     ) {
-        final Router router = Router.router(this.vertx);
         final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
+        final Router router = GatewayRouter.router(this.vertx, String.format("rule matcher %s", routerName));
 
         final String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
         final RoutingRule routingRule = parseRule(rule);

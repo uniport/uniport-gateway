@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.listener;
 
+import com.inventage.portal.gateway.GatewayRouter;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -16,10 +17,10 @@ public class RouterSwitchListener implements Listener {
 
     private static final String NAME = "RouterSwitchListener";
 
-    private final Router router;
+    private final GatewayRouter router;
     private final RouterFactory routerFactory;
 
-    public RouterSwitchListener(Router router, RouterFactory routerFactory) {
+    public RouterSwitchListener(GatewayRouter router, RouterFactory routerFactory) {
         this.router = router;
         this.routerFactory = new RouterFactory(routerFactory);
     }
@@ -39,8 +40,8 @@ public class RouterSwitchListener implements Listener {
 
     private void setSubRouter(Router subRouter) {
         // TODO might this create a connection gap?
-        this.router.clear();
-        this.router.route("/*").setName("router switch listener").subRouter(subRouter);
+        router.clear();
+        router.mountSubRouter("/", subRouter);
     }
 
 }

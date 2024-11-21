@@ -118,7 +118,10 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 .setSsl(entrypoint.isTls())
                 .setKeyCertOptions(entrypoint.jksOptions());
             LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
-            return vertx.createHttpServer(options).requestHandler(entrypoint.router()).listen(entrypoint.port());
+            return vertx
+                .createHttpServer(options)
+                .requestHandler(entrypoint.router())
+                .listen(entrypoint.port());
         } else {
             entrypoint.disable();
             LOGGER.warn("Disabling endpoint '{}' because its port ('{}') must be great 0",

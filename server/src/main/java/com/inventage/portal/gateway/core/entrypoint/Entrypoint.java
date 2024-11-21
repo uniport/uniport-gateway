@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
+import com.inventage.portal.gateway.GatewayRouter;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
@@ -32,7 +33,7 @@ public class Entrypoint {
     private final String name;
     private final int port;
     private final JsonArray entryMiddlewares;
-    private Router router;
+    private GatewayRouter router;
     private boolean enabled;
     private Tls tls;
 
@@ -66,11 +67,11 @@ public class Entrypoint {
         return port;
     }
 
-    public Router router() {
+    public GatewayRouter router() {
         if (router != null) {
             return router;
         }
-        router = Router.router(vertx);
+        router = GatewayRouter.router(vertx, String.format("entrypoint %s", name));
         if (this.entryMiddlewares != null) {
             LOGGER.info("Setup EntryMiddlewares");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
@@ -83,9 +84,8 @@ public class Entrypoint {
         optionApplicationRouter.ifPresent(applicationRouter -> {
             if (name.equals(application.entrypoint())) {
                 if (enabled()) {
-                    router().route(application.rootPath() + "*").setName("application").subRouter(applicationRouter);
-                    LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application,
-                        application.rootPath(), name);
+                    router().mountSubRouter(application.rootPath(), applicationRouter);
+                    LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application, application.rootPath(), name);
                 } else {
                     LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
                         application, application.rootPath());
