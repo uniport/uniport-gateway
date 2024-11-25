@@ -49,12 +49,22 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert isRedirectTo(String expectedLocation) {
         VertxAssertions.assertTrue(
-            testCtx,
-            String.valueOf(actual.statusCode()).startsWith("3"),
+            testCtx, 300 <= actual.statusCode() && actual.statusCode() <= 399,
             "Redirect status code expected, but was: " + actual.statusCode());
 
         final String location = actual.getHeader(LOCATION);
         VertxAssertions.assertEquals(testCtx, expectedLocation, location);
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert isRedirectToWithoutParameters(String expectedLocation) {
+        VertxAssertions.assertTrue(
+            testCtx, 300 <= actual.statusCode() && actual.statusCode() <= 399,
+            "Redirect status code expected, but was: " + actual.statusCode());
+
+        final String location = actual.getHeader(LOCATION);
+        final String locationWithoutParameters = location.split("\\?")[0];
+        VertxAssertions.assertEquals(testCtx, expectedLocation, locationWithoutParameters);
         return this;
     }
 

@@ -304,6 +304,62 @@ public class OAuth2AuthMiddlewareTest {
         });
     }
 
+    @Test
+    void authorizationPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String publicUrl = "http://some.domain/some/path";
+        final String scope = "protected";
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, true, publicUrl))
+            .build()
+            .start();
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        // when
+        gateway.incomingRequest(GET, "http://localhost:8080", reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isRedirectToWithoutParameters(publicUrl + "/auth/realms/test") // redirect path to OP should be patched
+                .isValidAuthenticationRequest(Map.of(
+                    "redirect_uri", publicUrl + "/callback/" + scope, // callback should be patched as well
+                    "scope", "openid test"))
+                .isUsingFormPost()
+                .hasPKCE();
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
+    void callbackPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String publicUrl = "http://some.domain/some/path";
+        final String scope = "protected";
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, false, publicUrl))
+            .build()
+            .start();
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        // when
+        gateway.incomingRequest(GET, "http://localhost:8080", reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isRedirectToWithoutParameters("http://" + keycloakServer.host() + ":" + keycloakServer.port() + "/auth/realms/test") // redirect should point directly to Keycloak
+                .isValidAuthenticationRequest(Map.of(
+                    "redirect_uri", publicUrl + "/callback/" + scope, // callback should still point to the gateway
+                    "scope", "openid test"))
+                .isUsingFormPost()
+                .hasPKCE();
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
     // Dieser Test stellt den kompletten Flow für PORTAL-1184 nach.
     @Test
     void fixed_PORTAL_1184(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {

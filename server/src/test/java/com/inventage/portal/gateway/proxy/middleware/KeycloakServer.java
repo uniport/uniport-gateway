@@ -87,6 +87,10 @@ public class KeycloakServer {
         latch.await();
     }
 
+    public String host() {
+        return host;
+    }
+
     public int port() {
         return port;
     }
@@ -175,25 +179,24 @@ public class KeycloakServer {
     }
 
     public JsonObject getDefaultOAuth2AuthConfig() {
-        final JsonObject config = new JsonObject();
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, SESSION_SCOPE);
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, true);
-        config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
-        config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
-        config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
-        return config;
+        return getOAuth2AuthConfig(SESSION_SCOPE, true, null);
     }
 
     public JsonObject getOAuth2AuthConfig(String scope) {
+        return getOAuth2AuthConfig(scope, true, null);
+    }
+
+    public JsonObject getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl) {
         final JsonObject config = new JsonObject();
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, scope);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
         config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, true);
+        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow);
+        if (publicUrl != null) {
+            config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PUBLIC_URL, publicUrl);
+        }
+
         config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
         config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
         config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
