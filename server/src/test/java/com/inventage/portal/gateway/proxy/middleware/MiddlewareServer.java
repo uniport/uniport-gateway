@@ -86,7 +86,10 @@ public class MiddlewareServer {
         Handler<HttpClientResponse> responseHandler
     ) {
         LOGGER.info("requesting '{}'", reqOpts.getURI());
-        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send).onComplete(testCtx.succeeding(responseHandler));
+        vertx.createHttpClient()
+            .request(reqOpts)
+            .compose(HttpClientRequest::send)
+            .onComplete(testCtx.succeeding(responseHandler));
     }
 
     private void createHttpClientWithRequestOptionsBodyAndResponseHandler(

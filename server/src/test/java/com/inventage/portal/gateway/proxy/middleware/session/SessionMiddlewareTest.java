@@ -9,6 +9,7 @@ import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
@@ -233,7 +234,7 @@ public class SessionMiddlewareTest {
                 Set.of(
                     sc -> "foo=canttouchthis",
                     sc -> sc),
-                Set.of("foo") //
+                Set.of("foo=canttouchthis") //
             ),
             entry(
                 // session cookie and other cookies in separate headers
@@ -241,22 +242,22 @@ public class SessionMiddlewareTest {
                     sc -> "foo=canttouchthis",
                     sc -> "bar=orthat",
                     sc -> sc),
-                Set.of("foo", "bar") //
+                Set.of("foo=canttouchthis", "bar=orthat") //
             ),
             entry(
                 // session cookie and another cookie in the same header (pre)
                 Set.of(sc -> String.join("; ", sc, "foo=canttouchthis")),
-                Set.of("foo") //
+                Set.of("foo=canttouchthis") //
             ),
             entry(
                 // session cookie and another cookie in the same header (post)
                 Set.of(sc -> String.join("; ", "foo=canttouchthis", sc)),
-                Set.of("foo") //
+                Set.of("foo=canttouchthis") //
             ),
             entry(
                 // session cookie and another cookie in the same header (middle)
                 Set.of(sc -> String.join("; ", "foo=canttouchthis", sc, "bar=orthat")),
-                Set.of("foo", "bar") //
+                Set.of("foo=canttouchthis", "bar=orthat") //
             ) //
         );
     }
@@ -276,6 +277,14 @@ public class SessionMiddlewareTest {
             testCtx.verify(() -> {
                 assertNull(ctx.request().getCookie(DEFAULT_SESSION_COOKIE_NAME),
                     String.format("session cookie was passed to the backend on the %d. request", rc));
+                final List<String> cookies = ctx.request().headers().getAll("cookie");
+                for (String ec : expectedCookies) {
+                    assertTrue(
+                        cookies.contains(ec),
+                        String.format("colateral damage: other cookie than session cookie was removed from request, expected: %s, actual: %s",
+                            expectedCookies,
+                            ctx.request().cookies().stream().map(c -> c.getName()).toList()));
+                }
             });
             ctx.response().setStatusCode(200).end("ok");
         };
