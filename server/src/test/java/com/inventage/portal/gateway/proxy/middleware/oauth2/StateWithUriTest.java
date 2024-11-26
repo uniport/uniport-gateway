@@ -119,12 +119,12 @@ public class StateWithUriTest {
     @Test
     public void fromEncodedWithEmptyUri() {
         // given
-        final String stateParameterBase64Encoded = "QWJDZDEyOg=="; // state=AbCd12
+        final String stateParameterBase64Encoded = "QWJDZDEyOi8="; // state=AbCd12
         // when
         final StateWithUri stateWithUri = new StateWithUri(stateParameterBase64Encoded);
         // then
         Assertions.assertEquals("AbCd12", stateWithUri.state());
-        Assertions.assertEquals("", stateWithUri.uri().get());
+        Assertions.assertEquals("/", stateWithUri.uri().get());
         Assertions.assertEquals(stateParameterBase64Encoded, stateWithUri.toStateParameter());
     }
 
@@ -164,6 +164,22 @@ public class StateWithUriTest {
             // then
             Assertions.assertEquals("Null is not a valid state parameter value!", e.getMessage());
         }
+    }
+
+    @Test
+    public void fromUrlWithoutPath() {
+        // given
+        final String state = "deadbeef";
+        final String uri = "http://some-random.domain";
+        // when
+        final StateWithUri stateWithUri = new StateWithUri(state, uri);
+        // then
+        Assertions.assertEquals(state, stateWithUri.state());
+        Assertions.assertEquals(uri, stateWithUri.uri().orElse(null));
+
+        final StateWithUri stateWithUri2 = new StateWithUri(stateWithUri.toStateParameter());
+        Assertions.assertEquals(state, stateWithUri2.state());
+        Assertions.assertEquals("/", stateWithUri2.uri().orElse(null));
     }
 
     @Test

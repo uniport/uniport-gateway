@@ -154,7 +154,7 @@ public class StateWithUri {
     private String ensureRelativeUri(String anUri) {
         try {
             final URI uri = new URI(anUri);
-            final URI relativeURI = new URI(null, null, uri.getPath(), uri.getQuery(), uri.getFragment());
+            final URI relativeURI = new URI(null, null, uri.getPath().isEmpty() ? "/" : uri.getPath(), uri.getQuery(), uri.getFragment());
             return relativeURI.toString();
         } catch (URISyntaxException e) {
             LOGGER.warn("URI '{}' couldn't be parsed ('{}'), using '/'", anUri, e.getMessage());

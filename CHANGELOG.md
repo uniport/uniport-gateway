@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On back channel logout, remove session directly from the session store, instead of destroying it to invalidat it immediately ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
 - Dont forward the session cookie to the backend service ([PORTAL-2119](https://issue.inventage.com/browse/PORTAL-2119)).
 - Dont shadow Oauth2 callback routes by a catch all router ([PORTAL-2302](https://issue.inventage.com/browse/PORTAL-2302)).
+- StateWithUri redirects to an empty location if the original URL has no path ([PORTAL-2309](https://issue.inventage.com/browse/PORTAL-2309)).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
