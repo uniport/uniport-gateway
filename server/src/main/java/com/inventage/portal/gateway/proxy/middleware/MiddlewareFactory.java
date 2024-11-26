@@ -28,7 +28,8 @@ public interface MiddlewareFactory {
         public static MiddlewareFactory getFactory(String middlewareName) {
             LOGGER.debug("Middleware factory for '{}'", middlewareName);
             final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()
-                .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(middlewareName))
+                .map(ServiceLoader.Provider::get)
+                .filter(instance -> instance.provides().equals(middlewareName))
                 .findFirst();
             return middleware.orElse(null);
         }

@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.proxy.router;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -18,7 +17,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -358,22 +356,19 @@ public class RouterFactoryTest {
         testCtx.completeNow();
     }
 
-    @Disabled
     @Test
-    void oauth2CallbackRoutesShouldNotBeShadowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void additionalRoutesShouldNotBeShadowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String sessionScope = "test";
-        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
+        final String additionalRoutePath = "/some-route";
         JsonObject config = TestUtils.buildConfiguration(
             TestUtils.withRouters(TestUtils.withRouter("foo",
                 TestUtils.withRouterEntrypoints(entrypointName),
                 TestUtils.withRouterRule("PathPrefix('/')"), // shadowing /callback/test
-                TestUtils.withRouterMiddlewares("sessionmiddleware", "oauth2middleware"),
+                TestUtils.withRouterMiddlewares("middleware"),
                 TestUtils.withRouterService("bar"))),
             TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("sessionmiddleware", DynamicConfiguration.MIDDLEWARE_SESSION),
-                TestUtils.withMiddleware("oauth2middleware", DynamicConfiguration.MIDDLEWARE_OAUTH2,
-                    TestUtils.withMiddlewareOpts(keycloakServer.getOAuth2AuthConfig(sessionScope)))),
+                TestUtils.withMiddleware("middleware", "additionalRoutes",
+                    TestUtils.withMiddlewareOpts(JsonObject.of("path", additionalRoutePath)))),
             TestUtils.withServices(
                 TestUtils.withService("bar",
                     TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
@@ -382,9 +377,9 @@ public class RouterFactoryTest {
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when
-                RequestOptions reqOpts = new RequestOptions().setURI("/callback/" + sessionScope);
+                RequestOptions reqOpts = new RequestOptions().setURI(additionalRoutePath);
                 // then
-                doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code()); // DISABLED: this somehow times out on the request creation?
+                doRequest(vertx, testCtx, reqOpts, 418);
                 testCtx.completeNow();
             }));
     }
