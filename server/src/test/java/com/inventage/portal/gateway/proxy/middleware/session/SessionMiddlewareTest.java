@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -32,7 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -139,8 +139,8 @@ public class SessionMiddlewareTest {
                 assertThat(testCtx, response).hasStatusCode(200);
                 vertx.getOrCreateContext();
                 SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
-                Assertions.assertThat(sharedDataSession.id()).isEqualTo(sessionId.get(0));
-                Assertions.assertThat(sharedDataSession.lastAccessed()).isEqualTo(lastAccessed.get(0));
+                VertxAssertions.assertEquals(testCtx, sharedDataSession.id(), sessionId.get(0));
+                VertxAssertions.assertEquals(testCtx, sharedDataSession.lastAccessed(), lastAccessed.get(0));
                 testCtx.completeNow();
             });
     }
@@ -167,7 +167,7 @@ public class SessionMiddlewareTest {
                 // then
                 vertx.getOrCreateContext();
                 final String cookie = response.cookies().get(0);
-                Assertions.assertThat(originalCookie.get()).isEqualTo(cookie);
+                VertxAssertions.assertEquals(testCtx, originalCookie.get(), cookie);
                 testCtx.completeNow();
             });
     }
@@ -190,7 +190,7 @@ public class SessionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
             // then
-            Assertions.assertThat(hasSessionIdleTimeout.get());
+            VertxAssertions.assertNotNull(testCtx, hasSessionIdleTimeout.get());
             testCtx.completeNow();
         });
     }
@@ -213,7 +213,7 @@ public class SessionMiddlewareTest {
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
             // then
-            Assertions.assertThat(hasSessionStore.get());
+            VertxAssertions.assertNotNull(testCtx, hasSessionStore.get());
             testCtx.completeNow();
         });
     }
