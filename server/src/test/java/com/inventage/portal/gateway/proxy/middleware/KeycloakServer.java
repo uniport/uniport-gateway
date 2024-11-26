@@ -63,7 +63,7 @@ public class KeycloakServer {
     private String codeChallenge;
 
     public KeycloakServer(Vertx vertx, VertxTestContext testCtx) {
-        this(vertx, testCtx, "localhost", TestUtils.findFreePort());
+        this(vertx, testCtx, "localhost");
     }
 
     public KeycloakServer(Vertx vertx, VertxTestContext testCtx, String host) {
@@ -137,6 +137,10 @@ public class KeycloakServer {
                             .setStatusCode(200)
                             .send(tokenResponse.encode());
                     });
+                } else {
+                    req.response()
+                        .setStatusCode(404)
+                        .end();
                 }
             });
         return this;

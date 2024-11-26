@@ -25,6 +25,10 @@ public class GatewayRouter extends RouterImpl {
         super(vertx);
     }
 
+    public String getName() {
+        return getMetadata(ROUTER_NAME_KEY);
+    }
+
     @Override
     public Route mountSubRouter(String mountPoint, Router subRouter) {
         if (mountPoint.endsWith("*")) {

@@ -1,11 +1,9 @@
 package com.inventage.portal.gateway.proxy.router;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientRequest;
@@ -20,6 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -70,19 +69,30 @@ public class RouterFactoryTest {
         final CountDownLatch latch = new CountDownLatch(2);
 
         proxyPort = TestUtils.findFreePort();
-        proxy = vertx.createHttpServer().requestHandler(req -> proxyRouter.handle(req)).listen(proxyPort, ready -> {
-            if (ready.failed()) {
-                throw new RuntimeException(ready.cause());
-            }
-            latch.countDown();
-        });
+        vertx.createHttpServer()
+            .requestHandler(req -> {
+                proxyRouter.handle(req);
+            })
+            .listen(proxyPort)
+            .onComplete(r -> {
+                if (r.failed()) {
+                    throw new RuntimeException(r.cause());
+                }
+                proxy = r.result();
+                latch.countDown();
+            });
 
         serverPort = TestUtils.findFreePort();
-        server = vertx.createHttpServer().requestHandler(req -> req.response().setStatusCode(200).end("ok"))
-            .listen(serverPort, ready -> {
-                if (ready.failed()) {
-                    throw new RuntimeException(ready.cause());
+        vertx.createHttpServer()
+            .requestHandler(req -> {
+                req.response().setStatusCode(200).end("ok");
+            })
+            .listen(serverPort)
+            .onComplete(r -> {
+                if (r.failed()) {
+                    throw new RuntimeException(r.cause());
                 }
+                server = r.result();
                 latch.countDown();
             });
 
@@ -334,27 +344,62 @@ public class RouterFactoryTest {
 
     @ParameterizedTest
     @MethodSource("provideStringsForValidParseRule")
-    public void testValidParseRule(String input) {
-        assertNotNull(routerFactory.parseRule(input),
+    public void testValidParseRule(String input, VertxTestContext testCtx) {
+        VertxAssertions.assertNotNull(testCtx, routerFactory.parseRule(input),
             String.format("%s should be parseable into a routing rule", input));
+        testCtx.completeNow();
     }
 
     @ParameterizedTest
     @MethodSource("provideStringsForInvalidParseRule")
-    public void testInvalidParseRule(String input) {
-        assertNull(routerFactory.parseRule(input),
+    public void testInvalidParseRule(String input, VertxTestContext testCtx) {
+        VertxAssertions.assertNull(testCtx, routerFactory.parseRule(input),
             String.format("%s should not be parseable into a routing rule", input));
+        testCtx.completeNow();
+    }
+
+    @Disabled
+    @Test
+    void oauth2CallbackRoutesShouldNotBeShadowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String sessionScope = "test";
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
+        JsonObject config = TestUtils.buildConfiguration(
+            TestUtils.withRouters(TestUtils.withRouter("foo",
+                TestUtils.withRouterEntrypoints(entrypointName),
+                TestUtils.withRouterRule("PathPrefix('/')"), // shadowing /callback/test
+                TestUtils.withRouterMiddlewares("sessionmiddleware", "oauth2middleware"),
+                TestUtils.withRouterService("bar"))),
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("sessionmiddleware", DynamicConfiguration.MIDDLEWARE_SESSION),
+                TestUtils.withMiddleware("oauth2middleware", DynamicConfiguration.MIDDLEWARE_OAUTH2,
+                    TestUtils.withMiddlewareOpts(keycloakServer.getOAuth2AuthConfig(sessionScope)))),
+            TestUtils.withServices(
+                TestUtils.withService("bar",
+                    TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+
+        routerFactory.createRouter(config)
+            .onComplete(testCtx.succeeding(router -> {
+                proxyRouter = router;
+                // when
+                RequestOptions reqOpts = new RequestOptions().setURI("/callback/" + sessionScope);
+                // then
+                doRequest(vertx, testCtx, reqOpts, HttpResponseStatus.OK.code()); // DISABLED: this somehow times out on the request creation?
+                testCtx.completeNow();
+            }));
     }
 
     private void doRequest(Vertx vertx, VertxTestContext testCtx, RequestOptions reqOpts, int expectedStatusCode) {
         CountDownLatch latch = new CountDownLatch(1);
 
         reqOpts.setHost(host).setPort(proxyPort).setMethod(HttpMethod.GET);
-        vertx.createHttpClient().request(reqOpts).compose(HttpClientRequest::send)
-            .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
-                assertEquals(expectedStatusCode, resp.statusCode(), "unexpected status code");
+        vertx.createHttpClient()
+            .request(reqOpts)
+            .compose(HttpClientRequest::send)
+            .onComplete(testCtx.succeeding(resp -> {
+                VertxAssertions.assertEquals(testCtx, expectedStatusCode, resp.statusCode(), "unexpected status code");
                 latch.countDown();
-            })));
+            }));
 
         try {
             latch.await();

@@ -135,7 +135,7 @@ public class RouterFactory {
                     });
                 }
             });
-
+            LOGGER.debug("Router '{}' created successfully", router.getName());
             handler.handle(Future.succeededFuture(router));
         });
     }
