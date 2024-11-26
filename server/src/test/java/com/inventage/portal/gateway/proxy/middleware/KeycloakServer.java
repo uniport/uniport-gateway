@@ -11,6 +11,10 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -56,6 +60,7 @@ public class KeycloakServer {
     private final int port;
     private HttpServer server;
     private boolean serveValidPublicKeys = true;
+    private String codeChallenge;
 
     public KeycloakServer(Vertx vertx, VertxTestContext testCtx) {
         this(vertx, testCtx, "localhost", TestUtils.findFreePort());
@@ -70,6 +75,11 @@ public class KeycloakServer {
         this.testCtx = testCtx;
         this.host = host;
         this.port = port;
+    }
+
+    public KeycloakServer setPKCE(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+        return this;
     }
 
     public final void startServerWithCustomHandler(Handler<HttpServerRequest> handler) throws InterruptedException {
@@ -112,10 +122,21 @@ public class KeycloakServer {
                         .setStatusCode(200)
                         .send(discoveryResponse.encode());
                 } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
-                    req.response()
-                        .putHeader("content-type", "application/json")
-                        .setStatusCode(200)
-                        .send(tokenResponse.encode());
+                    req.setExpectMultipart(true);
+                    req.endHandler(v -> {
+                        final String codeVerifier = req.formAttributes().get("code_verifier");
+                        if (codeChallenge != null && !verifyPKCE(codeChallenge, codeVerifier)) {
+                            req.response()
+                                .setStatusCode(400)
+                                .end();
+                            return;
+                        }
+
+                        req.response()
+                            .putHeader("content-type", "application/json")
+                            .setStatusCode(200)
+                            .send(tokenResponse.encode());
+                    });
                 }
             });
         return this;
@@ -276,5 +297,23 @@ public class KeycloakServer {
             return url;
         }
         return HTTP_PREFIX.concat(url);
+    }
+
+    private boolean verifyPKCE(String challenge, String verifier) {
+        return challenge.equals(toChallenge(verifier));
+    }
+
+    private String toChallenge(String codeVerifier) {
+        final MessageDigest sha256;
+        try {
+            sha256 = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Cannot get instance of SHA-256 MessageDigest", e);
+        }
+
+        final byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
+        sha256.update(bytes);
+        final byte[] digest = sha256.digest();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
 }

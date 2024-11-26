@@ -390,16 +390,20 @@ public final class MiddlewareServerBuilder {
             authContext.toSessionAtScope(ctx.session(), sessionScope);
             ctx.next();
         };
-        router.route().handler(injectTokenHandler);
+        withMiddleware(injectTokenHandler);
         return this;
     }
 
-    public MiddlewareServerBuilder withCustomSessionState(Map<String, String> sessionEntries) {
+    public MiddlewareServerBuilder withCustomSessionState(String key, Object value) {
+        return withCustomSessionState(Map.of(key, value));
+    }
+
+    public MiddlewareServerBuilder withCustomSessionState(Map<String, Object> sessionEntries) {
         final Handler<RoutingContext> handler = ctx -> {
             sessionEntries.forEach((key, value) -> ctx.session().put(key, value));
             ctx.next();
         };
-        router.route().handler(handler);
+        withMiddleware(handler);
         return this;
     }
 
@@ -408,7 +412,7 @@ public final class MiddlewareServerBuilder {
             ctx.setUser(new UserImpl());
             ctx.next();
         };
-        router.route().handler(handler);
+        withMiddleware(handler);
         return this;
     }
 
@@ -417,8 +421,7 @@ public final class MiddlewareServerBuilder {
             routingContextHolder.set(ctx);
             ctx.next();
         };
-
-        router.route().handler(holdRoutingContext);
+        withMiddleware(holdRoutingContext);
         return this;
     }
 

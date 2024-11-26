@@ -5,6 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuil
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_PKCE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_REDIRECT_URI;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.PREFIX_STATE;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
@@ -22,10 +23,16 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -211,24 +218,24 @@ public class OAuth2AuthMiddlewareTest {
     @Test
     void callbackRequestWithExistingState(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
+        final String url = "http://localhost:12345";
         // We need to mock the sessionstate to pass the OAuth2Middleware checks
-        final Map<String, String> oidcSessionState = oidcSessionState("aState",
-            "http://localhost:12345/a/b/c?p1=v1&p2=v2#fragment1", "aPKCE");
+        final JsonObject oidcSessionState = oidcSessionState("aState", url, "aPKCE");
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
             .startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler((bodyHandler -> {
+                // ?
             }));
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withCustomSessionState(oidcSessionState)
+            .withCustomSessionState(PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
         // when
-        gateway.incomingRequest(POST,
-            "/callback/test?state=" + oidcSessionState.get(OIDC_PARAM_STATE) + "&code=ghijklmnop",
+        gateway.incomingRequest(POST, "/callback/test?state=" + oidcSessionState.getString(OIDC_PARAM_STATE) + "&code=ghijklmnop",
             httpClientResponse -> {
                 // then
                 assertThat(testCtx, httpClientResponse)
-                    .isRedirectTo("/a/b/c?p1=v1&p2=v2#fragment1");
+                    .isRedirectTo(url);
                 testCtx.completeNow();
                 keycloakServer.closeServer();
             });
@@ -246,7 +253,7 @@ public class OAuth2AuthMiddlewareTest {
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
         // when
-        gateway.incomingRequest(POST, "http://localhost:8080/callback/test?state=anyInvalidState&code=anyCode",
+        gateway.incomingRequest(POST, "/callback/test?state=anyInvalidState&code=anyCode",
             (outgoingResponse) -> {
                 // then
                 assertThat(testCtx, outgoingResponse)
@@ -269,7 +276,7 @@ public class OAuth2AuthMiddlewareTest {
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
         // when
-        gateway.incomingRequest(POST, "http://localhost:8080/callback/test?state=" + state + "&code=anyCode",
+        gateway.incomingRequest(POST, "/callback/test?state=" + state + "&code=anyCode",
             (outgoingResponse) -> {
                 // then
                 assertThat(testCtx, outgoingResponse)
@@ -280,24 +287,56 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
-    void testSuccessfulPKCEFlow(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void callbackRequestWithPKCE(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
+        final String url = "http://localhost:12345";
+        final String codeVerifier = "aCodeVerifier";
         // We need to mock the sessionstate to pass the OAuth2Middleware checks
-        final Map<String, String> oidcSessionState = oidcSessionState("aState", "http://localhost:12345", "aPKCE");
-        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
+        final JsonObject oidcSessionState = oidcSessionState("aState", url, codeVerifier);
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
+            .setPKCE(createCodeChallenge(codeVerifier)) // is normally set on the authorization request, so we mimic it here
+            .startWithDefaultDiscoveryHandler();
         final MiddlewareServer gateway = MiddlewareServerBuilder.portalGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withCustomSessionState(oidcSessionState)
+            .withCustomSessionState(PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
         gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             // when
             gateway.incomingRequest(POST,
-                "/callback/test?state=" + oidcSessionState.get(OIDC_PARAM_STATE) + "&code=ghijklmnop",
+                "/callback/test?state=" + oidcSessionState.getString(OIDC_PARAM_STATE) + "&code=ghijklmnop",
                 httpClientResponse -> {
                     // then
                     assertThat(testCtx, httpClientResponse)
-                        .isRedirectTo("");
+                        .isRedirectTo(url);
+                    testCtx.completeNow();
+                    keycloakServer.closeServer();
+                });
+        });
+    }
+
+    @Test
+    void callbackRequestWithInvalidPKCE(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String url = "http://localhost:12345";
+        // We need to mock the sessionstate to pass the OAuth2Middleware checks
+        final JsonObject oidcSessionState = oidcSessionState("aState", url, "aCodeVerifier");
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
+            .setPKCE("anInvalidCodeChallenge") // is normally set on the authorization request, so we mimic it here
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = MiddlewareServerBuilder.portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withCustomSessionState(PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
+            .build().start();
+        gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
+            // when
+            gateway.incomingRequest(POST,
+                "/callback/test?state=" + oidcSessionState.getString(OIDC_PARAM_STATE) + "&code=ghijklmnop",
+                httpClientResponse -> {
+                    // then
+                    assertThat(testCtx, httpClientResponse)
+                        .hasStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()); // Keycloak serves a 400, but the Oauth2 middleware will convert this into a 500
                     testCtx.completeNow();
                     keycloakServer.closeServer();
                 });
@@ -368,70 +407,59 @@ public class OAuth2AuthMiddlewareTest {
         final String protectedResource2 = "http://localhost:8080/protected2/two";
         final String protectedResource3 = "http://localhost:8080/protected2/three";
         // We need to mock the sessionstate to pass the OAuth2Middleware checks
-        final Map<String, String> oidcSessionState = oidcSessionState("aState", protectedResource1, "aPKCE");
+        final JsonObject oidcSessionState = oidcSessionState("aState", protectedResource1, "aPKCE");
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
             .startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler((bodyHandler -> {
             }));
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withCustomSessionState(oidcSessionState)
+            .withCustomSessionState(PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected1")
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected2")
             .build().start();
-        final String[] sessionCookies = new String[1];
+
+        final AtomicReference<String> sessionCookies = new AtomicReference<String>();
         final RequestOptions reqOpts = new RequestOptions();
         // 1: callback -> code-to-token -> authenticated session
-        gateway.incomingRequest(POST,
-            "/callback/protected1?state=" + oidcSessionState.get(OIDC_PARAM_STATE)
-                + "&code=THE-CODE",
+        gateway.incomingRequest(POST, "/callback/protected1?state=" + oidcSessionState.getString(OIDC_PARAM_STATE) + "&code=THE-CODE",
             response1 -> {
                 assertThat(testCtx, response1)
-                    .isRedirectTo("/protected1/one");
-                sessionCookies[0] = cookieFrom(response1);
+                    .isRedirectTo(protectedResource1);
+                sessionCookies.set(cookieFrom(response1));
+
                 // 2: protected resource -> auth flow 1 startet
-                gateway.incomingRequest(GET, protectedResource2, withCookie(reqOpts, sessionCookies[0]),
+                gateway.incomingRequest(GET, protectedResource2, withCookie(reqOpts, sessionCookies.get()),
                     (response2) -> {
                         assertThat(testCtx, response2)
                             .isValidAuthenticationRequest()
                             .hasStateWithUri("/protected2/two");
-                        final String state2 = TestUtils
-                            .extractParametersFromHeader(response2
-                                .getHeader("location"))
-                            .get("state");
+                        final String state2 = TestUtils.extractParametersFromHeader(
+                            response2.getHeader("location")).get("state");
+
                         // 3: protected resource -> auth flow 2 startet
-                        gateway.incomingRequest(GET, protectedResource3, withCookie(reqOpts, sessionCookies[0]),
+                        gateway.incomingRequest(GET, protectedResource3, withCookie(reqOpts, sessionCookies.get()),
                             (response3) -> {
                                 assertThat(testCtx, response3)
                                     .isValidAuthenticationRequest()
                                     .hasStateWithUri("/protected2/three");
-                                final String state3 = TestUtils
-                                    .extractParametersFromHeader(
-                                        response3.getHeader(
-                                            "location"))
-                                    .get("state");
+                                final String state3 = TestUtils.extractParametersFromHeader(
+                                    response3.getHeader("location")).get("state");
+
                                 // 4: callback for auth flow 2 -> code-to-token -> session with regenerated id
-                                gateway.incomingRequest(POST,
-                                    "/callback/protected2?state="
-                                        + state2
-                                        + "&code=THE-CODE",
-                                    withCookie(reqOpts, sessionCookies[0]),
+                                gateway.incomingRequest(POST, "/callback/protected2?state=" + state2 + "&code=THE-CODE", withCookie(reqOpts, sessionCookies.get()),
                                     (response4) -> {
                                         assertThat(testCtx, response4)
-                                            .isRedirectTo("http://localhost:8080/protected2/two")
-                                            .hasSetSessionCookieDifferentThan(sessionCookies[0]);
+                                            .isRedirectTo(protectedResource2)
+                                            .hasSetSessionCookieDifferentThan(sessionCookies.get());
+
                                         // when
                                         // 5:
-                                        gateway.incomingRequest(
-                                            POST,
-                                            "/callback/protected2?state="
-                                                + state3
-                                                + "&code=THE-CODE",
-                                            withCookie(reqOpts, sessionCookies[0]),
+                                        gateway.incomingRequest(POST, "/callback/protected2?state=" + state3 + "&code=THE-CODE", withCookie(reqOpts, sessionCookies.get()),
                                             (response5) -> {
                                                 // then
                                                 assertThat(testCtx, response5)
                                                     .isRedirectTo("/protected2/three")
-                                                    .hasSetSessionCookieDifferentThan(sessionCookies[0]);
+                                                    .hasSetSessionCookieDifferentThan(sessionCookies.get());
                                                 testCtx.completeNow();
                                                 keycloakServer.closeServer();
                                             });
@@ -443,8 +471,8 @@ public class OAuth2AuthMiddlewareTest {
 
     // --------------------------------- helper functions ---------------------------------
 
-    private Map<String, String> oidcSessionState(String state, String redirect_uri, String pkce) {
-        return Map.of(
+    private JsonObject oidcSessionState(String state, String redirect_uri, String pkce) {
+        return JsonObject.of(
             OIDC_PARAM_STATE, stateWithUri(state, redirect_uri),
             OIDC_PARAM_REDIRECT_URI, redirect_uri,
             OIDC_PARAM_PKCE, pkce);
@@ -468,4 +496,17 @@ public class OAuth2AuthMiddlewareTest {
         return reqOpts.putHeader(HttpHeaderNames.COOKIE, cookieHeaderValue);
     }
 
+    private String createCodeChallenge(String codeVerifier) {
+        final MessageDigest sha256;
+        try {
+            sha256 = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Cannot get instance of SHA-256 MessageDigest", e);
+        }
+
+        final byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
+        sha256.update(bytes);
+        final byte[] digest = sha256.digest();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+    }
 }

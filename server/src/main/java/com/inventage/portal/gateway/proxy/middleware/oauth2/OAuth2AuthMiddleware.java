@@ -35,13 +35,13 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
     // the following keys are used by RelyingPartyHandler
     public static final String OIDC_PARAM_STATE = "state";
     public static final String OIDC_PARAM_REDIRECT_URI = "redirect_uri";
-    public static final String OIDC_PARAM_PKCE = "pkce";
+    public static final String OIDC_PARAM_PKCE = "pkce"; // aka code_verifier (vertx decided to call this pkce)
     public static final String OIDC_PARAM_CODE = "code";
 
     public static final String SINGLE_SIGN_ON_SID = "sso-sid";
 
     // prefix of the key for storing the oauth2 states in the session as a JSON structure
-    private static final String PREFIX_STATE = "oauth2_state_";
+    static final String PREFIX_STATE = "oauth2_state_";
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2AuthMiddleware.class);
 
     private final String name;
@@ -254,10 +254,10 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
     }
 
     private JsonObject oAuth2FlowState(RoutingContext ctx) {
-        final JsonObject oAuth2FlowState = new JsonObject();
-        oAuth2FlowState.put(OIDC_PARAM_STATE, ctx.session().get(OIDC_PARAM_STATE));
-        oAuth2FlowState.put(OIDC_PARAM_REDIRECT_URI, ctx.session().get(OIDC_PARAM_REDIRECT_URI));
-        oAuth2FlowState.put(OIDC_PARAM_PKCE, ctx.session().get(OIDC_PARAM_PKCE));
+        final JsonObject oAuth2FlowState = new JsonObject()
+            .put(OIDC_PARAM_STATE, ctx.session().get(OIDC_PARAM_STATE))
+            .put(OIDC_PARAM_REDIRECT_URI, ctx.session().get(OIDC_PARAM_REDIRECT_URI))
+            .put(OIDC_PARAM_PKCE, ctx.session().get(OIDC_PARAM_PKCE));
         return oAuth2FlowState;
     }
 
