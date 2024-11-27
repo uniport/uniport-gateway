@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dont forward the session cookie to the backend service ([PORTAL-2119](https://issue.inventage.com/browse/PORTAL-2119)).
 - Dont shadow Oauth2 callback routes by a catch all router ([PORTAL-2302](https://issue.inventage.com/browse/PORTAL-2302)).
 
+### Changed
+
+- Allow underscore characters in `Path`, `PathPrefix` and `Host` router rules.
+
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~9.3.0-202410161127-1201-84e80ee2) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.3.0-202410161127-1201-84e80ee2)

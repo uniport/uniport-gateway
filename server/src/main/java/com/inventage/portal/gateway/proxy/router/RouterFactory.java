@@ -319,7 +319,7 @@ public class RouterFactory {
     // supported
     protected RoutingRule parseRule(String rule) {
         final Pattern rulePattern = Pattern
-            .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\da-zA-Z/\\-.]+)'\\)$");
+            .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\w/\\-.]+)'\\)$");
         final Matcher m = rulePattern.matcher(rule);
 
         if (!m.find()) {

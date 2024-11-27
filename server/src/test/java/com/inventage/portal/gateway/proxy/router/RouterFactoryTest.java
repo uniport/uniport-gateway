@@ -42,16 +42,19 @@ public class RouterFactoryTest {
             "Path('/foo/bar')",
             "Path('/.bar')",
             "Path('/.foo-bar/baz')",
+            "Path('/_foo-bar/baz')",
 
             "PathPrefix('/foo')",
             "PathPrefix('/foo/bar')",
             "PathPrefix('/.bar')",
             "PathPrefix('/.foo-bar/baz')",
+            "PathPrefix('/_foo-bar/baz')",
 
             "Host('/foo')",
             "Host('/foo/bar')",
             "Host('/.bar')",
-            "Host('/.foo-bar/baz')");
+            "Host('/.foo-bar/baz')",
+            "Host('/_foo-bar/baz')");
     }
 
     private static Stream<String> provideStringsForInvalidParseRule() {
