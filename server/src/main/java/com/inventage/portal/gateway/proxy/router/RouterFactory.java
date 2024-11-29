@@ -56,6 +56,66 @@ public class RouterFactory {
     private final String publicPort;
     private final String entrypointName;
 
+    private static final String PATH_RULE_NAME = "Path";
+    private static final String PATH_PREFIX_RULE_NAME = "PathPrefix";
+    private static final String PATH_REGEX_RULE_NAME = "PathRegex";
+    private static final String HOST_RULE_NAME = "Host";
+    private static final String HOST_REGEX_RULE_NAME = "HostRegex";
+    private static final Pattern RULE_PATTERN = Pattern.compile(String.format("^(?<ruleName>(%s))\\('(?<ruleValue>.*)'\\)$",
+        String.join("|", PATH_RULE_NAME, PATH_PREFIX_RULE_NAME, PATH_REGEX_RULE_NAME, HOST_RULE_NAME, HOST_REGEX_RULE_NAME)));
+    /**
+     * Allowed rule values according to RFC 3986 - Uniform Resource Identifier (URI): Generic Syntax
+     * See https://www.rfc-editor.org/rfc/rfc3986.html#appendix-A
+     * 
+     * URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+     * 
+     * hier-part = "//" authority (path-abempty | path-absolute | path-rootless | path-empty)
+     * 
+     * authority = [ userinfo "@" ] host [ ":" port ]
+     * host = IP-literal | IPv4address | reg-name
+     * port = *DIGIT
+     * 
+     * IP-literal = "[" ( IPv6address | IPvFuture ) "]"
+     * IPvFuture = "v" 1*HEXDIG "." 1*( unreserved | sub-delims | ":" )
+     * reg-name = *( unreserved | pct-encoded | sub-delims )
+     * 
+     * path-abempty = *( "/" segment )
+     * path-absolute = "/" [ segment-nz *( "/" segment ) ]
+     * path-rootless = segment-nz *( "/" segment )
+     * path-empty = 0<pchar>
+     * 
+     * segment = *pchar
+     * segment-nz = 1*pchar
+     * 
+     * pchar = unreserved | pct-encoded | sub-delims | ":" | "@"
+     * unreserved = ALPHA | DIGIT | "-" | "." | "_" | "~"
+     * pct-encoded = "%" HEXDIG HEXDIG
+     * sub-delims = "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
+     * 
+     * alpha, digit, hex, IPv4address, IPv6address are omitted
+     * 
+     * This yields the following regexes:
+     */
+    private static final String ALPHA = "A-Za-z";
+    private static final String DIGIT = "0-9";
+    private static final String HEX_DIGIT = DIGIT + "A-Fa-f";
+    private static final String UNRESERVED = ALPHA + DIGIT + "\\-" + "\\." + "_" + "~";
+    private static final String PCT_ENCODED = "%" + HEX_DIGIT;
+    private static final String SUB_DELIMS = "!" + "\\$" + "&" + "'" + "\\(" + "\\)" + "\\*" + "\\+" + "," + ";" + "=";
+
+    private static final String IP_LITERAL = "\\[" + "\\]" + ":";
+    private static final String IPV4 = DIGIT + "\\.";
+    private static final String REG_NAME = UNRESERVED + PCT_ENCODED + SUB_DELIMS;
+
+    private static final String PCHAR = UNRESERVED + PCT_ENCODED + SUB_DELIMS + ":" + "@";
+
+    /*
+     * We dont enforce the complete structure, but at least only allow possible characters. 
+     * Invalid combinations of those are still possible. Could still be extended though.
+     */
+    private static final Pattern HOST_PATTERN = Pattern.compile("^[" + IP_LITERAL + IPV4 + REG_NAME + "]+$");
+    private static final Pattern PATH_PATTERN = Pattern.compile("^\\/[" + PCHAR + "\\/]*$");
+
     public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort, String entrypointName) {
         this.vertx = vertx;
         this.publicProtocol = publicProtocol;
@@ -294,55 +354,42 @@ public class RouterFactory {
         }
     }
 
-    private RoutingRule path(String path) {
-        return router -> {
-            LOGGER.debug("Create route with exact path '{}'", path);
-            return router.route(path).setName(String.format("path matcher: %s", path));
-        };
-    }
-
-    private RoutingRule pathPrefix(String pathPrefix) {
-        return router -> {
-            LOGGER.debug("Create route with path prefix '{}'", pathPrefix);
-            return router.route(pathPrefix).setName(String.format("path prefix matcher: %s", pathPrefix));
-        };
-    }
-
-    private RoutingRule host(String host) {
-        return router -> {
-            LOGGER.debug("Create route with host '{}'", host);
-            return router.route().virtualHost(host).setName(String.format("host matcher: %s", host));
-        };
-    }
-
-    // only rules like Path("/foo"), PathPrefix('/bar') and Host('example.com') are
-    // supported
+    /**
+     * Rules like Path("/foo"), PathPrefix('/bar'), PathRegex('/language/(de|en)/.*'), Host('*.example.com') and HostRegex('(de|en)\.example\.com') and are
+     * supported.
+     */
     protected RoutingRule parseRule(String rule) {
-        final Pattern rulePattern = Pattern
-            .compile("^(?<ruleName>(Path|PathPrefix|Host))\\('(?<ruleValue>[\\w/\\-.]+)'\\)$");
-        final Matcher m = rulePattern.matcher(rule);
+        if (rule == null) {
+            return null;
+        }
 
-        if (!m.find()) {
+        final Matcher m = RULE_PATTERN.matcher(rule);
+        if (!m.matches()) {
             return null;
         }
 
         final RoutingRule routingRule;
+        final String ruleName = m.group("ruleName");
         final String ruleValue = m.group("ruleValue");
-        switch (m.group("ruleName")) {
-            case "Path": {
+        switch (ruleName) {
+            case PATH_RULE_NAME: {
                 routingRule = path(ruleValue);
                 break;
             }
-            case "PathPrefix": {
-                // append * to do path prefix routing
-                String pathPrefix = ruleValue;
-                pathPrefix += "*";
-
-                routingRule = pathPrefix(pathPrefix);
+            case PATH_PREFIX_RULE_NAME: {
+                routingRule = pathPrefix(ruleValue);
                 break;
             }
-            case "Host": {
+            case PATH_REGEX_RULE_NAME: {
+                routingRule = pathRegex(ruleValue);
+                break;
+            }
+            case HOST_RULE_NAME: {
                 routingRule = host(ruleValue);
+                break;
+            }
+            case HOST_REGEX_RULE_NAME: {
+                routingRule = hostRegex(ruleValue);
                 break;
             }
             default: {
@@ -352,5 +399,62 @@ public class RouterFactory {
         }
 
         return routingRule;
+    }
+
+    private RoutingRule path(String path) {
+        final Matcher m = PATH_PATTERN.matcher(path);
+        if (!m.matches()) {
+            return null;
+        }
+
+        final String name = String.format("path matcher: %s", path);
+        return router -> {
+            LOGGER.debug("Create route with exact path '{}'", path);
+            return router.route(path).setName(name);
+        };
+    }
+
+    private RoutingRule pathPrefix(String path) {
+        final Matcher m = PATH_PATTERN.matcher(path);
+        if (!m.matches()) {
+            return null;
+        }
+
+        // append * to do path prefix routing as implemented by vertx Router.route()
+        final String pathPrefix = path + "*";
+        final String name = String.format("path prefix matcher: %s", pathPrefix);
+        return router -> {
+            LOGGER.debug("Create route with path prefix '{}'", pathPrefix);
+            return router.route(pathPrefix).setName(name);
+        };
+    }
+
+    private RoutingRule host(String host) {
+        final Matcher m = HOST_PATTERN.matcher(host);
+        if (!m.matches()) {
+            return null;
+        }
+
+        final String name = String.format("host matcher: %s", host);
+        return router -> {
+            LOGGER.debug("Create route with host '{}'", host);
+            return router.route().virtualHost(host).setName(name);
+        };
+    }
+
+    // https://vertx.tk/docs/vertx-web/java/#_routing_with_regular_expressions
+    private RoutingRule pathRegex(String pathRegex) {
+        final String name = String.format("path regex matcher: %s", pathRegex);
+        return router -> {
+            return router.route().pathRegex(pathRegex).setName(name);
+        };
+    }
+
+    private RoutingRule hostRegex(String hostRegex) {
+        final String name = String.format("host regex matcher: %s", hostRegex);
+        return router -> {
+            // technically the same as this.host, but we dont check the rule value
+            return router.route().virtualHost(hostRegex).setName(name);
+        };
     }
 }
