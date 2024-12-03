@@ -11,6 +11,7 @@ import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
@@ -23,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -31,6 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,7 @@ public class OAuth2AuthMiddlewareTest {
     public static final String PKCE_METHOD_S256 = "S256";
     public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
     public static final String CODE_CHALLENGE = "code_challenge";
+    public static final String SCOPE = "scope";
 
     @Test
     void redirectForAuthenticationRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
@@ -210,6 +214,56 @@ public class OAuth2AuthMiddlewareTest {
             assertThat(testCtx, redirectResponse)
                 .isValidAuthenticationRequest()
                 .isUsingFormPost();
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
+    void redirectWithExtraParametersForAuthenticationRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of("extra", "parameter"));
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddleware(middlewareConfig)
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/protected";
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        // when
+        gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isValidAuthenticationRequest(Map.of("extra", "paramater"));
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
+    void redirectWithAdditionalScope(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final List<String> scopes = List.of("scopeA", "scopeB", "scopeC");
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES, new JsonArray(scopes));
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddleware(middlewareConfig)
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/protected";
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        // when
+        gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isValidAuthenticationRequest()
+                .hasScopes(scopes);
             testCtx.completeNow();
             keycloakServer.closeServer();
         });

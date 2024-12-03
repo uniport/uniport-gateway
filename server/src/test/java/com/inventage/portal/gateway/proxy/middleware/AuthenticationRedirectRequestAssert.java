@@ -5,6 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMid
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.CODE_CHALLENGE_METHOD;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_PLAIN;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_S256;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.SCOPE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.assertj.core.api.AbstractAssert;
@@ -102,6 +104,14 @@ public class AuthenticationRedirectRequestAssert
         VertxAssertions.assertEquals(testCtx, PKCE_METHOD_S256, locationParameters.get(CODE_CHALLENGE_METHOD));
         VertxAssertions.assertNotEquals(testCtx, PKCE_METHOD_PLAIN, locationParameters.get(CODE_CHALLENGE_METHOD));
 
+        return this;
+    }
+
+    public AuthenticationRedirectRequestAssert hasScopes(List<String> expectedScopes) {
+        final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
+        final List<String> actualScopes = Stream.of(locationParameters.get(SCOPE).split(" ")).toList();
+        VertxAssertions.assertTrue(testCtx, actualScopes.containsAll(expectedScopes),
+            String.format("Expected session scopes '%s', but was '%s'", expectedScopes, actualScopes));
         return this;
     }
 

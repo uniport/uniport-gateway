@@ -30,6 +30,13 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
+                  "additionalScopes" : {
+                    "type" : "array",
+                    "items" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    }
+                  },
                   "publicKeyAlgorithm" : {
                     "minLength" : 1,
                     "type" : "string"
@@ -241,6 +248,10 @@
                   "publicUrl" : {
                     "minLength" : 1,
                     "type" : "string"
+                  },
+                  "additionalParameters" : {
+                    "additionalProperties" : true,
+                    "type" : "object"
                   },
                   "pathEmail" : {
                     "minLength" : 1,

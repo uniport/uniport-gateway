@@ -124,6 +124,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
     public static final String MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW = "proxyAuthenticationFlow";
     public static final String MIDDLEWARE_OAUTH2_PUBLIC_URL = "publicUrl";
+    public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES = "additionalScopes";
+    public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS = "additionalParameters";
     // path authorization
     public static final String MIDDLEWARE_PASS_AUTHORIZATION = "passAuthorization";
     public static final String MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE = "sessionScope";
@@ -347,6 +349,11 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
             .property(MIDDLEWARE_OAUTH2_PUBLIC_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .property(MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
+                .additionalProperties(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .allowAdditionalProperties(true))
             // pass authorization
             .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))

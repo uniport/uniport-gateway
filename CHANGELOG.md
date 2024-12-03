@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added option to configure if the authentication request, triggered by a `oauth2` middleware, should be executed via the portal-gateway ([PORTAL-2301](https://issue.inventage.com/browse/PORTAL-2301)).
 - Added support for `HostRegex` and `PathRegex` Routing ([PORTAL-2307](https://issue.inventage.com/browse/PORTAL-2307))
+- Added support to configure `additionalScopes` and `additionalParameters` in the `oauth2` middleware ([PORTAL-2312](https://issue.inventage.com/browse/PORTAL-2312))
 
 ### Fixed
 
