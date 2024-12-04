@@ -118,7 +118,6 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
     public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
     public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
-    public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
     public static final String MIDDLEWARE_OAUTH2_RESPONSE_MODE = "responseMode";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
@@ -126,6 +125,8 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_PUBLIC_URL = "publicUrl";
     public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES = "additionalScopes";
     public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS = "additionalParameters";
+    // oauth2 registration
+    public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
     // path authorization
     public static final String MIDDLEWARE_PASS_AUTHORIZATION = "passAuthorization";
     public static final String MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE = "sessionScope";

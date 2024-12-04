@@ -283,11 +283,11 @@ public final class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) {
+    public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) throws Throwable {
         return withOAuth2AuthMiddleware(oAuth2AuthConfig, null);
     }
 
-    private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) {
+    private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) throws Throwable {
         final OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         final Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
 
@@ -302,7 +302,7 @@ public final class MiddlewareServerBuilder {
         }
 
         if (middlewareFuture.failed()) {
-            throw new IllegalStateException("OAuth2Auth Middleware failed to be instantiated", middlewareFuture.cause());
+            throw middlewareFuture.cause();
         }
         if (middlewareFuture.result() == null) {
             throw new IllegalStateException("OAuth2Auth Middleware failed to be instantiated and is null");

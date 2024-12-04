@@ -6,8 +6,6 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -23,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,34 +54,28 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
         final List<Route> callbacks = mountCallbackRoutes(router, callbackPath, responseMode);
 
-        final Promise<Middleware> promise = Promise.promise();
-        KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig))
-            .onSuccess(
-                createMiddleware(
-                    vertx,
-                    name,
-                    getPublicURL(middlewareConfig),
-                    proxyAuthenticationFlow,
-                    callbacks,
-                    callbackPath,
-                    sessionScope,
-                    getAdditionalScopes(middlewareConfig),
-                    getAdditionalAuthRequestParams(middlewareConfig, responseMode),
-                    promise))
-            .onFailure(err -> {
-                LOGGER.warn("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'", err.getMessage());
-                promise.fail("Failed to create OAuth2 Middleware '" + err.getMessage() + "'");
-            });
-
-        return promise.future();
+        return KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig))
+            .onFailure(err -> LOGGER.error("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'", err.getMessage()))
+            .compose(createMiddleware(
+                vertx,
+                name,
+                getPublicURL(middlewareConfig),
+                proxyAuthenticationFlow,
+                callbacks,
+                callbackPath,
+                sessionScope,
+                getAdditionalScopes(middlewareConfig),
+                getAdditionalAuthRequestParams(middlewareConfig, responseMode)))
+            .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2))
+            .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
     }
 
     protected String patchPath(String publicUrl, URI keycloakUrl) {
         return String.format("%s%s", publicUrl, keycloakUrl.getPath());
     }
 
-    /*
-     * Additional request parameters for the OAuth 2.0 Authentication Request to the Authorization Server. 
+    /**
+     * Additional request parameters for the OAuth 2.0 Authentication Request to the Authorization Server.
      * See https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
      */
     private JsonObject getAdditionalAuthRequestParams(JsonObject middlewareConfig, String responseMode) {
@@ -167,7 +160,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             .setValidateIssuer(false);
     }
 
-    private Handler<OAuth2Auth> createMiddleware(
+    private Function<OAuth2Auth, Future<Middleware>> createMiddleware(
         Vertx vertx,
         String name,
         String publicUrl,
@@ -176,8 +169,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         String callbackPath,
         String sessionScope,
         List<String> additionalScopes,
-        JsonObject additionalAuthRequestParams,
-        Promise<Middleware> promise
+        JsonObject additionalAuthRequestParams
     ) {
         return authProvider -> {
             LOGGER.debug("Successfully completed Keycloak discovery");
@@ -188,8 +180,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 } catch (URISyntaxException err) {
                     LOGGER.warn("Failed to create OAuth2 Middleware due to failed authorization path patching: '{}'",
                         err.getMessage());
-                    promise.fail("Failed to patch authorization path: '" + err.getMessage() + "'");
-                    return;
+                    return Future.failedFuture("Failed to patch authorization path: '" + err.getMessage() + "'");
                 }
             }
 
@@ -205,8 +196,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .withScopes(scopes(sessionScope, additionalScopes))
                 .extraParams(additionalAuthRequestParams);
 
-            promise.complete(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
-            LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2);
+            return Future.succeededFuture(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
         };
     }
 

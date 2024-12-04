@@ -17,6 +17,7 @@ import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
+import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.MultiMap;
@@ -46,6 +47,30 @@ public class OAuth2AuthMiddlewareTest {
     public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
     public static final String CODE_CHALLENGE = "code_challenge";
     public static final String SCOPE = "scope";
+
+    @Test
+    void discoveryFailure(Vertx vertx, VertxTestContext testCtx) throws Throwable {
+        final JsonObject config = new JsonObject()
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, "http://inexistent.host")
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "scopee")
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, "id")
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, "secret")
+            .put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http")
+            .put(RouterFactory.PUBLIC_HOSTNAME_KEY, "host")
+            .put(RouterFactory.PUBLIC_PORT_KEY, 1234);
+
+        try {
+            portalGateway(vertx, testCtx)
+                .withSessionMiddleware()
+                .withOAuth2AuthMiddleware(config)
+                .build()
+                .start();
+        } catch (Exception e) {
+            testCtx.completeNow();
+            return;
+        }
+        testCtx.failNow("Exception expected");
+    }
 
     @Test
     void redirectForAuthenticationRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
@@ -220,7 +245,7 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
-    void redirectWithExtraParametersForAuthenticationRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void redirectWithExtraParametersForAuthenticationRequest(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
@@ -244,7 +269,7 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
-    void redirectWithAdditionalScope(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void redirectWithAdditionalScope(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         // given
         final List<String> scopes = List.of("scopeA", "scopeB", "scopeC");
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
@@ -398,7 +423,7 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
-    void authorizationPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void authorizationPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         // given
         final String publicUrl = "http://some.domain/some/path";
         final String scope = "protected";
@@ -426,7 +451,7 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
-    void callbackPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void callbackPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         // given
         final String publicUrl = "http://some.domain/some/path";
         final String scope = "protected";
