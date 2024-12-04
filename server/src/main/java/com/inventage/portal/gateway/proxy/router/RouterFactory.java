@@ -57,12 +57,13 @@ public class RouterFactory {
     private final String entrypointName;
 
     private static final String PATH_RULE_NAME = "Path";
-    private static final String PATH_PREFIX_RULE_NAME = "PathPrefix";
     private static final String PATH_REGEX_RULE_NAME = "PathRegex";
+    private static final String PATH_PREFIX_RULE_NAME = "PathPrefix";
+    private static final String PATH_PREFIX_REGEX_RULE_NAME = "PathPrefixRegex";
     private static final String HOST_RULE_NAME = "Host";
     private static final String HOST_REGEX_RULE_NAME = "HostRegex";
     private static final Pattern RULE_PATTERN = Pattern.compile(String.format("^(?<ruleName>(%s))\\('(?<ruleValue>.*)'\\)$",
-        String.join("|", PATH_RULE_NAME, PATH_PREFIX_RULE_NAME, PATH_REGEX_RULE_NAME, HOST_RULE_NAME, HOST_REGEX_RULE_NAME)));
+        String.join("|", PATH_RULE_NAME, PATH_REGEX_RULE_NAME, PATH_PREFIX_RULE_NAME, PATH_PREFIX_REGEX_RULE_NAME, HOST_RULE_NAME, HOST_REGEX_RULE_NAME)));
     /**
      * Allowed rule values according to RFC 3986 - Uniform Resource Identifier (URI): Generic Syntax
      * See https://www.rfc-editor.org/rfc/rfc3986.html#appendix-A
@@ -376,12 +377,16 @@ public class RouterFactory {
                 routingRule = path(ruleValue);
                 break;
             }
+            case PATH_REGEX_RULE_NAME: {
+                routingRule = pathRegex(ruleValue);
+                break;
+            }
             case PATH_PREFIX_RULE_NAME: {
                 routingRule = pathPrefix(ruleValue);
                 break;
             }
-            case PATH_REGEX_RULE_NAME: {
-                routingRule = pathRegex(ruleValue);
+            case PATH_PREFIX_REGEX_RULE_NAME: {
+                routingRule = pathPrefixRegex(ruleValue);
                 break;
             }
             case HOST_RULE_NAME: {
@@ -447,6 +452,15 @@ public class RouterFactory {
         final String name = String.format("path regex matcher: %s", pathRegex);
         return router -> {
             return router.route().pathRegex(pathRegex).setName(name);
+        };
+    }
+
+    private RoutingRule pathPrefixRegex(String pathRegex) {
+        // append non-capturing atomic group that matches anything to do regex-based path prefix routing
+        final String pathPrefixRegex = pathRegex + "(?>.*)";
+        final String name = String.format("path regex matcher: %s", pathRegex);
+        return router -> {
+            return router.route().pathRegex(pathPrefixRegex).setName(name);
         };
     }
 

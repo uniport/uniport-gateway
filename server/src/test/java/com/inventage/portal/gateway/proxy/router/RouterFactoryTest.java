@@ -18,9 +18,11 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -210,12 +212,23 @@ public class RouterFactoryTest {
             Arguments.of("PathPrefix('/path')", host, "/path", HttpResponseStatus.OK.code()),
             Arguments.of("PathPrefix('/path')", host, "/path/long", HttpResponseStatus.OK.code()),
             Arguments.of("PathPrefix('/.well-known/any-path')", host, "/bar", HttpResponseStatus.NOT_FOUND.code()),
-            Arguments.of("PathPrefix('/.well-known/any-path/long')", host, "/bar", HttpResponseStatus.NOT_FOUND.code()) //
+            Arguments.of("PathPrefix('/.well-known/any-path/long')", host, "/bar", HttpResponseStatus.NOT_FOUND.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)/')", host, "/foo/ab/", HttpResponseStatus.NOT_FOUND.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)/')", host, "/foo/a/", HttpResponseStatus.OK.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)/')", host, "/foo/a/bar", HttpResponseStatus.OK.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo/", HttpResponseStatus.NOT_FOUND.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo/c", HttpResponseStatus.NOT_FOUND.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo/a", HttpResponseStatus.OK.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo/bar", HttpResponseStatus.OK.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo/bar/baz", HttpResponseStatus.OK.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo/b/baz", HttpResponseStatus.OK.code()),
+            Arguments.of("PathPrefixRegex('/foo/(a|b)')", host, "/foo", HttpResponseStatus.NOT_FOUND.code()) //
         );
     }
 
     @ParameterizedTest
     @MethodSource("provideRulesForRouting")
+    @Timeout(value = 1, timeUnit = TimeUnit.HOURS)
     public void testRoutingRules(String rule, String virtualHost, String path, int expectedStatusCode, Vertx vertx, VertxTestContext testCtx) {
         // given
         final String svcName = "bar";
