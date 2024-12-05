@@ -77,6 +77,10 @@ public class AuthenticationRedirectRequestAssert
     public AuthenticationRedirectRequestAssert isValidAuthenticationRequest(
         Map<String, String> expectedLocationParameters
     ) {
+        VertxAssertions.assertTrue(
+            testCtx, 300 <= actual.statusCode() && actual.statusCode() <= 399,
+            "Redirect status code expected, but was: " + actual.statusCode());
+
         final String location = actual.getHeader(LOCATION);
         VertxAssertions.assertNotNull(testCtx, location, "No 'location' header found in response");
         final Map<String, String> locationParameters = extractParametersFromHeader(location);

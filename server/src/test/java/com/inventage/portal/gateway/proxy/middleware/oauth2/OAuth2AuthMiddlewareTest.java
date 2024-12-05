@@ -19,6 +19,7 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -295,6 +296,30 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
+    void redirectForAuthenticationRequestWithApplicationJson(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/protected";
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.APPLICATION_JSON.toString());
+        // when
+        gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isValidAuthenticationRequest(Map.of(
+                    "prompt", "none"));
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
     void callbackRequestWithExistingState(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String url = "http://localhost:12345";
@@ -320,11 +345,32 @@ public class OAuth2AuthMiddlewareTest {
             });
     }
 
+    @Test
+    void callbackRequestWithErrorLoginRequired(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
+        // We need to mock the sessionstate to pass the OAuth2Middleware checks
+        final JsonObject oidcSessionState = oidcSessionState("aState", "http://localhost:12345", "aPKCE");
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withCustomSessionState(PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
+            .build().start();
+        // when
+        gateway.incomingRequest(POST, "/callback/test?error=login_required&state=" + oidcSessionState.getString(OIDC_PARAM_STATE) + "&code=ghijklmnop",
+            outgoingResponse -> {
+                // then
+                assertThat(testCtx, outgoingResponse)
+                    .hasStatusCode(HttpResponseStatus.UNAUTHORIZED.code());
+                testCtx.completeNow();
+                keycloakServer.closeServer();
+            });
+    }
+
     // Dieser Test überprüft, dass ein Code Callback Request mit ungültigem Session Cookie
     // zu keinem Hänger (PORTAL-1184) führt, sondern Status Code `401` zurückgibt.
     @Test
-    void callbackRequestWithNonExistingStateWithoutURI(Vertx vertx, VertxTestContext testCtx)
-        throws InterruptedException {
+    void callbackRequestWithNonExistingStateWithoutURI(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
