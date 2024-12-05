@@ -296,7 +296,7 @@ public class OAuth2AuthMiddlewareTest {
     }
 
     @Test
-    void redirectForAuthenticationRequestWithApplicationJson(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void redirectForAuthenticationRequestRefusingTextHtml(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
@@ -313,7 +313,8 @@ public class OAuth2AuthMiddlewareTest {
             // then
             assertThat(testCtx, outgoingResponse)
                 .isValidAuthenticationRequest(Map.of(
-                    "prompt", "none"));
+                    "prompt", "none",
+                    "response_mode", "query"));
             testCtx.completeNow();
             keycloakServer.closeServer();
         });

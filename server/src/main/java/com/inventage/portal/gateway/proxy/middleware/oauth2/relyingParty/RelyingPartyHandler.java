@@ -81,6 +81,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         OPENID_SCOPES.add("offline");
     }
     private static final ParsableMIMEValue ACCEPT_HEADER_FOR_PROMPT_NONE = new ParsableMIMEValue(HttpHeaders.TEXT_HTML.toString()).forceParse();
+
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
     private final MessageDigest sha256;
@@ -230,14 +231,17 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         final OAuth2AuthorizationURL config = new OAuth2AuthorizationURL();
 
         if (extraParams != null) {
-            // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
-            if (!acceptHeaderIncludesTextHTML(acceptHeader)) {
-                config.putAdditionalParameter("prompt", "none");
-            } else {
-                for (Entry<String, String> kv : extraParams.entrySet()) {
-                    config.putAdditionalParameter(kv.getKey(), kv.getValue());
-                }
+            for (Entry<String, String> kv : extraParams.entrySet()) {
+                config.putAdditionalParameter(kv.getKey(), kv.getValue());
             }
+        }
+
+        String promptOverride = null;
+        if (!acceptHeaderIncludesTextHTML(acceptHeader)) {
+            // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
+            config.putAdditionalParameter("response_mode", "query");
+            // in case the request does not accept any html response, set prompt=none
+            promptOverride = "none";
         }
 
         config.setState(state != null ? state : redirectURL);
@@ -250,8 +254,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             config.setScopes(scopes);
         }
 
-        if (prompt != null) {
-            config.putAdditionalParameter("prompt", prompt);
+        if (prompt != null && promptOverride == null) {
+            config.putAdditionalParameter("prompt", promptOverride);
         }
 
         if (codeVerifier != null) {
