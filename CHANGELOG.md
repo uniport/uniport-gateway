@@ -19,9 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Use fresh public keys to verify the logout token in the back channel logout ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
-- On back channel logout, remove session directly from the session store, instead of destroying it to invalidat it immediately ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
-- Dont forward the session cookie to the backend service ([PORTAL-2119](https://issue.inventage.com/browse/PORTAL-2119)).
-- Dont shadow Oauth2 callback routes by a catch all router ([PORTAL-2302](https://issue.inventage.com/browse/PORTAL-2302)).
+- On back channel logout, remove session directly from the session store, instead of destroying it to invalidate it immediately ([PORTAL-2175](https://issue.inventage.com/browse/PORTAL-2175)).
+- Don't forward the session cookie to the backend service ([PORTAL-2119](https://issue.inventage.com/browse/PORTAL-2119)).
+- Don't shadow OAuth2 callback routes by a catch-all router ([PORTAL-2302](https://issue.inventage.com/browse/PORTAL-2302)).
 
 ### Changed
 
@@ -72,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Replaced Portal-Kowl with Portal-Kafka-UI on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
+- Replaced `Portal-Kowl` with `Portal-Kafka-UI` on `/ips/portal-messaging` ([PORTAL-2005](https://issue.inventage.com/browse/PORTAL-2005)).
 - Modifying oauth2 flow --> Set prompt=none for accept headers that do not allow text/html ([PORTAL-2004](https://issue.inventage.com/browse/PORTAL-2004)).
 - Upgrade the Vert.x stack from `4.4.4` to `4.4.9` ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
 - Make clustered session store retry timeout in `session` middleware configurable ([PORTAL-2027](https://issue.inventage.com/browse/PORTAL-2027)).
@@ -92,7 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `SameSite` attribute with value `STRICT` to `uniport.session-lifetime` cookie ([PORTAL-1942](https://issue.inventage.com/browse/PORTAL-1942)).
 - Remove disabled tests ([PORTAL-1731](https://issue.inventage.com/browse/PORTAL-1731)).
-- Update Step 'Dev Deployment' to use Jenkinslib method ([PORTAL-1623](https://issue.inventage.com/browse/PORTAL-1623)).
+- Update Step 'Dev Deployment' to use `Jenkinslib` method ([PORTAL-1623](https://issue.inventage.com/browse/PORTAL-1623)).
 - Do not use any conditional logic in logback configuration files ([PORTAL-1562](https://issue.inventage.com/browse/PORTAL-1562)).
 - **BREAKING**: configuration of security context for gateway container. Note that this is breaking due to changes in `values.yaml`. The security context is now enabled by default.
 
@@ -159,7 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Middleware `claimToHeader` for setting an HTTP header from a JWT claim value ([PORTAL-1483](https://issue.inventage.com/browse/PORTAL-1483)).
 - Support for additional issuers. Can be defined in the configuration with `additionalIssuers` ([PORTAL-1331](https://issue.inventage.com/browse/PORTAL-1331)).
 - Configuring the CSP middleware at route level. It is now possible to define basic CSP policies on the entry-middleware and specific/more restrictive CSP policies on each specific route ([PORTAL-1230](https://issue.inventage.com/browse/PORTAL-1230)).
-- Support for periodical public keys refreshs for `bearerOnly` and `passAuthorization` middlewares. Can be configured with `publicKeysReconcilation.enabled` and `publicKeysReconcilation.intervalMs` in the middleware options ([PORTAL-1020](https://issue.inventage.com/browse/PORTAL-1020)).
+- Support for periodical public keys refreshes for `bearerOnly` and `passAuthorization` middlewares. Can be configured with `publicKeysReconcilation.enabled` and `publicKeysReconcilation.intervalMs` in the middleware options ([PORTAL-1020](https://issue.inventage.com/browse/PORTAL-1020)).
 - Created middleware `bodyHandler`, that is required for the csrf middleware ([PORTAL-1497](https://issue.inventage.com/browse/PORTAL-1497)).
 - Enhanced configuration for CSP-middleware. It is possible to define how external/incoming CSP policies should be merged with the middleware policies ([PORTAL-1470](https://issue.inventage.com/browse/PORTAL-1470)).
 - Language cookie name can be configured ([PORTAL-1636](https://issue.inventage.com/browse/PORTAL-1636)).
@@ -198,7 +198,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: HTTP response header `X-IPS-Trace-Id` is not written anymore, please use `OpenTelemetryMiddleware` as entrypoint middleware instead ().
 - **BREAKING**: Changed cookie name `ips.language` to `uniport.language`, `inventage-portal-gateway.session` to `uniport.session`, and `ipg.state` to `uniport.state` ([PORTAL-718](https://issue.inventage.com/browse/PORTAL-718)).
 - **BREAKING**: Removed configuration session bag middleware configuration `whithelistedCookies`, that was deprecated in `4.3.0` ([PORTAL-620](https://issue.inventage.com/browse/PORTAL-620)).
-- The filter that determines which requests refresh the session has been updated to exclude polling requests from Conversation [PORTAL-1409](https://issue.inventage.com/browse/PORTAL-1409)).
+- The filter that determines which requests refresh the session has been updated to exclude polling requests from Conversation ([PORTAL-1409](https://issue.inventage.com/browse/PORTAL-1409)).
 - Change route ordering. `/health` route is hard-configured as first route to be considered ([PORTAL-859](https://issue.inventage.com/browse/PORTAL-859)).
 - Support mounting of gateway-routing-config files via configMap. The directory `proxy-config.examples` contains a selected set of example config files for each microservice. Consumers of this chart should selectively copy these files and adapt according to their specific environment ([PORTAL-1290](https://issue.inventage.com/browse/PORTAL-1290)).
 - Update portal-helm-chart-library to version `4.3.0-202305220818-197-8c61d10`
@@ -230,7 +230,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a custom implementation of the relying party (based on vertx's implementation) ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
+- Added a custom implementation of the relying party (based on Vert.x's implementation) ([PORTAL-1146](https://issue.inventage.com/browse/PORTAL-1146)).
 - Add a CSP middleware ([PORTAL-665](https://issue.inventage.com/browse/PORTAL-665)).
 - Add a CSRF middleware ([PORTAL-666](https://issue.inventage.com/browse/PORTAL-666)).
 - Support for HTTPS for backend connections ([PORTAL-1292](https://issue.inventage.com/browse/PORTAL-1292)).
@@ -466,7 +466,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Version updated of portal-helm-chart-library.version dependency
+- Version updated of `portal-helm-chart-library.version` dependency
 
 ## [2.4.1]-202110041214-219-5351207 - 2021-10-04
 
@@ -480,7 +480,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `ControlApiMiddleware` (PORTAL-195). Handles control api actions provided as values from a "IPS_GW_CONTROL" cookie. Supported actions:
+- Added `ControlApiMiddleware` (PORTAL-195). Handles control api actions provided as values from a `IPS_GW_CONTROL` cookie. Supported actions:
   - SESSION_TERMINATE: invalidates the session and calls "end_session_endpoint" on Keycloak
 - Tracing enabled ([PORTAL-418](https://issue.inventage.com/browse/PORTAL-418))
 - Ports can now also be defined by env variables ([PORTAL-417](https://issue.inventage.com/browse/PORTAL-417))
