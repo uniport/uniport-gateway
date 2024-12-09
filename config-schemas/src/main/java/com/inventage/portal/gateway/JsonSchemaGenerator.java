@@ -31,7 +31,6 @@ public final class JsonSchemaGenerator {
         final JsonObject schemaAsJson = schema.toJson();
         removeId(schemaAsJson);
         Files.write(Paths.get(path + "portalGatewayStaticSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
-
     }
 
     private static void createDynamicJsonSchemaValidator(String path) throws IOException {
@@ -39,7 +38,6 @@ public final class JsonSchemaGenerator {
         final JsonObject schemaAsJson = schema.toJson();
         removeId(schemaAsJson);
         Files.write(Paths.get(path + "portalGatewayDynamicSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
-
     }
 
     private static void removeId(JsonObject jsonObject) {

@@ -203,6 +203,72 @@ public class DynamicConfigurationTest {
                                 "foo",
                                 "bar"))))));
 
+        final JsonObject customResponseHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddleware")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject().put(
+                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200).put(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST,
+                                new JsonObject().put(
+                                    "foo",
+                                    "bar"))))));
+
+        final JsonObject customResponseHttpMiddlewareWrongStatusCodeType = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareWrongStatusCodeType")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject().put(
+                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, "200")))));
+
+        final JsonObject customResponseHttpMiddlewareContentType = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareContentType")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, 200)
+                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+
+        final JsonObject customResponseHttpMiddlewareWrongHeaders = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareWrongHeaders")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
+                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_HEADERS, new JsonObject().put("X-Foo", 2))
+                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+
+        final JsonObject customResponseHttpMiddlewareWrongStatusCodeMin = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject().put(
+                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 99)))));
+
+        final JsonObject customResponseHttpMiddlewareWrongStatusCodeMax = new JsonObject().put(DynamicConfiguration.HTTP,
+            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
+                new JsonArray().add(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
+                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                        new JsonObject().put(
+                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 600)))));
+
         final JsonObject authBearerHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
@@ -830,6 +896,24 @@ public class DynamicConfigurationTest {
                 expectedTrue),
             Arguments.of("reject headers middleware with missing options",
                 headersHttpMiddlewareWithMissingOptions,
+                complete, expectedFalse),
+            // custom response middleware
+            Arguments.of("custom response middleware", customResponseHttpMiddleware, complete,
+                expectedTrue),
+            Arguments.of("reject custom response middleware with wrong status code type",
+                customResponseHttpMiddlewareWrongStatusCodeType,
+                complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong status code (min)",
+                customResponseHttpMiddlewareWrongStatusCodeMin,
+                complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong status code (max)",
+                customResponseHttpMiddlewareWrongStatusCodeMax,
+                complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong content type",
+                customResponseHttpMiddlewareContentType,
+                complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong headers",
+                customResponseHttpMiddlewareWrongHeaders,
                 complete, expectedFalse),
             // authorization bearer middleware
             Arguments.of("accept authorization bearer middleware", authBearerHttpMiddleware,

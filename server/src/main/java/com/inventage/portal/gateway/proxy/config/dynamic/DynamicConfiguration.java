@@ -104,6 +104,11 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_HEADERS = "headers";
     public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
     public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
+    // custom response
+    public static final String MIDDLEWARE_CUSTOM_RESPONSE = "customResponse";
+    public static final String MIDDLEWARE_CUSTOM_RESPONSE_CONTENT = "content";
+    public static final String MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE = "statusCode";
+    public static final String MIDDLEWARE_CUSTOM_RESPONSE_HEADERS = "headers";
     // language cookie
     public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
     public static final String MIDDLEWARE_LANGUAGE_COOKIE_NAME = "name";
@@ -225,6 +230,7 @@ public class DynamicConfiguration {
         MIDDLEWARE_CSRF,
         MIDDLEWARE_BODY_HANDLER,
         MIDDLEWARE_HEADERS,
+        MIDDLEWARE_CUSTOM_RESPONSE,
         MIDDLEWARE_LANGUAGE_COOKIE,
         MIDDLEWARE_OAUTH2,
         MIDDLEWARE_OAUTH2_REGISTRATION,
@@ -270,8 +276,11 @@ public class DynamicConfiguration {
     private static final String KEYWORD_ENUM = "enum";
     private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
     private static final String KEYWORD_INT_MIN = "minimum";
+    private static final String KEYWORD_INT_MAX = "maximum";
     private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
     private static final int INT_MIN = 0;
+    private static final int HTTP_STATUS_CODE_MIN = 100;
+    private static final int HTTP_STATUS_CODE_MAX = 599;
     private static final String KEYWORD_TYPE = "type";
     private static final String KEYWORD_PATTERN = "pattern";
     private static final String INT_TYPE = "integer";
@@ -336,6 +345,12 @@ public class DynamicConfiguration {
             // headers
             .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
             .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+            // content
+            .property(MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, Schemas.stringSchema())
+            .property(MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, Schemas.intSchema()
+                .withKeyword(KEYWORD_INT_MIN, HTTP_STATUS_CODE_MIN)
+                .withKeyword(KEYWORD_INT_MAX, HTTP_STATUS_CODE_MAX))
+            .optionalProperty(MIDDLEWARE_CUSTOM_RESPONSE_HEADERS, Schemas.objectSchema())
             // oauth2
             .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
@@ -952,6 +967,24 @@ public class DynamicConfiguration {
                             String.format("%s: at least one response or request header has to be defined", mwType));
                     }
 
+                    break;
+                }
+                case MIDDLEWARE_CUSTOM_RESPONSE: {
+                    final Integer statusCode = mwOptions.getInteger(MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE);
+                    if (statusCode == null) {
+                        return Future.failedFuture(String
+                            .format("%s: Status code can only be of type integer", mwType));
+                    }
+
+                    final JsonObject headers = mwOptions.getJsonObject(MIDDLEWARE_CUSTOM_RESPONSE_HEADERS);
+                    if (headers != null) {
+                        for (Entry<String, Object> entry : headers) {
+                            if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
+                                return Future.failedFuture(String
+                                    .format("%s: Response header and value can only be of type string", mwType));
+                            }
+                        }
+                    }
                     break;
                 }
                 case MIDDLEWARE_LANGUAGE_COOKIE: {

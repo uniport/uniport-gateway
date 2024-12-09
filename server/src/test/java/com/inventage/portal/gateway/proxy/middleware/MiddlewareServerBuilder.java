@@ -24,6 +24,7 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingSe
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.customResponse.CustomResponseMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
@@ -47,6 +48,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -212,6 +214,10 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withHeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
         return withMiddleware(new HeaderMiddleware("header", requestHeaders, responseHeaders));
+    }
+
+    public MiddlewareServerBuilder withCustomResponseMiddleware(String content, Integer statusCode, HeadersMultiMap headers) {
+        return withMiddleware(new CustomResponseMiddleware("customResponse", content, statusCode, headers));
     }
 
     public MiddlewareServerBuilder withReplacePathRegexMiddleware(String regex, String replacement) {

@@ -159,6 +159,11 @@
                     "loggingResponseEnabled" : {
                       "type" : "boolean"
                     },
+                    "statusCode" : {
+                      "maximum" : 599,
+                      "type" : "integer",
+                      "minimum" : 100
+                    },
                     "responseMode" : {
                       "type" : "string",
                       "enum" : [ "query", "fragment", "form_post" ]
@@ -169,6 +174,9 @@
                     },
                     "origin" : {
                       "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "content" : {
                       "type" : "string"
                     },
                     "lifetimeHeader" : {
@@ -208,6 +216,9 @@
                     "iamSessionResetUrl" : {
                       "minLength" : 1,
                       "type" : "string"
+                    },
+                    "headers" : {
+                      "type" : "object"
                     },
                     "headerName" : {
                       "minLength" : 1,
@@ -272,7 +283,7 @@
                 },
                 "type" : {
                   "type" : "string",
-                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo", "backChannelLogout" ]
+                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "customResponse", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo", "backChannelLogout" ]
                 }
               },
               "required" : [ "name", "type" ]
