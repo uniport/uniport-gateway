@@ -699,7 +699,7 @@
                             <goal>display-dependency-updates</goal>
                             <goal>display-plugin-updates</goal>
                         </goals>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -713,7 +713,7 @@
                         <goals>
                             <goal>analyze</goal>
                         </goals>
-                        <phase>validate</phase>
+                        <phase>process-sources</phase>
                     </execution>
                 </executions>
             </plugin>
