@@ -14,6 +14,17 @@
                 "service": "base-proxy"
             },
             {
+                "name": "base-favicon",
+                "entrypoints": [
+                    "http20000"
+                ],
+                "middlewares": [
+                    "baseFaviconIconReplacePath"
+                ],
+                "rule": "Path('/favicon.ico')",
+                "service": "base-proxy"
+            },
+            {
                 "name": "apple-app-site-association",
                 "middlewares": [
                     "applicationJsonNoCacheHeaders"
@@ -52,6 +63,14 @@
                 "options": {
                     "regex": "/base/(.*)",
                     "replacement": "/$1"
+                }
+            },
+            {
+                "name": "baseFaviconIconReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "^/(.*)",
+                    "replacement": "/assets/favicon/$1"
                 }
             },
             {
