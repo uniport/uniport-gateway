@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for `HostRegex`, `PathRegex` and `PathPrefixRegex` Routing ([PORTAL-2307](https://issue.inventage.com/browse/PORTAL-2307))
 - Added support to configure `additionalScopes` and `additionalParameters` in the `oauth2` middleware ([PORTAL-2312](https://issue.inventage.com/browse/PORTAL-2312))
 - Added `customResponse` middleware for delivering static responses with ease (#5).
+- Added support to configure `passthroughParameters` in the `oauth2` middleware ([PORTAL-2327](https://issue.inventage.com/browse/PORTAL-2327))
 
 ### Fixed
 

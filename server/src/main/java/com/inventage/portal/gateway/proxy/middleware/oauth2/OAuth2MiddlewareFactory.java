@@ -65,7 +65,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 callbackPath,
                 sessionScope,
                 getAdditionalScopes(middlewareConfig),
-                getAdditionalAuthRequestParams(middlewareConfig, responseMode)))
+                getAdditionalAuthRequestParams(middlewareConfig, responseMode),
+                getPassthroughParameters(middlewareConfig)))
             .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2))
             .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
     }
@@ -95,6 +96,15 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             return List.of();
         }
         return additionalScopes.getList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getPassthroughParameters(JsonObject middlewareConfig) {
+        final JsonArray passthroughParamaters = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS);
+        if (passthroughParamaters == null) {
+            return List.of();
+        }
+        return passthroughParamaters.getList();
     }
 
     /**
@@ -169,7 +179,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         String callbackPath,
         String sessionScope,
         List<String> additionalScopes,
-        JsonObject additionalAuthRequestParams
+        JsonObject additionalAuthRequestParams,
+        List<String> passthroughParameters
     ) {
         return authProvider -> {
             LOGGER.debug("Successfully completed Keycloak discovery");
@@ -192,9 +203,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             // PORTAL-1184 we are using a patched OAuth2AuthHandlerImpl class as OAuth2AuthHandler implementation.
             final OAuth2AuthHandler authHandler = new RelyingPartyHandler(vertx, authProvider, callbackURL)
                 .setupCallbacks(callbacks)
-                .pkceVerifierLength(OAUTH2_PKCE_VERIFIER_LENGTH)
+                .passthroughParameters(passthroughParameters)
+                .extraParams(additionalAuthRequestParams)
                 .withScopes(scopes(sessionScope, additionalScopes))
-                .extraParams(additionalAuthRequestParams);
+                .pkceVerifierLength(OAUTH2_PKCE_VERIFIER_LENGTH);
 
             return Future.succeededFuture(new OAuth2AuthMiddleware(vertx, name, authHandler, sessionScope));
         };

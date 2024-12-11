@@ -38,8 +38,12 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
 public class OAuth2AuthMiddlewareTest {
@@ -315,6 +319,60 @@ public class OAuth2AuthMiddlewareTest {
                 .isValidAuthenticationRequest(Map.of(
                     "prompt", "none",
                     "response_mode", "query"));
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    static Stream<Arguments> provideForPassthroughParamTest() {
+        return Stream.of(
+            Arguments.of(
+                List.of("paramA"),
+                Map.of("paramA", List.of("valueA")),
+                Map.of("paramA", "valueA")),
+            Arguments.of(
+                List.of("paramA"),
+                Map.of("paramA", List.of("valueA", "valueB")),
+                Map.of("paramA", "valueA")),
+            Arguments.of(
+                List.of("paramA"),
+                Map.of("paramB", List.of("valueB")),
+                null),
+            Arguments.of(
+                List.of("paramA", "paramB"),
+                Map.of("paramA", List.of("valueA"), "paramB", List.of("valueB")),
+                Map.of("paramA", "valueA", "paramB", "valueB")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideForPassthroughParamTest")
+    void redirectForAuthenticationRequestWithPassthroughParam(List<String> passthrough, Map<String, List<String>> in, Map<String, String> expected, Vertx vertx, VertxTestContext testCtx) throws Throwable {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
+            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS, new JsonArray(passthrough));
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddleware(middlewareConfig)
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/protected";
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
+
+        final String query = in.entrySet().stream()
+            .flatMap(entry -> entry.getValue().stream()
+                .map(value -> entry.getKey() + "=" + value))
+            .reduce((p1, p2) -> p1 + "&" + p2)
+            .map(s -> "?" + s)
+            .orElse("");
+
+        // when
+        gateway.incomingRequest(GET, protectedResource + query, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isValidAuthenticationRequest(expected);
             testCtx.completeNow();
             keycloakServer.closeServer();
         });

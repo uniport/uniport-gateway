@@ -130,6 +130,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_OAUTH2_PUBLIC_URL = "publicUrl";
     public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES = "additionalScopes";
     public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS = "additionalParameters";
+    public static final String MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS = "passthroughParameters";
     // oauth2 registration
     public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration"; // same props as "oauth2"
     // path authorization
@@ -370,6 +371,8 @@ public class DynamicConfiguration {
             .property(MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
                 .additionalProperties(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
                 .allowAdditionalProperties(true))
+            .property(MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
             // pass authorization
             .property(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))

@@ -16,6 +16,7 @@
 
 package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -89,6 +90,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
     private final List<String> scopes;
     private final boolean openId;
     private Map<String, String> extraParams;
+    private Set<String> passthroughParams;
     private String prompt;
     private int pkce = -1;
     // explicit signal that tokens are handled as bearer only (meaning, no backend server known)
@@ -139,6 +141,9 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         // state copy
         if (base.extraParams != null) {
             extraParams = new HashMap<String, String>(base.extraParams);
+        }
+        if (base.passthroughParams != null) {
+            passthroughParams = new HashSet<String>(base.passthroughParams);
         }
         this.callback = base.callback;
         this.order = base.order;
@@ -236,6 +241,25 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             }
         }
 
+        if (passthroughParams != null) {
+            final Map<String, List<String>> queryParams = getQueryParameters(redirectURL);
+            for (Map.Entry<String, List<String>> query : queryParams.entrySet()) {
+                if (passthroughParams.contains(query.getKey())) {
+                    if (query.getValue().size() == 0) {
+                        // should not happen
+                        continue;
+                    }
+                    final String v = query.getValue().get(0);
+                    config.putAdditionalParameter(query.getKey(), v);
+
+                    if (query.getValue().size() > 1) {
+                        // this is due to a limitation in the vert.x API
+                        LOGGER.warn("Query parameter '{}' is supplied multiple times. Will use the first '{}' and ignore the rest", query.getKey(), v);
+                    }
+                }
+            }
+        }
+
         String promptOverride = null;
         if (!acceptHeaderIncludesTextHTML(acceptHeader)) {
             // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
@@ -300,6 +324,11 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return this;
     }
 
+    public RelyingPartyHandler passthroughParameters(List<String> passthroughParams) {
+        this.passthroughParams = new HashSet<String>(passthroughParams);
+        return this;
+    }
+
     @Override
     public OAuth2AuthHandler withScope(String scope) {
         final List<String> updatedScopes = new ArrayList<>(this.scopes);
@@ -330,7 +359,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return this;
     }
 
-    public OAuth2AuthHandler setupCallbacks(final List<Route> routes) {
+    public RelyingPartyHandler setupCallbacks(final List<Route> routes) {
         for (Route route : routes) {
             if (route != null) {
                 this.setupCallback(route);
@@ -552,5 +581,9 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                 }
             });
         });
+    }
+
+    private Map<String, List<String>> getQueryParameters(String url) {
+        return new QueryStringDecoder(url).parameters();
     }
 }

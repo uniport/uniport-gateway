@@ -167,6 +167,13 @@
                     "minLength" : 1,
                     "type" : "string"
                   },
+                  "passthroughParameters" : {
+                    "type" : "array",
+                    "items" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    }
+                  },
                   "origin" : {
                     "minLength" : 1,
                     "type" : "string"
