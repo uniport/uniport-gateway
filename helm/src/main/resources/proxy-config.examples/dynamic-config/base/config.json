@@ -70,7 +70,7 @@
                 "type": "replacePathRegex",
                 "options": {
                     "regex": "^/(.*)",
-                    "replacement": "/assets/favicon/$1"
+                    "replacement": "/assets/$1"
                 }
             },
             {
