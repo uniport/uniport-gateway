@@ -46,6 +46,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
@@ -63,6 +64,7 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -129,7 +131,31 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigin));
+        return withCorsMiddleware(List.of(allowedOrigin));
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins) {
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, null, -1, false, false));
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, List<String> allowedOriginPatterns) {
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, allowedOriginPatterns, null, null, null, -1, false, false));
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, Set<HttpMethod> allowedMethods, Set<String> allowedHeaders) {
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, allowedMethods, allowedHeaders, null, -1, false, false));
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, Set<String> exposedHeaders) {
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, exposedHeaders, -1, false, false));
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, int maxAge) {
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, null, maxAge, false, false));
+    }
+
+    public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, boolean allowCredentials) {
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, null, -1, allowCredentials, false));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) {

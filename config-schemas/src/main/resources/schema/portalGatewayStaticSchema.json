@@ -68,12 +68,26 @@
                       "type" : "integer",
                       "minimum" : 0
                     },
+                    "allowedOriginPatterns" : {
+                      "type" : "array",
+                      "items" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    },
                     "policyDirectives" : {
                       "type" : "array"
                     },
                     "action" : {
                       "type" : "string",
                       "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
+                    },
+                    "allowedHeaders" : {
+                      "type" : "array",
+                      "items" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
                     },
                     "customResponseHeaders" : {
                       "type" : "object"
@@ -83,6 +97,9 @@
                       "type" : "string"
                     },
                     "reportOnly" : {
+                      "type" : "boolean"
+                    },
+                    "allowCredentials" : {
                       "type" : "boolean"
                     },
                     "timeoutInMinute" : {
@@ -112,6 +129,13 @@
                         "secure" : {
                           "type" : "boolean"
                         }
+                      }
+                    },
+                    "exposedHeaders" : {
+                      "type" : "array",
+                      "items" : {
+                        "minLength" : 1,
+                        "type" : "string"
                       }
                     },
                     "optional" : {
@@ -189,6 +213,13 @@
                     "lifetimeHeader" : {
                       "type" : "boolean"
                     },
+                    "allowedOrigins" : {
+                      "type" : "array",
+                      "items" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    },
                     "logLevel" : {
                       "type" : "string",
                       "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
@@ -208,6 +239,13 @@
                     "nagHttps" : {
                       "type" : "boolean"
                     },
+                    "allowedMethods" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "string",
+                        "enum" : [ "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT" ]
+                      }
+                    },
                     "pathRoles" : {
                       "minLength" : 1,
                       "type" : "string"
@@ -226,6 +264,9 @@
                     },
                     "headers" : {
                       "type" : "object"
+                    },
+                    "allowPrivateNetwork" : {
+                      "type" : "boolean"
                     },
                     "headerName" : {
                       "minLength" : 1,
@@ -280,6 +321,10 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "maxAgeSeconds" : {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
                     "contentTypes" : {
                       "type" : "array",
                       "items" : {
@@ -290,7 +335,7 @@
                 },
                 "type" : {
                   "type" : "string",
-                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "customResponse", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo", "backChannelLogout" ]
+                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "cors", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "customResponse", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo", "backChannelLogout" ]
                 }
               },
               "required" : [ "name", "type" ]

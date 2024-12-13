@@ -77,6 +77,14 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_CONTROL_API_ACTION_SESSION_RESET = "SESSION_RESET";
     // cors
     public static final String MIDDLEWARE_CORS = "cors";
+    public static final String MIDDLEWARE_CORS_ALLOWED_ORIGINS = "allowedOrigins";
+    public static final String MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS = "allowedOriginPatterns";
+    public static final String MIDDLEWARE_CORS_ALLOWED_METHODS = "allowedMethods";
+    public static final String MIDDLEWARE_CORS_ALLOWED_HEADERS = "allowedHeaders";
+    public static final String MIDDLEWARE_CORS_EXPOSED_HEADERS = "exposedHeaders";
+    public static final String MIDDLEWARE_CORS_MAX_AGE_SECONDS = "maxAgeSeconds";
+    public static final String MIDDLEWARE_CORS_ALLOW_CREDENTIALS = "allowCredentials";
+    public static final String MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK = "allowPrivateNetwork";
     // csp
     public static final String MIDDLEWARE_CSP = "csp";
     public static final String MIDDLEWARE_CSP_DIRECTIVES = "policyDirectives";
@@ -216,6 +224,7 @@ public class DynamicConfiguration {
     public static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
     public static final List<String> MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = List.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
     public static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
+    public static final List<String> HTTP_METHODS = List.of("GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT");
     public static final List<String> AUTH_HANDLER_CLAIM_OPERATORS = List.of(
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
@@ -226,6 +235,7 @@ public class DynamicConfiguration {
         MIDDLEWARE_BEARER_ONLY,
         MIDDLEWARE_CHECK_ROUTE,
         MIDDLEWARE_CONTROL_API,
+        MIDDLEWARE_CORS,
         MIDDLEWARE_CSP,
         MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
         MIDDLEWARE_CSRF,
@@ -322,6 +332,20 @@ public class DynamicConfiguration {
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CONTROL_API_ACTIONS.toArray())))
             .optionalProperty(MIDDLEWARE_CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            // cors
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_ORIGINS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_METHODS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_ENUM, JsonArray.of(HTTP_METHODS.toArray()))))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_HEADERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_EXPOSED_HEADERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_MAX_AGE_SECONDS, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, INT_MIN))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema())
+            .optionalProperty(MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema())
             // csp
             .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
             .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
@@ -817,6 +841,9 @@ public class DynamicConfiguration {
                     break;
                 }
                 case MIDDLEWARE_CHECK_ROUTE: {
+                    break;
+                }
+                case MIDDLEWARE_CORS: {
                     break;
                 }
                 case MIDDLEWARE_CONTROL_API: {

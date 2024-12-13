@@ -793,6 +793,52 @@ public class DynamicConfigurationTest {
                         DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
                         "blub")))));
 
+        final JsonObject cors = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    TestUtils.withMiddlewareOpts(
+                        JsonObject.of(
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
+
+        final JsonObject corsFull = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    TestUtils.withMiddlewareOpts(
+                        JsonObject.of(
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                            DynamicConfiguration.MIDDLEWARE_CORS_EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                            DynamicConfiguration.MIDDLEWARE_CORS_MAX_AGE_SECONDS, 42,
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOW_CREDENTIALS, false,
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, false)))));
+
+        final JsonObject corsWithEmptyOrigin = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    TestUtils.withMiddlewareOpts(
+                        JsonObject.of(
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_HEADERS, JsonArray.of(""))))));
+
+        final JsonObject corsWithUnkownMethod = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    TestUtils.withMiddlewareOpts(
+                        JsonObject.of(
+                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_METHODS, JsonArray.of("BLUB"))))));
+
+        final JsonObject corsWithIllegalMaxAgeType = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    TestUtils.withMiddlewareOpts(
+                        JsonObject.of(
+                            DynamicConfiguration.MIDDLEWARE_CORS_MAX_AGE_SECONDS, false)))));
+
         final JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware(
                 "sessionMiddleware",
@@ -995,6 +1041,13 @@ public class DynamicConfigurationTest {
             // claimToHeader middleware
             Arguments.of("accept claimToHeader middleware",
                 claimToHeaderMiddleware, complete, expectedTrue),
+
+            // cors middleware
+            Arguments.of("accept simple cors", cors, complete, expectedTrue),
+            Arguments.of("accept full cors", corsFull, complete, expectedTrue),
+            Arguments.of("reject cors with empty origin", corsWithEmptyOrigin, complete, expectedFalse),
+            Arguments.of("reject cors with unknown method", corsWithUnkownMethod, complete, expectedFalse),
+            Arguments.of("reject cors with illegal max age type", corsWithIllegalMaxAgeType, complete, expectedFalse),
 
             // services
             Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),

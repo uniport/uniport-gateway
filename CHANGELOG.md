@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Don't forward the session cookie to the backend service ([PORTAL-2119](https://issue.inventage.com/browse/PORTAL-2119)).
 - Don't shadow OAuth2 callback routes by a catch-all router ([PORTAL-2302](https://issue.inventage.com/browse/PORTAL-2302)).
 - Set `response_mode` to `query`, in case the request does not accept `text/html` ([PORTAL-2321](https://issue.inventage.com/browse/PORTAL-2321)).
+- Make the `cors` middleware available and configurable ([PORTAL-2330](https://issue.inventage.com/browse/PORTAL-2330)).
 
 ### Changed
 

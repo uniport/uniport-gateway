@@ -241,6 +241,14 @@ public class AuthenticationRedirectRequestAssert
         return this;
     }
 
+    public AuthenticationRedirectRequestAssert hasHeader(String expectedHeader, Set<String> expectedValues) {
+        final String value = actual.getHeader(expectedHeader);
+        VertxAssertions.assertNotNull(testCtx, value);
+        final Set<String> values = Set.of(value.split(","));
+        VertxAssertions.assertEquals(testCtx, expectedValues, values);
+        return this;
+    }
+
     public AuthenticationRedirectRequestAssert hasStateWithUri(String expectedUriInStateParameter) {
         final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
         VertxAssertions.assertEquals(testCtx, expectedUriInStateParameter,
