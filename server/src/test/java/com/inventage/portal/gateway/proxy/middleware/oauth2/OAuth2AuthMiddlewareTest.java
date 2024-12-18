@@ -137,6 +137,29 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
+    void unauthenticatedApplicationJsonRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/test";
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.APPLICATION_JSON.toString());
+        // when
+        gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .hasStatusCode(401);
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
     void redirectForAuthenticationRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
@@ -148,7 +171,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .start();
         final String protectedResource = "http://localhost:8080/test";
         final RequestOptions reqOpts = new RequestOptions()
-            .addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
             // then
@@ -163,6 +186,30 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
+    void redirectForAuthenticationRequestWithAcceptAll(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/test";
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString())
+            .addHeader(HttpHeaders.ACCEPT, "*/*");
+        // when
+        gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isValidAuthenticationRequest();
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
     void redirectForTwoAuthenticationRequests(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
@@ -171,7 +218,8 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build().start();
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, "http://localhost:8080/protected/one", reqOpts, (outgoingResponse) -> {
             assertThat(testCtx, outgoingResponse)
@@ -202,7 +250,8 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build().start().connectBrowser();
-        final MultiMap headers = MultiMap.caseInsensitiveMultiMap().add(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap()
+            .add(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         browser.request(GET, "http://localhost:8080/protected/one")
             .thenCompose(response -> browser.request(GET, "http://localhost:8080/protected/two", headers))
@@ -231,7 +280,8 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .start();
         // when
         final String[] sessionCookie = new String[1];
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         String initialUri1 = "http://localhost:8080/protected/one";
         gateway.incomingRequest(GET, initialUri1, reqOpts, (outgoingResponse1) -> {
             // then
@@ -296,7 +346,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protectedScope")
             .build()
             .start();
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, "/protectedScope", reqOpts, (redirectResponse) -> {
             // then
@@ -323,7 +373,8 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .build()
             .start();
         final String protectedResource = "http://localhost:8080/protected";
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
             // then
@@ -349,7 +400,8 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .build()
             .start();
         final String protectedResource = "http://localhost:8080/protected";
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
             // then
@@ -373,7 +425,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .start();
         final String protectedResource = "http://localhost:8080/protected";
         final RequestOptions reqOpts = new RequestOptions()
-            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.APPLICATION_JSON.toString());
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString());
         // when
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
             // then
@@ -398,7 +450,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .start();
         final String protectedResource = "http://localhost:8080/protected";
         final RequestOptions reqOpts = new RequestOptions()
-            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.APPLICATION_JSON.toString())
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.MULTIPART_MIXED.toString())
             .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
@@ -627,7 +679,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, true, publicUrl))
             .build()
             .start();
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, "http://localhost:8080", reqOpts, (outgoingResponse) -> {
             // then
@@ -655,7 +707,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, false, publicUrl))
             .build()
             .start();
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, "http://localhost:8080", reqOpts, (outgoingResponse) -> {
             // then

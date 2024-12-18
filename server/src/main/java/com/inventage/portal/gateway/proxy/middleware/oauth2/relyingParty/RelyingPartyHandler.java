@@ -16,6 +16,7 @@
 
 package com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty;
 
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -24,6 +25,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.VertxContextPRNG;
@@ -66,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * - wrap oauth2 state parameter with StateWithUri
  * - dont implement OrderListener interface (mount callback immediately)
  * - set prompt=none if accept headers do not allow text/html
+ * - non-interactive requests are not redirected, but served a 401 directly
  * 
  * @see OAuth2AuthHandlerImpl
  */
@@ -81,7 +84,6 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         OPENID_SCOPES.add("phone");
         OPENID_SCOPES.add("offline");
     }
-    private static final ParsableMIMEValue ACCEPT_HEADER_FOR_PROMPT_NONE = new ParsableMIMEValue(HttpHeaders.TEXT_HTML.toString()).forceParse();
 
     private final VertxContextPRNG prng;
     private final Origin callbackURL;
@@ -164,6 +166,12 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             final String token = parseAuthorization.result();
 
             if (token == null) {
+                if (isNoneInteractive(context.request())) {
+                    // in case the request is non-interactive, redirecting serves no purpose
+                    context.fail(401, new VertxException("OAuth2 No valid authentication in non-interactive request. Access Denied.", true));
+                    return;
+                }
+
                 // redirect request to the oauth2 server as we know nothing about this request
                 if (bearerOnly) {
                     // it's a failure both cases but the cause is not the same
@@ -214,8 +222,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                             session.put("pkce", codeVerifier);
                         }
                     }
-                    final List<String> acceptValues = context.request().headers().getAll(HttpHeaders.ACCEPT);
-                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier, acceptValues))));
+                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier, context.request()))));
                 }
             } else {
                 // continue
@@ -232,7 +239,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         });
     }
 
-    private String authURI(String redirectURL, String state, String codeVerifier, List<String> acceptValues) {
+    private String authURI(String redirectURL, String state, String codeVerifier, HttpServerRequest request) {
         final OAuth2AuthorizationURL config = new OAuth2AuthorizationURL();
 
         if (extraParams != null) {
@@ -261,7 +268,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
 
         String promptOverride = null;
-        if (!acceptHeaderIncludesTextHTML(acceptValues)) {
+        if (!acceptsTextHTML(request)) {
             // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, 
             // because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
             config.putAdditionalParameter("response_mode", "query");
@@ -299,7 +306,20 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return authProvider.authorizeURL(config);
     }
 
-    private boolean acceptHeaderIncludesTextHTML(List<String> acceptValues) {
+    private boolean isNoneInteractive(HttpServerRequest request) {
+        return acceptsApplicationJson(request);
+    }
+
+    private boolean acceptsTextHTML(HttpServerRequest request) {
+        return acceptsMimeType(request, HttpHeaderValues.TEXT_HTML.toString());
+    }
+
+    private boolean acceptsApplicationJson(HttpServerRequest request) {
+        return acceptsMimeType(request, HttpHeaderValues.APPLICATION_JSON.toString());
+    }
+
+    private boolean acceptsMimeType(HttpServerRequest request, String mimeTypePattern) {
+        final List<String> acceptValues = request.headers().getAll(HttpHeaders.ACCEPT);
         if (acceptValues == null) {
             return false;
         }
@@ -310,13 +330,17 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             // Iterate over multiple mimetypes in a single header, i.e.
             // Accept: application/json, text/plain, */*
             for (String mimeType : mimeTypes.split(",")) {
-                final ParsableMIMEValue mimeValue = new ParsableMIMEValue(mimeType.trim()).forceParse();
-                if (mimeValue.isMatchedBy(ACCEPT_HEADER_FOR_PROMPT_NONE)) {
+                if (matchesMimeType(mimeTypePattern, mimeType)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private boolean matchesMimeType(String mimeTypePattern, String mimeType) {
+        return new ParsableMIMEValue(mimeTypePattern.trim()).isMatchedBy(
+            new ParsableMIMEValue(mimeType.trim()));
     }
 
     // See https://github.com/vert-x3/vertx-web/issues/2602

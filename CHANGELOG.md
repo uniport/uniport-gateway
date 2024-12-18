@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - To ensure a custom response header is always written to the response, the `addHeadersEndHandler` is to be used, instead of only adding it on proxied incoming responses with the help of `ProxyInterceptor`s ([PORTAL-2329](https://inventage-all.atlassian.net/browse/PORTAL-2329)).
 - Respecting all accept headers to determine, if `prompt=none` should be set in the authentication request in the `oauth2` middleware ([PORTAL-2333](https://inventage-all.atlassian.net/browse/PORTAL-2333)).
 - Should be capable of handling received malformed cookie and pass them on [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
+- Unauthenticated `application/json`requests should be handled with a `401` directly instead of returning a redirect ([PORTAL-2332](https://inventage-all.atlassian.net/browse/PORTAL-2332)).
 
 ### Changed
 
