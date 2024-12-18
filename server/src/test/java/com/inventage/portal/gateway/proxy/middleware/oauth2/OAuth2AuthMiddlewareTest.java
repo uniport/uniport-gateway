@@ -142,17 +142,17 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .startWithDefaultDiscoveryHandler();
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build()
             .start();
-        final String protectedResource = "http://localhost:8080/protected";
-        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
+        final String protectedResource = "http://localhost:8080/test";
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaders.TEXT_HTML.toString());
         // when
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
             // then
             assertThat(testCtx, outgoingResponse)
                 .isValidAuthenticationRequest(Map.of(
-                    "redirect_uri", protectedResource,
                     "scope", "openid test"))
                 .isUsingFormPost()
                 .hasPKCE();
@@ -325,7 +325,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
             // then
             assertThat(testCtx, outgoingResponse)
-                .isValidAuthenticationRequest(Map.of("extra", "paramater"));
+                .isValidAuthenticationRequest(Map.of("extra", "parameter"));
             testCtx.completeNow();
             keycloakServer.closeServer();
         });
@@ -377,6 +377,31 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
                 .isValidAuthenticationRequest(Map.of(
                     "prompt", "none",
                     "response_mode", "query"));
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
+    @Test
+    void redirectForAuthenticationRequestWithMultipleAcceptHeaders(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
+            .build()
+            .start();
+        final String protectedResource = "http://localhost:8080/protected";
+        final RequestOptions reqOpts = new RequestOptions()
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.APPLICATION_JSON.toString())
+            .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
+        // when
+        gateway.incomingRequest(GET, protectedResource, reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isValidAuthenticationRequest(Map.of(
+                    "response_mode", "form_post"));
             testCtx.completeNow();
             keycloakServer.closeServer();
         });
@@ -589,7 +614,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     void authorizationPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         // given
         final String publicUrl = "http://some.domain/some/path";
-        final String scope = "protected";
+        final String scope = "test";
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
@@ -617,7 +642,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     void callbackPathShouldBePatched(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         // given
         final String publicUrl = "http://some.domain/some/path";
-        final String scope = "protected";
+        final String scope = "test";
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)

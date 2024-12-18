@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,13 +85,20 @@ public class AuthenticationRedirectRequestAssert
 
         final String location = actual.getHeader(LOCATION);
         VertxAssertions.assertNotNull(testCtx, location, "No 'location' header found in response");
+
         final Map<String, String> locationParameters = extractParametersFromHeader(location);
         VertxAssertions.assertNotNull(testCtx, locationParameters);
+
         if (expectedLocationParameters != null) {
-            expectedLocationParameters.entrySet().stream()
-                .filter(entry -> locationParameters.containsKey(entry.getKey())).findAny()
-                .orElseThrow(() -> new IllegalStateException(
-                    "expecting: " + expectedLocationParameters + ", found: " + locationParameters));
+            for (Entry<String, String> expectedLocationParameter : expectedLocationParameters.entrySet()) {
+                VertxAssertions.assertNotNull(testCtx,
+                    locationParameters.get(expectedLocationParameter.getKey()),
+                    locationParameters.toString());
+                VertxAssertions.assertEquals(testCtx,
+                    expectedLocationParameter.getValue(),
+                    locationParameters.get(expectedLocationParameter.getKey()),
+                    "No 'location' header found in response");
+            }
         }
         return this;
     }
@@ -122,14 +130,16 @@ public class AuthenticationRedirectRequestAssert
 
     private Map<String, String> extractParametersFromHeader(String header) {
         if (header == null) {
-            throw new IllegalArgumentException("header is null");
+            testCtx.failNow("header is null");
+            return null;
         }
 
         List<NameValuePair> responseParamsList = null;
         try {
             responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            testCtx.failNow(e);
+            return null;
         }
         VertxAssertions.assertNotNull(testCtx, responseParamsList);
         final Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(

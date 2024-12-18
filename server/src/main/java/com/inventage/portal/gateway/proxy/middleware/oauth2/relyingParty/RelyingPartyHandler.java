@@ -214,8 +214,8 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
                             session.put("pkce", codeVerifier);
                         }
                     }
-                    final String acceptHeader = context.request().headers().get(HttpHeaders.ACCEPT);
-                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier, acceptHeader))));
+                    final List<String> acceptValues = context.request().headers().getAll(HttpHeaders.ACCEPT);
+                    handler.handle(Future.failedFuture(new HttpException(302, authURI(redirectUri, state, codeVerifier, acceptValues))));
                 }
             } else {
                 // continue
@@ -232,7 +232,7 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         });
     }
 
-    private String authURI(String redirectURL, String state, String codeVerifier, String acceptHeader) {
+    private String authURI(String redirectURL, String state, String codeVerifier, List<String> acceptValues) {
         final OAuth2AuthorizationURL config = new OAuth2AuthorizationURL();
 
         if (extraParams != null) {
@@ -261,8 +261,9 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         }
 
         String promptOverride = null;
-        if (!acceptHeaderIncludesTextHTML(acceptHeader)) {
-            // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
+        if (!acceptHeaderIncludesTextHTML(acceptValues)) {
+            // PORTAL-2004: change response_mode to `query` if `Accept:` header is not `text/html`, 
+            // because JS code doesn't execute `onload="javascript:document.forms[0].submit()"` trigger
             config.putAdditionalParameter("response_mode", "query");
             // in case the request does not accept any html response, set prompt=none
             promptOverride = "none";
@@ -278,8 +279,10 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
             config.setScopes(scopes);
         }
 
-        if (prompt != null && promptOverride == null) {
+        if (promptOverride != null) {
             config.putAdditionalParameter("prompt", promptOverride);
+        } else if (prompt != null) {
+            config.putAdditionalParameter("prompt", prompt);
         }
 
         if (codeVerifier != null) {
@@ -296,15 +299,21 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return authProvider.authorizeURL(config);
     }
 
-    private boolean acceptHeaderIncludesTextHTML(String header) {
-        if (header == null) {
+    private boolean acceptHeaderIncludesTextHTML(List<String> acceptValues) {
+        if (acceptValues == null) {
             return false;
         }
-        final String[] allMimeValues = header.split(",");
-        for (String mimeValueString : allMimeValues) {
-            final ParsableMIMEValue mimeValue = new ParsableMIMEValue(mimeValueString.trim()).forceParse();
-            if (mimeValue.isMatchedBy(ACCEPT_HEADER_FOR_PROMPT_NONE)) {
-                return true;
+        // Iterate over multiple Accept headers, i.e.
+        // Accept: application/json
+        // Accept: text/plain
+        for (String mimeTypes : acceptValues) {
+            // Iterate over multiple mimetypes in a single header, i.e.
+            // Accept: application/json, text/plain, */*
+            for (String mimeType : mimeTypes.split(",")) {
+                final ParsableMIMEValue mimeValue = new ParsableMIMEValue(mimeType.trim()).forceParse();
+                if (mimeValue.isMatchedBy(ACCEPT_HEADER_FOR_PROMPT_NONE)) {
+                    return true;
+                }
             }
         }
         return false;
