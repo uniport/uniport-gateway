@@ -35,7 +35,7 @@ public class HeaderMiddleware extends TraceMiddleware {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
         for (Entry<String, String> header : this.requestHeaders.entries()) {
-            if (header.getValue().equals("")) {
+            if (header.getValue().isEmpty()) {
                 LOGGER.debug("Removing request header '{}'", header.getKey());
                 ctx.request().headers().remove(header.getKey());
             } else {
@@ -44,9 +44,10 @@ public class HeaderMiddleware extends TraceMiddleware {
             }
         }
 
-        final Handler<MultiMap> respHeadersModifier = headers -> {
+        final Handler<Void> respHeadersModifier = v -> {
+            final MultiMap headers = ctx.response().headers();
             for (Entry<String, String> header : this.responseHeaders.entries()) {
-                if (header.getValue().equals("")) {
+                if (header.getValue().isEmpty()) {
                     if (headers.contains(header.getKey())) {
                         LOGGER.debug("Removing response header '{}'", header.getKey());
                         headers.remove(header.getKey());
@@ -61,8 +62,8 @@ public class HeaderMiddleware extends TraceMiddleware {
                 }
             }
         };
-        this.addResponseHeaderModifier(ctx, respHeadersModifier);
 
+        ctx.addHeadersEndHandler(respHeadersModifier);
         ctx.next();
     }
 

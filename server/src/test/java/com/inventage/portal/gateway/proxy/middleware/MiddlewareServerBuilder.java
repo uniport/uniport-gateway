@@ -49,7 +49,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -242,7 +241,7 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new HeaderMiddleware("header", requestHeaders, responseHeaders));
     }
 
-    public MiddlewareServerBuilder withCustomResponseMiddleware(String content, Integer statusCode, HeadersMultiMap headers) {
+    public MiddlewareServerBuilder withCustomResponseMiddleware(String content, Integer statusCode, MultiMap headers) {
         return withMiddleware(new CustomResponseMiddleware("customResponse", content, statusCode, headers));
     }
 

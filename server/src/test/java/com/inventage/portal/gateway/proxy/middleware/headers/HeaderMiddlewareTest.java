@@ -1,10 +1,13 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
+import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import io.vertx.core.MultiMap;
@@ -18,6 +21,7 @@ import io.vertx.junit5.VertxTestContext;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,7 +30,27 @@ import org.junit.jupiter.params.provider.MethodSource;
 @ExtendWith(VertxExtension.class)
 public class HeaderMiddlewareTest {
 
-    String host = "localhost";
+    final String host = "localhost";
+
+    @Test
+    public void test_redirect_has_custom_response_headers(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final MiddlewareServer portalGateway = portalGateway(vertx, host, testCtx)
+            .withHeaderMiddleware(
+                MultiMap.caseInsensitiveMultiMap(),
+                MultiMap.caseInsensitiveMultiMap().add("foo", "bar"))
+            .withCustomResponseMiddleware(null, 302, MultiMap.caseInsensitiveMultiMap().add("Location", "/baz"))
+            .build().start();
+        // when
+        portalGateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
+            // then
+            assertThat(testCtx, resp)
+                .hasStatusCode(302)
+                .hasHeader("Location", "/baz")
+                .hasHeader("foo", "bar");
+            testCtx.completeNow();
+        });
+    }
 
     static Stream<Arguments> requestHeaderTestData() {
         return Stream.of(//

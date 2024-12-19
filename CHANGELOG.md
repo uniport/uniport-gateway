@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Don't shadow OAuth2 callback routes by a catch-all router ([PORTAL-2302](https://inventage-all.atlassian.net/browse/PORTAL-2302)).
 - Set `response_mode` to `query`, in case the request does not accept `text/html` ([PORTAL-2321](https://inventage-all.atlassian.net/browse/PORTAL-2321)).
 - Make the `cors` middleware available and configurable ([PORTAL-2330](https://inventage-all.atlassian.net/browse/PORTAL-2330)).
+- To ensure a custom response header is always written to the response, the `addHeadersEndHandler` is to be used, instead of only adding it on proxied incoming responses with the help of `ProxyInterceptor`s ([PORTAL-2329](https://inventage-all.atlassian.net/browse/PORTAL-2329)).
 
 ### Changed
 
