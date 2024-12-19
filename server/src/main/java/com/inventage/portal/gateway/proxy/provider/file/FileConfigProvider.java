@@ -210,8 +210,7 @@ public class FileConfigProvider extends Provider {
                     .put(Provider.PROVIDER_CONFIGURATION, config));
             LOGGER.info("Configuration published from '{}'", this.source);
         }).onFailure(err -> {
-            LOGGER.warn("Ignoring invalid configuration '{}' from '{}'", err.getMessage(),
-                this.source);
+            LOGGER.warn("Ignoring invalid configuration '{}' from '{}': '{}'", this.filename, this.source, err.getMessage());
         });
     }
 }
