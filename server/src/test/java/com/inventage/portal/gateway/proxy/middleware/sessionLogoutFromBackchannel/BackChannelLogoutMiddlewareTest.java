@@ -23,7 +23,6 @@ import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
-import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
@@ -33,7 +32,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -63,7 +61,6 @@ public class BackChannelLogoutMiddlewareTest {
     private static final String PUBLIC_KEY_ALGORITHM = "RS256";
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.MINUTES)
     public void backChannelLogoutRequest(Vertx vertx, VertxTestContext testCtx) {
         // given
         final String signedValidLogoutToken = TestBearerOnlyJWTProvider.signToken(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE);
