@@ -21,13 +21,12 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT;
+        return DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE;
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully",
-            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE);
+        LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE);
 
         final String content = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT);
         final Integer statusCode = middlewareConfig.getInteger(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE);
