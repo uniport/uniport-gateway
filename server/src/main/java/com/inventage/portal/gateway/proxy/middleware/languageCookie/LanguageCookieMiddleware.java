@@ -30,7 +30,7 @@ public class LanguageCookieMiddleware extends TraceMiddleware {
 
         Cookie cookie = ctx.request().getCookie(languageCookieName);
 
-        // DEPRECATED: backward compatibility because of cookie name change (https://issue.inventage.com/browse/PORTAL-718)
+        // DEPRECATED: backward compatibility because of cookie name change (https://inventage-all.atlassian.net/browse/PORTAL-718)
         if (cookie == null) {
             cookie = ctx.request().getCookie("ips.language"); // support for old cookie name
         }
