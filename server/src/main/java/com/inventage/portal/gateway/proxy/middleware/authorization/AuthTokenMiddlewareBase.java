@@ -24,7 +24,7 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
 
     private final Vertx vertx;
     protected final String name;
-    private final String sessionScope;
+    protected final String sessionScope;
 
     protected AuthTokenMiddlewareBase(Vertx vertx, String name, String sessionScope) {
         this.vertx = vertx;

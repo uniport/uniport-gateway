@@ -2,15 +2,16 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.authorizatio
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
 import io.opentelemetry.api.trace.Span;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages the authentication bearer. If the user is authenticated it provides either an ID token or
+ * Manages the authorization bearer. If the user is authenticated it provides either an ID token or
  * an access token as defined in the sessionScope. Access tokens are only provided if the
  * sessionScope matches the corresponding scope of the OAuth2 provider. It also ensures that no
  * token is sent to the Client.
@@ -27,25 +28,30 @@ public class AuthorizationBearerMiddleware extends AuthTokenMiddlewareBase {
 
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
-        this.getAuthToken(ctx.session()).onSuccess(token -> {
-            if (token == null || token.length() == 0) {
-                LOGGER.debug("Skipping empty token");
+        getAuthToken(ctx.session())
+            .onSuccess(token -> {
+                setAuthorizationBearer(ctx.request(), token);
+                ctx.addHeadersEndHandler(v -> removeAuthorizationHeader(ctx.response()));
                 ctx.next();
-                return;
-            }
+            }).onFailure(err -> {
+                LOGGER.debug("Providing no token: '{}'", err.getMessage());
+                ctx.next();
+            });
+    }
 
-            ctx.request().headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
+    private void setAuthorizationBearer(HttpServerRequest request, String token) {
+        if (token == null || token.length() == 0) {
+            LOGGER.debug("Skipping empty token");
+            return;
+        }
 
-            final Handler<Void> removeAuthorizationHeaderOnResponse = v -> {
-                ctx.response().headers().remove(HttpHeaders.AUTHORIZATION);
-            };
-            ctx.addHeadersEndHandler(removeAuthorizationHeaderOnResponse);
+        LOGGER.debug("Providing token for session scope: '{}'", sessionScope);
+        request.headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
+    }
 
-            ctx.next();
-        }).onFailure(err -> {
-            LOGGER.debug("Providing no token '{}'", err.getMessage());
-            ctx.next();
-        });
+    private void removeAuthorizationHeader(HttpServerResponse response) {
+        LOGGER.debug("Removing authorization bearer on response");
+        response.headers().remove(HttpHeaders.AUTHORIZATION);
     }
 
 }

@@ -6,6 +6,7 @@ import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCooki
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
@@ -255,6 +256,10 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
         return withMiddleware(new PassAuthorizationMiddleware(vertx, "passAuthorization", sessionScope, JWTAuthHandler.create(authProvider)));
+    }
+
+    public MiddlewareServerBuilder withAuthorizationBearerMiddleware(String sessionScope) {
+        return withMiddleware(new AuthorizationBearerMiddleware(vertx, "authorizationBearer", sessionScope));
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
