@@ -82,7 +82,8 @@
                         {
                             "directive": "connect-src",
                             "values": [
-                                "https://grafana.com"
+                                "https://grafana.com",
+                                "data:"
                             ]
                         }
                     ]
