@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP;
 
-import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
 
@@ -40,5 +39,5 @@ public interface CompositeCSPHandler extends CSPHandler {
         return new CompositeCSPHandlerImpl(mergeStrategy);
     }
 
-    void handleResponse(RoutingContext ctx, MultiMap headers);
+    void handleResponse(RoutingContext ctx);
 }

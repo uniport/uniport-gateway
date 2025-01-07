@@ -35,8 +35,8 @@ public class CSPMiddleware extends TraceMiddleware {
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+        ctx.addHeadersEndHandler(v -> this.cspHandler.handleResponse(ctx));
         this.cspHandler.handle(ctx);
-        ctx.addHeadersEndHandler(v -> this.cspHandler.handleResponse(ctx, ctx.response().headers()));
     }
 
     private void addDirective(CSPHandler cspHandler, JsonObject directive) {

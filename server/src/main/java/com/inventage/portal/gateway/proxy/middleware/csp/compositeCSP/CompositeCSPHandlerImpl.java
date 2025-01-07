@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP;
 
 import com.google.common.collect.Sets;
-import io.vertx.core.MultiMap;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CSPHandler;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +46,13 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
 
     private boolean reportOnly;
 
-    private final CSPMergeStrategy cspMergeStrategy;
+    private final CSPMergeStrategy mergeStrategy;
 
     /**
-     * Modified constructor to configure the merging strategy of multiple csp policies
+     * Modified constructor to configure the merging strategy of multiple CSP policies
      */
     public CompositeCSPHandlerImpl(CSPMergeStrategy mergeStrategy) {
-        this.cspMergeStrategy = mergeStrategy;
+        this.mergeStrategy = mergeStrategy;
     }
 
     @Override
@@ -132,7 +133,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
     /*
      * handles requests
      * assemble configured policy and saves it in the routing context
-     * merge policies of multiple csp middleware instances
+     * merge policies of multiple CSP middleware instances
      */
     @Override
     public void handle(RoutingContext ctx) {
@@ -142,33 +143,36 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
 
         if (effectiveCSPPolicy.length() != 0) {
             ctx.put(CSP_PREVIOUS_POLICY_KEY, effectiveCSPPolicy);
-            setPolicyOnResponse(ctx, effectiveCSPPolicy);
         }
         ctx.next();
     }
 
     /**
      * handles responses
-     * internal policies are read from the routing context, configured by previous middleware instance
-     * external policies are read from Content-Security-Policy and Content-Security-Policy-Report-Only headers and merged (union)
-     * if internal is configured, all external configured policies are ingored
-     * if external is configured, all internal configured policies are ingored
+     * INTERNAL policies are read from the routing context, configured by previous middleware instance
+     * EXTERNAL policies are read from Content-Security-Policy and Content-Security-Policy-Report-Only headers and merged (union)
+     * if INTERNAL is configured, all EXTERNAL configured policies are ingored
+     * if EXTERNAL is configured, all INTERNAL configured policies are ingored
      */
-    public void handleResponse(RoutingContext ctx, MultiMap headers) {
-        final String internalCSPPolicy = cspMergeStrategy == CSPMergeStrategy.EXTERNAL ? "" : ctx.get(CSP_PREVIOUS_POLICY_KEY);
-        final String externalCSPPolicy = cspMergeStrategy == CSPMergeStrategy.INTERNAL ? "" : mergePolicies(headers.get(CSP_HEADER_NAME), headers.get(CSP_REPORT_ONLY_HEADER_NAME), CSPMergeStrategy.UNION);
+    public void handleResponse(RoutingContext ctx) {
+        final String internalCSPPolicy = mergeStrategy == CSPMergeStrategy.EXTERNAL ? "" : ctx.get(CSP_PREVIOUS_POLICY_KEY);
+        final String externalCSPPolicy = mergeStrategy == CSPMergeStrategy.INTERNAL ? ""
+            : unitePolicies(Stream.concat(
+                ctx.response().headers().getAll(CSP_HEADER_NAME).stream(),
+                ctx.response().headers().getAll(CSP_REPORT_ONLY_HEADER_NAME).stream())
+                .toList());
 
-        headers.remove(CSP_HEADER_NAME);
-        headers.remove(CSP_REPORT_ONLY_HEADER_NAME);
+        ctx.response().headers().remove(CSP_HEADER_NAME);
+        ctx.response().headers().remove(CSP_REPORT_ONLY_HEADER_NAME);
 
-        String effectiveCSPPolicy = mergePolicies(internalCSPPolicy, externalCSPPolicy, cspMergeStrategy);
+        String effectiveCSPPolicy = mergePolicies(internalCSPPolicy, externalCSPPolicy, mergeStrategy);
 
         final String previousResponsePolicy = ctx.get(CSP_PREVIOUS_RESPONSE_POLICY_KEY);
         if (previousResponsePolicy != null) {
             effectiveCSPPolicy = mergePolicies(effectiveCSPPolicy, previousResponsePolicy, CSPMergeStrategy.UNION);
         }
         ctx.put(CSP_PREVIOUS_RESPONSE_POLICY_KEY, effectiveCSPPolicy);
-        setPolicyOnResponse(ctx, effectiveCSPPolicy);
+        setPolicy(ctx.response(), effectiveCSPPolicy);
     }
 
     private String mergePolicies(String internal, String external, CSPMergeStrategy strategy) {
@@ -245,7 +249,7 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
         return directives;
     }
 
-    private void setPolicyOnResponse(RoutingContext ctx, String policyString) {
+    private void setPolicy(HttpServerResponse response, String policyString) {
         if (policyString.length() == 0) {
             return;
         }
@@ -254,10 +258,10 @@ public class CompositeCSPHandlerImpl implements CompositeCSPHandler {
             if (!policy.containsKey("report-uri") && !policy.containsKey("report-to")) {
                 throw new IllegalStateException("Please disable CSP reportOnly or add a report-uri/report-to policy.");
             } else {
-                ctx.response().putHeader(CSP_REPORT_ONLY_HEADER_NAME, policyString);
+                response.putHeader(CSP_REPORT_ONLY_HEADER_NAME, policyString);
             }
         } else {
-            ctx.response().putHeader(CSP_HEADER_NAME, policyString);
+            response.putHeader(CSP_HEADER_NAME, policyString);
         }
     }
 }
