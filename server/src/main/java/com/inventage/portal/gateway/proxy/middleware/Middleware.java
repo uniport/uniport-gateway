@@ -42,16 +42,6 @@ public interface Middleware extends Handler<RoutingContext> {
         appendModifier(ctx, modifier, REQUEST_HEADERS_MODIFIERS);
     }
 
-    /**
-     * @param ctx
-     *            current request context
-     * @param modifier
-     *            to be applied when processing incoming response headers
-     */
-    default void addResponseHeaderModifier(RoutingContext ctx, Handler<MultiMap> modifier) {
-        prependModifier(ctx, modifier, RESPONSE_HEADERS_MODIFIERS);
-    }
-
     // prependModifier allows to modify the response returned by forwarded servers.
     private void prependModifier(RoutingContext ctx, Handler modifier, String modifierType) {
         addModifier(ctx, modifier, modifierType, true);

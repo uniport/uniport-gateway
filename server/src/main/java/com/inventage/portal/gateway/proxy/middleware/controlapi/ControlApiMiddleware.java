@@ -8,7 +8,6 @@ import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieBag;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.opentelemetry.api.trace.Span;
-import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.Cookie;
@@ -71,8 +70,7 @@ public class ControlApiMiddleware extends TraceMiddleware {
             return;
         }
 
-        final Handler<MultiMap> respHeadersModifier = headers -> handleControlCookies(ctx, headers);
-        this.addResponseHeaderModifier(ctx, respHeadersModifier);
+        ctx.addHeadersEndHandler(v -> handleControlCookies(ctx, ctx.response().headers()));
         ctx.next();
     }
 

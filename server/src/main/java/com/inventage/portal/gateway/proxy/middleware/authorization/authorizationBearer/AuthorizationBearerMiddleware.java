@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.authorizatio
 import com.inventage.portal.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
@@ -37,10 +36,10 @@ public class AuthorizationBearerMiddleware extends AuthTokenMiddlewareBase {
 
             ctx.request().headers().add(HttpHeaders.AUTHORIZATION, BEARER + token);
 
-            final Handler<MultiMap> respHeadersModifier = headers -> {
-                headers.remove(HttpHeaders.AUTHORIZATION);
+            final Handler<Void> removeAuthorizationHeaderOnResponse = v -> {
+                ctx.response().headers().remove(HttpHeaders.AUTHORIZATION);
             };
-            this.addResponseHeaderModifier(ctx, respHeadersModifier);
+            ctx.addHeadersEndHandler(removeAuthorizationHeaderOnResponse);
 
             ctx.next();
         }).onFailure(err -> {

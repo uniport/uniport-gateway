@@ -72,7 +72,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         }
 
         // on outgoing response: remove cookies if present and store them in session bag
-        this.addResponseHeaderModifier(ctx, headers -> storeCookiesInSessionBag(ctx, headers));
+        ctx.addHeadersEndHandler(v -> storeCookiesInSessionBag(ctx, ctx.response().headers()));
         LOGGER.debug("{}: Added storeCookiesInSessionBag as response header modifier", name);
 
         ctx.next();
