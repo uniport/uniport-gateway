@@ -73,6 +73,7 @@ public class ControlApiMiddlewareTest {
             .incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
                 // then
                 assertSessionTermination(testCtx, outgoingResponse, routingContextHolder.get());
+                assertControlCookieRemoval(testCtx, outgoingResponse);
                 responseReceived.flag();
             });
     }
@@ -133,6 +134,7 @@ public class ControlApiMiddlewareTest {
             .incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
                 // then
                 assertSessionReset(testCtx, outgoingResponse, routingContextHolder.get(), keycloakTestCookie);
+                assertControlCookieRemoval(testCtx, outgoingResponse);
                 responseReceived.flag();
             });
     }
@@ -154,6 +156,14 @@ public class ControlApiMiddlewareTest {
             "there should be only one cookie in the session bag");
         VertxAssertions.assertTrue(testCtx, cookiesInContext.stream().anyMatch(cookie -> cookie.getName().startsWith("KEYCLOAK_")),
             "there should be the test keycloak cookie in the session bag");
+    }
+
+    private void assertControlCookieRemoval(VertxTestContext testCtx, HttpClientResponse response) {
+        final List<String> cookies = response.cookies();
+        final long controlCookieCount = cookies.stream()
+            .filter(cookie -> cookie.startsWith(CONTROL_COOKIE_NAME))
+            .count();
+        VertxAssertions.assertTrue(testCtx, controlCookieCount == 0);
     }
 
     private Handler<RoutingContext> getCookieInsertionHandler(List<Cookie> cookies) {
