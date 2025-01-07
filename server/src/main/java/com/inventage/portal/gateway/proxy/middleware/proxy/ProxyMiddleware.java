@@ -254,23 +254,6 @@ public class ProxyMiddleware extends TraceMiddleware {
                 // continue the interception chain
                 return proxyContext.sendRequest();
             }
-
-            @Override
-            public Future<Void> handleProxyResponse(ProxyContext proxyContext) {
-                final RoutingContext ctx = getContextFromRequest(proxyContext);
-                final ProxyResponse outgoingResponse = proxyContext.response();
-
-                // modify headers
-                final List<Handler<MultiMap>> modifiers = ctx.get(Middleware.RESPONSE_HEADERS_MODIFIERS);
-                if (modifiers != null) {
-                    for (Handler<MultiMap> modifier : modifiers) {
-                        modifier.handle(outgoingResponse.headers());
-                    }
-                }
-
-                // continue the interception chain
-                return proxyContext.sendResponse();
-            }
         });
     }
 

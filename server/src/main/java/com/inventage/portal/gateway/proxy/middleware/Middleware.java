@@ -20,9 +20,11 @@ public interface Middleware extends Handler<RoutingContext> {
 
     String REQUEST_URI_MODIFIERS = String.format("%s-request-uri-modifiers", MODIFIERS_PREFIX);
     String REQUEST_HEADERS_MODIFIERS = String.format("%s-request-headers-modifiers", MODIFIERS_PREFIX);
-    String RESPONSE_HEADERS_MODIFIERS = String.format("%s-response-headers-modifiers", MODIFIERS_PREFIX);
 
     /**
+     * Vertx does not allow to change the path of a request in a common handler.
+     * So we do it later, before the outgoing request is sent to the backend in the ProxyMiddleware, as it is not important earlier anyway.
+     * 
      * @param ctx
      *            current request context
      * @param modifier
@@ -33,6 +35,10 @@ public interface Middleware extends Handler<RoutingContext> {
     }
 
     /**
+     * Generally, this should only be used as a last resort to modify the headers of the outgoing request.
+     * It is designed for the special case when headers could not have been modified earlier due to logical constraints,
+     * but must be modified before the request is sent to the backend, e.g. removing the session cookie from the request.
+     * 
      * @param ctx
      *            current request context
      * @param modifier
