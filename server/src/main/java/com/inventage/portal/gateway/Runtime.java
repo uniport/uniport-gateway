@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway;
 
+import io.vertx.core.Vertx;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -82,6 +83,17 @@ public class Runtime {
             return true;
         }
         return false;
+    }
+
+    /**
+     * This logs the error message and shuts the irrecoverably Gateway down.
+     * 
+     * @param vertx
+     */
+    public static void fatal(Vertx vertx, String errMsg) {
+        vertx.close().onComplete(event -> {
+            LOGGER.error("Gateway is shutting down: '{}'", errMsg);
+        });
     }
 
     /**

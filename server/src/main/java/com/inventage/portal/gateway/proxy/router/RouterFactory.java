@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.proxy.router;
 
 import com.inventage.portal.gateway.GatewayRouter;
+import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
@@ -201,10 +202,8 @@ public class RouterFactory {
                 final String errMsg = "Router has no entrypoints";
                 handler.handle(Future.failedFuture(errMsg));
 
-                //Fast-failing
-                vertx.close().onComplete(event -> {
-                    LOGGER.error("Gateway is shutting down '{}'", errMsg);
-                });
+                // Fast-failing
+                Runtime.fatal(vertx, errMsg);
                 return;
             }
 
@@ -233,10 +232,8 @@ public class RouterFactory {
                     handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
                     LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
 
-                    //Fast-failing
-                    vertx.close().onComplete(event -> {
-                        LOGGER.error("Gateway is shutting down '{}'", srf.cause().getMessage());
-                    });
+                    // Fast-failing
+                    Runtime.fatal(vertx, srf.cause().getMessage());
                 }
             });
             LOGGER.debug("Router '{}' created successfully", router.getName());

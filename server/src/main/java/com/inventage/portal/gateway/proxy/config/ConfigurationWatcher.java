@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.config;
 
+import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
@@ -44,6 +46,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
     private final int providersThrottleIntervalMs;
     private final List<String> defaultEntrypoints;
     private final Set<String> providerConfigReloadThrottler;
+    private final AtomicBoolean anyConfigurationPublished;
+
     private long timerId;
     private List<Listener> configurationListeners;
 
@@ -59,6 +63,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.defaultEntrypoints = new ArrayList<String>(defaultEntrypoints);
         this.currentConfigurations = new HashMap<>();
         this.providerConfigReloadThrottler = new HashSet<>();
+        this.anyConfigurationPublished = new AtomicBoolean();
     }
 
     /**
@@ -378,9 +383,14 @@ public class ConfigurationWatcher extends AbstractVerticle {
                 for (Listener listener : this.configurationListeners) {
                     listener.listen(mergedConfig);
                 }
+                anyConfigurationPublished.set(true);
             }).onFailure(err -> {
-                LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
-                    err.getMessage());
+                if (!anyConfigurationPublished.get()) {
+                    // PORTAL-2109 if first configuration is invalid, fail hard
+                    Runtime.fatal(vertx, "Initial configuration is invalid");
+                }
+
+                LOGGER.warn("Ignoring invalid configuration for '{}': '{}'", providerName, err.getMessage());
             });
     }
 }

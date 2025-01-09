@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -79,6 +80,101 @@ public class ConfigurationWatcherTest {
 
         vertx.deployVerticle(watcher)
             .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
+    }
+
+    @Test
+    @DisplayName("should fail fast when the first configuration is invalid")
+    @SuppressWarnings("unchecked")
+    void shouldFailFastWhenFirstConfigurationIsInvalid(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+
+        // given
+        String configurationAddress = "test-simple-configuration-watcher";
+        List<JsonObject> messages = List.of(
+            assembleMessage("mock", buildConfiguration(
+                withRouters(
+                    withRouter("test",
+                        withRouterService("non-existent-svc"))))));
+
+        int providersThrottleIntervalMs = 1000;
+        Provider pvd = new MockProvider(vertx, configurationAddress, messages);
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress, providersThrottleIntervalMs, List.of());
+
+        // when
+        watcher.addListener(new Listener() {
+            @Override
+            public void listen(JsonObject actual) {
+                testCtx.failNow(String.format("%s: %s", errMsg, "no message expected"));
+            }
+        });
+
+        vertx.deployVerticle(watcher)
+            .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            testCtx.completeNow();
+            promise.complete();
+        });
+    }
+
+    @Test
+    @DisplayName("should should ignore invalid configurations after the first valid one")
+    @SuppressWarnings("unchecked")
+    void shouldIgnoreInvalidConfigsAfterTheFirstOne(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
+        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+
+        // given
+        String configurationAddress = "test-simple-configuration-watcher";
+        List<JsonObject> messages = List.of(
+            assembleMessage("mock", buildConfiguration(
+                withRouters(
+                    withRouter("test",
+                        withRouterRule("Path('/')"),
+                        withRouterService("svc"),
+                        withRouterEntrypoints("ep"))),
+                withServices(
+                    withService("svc",
+                        withServers(withServer("host", 1234)))))),
+            assembleMessage("mock", buildConfiguration(
+                withRouters(
+                    withRouter("test",
+                        withRouterService("non-existent-svc"))))));
+
+        int providersThrottleIntervalMs = 100;
+        Provider pvd = new MockProvider(vertx, configurationAddress, messages, 150);
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress, providersThrottleIntervalMs, List.of());
+
+        // when
+        final AtomicInteger publishedConfigCount = new AtomicInteger(0);
+        watcher.addListener(new Listener() {
+            @Override
+            public void listen(JsonObject actual) {
+                publishedConfigCount.incrementAndGet();
+            }
+        });
+
+        vertx.deployVerticle(watcher)
+            .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
+
+        // give some time so that the configuration can be processed
+        vertx.setTimer(500, timerID -> {
+            testCtx.verify(() -> assertEquals(1, publishedConfigCount.get()));
+            testCtx.completeNow();
+        });
     }
 
     @Test
@@ -117,6 +213,13 @@ public class ConfigurationWatcherTest {
         vertx.deployVerticle(watcher)
             .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
+
         // give some time so that the configuration can be processed
         vertx.setTimer(10000, timerID -> {
             // after 500 milliseconds 5 new configs were published
@@ -151,6 +254,13 @@ public class ConfigurationWatcherTest {
 
         vertx.deployVerticle(watcher)
             .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
 
         vertx.setTimer(2000, timerID -> {
             testCtx.completeNow();
@@ -197,6 +307,13 @@ public class ConfigurationWatcherTest {
         vertx.deployVerticle(watcher)
             .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
+
         vertx.setTimer(2000, timerID -> {
             testCtx.completeNow();
         });
@@ -238,6 +355,13 @@ public class ConfigurationWatcherTest {
 
         vertx.deployVerticle(watcher)
             .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
 
         vertx.setTimer(2000, timerID -> {
             JsonObject expected = buildConfiguration(
@@ -303,6 +427,13 @@ public class ConfigurationWatcherTest {
 
         vertx.deployVerticle(watcher)
             .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+
+        ((VertxInternal) vertx).addCloseHook(promise -> {
+            if (!testCtx.completed()) {
+                testCtx.failNow("should not terminate");
+            }
+            promise.complete();
+        });
 
         vertx.setTimer(2000, timerID -> {
             testCtx.verify(() -> assertEquals(2, publishedConfigCount.get()));

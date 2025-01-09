@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.core;
 
+import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
@@ -131,12 +132,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     }
 
     private void shutdownOnStartupFailure(Throwable throwable) {
-        if (throwable instanceof IllegalArgumentException) {
-            LOGGER.error("Will shut down because '{}'", throwable.getMessage());
-        } else {
-            LOGGER.error("Will shut down because '{}'", throwable.getMessage(), throwable);
-        }
-        vertx.close();
+        Runtime.fatal(vertx, throwable.getMessage());
     }
 
     private List<Entrypoint> entrypoints(JsonArray entrypointConfigs) {

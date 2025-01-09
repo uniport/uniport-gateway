@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
 import com.inventage.portal.gateway.GatewayRouter;
+import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
@@ -130,9 +131,7 @@ public class Entrypoint {
                 });
             LOGGER.info("EntryMiddlewares created successfully");
         }).onFailure(err -> {
-            vertx.close().onComplete(event -> {
-                LOGGER.error("Gateway is shutting down '{}'", err.getMessage());
-            });
+            Runtime.fatal(vertx, err.getMessage());
         });
     }
 
