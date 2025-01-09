@@ -24,8 +24,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class ConfigurationWatcherTest {
 
     private JsonObject assembleMessage(String providerName, JsonObject providerConfig) {
-        return new JsonObject().put(Provider.PROVIDER_NAME, providerName).put(Provider.PROVIDER_CONFIGURATION,
-            providerConfig);
+        return new JsonObject()
+            .put(Provider.PROVIDER_NAME, providerName)
+            .put(Provider.PROVIDER_CONFIGURATION, providerConfig);
     }
 
     @Test
@@ -34,32 +35,40 @@ public class ConfigurationWatcherTest {
         String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
         String configurationAddress = "test-simple-configuration-watcher";
-        List<JsonObject> messages = List.of(assembleMessage("mock", TestUtils.buildConfiguration(
+        List<JsonObject> messages = List.of(
+            assembleMessage("mock", TestUtils.buildConfiguration(
+                TestUtils.withRouters(
+                    TestUtils.withRouter("test",
+                        TestUtils.withRouterService("svc"),
+                        TestUtils.withRouterEntrypoints("ep"))),
+                TestUtils.withServices(
+                    TestUtils.withService("svc",
+                        TestUtils.withServers(TestUtils.withServer("host", 1234)))))));
+
+        JsonObject expected = TestUtils.buildConfiguration(
             TestUtils.withRouters(
-                TestUtils.withRouter("test", TestUtils.withRouterService("svc"), TestUtils.withRouterEntrypoints("ep"))),
-            TestUtils
-                .withServices(TestUtils.withService("svc", TestUtils.withServers(TestUtils.withServer("host", 1234)))))));
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages);
+                TestUtils.withRouter("test@mock",
+                    TestUtils.withRouterEntrypoints("ep"),
+                    TestUtils.withRouterService("svc@mock"))),
+            TestUtils.withMiddlewares(),
+            TestUtils.withServices(
+                TestUtils.withService("svc@mock",
+                    TestUtils.withServers(TestUtils.withServer("host", 1234)))));
 
         int providersThrottleIntervalMs = 1000;
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
-            providersThrottleIntervalMs, List.of());
+        Provider pvd = new MockProvider(vertx, configurationAddress, messages);
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress, providersThrottleIntervalMs, List.of());
 
         watcher.addListener(new Listener() {
             @Override
             public void listen(JsonObject actual) {
-                JsonObject expected = TestUtils.buildConfiguration(
-                    TestUtils.withRouters(TestUtils.withRouter("test@mock", TestUtils.withRouterEntrypoints("ep"),
-                        TestUtils.withRouterService("svc@mock"))),
-                    TestUtils.withMiddlewares(), TestUtils.withServices(
-                        TestUtils.withService("svc@mock", TestUtils.withServers(TestUtils.withServer("host", 1234)))));
-
                 testCtx.verify(() -> assertEquals(expected, actual, errMsg));
                 testCtx.completeNow();
             }
         });
 
-        vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
+        vertx.deployVerticle(watcher)
+            .onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
     }
 
     @Test
@@ -71,9 +80,12 @@ public class ConfigurationWatcherTest {
         List<JsonObject> messages = new ArrayList<JsonObject>();
         for (int i = 0; i < 5; i++) {
             messages.add(assembleMessage("mock", TestUtils.buildConfiguration(
-                TestUtils.withRouters(TestUtils.withRouter(String.format("foo%d", i), TestUtils.withRouterService("bar"))),
-                TestUtils
-                    .withServices(TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234)))))));
+                TestUtils.withRouters(
+                    TestUtils.withRouter(String.format("foo%d", i),
+                        TestUtils.withRouterService("bar"))),
+                TestUtils.withServices(
+                    TestUtils.withService("bar",
+                        TestUtils.withServers(TestUtils.withServer("host", 1234)))))));
         }
         long waitMs = 1000;
         Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
@@ -138,8 +150,12 @@ public class ConfigurationWatcherTest {
 
         String configurationAddress = "test-throttle-configuration-watcher";
         JsonObject message = assembleMessage("mock", TestUtils.buildConfiguration(
-            TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"))), TestUtils
-                .withServices(TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234))))));
+            TestUtils.withRouters(
+                TestUtils.withRouter("foo",
+                    TestUtils.withRouterService("bar"))),
+            TestUtils.withServices(
+                TestUtils.withService("bar",
+                    TestUtils.withServers(TestUtils.withServer("host", 1234))))));
         List<JsonObject> messages = List.of(message, message);
         long waitMs = 100;
 
@@ -176,8 +192,12 @@ public class ConfigurationWatcherTest {
 
         String configurationAddress = "test-throttle-configuration-watcher";
         JsonObject pvdConfig = TestUtils.buildConfiguration(
-            TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"))), TestUtils
-                .withServices(TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234)))));
+            TestUtils.withRouters(
+                TestUtils.withRouter("foo",
+                    TestUtils.withRouterService("bar"))),
+            TestUtils.withServices(
+                TestUtils.withService("bar",
+                    TestUtils.withServers(TestUtils.withServer("host", 1234)))));
         List<JsonObject> messages = List.of(assembleMessage("mock", pvdConfig), assembleMessage("mock2", pvdConfig));
         long waitMs = 10;
 
@@ -198,10 +218,14 @@ public class ConfigurationWatcherTest {
         vertx.deployVerticle(watcher).onFailure(err -> testCtx.failNow(String.format("%s: %s", errMsg, err.getMessage())));
 
         vertx.setTimer(2000, timerID -> {
-            JsonObject expected = TestUtils.buildConfiguration(TestUtils.withRouters(
-                TestUtils.withRouter("foo@mock", TestUtils.withRouterEntrypoints(), TestUtils.withRouterService("bar@mock")),
-                TestUtils
-                    .withRouter("foo@mock2", TestUtils.withRouterEntrypoints(), TestUtils.withRouterService("bar@mock2"))),
+            JsonObject expected = TestUtils.buildConfiguration(
+                TestUtils.withRouters(
+                    TestUtils.withRouter("foo@mock",
+                        TestUtils.withRouterEntrypoints(),
+                        TestUtils.withRouterService("bar@mock")),
+                    TestUtils.withRouter("foo@mock2",
+                        TestUtils.withRouterEntrypoints(),
+                        TestUtils.withRouterService("bar@mock2"))),
                 TestUtils.withMiddlewares(),
                 TestUtils.withServices(
                     TestUtils.withService("bar@mock", TestUtils.withServers(TestUtils.withServer("host", 1234))),
@@ -219,13 +243,19 @@ public class ConfigurationWatcherTest {
 
         String configurationAddress = "test-throttle-configuration-watcher";
         JsonObject pvdConfig = TestUtils.buildConfiguration(
-            TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"))), TestUtils
-                .withServices(TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234)))));
+            TestUtils.withRouters(
+                TestUtils.withRouter("foo",
+                    TestUtils.withRouterService("bar"))),
+            TestUtils.withServices(
+                TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234)))));
 
         // Update the provider configuration published in next dynamic Message which should trigger a new publish.
         JsonObject pvdConfigUpdate = TestUtils.buildConfiguration(
-            TestUtils.withRouters(TestUtils.withRouter("blub", TestUtils.withRouterService("bar"))), TestUtils
-                .withServices(TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234)))));
+            TestUtils.withRouters(
+                TestUtils.withRouter("blub",
+                    TestUtils.withRouterService("bar"))),
+            TestUtils.withServices(
+                TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer("host", 1234)))));
 
         List<JsonObject> messages = List.of(assembleMessage("mock", pvdConfig), assembleMessage("mock", pvdConfigUpdate));
         long waitMs = 100;

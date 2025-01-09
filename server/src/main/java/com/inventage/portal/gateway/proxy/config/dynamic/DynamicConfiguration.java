@@ -509,8 +509,8 @@ public class DynamicConfiguration {
                     .optionalProperty(SERVICE_SERVER_PROTOCOL, Schemas.stringSchema())
                     .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema())
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
-                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(Schemas.schema()
-                        .withKeyword(KEYWORD_TYPE, INT_TYPE),
+                    .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(
+                        Schemas.schema().withKeyword(KEYWORD_TYPE, INT_TYPE),
                         Schemas.schema()
                             .withKeyword(KEYWORD_TYPE, STRING_TYPE)
                             .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT)))
@@ -721,10 +721,13 @@ public class DynamicConfiguration {
         }
 
         final JsonObject httpConfig = json.getJsonObject(HTTP);
-        final List<Future<Void>> validFutures = Arrays.asList(validateRouters(httpConfig, complete),
-            validateMiddlewares(httpConfig), validateServices(httpConfig));
+        final List<Future<Void>> validFutures = Arrays.asList(
+            validateRouters(httpConfig, complete),
+            validateMiddlewares(httpConfig),
+            validateServices(httpConfig));
 
-        Future.all(validFutures).onSuccess(h -> {
+        Future.all(validFutures)
+            .onSuccess(h -> {
             validPromise.complete();
         }).onFailure(err -> {
             validPromise.fail(err.getMessage());
@@ -744,9 +747,9 @@ public class DynamicConfiguration {
         for (int i = 0; i < routers.size(); i++) {
             final JsonObject router = routers.getJsonObject(i);
             final String routerName = router.getString(ROUTER_NAME);
+
             if (routerNames.contains(routerName)) {
-                final String errMsg = String.format("validateRouters: duplicated router name '%s'. Should be unique.",
-                    routerName);
+                final String errMsg = String.format("duplicated router name '%s'. Should be unique.", routerName);
                 LOGGER.warn(errMsg);
                 return Future.failedFuture(errMsg);
             }

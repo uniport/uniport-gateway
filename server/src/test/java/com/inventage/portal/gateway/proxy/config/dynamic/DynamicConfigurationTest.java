@@ -81,15 +81,11 @@ public class DynamicConfigurationTest {
             new JsonObject().put(DynamicConfiguration.ROUTERS,
                 new JsonArray()
                     .add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME,
-                            "foo")
-                        .put(DynamicConfiguration.ROUTER_SERVICE,
-                            "bar"))
+                        .put(DynamicConfiguration.ROUTER_NAME, "foo")
+                        .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))
                     .add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME,
-                            "blub")
-                        .put(DynamicConfiguration.ROUTER_SERVICE,
-                            "testing"))));
+                        .put(DynamicConfiguration.ROUTER_NAME, "blub")
+                        .put(DynamicConfiguration.ROUTER_SERVICE, "testing"))));
 
         final JsonObject duplicatedRouter = new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
             .put(DynamicConfiguration.ROUTER_SERVICE, "bar");
@@ -594,37 +590,27 @@ public class DynamicConfigurationTest {
 
         final JsonObject httpRouterWithMiddlewareAndService = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
-                .put(DynamicConfiguration.ROUTERS,
-                    new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME,
-                            "routerFoo")
-                        .put(DynamicConfiguration.MIDDLEWARES,
-                            new JsonArray().add(
-                                "middlewareFoo"))
-                        .put(DynamicConfiguration.ROUTER_SERVICE,
-                            "serviceFoo")))
-                .put(DynamicConfiguration.MIDDLEWARES,
-                    new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME,
-                            "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                            DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                            new JsonObject().put(
-                                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                                "blub"))))
-                .put(DynamicConfiguration.SERVICES,
-                    new JsonArray()
-                        .add(new JsonObject().put(
-                            DynamicConfiguration.SERVICE_NAME,
-                            "serviceFoo").put(
-                                DynamicConfiguration.SERVICE_SERVERS,
-                                new JsonArray().add(
-                                    new JsonObject()
-                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST,
-                                            "localhost")
-                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT,
-                                            1234))))));
+                .put(DynamicConfiguration.ROUTERS, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                            .add("middlewareFoo"))
+                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))))
+                .put(DynamicConfiguration.SERVICES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
+                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
+                            .add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
+                                    "localhost")
+                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
+                                    1234))))));
 
         final JsonObject httpRouterWithMissingMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
@@ -676,69 +662,47 @@ public class DynamicConfigurationTest {
             new JsonObject()
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME,
-                            "routerFoo")
-                        .put(DynamicConfiguration.MIDDLEWARES,
-                            new JsonArray().add(
-                                "middlewareFoo"))
-                        .put(DynamicConfiguration.ROUTER_SERVICE,
-                            "serviceFoo")))
-                .put(DynamicConfiguration.MIDDLEWARES,
-                    new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME,
-                            "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                            DynamicConfiguration.MIDDLEWARE_CONTROL_API)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                            new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION,
-                                    "SESSION_TERMINATE"))))
-                .put(DynamicConfiguration.SERVICES,
-                    new JsonArray()
-                        .add(new JsonObject().put(
-                            DynamicConfiguration.SERVICE_NAME,
-                            "serviceFoo").put(
-                                DynamicConfiguration.SERVICE_SERVERS,
-                                new JsonArray().add(
-                                    new JsonObject()
-                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST,
-                                            "localhost")
-                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT,
-                                            1234))))));
+                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                            .add("middlewareFoo"))
+                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_CONTROL_API)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_TERMINATE"))))
+                .put(DynamicConfiguration.SERVICES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
+                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
+                            .add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
+                                    "localhost")
+                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
+                                    1234))))));
 
         final JsonObject controlApiMiddlewareWithSessionReset = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
-                .put(DynamicConfiguration.ROUTERS,
-                    new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME,
-                            "routerFoo")
-                        .put(DynamicConfiguration.MIDDLEWARES,
-                            new JsonArray().add(
-                                "middlewareFoo"))
-                        .put(DynamicConfiguration.ROUTER_SERVICE,
-                            "serviceFoo")))
-                .put(DynamicConfiguration.MIDDLEWARES,
-                    new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME,
-                            "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                            DynamicConfiguration.MIDDLEWARE_CONTROL_API)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                            new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION,
-                                    "SESSION_RESET"))))
-                .put(DynamicConfiguration.SERVICES,
-                    new JsonArray()
-                        .add(new JsonObject().put(
-                            DynamicConfiguration.SERVICE_NAME,
-                            "serviceFoo").put(
-                                DynamicConfiguration.SERVICE_SERVERS,
-                                new JsonArray().add(
-                                    new JsonObject()
-                                        .put(DynamicConfiguration.SERVICE_SERVER_HOST,
-                                            "localhost")
-                                        .put(DynamicConfiguration.SERVICE_SERVER_PORT,
-                                            1234))))));
+                .put(DynamicConfiguration.ROUTERS, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                            .add("middlewareFoo"))
+                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
+                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_CONTROL_API)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_RESET"))))
+                .put(DynamicConfiguration.SERVICES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
+                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
+                            .add(new JsonObject()
+                                .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
+                                .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
 
         final JsonObject cspMiddlewareWithDefaultSrcSelf = TestUtils
             .buildConfiguration(TestUtils

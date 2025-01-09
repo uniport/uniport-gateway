@@ -250,15 +250,16 @@ public class RouterFactory {
         // Handlers will get called if and only if
         // - all futures are succeeded and completed
         // - any future is failed.
-        Future.all(middlewareFutures).onSuccess(cf -> {
-            middlewareFutures.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
-            LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
-            handler.handle(Future.succeededFuture(router));
-        }).onFailure(cfErr -> {
-            final String errMsg = String.format("Failed to create middlewares of router '%s'", routerName);
-            LOGGER.warn("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-        });
+        Future.all(middlewareFutures)
+            .onSuccess(cf -> {
+                middlewareFutures.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
+                LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
+                handler.handle(Future.succeededFuture(router));
+            }).onFailure(cfErr -> {
+                final String errMsg = String.format("Failed to create middlewares of router '%s'", routerName);
+                LOGGER.warn("{}", errMsg);
+                handler.handle(Future.failedFuture(errMsg));
+            });
     }
 
     private Future<Middleware> createMiddleware(JsonObject middlewareConfig, Router router) {

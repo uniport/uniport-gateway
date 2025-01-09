@@ -129,7 +129,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             final String rtName = rt.getString(DynamicConfiguration.ROUTER_NAME);
             rt.put(DynamicConfiguration.ROUTER_NAME, getQualifiedName(providerName, rtName));
 
-            // Service and middlewares may referencing to another provider namespace
+            // Service and middlewares may referencing another provider namespace
             // The names are only patched if this is not the case.
             final String svName = rt.getString(DynamicConfiguration.ROUTER_SERVICE);
             rt.put(DynamicConfiguration.ROUTER_SERVICE, getQualifiedName(providerName, svName));
@@ -142,7 +142,6 @@ public class ConfigurationWatcher extends AbstractVerticle {
                     qualifiedMwNames.add(getQualifiedName(providerName, mwName));
                 }
                 rt.put(DynamicConfiguration.ROUTER_MIDDLEWARES, qualifiedMwNames);
-
             }
 
             mergedRts.add(rt);
@@ -221,9 +220,11 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.configurationListeners.add(listener);
     }
 
-    // listenProviders receives configuration changes from the providers.
-    // The configuration message then gets passed along a series of check
-    // to finally end up in a throttler that sends it to listenConfigurations.
+    /**
+     * listenProviders receives configuration changes from the providers.
+     * The configuration message then gets passed along a series of check
+     * to finally end up in a throttler that sends it to listenConfigurations.
+     */
     private void listenProviders() {
         LOGGER.debug("Listening for new configuration...");
         final MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
@@ -267,13 +268,15 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.eventBus.publish(providerName, nextConfig);
     }
 
-    // throttleProviderConfigReload throttles the configuration reload speed for a
-    // single provider.
-    // It will immediately publish a new configuration and then only publish the
-    // next configuration after the throttle duration.
-    // Note that in the case it receives N new configs in the timeframe of the
-    // throttle duration after publishing, it will publish the last of the newly
-    // received configurations.
+    /**
+     * throttleProviderConfigReload throttles the configuration reload speed for a
+     * single provider.
+     * It will immediately publish a new configuration and then only publish the
+     * next configuration after the throttle duration.
+     * Note that in the case it receives N new configs in the timeframe of the
+     * throttle duration after publishing, it will publish the last of the newly
+     * received configurations.
+     */
     private void throttleProviderConfigReload(int throttleMs, String providerConfigReloadAddress) {
         final Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
         final Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
@@ -332,7 +335,6 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
         final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
         final JsonObject providerConfig = nextConfig.getJsonObject(Provider.PROVIDER_CONFIGURATION);
-
         if (providerConfig == null) {
             return;
         }
@@ -342,7 +344,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
         final JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
-        DynamicConfiguration.validate(vertx, mergedConfig, true).onSuccess(handler -> {
+        DynamicConfiguration.validate(vertx, mergedConfig, true)
+            .onSuccess(handler -> {
             LOGGER.debug("Informing listeners about new configuration '{}'", mergedConfig);
             for (Listener listener : this.configurationListeners) {
                 listener.listen(mergedConfig);

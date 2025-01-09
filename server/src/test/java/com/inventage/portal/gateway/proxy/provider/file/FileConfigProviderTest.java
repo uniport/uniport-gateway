@@ -28,7 +28,8 @@ public class FileConfigProviderTest {
 
     static Stream<Arguments> provideWithoutWatchTestData() {
         // port as int/no variables
-        return Stream.of(Arguments.of("simple file", "fileConfigProvider/simple_file_01.json", 3, 6),
+        return Stream.of(
+            Arguments.of("simple file", "fileConfigProvider/simple_file_01.json", 3, 6),
             Arguments.of("simple directory", "fileConfigProvider/simple_dir_01", 2, 3),
             Arguments.of("merge directories", "fileConfigProvider/merge_dir_01", 3, 3),
             Arguments.of("merge directories with arbitrary folder names", "fileConfigProvider/merge_dir_02", 3, 3));
@@ -67,7 +68,7 @@ public class FileConfigProviderTest {
 
     @Test
     @DisplayName("simple file with variable substitution")
-    void varibleSubstitutionTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
+    void variableSubstitutionTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
         String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
         Checkpoint fileProviderStarted = testCtx.checkpoint();
@@ -83,8 +84,10 @@ public class FileConfigProviderTest {
         String path = "fileConfigProvider/variable_substitution_file_01.json";
         String configurationAddress = "file-config-provider-test";
         boolean watch = false;
-        JsonObject env = new JsonObject().put("test.host", expectedHost)
-            .put("test.port.string", String.format("%s", expectedPort)).put("test.port.number", expectedPort);
+        JsonObject env = new JsonObject()
+            .put("test.host", expectedHost)
+            .put("test.port.string", String.format("%s", expectedPort))
+            .put("test.port.number", expectedPort);
         FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
         if (fileProvider == null) {
             testCtx.failNow("Failed to created file provder. File/Directory does not exist.");

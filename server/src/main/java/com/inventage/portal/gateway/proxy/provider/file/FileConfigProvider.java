@@ -68,12 +68,13 @@ public class FileConfigProvider extends Provider {
     @Override
     public void provide(Promise<Void> startPromise) {
         final ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
-        retriever.getConfig().onSuccess(config -> {
-            this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
-        }).onFailure(err -> {
-            final String errMsg = String.format("failed to retrieve dynamic configuration '{}'", err.getMessage());
-            LOGGER.warn(errMsg);
-        });
+        retriever.getConfig()
+            .onSuccess(config -> {
+                this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
+            }).onFailure(err -> {
+                final String errMsg = String.format("failed to retrieve dynamic configuration '{}'", err.getMessage());
+                LOGGER.warn(errMsg);
+            });
 
         if (this.watch) {
             LOGGER.info("Listening to configuration changes");
@@ -204,13 +205,15 @@ public class FileConfigProvider extends Provider {
     }
 
     private void validateAndPublish(JsonObject config) {
-        DynamicConfiguration.validate(this.vertx, config, false).onSuccess(f -> {
-            this.eb.publish(this.configurationAddress,
-                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
-                    .put(Provider.PROVIDER_CONFIGURATION, config));
-            LOGGER.info("Configuration published from '{}'", this.source);
-        }).onFailure(err -> {
-            LOGGER.warn("Ignoring invalid configuration '{}' from '{}': '{}'", this.filename, this.source, err.getMessage());
-        });
+        DynamicConfiguration.validate(this.vertx, config, false)
+            .onSuccess(f -> {
+                this.eb.publish(this.configurationAddress,
+                    new JsonObject()
+                        .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)
+                        .put(Provider.PROVIDER_CONFIGURATION, config));
+                LOGGER.info("Configuration published from '{}'", this.source);
+            }).onFailure(err -> {
+                LOGGER.warn("Ignoring invalid configuration '{}' from '{}': '{}'", this.filename, this.source, err.getMessage());
+            });
     }
 }
