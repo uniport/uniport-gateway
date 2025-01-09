@@ -3,6 +3,7 @@
         "routers": [
             {
                 "name": "router3",
+                "rule": "Path('/')",
                 "service": "application-3"
             }
         ],

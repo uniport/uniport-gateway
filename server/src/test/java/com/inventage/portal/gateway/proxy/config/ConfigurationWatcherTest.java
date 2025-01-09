@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.TestUtils.withRouter;
 import static com.inventage.portal.gateway.TestUtils.withRouterEntrypoints;
+import static com.inventage.portal.gateway.TestUtils.withRouterRule;
 import static com.inventage.portal.gateway.TestUtils.withRouterService;
 import static com.inventage.portal.gateway.TestUtils.withRouters;
 import static com.inventage.portal.gateway.TestUtils.withServer;
@@ -44,6 +45,7 @@ public class ConfigurationWatcherTest {
             assembleMessage("mock", buildConfiguration(
                 withRouters(
                     withRouter("test",
+                        withRouterRule("Path('/')"),
                         withRouterService("svc"),
                         withRouterEntrypoints("ep"))),
                 withServices(
@@ -54,6 +56,7 @@ public class ConfigurationWatcherTest {
             withRouters(
                 withRouter("test@mock",
                     withRouterEntrypoints("ep"),
+                    withRouterRule("Path('/')"),
                     withRouterService("svc@mock"))),
             withMiddlewares(),
             withServices(
@@ -80,6 +83,7 @@ public class ConfigurationWatcherTest {
 
     @Test
     @DisplayName("throttle provider config reload test")
+    @SuppressWarnings("unchecked")
     void throttleProviderConfigReloadTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
         String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
@@ -89,6 +93,7 @@ public class ConfigurationWatcherTest {
             messages.add(assembleMessage("mock", buildConfiguration(
                 withRouters(
                     withRouter(String.format("foo%d", i),
+                        withRouterRule("Path('/')"),
                         withRouterService("bar"))),
                 withServices(
                     withService("bar",
@@ -154,6 +159,7 @@ public class ConfigurationWatcherTest {
 
     @Test
     @DisplayName("skip same config for provider test")
+    @SuppressWarnings("unchecked")
     void skipSameConfigForProviderTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
         String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
@@ -161,6 +167,7 @@ public class ConfigurationWatcherTest {
         JsonObject message = assembleMessage("mock", buildConfiguration(
             withRouters(
                 withRouter("foo",
+                    withRouterRule("Path('/')"),
                     withRouterService("bar"))),
             withServices(
                 withService("bar",
@@ -197,6 +204,7 @@ public class ConfigurationWatcherTest {
 
     @Test
     @DisplayName("publishes config for each provider test")
+    @SuppressWarnings("unchecked")
     void publishesConfigForEachProviderTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
         String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
@@ -204,6 +212,7 @@ public class ConfigurationWatcherTest {
         JsonObject pvdConfig = buildConfiguration(
             withRouters(
                 withRouter("foo",
+                    withRouterRule("Path('/')"),
                     withRouterService("bar"))),
             withServices(
                 withService("bar",
@@ -234,9 +243,11 @@ public class ConfigurationWatcherTest {
             JsonObject expected = buildConfiguration(
                 withRouters(
                     withRouter("foo@mock",
+                        withRouterRule("Path('/')"),
                         withRouterEntrypoints(),
                         withRouterService("bar@mock")),
                     withRouter("foo@mock2",
+                        withRouterRule("Path('/')"),
                         withRouterEntrypoints(),
                         withRouterService("bar@mock2"))),
                 withMiddlewares(),
@@ -251,6 +262,7 @@ public class ConfigurationWatcherTest {
 
     @Test
     @DisplayName("publish config by provider test")
+    @SuppressWarnings("unchecked")
     void publishConfigByProviderTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
         String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
@@ -258,6 +270,7 @@ public class ConfigurationWatcherTest {
         JsonObject pvdConfig = buildConfiguration(
             withRouters(
                 withRouter("foo",
+                    withRouterRule("Path('/')"),
                     withRouterService("bar"))),
             withServices(
                 withService("bar", withServers(withServer("host", 1234)))));
@@ -266,6 +279,7 @@ public class ConfigurationWatcherTest {
         JsonObject pvdConfigUpdate = buildConfiguration(
             withRouters(
                 withRouter("blub",
+                    withRouterRule("Path('/')"),
                     withRouterService("bar"))),
             withServices(
                 withService("bar", withServers(withServer("host", 1234)))));

@@ -6,6 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
 import io.vertx.core.Future;
@@ -752,6 +753,14 @@ public class DynamicConfiguration {
                 return Future.failedFuture(errMsg);
             }
             routerNames.add(routerName);
+
+            try {
+                RouterFactory.validateRouter(router);
+            } catch (IllegalArgumentException e) {
+                final String errMsg = String.format("router '%s' is invalid: %s", routerName, e.getMessage());
+                LOGGER.warn(errMsg);
+                return Future.failedFuture(errMsg);
+            }
         }
 
         if (!complete) {

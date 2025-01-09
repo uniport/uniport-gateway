@@ -337,7 +337,7 @@ public class RouterFactoryTest {
         }));
     }
 
-    private static Stream<String> provideStringsForValidParseRule() {
+    private static Stream<String> provideStringsForValidRouterRule() {
         return Stream.of(
             "Path('/')",
             "Path('/foo')",
@@ -374,14 +374,16 @@ public class RouterFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideStringsForValidParseRule")
-    public void testValidParseRule(String input, VertxTestContext testCtx) {
-        VertxAssertions.assertNotNull(testCtx, routerFactory.parseRule(input),
-            String.format("%s should be parseable into a routing rule", input));
+    @MethodSource("provideStringsForValidRouterRule")
+    public void testValidRouterRule(String rule, VertxTestContext testCtx) {
+        final JsonObject config = JsonObject.of(DynamicConfiguration.ROUTER_RULE, rule);
+        VertxAssertions.assertDoesNotThrow(testCtx,
+            () -> RouterFactory.validateRouter(config),
+            String.format("%s should be parseable into a routing rule", rule));
         testCtx.completeNow();
     }
 
-    private static Stream<String> provideStringsForInvalidParseRule() {
+    private static Stream<String> provideStringsForInvalidRouterRule() {
         return Stream.of(
             "Path(\"/foo\")",
             "Path('')",
@@ -408,10 +410,13 @@ public class RouterFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideStringsForInvalidParseRule")
-    public void testInvalidParseRule(String input, VertxTestContext testCtx) {
-        VertxAssertions.assertNull(testCtx, routerFactory.parseRule(input),
-            String.format("%s should not be parseable into a routing rule", input));
+    @MethodSource("provideStringsForInvalidRouterRule")
+    public void testInvalidRouterRule(String rule, VertxTestContext testCtx) {
+        final JsonObject config = JsonObject.of(DynamicConfiguration.ROUTER_RULE, rule);
+        VertxAssertions.assertThrows(testCtx,
+            IllegalArgumentException.class,
+            () -> RouterFactory.validateRouter(config),
+            String.format("%s should not be parseable into a routing rule", rule));
         testCtx.completeNow();
     }
 

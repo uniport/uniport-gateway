@@ -117,6 +117,49 @@ public class RouterFactory {
     private static final Pattern HOST_PATTERN = Pattern.compile("^[" + IP_LITERAL + IPV4 + REG_NAME + "]+$");
     private static final Pattern PATH_PATTERN = Pattern.compile("^\\/[" + PCHAR + "\\/]*$");
 
+    public static void validateRouter(JsonObject config) {
+        final String rule = config.getString(DynamicConfiguration.ROUTER_RULE);
+        if (rule == null) {
+            throw new IllegalArgumentException("no rule");
+        }
+
+        final Matcher m = RULE_PATTERN.matcher(rule);
+        if (!m.matches()) {
+            throw new IllegalArgumentException("illegal rule format");
+        }
+
+        final String ruleName = m.group("ruleName");
+        final String ruleValue = m.group("ruleValue");
+        switch (ruleName) {
+            case PATH_RULE_NAME: {
+                if (!PATH_PATTERN.matcher(ruleValue).matches()) {
+                    throw new IllegalArgumentException("illegal path value");
+                }
+                return;
+            }
+            case PATH_PREFIX_RULE_NAME: {
+                if (!PATH_PATTERN.matcher(ruleValue).matches()) {
+                    throw new IllegalArgumentException("illegal path prefix value");
+                }
+                return;
+            }
+            case HOST_RULE_NAME: {
+                if (!HOST_PATTERN.matcher(ruleValue).matches()) {
+                    throw new IllegalArgumentException("illegal host value");
+                }
+                return;
+            }
+            case PATH_REGEX_RULE_NAME:
+            case PATH_PREFIX_REGEX_RULE_NAME:
+            case HOST_REGEX_RULE_NAME: {
+                return; // regex value is not validated further
+            }
+            default: {
+                throw new IllegalArgumentException("unkown rule");
+            }
+        }
+    }
+
     public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort, String entrypointName) {
         this.vertx = vertx;
         this.publicProtocol = publicProtocol;

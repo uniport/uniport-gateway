@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Allow underscore characters in `Path`, `PathPrefix` and `Host` router rules.
+- Validate router rule as part of the global configuration validation ([PORTAL-2109](https://inventage-all.atlassian.net/browse/PORTAL-2109)).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 

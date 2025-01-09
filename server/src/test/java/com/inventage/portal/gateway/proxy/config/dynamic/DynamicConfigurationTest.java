@@ -59,6 +59,7 @@ public class DynamicConfigurationTest {
             new JsonObject().put(DynamicConfiguration.ROUTERS,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.ROUTER_NAME, "foo")
+                    .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                     .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))));
 
         final JsonObject singleCompleteHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
@@ -67,7 +68,7 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.ROUTER_SERVICE, "bar")
                 .put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray())
                 .put(DynamicConfiguration.ROUTER_MIDDLEWARES, new JsonArray())
-                .put(DynamicConfiguration.ROUTER_RULE, "bla")
+                .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                 .put(DynamicConfiguration.ROUTER_PRIORITY, 42))));
 
         final JsonObject unkownKeyHttpRouter = new JsonObject().put(DynamicConfiguration.HTTP,
@@ -82,9 +83,11 @@ public class DynamicConfigurationTest {
                 new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.ROUTER_NAME, "foo")
+                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                         .put(DynamicConfiguration.ROUTER_SERVICE, "bar"))
                     .add(new JsonObject()
                         .put(DynamicConfiguration.ROUTER_NAME, "blub")
+                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                         .put(DynamicConfiguration.ROUTER_SERVICE, "testing"))));
 
         final JsonObject duplicatedRouter = new JsonObject().put(DynamicConfiguration.ROUTER_NAME, "foo")
@@ -593,6 +596,7 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.ROUTERS, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                             .add("middlewareFoo"))
                         .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
@@ -663,6 +667,7 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.ROUTERS,
                     new JsonArray().add(new JsonObject()
                         .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                             .add("middlewareFoo"))
                         .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
@@ -687,6 +692,7 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.ROUTERS, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
+                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
                         .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                             .add("middlewareFoo"))
                         .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
