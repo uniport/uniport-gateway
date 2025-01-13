@@ -20,7 +20,6 @@ import io.vertx.json.schema.JsonSchema;
 import io.vertx.json.schema.JsonSchemaOptions;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.SchemaException;
-import io.vertx.json.schema.ValidationException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
@@ -28,7 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -692,628 +690,756 @@ public class DynamicConfiguration {
 
     /**
      * Validates a JSON object representing a dynamic configuration instance.
+     * The JSON object is expected to be complete i.e. all references are present in it.
+     * 
+     * This is a all or nothing validation.
+     * 
+     * @param vertx
+     * @param json
+     * @return Future that fails, if any reference cannot be resolved or any part is invalid.
+     */
+    public static Future<Void> validate(Vertx vertx, JsonObject json) {
+        return validate(vertx, json, true, false).mapEmpty();
+    }
+
+    /**
+     * Validates a JSON object representing a dynamic configuration instance.
+     * The JSON object may contain references that are not present <==> {@code requireCompleteConfig == false}.
+     * 
+     * @param vertx
+     * @param json
+     * @param requireCompleteConfig
+     * @return Future that fails, if any part is invalid.
+     */
+    public static Future<Void> validate(Vertx vertx, JsonObject json, boolean requireCompleteConfig) {
+        return validate(vertx, json, requireCompleteConfig, false).mapEmpty();
+    }
+
+    /**
+     * Validates a JSON object representing a dynamic configuration instance.
      *
      * @param vertx
-     *            a Vertx instance
+     *            The Vertx instance
      * @param json
-     *            the json object to validate
-     * @param complete
-     *            if set to true, all references to objects need to point to
-     *            existing objects (e.g. router middlewares and router
-     *            services)
-     * @return a Future that will succeed or fail eventually
+     *            The JSON object to validate
+     * @param requireCompleteConfig
+     *            If set, all references (to middlewares and services) need to be present
+     * @param omitInvalidRouters
+     *            If set, routers with invalid configuration are omitted from the final result
+     *            A valid router requires all of its referenced dependencies to be valid as well.
+     * @return Future that contains the subset of router that are valid.
      */
-    public static Future<Void> validate(Vertx vertx, JsonObject json, boolean complete) {
+    public static Future<JsonArray> validate(Vertx vertx, JsonObject json, boolean requireCompleteConfig, boolean omitInvalidRouters) {
         if (validator == null) {
             validator = buildValidator();
         }
 
-        final Promise<Void> validPromise = Promise.promise();
+        final OutputUnit result;
         try {
-            final OutputUnit result = validator.validate(json);
-            if (!result.getValid()) {
-                throw result.toException(json);
-            }
-        } catch (SchemaException | ValidationException e) {
-            validPromise.fail(e);
-            return validPromise.future();
+            result = validator.validate(json);
+        } catch (SchemaException e) {
+            return Future.failedFuture(e);
+        }
+        if (result.getValid() == null || !result.getValid()) {
+            return Future.failedFuture(result.toString());
         }
 
+        // validate possible dependencies first
         final JsonObject httpConfig = json.getJsonObject(HTTP);
-        final List<Future<Void>> validFutures = Arrays.asList(
-            validateRouters(httpConfig, complete),
-            validateMiddlewares(httpConfig),
-            validateServices(httpConfig));
+        final Future<JsonArray> validMiddlewares = validateMiddlewares(httpConfig.getJsonArray(MIDDLEWARES), omitInvalidRouters);
+        final Future<JsonArray> validServices = validateServices(httpConfig.getJsonArray(SERVICES), omitInvalidRouters);
 
-        Future.all(validFutures)
-            .onSuccess(h -> {
-                validPromise.complete();
-            }).onFailure(err -> {
-                validPromise.fail(err.getMessage());
-            });
-
-        return validPromise.future();
+        return Future.join(List.of(validMiddlewares, validServices))
+            .compose(
+                cf -> {
+                    final JsonArray routers = httpConfig.getJsonArray(ROUTERS);
+                    return validateRouters(routers, validMiddlewares.result(), validServices.result(), requireCompleteConfig, omitInvalidRouters);
+                },
+                err -> {
+                    if (validMiddlewares.failed()) {
+                        LOGGER.warn("invalid middleware configuration: {}", validMiddlewares.cause().getMessage());
+                    }
+                    if (validMiddlewares.failed()) {
+                        LOGGER.warn("invalid service configuration: {}", validServices.cause().getMessage());
+                    }
+                    return Future.failedFuture("invalid configuration");
+                });
     }
 
-    private static Future<Void> validateRouters(JsonObject httpConfig, boolean complete) {
-        final JsonArray routers = httpConfig.getJsonArray(ROUTERS);
+    private static Future<JsonArray> validateRouters(
+        JsonArray routers, JsonArray validMiddlewares, JsonArray validServices,
+        boolean requireFullValidation, boolean discardInvalid
+    ) {
         if (routers == null || routers.size() == 0) {
-            LOGGER.warn("No routers defined");
-            return Future.succeededFuture();
+            LOGGER.info("No routers defined");
+            return Future.succeededFuture(JsonArray.of());
         }
 
-        final Set<String> routerNames = new HashSet<>();
+        final JsonArray validRouters = filterValidRouters(routers);
+        if (!discardInvalid && validRouters.size() != routers.size()) {
+            return Future.failedFuture("at least one router configuration is invalid");
+        }
+
+        if (!requireFullValidation) {
+            return Future.succeededFuture(validRouters);
+        }
+
+        final Set<String> middlewareNames = collectMiddlewareNames(validMiddlewares);
+        final Set<String> serviceNames = collectServiceNames(validServices);
+        final JsonArray validRoutersExtended = filterRoutersWithValidReferences(validRouters, middlewareNames, serviceNames);
+        if (!discardInvalid && validRoutersExtended.size() != validRouters.size()) {
+            return Future.failedFuture("at least one router configuration is invalid");
+        }
+
+        return Future.succeededFuture(validRoutersExtended);
+    }
+
+    /**
+     * Filters routers, which a unique name and a valid rule.
+     * 
+     * @param routers
+     *            to validate
+     * @return the filtered routers
+     * 
+     */
+    private static JsonArray filterValidRouters(JsonArray routers) {
+        final JsonArray validRouters = new JsonArray();
+        final Set<String> names = new HashSet<>();
         for (int i = 0; i < routers.size(); i++) {
             final JsonObject router = routers.getJsonObject(i);
-            final String routerName = router.getString(ROUTER_NAME);
-
-            if (routerNames.contains(routerName)) {
-                final String errMsg = String.format("duplicated router name '%s'. Should be unique.", routerName);
-                LOGGER.warn(errMsg);
-                return Future.failedFuture(errMsg);
+            final String name = router.getString(ROUTER_NAME);
+            if (names.contains(name)) {
+                final String errMsg = String.format("duplicated router name '%s'. Should be unique.", name);
+                LOGGER.warn("ignoring invalid router '{}': {}", name, errMsg);
+                continue;
             }
-            routerNames.add(routerName);
+            names.add(name);
 
             try {
                 RouterFactory.validateRouter(router);
             } catch (IllegalArgumentException e) {
-                final String errMsg = String.format("router '%s' is invalid: %s", routerName, e.getMessage());
-                LOGGER.warn(errMsg);
-                return Future.failedFuture(errMsg);
+                final String errMsg = e.getMessage();
+                LOGGER.warn("ignoring invalid router '{}': {}", name, errMsg);
+                continue;
+            }
+
+            validRouters.add(router);
+        }
+        return validRouters;
+    }
+
+    private static Set<String> collectMiddlewareNames(JsonArray middlewares) {
+        if (middlewares == null) {
+            return Set.of();
+        }
+
+        final Set<String> names = new HashSet<>();
+        for (int i = 0; i < middlewares.size(); i++) {
+            final JsonObject middleware = middlewares.getJsonObject(i);
+            final String mwName = middleware.getString(MIDDLEWARE_NAME);
+            if (mwName != null) {
+                names.add(mwName);
             }
         }
+        return names;
+    }
 
-        if (!complete) {
-            return Future.succeededFuture();
+    private static Set<String> collectServiceNames(JsonArray services) {
+        if (services == null) {
+            return Set.of();
         }
 
-        // collect used middlewares and services
-        final Set<String> routerMiddlewareNames = new HashSet<>();
-        final Set<String> routerServiceNames = new HashSet<>();
+        final Set<String> names = new HashSet<>();
+        for (int i = 0; i < services.size(); i++) {
+            final JsonObject service = services.getJsonObject(i);
+            final String svName = service.getString(SERVICE_NAME);
+            if (svName != null) {
+                names.add(svName);
+            }
+        }
+        return names;
+    }
+
+    /**
+     * Filters routers, which reference only middlewares and services that exist.
+     * 
+     * @param routers
+     *            to validate
+     * @param middlewareNames
+     *            set of names of existing middleware
+     * @param serviceNames
+     *            set of names of existing services
+     * @return the filtered routers
+     */
+    private static JsonArray filterRoutersWithValidReferences(JsonArray routers, Set<String> middlewareNames, Set<String> serviceNames) {
+        final JsonArray validRouters = new JsonArray();
+
         for (int i = 0; i < routers.size(); i++) {
             final JsonObject router = routers.getJsonObject(i);
+            final String name = router.getString(ROUTER_NAME);
 
-            final JsonArray routerMwNames = router.getJsonArray(ROUTER_MIDDLEWARES);
-            if (routerMwNames != null) {
-                for (int j = 0; j < routerMwNames.size(); j++) {
-                    final String routerMwName = routerMwNames.getString(j);
-                    if (routerMwName != null) {
-                        routerMiddlewareNames.add(routerMwName);
-                    }
+            final JsonArray routerMwNames = router.getJsonArray(ROUTER_MIDDLEWARES, JsonArray.of());
+            for (int j = 0; j < routerMwNames.size(); j++) {
+                final String routerMwName = routerMwNames.getString(j);
+                if (!middlewareNames.contains(routerMwName)) {
+                    final String errMsg = String.format("unknown middleware '%s' defined", routerMwNames);
+                    LOGGER.warn("ignoring invalid router '{}': {}", name, errMsg);
+                    continue;
                 }
             }
 
-            final String routerSvName = router.getString(ROUTER_SERVICE);
-            if (routerSvName != null) {
-                routerServiceNames.add(routerSvName);
+            final String routerSvcName = router.getString(ROUTER_SERVICE);
+            if (!serviceNames.contains(routerSvcName)) {
+                final String errMsg = String.format("unknown service '%s' defined", routerSvcName);
+                LOGGER.warn("ignoring invalid router '{}': {}", name, errMsg);
+                continue;
             }
+
+            validRouters.add(router);
         }
 
-        // check whether alls used middlewares and services are defined
-        final JsonArray middlewares = httpConfig.getJsonArray(MIDDLEWARES);
-        final JsonArray services = httpConfig.getJsonArray(SERVICES);
-
-        for (String mwName : routerMiddlewareNames) {
-            if (getObjByKeyWithValue(middlewares, MIDDLEWARE_NAME, mwName) == null) {
-                final String errMsg = String.format("validateRouters: unknown middleware '%s' defined", mwName);
-                LOGGER.error(errMsg);
-                return Future.failedFuture(errMsg);
-            }
-        }
-
-        for (String svName : routerServiceNames) {
-            if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
-                final String errMsg = String.format("validateRouters: unknown service '%s' defined", svName);
-                LOGGER.error(errMsg);
-                return Future.failedFuture(errMsg);
-            }
-        }
-
-        return Future.succeededFuture();
+        return validRouters;
     }
 
-    public static Future<Void> validateMiddlewares(JsonObject httpConfig) {
-        final JsonArray mws = httpConfig.getJsonArray(MIDDLEWARES);
-        if (mws == null || mws.size() == 0) {
+    public static Future<JsonArray> validateMiddlewares(JsonArray middlewares, boolean discardInvalid) {
+        if (middlewares == null || middlewares.size() == 0) {
             LOGGER.debug("No middlewares defined");
-            return Future.succeededFuture();
+            return Future.succeededFuture(JsonArray.of());
         }
 
-        final Set<String> mwNames = new HashSet<>();
-        for (int i = 0; i < mws.size(); i++) {
-            final JsonObject mw = mws.getJsonObject(i);
-            final String mwName = mw.getString(MIDDLEWARE_NAME);
-            final String mwType = mw.getString(MIDDLEWARE_TYPE);
-            final JsonObject mwOptions = mw.getJsonObject(MIDDLEWARE_OPTIONS, new JsonObject());
+        return filterValidMiddlewares(middlewares)
+            .compose(validMiddlewares -> {
+                if (!discardInvalid && validMiddlewares.size() != middlewares.size()) {
+                    return Future.failedFuture("at least one middleware configuration is invalid");
+                }
+                return Future.succeededFuture(validMiddlewares);
+            });
+    }
 
-            if (mwNames.contains(mwName)) {
-                final String errMsg = String.format(
-                    "validateMiddlewares: duplicated middleware name '%s'. Should be unique.",
-                    mwName);
-                LOGGER.warn(errMsg);
-                return Future.failedFuture(errMsg);
+    private static Future<JsonArray> filterValidMiddlewares(JsonArray middlewares) {
+        final JsonArray validMiddlewares = new JsonArray();
+        final List<Future<Void>> futs = new LinkedList<>();
+        final Set<String> names = new HashSet<>();
+        for (int i = 0; i < middlewares.size(); i++) {
+            final JsonObject middleware = middlewares.getJsonObject(i);
+            final String name = middleware.getString(MIDDLEWARE_NAME);
+            if (names.contains(name)) {
+                final String errMsg = String.format("duplicated middleware name '%s'. Should be unique.", name);
+                LOGGER.info("ignoring invalid middleware'{}': {}", name, errMsg);
+                continue;
             }
-            mwNames.add(mwName);
+            names.add(name);
 
-            switch (mwType) {
-                case MIDDLEWARE_AUTHORIZATION_BEARER: {
-                    final String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
-                    if (sessionScope == null || sessionScope.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
-                    }
-                    break;
-                }
-                case MIDDLEWARE_BEARER_ONLY: {
-                    final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
-                    if (validationResult != null) {
-                        return validationResult;
-                    }
-                    break;
-                }
-                case MIDDLEWARE_CHECK_ROUTE: {
-                    break;
-                }
-                case MIDDLEWARE_CORS: {
-                    break;
-                }
-                case MIDDLEWARE_CONTROL_API: {
-                    final String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
-                    if (action == null) {
-                        return Future.failedFuture(
-                            String.format("%s: No control api action defined", mwType));
-                    }
+            final String type = middleware.getString(MIDDLEWARE_TYPE);
+            final JsonObject options = middleware.getJsonObject(MIDDLEWARE_OPTIONS, new JsonObject());
+            futs.add(validateMiddlewareOptions(type, options)
+                .onSuccess(v -> validMiddlewares.add(middleware))
+                .onFailure(err -> LOGGER.warn("ignoring invalid middleware '{}': {}", name, err.getMessage())));
+        }
 
-                    if (!MIDDLEWARE_CONTROL_API_ACTIONS.contains(action)) {
-                        return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
-                    }
-                    break;
+        final Promise<JsonArray> p = Promise.promise();
+        Future.join(futs)
+            .onComplete(cf -> {
+                p.complete(validMiddlewares);
+            });
+
+        return p.future();
+    }
+
+    private static Future<Void> validateMiddlewareOptions(String mwType, JsonObject mwOptions) {
+        switch (mwType) {
+            case MIDDLEWARE_AUTHORIZATION_BEARER: {
+                final String sessionScope = mwOptions.getString(MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE);
+                if (sessionScope == null || sessionScope.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No session scope defined", mwType));
                 }
-                case MIDDLEWARE_CSP: {
-                    final JsonArray directives = mwOptions.getJsonArray(MIDDLEWARE_CSP_DIRECTIVES);
-                    if (directives == null) {
-                        return Future.failedFuture(
-                            String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
-                    } else {
-                        boolean hasReportToOrUriDirective = false;
-                        for (Object directive : directives) {
-                            if (directive instanceof JsonObject) {
-                                final String directiveName = ((JsonObject) directive)
-                                    .getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
-                                if (directiveName == null) {
+                break;
+            }
+            case MIDDLEWARE_BEARER_ONLY: {
+                final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                if (validationResult != null) {
+                    return validationResult;
+                }
+                break;
+            }
+            case MIDDLEWARE_CHECK_ROUTE: {
+                break;
+            }
+            case MIDDLEWARE_CORS: {
+                break;
+            }
+            case MIDDLEWARE_CONTROL_API: {
+                final String action = mwOptions.getString(MIDDLEWARE_CONTROL_API_ACTION);
+                if (action == null) {
+                    return Future.failedFuture(
+                        String.format("%s: No control api action defined", mwType));
+                }
+
+                if (!MIDDLEWARE_CONTROL_API_ACTIONS.contains(action)) {
+                    return Future.failedFuture(String.format("%s: Not supported control api action defined.", mwType));
+                }
+                break;
+            }
+            case MIDDLEWARE_CSP: {
+                final JsonArray directives = mwOptions.getJsonArray(MIDDLEWARE_CSP_DIRECTIVES);
+                if (directives == null) {
+                    return Future.failedFuture(
+                        String.format("Directive is not defined as JsonObject, middleware: '%s'", mwType));
+                } else {
+                    boolean hasReportToOrUriDirective = false;
+                    for (Object directive : directives) {
+                        if (directive instanceof JsonObject) {
+                            final String directiveName = ((JsonObject) directive)
+                                .getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
+                            if (directiveName == null) {
+                                return Future.failedFuture(
+                                    String.format("Directive name is not defined, middleware: '%s'", mwType));
+                            }
+                            if (directiveName.equals(CompositeCSPHandler.REPORT_URI) || directiveName.equals(CompositeCSPHandler.REPORT_TO)) {
+                                hasReportToOrUriDirective = true;
+                            }
+                            final JsonArray directiveValues = ((JsonObject) directive)
+                                .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
+                            if (directiveValues == null) {
+                                return Future.failedFuture(
+                                    String.format("Directive values is not defined, middleware: '%s'", mwType));
+                            }
+                            for (Object a : directiveValues.getList()) {
+                                if (!(a instanceof String)) {
                                     return Future.failedFuture(
-                                        String.format("Directive name is not defined, middleware: '%s'", mwType));
-                                }
-                                if (directiveName.equals(CompositeCSPHandler.REPORT_URI) || directiveName.equals(CompositeCSPHandler.REPORT_TO)) {
-                                    hasReportToOrUriDirective = true;
-                                }
-                                final JsonArray directiveValues = ((JsonObject) directive)
-                                    .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
-                                if (directiveValues == null) {
-                                    return Future.failedFuture(
-                                        String.format("Directive values is not defined, middleware: '%s'", mwType));
-                                }
-                                for (Object a : directiveValues.getList()) {
-                                    if (!(a instanceof String)) {
-                                        return Future.failedFuture(
-                                            String.format(
-                                                "%s: Directive values is required to be a list of strings.",
-                                                mwType));
-                                    }
+                                        String.format(
+                                            "%s: Directive values is required to be a list of strings.",
+                                            mwType));
                                 }
                             }
                         }
-                        final Boolean reportOnly = mwOptions.getBoolean(MIDDLEWARE_CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
-                        if (reportOnly && !hasReportToOrUriDirective) {
-                            return Future.failedFuture(String.format("Reporting enabled, but no report-uri or report-to set: '%s'", mwType));
-                        }
                     }
-                    break;
+                    final Boolean reportOnly = mwOptions.getBoolean(MIDDLEWARE_CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
+                    if (reportOnly && !hasReportToOrUriDirective) {
+                        return Future.failedFuture(String.format("Reporting enabled, but no report-uri or report-to set: '%s'", mwType));
+                    }
                 }
-                case MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER: {
-                    final String logLevel = mwOptions.getString(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL);
-                    if (logLevel != null && !MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.contains(logLevel)) {
-                        return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
-                            MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel, MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS));
-                    }
-                    break;
+                break;
+            }
+            case MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER: {
+                final String logLevel = mwOptions.getString(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL);
+                if (logLevel != null && !MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.contains(logLevel)) {
+                    return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
+                        MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel, MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS));
                 }
-                case MIDDLEWARE_CSRF: {
-                    final Integer timeoutInMinutes = mwOptions
-                        .getInteger(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES);
-                    if (timeoutInMinutes == null) {
-                        LOGGER.debug(String.format("%s: csrf token timeout not specified. Use default value: %s",
-                            mwType,
-                            CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES));
-                    } else {
-                        if (timeoutInMinutes <= 0) {
-                            return Future.failedFuture(String
-                                .format("%s: csrf token timeout is required to be a positive number", mwType));
-                        }
-                    }
-                    final String origin = mwOptions.getString(MIDDLEWARE_CSRF_ORIGIN);
-                    if (origin != null && (origin.isEmpty() || origin.isBlank())) {
-                        return Future
-                            .failedFuture(String.format("%s: if origin is defined it should not be empty or blank!",
-                                mwType));
-                    }
-                    final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_CSRF_NAG_HTTPS);
-                    if (nagHttps == null) {
-                        LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
-                            CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
-                    }
-                    final String headerName = mwOptions.getString(MIDDLEWARE_CSRF_HEADER_NAME);
-                    if (headerName == null) {
-                        LOGGER.debug(String.format("%s: header name not specified. Use default value: %s", mwType,
-                            CSRFMiddlewareFactory.DEFAULT_HEADER_NAME));
-                    }
-                    final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_CSRF_COOKIE);
-                    if (cookie == null) {
-                        LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
-                    } else {
-                        final String cookieName = cookie.getString(MIDDLEWARE_CSRF_COOKIE_NAME);
-                        if (cookieName == null) {
-                            LOGGER.debug(String.format(
-                                "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
-                        }
-                        final String cookiePath = cookie.getString(MIDDLEWARE_CSRF_COOKIE_PATH);
-                        if (cookiePath == null) {
-                            LOGGER.debug(String.format(
-                                "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME));
-                        }
-                        final Boolean cookieSecure = cookie.getBoolean(MIDDLEWARE_CSRF_COOKIE_SECURE);
-                        if (cookieSecure == null) {
-                            LOGGER.debug(String.format(
-                                "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE));
-                        }
-                    }
-                    break;
-                }
-                case MIDDLEWARE_BODY_HANDLER:
-                    break;
-                case MIDDLEWARE_HEADERS: {
-                    final JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
-                    if (requestHeaders != null) {
-                        if (requestHeaders.isEmpty()) {
-                            return Future.failedFuture(String.format("%s: Empty request headers defined", mwType));
-                        }
-
-                        for (Entry<String, Object> entry : requestHeaders) {
-                            if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
-                                return Future.failedFuture(String
-                                    .format("%s: Request header and value can only be of type string", mwType));
-                            }
-                        }
-                    }
-
-                    final JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
-                    if (responseHeaders != null) {
-                        if (responseHeaders.isEmpty()) {
-                            return Future.failedFuture(String.format("%s: Empty response headers defined", mwType));
-                        }
-
-                        for (Entry<String, Object> entry : responseHeaders) {
-                            if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
-                                return Future.failedFuture(String
-                                    .format("%s: Response header and value can only be of type string", mwType));
-                            }
-                        }
-                    }
-
-                    if (requestHeaders == null && responseHeaders == null) {
-                        return Future.failedFuture(
-                            String.format("%s: at least one response or request header has to be defined", mwType));
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_CUSTOM_RESPONSE: {
-                    final Integer statusCode = mwOptions.getInteger(MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE);
-                    if (statusCode == null) {
+                break;
+            }
+            case MIDDLEWARE_CSRF: {
+                final Integer timeoutInMinutes = mwOptions
+                    .getInteger(MIDDLEWARE_CSRF_TIMEOUT_IN_MINUTES);
+                if (timeoutInMinutes == null) {
+                    LOGGER.debug(String.format("%s: csrf token timeout not specified. Use default value: %s",
+                        mwType,
+                        CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES));
+                } else {
+                    if (timeoutInMinutes <= 0) {
                         return Future.failedFuture(String
-                            .format("%s: Status code can only be of type integer", mwType));
+                            .format("%s: csrf token timeout is required to be a positive number", mwType));
                     }
-
-                    final JsonObject headers = mwOptions.getJsonObject(MIDDLEWARE_CUSTOM_RESPONSE_HEADERS);
-                    if (headers != null) {
-                        for (Entry<String, Object> entry : headers) {
-                            if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
-                                return Future.failedFuture(String
-                                    .format("%s: Response header and value can only be of type string", mwType));
-                            }
-                        }
-                    }
-                    break;
                 }
-                case MIDDLEWARE_LANGUAGE_COOKIE: {
-                    break;
+                final String origin = mwOptions.getString(MIDDLEWARE_CSRF_ORIGIN);
+                if (origin != null && (origin.isEmpty() || origin.isBlank())) {
+                    return Future
+                        .failedFuture(String.format("%s: if origin is defined it should not be empty or blank!",
+                            mwType));
                 }
-                case MIDDLEWARE_OAUTH2:
-                case MIDDLEWARE_OAUTH2_REGISTRATION: {
-                    final String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
-                    if (clientID == null || clientID.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No client ID defined", mwType));
-                    }
-
-                    final String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
-                    if (clientSecret == null || clientSecret.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No client secret defined", mwType));
-                    }
-
-                    final String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
-                    if (discoveryUrl == null || discoveryUrl.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No discovery URL defined", mwType));
-                    }
-
-                    final String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-                    if (sessionScope == null || sessionScope.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
-                    }
-
-                    final String responseMode = mwOptions.getString(MIDDLEWARE_OAUTH2_RESPONSE_MODE);
-                    if (responseMode == null) {
-                        LOGGER.debug(String.format("%s: value not specified. Use default value: %s",
-                            MIDDLEWARE_OAUTH2_RESPONSE_MODE, OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
-                    } else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
-                        return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
-                            MIDDLEWARE_OAUTH2_RESPONSE_MODE, responseMode, OIDC_RESPONSE_MODES));
-                    }
-
-                    break;
+                final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_CSRF_NAG_HTTPS);
+                if (nagHttps == null) {
+                    LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
+                        CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
                 }
-                case MIDDLEWARE_PASS_AUTHORIZATION: {
-                    final String sessionScope = mwOptions.getString(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE);
-                    if (sessionScope == null || sessionScope.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No session scope defined", mwType));
-                    }
-
-                    final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
-                    if (validationResult != null) {
-                        return validationResult;
-                    }
-                    break;
+                final String headerName = mwOptions.getString(MIDDLEWARE_CSRF_HEADER_NAME);
+                if (headerName == null) {
+                    LOGGER.debug(String.format("%s: header name not specified. Use default value: %s", mwType,
+                        CSRFMiddlewareFactory.DEFAULT_HEADER_NAME));
                 }
-                case MIDDLEWARE_REDIRECT_REGEX: {
-                    final String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
-                    if (regex == null || regex.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No regex defined", mwType));
-                    }
-
-                    final String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
-                    if (replacement == null || replacement.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No replacement defined", mwType));
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
-                    final Integer waitTimeRetryInMs = mwOptions
-                        .getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
-                    if (waitTimeRetryInMs == null) {
-                        LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s",
-                            mwType,
-                            ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS));
-                    } else {
-                        if (waitTimeRetryInMs <= 0) {
-                            return Future.failedFuture(
-                                String.format("%s: wait time for retry required to be positive", mwType));
-                        }
-                    }
-                    final Integer maxRetries = mwOptions
-                        .getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
-                    if (maxRetries == null) {
-                        LOGGER.debug(String.format("%s: No max retries for redirect specified. Use default value: %s",
-                            mwType,
-                            ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES));
-                    }
-                    final String detectionCookieName = mwOptions
-                        .getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
-                    if (detectionCookieName == null) {
-                        LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s",
-                            mwType,
-                            ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME));
-                    }
-                    break;
-                }
-                case MIDDLEWARE_REPLACE_PATH_REGEX: {
-                    final String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
-                    if (regex == null || regex.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No regex defined", mwType));
-                    }
-
-                    final String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
-                    if (replacement == null || replacement.length() == 0) {
-                        return Future.failedFuture(String.format("%s: No replacement defined", mwType));
-                    }
-
-                    break;
-                }
-                case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
-                    break;
-                }
-                case MIDDLEWARE_OPEN_TELEMETRY: {
-                    break;
-                }
-                case MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION: {
-                    final String redirect = mwOptions.getString(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
-                    if (redirect == null) {
-                        LOGGER.debug(String.format("%s: URI for redirect not specified.", mwType));
-                    }
-                    break;
-                }
-                case MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL: {
-                    final String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
-                    if (name == null) {
+                final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_CSRF_COOKIE);
+                if (cookie == null) {
+                    LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
+                } else {
+                    final String cookieName = cookie.getString(MIDDLEWARE_CSRF_COOKIE_NAME);
+                    if (cookieName == null) {
                         LOGGER.debug(String.format(
-                            "%s: No session cookie name specified to be removed. Use default value: %s",
-                            mwType,
+                            "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
                             SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
                     }
-                    break;
+                    final String cookiePath = cookie.getString(MIDDLEWARE_CSRF_COOKIE_PATH);
+                    if (cookiePath == null) {
+                        LOGGER.debug(String.format(
+                            "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
+                            CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME));
+                    }
+                    final Boolean cookieSecure = cookie.getBoolean(MIDDLEWARE_CSRF_COOKIE_SECURE);
+                    if (cookieSecure == null) {
+                        LOGGER.debug(String.format(
+                            "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
+                            CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE));
+                    }
                 }
-                case MIDDLEWARE_SESSION: {
-                    final Integer sessionIdleTimeoutInMinutes = mwOptions
-                        .getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
-                    if (sessionIdleTimeoutInMinutes == null) {
-                        LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s",
-                            mwType,
-                            SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE));
-                    } else {
-                        if (sessionIdleTimeoutInMinutes <= 0) {
+                break;
+            }
+            case MIDDLEWARE_BODY_HANDLER:
+                break;
+            case MIDDLEWARE_HEADERS: {
+                final JsonObject requestHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+                if (requestHeaders != null) {
+                    if (requestHeaders.isEmpty()) {
+                        return Future.failedFuture(String.format("%s: Empty request headers defined", mwType));
+                    }
+
+                    for (Entry<String, Object> entry : requestHeaders) {
+                        if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
                             return Future.failedFuture(String
-                                .format("%s: Session idle timeout is required to be positive number", mwType));
+                                .format("%s: Request header and value can only be of type string", mwType));
                         }
                     }
-                    final Integer sessionIdMinLength = mwOptions.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
-                    if (sessionIdMinLength == null) {
-                        LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s",
-                            mwType,
-                            SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH));
-                    } else {
-                        if (sessionIdMinLength <= 0) {
+                }
+
+                final JsonObject responseHeaders = mwOptions.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+                if (responseHeaders != null) {
+                    if (responseHeaders.isEmpty()) {
+                        return Future.failedFuture(String.format("%s: Empty response headers defined", mwType));
+                    }
+
+                    for (Entry<String, Object> entry : responseHeaders) {
+                        if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
                             return Future.failedFuture(String
-                                .format("%s: Minimum session id length is required to be positive number", mwType));
+                                .format("%s: Response header and value can only be of type string", mwType));
                         }
                     }
-                    final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
-                    if (nagHttps == null) {
-                        LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
-                            SessionMiddlewareFactory.DEFAULT_NAG_HTTPS));
+                }
+
+                if (requestHeaders == null && responseHeaders == null) {
+                    return Future.failedFuture(
+                        String.format("%s: at least one response or request header has to be defined", mwType));
+                }
+
+                break;
+            }
+            case MIDDLEWARE_CUSTOM_RESPONSE: {
+                final Integer statusCode = mwOptions.getInteger(MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE);
+                if (statusCode == null) {
+                    return Future.failedFuture(String
+                        .format("%s: Status code can only be of type integer", mwType));
+                }
+
+                final JsonObject headers = mwOptions.getJsonObject(MIDDLEWARE_CUSTOM_RESPONSE_HEADERS);
+                if (headers != null) {
+                    for (Entry<String, Object> entry : headers) {
+                        if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
+                            return Future.failedFuture(String
+                                .format("%s: Response header and value can only be of type string", mwType));
+                        }
                     }
-                    final Boolean lifetimeHeader = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_HEADER);
-                    if (lifetimeHeader == null) {
-                        LOGGER.debug(String.format("%s: LifetimeHeader not specified. Use default value: %s", mwType,
-                            SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER));
+                }
+                break;
+            }
+            case MIDDLEWARE_LANGUAGE_COOKIE: {
+                break;
+            }
+            case MIDDLEWARE_OAUTH2:
+            case MIDDLEWARE_OAUTH2_REGISTRATION: {
+                final String clientID = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+                if (clientID == null || clientID.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No client ID defined", mwType));
+                }
+
+                final String clientSecret = mwOptions.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+                if (clientSecret == null || clientSecret.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No client secret defined", mwType));
+                }
+
+                final String discoveryUrl = mwOptions.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+                if (discoveryUrl == null || discoveryUrl.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No discovery URL defined", mwType));
+                }
+
+                final String sessionScope = mwOptions.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+                if (sessionScope == null || sessionScope.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No session scope defined", mwType));
+                }
+
+                final String responseMode = mwOptions.getString(MIDDLEWARE_OAUTH2_RESPONSE_MODE);
+                if (responseMode == null) {
+                    LOGGER.debug(String.format("%s: value not specified. Use default value: %s",
+                        MIDDLEWARE_OAUTH2_RESPONSE_MODE, OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
+                } else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
+                    return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
+                        MIDDLEWARE_OAUTH2_RESPONSE_MODE, responseMode, OIDC_RESPONSE_MODES));
+                }
+
+                break;
+            }
+            case MIDDLEWARE_PASS_AUTHORIZATION: {
+                final String sessionScope = mwOptions.getString(MIDDLEWARE_PASS_AUTHORIZATION_SESSION_SCOPE);
+                if (sessionScope == null || sessionScope.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No session scope defined", mwType));
+                }
+
+                final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                if (validationResult != null) {
+                    return validationResult;
+                }
+                break;
+            }
+            case MIDDLEWARE_REDIRECT_REGEX: {
+                final String regex = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+                if (regex == null || regex.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No regex defined", mwType));
+                }
+
+                final String replacement = mwOptions.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+                if (replacement == null || replacement.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No replacement defined", mwType));
+                }
+
+                break;
+            }
+            case MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION: {
+                final Integer waitTimeRetryInMs = mwOptions
+                    .getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+                if (waitTimeRetryInMs == null) {
+                    LOGGER.debug(String.format("%s: No wait time for redirect specified. Use default value: %s",
+                        mwType,
+                        ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS));
+                } else {
+                    if (waitTimeRetryInMs <= 0) {
+                        return Future.failedFuture(
+                            String.format("%s: wait time for retry required to be positive", mwType));
                     }
-                    final Boolean lifetimeCookie = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_COOKIE);
-                    if (lifetimeCookie == null) {
-                        LOGGER.debug(String.format("%s: LifetimeCookie not specified. Use default value: %s", mwType,
-                            SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE));
+                }
+                final Integer maxRetries = mwOptions
+                    .getInteger(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+                if (maxRetries == null) {
+                    LOGGER.debug(String.format("%s: No max retries for redirect specified. Use default value: %s",
+                        mwType,
+                        ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES));
+                }
+                final String detectionCookieName = mwOptions
+                    .getString(MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+                if (detectionCookieName == null) {
+                    LOGGER.debug(String.format("%s: No detection cookie name. Use default value: %s",
+                        mwType,
+                        ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME));
+                }
+                break;
+            }
+            case MIDDLEWARE_REPLACE_PATH_REGEX: {
+                final String regex = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+                if (regex == null || regex.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No regex defined", mwType));
+                }
+
+                final String replacement = mwOptions.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+                if (replacement == null || replacement.length() == 0) {
+                    return Future.failedFuture(String.format("%s: No replacement defined", mwType));
+                }
+
+                break;
+            }
+            case MIDDLEWARE_REQUEST_RESPONSE_LOGGER: {
+                break;
+            }
+            case MIDDLEWARE_OPEN_TELEMETRY: {
+                break;
+            }
+            case MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION: {
+                final String redirect = mwOptions.getString(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
+                if (redirect == null) {
+                    LOGGER.debug(String.format("%s: URI for redirect not specified.", mwType));
+                }
+                break;
+            }
+            case MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL: {
+                final String name = mwOptions.getString(MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
+                if (name == null) {
+                    LOGGER.debug(String.format(
+                        "%s: No session cookie name specified to be removed. Use default value: %s",
+                        mwType,
+                        SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
+                }
+                break;
+            }
+            case MIDDLEWARE_SESSION: {
+                final Integer sessionIdleTimeoutInMinutes = mwOptions
+                    .getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
+                if (sessionIdleTimeoutInMinutes == null) {
+                    LOGGER.debug(String.format("%s: Session idle timeout not specified. Use default value: %s",
+                        mwType,
+                        SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE));
+                } else {
+                    if (sessionIdleTimeoutInMinutes <= 0) {
+                        return Future.failedFuture(String
+                            .format("%s: Session idle timeout is required to be positive number", mwType));
                     }
-                    final String uriWithoutSessionTimeoutReset = mwOptions.getString(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
-                    if (uriWithoutSessionTimeoutReset == null) {
-                        LOGGER.debug(String.format("%s: URI without session timeout reset not specified.", mwType));
+                }
+                final Integer sessionIdMinLength = mwOptions.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
+                if (sessionIdMinLength == null) {
+                    LOGGER.debug(String.format("%s: Minimum session id length not specified. Use default value: %s",
+                        mwType,
+                        SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH));
+                } else {
+                    if (sessionIdMinLength <= 0) {
+                        return Future.failedFuture(String
+                            .format("%s: Minimum session id length is required to be positive number", mwType));
                     }
-                    final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
-                    if (cookie == null) {
-                        LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
+                }
+                final Boolean nagHttps = mwOptions.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
+                if (nagHttps == null) {
+                    LOGGER.debug(String.format("%s: NagHttps not specified. Use default value: %s", mwType,
+                        SessionMiddlewareFactory.DEFAULT_NAG_HTTPS));
+                }
+                final Boolean lifetimeHeader = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_HEADER);
+                if (lifetimeHeader == null) {
+                    LOGGER.debug(String.format("%s: LifetimeHeader not specified. Use default value: %s", mwType,
+                        SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER));
+                }
+                final Boolean lifetimeCookie = mwOptions.getBoolean(MIDDLEWARE_SESSION_LIFETIME_COOKIE);
+                if (lifetimeCookie == null) {
+                    LOGGER.debug(String.format("%s: LifetimeCookie not specified. Use default value: %s", mwType,
+                        SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE));
+                }
+                final String uriWithoutSessionTimeoutReset = mwOptions.getString(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+                if (uriWithoutSessionTimeoutReset == null) {
+                    LOGGER.debug(String.format("%s: URI without session timeout reset not specified.", mwType));
+                }
+                final JsonObject cookie = mwOptions.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
+                if (cookie == null) {
+                    LOGGER.debug(String.format("%s: Cookie settings not specified. Use default setting", mwType));
+                } else {
+                    final String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
+                    if (cookieName == null) {
+                        LOGGER.debug(String.format(
+                            "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
+                            SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
+                    }
+                    final Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
+                    if (cookieHttpOnly == null) {
+                        LOGGER.debug(String.format("%s: Cookie HttpOnly not specified. Use default value: %s",
+                            mwType, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY));
+                    }
+                    final String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
+                    if (cookieSameSite == null) {
+                        LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s",
+                            mwType, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE));
                     } else {
-                        final String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
-                        if (cookieName == null) {
-                            LOGGER.debug(String.format(
-                                "%s: No session cookie name specified to be removed. Use default value: %s", mwType,
-                                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
-                        }
-                        final Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
-                        if (cookieHttpOnly == null) {
-                            LOGGER.debug(String.format("%s: Cookie HttpOnly not specified. Use default value: %s",
-                                mwType, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY));
-                        }
-                        final String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
-                        if (cookieSameSite == null) {
-                            LOGGER.debug(String.format("%s: Cookie SameSite not specified. Use default value: %s",
-                                mwType, SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE));
-                        } else {
-                            try {
-                                CookieSameSite.valueOf(cookieSameSite);
-                            } catch (RuntimeException exception) {
-                                final List<String> allowedPolicies = new LinkedList<>();
-                                for (CookieSameSite value : CookieSameSite.values()) {
-                                    allowedPolicies.add(value.toString().toUpperCase());
-                                }
-                                return Future.failedFuture(
-                                    String.format("%s: invalid cookie same site value. Allowed values: %s", mwType,
-                                        allowedPolicies));
+                        try {
+                            CookieSameSite.valueOf(cookieSameSite);
+                        } catch (RuntimeException exception) {
+                            final List<String> allowedPolicies = new LinkedList<>();
+                            for (CookieSameSite value : CookieSameSite.values()) {
+                                allowedPolicies.add(value.toString().toUpperCase());
                             }
-                        }
-                    }
-                    break;
-                }
-                case MIDDLEWARE_SESSION_BAG: {
-                    final JsonArray whitelistedCookies = mwOptions
-                        .getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
-                    if (whitelistedCookies == null) {
-                        return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
-                    }
-                    for (int j = 0; j < whitelistedCookies.size(); j++) {
-                        final JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
-                        if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                            || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                                .isEmpty()) {
                             return Future.failedFuture(
-                                String.format("%s: whitelisted cookie name has to contain a value", mwType));
-                        }
-                        if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                            || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                                .isEmpty()) {
-                            return Future.failedFuture(
-                                String.format("%s: whitelisted cookie path has to contain a value", mwType));
+                                String.format("%s: invalid cookie same site value. Allowed values: %s", mwType,
+                                    allowedPolicies));
                         }
                     }
-                    break;
                 }
-                case MIDDLEWARE_SHOW_SESSION_CONTENT: {
-                    break;
+                break;
+            }
+            case MIDDLEWARE_SESSION_BAG: {
+                final JsonArray whitelistedCookies = mwOptions
+                    .getJsonArray(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES);
+                if (whitelistedCookies == null) {
+                    return Future.failedFuture(String.format("%s: No whitelisted cookies defined.", mwType));
                 }
-                case MIDDLEWARE_CLAIM_TO_HEADER: {
-                    final String path = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_PATH);
-                    if (path == null || path.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Claim path not defined", mwType));
+                for (int j = 0; j < whitelistedCookies.size(); j++) {
+                    final JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
+                    if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
+                        || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME)
+                            .isEmpty()) {
+                        return Future.failedFuture(
+                            String.format("%s: whitelisted cookie name has to contain a value", mwType));
                     }
-                    final String name = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_NAME);
-                    if (name == null || name.length() == 0) {
-                        return Future.failedFuture(String.format("%s: Header name not defined", mwType));
+                    if (!whitelistedCookie.containsKey(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
+                        || whitelistedCookie.getString(MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH)
+                            .isEmpty()) {
+                        return Future.failedFuture(
+                            String.format("%s: whitelisted cookie path has to contain a value", mwType));
                     }
-                    break;
                 }
-                case MIDDLEWARE_MATOMO:
-                    break;
-                case MIDDLEWARE_BACK_CHANNEL_LOGOUT: {
-                    final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
-                    if (validationResult != null) {
-                        return validationResult;
-                    }
-                    break;
+                break;
+            }
+            case MIDDLEWARE_SHOW_SESSION_CONTENT: {
+                break;
+            }
+            case MIDDLEWARE_CLAIM_TO_HEADER: {
+                final String path = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_PATH);
+                if (path == null || path.length() == 0) {
+                    return Future.failedFuture(String.format("%s: Claim path not defined", mwType));
                 }
-                default: {
-                    return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
+                final String name = mwOptions.getString(MIDDLEWARE_CLAIM_TO_HEADER_NAME);
+                if (name == null || name.length() == 0) {
+                    return Future.failedFuture(String.format("%s: Header name not defined", mwType));
                 }
+                break;
+            }
+            case MIDDLEWARE_MATOMO:
+                break;
+            case MIDDLEWARE_BACK_CHANNEL_LOGOUT: {
+                final Future<Void> validationResult = validateWithAuthHandler(mwType, mwOptions);
+                if (validationResult != null) {
+                    return validationResult;
+                }
+                break;
+            }
+            default: {
+                return Future.failedFuture(String.format("Unknown middleware: '%s'", mwType));
             }
         }
 
         return Future.succeededFuture();
     }
 
-    private static Future<Void> validateServices(JsonObject httpConfig) {
-        final JsonArray svs = httpConfig.getJsonArray(SERVICES);
-        if (svs == null || svs.size() == 0) {
+    private static Future<JsonArray> validateServices(JsonArray services, boolean discardInvalid) {
+        if (services == null || services.size() == 0) {
             LOGGER.debug("No services defined");
-            return Future.succeededFuture();
+            return Future.succeededFuture(JsonArray.of());
         }
 
-        final Set<String> svNames = new HashSet<>();
-        for (int i = 0; i < svs.size(); i++) {
-            final JsonObject sv = svs.getJsonObject(i);
-            final String svName = sv.getString(SERVICE_NAME);
-            if (svNames.contains(svName)) {
-                final String errMsg = String.format("validateServices: duplicated service name '%s'. Should be unique.",
-                    svName);
-                LOGGER.warn(errMsg);
-                return Future.failedFuture(errMsg);
-            }
-            svNames.add(svName);
-
-            final JsonArray servers = sv.getJsonArray(SERVICE_SERVERS);
-            if (servers == null || servers.size() == 0) {
-                final String errMsg = "validateServices: no servers defined";
-                LOGGER.debug(errMsg);
-                return Future.failedFuture(errMsg);
-            }
+        final JsonArray validServices = filterValidServices(services);
+        if (!discardInvalid && validServices.size() != services.size()) {
+            return Future.failedFuture("at least one service configuration is invalid");
         }
 
-        return Future.succeededFuture();
+        return Future.succeededFuture(validServices);
+    }
+
+    private static JsonArray filterValidServices(JsonArray services) {
+        final JsonArray validServices = new JsonArray();
+        final Set<String> names = new HashSet<>();
+        for (int i = 0; i < services.size(); i++) {
+            final JsonObject service = services.getJsonObject(i);
+            final String name = service.getString(SERVICE_NAME);
+            if (names.contains(name)) {
+                final String errMsg = String.format("duplicated service name '%s'. Should be unique.", name);
+                LOGGER.warn("ignoring invalid service '{}': {}", name, errMsg);
+                continue;
+            }
+            names.add(name);
+
+            try {
+                validateService(service);
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("ignoring invalid service '{}': {}", name, e.getMessage());
+                continue;
+            }
+            validServices.add(service);
+        }
+        return validServices;
+    }
+
+    private static void validateService(JsonObject service) {
+        final JsonArray servers = service.getJsonArray(SERVICE_SERVERS);
+        if (servers == null || servers.size() == 0) {
+            throw new IllegalArgumentException("no servers defined");
+        }
     }
 
     private static Future<Void> validateWithAuthHandler(String mwType, JsonObject mwOptions) {

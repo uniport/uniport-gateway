@@ -377,7 +377,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         final JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
-        DynamicConfiguration.validate(vertx, mergedConfig, true)
+        DynamicConfiguration.validate(vertx, mergedConfig)
             .onSuccess(v -> {
                 LOGGER.debug("Informing listeners about new configuration: '{}'", mergedConfig);
                 for (Listener listener : this.configurationListeners) {

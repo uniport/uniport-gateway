@@ -143,10 +143,10 @@ public class StaticConfiguration {
         futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
         Future.all(futures)
             .onSuccess(cf -> {
-            validPromise.complete();
-        }).onFailure(cfErr -> {
-            validPromise.fail(cfErr.getMessage());
-        });
+                validPromise.complete();
+            }).onFailure(cfErr -> {
+                validPromise.fail(cfErr.getMessage());
+            });
 
         return validPromise.future();
     }
@@ -164,8 +164,7 @@ public class StaticConfiguration {
     }
 
     private static Future<Void> validateEntryMiddlewares(JsonArray entryMiddlewares) {
-        final JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, entryMiddleware);
-        return DynamicConfiguration.validateMiddlewares(toValidate);
+        return DynamicConfiguration.validateMiddlewares(entryMiddlewares, false).mapEmpty();
     }
 
     private static Future<Void> validateProviders(JsonArray providers) {

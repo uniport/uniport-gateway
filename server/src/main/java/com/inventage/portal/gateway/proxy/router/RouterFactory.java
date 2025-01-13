@@ -118,6 +118,14 @@ public class RouterFactory {
     private static final Pattern HOST_PATTERN = Pattern.compile("^[" + IP_LITERAL + IPV4 + REG_NAME + "]+$");
     private static final Pattern PATH_PATTERN = Pattern.compile("^\\/[" + PCHAR + "\\/]*$");
 
+    /**
+     * Validates a router config i.e. with a valid rule.
+     * 
+     * @param config
+     *            of a router
+     * @throws IllegalArgumentException
+     *             if the router is invalid
+     */
     public static void validateRouter(JsonObject config) {
         final String rule = config.getString(DynamicConfiguration.ROUTER_RULE);
         if (rule == null) {

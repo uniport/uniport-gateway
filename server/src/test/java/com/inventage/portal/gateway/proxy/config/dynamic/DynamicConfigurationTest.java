@@ -1,9 +1,23 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
+import static com.inventage.portal.gateway.TestUtils.withRouter;
+import static com.inventage.portal.gateway.TestUtils.withRouterMiddlewares;
+import static com.inventage.portal.gateway.TestUtils.withRouterRule;
+import static com.inventage.portal.gateway.TestUtils.withRouterService;
+import static com.inventage.portal.gateway.TestUtils.withRouters;
+import static com.inventage.portal.gateway.TestUtils.withServer;
+import static com.inventage.portal.gateway.TestUtils.withServers;
+import static com.inventage.portal.gateway.TestUtils.withService;
+import static com.inventage.portal.gateway.TestUtils.withServices;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,6 +27,7 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -1058,6 +1073,131 @@ public class DynamicConfigurationTest {
 
     }
 
+    static Stream<Arguments> validateWithDiscardAllowedTestData() {
+
+        final JsonObject singleValidRouter = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sA"))),
+            withServices(
+                withService("sA",
+                    withServers(
+                        withServer("example.com", 1234)))));
+
+        final JsonObject singleRouterWithInvalidRule = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Foo('/')"),
+                    withRouterService("sA"))));
+
+        final JsonObject singleRouterWithMissingService = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Foo('/')"),
+                    withRouterService("sA"))));
+
+        final JsonObject singleRouterWithInvalidService = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Foo('/')"),
+                    withRouterService("sA"))),
+            withServices(
+                withService("sA",
+                    withServers())));
+
+        final JsonObject singleRouterWithMissingMiddleware = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Foo('/')"),
+                    withRouterMiddlewares("rA"),
+                    withRouterService("sA"))),
+            withServices(
+                withService("sA",
+                    withServers(
+                        withServer("example.com", 1234)))));
+
+        final JsonObject singleRouterWithInvalidMiddleware = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Foo('/')"),
+                    withRouterMiddlewares("rA"),
+                    withRouterService("sA"))),
+            withMiddlewares(
+                withMiddleware("mA",
+                    DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE,
+                    withMiddlewareOpts(
+                        JsonObject.of(
+                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))),
+            withServices(
+                withService("sA",
+                    withServers(
+                        withServer("example.com", 1234)))));
+
+        final JsonObject duplicatedRouterName = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sA")),
+                withRouter("rA",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sA"))));
+
+        final JsonObject multipleRoutersInvalidA = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Blub('/')"),
+                    withRouterService("sA")),
+                withRouter("rB",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sB")),
+                withRouter("rC",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sC"))));
+
+        final JsonObject multipleRoutersInvalidB = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sA")),
+                withRouter("rB",
+                    withRouterRule("Blub('/')"),
+                    withRouterService("sB")),
+                withRouter("rC",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sC"))));
+
+        final JsonObject multipleRoutersInvalidC = buildConfiguration(
+            withRouters(
+                withRouter("rA",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sA")),
+                withRouter("rB",
+                    withRouterRule("Path('/')"),
+                    withRouterService("sB")),
+                withRouter("rC",
+                    withRouterRule("Blub('/')"),
+                    withRouterService("sC"))));
+
+        // the default used in the following should be "complete" since it is more restrictive
+        final boolean complete = true;
+        final boolean incomplete = false;
+
+        return Stream.of(
+            Arguments.of("single valid router", singleValidRouter, complete, List.of("rA")),
+            Arguments.of("single invalid router (invalid rule)", singleRouterWithInvalidRule, incomplete, List.of()),
+            Arguments.of("single invalid router (missing service)", singleRouterWithMissingService, complete, List.of()),
+            Arguments.of("single invalid router (invalid service)", singleRouterWithInvalidService, complete, List.of()),
+            Arguments.of("single invalid router (missing middleware)", singleRouterWithMissingMiddleware, complete, List.of()),
+            Arguments.of("single invalid router (invalid middleware)", singleRouterWithInvalidMiddleware, complete, List.of()),
+            Arguments.of("duplicated router name, only take first", duplicatedRouterName, incomplete, List.of("rA")),
+            Arguments.of("multiple router, invalid 1", multipleRoutersInvalidA, incomplete, List.of("rB", "rC")),
+            Arguments.of("multiple router, invalid 2", multipleRoutersInvalidB, incomplete, List.of("rA", "rC")),
+            Arguments.of("multiple router, invalid 3", multipleRoutersInvalidC, incomplete, List.of("rA", "rB"))
+
+        );
+    }
+
     static Stream<Arguments> isEmptyConfigurationTestData() {
 
         final JsonObject nullConfig = null;
@@ -1236,20 +1376,45 @@ public class DynamicConfigurationTest {
     @ParameterizedTest
     @MethodSource("validateTestData")
     void validateTest(
-        String name, JsonObject json, Boolean complete, Boolean expected, Vertx vertx,
-        VertxTestContext testCtx
+        String name, JsonObject json, Boolean complete, Boolean expected,
+        Vertx vertx, VertxTestContext testCtx
     ) {
+        DynamicConfiguration.validate(vertx, json, complete)
+            .onComplete(ar -> {
+                if (ar.succeeded() && expected || ar.failed() && !expected) {
+                    testCtx.completeNow();
+                } else {
+                    testCtx.failNow(String.format(
+                        "'%s' was expected to have '%s'. Error: '%s', Input: '%s'", name,
+                        expected ? "succeeded" : "failed", ar.cause(),
+                        json != null ? json.encodePrettily() : null));
+                }
+            });
+    }
 
-        DynamicConfiguration.validate(vertx, json, complete).onComplete(ar -> {
-            if (ar.succeeded() && expected || ar.failed() && !expected) {
+    @ParameterizedTest
+    @MethodSource("validateWithDiscardAllowedTestData")
+    void validateWithDiscardAllowedTest(
+        String name, JsonObject json, Boolean complete, List<String> expectedRouterNames,
+        Vertx vertx, VertxTestContext testCtx
+    ) {
+        DynamicConfiguration.validate(vertx, json, complete, true)
+            .onSuccess(validRouters -> {
+                VertxAssertions.assertNotNull(testCtx, validRouters, "validRouters should not be null");
+
+                final List<String> actualRouterNames = new LinkedList<String>();
+                for (int i = 0; i < validRouters.size(); i++) {
+                    final JsonObject validRouter = validRouters.getJsonObject(i);
+                    final String routerName = validRouter.getString(DynamicConfiguration.ROUTER_NAME);
+                    actualRouterNames.add(routerName);
+                }
+
+                VertxAssertions.assertEquals(testCtx, expectedRouterNames, actualRouterNames);
                 testCtx.completeNow();
-            } else {
-                testCtx.failNow(String.format(
-                    "'%s' was expected to have '%s'. Error: '%s', Input: '%s'", name,
-                    expected ? "succeeded" : "failed", ar.cause(),
-                    json != null ? json.encodePrettily() : null));
-            }
-        });
+            })
+            .onFailure(err -> {
+                testCtx.failNow(String.format("'%s' failed:\nError: '%s'\nInput: '%s'", name, err, json != null ? json.encodePrettily() : null));
+            });
     }
 
     @Test
