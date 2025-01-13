@@ -33,7 +33,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationWatcher.class);
 
-    private static final String CONFIG_VALIDATED_ADDRESS = "configuration-watcher-config-validated";
+    private static final String CONFIG_THROTTLED_ADDRESS = "configuration-watcher-config-throttled";
 
     private final Vertx vertx;
 
@@ -61,6 +61,15 @@ public class ConfigurationWatcher extends AbstractVerticle {
         this.providerConfigReloadThrottler = new HashSet<>();
     }
 
+    /**
+     * If a router has no entrypoint applied, the default entrypoints are set.
+     * 
+     * @param config
+     *            to inspect
+     * @param entrypoints
+     *            default entrypoints
+     * @return
+     */
     private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
         final JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
 
@@ -85,6 +94,13 @@ public class ConfigurationWatcher extends AbstractVerticle {
         return config;
     }
 
+    /**
+     * Each provider supplies one configuration. Here, all configurations are merged into one aggregated configuration.
+     * 
+     * @param configurations
+     *            contains the configuration supplied by each provider
+     * @return merged configuration of all providers
+     */
     private static JsonObject mergeConfigurations(Map<String, JsonObject> configurations) {
         LOGGER.debug("Merge configurations");
         final JsonObject mergedConfig = DynamicConfiguration.buildDefaultConfiguration();
@@ -94,8 +110,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return mergedConfig;
         }
 
-        final Set<Entry<String, JsonObject>> providers = configurations.entrySet();
-        for (Entry<String, JsonObject> provider : providers) {
+        for (Entry<String, JsonObject> provider : configurations.entrySet()) {
             final String providerName = provider.getKey();
             final JsonObject conf = configurations.get(providerName);
             final JsonObject httpConf = conf.getJsonObject(DynamicConfiguration.HTTP);
@@ -179,6 +194,14 @@ public class ConfigurationWatcher extends AbstractVerticle {
         return mergedSvs;
     }
 
+    /**
+     * Returns the qualified name of a service like 'service@provider'.
+     * If it already is a qualified service, this is a no-op.
+     * 
+     * @param providerName
+     * @param name
+     * @return qualifiedName
+     */
     private static String getQualifiedName(String providerName, String name) {
         if (isQualifiedName(name)) {
             return name;
@@ -186,6 +209,13 @@ public class ConfigurationWatcher extends AbstractVerticle {
         return makeQualifiedName(providerName, name);
     }
 
+    /**
+     * Qualified name is of the format 'service@provider'
+     * 
+     * @param providerName
+     * @param name
+     * @return qualifiedName
+     */
     private static String makeQualifiedName(String providerName, String name) {
         return String.format("%s@%s", name, providerName);
     }
@@ -318,19 +348,17 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return;
         }
         LOGGER.info("Publishing configuration");
-        this.eventBus.publish(CONFIG_VALIDATED_ADDRESS, nextConfig);
+        this.eventBus.publish(CONFIG_THROTTLED_ADDRESS, nextConfig);
     }
 
     private void listenConfigurations() {
         LOGGER.debug("Listening for new configuration...");
-        final MessageConsumer<JsonObject> validatedProviderConfigUpdateConsumer = this.eventBus
-            .consumer(CONFIG_VALIDATED_ADDRESS);
-
-        validatedProviderConfigUpdateConsumer.handler(message -> onValidConfiguration(message));
+        final MessageConsumer<JsonObject> throttledProviderConfigUpdateConsumer = this.eventBus.consumer(CONFIG_THROTTLED_ADDRESS);
+        throttledProviderConfigUpdateConsumer.handler(message -> onThrottledConfiguration(message));
     }
 
-    // handler for address: CONFIG_VALIDATED_ADDRESS
-    private void onValidConfiguration(Message<JsonObject> message) {
+    // handler for address: CONFIG_THROTTLED_ADDRESS
+    private void onThrottledConfiguration(Message<JsonObject> message) {
         final JsonObject nextConfig = message.body();
 
         final String providerName = nextConfig.getString(Provider.PROVIDER_NAME);
@@ -345,14 +373,14 @@ public class ConfigurationWatcher extends AbstractVerticle {
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
         DynamicConfiguration.validate(vertx, mergedConfig, true)
-            .onSuccess(handler -> {
-            LOGGER.debug("Informing listeners about new configuration '{}'", mergedConfig);
-            for (Listener listener : this.configurationListeners) {
-                listener.listen(mergedConfig);
-            }
-        }).onFailure(err -> {
-            LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
-                err.getMessage());
-        });
+            .onSuccess(v -> {
+                LOGGER.debug("Informing listeners about new configuration: '{}'", mergedConfig);
+                for (Listener listener : this.configurationListeners) {
+                    listener.listen(mergedConfig);
+                }
+            }).onFailure(err -> {
+                LOGGER.warn("Ignoring invalid configuration for '{}' because of '{}'", providerName,
+                    err.getMessage());
+            });
     }
 }

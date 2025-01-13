@@ -360,7 +360,7 @@ public class RouterFactory {
      * Rules like Path("/foo"), PathPrefix('/bar'), PathRegex('/language/(de|en)/.*'), Host('*.example.com') and HostRegex('(de|en)\.example\.com') and are
      * supported.
      */
-    protected RoutingRule parseRule(String rule) {
+    private RoutingRule parseRule(String rule) {
         if (rule == null) {
             return null;
         }
@@ -370,41 +370,31 @@ public class RouterFactory {
             return null;
         }
 
-        final RoutingRule routingRule;
         final String ruleName = m.group("ruleName");
         final String ruleValue = m.group("ruleValue");
         switch (ruleName) {
             case PATH_RULE_NAME: {
-                routingRule = path(ruleValue);
-                break;
+                return path(ruleValue);
             }
             case PATH_REGEX_RULE_NAME: {
-                routingRule = pathRegex(ruleValue);
-                break;
+                return pathRegex(ruleValue);
             }
             case PATH_PREFIX_RULE_NAME: {
-                routingRule = pathPrefix(ruleValue);
-                break;
+                return pathPrefix(ruleValue);
             }
             case PATH_PREFIX_REGEX_RULE_NAME: {
-                routingRule = pathPrefixRegex(ruleValue);
-                break;
+                return pathPrefixRegex(ruleValue);
             }
             case HOST_RULE_NAME: {
-                routingRule = host(ruleValue);
-                break;
+                return host(ruleValue);
             }
             case HOST_REGEX_RULE_NAME: {
-                routingRule = hostRegex(ruleValue);
-                break;
+                return hostRegex(ruleValue);
             }
             default: {
-                routingRule = null;
-                break;
+                return null;
             }
         }
-
-        return routingRule;
     }
 
     private RoutingRule path(String path) {

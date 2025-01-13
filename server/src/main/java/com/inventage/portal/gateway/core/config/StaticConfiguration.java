@@ -141,7 +141,8 @@ public class StaticConfiguration {
 
         final List<Future<Void>> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
         futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
-        Future.all(futures).onSuccess(cf -> {
+        Future.all(futures)
+            .onSuccess(cf -> {
             validPromise.complete();
         }).onFailure(cfErr -> {
             validPromise.fail(cfErr.getMessage());
@@ -154,15 +155,15 @@ public class StaticConfiguration {
         final List<Future<Void>> middlewareFutures = new ArrayList<>();
         if (entrypoints != null) {
             for (int i = 0; i < entrypoints.size(); i++) {
-                final JsonObject entrypointJson = entrypoints.getJsonObject(i);
-                final JsonArray middlewares = entrypointJson.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-                middlewareFutures.add(validateEntryMiddlewareFuture(middlewares));
+                final JsonObject entrypoint = entrypoints.getJsonObject(i);
+                final JsonArray middlewares = entrypoint.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                middlewareFutures.add(validateEntryMiddlewares(middlewares));
             }
         }
         return middlewareFutures;
     }
 
-    private static Future<Void> validateEntryMiddlewareFuture(JsonArray entryMiddleware) {
+    private static Future<Void> validateEntryMiddlewares(JsonArray entryMiddlewares) {
         final JsonObject toValidate = new JsonObject().put(DynamicConfiguration.MIDDLEWARES, entryMiddleware);
         return DynamicConfiguration.validateMiddlewares(toValidate);
     }

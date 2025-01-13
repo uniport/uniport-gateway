@@ -24,7 +24,7 @@ public class MockProvider extends Provider {
     private long timerId;
 
     public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages) {
-        this(vertx, configurationAddress, messages, 0);
+        this(vertx, configurationAddress, messages, 20);
     }
 
     public MockProvider(Vertx vertx, String configurationAddress, List<JsonObject> messages, long waitMs) {
@@ -32,12 +32,7 @@ public class MockProvider extends Provider {
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
         this.messages = messages;
-
-        if (waitMs == 0) {
-            this.waitMs = 20;
-        } else {
-            this.waitMs = waitMs;
-        }
+        this.waitMs = waitMs;
     }
 
     @Override

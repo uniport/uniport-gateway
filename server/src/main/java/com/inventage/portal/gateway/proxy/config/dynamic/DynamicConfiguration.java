@@ -296,7 +296,7 @@ public class DynamicConfiguration {
     private static final String KEYWORD_PATTERN = "pattern";
     private static final String INT_TYPE = "integer";
     private static final String STRING_TYPE = "string";
-    private static final String ENV_VARIABLE_PATTERN_STRING_TO_INT = "^\\$\\{.*\\}$";
+    private static final String ENV_VARIABLE_PATTERN = "^\\$\\{.*\\}$";
 
     private static Validator buildValidator() {
         final JsonSchema schema = JsonSchema.of(buildSchema().toJson());
@@ -513,7 +513,7 @@ public class DynamicConfiguration {
                         Schemas.schema().withKeyword(KEYWORD_TYPE, INT_TYPE),
                         Schemas.schema()
                             .withKeyword(KEYWORD_TYPE, STRING_TYPE)
-                            .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT)))
+                            .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN)))
                     .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
         return serviceSchema;
@@ -566,8 +566,6 @@ public class DynamicConfiguration {
         return httpRouters == null && httpMiddlewares == null && httpServices == null;
     }
 
-    /**
-     */
     public static JsonObject merge(Map<String, JsonObject> configurations) {
         final JsonObject mergedConfig = buildDefaultConfiguration();
         if (configurations == null) {
@@ -728,10 +726,10 @@ public class DynamicConfiguration {
 
         Future.all(validFutures)
             .onSuccess(h -> {
-            validPromise.complete();
-        }).onFailure(err -> {
-            validPromise.fail(err.getMessage());
-        });
+                validPromise.complete();
+            }).onFailure(err -> {
+                validPromise.fail(err.getMessage());
+            });
 
         return validPromise.future();
     }
@@ -789,7 +787,7 @@ public class DynamicConfiguration {
         for (String mwName : routerMiddlewareNames) {
             if (getObjByKeyWithValue(middlewares, MIDDLEWARE_NAME, mwName) == null) {
                 final String errMsg = String.format("validateRouters: unknown middleware '%s' defined", mwName);
-                LOGGER.warn(errMsg);
+                LOGGER.error(errMsg);
                 return Future.failedFuture(errMsg);
             }
         }
@@ -797,7 +795,7 @@ public class DynamicConfiguration {
         for (String svName : routerServiceNames) {
             if (getObjByKeyWithValue(services, SERVICE_NAME, svName) == null) {
                 final String errMsg = String.format("validateRouters: unknown service '%s' defined", svName);
-                LOGGER.warn(errMsg);
+                LOGGER.error(errMsg);
                 return Future.failedFuture(errMsg);
             }
         }

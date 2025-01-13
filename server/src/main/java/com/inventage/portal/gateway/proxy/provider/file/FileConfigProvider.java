@@ -206,7 +206,7 @@ public class FileConfigProvider extends Provider {
 
     private void validateAndPublish(JsonObject config) {
         DynamicConfiguration.validate(this.vertx, config, false)
-            .onSuccess(f -> {
+            .onSuccess(v -> {
                 this.eb.publish(this.configurationAddress,
                     new JsonObject()
                         .put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_FILE)

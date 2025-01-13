@@ -175,12 +175,13 @@ public class DockerContainerProvider extends Provider {
             return null;
         }
 
-        DynamicConfiguration.validate(vertx, confFromLabels, false).onSuccess(handler -> {
-            LOGGER.debug("Configuration from labels '{}'", confFromLabels);
-            this.configurations.put(containerId, confFromLabels);
-        }).onFailure(err -> LOGGER.warn(
-            "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
-            err.getMessage(), containerName, confFromLabels));
+        DynamicConfiguration.validate(vertx, confFromLabels, false)
+            .onSuccess(v -> {
+                LOGGER.debug("Configuration from labels '{}'", confFromLabels);
+                this.configurations.put(containerId, confFromLabels);
+            }).onFailure(err -> LOGGER.warn(
+                "Invalid configuration form container labels '{}' (container name: '{}', labels: '{}')",
+                err.getMessage(), containerName, confFromLabels));
 
         return DynamicConfiguration.merge(this.configurations);
     }
@@ -396,12 +397,13 @@ public class DockerContainerProvider extends Provider {
     }
 
     private void validateAndPublish(JsonObject config) {
-        DynamicConfiguration.validate(this.vertx, config, false).onSuccess(handler -> {
-            LOGGER.info("Configuration published");
-            this.eb.publish(this.configurationAddress,
-                new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
-                    .put(Provider.PROVIDER_CONFIGURATION, config));
-        }).onFailure(err -> LOGGER.warn("Unable to publish invalid configuration '{}': '{}'", config,
-            err.getMessage()));
+        DynamicConfiguration.validate(this.vertx, config, false)
+            .onSuccess(v -> {
+                LOGGER.info("Configuration published");
+                this.eb.publish(this.configurationAddress,
+                    new JsonObject().put(Provider.PROVIDER_NAME, StaticConfiguration.PROVIDER_DOCKER)
+                        .put(Provider.PROVIDER_CONFIGURATION, config));
+            }).onFailure(err -> LOGGER.warn("Unable to publish invalid configuration '{}': '{}'", config,
+                err.getMessage()));
     }
 }
