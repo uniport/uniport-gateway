@@ -23,6 +23,7 @@ import io.vertx.spi.cluster.hazelcast.ClusterHealthCheck;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -321,8 +322,7 @@ public class RouterFactory {
         Handler<AsyncResult<Middleware>> handler
     ) {
         final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-            new JsonObject());
+        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject());
 
         // needed to ensure authenticating requests are routed through this application
         if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)
@@ -332,8 +332,8 @@ public class RouterFactory {
             middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);
         }
 
-        final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
-        if (middlewareFactory == null) {
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.warn("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
@@ -341,7 +341,9 @@ public class RouterFactory {
         }
 
         final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
-        middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
+        middlewareFactory.get()
+            .create(this.vertx, middlewareName, router, middlewareOptions)
+            .onComplete(handler);
     }
 
     private void addHealthRoute(Router router) {

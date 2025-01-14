@@ -13,11 +13,10 @@ import static com.inventage.portal.gateway.TestUtils.withServer;
 import static com.inventage.portal.gateway.TestUtils.withServers;
 import static com.inventage.portal.gateway.TestUtils.withService;
 import static com.inventage.portal.gateway.TestUtils.withServices;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertEquals;
+import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertNotNull;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -1400,7 +1399,7 @@ public class DynamicConfigurationTest {
     ) {
         DynamicConfiguration.validate(vertx, json, complete, true)
             .onSuccess(validRouters -> {
-                VertxAssertions.assertNotNull(testCtx, validRouters, "validRouters should not be null");
+                assertNotNull(testCtx, validRouters, "validRouters should not be null");
 
                 final List<String> actualRouterNames = new LinkedList<String>();
                 for (int i = 0; i < validRouters.size(); i++) {
@@ -1409,7 +1408,7 @@ public class DynamicConfigurationTest {
                     actualRouterNames.add(routerName);
                 }
 
-                VertxAssertions.assertEquals(testCtx, expectedRouterNames, actualRouterNames);
+                assertEquals(testCtx, expectedRouterNames, actualRouterNames);
                 testCtx.completeNow();
             })
             .onFailure(err -> {
@@ -1424,7 +1423,7 @@ public class DynamicConfigurationTest {
             new JsonObject().put(DynamicConfiguration.ROUTERS, new JsonArray())
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray())
                 .put(DynamicConfiguration.SERVICES, new JsonArray()));
-        testCtx.verify(() -> assertEquals(expectedConfig, actualConfig));
+        assertEquals(testCtx, expectedConfig, actualConfig);
         testCtx.completeNow();
     }
 
@@ -1434,9 +1433,9 @@ public class DynamicConfigurationTest {
         String name, JsonObject json, boolean expected, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        final String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'", name,
-            expected ? "succeeded" : "failed", json != null ? json.encodePrettily() : json);
-        testCtx.verify(() -> assertEquals(expected, DynamicConfiguration.isEmptyConfiguration(json), errMsg));
+        final String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'",
+            name, expected ? "succeeded" : "failed", json != null ? json.encodePrettily() : json);
+        assertEquals(testCtx, expected, DynamicConfiguration.isEmptyConfiguration(json), errMsg);
         testCtx.completeNow();
     }
 
@@ -1461,31 +1460,29 @@ public class DynamicConfigurationTest {
         };
 
         final JsonObject actual = DynamicConfiguration.merge(configurations);
-        testCtx.verify(() -> {
-            assertNotNull(actual, errMsg);
+        assertNotNull(testCtx, actual, errMsg);
 
-            final JsonObject expectedHttp = expected.getJsonObject(DynamicConfiguration.HTTP);
-            final JsonObject actualHttp = actual.getJsonObject(DynamicConfiguration.HTTP);
-            assertNotNull(actualHttp, errMsg);
+        final JsonObject expectedHttp = expected.getJsonObject(DynamicConfiguration.HTTP);
+        final JsonObject actualHttp = actual.getJsonObject(DynamicConfiguration.HTTP);
+        assertNotNull(testCtx, actualHttp, errMsg);
 
-            final JsonArray expectedRouters = expectedHttp.getJsonArray(DynamicConfiguration.ROUTERS);
-            final JsonArray actualRouters = actualHttp.getJsonArray(DynamicConfiguration.ROUTERS);
-            Collections.sort((List<JsonObject>) expectedRouters.getList(), sortByName);
-            Collections.sort((List<JsonObject>) actualRouters.getList(), sortByName);
-            assertEquals(expectedRouters, actualRouters, errMsg);
+        final JsonArray expectedRouters = expectedHttp.getJsonArray(DynamicConfiguration.ROUTERS);
+        final JsonArray actualRouters = actualHttp.getJsonArray(DynamicConfiguration.ROUTERS);
+        Collections.sort((List<JsonObject>) expectedRouters.getList(), sortByName);
+        Collections.sort((List<JsonObject>) actualRouters.getList(), sortByName);
+        assertEquals(testCtx, expectedRouters, actualRouters, errMsg);
 
-            final JsonArray expectedMiddlewares = expectedHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            final JsonArray actualMiddlewares = actualHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-            Collections.sort((List<JsonObject>) expectedMiddlewares.getList(), sortByName);
-            Collections.sort((List<JsonObject>) actualMiddlewares.getList(), sortByName);
-            assertEquals(expectedMiddlewares, actualMiddlewares, errMsg);
+        final JsonArray expectedMiddlewares = expectedHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+        final JsonArray actualMiddlewares = actualHttp.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+        Collections.sort((List<JsonObject>) expectedMiddlewares.getList(), sortByName);
+        Collections.sort((List<JsonObject>) actualMiddlewares.getList(), sortByName);
+        assertEquals(testCtx, expectedMiddlewares, actualMiddlewares, errMsg);
 
-            final JsonArray expectedServices = expectedHttp.getJsonArray(DynamicConfiguration.SERVICES);
-            final JsonArray actualServices = actualHttp.getJsonArray(DynamicConfiguration.SERVICES);
-            Collections.sort((List<JsonObject>) expectedServices.getList(), sortByName);
-            Collections.sort((List<JsonObject>) actualServices.getList(), sortByName);
-            assertEquals(expectedServices, actualServices, errMsg);
-        });
+        final JsonArray expectedServices = expectedHttp.getJsonArray(DynamicConfiguration.SERVICES);
+        final JsonArray actualServices = actualHttp.getJsonArray(DynamicConfiguration.SERVICES);
+        Collections.sort((List<JsonObject>) expectedServices.getList(), sortByName);
+        Collections.sort((List<JsonObject>) actualServices.getList(), sortByName);
+        assertEquals(testCtx, expectedServices, actualServices, errMsg);
         testCtx.completeNow();
     }
 
@@ -1495,11 +1492,9 @@ public class DynamicConfigurationTest {
         String name, JsonArray arr, String key, String value, JsonObject expected,
         Vertx vertx, VertxTestContext testCtx
     ) {
-        final String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'", name,
-            arr != null ? arr.encodePrettily() : arr, key, value);
-        testCtx.verify(
-            () -> assertEquals(expected, DynamicConfiguration.getObjByKeyWithValue(arr, key, value),
-                errMsg));
+        final String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'",
+            name, arr != null ? arr.encodePrettily() : arr, key, value);
+        assertEquals(testCtx, expected, DynamicConfiguration.getObjByKeyWithValue(arr, key, value), errMsg);
         testCtx.completeNow();
     }
 

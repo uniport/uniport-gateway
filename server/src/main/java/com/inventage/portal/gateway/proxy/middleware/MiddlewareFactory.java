@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import org.slf4j.Logger;
@@ -23,15 +24,17 @@ public interface MiddlewareFactory {
     Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
 
     class Loader {
-        /**
-        */
-        public static MiddlewareFactory getFactory(String middlewareName) {
-            LOGGER.debug("Middleware factory for '{}'", middlewareName);
-            final Optional<MiddlewareFactory> middleware = ServiceLoader.load(MiddlewareFactory.class).stream()
+        public static List<MiddlewareFactory> listFactories() {
+            return ServiceLoader.load(MiddlewareFactory.class).stream()
                 .map(ServiceLoader.Provider::get)
+                .toList();
+        }
+
+        public static Optional<MiddlewareFactory> getFactory(String middlewareName) {
+            LOGGER.debug("Middleware factory for '{}'", middlewareName);
+            return listFactories().stream()
                 .filter(instance -> instance.provides().equals(middlewareName))
                 .findFirst();
-            return middleware.orElse(null);
         }
     }
 

@@ -149,8 +149,8 @@ public class Entrypoint {
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
             new JsonObject());
 
-        final MiddlewareFactory middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
-        if (middlewareFactory == null) {
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.warn("{}", errMsg);
             handler.handle(Future.failedFuture(errMsg));
@@ -158,7 +158,9 @@ public class Entrypoint {
         }
 
         final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
-        middlewareFactory.create(this.vertx, middlewareName, router, middlewareOptions).onComplete(handler);
+        middlewareFactory.get()
+            .create(this.vertx, middlewareName, router, middlewareOptions)
+            .onComplete(handler);
     }
 
     static class Tls {

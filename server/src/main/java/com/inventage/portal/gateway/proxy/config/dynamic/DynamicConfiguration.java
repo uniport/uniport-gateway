@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
@@ -229,35 +230,7 @@ public class DynamicConfiguration {
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS,
         MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
-    public static final List<String> MIDDLEWARE_TYPES = List.of(
-        MIDDLEWARE_AUTHORIZATION_BEARER,
-        MIDDLEWARE_BEARER_ONLY,
-        MIDDLEWARE_CHECK_ROUTE,
-        MIDDLEWARE_CONTROL_API,
-        MIDDLEWARE_CORS,
-        MIDDLEWARE_CSP,
-        MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
-        MIDDLEWARE_CSRF,
-        MIDDLEWARE_BODY_HANDLER,
-        MIDDLEWARE_HEADERS,
-        MIDDLEWARE_CUSTOM_RESPONSE,
-        MIDDLEWARE_LANGUAGE_COOKIE,
-        MIDDLEWARE_OAUTH2,
-        MIDDLEWARE_OAUTH2_REGISTRATION,
-        MIDDLEWARE_PASS_AUTHORIZATION,
-        MIDDLEWARE_REDIRECT_REGEX,
-        MIDDLEWARE_REPLACED_SESSION_COOKIE_DETECTION,
-        MIDDLEWARE_REPLACE_PATH_REGEX,
-        MIDDLEWARE_REQUEST_RESPONSE_LOGGER,
-        MIDDLEWARE_RESPONSE_SESSION_COOKIE_REMOVAL,
-        MIDDLEWARE_SESSION,
-        MIDDLEWARE_SESSION_BAG,
-        MIDDLEWARE_SHOW_SESSION_CONTENT,
-        MIDDLEWARE_OPEN_TELEMETRY,
-        MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION,
-        MIDDLEWARE_CLAIM_TO_HEADER,
-        MIDDLEWARE_MATOMO,
-        MIDDLEWARE_BACK_CHANNEL_LOGOUT);
+    public static final List<String> MIDDLEWARE_TYPES = MiddlewareFactory.Loader.listFactories().stream().map(MiddlewareFactory::provides).toList();
     public static final List<String> CSP_MERGE_STRATEGIES = List.of(
         MIDDLEWARE_CSP_MERGE_STRATEGY_UNION,
         MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL,
