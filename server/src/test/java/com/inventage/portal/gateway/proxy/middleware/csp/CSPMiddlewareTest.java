@@ -7,7 +7,6 @@ import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.asse
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import io.vertx.core.Handler;
@@ -449,7 +448,8 @@ class CSPMiddlewareTest {
     }
 
     private JsonObject createDirective(String directive, String... values) {
-        return JsonObject.of(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME, directive,
-            DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of((Object[]) values));
+        return JsonObject.of(
+            CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_NAME, directive,
+            CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of((Object[]) values));
     }
 }

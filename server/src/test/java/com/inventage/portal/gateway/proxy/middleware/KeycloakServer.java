@@ -1,7 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -213,13 +214,13 @@ public class KeycloakServer {
 
     public JsonObject getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl) {
         final JsonObject config = new JsonObject();
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, scope);
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
-        config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow);
+        config.put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE, scope);
+        config.put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_CLIENTID, EMPTY_STRING);
+        config.put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_CLIENTSECRET, EMPTY_STRING);
+        config.put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
+        config.put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow);
         if (publicUrl != null) {
-            config.put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PUBLIC_URL, publicUrl);
+            config.put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_PUBLIC_URL, publicUrl);
         }
 
         config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
@@ -230,12 +231,12 @@ public class KeycloakServer {
 
     public JsonObject getBearerOnlyConfig(String issuer, List<String> audience, JsonArray publicKeys, boolean reconcilationEnabled, long reconcilationIntervalMs) {
         final JsonObject config = new JsonObject();
-        config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys);
-        config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, issuer);
-        config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(audience));
-        config.put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION, JsonObject.of(
-            DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, reconcilationEnabled,
-            DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, reconcilationIntervalMs));
+        config.put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys);
+        config.put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, issuer);
+        config.put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(audience));
+        config.put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION, JsonObject.of(
+            WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, reconcilationEnabled,
+            WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, reconcilationIntervalMs));
         config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
         config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
         config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);

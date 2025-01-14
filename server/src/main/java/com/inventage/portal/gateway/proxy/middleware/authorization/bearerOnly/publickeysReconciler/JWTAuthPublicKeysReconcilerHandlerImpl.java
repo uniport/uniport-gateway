@@ -20,6 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Validates an Bearer Token provided in the Authorzation Headers.
+ * The validation includes signature check, issuers, claims
+ * The public key used to verify the JWT siganture is fetched periodically, if enabled.
  */
 public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeysReconcilerHandler {
 
@@ -40,8 +43,13 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     private boolean reconcilerStarted;
 
     public JWTAuthPublicKeysReconcilerHandlerImpl(
-        Vertx vertx, JWTAuthOptions jwtAuthOptions, JWTAuthMultipleIssuersOptions additionalIssuersOptions, JWTAuthAdditionalClaimsOptions additionalClaimsOptions,
-        JsonArray publicKeySources, boolean reconcilationEnabled, long reconcilationIntervalMs
+        Vertx vertx,
+        JWTAuthOptions jwtAuthOptions,
+        JWTAuthMultipleIssuersOptions additionalIssuersOptions,
+        JWTAuthAdditionalClaimsOptions additionalClaimsOptions,
+        JsonArray publicKeySources,
+        boolean reconcilationEnabled,
+        long reconcilationIntervalMs
     ) {
         this.vertx = vertx;
         this.jwtAuthOptions = jwtAuthOptions;
@@ -69,8 +77,8 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     }
 
     private AuthenticationHandler createAuthHandlerWithFreshPublicKeys(JWTAuthOptions authOpts) {
-        final JWTAuthOptions authOptions = new JWTAuthOptions(authOpts).setJWTOptions(jwtOptions);
-
+        final JWTAuthOptions authOptions = new JWTAuthOptions(authOpts)
+            .setJWTOptions(jwtOptions);
         final JWTAuth authProvider = JWTAuthMultipleIssuersProvider.create(this.vertx, authOptions, this.additionalIssuersOptions);
         final AuthenticationHandler authHandler = JWTAuthAdditionalClaimsHandler.create(authProvider, additionalClaimsOptions, this);
 
@@ -101,8 +109,6 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         }
     }
 
-    /**
-     */
     public Future<AuthenticationHandler> getOrRefreshPublicKeys() {
         LOGGER.debug("Refreshing public keys");
 

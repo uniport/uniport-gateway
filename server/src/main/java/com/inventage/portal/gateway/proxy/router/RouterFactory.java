@@ -5,6 +5,8 @@ import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -325,8 +327,8 @@ public class RouterFactory {
         final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject());
 
         // needed to ensure authenticating requests are routed through this application
-        if (middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2)
-            || middlewareType.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION)) {
+        if (middlewareType.equals(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2)
+            || middlewareType.equals(OAuth2RegistrationMiddlewareFactory.MIDDLEWARE_OAUTH2_REGISTRATION)) {
             middlewareOptions.put(PUBLIC_PROTOCOL_KEY, this.publicProtocol);
             middlewareOptions.put(PUBLIC_HOSTNAME_KEY, this.publicHostname);
             middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);

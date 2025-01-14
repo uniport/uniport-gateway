@@ -55,7 +55,6 @@
                         "Portal-IAM"
                     ],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Portal-IAM']['roles']",

@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.proxy.middleware.debug;
 
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.SINGLE_SIGN_ON_SID;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
@@ -42,7 +41,7 @@ public class ShowSessionContentMiddleware extends TraceMiddleware {
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         // Bail if we're not on the debug URL
-        if (!ctx.request().absoluteURI().contains(DynamicConfiguration.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
+        if (!ctx.request().absoluteURI().contains(ShowSessionContentMiddlewareFactory.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
             ctx.next();
             return;
         }

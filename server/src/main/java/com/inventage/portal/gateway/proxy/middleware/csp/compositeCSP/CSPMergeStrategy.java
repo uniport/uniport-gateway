@@ -1,11 +1,14 @@
 package com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 
-/**
- */
 public enum CSPMergeStrategy {
-    EXTERNAL(DynamicConfiguration.MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL), INTERNAL(DynamicConfiguration.MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL), UNION(DynamicConfiguration.MIDDLEWARE_CSP_MERGE_STRATEGY_UNION);
+
+    EXTERNAL(CSPMiddlewareFactory.MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL),
+
+    INTERNAL(CSPMiddlewareFactory.MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL),
+
+    UNION(CSPMiddlewareFactory.MIDDLEWARE_CSP_MERGE_STRATEGY_UNION);
 
     private final String name;
 

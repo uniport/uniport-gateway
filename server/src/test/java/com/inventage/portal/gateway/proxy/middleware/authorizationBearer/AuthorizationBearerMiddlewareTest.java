@@ -6,10 +6,10 @@ import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.asse
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertNotEquals;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertTrue;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
@@ -67,7 +67,7 @@ public class AuthorizationBearerMiddlewareTest {
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(injectTokenHandler)
-            .withAuthorizationBearerMiddleware(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)
+            .withAuthorizationBearerMiddleware(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)
             .build(ctx -> {
                 // then
                 assertAuthorizationBearer(testCtx, ctx.request(), rawIdToken);

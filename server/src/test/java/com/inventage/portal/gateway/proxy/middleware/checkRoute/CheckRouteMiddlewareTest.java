@@ -4,7 +4,6 @@ import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedire
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import io.vertx.core.Vertx;
@@ -20,10 +19,10 @@ public class CheckRouteMiddlewareTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "/" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH,
-        "/a/b/" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH,
-        "/a/b/" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH + "/c/d",
-        "/prefix" + DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH + "postfix"
+        "/" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH,
+        "/a/b/" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH,
+        "/a/b/" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH + "/c/d",
+        "/prefix" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH + "postfix"
     })
     public void isHandledByCheckRoute(String uri, Vertx vertx, VertxTestContext testCtx) {
         // given

@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Abstract middleware for middlewares operating on the Authorization Header.
  */
 public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
 
@@ -54,7 +55,7 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
             return;
         }
 
-        if (this.sessionScope.equals(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
+        if (this.sessionScope.equals(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
             idTokenDemanded = true;
             // all ID tokens are the same hence take anyone
             authContext = AuthenticationUserContext.fromSessionAtAnyScope(session).orElse(null);

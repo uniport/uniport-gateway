@@ -1,32 +1,53 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Factory for {@link LanguageCookieMiddleware}.
  */
 public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
+    // schema
+    public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
+    public static final String MIDDLEWARE_LANGUAGE_COOKIE_NAME = "name";
+
+    // defaults
     public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE;
+        return MIDDLEWARE_LANGUAGE_COOKIE;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return Schemas.objectSchema()
+            .property(MIDDLEWARE_LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .allowAdditionalProperties(false);
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
-            DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE);
-        final String languageCookieName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
+            MIDDLEWARE_LANGUAGE_COOKIE);
+        final String languageCookieName = middlewareConfig.getString(MIDDLEWARE_LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
         return Future.succeededFuture(new LanguageCookieMiddleware(name, languageCookieName));
     }
 }

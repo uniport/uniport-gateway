@@ -11,7 +11,6 @@ import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
@@ -56,10 +55,10 @@ public class OAuth2AuthMiddlewareTest {
     @Test
     void discoveryFailure(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         final JsonObject config = new JsonObject()
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, "http://inexistent.host")
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "scopee")
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, "id")
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, "secret")
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_DISCOVERYURL, "http://inexistent.host")
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "scopee")
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_CLIENTID, "id")
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_CLIENTSECRET, "secret")
             .put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http")
             .put(RouterFactory.PUBLIC_HOSTNAME_KEY, "host")
             .put(RouterFactory.PUBLIC_PORT_KEY, 1234);
@@ -255,7 +254,7 @@ public class OAuth2AuthMiddlewareTest {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
         final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of("extra", "parameter"));
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of("extra", "parameter"));
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
@@ -280,7 +279,7 @@ public class OAuth2AuthMiddlewareTest {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
         final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES, new JsonArray(scopes));
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES, new JsonArray(scopes));
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
@@ -351,7 +350,7 @@ public class OAuth2AuthMiddlewareTest {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
         final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
-            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS, new JsonArray(passthrough));
+            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS, new JsonArray(passthrough));
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)

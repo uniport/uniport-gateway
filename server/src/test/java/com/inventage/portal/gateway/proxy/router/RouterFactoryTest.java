@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
+import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -146,8 +147,8 @@ public class RouterFactoryTest {
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("redirect", "redirectRegex",
                     TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX, ".*")
-                        .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, "/redirect")))),
+                        .put(RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX_REGEX, ".*")
+                        .put(RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, "/redirect")))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 

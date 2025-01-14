@@ -1,12 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.Validate;
 
-/**
- * JWTClaim Model.
- */
 public class JWTClaim {
 
     final String path;
@@ -22,11 +19,9 @@ public class JWTClaim {
      */
     public JWTClaim(JsonObject claimObject) {
         this(
-            claimObject.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
-            JWTClaimOperator
-                .valueOf(claimObject
-                    .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
-            claimObject.getValue(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
+            claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
+            JWTClaimOperator.valueOf(claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
+            claimObject.getValue(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
     }
 
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {

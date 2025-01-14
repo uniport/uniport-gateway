@@ -21,321 +21,592 @@
                   "type" : "string"
                 },
                 "options" : {
-                  "additionalProperties" : false,
-                  "type" : "object",
-                  "properties" : {
-                    "redirectUri" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "publicKeys" : {
-                      "type" : "array"
-                    },
-                    "claimPath" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "additionalScopes" : {
-                      "type" : "array",
-                      "items" : {
+                  "anyOf" : [ {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "sessionScope" : {
                         "minLength" : 1,
-                        "type" : "string"
-                      }
-                    },
-                    "publicKeyAlgorithm" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "lifetimeCookie" : {
-                      "type" : "boolean"
-                    },
-                    "proxyAuthenticationFlow" : {
-                      "type" : "boolean"
-                    },
-                    "publicKey" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "idleTimeoutInMinute" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "issuer" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "waitTimeInMillisecond" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "allowedOriginPatterns" : {
-                      "type" : "array",
-                      "items" : {
-                        "minLength" : 1,
-                        "type" : "string"
-                      }
-                    },
-                    "policyDirectives" : {
-                      "type" : "array"
-                    },
-                    "action" : {
-                      "type" : "string",
-                      "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
-                    },
-                    "allowedHeaders" : {
-                      "type" : "array",
-                      "items" : {
-                        "minLength" : 1,
-                        "type" : "string"
-                      }
-                    },
-                    "customResponseHeaders" : {
-                      "type" : "object"
-                    },
-                    "clientSecret" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "reportOnly" : {
-                      "type" : "boolean"
-                    },
-                    "allowCredentials" : {
-                      "type" : "boolean"
-                    },
-                    "timeoutInMinute" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "whitelistedCookies" : {
-                      "type" : "array"
-                    },
-                    "audience" : {
-                      "type" : "array"
-                    },
-                    "cookie" : {
-                      "type" : "object",
-                      "properties" : {
-                        "sameSite" : {
-                          "type" : "string",
-                          "enum" : [ "NONE", "STRICT", "LAX" ]
-                        },
-                        "name" : {
-                          "minLength" : 0,
-                          "type" : "string"
-                        },
-                        "httpOnly" : {
-                          "type" : "boolean"
-                        },
-                        "secure" : {
-                          "type" : "boolean"
-                        }
-                      }
-                    },
-                    "exposedHeaders" : {
-                      "type" : "array",
-                      "items" : {
-                        "minLength" : 1,
-                        "type" : "string"
-                      }
-                    },
-                    "optional" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "uriWithoutLoggingRegex" : {
-                      "type" : "string"
-                    },
-                    "regex" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "loggingRequestEnabled" : {
-                      "type" : "boolean"
-                    },
-                    "name" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "claims" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "object",
-                        "properties" : {
-                          "claimPath" : {
-                            "type" : "string"
-                          },
-                          "value" : { },
-                          "operator" : {
-                            "type" : "string",
-                            "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
-                          }
-                        }
-                      }
-                    },
-                    "sessionScope" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "replacement" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "loggingResponseEnabled" : {
-                      "type" : "boolean"
-                    },
-                    "statusCode" : {
-                      "maximum" : 599,
-                      "type" : "integer",
-                      "minimum" : 100
-                    },
-                    "responseMode" : {
-                      "type" : "string",
-                      "enum" : [ "query", "fragment", "form_post" ]
-                    },
-                    "uriWithoutSessionTimeoutReset" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "passthroughParameters" : {
-                      "type" : "array",
-                      "items" : {
-                        "minLength" : 1,
-                        "type" : "string"
-                      }
-                    },
-                    "origin" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "content" : {
-                      "type" : "string"
-                    },
-                    "lifetimeHeader" : {
-                      "type" : "boolean"
-                    },
-                    "allowedOrigins" : {
-                      "type" : "array",
-                      "items" : {
-                        "minLength" : 1,
-                        "type" : "string"
-                      }
-                    },
-                    "logLevel" : {
-                      "type" : "string",
-                      "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
-                    },
-                    "publicKeysReconcilation" : {
-                      "type" : "object",
-                      "properties" : {
-                        "intervalMs" : {
-                          "type" : "integer",
-                          "minimum" : 0
-                        },
-                        "enabled" : {
-                          "type" : "boolean"
-                        }
-                      }
-                    },
-                    "nagHttps" : {
-                      "type" : "boolean"
-                    },
-                    "allowedMethods" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "string",
-                        "enum" : [ "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT" ]
-                      }
-                    },
-                    "pathRoles" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "cookieName" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "discoveryUrl" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "iamSessionResetUrl" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "headers" : {
-                      "type" : "object"
-                    },
-                    "allowPrivateNetwork" : {
-                      "type" : "boolean"
-                    },
-                    "headerName" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "clientId" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "pathUsername" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "customRequestHeaders" : {
-                      "type" : "object"
-                    },
-                    "mergeStrategy" : {
-                      "type" : "string",
-                      "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
-                    },
-                    "additionalIssuers" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "string"
-                      }
-                    },
-                    "maxRedirectRetries" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "idMinimumLength" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "clusteredSessionStoreRetryTimeoutInMiliseconds" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "pathGroup" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "publicUrl" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "additionalParameters" : {
-                      "additionalProperties" : true,
-                      "type" : "object"
-                    },
-                    "pathEmail" : {
-                      "minLength" : 1,
-                      "type" : "string"
-                    },
-                    "maxAgeSeconds" : {
-                      "type" : "integer",
-                      "minimum" : 0
-                    },
-                    "contentTypes" : {
-                      "type" : "array",
-                      "items" : {
                         "type" : "string"
                       }
                     }
-                  }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "audience" : {
+                        "type" : "array"
+                      },
+                      "publicKeys" : {
+                        "type" : "array"
+                      },
+                      "publicKeysReconcilation" : {
+                        "type" : "object",
+                        "properties" : {
+                          "intervalMs" : {
+                            "type" : "integer",
+                            "minimum" : 0
+                          },
+                          "enabled" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "additionalIssuers" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string"
+                        }
+                      },
+                      "publicKeyAlgorithm" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "claims" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "object",
+                          "properties" : {
+                            "claimPath" : {
+                              "type" : "string"
+                            },
+                            "value" : { },
+                            "operator" : {
+                              "type" : "string",
+                              "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
+                            }
+                          }
+                        }
+                      },
+                      "optional" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "publicKey" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "issuer" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "audience" : {
+                        "type" : "array"
+                      },
+                      "publicKeys" : {
+                        "type" : "array"
+                      },
+                      "publicKeysReconcilation" : {
+                        "type" : "object",
+                        "properties" : {
+                          "intervalMs" : {
+                            "type" : "integer",
+                            "minimum" : 0
+                          },
+                          "enabled" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "additionalIssuers" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string"
+                        }
+                      },
+                      "publicKeyAlgorithm" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "claims" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "object",
+                          "properties" : {
+                            "claimPath" : {
+                              "type" : "string"
+                            },
+                            "value" : { },
+                            "operator" : {
+                              "type" : "string",
+                              "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
+                            }
+                          }
+                        }
+                      },
+                      "sessionScope" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "publicKey" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "issuer" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object"
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object"
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "headerName" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "claimPath" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "iamSessionResetUrl" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "action" : {
+                        "type" : "string",
+                        "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "allowPrivateNetwork" : {
+                        "type" : "boolean"
+                      },
+                      "allowedOrigins" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "exposedHeaders" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "allowedOriginPatterns" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "allowedHeaders" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "allowedMethods" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string",
+                          "enum" : [ "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT" ]
+                        }
+                      },
+                      "maxAgeSeconds" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      },
+                      "allowCredentials" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "mergeStrategy" : {
+                        "type" : "string",
+                        "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
+                      },
+                      "policyDirectives" : {
+                        "type" : "array"
+                      },
+                      "reportOnly" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "logLevel" : {
+                        "type" : "string",
+                        "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "headerName" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "cookie" : {
+                        "type" : "object",
+                        "properties" : {
+                          "path" : {
+                            "minLength" : 1,
+                            "type" : "string"
+                          },
+                          "name" : {
+                            "minLength" : 1,
+                            "type" : "string"
+                          },
+                          "secure" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "origin" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "nagHttps" : {
+                        "type" : "boolean"
+                      },
+                      "timeoutInMinute" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "headers" : {
+                        "type" : "object"
+                      },
+                      "content" : {
+                        "type" : "string"
+                      },
+                      "statusCode" : {
+                        "maximum" : 599,
+                        "type" : "integer",
+                        "minimum" : 100
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object"
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "customRequestHeaders" : {
+                        "type" : "object"
+                      },
+                      "customResponseHeaders" : {
+                        "type" : "object"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "loggingRequestEnabled" : {
+                        "type" : "boolean"
+                      },
+                      "uriWithoutLoggingRegex" : {
+                        "type" : "string"
+                      },
+                      "contentTypes" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string"
+                        }
+                      },
+                      "loggingResponseEnabled" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "pathGroup" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "pathUsername" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "pathEmail" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "pathRoles" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "responseMode" : {
+                        "type" : "string",
+                        "enum" : [ "query", "fragment", "form_post" ]
+                      },
+                      "clientId" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "additionalScopes" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "passthroughParameters" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "publicUrl" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "sessionScope" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "clientSecret" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "proxyAuthenticationFlow" : {
+                        "type" : "boolean"
+                      },
+                      "additionalParameters" : {
+                        "additionalProperties" : true,
+                        "type" : "object"
+                      },
+                      "discoveryUrl" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "responseMode" : {
+                        "type" : "string",
+                        "enum" : [ "query", "fragment", "form_post" ]
+                      },
+                      "clientId" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "additionalScopes" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "passthroughParameters" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "publicUrl" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "sessionScope" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "clientSecret" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "proxyAuthenticationFlow" : {
+                        "type" : "boolean"
+                      },
+                      "additionalParameters" : {
+                        "additionalProperties" : true,
+                        "type" : "object"
+                      },
+                      "discoveryUrl" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "redirectUri" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object"
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "regex" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "replacement" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "regex" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "replacement" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "waitTimeInMillisecond" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      },
+                      "name" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "maxRedirectRetries" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "uriWithoutSessionTimeoutReset" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "cookie" : {
+                        "type" : "object",
+                        "properties" : {
+                          "sameSite" : {
+                            "type" : "string",
+                            "enum" : [ "NONE", "STRICT", "LAX" ]
+                          },
+                          "name" : {
+                            "minLength" : 0,
+                            "type" : "string"
+                          },
+                          "httpOnly" : {
+                            "type" : "boolean"
+                          },
+                          "secure" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "lifetimeCookie" : {
+                        "type" : "boolean"
+                      },
+                      "nagHttps" : {
+                        "type" : "boolean"
+                      },
+                      "idMinimumLength" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      },
+                      "idleTimeoutInMinute" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      },
+                      "lifetimeHeader" : {
+                        "type" : "boolean"
+                      },
+                      "clusteredSessionStoreRetryTimeoutInMiliseconds" : {
+                        "type" : "integer",
+                        "minimum" : 0
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "whitelistedCookies" : {
+                        "type" : "array"
+                      },
+                      "cookieName" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    }
+                  }, {
+                    "additionalProperties" : false,
+                    "type" : "object"
+                  } ]
                 },
                 "type" : {
                   "type" : "string",
-                  "enum" : [ "authorizationBearer", "bearerOnly", "checkRoute", "controlApi", "cors", "csp", "cspViolationReportingServer", "csrf", "bodyHandler", "headers", "customResponse", "languageCookie", "oauth2", "oauth2registration", "passAuthorization", "redirectRegex", "replacedSessionCookieDetection", "replacePathRegex", "requestResponseLogger", "responseSessionCookieRemoval", "session", "sessionBag", "_session_", "openTelemetry", "checkInitiatedAuth", "claimToHeader", "matomo", "backChannelLogout" ]
+                  "enum" : [ "authorizationBearer", "bearerOnly", "passAuthorization", "bodyHandler", "checkRoute", "claimToHeader", "controlApi", "cors", "csp", "cspViolationReportingServer", "csrf", "customResponse", "_session_", "headers", "languageCookie", "requestResponseLogger", "matomo", "oauth2", "oauth2registration", "checkInitiatedAuth", "openTelemetry", "redirectRegex", "replacePathRegex", "replacedSessionCookieDetection", "responseSessionCookieRemoval", "session", "sessionBag", "backChannelLogout" ]
                 }
               },
               "required" : [ "name", "type" ]

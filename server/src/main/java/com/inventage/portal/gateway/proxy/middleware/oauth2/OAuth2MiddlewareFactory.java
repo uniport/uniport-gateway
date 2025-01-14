@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
@@ -17,6 +16,8 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
@@ -26,30 +27,106 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Factory for {@link OAuth2AuthMiddleware}.
+ *
  * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
  * follow-up requests are routed through this application as well, if configured.
  */
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
+    // schema
+    public static final String MIDDLEWARE_OAUTH2 = "oauth2";
+    public static final String MIDDLEWARE_OAUTH2_CLIENTID = "clientId";
+    public static final String MIDDLEWARE_OAUTH2_CLIENTSECRET = "clientSecret";
+    public static final String MIDDLEWARE_OAUTH2_DISCOVERYURL = "discoveryUrl";
+    public static final String MIDDLEWARE_OAUTH2_RESPONSE_MODE = "responseMode";
+    public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE = "sessionScope";
+    public static final String MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID = "id";
+    public static final String MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW = "proxyAuthenticationFlow";
+    public static final String MIDDLEWARE_OAUTH2_PUBLIC_URL = "publicUrl";
+    public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES = "additionalScopes";
+    public static final String MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS = "additionalParameters";
+    public static final String MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS = "passthroughParameters";
+
     public static final String OIDC_RESPONSE_MODE = "response_mode";
     public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
     public static final String OIDC_RESPONSE_MODE_DEFAULT = OIDC_RESPONSE_MODE_FORM_POST;
 
+    private static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_OAUTH2;
+        return MIDDLEWARE_OAUTH2;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return Schemas.objectSchema()
+            .property(MIDDLEWARE_OAUTH2_CLIENTID, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_CLIENTSECRET, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_DISCOVERYURL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_RESPONSE_MODE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
+            .property(MIDDLEWARE_OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
+            .property(MIDDLEWARE_OAUTH2_PUBLIC_URL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .property(MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .property(MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
+                .additionalProperties(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .allowAdditionalProperties(true))
+            .property(MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .allowAdditionalProperties(false);
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        final String clientID = options.getString(MIDDLEWARE_OAUTH2_CLIENTID);
+        if (clientID == null || clientID.length() == 0) {
+            return Future.failedFuture("No client ID defined");
+        }
+
+        final String clientSecret = options.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET);
+        if (clientSecret == null || clientSecret.length() == 0) {
+            return Future.failedFuture("No client secret defined");
+        }
+
+        final String discoveryUrl = options.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL);
+        if (discoveryUrl == null || discoveryUrl.length() == 0) {
+            return Future.failedFuture("No discovery URL defined");
+        }
+
+        final String sessionScope = options.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+        if (sessionScope == null || sessionScope.length() == 0) {
+            return Future.failedFuture("No session scope defined");
+        }
+
+        final String responseMode = options.getString(MIDDLEWARE_OAUTH2_RESPONSE_MODE);
+        if (responseMode == null) {
+            LOGGER.debug(String.format("No response mode specified. Use default value: %s", OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
+        } else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
+            return Future.failedFuture(String.format("response mode '%s' not allowed, must be one of %s", responseMode, OIDC_RESPONSE_MODES));
+        }
+
+        return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, true);
-        final String sessionScope = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE);
-        final String responseMode = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_RESPONSE_MODE, OIDC_RESPONSE_MODE_DEFAULT);
+        final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, true);
+        final String sessionScope = middlewareConfig.getString(MIDDLEWARE_OAUTH2_SESSION_SCOPE);
+        final String responseMode = middlewareConfig.getString(MIDDLEWARE_OAUTH2_RESPONSE_MODE, OIDC_RESPONSE_MODE_DEFAULT);
 
         final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
         final List<Route> callbacks = mountCallbackRoutes(router, callbackPath, responseMode);
@@ -67,7 +144,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 getAdditionalScopes(middlewareConfig),
                 getAdditionalAuthRequestParams(middlewareConfig, responseMode),
                 getPassthroughParameters(middlewareConfig)))
-            .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", DynamicConfiguration.MIDDLEWARE_OAUTH2))
+            .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", MIDDLEWARE_OAUTH2))
             .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
     }
 
@@ -81,27 +158,20 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">AuthRequest</a>
      */
     private JsonObject getAdditionalAuthRequestParams(JsonObject middlewareConfig, String responseMode) {
-        JsonObject additionalParameters = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS);
-        if (additionalParameters == null) {
-            additionalParameters = JsonObject.of();
-        }
-
+        final JsonObject additionalParameters = middlewareConfig.getJsonObject(MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of());
         return new JsonObject(additionalParameters.getMap())
             .put(OIDC_RESPONSE_MODE, responseMode);
     }
 
     @SuppressWarnings("unchecked")
     private List<String> getAdditionalScopes(JsonObject middlewareConfig) {
-        final JsonArray additionalScopes = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES);
-        if (additionalScopes == null) {
-            return List.of();
-        }
+        final JsonArray additionalScopes = middlewareConfig.getJsonArray(MIDDLEWARE_OAUTH2_ADDITIONAL_SCOPES, JsonArray.of());
         return additionalScopes.getList();
     }
 
     @SuppressWarnings("unchecked")
     private List<String> getPassthroughParameters(JsonObject middlewareConfig) {
-        final JsonArray passthroughParameters = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS);
+        final JsonArray passthroughParameters = middlewareConfig.getJsonArray(MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS);
         if (passthroughParameters == null) {
             return List.of();
         }
@@ -115,8 +185,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      * configuration
      */
     private String getPublicURL(JsonObject middlewareConfig) {
-        if (middlewareConfig.containsKey(DynamicConfiguration.MIDDLEWARE_OAUTH2_PUBLIC_URL)) {
-            return middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_PUBLIC_URL);
+        if (middlewareConfig.containsKey(MIDDLEWARE_OAUTH2_PUBLIC_URL)) {
+            return middlewareConfig.getString(MIDDLEWARE_OAUTH2_PUBLIC_URL);
         }
 
         String publicUrl = String.format("%s://%s",
@@ -165,9 +235,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     private OAuth2Options oAuth2Options(JsonObject middlewareConfig) {
         return new OAuth2Options()
-            .setClientId(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID))
-            .setClientSecret(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET))
-            .setSite(middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL))
+            .setClientId(middlewareConfig.getString(MIDDLEWARE_OAUTH2_CLIENTID))
+            .setClientSecret(middlewareConfig.getString(MIDDLEWARE_OAUTH2_CLIENTSECRET))
+            .setSite(middlewareConfig.getString(MIDDLEWARE_OAUTH2_DISCOVERYURL))
             .setValidateIssuer(false);
     }
 

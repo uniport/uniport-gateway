@@ -1,38 +1,62 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Factory for {@link RequestResponseLoggerMiddleware}.
  */
 public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory {
+
+    // schema
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX = "uriWithoutLoggingRegex";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES = "contentTypes";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED = "loggingRequestEnabled";
+    public static final String MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED = "loggingResponseEnabled";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggerMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER;
+        return MIDDLEWARE_REQUEST_RESPONSE_LOGGER;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return Schemas.objectSchema()
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema())
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, Schemas.booleanSchema())
+            .optionalProperty(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, Schemas.booleanSchema())
+            .allowAdditionalProperties(false);
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String requestFilterPattern = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX);
+        final String requestFilterPattern = middlewareConfig.getString(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX);
         List<String> contentTypesToLog = null;
-        if (middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES) != null) {
-            contentTypesToLog = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES).getList();
+        if (middlewareConfig.getJsonArray(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES) != null) {
+            contentTypesToLog = middlewareConfig.getJsonArray(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_CONTENT_TYPES).getList();
         }
-        final Boolean loggingRequestEnabled = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED);
-        final Boolean loggingResponseEnabled = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED);
+        final Boolean loggingRequestEnabled = middlewareConfig.getBoolean(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED);
+        final Boolean loggingResponseEnabled = middlewareConfig.getBoolean(MIDDLEWARE_REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED);
 
-        LOGGER.debug("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER);
+        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_REQUEST_RESPONSE_LOGGER);
         return Future.succeededFuture(new RequestResponseLoggerMiddleware(name, requestFilterPattern, contentTypesToLog, loggingRequestEnabled, loggingResponseEnabled));
     }
 

@@ -17,6 +17,23 @@ import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.asse
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertNotNull;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.customResponse.CustomResponseMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.openTelemetry.OpenTelemetryMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -139,12 +156,9 @@ public class DynamicConfigurationTest {
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX,
-                            ".*/health.*|.*/ready.*")))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, RequestResponseLoggerMiddlewareFactory.MIDDLEWARE_REQUEST_RESPONSE_LOGGER)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(RequestResponseLoggerMiddlewareFactory.MIDDLEWARE_REQUEST_RESPONSE_LOGGER_FILTER_REGEX, ".*/health.*|.*/ready.*")))));
 
         final JsonObject requestResponseLoggerHttpMiddlewareMinimal = new JsonObject().put(
             DynamicConfiguration.HTTP,
@@ -152,325 +166,258 @@ public class DynamicConfigurationTest {
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_REQUEST_RESPONSE_LOGGER))));
+                        RequestResponseLoggerMiddlewareFactory.MIDDLEWARE_REQUEST_RESPONSE_LOGGER))));
 
         final JsonObject replacePathRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX,
-                            "^$")
-                            .put(DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT,
-                                "foobar")))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, ReplacePathRegexMiddlewareFactory.MIDDLEWARE_REPLACE_PATH_REGEX)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(ReplacePathRegexMiddlewareFactory.MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, "^$")
+                        .put(ReplacePathRegexMiddlewareFactory.MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, "foobar")))));
 
         final JsonObject replacePathRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(
             DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_REPLACE_PATH_REGEX))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, ReplacePathRegexMiddlewareFactory.MIDDLEWARE_REPLACE_PATH_REGEX))));
 
         final JsonObject directRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REGEX,
-                            "^$")
-                            .put(DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT,
-                                "foorbar")))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX_REGEX, "^$")
+                        .put(RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, "foorbar")))));
 
         final JsonObject directRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_REDIRECT_REGEX))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX))));
 
         final JsonObject headersHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_HEADERS))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.MIDDLEWARE_HEADERS))));
 
         final JsonObject headersHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_HEADERS)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST,
-                            new JsonObject().put(
-                                "foo",
-                                "bar"))))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.MIDDLEWARE_HEADERS)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(HeaderMiddlewareFactory.MIDDLEWARE_HEADERS_REQUEST, new JsonObject()
+                            .put("foo", "bar"))))));
 
         final JsonObject customResponseHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddleware")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200).put(DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST,
-                                new JsonObject().put(
-                                    "foo",
-                                    "bar"))))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_HEADERS, new JsonObject()
+                            .put("foo", "bar"))))));
 
         final JsonObject customResponseHttpMiddlewareWrongStatusCodeType = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareWrongStatusCodeType")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, "200")))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, "200")))));
 
         final JsonObject customResponseHttpMiddlewareContentType = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareContentType")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, 200)
-                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, 200)
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))));
 
         final JsonObject customResponseHttpMiddlewareWrongHeaders = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareWrongHeaders")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE)
                     .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
                         new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
-                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_HEADERS, new JsonObject().put("X-Foo", 2))
-                            .put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+                            .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
+                            .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_HEADERS, new JsonObject().put("X-Foo", 2))
+                            .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))));
 
         final JsonObject customResponseHttpMiddlewareWrongStatusCodeMin = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 99)))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 99)))));
 
         final JsonObject customResponseHttpMiddlewareWrongStatusCodeMax = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test").put(DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 600)))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_CONTENT, "test")
+                        .put(CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 600)))));
 
         final JsonObject authBearerHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER))));
 
         final JsonObject authBearerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject().put(
                 DynamicConfiguration.MIDDLEWARES,
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                                "blub")))));
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
+                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                        .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
 
-        final JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils
-            .buildConfiguration(TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
-                DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
-                TestUtils.withMiddlewareOpts(
-                    new JsonObject().put(
-                        DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
-                        "blub")))));
+        final JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    BearerOnlyMiddlewareFactory.MIDDLEWARE_BEARER_ONLY,
+                    TestUtils.withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "blub")))));
 
         final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
-                DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+                BearerOnlyMiddlewareFactory.MIDDLEWARE_BEARER_ONLY,
                 TestUtils.withMiddlewareOpts(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY,
-                        "notbase64*oraurl")
-                    .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
-                        "RS256")
-                    .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
-                        "bar")
-                    .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
-                        new JsonArray().add("blub"))))));
+                    .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "notbase64*oraurl")
+                    .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
+                    .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                    .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray().add("blub"))))));
 
-        final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+        final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    BearerOnlyMiddlewareFactory.MIDDLEWARE_BEARER_ONLY,
                     TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY,
-                            "Ymx1Ygo=")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
-                            "")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
-                            "bar")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
-                            new JsonArray().add(
-                                "blub"))))));
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
 
-        final JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+        final JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    BearerOnlyMiddlewareFactory.MIDDLEWARE_BEARER_ONLY,
                     TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY,
-                            "Ymx1Ygo=")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
-                            "RS256")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
-                            "bar")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
-                            new JsonArray().add(
-                                "valid")
-                                .add(123)
-                                .add(true))))));
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("valid", 123, true))))));
 
-        final JsonObject bearerOnlyHttpMiddleware = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_BEARER_ONLY,
+        final JsonObject bearerOnlyHttpMiddleware = TestUtils.buildConfiguration(
+            TestUtils.withMiddlewares(
+                TestUtils.withMiddleware("foo",
+                    BearerOnlyMiddlewareFactory.MIDDLEWARE_BEARER_ONLY,
                     TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS,
-                            new JsonArray().add(
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                            new JsonObject()
+                                .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                                .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")))
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+
+        final JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, JsonArray
+                    .of(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2))));
+
+        final JsonObject oauth2PathHttpMiddleware = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(
+                    new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_CLIENTID, "foo")
+                            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_CLIENTSECRET, "bar")
+                            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_DISCOVERYURL, "localhost:1234")
+                            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "blub")
+                            .put(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
+
+        final JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(new JsonObject()
+                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG))));
+
+        final JsonObject sessionBagHttpMiddleware = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(
+                    new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
                                 new JsonObject()
-                                    .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY,
-                                        "Ymx1Ygo=")
-                                    .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
-                                        "RS256")))
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER,
-                            "bar")
-                        .put(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE,
-                            new JsonArray().add(
-                                "blub"))))));
+                                    .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo")
+                                    .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar")))))));
 
-        final JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_OAUTH2))));
+        final JsonObject unkownKeyHttpMiddleware = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(
+                    new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
+                            new JsonObject()
+                                .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))
+                        .put("blub", true))));
 
-        final JsonObject oauth2PathHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(
-                DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_OAUTH2)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTID, "foo")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_CLIENTSECRET, "bar")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_DISCOVERYURL, "localhost:1234")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_SESSION_SCOPE, "blub")
-                            .put(DynamicConfiguration.MIDDLEWARE_OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
+        final JsonObject doubleHttpMiddlewares = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.MIDDLEWARE_HEADERS)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(HeaderMiddlewareFactory.MIDDLEWARE_HEADERS_REQUEST, new JsonObject()
+                                .put("foo", "bar"))))
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "bar")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
 
-        final JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_SESSION_BAG))));
-
-        final JsonObject sessionBagHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(
-                DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_SESSION_BAG)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIES,
-                            new JsonArray().add(
-                                new JsonObject()
-                                    .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME,
-                                        "foo")
-                                    .put(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
-                                        "/bar")))))));
-
-        final JsonObject unkownKeyHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(
-                DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                                "blub"))
-                    .put("blub", true))));
-
-        final JsonObject doubleHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
-                .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_HEADERS)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_HEADERS_REQUEST,
-                            new JsonObject().put(
-                                "foo",
-                                "bar"))))
-                .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "bar")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                            "blub")))));
-
-        final JsonObject duplicatedMiddleware = new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-            .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+        final JsonObject duplicatedMiddleware = new JsonObject()
+            .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+            .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
             .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                    "blub"));
-        final JsonObject duplicatedHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(
-                DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(duplicatedMiddleware).add(duplicatedMiddleware)));
+                .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"));
+        final JsonObject duplicatedHttpMiddlewares = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(duplicatedMiddleware, duplicatedMiddleware)));
 
-        final JsonObject completeAndEmptyHttpMiddlewares = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
-                .add(new JsonObject().put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject().put(
-                            DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                            "blub")))
-                .add(new JsonObject())));
+        final JsonObject completeAndEmptyHttpMiddlewares = new JsonObject()
+            .put(DynamicConfiguration.HTTP, new JsonObject()
+                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
+                    .add(new JsonObject()
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))
+                    .add(new JsonObject())));
 
         // http services
         final JsonObject nullHttpServices = new JsonObject().put(DynamicConfiguration.HTTP,
@@ -617,9 +564,9 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))))
+                            .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))))
                 .put(DynamicConfiguration.SERVICES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
@@ -667,14 +614,10 @@ public class DynamicConfigurationTest {
                             "serviceFoo")))
                 .put(DynamicConfiguration.MIDDLEWARES,
                     new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME,
-                            "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                            DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                            new JsonObject().put(
-                                DynamicConfiguration.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE,
-                                "blub")))));
+                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
+                            .put(AuthorizationBearerMiddlewareFactory.MIDDLEWARE_AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
 
         final JsonObject controlApiMiddlewareWithSessionTermination = new JsonObject().put(DynamicConfiguration.HTTP,
             new JsonObject()
@@ -688,9 +631,9 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_CONTROL_API)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, ControlApiMiddlewareFactory.MIDDLEWARE_CONTROL_API)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_TERMINATE"))))
+                            .put(ControlApiMiddlewareFactory.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_TERMINATE"))))
                 .put(DynamicConfiguration.SERVICES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
@@ -713,9 +656,9 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, DynamicConfiguration.MIDDLEWARE_CONTROL_API)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, ControlApiMiddlewareFactory.MIDDLEWARE_CONTROL_API)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_RESET"))))
+                            .put(ControlApiMiddlewareFactory.MIDDLEWARE_CONTROL_API_ACTION, "SESSION_RESET"))))
                 .put(DynamicConfiguration.SERVICES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
@@ -727,142 +670,134 @@ public class DynamicConfigurationTest {
         final JsonObject cspMiddlewareWithDefaultSrcSelf = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CSP,
-                    TestUtils.withMiddlewareOpts(new JsonObject().put(
-                        DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVES,
-                        new JsonArray().add(
+                    CSPMiddlewareFactory.MIDDLEWARE_CSP,
+                    TestUtils.withMiddlewareOpts(new JsonObject()
+                        .put(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVES, JsonArray.of(
                             new JsonObject()
-                                .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME,
-                                    "default-src")
-                                .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES,
-                                    new JsonArray().add(
-                                        "self"))))))));
+                                .put(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_NAME, "default-src")
+                                .put(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of("self"))))))));
 
         final JsonObject cspMiddlewareWithInvalidValues = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CSP,
-                    TestUtils.withMiddlewareOpts(new JsonObject().put(
-                        DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVES,
-                        new JsonArray().add(new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME,
-                                "foo")
-                            .put(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES,
-                                new JsonArray().add(
-                                    "valid")
+                    CSPMiddlewareFactory.MIDDLEWARE_CSP,
+                    TestUtils.withMiddlewareOpts(new JsonObject()
+                        .put(
+                            CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVES, JsonArray.of(new JsonObject()
+                                .put(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_NAME, "foo")
+                                .put(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_VALUES, new JsonArray()
+                                    .add("valid")
                                     .add(123)
                                     .add(true))))))));
 
         final JsonObject cspViolationReportingServerMiddlewareWithLogLevelTrace = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
-                    TestUtils.withMiddlewareOpts(new JsonObject().put(
-                        DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
-                        "TRACE")))));
+                    CSPViolationReportingServerMiddlewareFactory.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
+                    TestUtils.withMiddlewareOpts(new JsonObject()
+                        .put(CSPViolationReportingServerMiddlewareFactory.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "TRACE")))));
 
         final JsonObject cspViolationReportingServerMiddlewareWithLogLevelWithWeirdCaps = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
-                    TestUtils.withMiddlewareOpts(new JsonObject().put(
-                        DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
-                        "eRroR")))));
+                    CSPViolationReportingServerMiddlewareFactory.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
+                    TestUtils.withMiddlewareOpts(new JsonObject()
+                        .put(CSPViolationReportingServerMiddlewareFactory.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "eRroR")))));
 
         final JsonObject cspViolationReportingServerMiddlewareWithInvalidValues = TestUtils
             .buildConfiguration(TestUtils
                 .withMiddlewares(TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
+                    CSPViolationReportingServerMiddlewareFactory.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER,
                     TestUtils.withMiddlewareOpts(new JsonObject().put(
-                        DynamicConfiguration.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL,
-                        "blub")))));
+                        CSPViolationReportingServerMiddlewareFactory.MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "blub")))));
 
         final JsonObject cors = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    CorsMiddlewareFactory.MIDDLEWARE_CORS,
                     TestUtils.withMiddlewareOpts(
                         JsonObject.of(
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
 
         final JsonObject corsFull = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    CorsMiddlewareFactory.MIDDLEWARE_CORS,
                     TestUtils.withMiddlewareOpts(
                         JsonObject.of(
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
-                            DynamicConfiguration.MIDDLEWARE_CORS_EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
-                            DynamicConfiguration.MIDDLEWARE_CORS_MAX_AGE_SECONDS, 42,
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOW_CREDENTIALS, false,
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, false)))));
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_MAX_AGE_SECONDS, 42,
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOW_CREDENTIALS, false,
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, false)))));
 
         final JsonObject corsWithEmptyOrigin = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    CorsMiddlewareFactory.MIDDLEWARE_CORS,
                     TestUtils.withMiddlewareOpts(
                         JsonObject.of(
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_HEADERS, JsonArray.of(""))))));
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOWED_HEADERS, JsonArray.of(""))))));
 
         final JsonObject corsWithUnkownMethod = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    CorsMiddlewareFactory.MIDDLEWARE_CORS,
                     TestUtils.withMiddlewareOpts(
                         JsonObject.of(
-                            DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_METHODS, JsonArray.of("BLUB"))))));
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_ALLOWED_METHODS, JsonArray.of("BLUB"))))));
 
         final JsonObject corsWithIllegalMaxAgeType = TestUtils.buildConfiguration(
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("foo",
-                    DynamicConfiguration.MIDDLEWARE_CORS,
+                    CorsMiddlewareFactory.MIDDLEWARE_CORS,
                     TestUtils.withMiddlewareOpts(
                         JsonObject.of(
-                            DynamicConfiguration.MIDDLEWARE_CORS_MAX_AGE_SECONDS, false)))));
+                            CorsMiddlewareFactory.MIDDLEWARE_CORS_MAX_AGE_SECONDS, false)))));
 
         final JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware(
                 "sessionMiddleware",
-                DynamicConfiguration.MIDDLEWARE_SESSION,
+                SessionMiddlewareFactory.MIDDLEWARE_SESSION,
                 TestUtils.withMiddlewareOpts(
                     new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, true)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*")
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_NAG_HTTPS, true)
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*")
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
 
         final JsonObject sessionMiddlewareMinimal = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
             TestUtils.withMiddleware(
                 "sessionMiddleware",
-                DynamicConfiguration.MIDDLEWARE_SESSION,
+                SessionMiddlewareFactory.MIDDLEWARE_SESSION,
                 TestUtils.withMiddlewareOpts(
                     new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_NAG_HTTPS, true)
-                        .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
-                            .put(DynamicConfiguration.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_ID_MIN_LENGTH, 32)
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_NAG_HTTPS, true)
+                        .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE, new JsonObject()
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_NAME, "uniport.session")
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, true)
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_SECURE, false)
+                            .put(SessionMiddlewareFactory.MIDDLEWARE_SESSION_COOKIE_SAME_SITE, "STRICT"))))));
 
         final JsonObject openTelemetryMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
-            TestUtils.withMiddleware("openTelemetry", DynamicConfiguration.MIDDLEWARE_OPEN_TELEMETRY)));
+            TestUtils.withMiddleware("openTelemetry", OpenTelemetryMiddlewareFactory.MIDDLEWARE_OPEN_TELEMETRY)));
 
         final JsonObject claimToHeaderMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
-            TestUtils.withMiddleware("claimToHeader", DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER,
+            TestUtils.withMiddleware("claimToHeader",
+                ClaimToHeaderMiddlewareFactory.MIDDLEWARE_CLAIM_TO_HEADER,
                 TestUtils.withMiddlewareOpts(
                     new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER_PATH, "claimPath")
-                        .put(DynamicConfiguration.MIDDLEWARE_CLAIM_TO_HEADER_NAME, "headerName")))));
+                        .put(ClaimToHeaderMiddlewareFactory.MIDDLEWARE_CLAIM_TO_HEADER_PATH, "claimPath")
+                        .put(ClaimToHeaderMiddlewareFactory.MIDDLEWARE_CLAIM_TO_HEADER_NAME, "headerName")))));
 
         // the sole purpose of the following variable are to improve readability
         final boolean expectedTrue = true;
@@ -1124,10 +1059,10 @@ public class DynamicConfigurationTest {
                     withRouterService("sA"))),
             withMiddlewares(
                 withMiddleware("mA",
-                    DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE,
+                    CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE,
                     withMiddlewareOpts(
                         JsonObject.of(
-                            DynamicConfiguration.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))),
+                            CustomResponseMiddlewareFactory.MIDDLEWARE_CUSTOM_RESPONSE_STATUS_CODE, 200)))),
             withServices(
                 withService("sA",
                     withServers(
@@ -1384,7 +1319,7 @@ public class DynamicConfigurationTest {
                     testCtx.completeNow();
                 } else {
                     testCtx.failNow(String.format(
-                        "'%s' was expected to have '%s'. Error: '%s', Input: '%s'", name,
+                        "'%s' was expected to have '%s':\nError: '%s'\nInput: '%s'", name,
                         expected ? "succeeded" : "failed", ar.cause(),
                         json != null ? json.encodePrettily() : null));
                 }
@@ -1433,7 +1368,7 @@ public class DynamicConfigurationTest {
         String name, JsonObject json, boolean expected, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        final String errMsg = String.format("'%s' was expected to have '%s'. Input: '%s'",
+        final String errMsg = String.format("'%s' was expected to have '%s':\nInput: '%s'",
             name, expected ? "succeeded" : "failed", json != null ? json.encodePrettily() : json);
         assertEquals(testCtx, expected, DynamicConfiguration.isEmptyConfiguration(json), errMsg);
         testCtx.completeNow();
@@ -1445,7 +1380,7 @@ public class DynamicConfigurationTest {
         String name, Map<String, JsonObject> configurations, JsonObject expected, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        final String errMsg = String.format("'%s' failed. Input: '%s'", name, configurations);
+        final String errMsg = String.format("'%s' failed\nInput: '%s'", name, configurations);
 
         final Comparator<JsonObject> sortByName = new Comparator<JsonObject>() {
 
@@ -1492,7 +1427,7 @@ public class DynamicConfigurationTest {
         String name, JsonArray arr, String key, String value, JsonObject expected,
         Vertx vertx, VertxTestContext testCtx
     ) {
-        final String errMsg = String.format("'%s' failed. Array: '%s', Key: '%s', value: '%s'",
+        final String errMsg = String.format("'%s' failed:\nArray: '%s'\nKey: '%s'\nValue: '%s'",
             name, arr != null ? arr.encodePrettily() : arr, key, value);
         assertEquals(testCtx, expected, DynamicConfiguration.getObjByKeyWithValue(arr, key, value), errMsg);
         testCtx.completeNow();

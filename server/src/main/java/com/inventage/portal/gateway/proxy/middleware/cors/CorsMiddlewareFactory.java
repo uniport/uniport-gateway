@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
@@ -9,6 +8,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,35 +17,74 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Factory for {@link CorsMiddleware}.
+ */
 public class CorsMiddlewareFactory implements MiddlewareFactory {
 
+    // schema
+    public static final String MIDDLEWARE_CORS = "cors";
+    public static final String MIDDLEWARE_CORS_ALLOWED_ORIGINS = "allowedOrigins";
+    public static final String MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS = "allowedOriginPatterns";
+    public static final String MIDDLEWARE_CORS_ALLOWED_METHODS = "allowedMethods";
+    public static final String MIDDLEWARE_CORS_ALLOWED_HEADERS = "allowedHeaders";
+    public static final String MIDDLEWARE_CORS_EXPOSED_HEADERS = "exposedHeaders";
+    public static final String MIDDLEWARE_CORS_MAX_AGE_SECONDS = "maxAgeSeconds";
+    public static final String MIDDLEWARE_CORS_ALLOW_CREDENTIALS = "allowCredentials";
+    public static final String MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK = "allowPrivateNetwork";
     public static final int DEFAULT_MAX_AGE_SECONDS = -1;
     public static final boolean DEFAULT_ALLOW_CREDENTIALS = false;
     public static final boolean DEFAULT_ALLOW_PRIVATE_NETWORKS = false;
 
     private static final String ORIGIN_LOCALHOST = "http://localhost";
+    private static final List<String> HTTP_METHODS = List.of("GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CorsMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_CORS;
+        return MIDDLEWARE_CORS;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return Schemas.objectSchema()
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_ORIGINS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_METHODS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_ENUM, JsonArray.of(HTTP_METHODS.toArray()))))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOWED_HEADERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_EXPOSED_HEADERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(MIDDLEWARE_CORS_MAX_AGE_SECONDS, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, INT_MIN))
+            .optionalProperty(MIDDLEWARE_CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema())
+            .optionalProperty(MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema())
+            .allowAdditionalProperties(false);
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
 
-        final JsonArray allowedOrigin = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGINS);
-        final JsonArray allowedOriginPatterns = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS);
+        final JsonArray allowedOrigin = middlewareConfig.getJsonArray(MIDDLEWARE_CORS_ALLOWED_ORIGINS);
+        final JsonArray allowedOriginPatterns = middlewareConfig.getJsonArray(MIDDLEWARE_CORS_ALLOWED_ORIGIN_PATTERNS);
 
-        final JsonArray allowedMethods = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_METHODS);
-        final JsonArray allowedHeaders = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_CORS_ALLOWED_HEADERS);
-        final JsonArray exposedHeaders = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_CORS_EXPOSED_HEADERS);
+        final JsonArray allowedMethods = middlewareConfig.getJsonArray(MIDDLEWARE_CORS_ALLOWED_METHODS);
+        final JsonArray allowedHeaders = middlewareConfig.getJsonArray(MIDDLEWARE_CORS_ALLOWED_HEADERS);
+        final JsonArray exposedHeaders = middlewareConfig.getJsonArray(MIDDLEWARE_CORS_EXPOSED_HEADERS);
 
-        final int maxAgeSeconds = middlewareConfig.getInteger(DynamicConfiguration.MIDDLEWARE_CORS_MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
-        final boolean allowCredentials = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_CORS_ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
-        final boolean allowPrivateNetwork = middlewareConfig.getBoolean(DynamicConfiguration.MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
+        final int maxAgeSeconds = middlewareConfig.getInteger(MIDDLEWARE_CORS_MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
+        final boolean allowCredentials = middlewareConfig.getBoolean(MIDDLEWARE_CORS_ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
+        final boolean allowPrivateNetwork = middlewareConfig.getBoolean(MIDDLEWARE_CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
 
-        LOGGER.info("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_CORS);
+        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_CORS);
         return Future.succeededFuture(new CorsMiddleware(
             name,
             allowedOrigins(allowedOrigin),

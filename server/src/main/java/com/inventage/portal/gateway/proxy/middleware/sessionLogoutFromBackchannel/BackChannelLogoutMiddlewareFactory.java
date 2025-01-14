@@ -1,29 +1,45 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory for BackChannelLogoutMiddleware.
+ * Factory for {@link BackChannelLogoutMiddleware}.
  */
 public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
+
+    // schema
+    public static final String MIDDLEWARE_BACK_CHANNEL_LOGOUT = "backChannelLogout";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackChannelLogoutMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_BACK_CHANNEL_LOGOUT;
+        return MIDDLEWARE_BACK_CHANNEL_LOGOUT;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return Schemas.objectSchema()
+            .allowAdditionalProperties(false);
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return super.validate(options);
     }
 
     @Override
     protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, final JsonObject middlewareConfig) {
-        LOGGER.info("Created '{}' middleware successfully", DynamicConfiguration.MIDDLEWARE_BACK_CHANNEL_LOGOUT);
+        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_BACK_CHANNEL_LOGOUT);
         return new BackChannelLogoutMiddleware(vertx, name, authHandler);
     }
 }

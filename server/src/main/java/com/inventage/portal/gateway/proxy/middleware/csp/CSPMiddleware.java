@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
@@ -40,8 +39,8 @@ public class CSPMiddleware extends TraceMiddleware {
     }
 
     private void addDirective(CSPHandler cspHandler, JsonObject directive) {
-        final String name = directive.getString(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_NAME);
-        final JsonArray values = directive.getJsonArray(DynamicConfiguration.MIDDLEWARE_CSP_DIRECTIVE_VALUES);
+        final String name = directive.getString(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_NAME);
+        final JsonArray values = directive.getJsonArray(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_VALUES);
 
         values.forEach(value -> {
             cspHandler.addDirective(name, (String) value);

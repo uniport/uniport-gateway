@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.opentelemetry.api.trace.Span;
@@ -287,10 +286,8 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     private boolean isWhitelisted(Cookie cookie) {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
             final JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
-            final String whitelistedCookieName = whitelistedCookie
-                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
-            final String whitelistedCookiePath = whitelistedCookie
-                .getString(DynamicConfiguration.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
+            final String whitelistedCookieName = whitelistedCookie.getString(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
+            final String whitelistedCookiePath = whitelistedCookie.getString(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
             if (whitelistedCookieName.equals(cookie.getName()) && whitelistedCookiePath.equals(cookie.getPath())) {
                 return true;
             }

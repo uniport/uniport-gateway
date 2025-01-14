@@ -1,23 +1,37 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import java.net.URI;
 
 /**
+ * Factory for patched {@link OAuth2Middleware}.
+ *
  * OAuth2 middleware, which sends the user directly to the self registration.
  */
 public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory {
 
-    //---- Static
+    // schema
+    public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration";
+    // same props as "oauth2"
 
     private static final String AUTH_ENDPOINT = "/protocol/openid-connect/auth";
     private static final String REGISTRATION_ENDPOINT = "/protocol/openid-connect/registrations";
 
-    //---- Methods
-
     @Override
     public String provides() {
-        return DynamicConfiguration.MIDDLEWARE_OAUTH2_REGISTRATION;
+        return MIDDLEWARE_OAUTH2_REGISTRATION;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return super.optionsSchema();
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return super.validate(options);
     }
 
     /**

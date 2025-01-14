@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.checkRoute;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -39,7 +38,7 @@ public class CheckRouteMiddleware extends TraceMiddleware {
     }
 
     private boolean isCheckRoute(RoutingContext ctx) {
-        return ctx.request().uri().contains(DynamicConfiguration.MIDDLEWARE_CHECK_ROUTE_PATH);
+        return ctx.request().uri().contains(CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH);
     }
 
 }

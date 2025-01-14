@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler;
 
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import io.vertx.core.AsyncResult;
@@ -27,6 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Given a list of public key source, {@code JWTAuthPublicKeysReconcilerHandler} created by {@link create}
+ * can fetch the public key.
+ * A public key source can be a literal public key OR a URL pointing to a Keycloak realm (or more general an OIDC Provider).
  */
 public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHandler {
 
@@ -84,7 +87,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
         final List<Future<List<JsonObject>>> futures = new LinkedList<>();
 
         publicKeys.forEach(pk -> {
-            final String publicKey = pk.getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
+            final String publicKey = pk.getString(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
             boolean isURL = false;
             try {
                 new URL(publicKey).toURI();
@@ -107,8 +110,9 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
             } else {
                 LOGGER.info("Public key provided directly");
 
-                final String publicKeyAlgorithm = pk
-                    .getString(DynamicConfiguration.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256");
+                final String publicKeyAlgorithm = pk.getString(
+                    WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
+                    "RS256");
                 authOpts.addPubSecKey(
                     new PubSecKeyOptions()
                         .setAlgorithm(publicKeyAlgorithm)
