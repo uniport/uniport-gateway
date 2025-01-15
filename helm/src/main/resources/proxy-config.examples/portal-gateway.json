@@ -77,6 +77,10 @@
                             {
                                 "name": "ips.language",
                                 "path": "/"
+                            },
+                            {
+                                "name": "MATOMO_SESSID",
+                                "path": "/"
                             }
                         ]
                     }
