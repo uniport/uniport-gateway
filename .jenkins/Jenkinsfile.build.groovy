@@ -1,4 +1,4 @@
-library identifier: 'portal-jenkinsfile-library@0.3.1', retriever: modernSCM([
+library identifier: 'portal-jenkinsfile-library@0.3.2', retriever: modernSCM([
     $class: 'GitSCMSource', remote: 'git@github.com:uniport/jenkinsfile-library.git',
 ])
 
