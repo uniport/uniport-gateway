@@ -48,8 +48,8 @@ public class PortalGatewayConfigRetriever {
      * @return the path to the static config file
      */
     public static Optional<Path> getStaticConfigPath() {
-        return getPathFor(System.getenv(PROPERTY), "reading from system env variable '" + PROPERTY + "' as '{}'")
-            .or(() -> getPathFor(System.getProperty(PROPERTY), "reading from system property '" + PROPERTY + "' as '{}'"))
+        return getPathFor(System.getenv(PROPERTY), " reading from system env variable '" + PROPERTY + "' as '{}'")
+            .or(() -> getPathFor(System.getProperty(PROPERTY), " reading from system property '" + PROPERTY + "' as '{}'"))
             .or(() -> getPathFor(String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME), "reading from default file '{}'"))
             .or(() -> getPathFor(String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME), "reading from default file within working directory '{}'"))
             .or(() -> {
