@@ -20,7 +20,7 @@ buildPipeline(
     enableCodeQualityEvaluation: true,
     enableNoGeneratedCodeCheck: true,
     // deployment
-    enableDevDelployment: true,
+    enableDevDelployment: false,
     devDeploymentServiceName: "gateway",
     // register with archetype
     enableArchetypeRegistration: true,
