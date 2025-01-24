@@ -48,7 +48,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 env.remove(StaticConfiguration.ENTRYPOINTS);
                 env.remove(StaticConfiguration.APPLICATIONS);
                 env.remove(StaticConfiguration.PROVIDERS);
-                LOGGER.debug("Environemnt variables:\n{}", env.stream()
+                LOGGER.debug("Environment variables:\n{}", env.stream()
                     .sorted(Map.Entry.comparingByKey())
                     .map(Object::toString)
                     .collect(Collectors.joining("\n\t")));
