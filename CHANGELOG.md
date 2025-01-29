@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use fresh public keys to verify the logout token in the back channel logout ([PORTAL-2175](https://inventage-all.atlassian.net/browse/PORTAL-2175)).
 - On back channel logout, remove session directly from the session store, instead of destroying it to invalidate it immediately ([PORTAL-2175](https://inventage-all.atlassian.net/browse/PORTAL-2175)).
 - Don't forward the session cookie to the backend service ([PORTAL-2119](https://inventage-all.atlassian.net/browse/PORTAL-2119)).
+- Keep overall cookie header structure, when filterting out the session cookie from an outgoing request ([PORTAL-2349](https://inventage-all.atlassian.net/browse/PORTAL-2349)).
 - Don't shadow OAuth2 callback routes by a catch-all router ([PORTAL-2302](https://inventage-all.atlassian.net/browse/PORTAL-2302)).
 - Set `response_mode` to `query`, in case the request does not accept `text/html` ([PORTAL-2321](https://inventage-all.atlassian.net/browse/PORTAL-2321)).
 - Make the `cors` middleware available and configurable ([PORTAL-2330](https://inventage-all.atlassian.net/browse/PORTAL-2330)).

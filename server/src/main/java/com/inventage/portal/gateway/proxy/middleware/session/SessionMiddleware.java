@@ -3,6 +3,8 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_KEY;
 
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -15,10 +17,8 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.ClusteredSessionStore;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +33,7 @@ public class SessionMiddleware extends TraceMiddleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
     private static final int MINUTE_MS = 60_000;
+    private static final String COOKIE_DELIMITER = "; "; // RFC 6265 4.2.1
 
     private final String name;
 
@@ -199,15 +200,41 @@ public class SessionMiddleware extends TraceMiddleware {
         LOGGER.debug("{}: Added removeSessionCookieFromRequestBeforeProxying as request header modifier", name);
     }
 
+    /**
+     * Request headers is a multi map i.e. the same key can appear multiple times or formulated differently, each key may have multiple values.
+     * To safely filter the session cookie from the request header, this fact has to be respected.
+     * 
+     * To start, all "cookie" headers are read.
+     * Each cookie header may contain multiple cookies separated by a semicolon, that have to be parsed.
+     * Then, each cookie header is filtered for the session cookie and omitted, if found.
+     * Finally, the cookie header is assembled back together.
+     * 
+     * It is important to note, that the overall structure of the cookie headers i.e.
+     * how many cookie headers and what cookie are in what cookie header IS PRESERVED.
+     * See: https://inventage-all.atlassian.net/browse/PORTAL-2349
+     * 
+     * @param headers
+     *            of a request
+     */
     private void removeSessionCookieFromRequestBeforeProxying(MultiMap headers) {
-        final List<CharSequence> filteredCookies = headers
+        final List<String> filteredCookies = headers
             .getAll(HttpHeaders.COOKIE)
             .stream()
-            .flatMap(c -> Arrays.asList(c.split(";")).stream()) // cookie header may be a list
-            .map(c -> c.trim())
-            .filter(c -> !c.startsWith(sessionCookieName + "="))
-            .collect(Collectors.toList());
-        headers.set(HttpHeaders.COOKIE, filteredCookies);
+            .map(cookieHeader -> ServerCookieDecoder.LAX.decode(cookieHeader).stream()
+                .map(CookieUtil::fromNettyCookie)
+                .filter(cookie -> !cookie.getName().equals(sessionCookieName))
+                .map(cookie -> cookie.encode())
+                .toList())
+            .map(cookies -> String.join(COOKIE_DELIMITER, cookies))
+            .toList();
+
+        headers.remove(HttpHeaders.COOKIE);
+        for (String cookieHeader : filteredCookies) {
+            if (cookieHeader.length() == 0) {
+                continue;
+            }
+            headers.add(HttpHeaders.COOKIE.toString(), cookieHeader);
+        }
     }
 
     /**

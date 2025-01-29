@@ -9,7 +9,6 @@ import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
@@ -26,16 +25,20 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
@@ -222,7 +225,7 @@ public class SessionMiddlewareTest {
         return new AbstractMap.SimpleEntry<Set<Function<String, String>>, Set<String>>(a, b);
     }
 
-    private static Stream<Entry<Set<Function<String, String>>, Set<String>>> provideCookieHeaders() {
+    private static Stream<Entry<Set<Function<String, String>>, Set<String>>> provideCookieHeadersContainingSessionCookie() {
         return Stream.of(
             entry(
                 // only the session cookie
@@ -263,65 +266,134 @@ public class SessionMiddlewareTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideCookieHeaders")
-    void sessionCookieIsNotPassedToTheBackendService(Entry<Set<Function<String, String>>, Set<String>> arg, Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    @MethodSource("provideCookieHeadersContainingSessionCookie")
+    void shouldNotPassSessionCookieToABackendService(Entry<Set<Function<String, String>>, Set<String>> arg, Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final Set<Function<String, String>> cookieHeaders = arg.getKey();
         final Set<String> expectedCookies = arg.getValue();
         final AtomicInteger reqCount = new AtomicInteger();
         final int backendPort = TestUtils.findFreePort();
 
-        Handler<RoutingContext> backendHandler = ctx -> {
+        final Handler<RoutingContext> backendHandler = ctx -> {
             final int rc = reqCount.incrementAndGet();
+            if (rc == 1) {
+                // first request is for obtaining the session cookie
+                ctx.response().setStatusCode(200).end("ok");
+                return;
+            }
+
             // then
             testCtx.verify(() -> {
                 assertNull(ctx.request().getCookie(DEFAULT_SESSION_COOKIE_NAME),
                     String.format("session cookie was passed to the backend on the %d. request", rc));
-                final List<String> cookies = ctx.request().headers().getAll("cookie");
-                for (String ec : expectedCookies) {
-                    assertTrue(
-                        cookies.contains(ec),
-                        String.format("colateral damage: other cookie than session cookie was removed from request, expected: %s, actual: %s",
-                            expectedCookies,
-                            ctx.request().cookies().stream().map(c -> c.getName()).toList()));
-                }
+
+                final Set<String> actualCookies = ctx.request()
+                    .headers()
+                    .getAll(HttpHeaders.COOKIE)
+                    .stream()
+                    .flatMap(c -> Arrays.stream(c.split(";")))
+                    .map(c -> c.trim())
+                    .collect(Collectors.toSet());
+                Assertions.assertThat(actualCookies).isEqualTo(expectedCookies);
             });
             ctx.response().setStatusCode(200).end("ok");
         };
 
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build().start();
 
-        final String emptySessionCookie = "";
-        final RequestOptions reqOpts1 = new RequestOptions();
-        for (Function<String, String> f : cookieHeaders) {
-            final String cookieHeaderValue = f.apply(emptySessionCookie);
-            if (cookieHeaderValue.length() != 0) {
-                reqOpts1.addHeader(HttpHeaders.COOKIE, f.apply(emptySessionCookie));
-            }
-        }
-
-        // when
         // obtain session cookie
-        gateway.incomingRequest(GET, "/", reqOpts1, (outgoingResponse) -> {
+        gateway.incomingRequest(GET, "/", (outgoingResponse) -> {
             final String sessionCookie = outgoingResponse.cookies().stream()
                 .filter(c -> c.startsWith(DEFAULT_SESSION_COOKIE_NAME))
                 .map(c -> c.split(";")[0])
                 .findFirst()
                 .orElseThrow();
 
-            final RequestOptions reqOpts2 = new RequestOptions();
+            // when
+            final RequestOptions reqOpts = new RequestOptions();
             for (Function<String, String> f : cookieHeaders) {
-                reqOpts2.addHeader(HttpHeaders.COOKIE, f.apply(sessionCookie));
+                reqOpts.addHeader(HttpHeaders.COOKIE, f.apply(sessionCookie));
             }
 
             // send session cookie
-            gateway.incomingRequest(GET, "/", reqOpts2, (outgoingResponse2) -> {
+            gateway.incomingRequest(GET, "/", reqOpts, (outgoingResponse2) -> {
                 testCtx.completeNow();
             });
+        });
+    }
+
+    private static Stream<Arguments> provideCookieHeaders() {
+        return Stream.of(
+            Arguments.of(
+                List.of(
+                    List.of("a=1"))),
+            Arguments.of(
+                List.of(
+                    List.of("a=1"),
+                    List.of("b=2"))),
+            Arguments.of(
+                List.of(
+                    List.of("a=1"),
+                    List.of("b=2"),
+                    List.of("c=3"))),
+            Arguments.of(
+                List.of(
+                    List.of("a=1", "b=2"))),
+            Arguments.of(
+                List.of(
+                    List.of("a=1", "b=2", "c=3"))),
+            Arguments.of(
+                List.of(
+                    List.of("a=1", "b=2"),
+                    List.of("c=3"))),
+            Arguments.of(
+                List.of(
+                    List.of("a=1"),
+                    List.of("b=2", "c=3")))
+
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideCookieHeaders")
+    void shouldNotChangeCookieHeaderStructure(List<List<String>> cookieHeaders, Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final int backendPort = TestUtils.findFreePort();
+
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            // then
+            testCtx.verify(() -> {
+                final List<List<String>> actualCookies = ctx.request()
+                    .headers()
+                    .getAll(HttpHeaders.COOKIE)
+                    .stream()
+                    .map(cookieHeader -> Arrays.stream(cookieHeader.split(";"))
+                        .map(cookie -> cookie.trim())
+                        .toList())
+                    .toList();
+                Assertions.assertThat(actualCookies).isEqualTo(cookieHeaders);
+            });
+
+            ctx.response().setStatusCode(200).end("ok");
+        };
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withProxyMiddleware(backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build().start();
+
+        // when
+        final RequestOptions reqOpts = new RequestOptions();
+        for (List<String> cookieHeader : cookieHeaders) {
+            reqOpts.addHeader(HttpHeaders.COOKIE, String.join(";", cookieHeader));
+        }
+        gateway.incomingRequest(GET, "/", reqOpts, (outgoingResponse) -> {
+            testCtx.completeNow();
         });
     }
 
