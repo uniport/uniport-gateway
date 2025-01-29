@@ -119,6 +119,21 @@
                     </excludes>
                     <chartDirectory>${chart.directory}</chartDirectory>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <configuration>
+                            <skipInstall>false</skipInstall>
+                            <skipUpgrade>false</skipUpgrade>
+                            <releaseName>${upstream.chart.name}</releaseName>
+                            <values>
+                                <yamlFiles>
+                                    <yamlFiles>${chart.directory}/values.localdev.yaml</yamlFiles>
+                                </yamlFiles>
+                            </values>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

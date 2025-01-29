@@ -1,3 +1,9 @@
+
+initContainers:
+  init-portal-iam:
+    image:
+      registry: docker-registry.inventage.com:10116
+
 ingress:
   host: portal1.localdev.me
   className: nginx
@@ -49,6 +55,8 @@ containers:
       limits:
         memory: "512Mi"
     env:
+      PORTAL_GATEWAY_CLUSTERED:
+        value: "false"
       # PORTAL_GATEWAY_PUBLIC_HOSTNAME is the HTTP host name for external access
       PORTAL_GATEWAY_PUBLIC_HOSTNAME:
         value: "portal1.localdev.me"
@@ -65,7 +73,10 @@ containers:
         value: "DEBUG"
       PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
         value: "portal-gateway-headless.portal1.svc.cluster.local"
-
+      OTEL_TRACES_EXPORTER:
+        value: "otlp"
+      OTEL_EXPORTER_OTLP_ENDPOINT:
+        value: "http://portal-monitoring-open-telemetry-collector.monitoring:4317"
 pod:
   replicas: 1
   annotations:
