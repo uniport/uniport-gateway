@@ -39,6 +39,17 @@
                 ],
                 "rule": "PathPrefix('/ips/alertmanager')",
                 "service": "alertmanager-proxy"
+            },
+            {
+                "name": "jaeger-proxy",
+                "middlewares": [
+                    "portalGrafanaOauth2",
+                    "portalGrafanaAuthBearer",
+                    "portalGrafanaBearerOnly",
+                    "portalGrafanaHeaders"
+                ],
+                "rule": "PathPrefix('/ips/jaeger')",
+                "service": "jaeger-proxy"
             }
         ],
         "middlewares": [
@@ -71,6 +82,22 @@
                 "type": "replacePathRegex",
                 "options": {
                     "regex": "^/ips/alertmanager/(.*)$",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "jaegerRedirect",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/ips/jaeger)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "jaegerRewritePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "^/ips/jaeger/(.*)$",
                     "replacement": "/$1"
                 }
             },
@@ -181,6 +208,15 @@
                     {
                         "host": "${ALERTMANAGER_HOST}",
                         "port": "${ALERTMANAGER_PORT}"
+                    }
+                ]
+            },
+            {
+                "name": "jaeger-proxy",
+                "servers": [
+                    {
+                        "host": "${JAEGER_HOST}",
+                        "port": "${JAEGER_PORT}"
                     }
                 ]
             }

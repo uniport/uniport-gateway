@@ -83,6 +83,12 @@ containers:
       # Port for proxying the alertmanager
       ALERTMANAGER_PORT:
         value: "9093"
+      # Hostname for the jaeger ui
+      JAEGER_HOST:
+        value: tempo.monitoring.svc.cluster.local
+      # Port for the jaeger-ui
+      JAEGER_PORT:
+        value: "16686"
       # Hostname for proxying prometheus
       PROMETHEUS_HOST:
         value: prometheus-operated.monitoring.svc.cluster.local
