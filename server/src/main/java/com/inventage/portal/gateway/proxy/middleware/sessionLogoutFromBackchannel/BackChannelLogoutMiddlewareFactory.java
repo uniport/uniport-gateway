@@ -16,13 +16,13 @@ import org.slf4j.LoggerFactory;
 public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 
     // schema
-    public static final String MIDDLEWARE_BACK_CHANNEL_LOGOUT = "backChannelLogout";
+    public static final String BACK_CHANNEL_LOGOUT = "backChannelLogout";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackChannelLogoutMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return MIDDLEWARE_BACK_CHANNEL_LOGOUT;
+        return BACK_CHANNEL_LOGOUT;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewar
 
     @Override
     protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, final JsonObject middlewareConfig) {
-        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_BACK_CHANNEL_LOGOUT);
+        LOGGER.info("Created '{}' middleware successfully", BACK_CHANNEL_LOGOUT);
         return new BackChannelLogoutMiddleware(vertx, name, authHandler);
     }
 }

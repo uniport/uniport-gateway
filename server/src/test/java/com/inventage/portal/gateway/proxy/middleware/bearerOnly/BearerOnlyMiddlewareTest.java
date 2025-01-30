@@ -329,9 +329,9 @@ public class BearerOnlyMiddlewareTest {
                     "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5hnB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQIDAQAB"));
 
         final io.vertx.core.json.JsonObject bearerOnlyConfig = new io.vertx.core.json.JsonObject()
-            .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys)
-            .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_ISSUER, expectedIssuer)
-            .put(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(expectedAudience));
+            .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys)
+            .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, expectedIssuer)
+            .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(expectedAudience));
 
         portalGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(bearerOnlyConfig)

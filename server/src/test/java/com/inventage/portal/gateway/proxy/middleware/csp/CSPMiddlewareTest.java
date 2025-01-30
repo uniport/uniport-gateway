@@ -449,7 +449,7 @@ class CSPMiddlewareTest {
 
     private JsonObject createDirective(String directive, String... values) {
         return JsonObject.of(
-            CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_NAME, directive,
-            CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_VALUES, JsonArray.of((Object[]) values));
+            CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, directive,
+            CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, JsonArray.of((Object[]) values));
     }
 }

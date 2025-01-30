@@ -17,35 +17,35 @@ import org.slf4j.LoggerFactory;
 public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_REDIRECT_REGEX = "redirectRegex";
-    public static final String MIDDLEWARE_REDIRECT_REGEX_REGEX = "regex";
-    public static final String MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT = "replacement";
+    public static final String REDIRECT_REGEX = "redirectRegex";
+    public static final String REDIRECT_REGEX_REGEX = "regex";
+    public static final String REDIRECT_REGEX_REPLACEMENT = "replacement";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return MIDDLEWARE_REDIRECT_REGEX;
+        return REDIRECT_REGEX;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(MIDDLEWARE_REDIRECT_REGEX_REGEX, Schemas.stringSchema()
+            .property(REDIRECT_REGEX_REGEX, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema()
+            .property(REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String regex = options.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX);
+        final String regex = options.getString(REDIRECT_REGEX_REGEX);
         if (regex == null || regex.length() == 0) {
             return Future.failedFuture("No regex defined");
         }
 
-        final String replacement = options.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT);
+        final String replacement = options.getString(REDIRECT_REGEX_REPLACEMENT);
         if (replacement == null || replacement.length() == 0) {
             return Future.failedFuture("No replacement defined");
         }
@@ -55,10 +55,10 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_REDIRECT_REGEX);
+        LOGGER.debug("Created '{}' middleware successfully", REDIRECT_REGEX);
         return Future.succeededFuture(new RedirectRegexMiddleware(
             name,
-            middlewareConfig.getString(MIDDLEWARE_REDIRECT_REGEX_REGEX),
-            middlewareConfig.getString(MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT)));
+            middlewareConfig.getString(REDIRECT_REGEX_REGEX),
+            middlewareConfig.getString(REDIRECT_REGEX_REPLACEMENT)));
     }
 }

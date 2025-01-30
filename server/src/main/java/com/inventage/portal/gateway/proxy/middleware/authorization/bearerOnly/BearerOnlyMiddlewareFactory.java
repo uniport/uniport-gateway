@@ -17,20 +17,20 @@ import org.slf4j.LoggerFactory;
 public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 
     // schema
-    public static final String MIDDLEWARE_BEARER_ONLY = "bearerOnly";
-    public static final String MIDDLEWARE_BEARER_ONLY_OPTIONAL = "optional";
+    public static final String BEARER_ONLY = "bearerOnly";
+    public static final String BEARER_ONLY_OPTIONAL = "optional";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return MIDDLEWARE_BEARER_ONLY;
+        return BEARER_ONLY;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
-            .property(MIDDLEWARE_BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
+            .property(BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH));
     }
 
@@ -41,11 +41,11 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
 
     @Override
     protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig) {
-        final String optionalStr = middlewareConfig.getString(MIDDLEWARE_BEARER_ONLY_OPTIONAL);
+        final String optionalStr = middlewareConfig.getString(BEARER_ONLY_OPTIONAL);
         final boolean optional = optionalStr != null ? Boolean.parseBoolean(optionalStr) : false;
 
         final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, optional);
-        LOGGER.debug("Created '{}' middleware", MIDDLEWARE_BEARER_ONLY);
+        LOGGER.debug("Created '{}' middleware", BEARER_ONLY);
         return bearerOnlyMiddleware;
     }
 }

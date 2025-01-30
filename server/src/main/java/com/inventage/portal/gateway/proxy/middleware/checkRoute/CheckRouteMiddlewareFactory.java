@@ -17,14 +17,14 @@ import org.slf4j.LoggerFactory;
 public class CheckRouteMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_CHECK_ROUTE = "checkRoute";
-    public static final String MIDDLEWARE_CHECK_ROUTE_PATH = "_check-route_";
+    public static final String CHECK_ROUTE = "checkRoute";
+    public static final String CHECK_ROUTE_PATH = "_check-route_";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckRouteMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return MIDDLEWARE_CHECK_ROUTE;
+        return CHECK_ROUTE;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class CheckRouteMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_CHECK_ROUTE);
+        LOGGER.debug("Created '{}' middleware successfully", CHECK_ROUTE);
         return Future.succeededFuture(new CheckRouteMiddleware(name));
     }
 

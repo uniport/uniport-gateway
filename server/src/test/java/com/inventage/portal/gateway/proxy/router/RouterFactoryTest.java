@@ -147,8 +147,8 @@ public class RouterFactoryTest {
             TestUtils.withMiddlewares(
                 TestUtils.withMiddleware("redirect", "redirectRegex",
                     TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX_REGEX, ".*")
-                        .put(RedirectRegexMiddlewareFactory.MIDDLEWARE_REDIRECT_REGEX_REPLACEMENT, "/redirect")))),
+                        .put(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, ".*")
+                        .put(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT, "/redirect")))),
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 

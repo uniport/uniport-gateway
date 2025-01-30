@@ -154,11 +154,11 @@ public class SessionBagMiddlewareTest {
         final Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/portal/")
             .setMaxAge(3600);
         final JsonArray whitelistedCookies = new JsonArray().add(new JsonObject()
-            .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
-            .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH, "/auth/realms/master/"))
+            .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
+            .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/auth/realms/master/"))
             .add(new JsonObject()
-                .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
-                .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH,
+                .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
+                .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH,
                     "/auth/realms/portal/"));
         final SessionStore sessionStore = LocalSessionStore.create(vertx);
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
@@ -342,8 +342,8 @@ public class SessionBagMiddlewareTest {
 
                 assertTrue(
                     whitelistedCookies.contains(new JsonObject()
-                        .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME, decodedRespCookie.getName())
-                        .put(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH, decodedRespCookie.getPath())),
+                        .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, decodedRespCookie.getName())
+                        .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, decodedRespCookie.getPath())),
                     String.format("%s: Not whitelisted cookie was passed to user agent '%s'", errMsg, respCookie));
             }
 

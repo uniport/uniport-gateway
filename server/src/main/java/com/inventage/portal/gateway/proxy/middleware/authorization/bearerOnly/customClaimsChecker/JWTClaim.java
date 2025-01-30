@@ -19,9 +19,9 @@ public class JWTClaim {
      */
     public JWTClaim(JsonObject claimObject) {
         this(
-            claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_PATH),
-            JWTClaimOperator.valueOf(claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
-            claimObject.getValue(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_CLAIM_VALUE));
+            claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH),
+            JWTClaimOperator.valueOf(claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
+            claimObject.getValue(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_VALUE));
     }
 
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {

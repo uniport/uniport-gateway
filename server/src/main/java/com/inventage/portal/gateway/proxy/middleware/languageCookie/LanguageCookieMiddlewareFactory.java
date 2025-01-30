@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_LANGUAGE_COOKIE = "languageCookie";
-    public static final String MIDDLEWARE_LANGUAGE_COOKIE_NAME = "name";
+    public static final String LANGUAGE_COOKIE = "languageCookie";
+    public static final String LANGUAGE_COOKIE_NAME = "name";
 
     // defaults
     public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
@@ -27,13 +27,13 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return MIDDLEWARE_LANGUAGE_COOKIE;
+        return LANGUAGE_COOKIE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(MIDDLEWARE_LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
+            .property(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
@@ -46,8 +46,8 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
-            MIDDLEWARE_LANGUAGE_COOKIE);
-        final String languageCookieName = middlewareConfig.getString(MIDDLEWARE_LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
+            LANGUAGE_COOKIE);
+        final String languageCookieName = middlewareConfig.getString(LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
         return Future.succeededFuture(new LanguageCookieMiddleware(name, languageCookieName));
     }
 }

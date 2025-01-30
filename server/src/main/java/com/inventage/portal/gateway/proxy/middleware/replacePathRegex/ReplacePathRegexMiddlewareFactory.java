@@ -15,33 +15,33 @@ import io.vertx.json.schema.common.dsl.Schemas;
 public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_REPLACE_PATH_REGEX = "replacePathRegex";
-    public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REGEX = "regex";
-    public static final String MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
+    public static final String REPLACE_PATH_REGEX = "replacePathRegex";
+    public static final String REPLACE_PATH_REGEX_REGEX = "regex";
+    public static final String REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
 
     @Override
     public String provides() {
-        return MIDDLEWARE_REPLACE_PATH_REGEX;
+        return REPLACE_PATH_REGEX;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
+            .property(REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
+            .property(REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String regex = options.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX);
+        final String regex = options.getString(REPLACE_PATH_REGEX_REGEX);
         if (regex == null || regex.length() == 0) {
             return Future.failedFuture("No regex defined");
         }
 
-        final String replacement = options.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT);
+        final String replacement = options.getString(REPLACE_PATH_REGEX_REPLACEMENT);
         if (replacement == null || replacement.length() == 0) {
             return Future.failedFuture("No replacement defined");
         }
@@ -51,10 +51,10 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_REPLACE_PATH_REGEX);
+        LOGGER.debug("Created '{}' middleware successfully", REPLACE_PATH_REGEX);
         return Future.succeededFuture(new ReplacePathRegexMiddleware(
             name,
-            middlewareConfig.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REGEX),
-            middlewareConfig.getString(MIDDLEWARE_REPLACE_PATH_REGEX_REPLACEMENT)));
+            middlewareConfig.getString(REPLACE_PATH_REGEX_REGEX),
+            middlewareConfig.getString(REPLACE_PATH_REGEX_REPLACEMENT)));
     }
 }

@@ -15,25 +15,25 @@ import io.vertx.json.schema.common.dsl.Schemas;
 public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
-    public static final String MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
+    public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
+    public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
 
     @Override
     public String provides() {
-        return MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION;
+        return PREVENT_FOREIGN_INITIATED_AUTHENTICATION;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
+            .optionalProperty(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String redirect = options.getString(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
+        final String redirect = options.getString(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
         if (redirect == null) {
             LOGGER.debug("No URI for redirect specified.");
         }
@@ -43,8 +43,8 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION);
-        final String redirect = middlewareConfig.getString(MIDDLEWARE_PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
+        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, PREVENT_FOREIGN_INITIATED_AUTHENTICATION);
+        final String redirect = middlewareConfig.getString(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
         return Future.succeededFuture(new PreventForeignInitiatedAuthMiddleware(name, redirect));
     }
 }

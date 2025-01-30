@@ -87,7 +87,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
         final List<Future<List<JsonObject>>> futures = new LinkedList<>();
 
         publicKeys.forEach(pk -> {
-            final String publicKey = pk.getString(WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY);
+            final String publicKey = pk.getString(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY);
             boolean isURL = false;
             try {
                 new URL(publicKey).toURI();
@@ -111,7 +111,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
                 LOGGER.info("Public key provided directly");
 
                 final String publicKeyAlgorithm = pk.getString(
-                    WithAuthHandlerMiddlewareFactoryBase.MIDDLEWARE_WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
+                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
                     "RS256");
                 authOpts.addPubSecKey(
                     new PubSecKeyOptions()

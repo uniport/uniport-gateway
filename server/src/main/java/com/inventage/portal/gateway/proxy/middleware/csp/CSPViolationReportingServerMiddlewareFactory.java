@@ -20,9 +20,9 @@ import org.slf4j.event.Level;
 public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
-    public static final String MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL = "logLevel";
-    public static final List<String> MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = List.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
+    public static final String CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
+    public static final String CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL = "logLevel";
+    public static final List<String> CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = List.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
 
     // defaults
     public static final String DEFAULT_LOG_LEVEL = "WARN";
@@ -31,23 +31,23 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
 
     @Override
     public String provides() {
-        return MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER;
+        return CSP_VIOLATION_REPORTING_SERVER;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.toArray())))
+            .property(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
+                .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.toArray())))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String logLevel = options.getString(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL);
-        if (logLevel != null && !MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.contains(logLevel)) {
+        final String logLevel = options.getString(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL);
+        if (logLevel != null && !CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.contains(logLevel)) {
             return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
-                MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel, MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS));
+                CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel, CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS));
         }
 
         return Future.succeededFuture();
@@ -55,9 +55,9 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
 
     @Override
     public Future<Middleware> create(final Vertx vertx, final String name, final Router router, final JsonObject middlewareConfig) {
-        final String logLevel = middlewareConfig.getString(MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, DEFAULT_LOG_LEVEL);
+        final String logLevel = middlewareConfig.getString(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, DEFAULT_LOG_LEVEL);
 
-        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_CSP_VIOLATION_REPORTING_SERVER);
+        LOGGER.info("Created '{}' middleware successfully", CSP_VIOLATION_REPORTING_SERVER);
         return Future.succeededFuture(new CSPViolationReportingServerMiddleware(name, Level.valueOf(logLevel)));
     }
 }

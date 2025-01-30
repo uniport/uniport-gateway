@@ -21,20 +21,20 @@ import org.slf4j.LoggerFactory;
 public class CSPMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_CSP = "csp";
-    public static final String MIDDLEWARE_CSP_DIRECTIVES = "policyDirectives";
-    public static final String MIDDLEWARE_CSP_DIRECTIVE_NAME = "directive";
-    public static final String MIDDLEWARE_CSP_DIRECTIVE_VALUES = "values";
-    public static final String MIDDLEWARE_CSP_REPORT_ONLY = "reportOnly";
-    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY = "mergeStrategy";
-    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_UNION = "UNION";
-    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL = "EXTERNAL";
-    public static final String MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL = "INTERNAL";
+    public static final String CSP = "csp";
+    public static final String CSP_DIRECTIVES = "policyDirectives";
+    public static final String CSP_DIRECTIVE_NAME = "directive";
+    public static final String CSP_DIRECTIVE_VALUES = "values";
+    public static final String CSP_REPORT_ONLY = "reportOnly";
+    public static final String CSP_MERGE_STRATEGY = "mergeStrategy";
+    public static final String CSP_MERGE_STRATEGY_UNION = "UNION";
+    public static final String CSP_MERGE_STRATEGY_EXTERNAL = "EXTERNAL";
+    public static final String CSP_MERGE_STRATEGY_INTERNAL = "INTERNAL";
 
     public static final List<String> CSP_MERGE_STRATEGIES = List.of(
-        MIDDLEWARE_CSP_MERGE_STRATEGY_UNION,
-        MIDDLEWARE_CSP_MERGE_STRATEGY_EXTERNAL,
-        MIDDLEWARE_CSP_MERGE_STRATEGY_INTERNAL);
+        CSP_MERGE_STRATEGY_UNION,
+        CSP_MERGE_STRATEGY_EXTERNAL,
+        CSP_MERGE_STRATEGY_INTERNAL);
 
     // defaults
     public static final boolean DEFAULT_REPORT_ONLY = false;
@@ -44,22 +44,22 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return MIDDLEWARE_CSP;
+        return CSP;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(MIDDLEWARE_CSP_DIRECTIVES, Schemas.arraySchema())
-            .property(MIDDLEWARE_CSP_REPORT_ONLY, Schemas.booleanSchema())
-            .property(MIDDLEWARE_CSP_MERGE_STRATEGY, Schemas.stringSchema()
+            .property(CSP_DIRECTIVES, Schemas.arraySchema())
+            .property(CSP_REPORT_ONLY, Schemas.booleanSchema())
+            .property(CSP_MERGE_STRATEGY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final JsonArray directives = options.getJsonArray(MIDDLEWARE_CSP_DIRECTIVES);
+        final JsonArray directives = options.getJsonArray(CSP_DIRECTIVES);
         if (directives == null) {
             return Future.failedFuture("Directive is not defined as JsonObject");
         } else {
@@ -67,7 +67,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
             for (Object directive : directives) {
                 if (directive instanceof JsonObject) {
                     final String directiveName = ((JsonObject) directive)
-                        .getString(MIDDLEWARE_CSP_DIRECTIVE_NAME);
+                        .getString(CSP_DIRECTIVE_NAME);
                     if (directiveName == null) {
                         return Future.failedFuture("Directive name is not defined");
                     }
@@ -75,7 +75,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
                         hasReportToOrUriDirective = true;
                     }
                     final JsonArray directiveValues = ((JsonObject) directive)
-                        .getJsonArray(MIDDLEWARE_CSP_DIRECTIVE_VALUES);
+                        .getJsonArray(CSP_DIRECTIVE_VALUES);
                     if (directiveValues == null) {
                         return Future.failedFuture("Directive values is not defined");
                     }
@@ -86,7 +86,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
                     }
                 }
             }
-            final Boolean reportOnly = options.getBoolean(MIDDLEWARE_CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
+            final Boolean reportOnly = options.getBoolean(CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
             if (reportOnly && !hasReportToOrUriDirective) {
                 return Future.failedFuture("Reporting enabled, but no report-uri or report-to set");
             }
@@ -97,11 +97,11 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final Boolean reportOnly = middlewareConfig.getBoolean(MIDDLEWARE_CSP_REPORT_ONLY, DEFAULT_REPORT_ONLY);
-        final JsonArray directives = middlewareConfig.getJsonArray(MIDDLEWARE_CSP_DIRECTIVES);
-        final String mergeStrategy = middlewareConfig.getString(MIDDLEWARE_CSP_MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY.toString());
+        final Boolean reportOnly = middlewareConfig.getBoolean(CSP_REPORT_ONLY, DEFAULT_REPORT_ONLY);
+        final JsonArray directives = middlewareConfig.getJsonArray(CSP_DIRECTIVES);
+        final String mergeStrategy = middlewareConfig.getString(CSP_MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY.toString());
 
-        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_CSP);
+        LOGGER.info("Created '{}' middleware successfully", CSP);
         return Future.succeededFuture(new CSPMiddleware(name, directives, reportOnly.booleanValue(), CSPMergeStrategy.valueOf(mergeStrategy)));
     }
 }

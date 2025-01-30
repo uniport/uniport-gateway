@@ -20,58 +20,58 @@ import org.slf4j.LoggerFactory;
 public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_HEADERS = "headers";
-    public static final String MIDDLEWARE_HEADERS_REQUEST = "customRequestHeaders";
-    public static final String MIDDLEWARE_HEADERS_RESPONSE = "customResponseHeaders";
+    public static final String HEADERS = "headers";
+    public static final String HEADERS_REQUEST = "customRequestHeaders";
+    public static final String HEADERS_RESPONSE = "customResponseHeaders";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeaderMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return MIDDLEWARE_HEADERS;
+        return HEADERS;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(MIDDLEWARE_HEADERS_REQUEST, Schemas.objectSchema())
-            .property(MIDDLEWARE_HEADERS_RESPONSE, Schemas.objectSchema())
+            .property(HEADERS_REQUEST, Schemas.objectSchema())
+            .property(HEADERS_RESPONSE, Schemas.objectSchema())
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final JsonObject requestHeaders = options.getJsonObject(MIDDLEWARE_HEADERS_REQUEST);
+        final JsonObject requestHeaders = options.getJsonObject(HEADERS_REQUEST);
         if (requestHeaders != null) {
             if (requestHeaders.isEmpty()) {
-                return Future.failedFuture(String.format("%s: Empty request headers defined", MIDDLEWARE_HEADERS));
+                return Future.failedFuture(String.format("%s: Empty request headers defined", HEADERS));
             }
 
             for (Entry<String, Object> entry : requestHeaders) {
                 if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
                     return Future.failedFuture(String
-                        .format("%s: Request header and value can only be of type string", MIDDLEWARE_HEADERS));
+                        .format("%s: Request header and value can only be of type string", HEADERS));
                 }
             }
         }
 
-        final JsonObject responseHeaders = options.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE);
+        final JsonObject responseHeaders = options.getJsonObject(HEADERS_RESPONSE);
         if (responseHeaders != null) {
             if (responseHeaders.isEmpty()) {
-                return Future.failedFuture(String.format("%s: Empty response headers defined", MIDDLEWARE_HEADERS));
+                return Future.failedFuture(String.format("%s: Empty response headers defined", HEADERS));
             }
 
             for (Entry<String, Object> entry : responseHeaders) {
                 if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
                     return Future.failedFuture(String
-                        .format("%s: Response header and value can only be of type string", MIDDLEWARE_HEADERS));
+                        .format("%s: Response header and value can only be of type string", HEADERS));
                 }
             }
         }
 
         if (requestHeaders == null && responseHeaders == null) {
             return Future.failedFuture(
-                String.format("%s: at least one response or request header has to be defined", MIDDLEWARE_HEADERS));
+                String.format("%s: at least one response or request header has to be defined", HEADERS));
         }
 
         return Future.succeededFuture();
@@ -82,8 +82,8 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
         final MultiMap requestHeaders = new HeadersMultiMap();
         final MultiMap responseHeaders = new HeadersMultiMap();
 
-        if (middlewareConfig.getJsonObject(MIDDLEWARE_HEADERS_REQUEST) != null) {
-            middlewareConfig.getJsonObject(MIDDLEWARE_HEADERS_REQUEST).forEach(entry -> {
+        if (middlewareConfig.getJsonObject(HEADERS_REQUEST) != null) {
+            middlewareConfig.getJsonObject(HEADERS_REQUEST).forEach(entry -> {
                 if (entry.getValue() instanceof String) {
                     requestHeaders.set(entry.getKey(), (String) entry.getValue());
                 } else if (entry.getValue() instanceof Iterable) {
@@ -94,8 +94,8 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             });
         }
 
-        if (middlewareConfig.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE) != null) {
-            middlewareConfig.getJsonObject(MIDDLEWARE_HEADERS_RESPONSE).forEach(entry -> {
+        if (middlewareConfig.getJsonObject(HEADERS_RESPONSE) != null) {
+            middlewareConfig.getJsonObject(HEADERS_RESPONSE).forEach(entry -> {
                 if (entry.getValue() instanceof String) {
                     responseHeaders.set(entry.getKey(), (String) entry.getValue());
                 } else if (entry.getValue() instanceof Iterable) {
@@ -106,7 +106,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             });
         }
 
-        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_HEADERS);
+        LOGGER.debug("Created '{}' middleware successfully", HEADERS);
         return Future.succeededFuture(new HeaderMiddleware(name, requestHeaders, responseHeaders));
     }
 

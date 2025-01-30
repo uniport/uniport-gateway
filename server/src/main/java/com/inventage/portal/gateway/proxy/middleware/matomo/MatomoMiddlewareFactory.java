@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
 public class MatomoMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_MATOMO = "matomo";
-    public static final String MIDDLEWARE_MATOMO_JWT_PATH_ROLES = "pathRoles";
-    public static final String MIDDLEWARE_MATOMO_JWT_PATH_GROUP = "pathGroup";
-    public static final String MIDDLEWARE_MATOMO_JWT_PATH_EMAIL = "pathEmail";
-    public static final String MIDDLEWARE_MATOMO_JWT_PATH_USERNAME = "pathUsername";
+    public static final String MATOMO = "matomo";
+    public static final String MATOMO_JWT_PATH_ROLES = "pathRoles";
+    public static final String MATOMO_JWT_PATH_GROUP = "pathGroup";
+    public static final String MATOMO_JWT_PATH_EMAIL = "pathEmail";
+    public static final String MATOMO_JWT_PATH_USERNAME = "pathUsername";
 
     // defaults
     private static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";
@@ -33,20 +33,20 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return MIDDLEWARE_MATOMO;
+        return MATOMO;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             // matomo
-            .property(MIDDLEWARE_MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
+            .property(MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MIDDLEWARE_MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
+            .property(MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MIDDLEWARE_MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
+            .property(MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MIDDLEWARE_MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
+            .property(MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
@@ -58,12 +58,12 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_MATOMO);
+        LOGGER.info("Created '{}' middleware successfully", MATOMO);
 
-        final String jwtPathRoles = middlewareConfig.getString(MIDDLEWARE_MATOMO_JWT_PATH_ROLES, DEFAULT_JWT_PATH_ROLES);
-        final String jwtPathGroup = middlewareConfig.getString(MIDDLEWARE_MATOMO_JWT_PATH_GROUP, DEFAULT_JWT_PATH_GROUP);
-        final String jwtPathUsername = middlewareConfig.getString(MIDDLEWARE_MATOMO_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_USERNAME);
-        final String jwtPathEmail = middlewareConfig.getString(MIDDLEWARE_MATOMO_JWT_PATH_EMAIL, DEFAULT_JWT_PATH_EMAIL);
+        final String jwtPathRoles = middlewareConfig.getString(MATOMO_JWT_PATH_ROLES, DEFAULT_JWT_PATH_ROLES);
+        final String jwtPathGroup = middlewareConfig.getString(MATOMO_JWT_PATH_GROUP, DEFAULT_JWT_PATH_GROUP);
+        final String jwtPathUsername = middlewareConfig.getString(MATOMO_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_USERNAME);
+        final String jwtPathEmail = middlewareConfig.getString(MATOMO_JWT_PATH_EMAIL, DEFAULT_JWT_PATH_EMAIL);
 
         return Future.succeededFuture(new MatomoMiddleware(name, jwtPathRoles, jwtPathGroup, jwtPathUsername, jwtPathEmail));
     }

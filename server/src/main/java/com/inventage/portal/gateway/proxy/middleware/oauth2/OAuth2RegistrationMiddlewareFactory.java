@@ -13,7 +13,7 @@ import java.net.URI;
 public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_OAUTH2_REGISTRATION = "oauth2registration";
+    public static final String OAUTH2_REGISTRATION = "oauth2registration";
     // same props as "oauth2"
 
     private static final String AUTH_ENDPOINT = "/protocol/openid-connect/auth";
@@ -21,7 +21,7 @@ public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory
 
     @Override
     public String provides() {
-        return MIDDLEWARE_OAUTH2_REGISTRATION;
+        return OAUTH2_REGISTRATION;
     }
 
     @Override

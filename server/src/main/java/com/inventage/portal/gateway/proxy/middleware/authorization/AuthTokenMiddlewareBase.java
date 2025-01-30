@@ -55,7 +55,7 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
             return;
         }
 
-        if (this.sessionScope.equals(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)) {
+        if (this.sessionScope.equals(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE_ID)) {
             idTokenDemanded = true;
             // all ID tokens are the same hence take anyone
             authContext = AuthenticationUserContext.fromSessionAtAnyScope(session).orElse(null);

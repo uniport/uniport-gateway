@@ -67,7 +67,7 @@ public class AuthorizationBearerMiddlewareTest {
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(injectTokenHandler)
-            .withAuthorizationBearerMiddleware(OAuth2MiddlewareFactory.MIDDLEWARE_OAUTH2_SESSION_SCOPE_ID)
+            .withAuthorizationBearerMiddleware(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE_ID)
             .build(ctx -> {
                 // then
                 assertAuthorizationBearer(testCtx, ctx.request(), rawIdToken);

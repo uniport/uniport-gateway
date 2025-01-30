@@ -19,10 +19,10 @@ public class CheckRouteMiddlewareTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "/" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH,
-        "/a/b/" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH,
-        "/a/b/" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH + "/c/d",
-        "/prefix" + CheckRouteMiddlewareFactory.MIDDLEWARE_CHECK_ROUTE_PATH + "postfix"
+        "/" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH,
+        "/a/b/" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH,
+        "/a/b/" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH + "/c/d",
+        "/prefix" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH + "postfix"
     })
     public void isHandledByCheckRoute(String uri, Vertx vertx, VertxTestContext testCtx) {
         // given

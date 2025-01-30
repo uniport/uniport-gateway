@@ -286,8 +286,8 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     private boolean isWhitelisted(Cookie cookie) {
         for (int i = 0; i < this.whitelistedCookies.size(); i++) {
             final JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
-            final String whitelistedCookieName = whitelistedCookie.getString(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_NAME);
-            final String whitelistedCookiePath = whitelistedCookie.getString(SessionBagMiddlewareFactory.MIDDLEWARE_SESSION_BAG_WHITELISTED_COOKIE_PATH);
+            final String whitelistedCookieName = whitelistedCookie.getString(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME);
+            final String whitelistedCookiePath = whitelistedCookie.getString(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH);
             if (whitelistedCookieName.equals(cookie.getName()) && whitelistedCookiePath.equals(cookie.getPath())) {
                 return true;
             }

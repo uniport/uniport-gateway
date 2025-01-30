@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
 public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MIDDLEWARE_SHOW_SESSION_CONTENT = "_session_";
+    public static final String SHOW_SESSION_CONTENT = "_session_";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return MIDDLEWARE_SHOW_SESSION_CONTENT;
+        return SHOW_SESSION_CONTENT;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully",
-            MIDDLEWARE_SHOW_SESSION_CONTENT);
+            SHOW_SESSION_CONTENT);
         return Future.succeededFuture(new ShowSessionContentMiddleware(name));
     }
 

@@ -41,7 +41,7 @@ public class ShowSessionContentMiddleware extends TraceMiddleware {
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         // Bail if we're not on the debug URL
-        if (!ctx.request().absoluteURI().contains(ShowSessionContentMiddlewareFactory.MIDDLEWARE_SHOW_SESSION_CONTENT)) {
+        if (!ctx.request().absoluteURI().contains(ShowSessionContentMiddlewareFactory.SHOW_SESSION_CONTENT)) {
             ctx.next();
             return;
         }

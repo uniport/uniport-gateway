@@ -22,23 +22,23 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     // schema
     // session
-    public static final String MIDDLEWARE_SESSION = "session";
-    public static final String MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
-    public static final String MIDDLEWARE_SESSION_ID_MIN_LENGTH = "idMinimumLength";
-    public static final String MIDDLEWARE_SESSION_LIFETIME_COOKIE = "lifetimeCookie";
-    public static final String MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
-    public static final String MIDDLEWARE_SESSION_LIFETIME_HEADER = "lifetimeHeader";
-    public static final String MIDDLEWARE_SESSION_NAG_HTTPS = "nagHttps";
+    public static final String SESSION = "session";
+    public static final String SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
+    public static final String SESSION_ID_MIN_LENGTH = "idMinimumLength";
+    public static final String SESSION_LIFETIME_COOKIE = "lifetimeCookie";
+    public static final String SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
+    public static final String SESSION_LIFETIME_HEADER = "lifetimeHeader";
+    public static final String SESSION_NAG_HTTPS = "nagHttps";
 
     // session cookie
-    public static final String MIDDLEWARE_SESSION_COOKIE = "cookie";
-    public static final String MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY = "httpOnly";
-    public static final String MIDDLEWARE_SESSION_COOKIE_NAME = "name";
-    public static final String MIDDLEWARE_SESSION_COOKIE_SAME_SITE = "sameSite";
-    public static final String MIDDLEWARE_SESSION_COOKIE_SECURE = "secure";
+    public static final String SESSION_COOKIE = "cookie";
+    public static final String SESSION_COOKIE_HTTP_ONLY = "httpOnly";
+    public static final String SESSION_COOKIE_NAME = "name";
+    public static final String SESSION_COOKIE_SAME_SITE = "sameSite";
+    public static final String SESSION_COOKIE_SECURE = "secure";
 
     // session store
-    public static final String MIDDLEWARE_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS = "clusteredSessionStoreRetryTimeoutInMiliseconds";
+    public static final String CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS = "clusteredSessionStoreRetryTimeoutInMiliseconds";
 
     // defaults
     // session
@@ -72,33 +72,33 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return MIDDLEWARE_SESSION;
+        return SESSION;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             // session
-            .property(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
+            .property(SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
-            .property(MIDDLEWARE_SESSION_ID_MIN_LENGTH, Schemas.intSchema()
+            .property(SESSION_ID_MIN_LENGTH, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             // session lifetime
-            .property(MIDDLEWARE_SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
-            .property(MIDDLEWARE_SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
-            .property(MIDDLEWARE_SESSION_NAG_HTTPS, Schemas.booleanSchema())
-            .optionalProperty(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
+            .property(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
+            .property(SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
+            .property(SESSION_NAG_HTTPS, Schemas.booleanSchema())
+            .optionalProperty(SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             // session cookie
-            .property(MIDDLEWARE_SESSION_COOKIE, Schemas.objectSchema()
-                .property(MIDDLEWARE_SESSION_COOKIE_NAME, Schemas.stringSchema()
+            .property(SESSION_COOKIE, Schemas.objectSchema()
+                .property(SESSION_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, INT_MIN))
-                .property(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
-                .property(MIDDLEWARE_SESSION_COOKIE_SECURE, Schemas.booleanSchema())
-                .property(MIDDLEWARE_SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
+                .property(SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
+                .property(SESSION_COOKIE_SECURE, Schemas.booleanSchema())
+                .property(SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
                     .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray()))))
             // session store
-            .optionalProperty(MIDDLEWARE_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, Schemas.intSchema()
+            .optionalProperty(CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .allowAdditionalProperties(false);
     }
@@ -106,7 +106,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Void> validate(JsonObject options) {
         final Integer sessionIdleTimeoutInMinutes = options
-            .getInteger(MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES);
+            .getInteger(SESSION_IDLE_TIMEOUT_IN_MINUTES);
         if (sessionIdleTimeoutInMinutes == null) {
             LOGGER.debug(String.format("Session idle timeout not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE));
         } else {
@@ -114,7 +114,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
                 return Future.failedFuture("Session idle timeout is required to be positive number");
             }
         }
-        final Integer sessionIdMinLength = options.getInteger(MIDDLEWARE_SESSION_ID_MIN_LENGTH);
+        final Integer sessionIdMinLength = options.getInteger(SESSION_ID_MIN_LENGTH);
         if (sessionIdMinLength == null) {
             LOGGER.debug(String.format("Minimum session id length not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH));
         } else {
@@ -122,35 +122,35 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
                 return Future.failedFuture(String.format("Minimum session id length is required to be positive number"));
             }
         }
-        final Boolean nagHttps = options.getBoolean(MIDDLEWARE_SESSION_NAG_HTTPS);
+        final Boolean nagHttps = options.getBoolean(SESSION_NAG_HTTPS);
         if (nagHttps == null) {
             LOGGER.debug(String.format("NagHttps not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_NAG_HTTPS));
         }
-        final Boolean lifetimeHeader = options.getBoolean(MIDDLEWARE_SESSION_LIFETIME_HEADER);
+        final Boolean lifetimeHeader = options.getBoolean(SESSION_LIFETIME_HEADER);
         if (lifetimeHeader == null) {
             LOGGER.debug(String.format("LifetimeHeader not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER));
         }
-        final Boolean lifetimeCookie = options.getBoolean(MIDDLEWARE_SESSION_LIFETIME_COOKIE);
+        final Boolean lifetimeCookie = options.getBoolean(SESSION_LIFETIME_COOKIE);
         if (lifetimeCookie == null) {
             LOGGER.debug(String.format("LifetimeCookie not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE));
         }
-        final String uriWithoutSessionTimeoutReset = options.getString(MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+        final String uriWithoutSessionTimeoutReset = options.getString(SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
         if (uriWithoutSessionTimeoutReset == null) {
             LOGGER.debug("URI without session timeout reset not specified.");
         }
-        final JsonObject cookie = options.getJsonObject(MIDDLEWARE_SESSION_COOKIE);
+        final JsonObject cookie = options.getJsonObject(SESSION_COOKIE);
         if (cookie == null) {
             LOGGER.debug("Cookie settings not specified. Use default setting");
         } else {
-            final String cookieName = cookie.getString(MIDDLEWARE_SESSION_COOKIE_NAME);
+            final String cookieName = cookie.getString(SESSION_COOKIE_NAME);
             if (cookieName == null) {
                 LOGGER.debug(String.format("No session cookie name specified to be removed. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
             }
-            final Boolean cookieHttpOnly = cookie.getBoolean(MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY);
+            final Boolean cookieHttpOnly = cookie.getBoolean(SESSION_COOKIE_HTTP_ONLY);
             if (cookieHttpOnly == null) {
                 LOGGER.debug(String.format("Cookie HttpOnly not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY));
             }
-            final String cookieSameSite = cookie.getString(MIDDLEWARE_SESSION_COOKIE_SAME_SITE);
+            final String cookieSameSite = cookie.getString(SESSION_COOKIE_SAME_SITE);
             if (cookieSameSite == null) {
                 LOGGER.debug(String.format("Cookie SameSite not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE));
             } else {
@@ -173,44 +173,44 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         // session
         final int sessionIdMinLength = middlewareConfig.getInteger(
-            MIDDLEWARE_SESSION_ID_MIN_LENGTH,
+            SESSION_ID_MIN_LENGTH,
             DEFAULT_SESSION_ID_MINIMUM_LENGTH);
         final int sessionIdleTimeoutInMinutes = middlewareConfig.getInteger(
-            MIDDLEWARE_SESSION_IDLE_TIMEOUT_IN_MINUTES,
+            SESSION_IDLE_TIMEOUT_IN_MINUTES,
             DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
         final String pathWithoutSessionTimeoutReset = middlewareConfig.getString(
-            MIDDLEWARE_SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+            SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
         final Boolean nagHttps = middlewareConfig.getBoolean(
-            MIDDLEWARE_SESSION_NAG_HTTPS,
+            SESSION_NAG_HTTPS,
             DEFAULT_NAG_HTTPS);
 
         // session cookie
         final JsonObject sessionCookieConfig = middlewareConfig.getJsonObject(
-            MIDDLEWARE_SESSION_COOKIE,
+            SESSION_COOKIE,
             new JsonObject());
         final String sessionCookieName = sessionCookieConfig.getString(
-            MIDDLEWARE_SESSION_COOKIE_NAME,
+            SESSION_COOKIE_NAME,
             DEFAULT_SESSION_COOKIE_NAME);
         final boolean sessionCookieHttpOnly = sessionCookieConfig.getBoolean(
-            MIDDLEWARE_SESSION_COOKIE_HTTP_ONLY,
+            SESSION_COOKIE_HTTP_ONLY,
             DEFAULT_SESSION_COOKIE_HTTP_ONLY);
         final boolean sessionCookieSecure = sessionCookieConfig.getBoolean(
-            MIDDLEWARE_SESSION_COOKIE_SECURE,
+            SESSION_COOKIE_SECURE,
             DEFAULT_SESSION_COOKIE_SECURE);
         final String sessionCookieSameSiteValue = sessionCookieConfig.getString(
-            MIDDLEWARE_SESSION_COOKIE_SAME_SITE,
+            SESSION_COOKIE_SAME_SITE,
             DEFAULT_SESSION_COOKIE_SAME_SITE.toString());
         final CookieSameSite sessionCookieSameSite = CookieSameSite.valueOf(
             sessionCookieSameSiteValue.toUpperCase());
 
         // session lifetime
         final Boolean lifetimeHeader = middlewareConfig.getBoolean(
-            MIDDLEWARE_SESSION_LIFETIME_HEADER,
+            SESSION_LIFETIME_HEADER,
             DEFAULT_SESSION_LIFETIME_HEADER);
         final String lifetimeHeaderName = DEFAULT_SESSION_LIFETIME_HEADER_NAME;
 
         final Boolean lifetimeCookie = middlewareConfig.getBoolean(
-            MIDDLEWARE_SESSION_LIFETIME_COOKIE,
+            SESSION_LIFETIME_COOKIE,
             DEFAULT_SESSION_LIFETIME_COOKIE);
         final String lifetimeCookieName = DEFAULT_SESSION_LIFETIME_COOKIE_NAME;
         final String lifetimeCookiePath = DEFAULT_SESSION_LIFETIME_COOKIE_PATH;
@@ -220,10 +220,10 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
         // session store
         final int clusteredSessionStoreRetryTimeoutMiliSeconds = middlewareConfig.getInteger(
-            MIDDLEWARE_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS,
+            CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS,
             DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILISECONDS);
 
-        LOGGER.info("Created '{}' middleware successfully", MIDDLEWARE_SESSION);
+        LOGGER.info("Created '{}' middleware successfully", SESSION);
         return Future.succeededFuture(
             new SessionMiddleware(
                 vertx,

@@ -39,8 +39,8 @@ public class CSPMiddleware extends TraceMiddleware {
     }
 
     private void addDirective(CSPHandler cspHandler, JsonObject directive) {
-        final String name = directive.getString(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_NAME);
-        final JsonArray values = directive.getJsonArray(CSPMiddlewareFactory.MIDDLEWARE_CSP_DIRECTIVE_VALUES);
+        final String name = directive.getString(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME);
+        final JsonArray values = directive.getJsonArray(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES);
 
         values.forEach(value -> {
             cspHandler.addDirective(name, (String) value);

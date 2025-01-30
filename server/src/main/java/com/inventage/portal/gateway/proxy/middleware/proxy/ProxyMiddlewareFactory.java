@@ -39,11 +39,11 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
 
-    private static final String MIDDLEWARE_PROXY = "proxy";
+    private static final String PROXY = "proxy";
 
     @Override
     public String provides() {
-        return MIDDLEWARE_PROXY;
+        return PROXY;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject serviceConfig) {
-        LOGGER.debug("Created '{}' middleware successfully", MIDDLEWARE_PROXY);
+        LOGGER.debug("Created '{}' middleware successfully", PROXY);
 
         final String serverProtocol = serviceConfig.getString(SERVICE_SERVER_PROTOCOL, DEFAULT_SERVER_PROTOCOL);
         Boolean trustAll = DEFAULT_HTTPS_TRUST_ALL;
