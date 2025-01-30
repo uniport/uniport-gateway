@@ -82,7 +82,8 @@ public class StaticConfiguration {
                     .withKeyword(KEYWORD_TYPE, STRING_TYPE)
                     .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT)))
             .property(DynamicConfiguration.MIDDLEWARES,
-                Schemas.arraySchema().items(DynamicConfiguration.getBuildMiddlewareSchema()))
+                Schemas.arraySchema()
+                    .items(Schemas.anyOf(DynamicConfiguration.getBuildMiddlewareSchema())))
             .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
             .allowAdditionalProperties(false);
 

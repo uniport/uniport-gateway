@@ -7,7 +7,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
-import io.vertx.json.schema.common.dsl.Schemas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +27,7 @@ public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewar
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
-        return Schemas.objectSchema()
-            .allowAdditionalProperties(false);
+        return super.optionsSchema();
     }
 
     @Override

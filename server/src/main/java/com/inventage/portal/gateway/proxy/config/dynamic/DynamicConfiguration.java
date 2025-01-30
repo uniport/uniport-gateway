@@ -65,7 +65,7 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVICE_SERVER_PORT;
 
     // schema keywords
-    private static final String KEYWORD_ENUM = "enum";
+    private static final String KEYWORD_CONST = "const";
     private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
     private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
     private static final String KEYWORD_TYPE = "type";
@@ -99,18 +99,18 @@ public class DynamicConfiguration {
         return routerSchema;
     }
 
-    private static ObjectSchemaBuilder buildMiddlewareSchema() {
-        final List<ObjectSchemaBuilder> optionSchemas = MiddlewareFactory.Loader.listFactories()
+    private static ObjectSchemaBuilder[] buildMiddlewareSchema() {
+        final ObjectSchemaBuilder[] middlewareSchema = MiddlewareFactory.Loader.listFactories()
             .stream()
-            .map(MiddlewareFactory::optionsSchema)
-            .toList();
-
-        final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
-            .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-            .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_TYPES.toArray())))
-            .property(MIDDLEWARE_OPTIONS, Schemas.anyOf(optionSchemas.toArray(ObjectSchemaBuilder[]::new)))
-            .allowAdditionalProperties(false);
+            .map(factory -> {
+                return Schemas.objectSchema()
+                    .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
+                    .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_CONST, factory.provides()))
+                    .property(MIDDLEWARE_OPTIONS, factory.optionsSchema())
+                    .allowAdditionalProperties(false);
+            })
+            .toArray(ObjectSchemaBuilder[]::new);
         return middlewareSchema;
     }
 
@@ -134,17 +134,21 @@ public class DynamicConfiguration {
 
     private static ObjectSchemaBuilder buildHttpSchema(
         ObjectSchemaBuilder routerSchema,
-        ObjectSchemaBuilder middlewareSchema, ObjectSchemaBuilder serviceSchema
+        ObjectSchemaBuilder[] middlewareSchema,
+        ObjectSchemaBuilder serviceSchema
     ) {
         final ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
-            .property(ROUTERS, Schemas.arraySchema().items(routerSchema))
-            .property(MIDDLEWARES, Schemas.arraySchema().items(middlewareSchema))
-            .property(SERVICES, Schemas.arraySchema().items(serviceSchema))
+            .property(ROUTERS, Schemas.arraySchema()
+                .items(routerSchema))
+            .property(MIDDLEWARES, Schemas.arraySchema()
+                .items(Schemas.anyOf(middlewareSchema)))
+            .property(SERVICES, Schemas.arraySchema()
+                .items(serviceSchema))
             .allowAdditionalProperties(false);
         return httpSchema;
     }
 
-    public static ObjectSchemaBuilder getBuildMiddlewareSchema() {
+    public static ObjectSchemaBuilder[] getBuildMiddlewareSchema() {
         return buildMiddlewareSchema();
     }
 
@@ -291,7 +295,7 @@ public class DynamicConfiguration {
 
     public static ObjectSchemaBuilder buildSchema() {
         final ObjectSchemaBuilder routerSchema = buildRouterSchema();
-        final ObjectSchemaBuilder middlewareSchema = buildMiddlewareSchema();
+        final ObjectSchemaBuilder[] middlewareSchema = buildMiddlewareSchema();
         final ObjectSchemaBuilder serviceSchema = buildServiceSchema();
         final ObjectSchemaBuilder httpSchema = buildHttpSchema(routerSchema, middlewareSchema, serviceSchema);
 

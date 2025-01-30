@@ -9,14 +9,14 @@
         "middlewares" : {
           "type" : "array",
           "items" : {
-            "additionalProperties" : false,
-            "type" : "object",
-            "properties" : {
-              "name" : {
-                "type" : "string"
-              },
-              "options" : {
-                "anyOf" : [ {
+            "anyOf" : [ {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -25,7 +25,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "authorizationBearer",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -86,7 +100,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "bearerOnly",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -147,13 +175,55 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "passAuthorization",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object"
-                }, {
+                },
+                "type" : {
+                  "const" : "bodyHandler",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object"
-                }, {
+                },
+                "type" : {
+                  "const" : "checkRoute",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -166,7 +236,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "claimToHeader",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -179,7 +263,21 @@
                       "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "controlApi",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -229,7 +327,21 @@
                       "type" : "boolean"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "cors",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -244,7 +356,21 @@
                       "type" : "boolean"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "csp",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -253,7 +379,21 @@
                       "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "cspViolationReportingServer",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -289,7 +429,21 @@
                       "minimum" : 0
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "csrf",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -305,10 +459,38 @@
                       "minimum" : 100
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "customResponse",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object"
-                }, {
+                },
+                "type" : {
+                  "const" : "_session_",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -319,7 +501,21 @@
                       "type" : "object"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "headers",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -328,7 +524,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "languageCookie",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -348,7 +558,21 @@
                       "type" : "boolean"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "requestResponseLogger",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -369,7 +593,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "matomo",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -419,7 +657,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "oauth2",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -469,7 +721,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "oauth2registration",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -478,10 +744,38 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "checkInitiatedAuth",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object"
-                }, {
+                },
+                "type" : {
+                  "const" : "openTelemetry",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -494,7 +788,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "redirectRegex",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -507,7 +815,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "replacePathRegex",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -524,7 +846,21 @@
                       "minimum" : 0
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "replacedSessionCookieDetection",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -533,7 +869,21 @@
                       "type" : "string"
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "responseSessionCookieRemoval",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -582,7 +932,21 @@
                       "minimum" : 0
                     }
                   }
-                }, {
+                },
+                "type" : {
+                  "const" : "session",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
@@ -594,17 +958,85 @@
                       "type" : "string"
                     }
                   }
-                }, {
-                  "additionalProperties" : false,
-                  "type" : "object"
-                } ]
+                },
+                "type" : {
+                  "const" : "sessionBag",
+                  "type" : "string"
+                }
               },
-              "type" : {
-                "type" : "string",
-                "enum" : [ "authorizationBearer", "bearerOnly", "passAuthorization", "bodyHandler", "checkRoute", "claimToHeader", "controlApi", "cors", "csp", "cspViolationReportingServer", "csrf", "customResponse", "_session_", "headers", "languageCookie", "requestResponseLogger", "matomo", "oauth2", "oauth2registration", "checkInitiatedAuth", "openTelemetry", "redirectRegex", "replacePathRegex", "replacedSessionCookieDetection", "responseSessionCookieRemoval", "session", "sessionBag", "backChannelLogout" ]
-              }
-            },
-            "required" : [ "name", "type" ]
+              "required" : [ "name", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
+                  "additionalProperties" : false,
+                  "type" : "object",
+                  "properties" : {
+                    "audience" : {
+                      "type" : "array"
+                    },
+                    "publicKeys" : {
+                      "type" : "array"
+                    },
+                    "publicKeysReconcilation" : {
+                      "type" : "object",
+                      "properties" : {
+                        "intervalMs" : {
+                          "type" : "integer",
+                          "minimum" : 0
+                        },
+                        "enabled" : {
+                          "type" : "boolean"
+                        }
+                      }
+                    },
+                    "additionalIssuers" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "string"
+                      }
+                    },
+                    "publicKeyAlgorithm" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "claims" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object",
+                        "properties" : {
+                          "claimPath" : {
+                            "type" : "string"
+                          },
+                          "value" : { },
+                          "operator" : {
+                            "type" : "string",
+                            "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
+                          }
+                        }
+                      }
+                    },
+                    "publicKey" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "issuer" : {
+                      "minLength" : 1,
+                      "type" : "string"
+                    }
+                  }
+                },
+                "type" : {
+                  "const" : "backChannelLogout",
+                  "type" : "string"
+                }
+              },
+              "required" : [ "name", "type" ]
+            } ]
           }
         },
         "services" : {
