@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
@@ -13,12 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
@@ -42,7 +48,48 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
-public class SessionMiddlewareTest {
+public class SessionMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware(
+                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    withMiddlewareOpts(
+                        new JsonObject()
+                            .put(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
+                            .put(SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32)
+                            .put(SessionMiddlewareFactory.SESSION_NAG_HTTPS, true)
+                            .put(SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*")
+                            .put(SessionMiddlewareFactory.SESSION_COOKIE, new JsonObject()
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session")
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true)
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false)
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+
+        final JsonObject minimal = buildConfiguration(
+            withMiddlewares(
+                withMiddleware(
+                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    withMiddlewareOpts(
+                        new JsonObject()
+                            .put(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
+                            .put(SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32)
+                            .put(SessionMiddlewareFactory.SESSION_NAG_HTTPS, true)
+                            .put(SessionMiddlewareFactory.SESSION_COOKIE, new JsonObject()
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session")
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true)
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false)
+                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+
+        return Stream.of(
+            Arguments.of("accept session middleware", simple, complete, expectedTrue),
+            Arguments.of("accept minimal session middleware", minimal, complete, expectedTrue)
+
+        );
+    }
 
     @Test
     public void sessionLifetimeCookie(Vertx vertx, VertxTestContext testCtx) {

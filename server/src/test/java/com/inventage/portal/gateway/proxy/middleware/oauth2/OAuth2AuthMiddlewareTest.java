@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_PKCE;
@@ -15,6 +19,7 @@ import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -45,7 +50,32 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
-public class OAuth2AuthMiddlewareTest {
+public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2)));
+
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                    withMiddlewareOpts(JsonObject.of(
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, "bar",
+                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234",
+                        OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
+                        OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
+
+        return Stream.of(
+            Arguments.of("accept oAuth2 middleware", simple, complete, expectedTrue),
+            Arguments.of("reject oAuth2 middleware with missing options", missingOptions, complete, expectedFalse)
+
+        );
+    }
+
     public static final String PKCE_METHOD_PLAIN = "plain";
     public static final String PKCE_METHOD_S256 = "S256";
     public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";

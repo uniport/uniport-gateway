@@ -1,13 +1,19 @@
 package com.inventage.portal.gateway.proxy.middleware.controlApi;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware.CONTROL_COOKIE_NAME;
 import static com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiAction;
+import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
@@ -17,6 +23,7 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -27,13 +34,37 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class ControlApiMiddlewareTest {
+public class ControlApiMiddlewareTest extends MiddlewareTestBase {
 
     private static final String HOST = "localhost";
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject sessionTermination = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                    withMiddlewareOpts(
+                        JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_TERMINATE)))));
+
+        final JsonObject sessionReset = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                    withMiddlewareOpts(
+                        JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_RESET)))));
+
+        return Stream.of(
+            Arguments.of("accept control api with 'SESSION_TERMINATE' action middleware", sessionTermination, complete, expectedTrue),
+            Arguments.of("accept control api with 'SESSION_RESET' action middleware", sessionReset, complete, expectedTrue)
+
+        );
+    }
 
     @Test
     void sessionTerminationTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {

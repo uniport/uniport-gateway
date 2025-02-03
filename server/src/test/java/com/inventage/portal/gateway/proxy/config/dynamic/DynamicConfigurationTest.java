@@ -16,24 +16,9 @@ import static com.inventage.portal.gateway.TestUtils.withServices;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertEquals;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertNotNull;
 
-import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.customResponse.CustomResponseMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.openTelemetry.OpenTelemetryMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -151,228 +136,6 @@ public class DynamicConfigurationTest {
                 new JsonArray().add(new JsonObject()
                     .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
                     .put(DynamicConfiguration.MIDDLEWARE_TYPE, "blub"))));
-
-        final JsonObject requestResponseLoggerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_FILTER_REGEX, ".*/health.*|.*/ready.*")))));
-
-        final JsonObject requestResponseLoggerHttpMiddlewareMinimal = new JsonObject().put(
-            DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE,
-                        RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER))));
-
-        final JsonObject replacePathRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REGEX, "^$")
-                        .put(ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REPLACEMENT, "foobar")))));
-
-        final JsonObject replacePathRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(
-            DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX))));
-
-        final JsonObject directRegexHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(
-                DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, RedirectRegexMiddlewareFactory.REDIRECT_REGEX)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, "^$")
-                        .put(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT, "foorbar")))));
-
-        final JsonObject directRegexHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, RedirectRegexMiddlewareFactory.REDIRECT_REGEX))));
-
-        final JsonObject headersHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.HEADERS))));
-
-        final JsonObject headersHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.HEADERS)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(HeaderMiddlewareFactory.HEADERS_REQUEST, new JsonObject()
-                            .put("foo", "bar"))))));
-
-        final JsonObject customResponseHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddleware")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, new JsonObject()
-                            .put("foo", "bar"))))));
-
-        final JsonObject customResponseHttpMiddlewareWrongStatusCodeType = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareWrongStatusCodeType")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, "200")))));
-
-        final JsonObject customResponseHttpMiddlewareContentType = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareContentType")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, 200)
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))));
-
-        final JsonObject customResponseHttpMiddlewareWrongHeaders = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "customResponseHttpMiddlewareWrongHeaders")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-                        new JsonObject()
-                            .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")
-                            .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, new JsonObject().put("X-Foo", 2))
-                            .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))));
-
-        final JsonObject customResponseHttpMiddlewareWrongStatusCodeMin = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 99)))));
-
-        final JsonObject customResponseHttpMiddlewareWrongStatusCodeMax = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")
-                        .put(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 600)))));
-
-        final JsonObject authBearerHttpMiddlewareWithMissingOptions = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER))));
-
-        final JsonObject authBearerHttpMiddleware = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject().put(
-                DynamicConfiguration.MIDDLEWARES,
-                new JsonArray().add(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
-                    .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                        .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
-
-        final JsonObject bearerOnlyHttpMiddlewareWithMissingOptions = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    BearerOnlyMiddlewareFactory.BEARER_ONLY,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "blub")))));
-
-        final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKey = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(TestUtils.withMiddleware("foo",
-                BearerOnlyMiddlewareFactory.BEARER_ONLY,
-                TestUtils.withMiddlewareOpts(new JsonObject()
-                    .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "notbase64*oraurl")
-                    .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
-                    .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                    .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray().add("blub"))))));
-
-        final JsonObject bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    BearerOnlyMiddlewareFactory.BEARER_ONLY,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
-
-        final JsonObject bearerOnlyHttpMiddlewareWithInvalidAudience = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    BearerOnlyMiddlewareFactory.BEARER_ONLY,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("valid", 123, true))))));
-
-        final JsonObject bearerOnlyHttpMiddleware = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    BearerOnlyMiddlewareFactory.BEARER_ONLY,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
-                            new JsonObject()
-                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")))
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
-
-        final JsonObject oauth2PathHttpMiddlewareWithMissingOptions = new JsonObject()
-            .put(DynamicConfiguration.HTTP, new JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARES, JsonArray
-                    .of(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, OAuth2MiddlewareFactory.OAUTH2))));
-
-        final JsonObject oauth2PathHttpMiddleware = new JsonObject()
-            .put(DynamicConfiguration.HTTP, new JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(
-                    new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, OAuth2MiddlewareFactory.OAUTH2)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo")
-                            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, "bar")
-                            .put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234")
-                            .put(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub")
-                            .put(OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
-
-        final JsonObject sessionBagHttpMiddlewareWithMissingOptions = new JsonObject()
-            .put(DynamicConfiguration.HTTP, new JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(new JsonObject()
-                    .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                    .put(DynamicConfiguration.MIDDLEWARE_TYPE, SessionBagMiddlewareFactory.SESSION_BAG))));
-
-        final JsonObject sessionBagHttpMiddleware = new JsonObject()
-            .put(DynamicConfiguration.HTTP, new JsonObject()
-                .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(
-                    new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, SessionBagMiddlewareFactory.SESSION_BAG)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
-                                new JsonObject()
-                                    .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo")
-                                    .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar")))))));
 
         final JsonObject unkownKeyHttpMiddleware = new JsonObject()
             .put(DynamicConfiguration.HTTP, new JsonObject()
@@ -619,186 +382,6 @@ public class DynamicConfigurationTest {
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
                             .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
 
-        final JsonObject controlApiMiddlewareWithSessionTermination = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject()
-                .put(DynamicConfiguration.ROUTERS,
-                    new JsonArray().add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
-                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
-                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
-                            .add("middlewareFoo"))
-                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
-                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
-                    .add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, ControlApiMiddlewareFactory.CONTROL_API)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(ControlApiMiddlewareFactory.CONTROL_API_ACTION, "SESSION_TERMINATE"))))
-                .put(DynamicConfiguration.SERVICES, new JsonArray()
-                    .add(new JsonObject()
-                        .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
-                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
-                            .add(new JsonObject()
-                                .put(DynamicConfiguration.SERVICE_SERVER_HOST,
-                                    "localhost")
-                                .put(DynamicConfiguration.SERVICE_SERVER_PORT,
-                                    1234))))));
-
-        final JsonObject controlApiMiddlewareWithSessionReset = new JsonObject().put(DynamicConfiguration.HTTP,
-            new JsonObject()
-                .put(DynamicConfiguration.ROUTERS, new JsonArray()
-                    .add(new JsonObject()
-                        .put(DynamicConfiguration.ROUTER_NAME, "routerFoo")
-                        .put(DynamicConfiguration.ROUTER_RULE, "Path('/')")
-                        .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
-                            .add("middlewareFoo"))
-                        .put(DynamicConfiguration.ROUTER_SERVICE, "serviceFoo")))
-                .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
-                    .add(new JsonObject()
-                        .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, ControlApiMiddlewareFactory.CONTROL_API)
-                        .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(ControlApiMiddlewareFactory.CONTROL_API_ACTION, "SESSION_RESET"))))
-                .put(DynamicConfiguration.SERVICES, new JsonArray()
-                    .add(new JsonObject()
-                        .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
-                        .put(DynamicConfiguration.SERVICE_SERVERS, new JsonArray()
-                            .add(new JsonObject()
-                                .put(DynamicConfiguration.SERVICE_SERVER_HOST, "localhost")
-                                .put(DynamicConfiguration.SERVICE_SERVER_PORT, 1234))))));
-
-        final JsonObject cspMiddlewareWithDefaultSrcSelf = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    CSPMiddlewareFactory.CSP,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(CSPMiddlewareFactory.CSP_DIRECTIVES, JsonArray.of(
-                            new JsonObject()
-                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, "default-src")
-                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, JsonArray.of("self"))))))));
-
-        final JsonObject cspMiddlewareWithInvalidValues = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    CSPMiddlewareFactory.CSP,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(
-                            CSPMiddlewareFactory.CSP_DIRECTIVES, JsonArray.of(new JsonObject()
-                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, "foo")
-                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, new JsonArray()
-                                    .add("valid")
-                                    .add(123)
-                                    .add(true))))))));
-
-        final JsonObject cspViolationReportingServerMiddlewareWithLogLevelTrace = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "TRACE")))));
-
-        final JsonObject cspViolationReportingServerMiddlewareWithLogLevelWithWeirdCaps = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
-                    TestUtils.withMiddlewareOpts(new JsonObject()
-                        .put(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "eRroR")))));
-
-        final JsonObject cspViolationReportingServerMiddlewareWithInvalidValues = TestUtils
-            .buildConfiguration(TestUtils
-                .withMiddlewares(TestUtils.withMiddleware("foo",
-                    CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
-                    TestUtils.withMiddlewareOpts(new JsonObject().put(
-                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "blub")))));
-
-        final JsonObject cors = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    CorsMiddlewareFactory.CORS,
-                    TestUtils.withMiddlewareOpts(
-                        JsonObject.of(
-                            CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
-
-        final JsonObject corsFull = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    CorsMiddlewareFactory.CORS,
-                    TestUtils.withMiddlewareOpts(
-                        JsonObject.of(
-                            CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
-                            CorsMiddlewareFactory.CORS_ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
-                            CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
-                            CorsMiddlewareFactory.CORS_EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
-                            CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, 42,
-                            CorsMiddlewareFactory.CORS_ALLOW_CREDENTIALS, false,
-                            CorsMiddlewareFactory.CORS_ALLOW_PRIVATE_NETWORK, false)))));
-
-        final JsonObject corsWithEmptyOrigin = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    CorsMiddlewareFactory.CORS,
-                    TestUtils.withMiddlewareOpts(
-                        JsonObject.of(
-                            CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, JsonArray.of(""))))));
-
-        final JsonObject corsWithUnkownMethod = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    CorsMiddlewareFactory.CORS,
-                    TestUtils.withMiddlewareOpts(
-                        JsonObject.of(
-                            CorsMiddlewareFactory.CORS_ALLOWED_METHODS, JsonArray.of("BLUB"))))));
-
-        final JsonObject corsWithIllegalMaxAgeType = TestUtils.buildConfiguration(
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("foo",
-                    CorsMiddlewareFactory.CORS,
-                    TestUtils.withMiddlewareOpts(
-                        JsonObject.of(
-                            CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, false)))));
-
-        final JsonObject sessionMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
-            TestUtils.withMiddleware(
-                "sessionMiddleware",
-                SessionMiddlewareFactory.SESSION,
-                TestUtils.withMiddlewareOpts(
-                    new JsonObject()
-                        .put(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
-                        .put(SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32)
-                        .put(SessionMiddlewareFactory.SESSION_NAG_HTTPS, true)
-                        .put(SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*")
-                        .put(SessionMiddlewareFactory.SESSION_COOKIE, new JsonObject()
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session")
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true)
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false)
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
-
-        final JsonObject sessionMiddlewareMinimal = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
-            TestUtils.withMiddleware(
-                "sessionMiddleware",
-                SessionMiddlewareFactory.SESSION,
-                TestUtils.withMiddlewareOpts(
-                    new JsonObject()
-                        .put(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
-                        .put(SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32)
-                        .put(SessionMiddlewareFactory.SESSION_NAG_HTTPS, true)
-                        .put(SessionMiddlewareFactory.SESSION_COOKIE, new JsonObject()
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session")
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true)
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false)
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
-
-        final JsonObject openTelemetryMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
-            TestUtils.withMiddleware("openTelemetry", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY)));
-
-        final JsonObject claimToHeaderMiddleware = TestUtils.buildConfiguration(TestUtils.withMiddlewares(
-            TestUtils.withMiddleware("claimToHeader",
-                ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
-                TestUtils.withMiddlewareOpts(
-                    new JsonObject()
-                        .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, "claimPath")
-                        .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, "headerName")))));
-
         // the sole purpose of the following variable are to improve readability
         final boolean expectedTrue = true;
         final boolean expectedFalse = false;
@@ -811,8 +394,7 @@ public class DynamicConfigurationTest {
             // general
             Arguments.of("reject null config", nullConfig, complete, expectedFalse),
             Arguments.of("reject empty config", emptyConfig, complete, expectedFalse),
-            Arguments.of("reject config with unknown key", unknownConfigKey, complete,
-                expectedFalse),
+            Arguments.of("reject config with unknown key", unknownConfigKey, complete, expectedFalse),
 
             // http
             Arguments.of("reject null http config", nullHttp, complete, expectedFalse),
@@ -822,188 +404,40 @@ public class DynamicConfigurationTest {
             // routers (incomplete)
             Arguments.of("reject null routers", nullHttpRouters, incomplete, expectedFalse),
             Arguments.of("accept empty routers", emptyHttpRouters, incomplete, expectedTrue),
-            Arguments.of("accept single minimal router", singleMinimalHttpRouter, incomplete,
-                expectedTrue),
-            Arguments.of("accept single router with all properties", singleCompleteHttpRouter,
-                incomplete,
-                expectedTrue),
-            Arguments.of("reject single router with unknown key", unkownKeyHttpRouter, incomplete,
-                expectedFalse),
-            Arguments.of("accept two minimal routers", doubleMinimalHttpRouters, incomplete,
-                expectedTrue),
-            Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete,
-                expectedFalse),
-            Arguments.of("reject minimal and empty routers", minimalAndEmptyHttpRouters, incomplete,
-                expectedFalse),
+            Arguments.of("accept single minimal router", singleMinimalHttpRouter, incomplete, expectedTrue),
+            Arguments.of("accept single router with all properties", singleCompleteHttpRouter, incomplete, expectedTrue),
+            Arguments.of("reject single router with unknown key", unkownKeyHttpRouter, incomplete, expectedFalse),
+            Arguments.of("accept two minimal routers", doubleMinimalHttpRouters, incomplete, expectedTrue),
+            Arguments.of("reject duplicated router", dublicatedMinimalHttpRouters, incomplete, expectedFalse),
+            Arguments.of("reject minimal and empty routers", minimalAndEmptyHttpRouters, incomplete, expectedFalse),
 
             // middlewares
             Arguments.of("reject null middlewares", nullHttpMiddlewares, complete, expectedFalse),
             Arguments.of("accept empty middlewares", emptyHttpMiddlewares, complete, expectedTrue),
             Arguments.of("reject unkown middleware", unkownHttpMiddleware, complete, expectedFalse),
-            // replace path regex middleware
-            Arguments.of("accept replace path middleware", replacePathRegexHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject replace path middleware with missing options",
-                replacePathRegexHttpMiddlewareWithMissingOptions, complete,
-                expectedFalse),
-            // request response logger middleware
-            Arguments.of("accept request response logger middleware",
-                requestResponseLoggerHttpMiddleware, complete, expectedTrue),
-            Arguments.of("accept minimal request response logger middleware",
-                requestResponseLoggerHttpMiddlewareMinimal, complete, expectedTrue),
-            // redirect regex middleware
-            Arguments.of("accept redirect regex middleware", directRegexHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject redirect regex middleware with missing options",
-                directRegexHttpMiddlewareWithMissingOptions, complete, expectedFalse),
-            // headers middleware
-            Arguments.of("accept headers middleware", headersHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject headers middleware with missing options",
-                headersHttpMiddlewareWithMissingOptions,
-                complete, expectedFalse),
-            // custom response middleware
-            Arguments.of("custom response middleware", customResponseHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject custom response middleware with wrong status code type",
-                customResponseHttpMiddlewareWrongStatusCodeType,
-                complete, expectedFalse),
-            Arguments.of("reject custom response middleware with wrong status code (min)",
-                customResponseHttpMiddlewareWrongStatusCodeMin,
-                complete, expectedFalse),
-            Arguments.of("reject custom response middleware with wrong status code (max)",
-                customResponseHttpMiddlewareWrongStatusCodeMax,
-                complete, expectedFalse),
-            Arguments.of("reject custom response middleware with wrong content type",
-                customResponseHttpMiddlewareContentType,
-                complete, expectedFalse),
-            Arguments.of("reject custom response middleware with wrong headers",
-                customResponseHttpMiddlewareWrongHeaders,
-                complete, expectedFalse),
-            // authorization bearer middleware
-            Arguments.of("accept authorization bearer middleware", authBearerHttpMiddleware,
-                complete,
-                expectedTrue),
-            Arguments.of("reject authorization bearer with missing options",
-                authBearerHttpMiddlewareWithMissingOptions, complete, expectedFalse),
-            // bearer only middleware
-            Arguments.of("accept bearer only middleware", bearerOnlyHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject bearer only with missing options",
-                bearerOnlyHttpMiddlewareWithMissingOptions,
-                complete, expectedFalse),
-            Arguments.of("reject bearer with invalid public key",
-                bearerOnlyHttpMiddlewareWithInvalidPublicKey,
-                complete, expectedFalse),
-            Arguments.of("reject bearer with invalid public key format",
-                bearerOnlyHttpMiddlewareWithInvalidPublicKeyFormat, complete,
-                expectedFalse),
-            Arguments.of("reject bearer with invalid audience",
-                bearerOnlyHttpMiddlewareWithInvalidAudience,
-                complete, expectedFalse),
-            // oauth2 middleware
-            Arguments.of("accept oAuth2 middleware", oauth2PathHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject oAuth2 middleware with missing options",
-                oauth2PathHttpMiddlewareWithMissingOptions, complete, expectedFalse),
-            // session bag middleware
-            Arguments.of("accept session bag middleware", sessionBagHttpMiddleware, complete,
-                expectedTrue),
-            Arguments.of("reject session bag middleware with missing options",
-                sessionBagHttpMiddlewareWithMissingOptions, complete, expectedFalse),
-
-            Arguments.of("reject unkown key middleware", unkownKeyHttpMiddleware, complete,
-                expectedFalse),
-            Arguments.of("accept two valid middelwares", doubleHttpMiddlewares, complete,
-                expectedTrue),
-            Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete,
-                expectedFalse),
-            Arguments.of("reject complete and empty middlewares", completeAndEmptyHttpMiddlewares,
-                complete,
-                expectedFalse),
-
-            // controlapi middleware
-            Arguments.of("accept control api with 'SESSION_TERMINATE' action middleware",
-                controlApiMiddlewareWithSessionTermination, complete, expectedTrue),
-            Arguments.of("accept control api with 'SESSION_RESET' action middleware",
-                controlApiMiddlewareWithSessionReset, complete, expectedTrue),
-
-            // content security policy middleware
-            Arguments.of("accept csp middleware with default-src=[self]",
-                cspMiddlewareWithDefaultSrcSelf,
-                complete, expectedTrue),
-            Arguments.of("reject csp middleware with invalid values",
-                cspMiddlewareWithInvalidValues, complete,
-                expectedFalse),
-
-            // content security policy violation reporting server middleware
-            Arguments.of("accept csp violation reporting middleware with log level",
-                cspViolationReportingServerMiddlewareWithLogLevelTrace,
-                complete, expectedTrue),
-            Arguments.of("reject csp violation reporting middleware with log level with weird caps",
-                cspViolationReportingServerMiddlewareWithLogLevelWithWeirdCaps,
-                complete, expectedFalse),
-            Arguments.of("reject csp violation reporting middleware with invalid log level",
-                cspViolationReportingServerMiddlewareWithInvalidValues,
-                complete, expectedFalse),
-
-            // session middleware
-            Arguments.of("accept session middleware",
-                sessionMiddleware, complete, expectedTrue),
-            Arguments.of("accept minimal session middleware",
-                sessionMiddlewareMinimal, complete, expectedTrue),
-
-            // openTelemetry middleware
-            Arguments.of("accept openTelemetry middleware",
-                openTelemetryMiddleware, complete, expectedTrue),
-
-            // claimToHeader middleware
-            Arguments.of("accept claimToHeader middleware",
-                claimToHeaderMiddleware, complete, expectedTrue),
-
-            // cors middleware
-            Arguments.of("accept simple cors", cors, complete, expectedTrue),
-            Arguments.of("accept full cors", corsFull, complete, expectedTrue),
-            Arguments.of("reject cors with empty origin", corsWithEmptyOrigin, complete, expectedFalse),
-            Arguments.of("reject cors with unknown method", corsWithUnkownMethod, complete, expectedFalse),
-            Arguments.of("reject cors with illegal max age type", corsWithIllegalMaxAgeType, complete, expectedFalse),
+            Arguments.of("reject unkown key middleware", unkownKeyHttpMiddleware, complete, expectedFalse),
+            Arguments.of("accept two valid middelwares", doubleHttpMiddlewares, complete, expectedTrue),
+            Arguments.of("reject duplicated middlewares", duplicatedHttpMiddlewares, complete, expectedFalse),
+            Arguments.of("reject complete and empty middlewares", completeAndEmptyHttpMiddlewares, complete, expectedFalse),
 
             // services
             Arguments.of("reject null services", nullHttpServices, complete, expectedFalse),
             Arguments.of("accept empty services", emptyHttpServices, complete, expectedTrue),
-            Arguments.of("reject single service with no servers", singleHttpServiceWithNoServers,
-                complete,
-                expectedFalse),
-            Arguments.of("reject single service with empty servers",
-                singleHttpServiceWithEmptyServers, complete,
-                expectedFalse),
-            Arguments.of("accept single service with one valid server",
-                singleHttpServiceWithOneServer, complete,
-                expectedTrue),
-            Arguments.of("reject single service with one server with a missing key",
-                singleHttpServiceWithOneMissingKeyServer, complete, expectedFalse),
-            Arguments.of("reject single service with one server with a unknown key",
-                singleHttpServiceWithOneUnkownKeyServer, complete, expectedFalse),
-            Arguments.of("accept single service with two valid servers",
-                singleHttpServiceWithTwoServers, complete,
-                expectedTrue),
-            Arguments.of("reject single service with unkown key", unkownKeyHttpService, complete,
-                expectedFalse),
+            Arguments.of("reject single service with no servers", singleHttpServiceWithNoServers, complete, expectedFalse),
+            Arguments.of("reject single service with empty servers", singleHttpServiceWithEmptyServers, complete, expectedFalse),
+            Arguments.of("accept single service with one valid server", singleHttpServiceWithOneServer, complete, expectedTrue),
+            Arguments.of("reject single service with one server with a missing key", singleHttpServiceWithOneMissingKeyServer, complete, expectedFalse),
+            Arguments.of("reject single service with one server with a unknown key", singleHttpServiceWithOneUnkownKeyServer, complete, expectedFalse),
+            Arguments.of("accept single service with two valid servers", singleHttpServiceWithTwoServers, complete, expectedTrue),
+            Arguments.of("reject single service with unkown key", unkownKeyHttpService, complete, expectedFalse),
             Arguments.of("accept two valid services", doubleHttpServices, complete, expectedTrue),
-            Arguments.of("reject duplicated services", duplicatedHttpServices, complete,
-                expectedFalse),
-            Arguments.of("reject complete and empty services", completeAndEmptyHttpServices,
-                complete,
-                expectedFalse),
+            Arguments.of("reject duplicated services", duplicatedHttpServices, complete, expectedFalse),
+            Arguments.of("reject complete and empty services", completeAndEmptyHttpServices, complete, expectedFalse),
 
             // routers (complete)
-            Arguments.of("accept http config with router referencing middleware and service",
-                httpRouterWithMiddlewareAndService, complete, expectedTrue),
-            Arguments.of("reject http config with router referencing missing middleware",
-                httpRouterWithMissingMiddleware, complete, expectedFalse),
-            Arguments.of("accept http config with router referencing missing service",
-                httpRouterWithMissingService,
-                complete, expectedFalse));
+            Arguments.of("accept http config with router referencing middleware and service", httpRouterWithMiddlewareAndService, complete, expectedTrue),
+            Arguments.of("reject http config with router referencing missing middleware", httpRouterWithMissingMiddleware, complete, expectedFalse),
+            Arguments.of("accept http config with router referencing missing service", httpRouterWithMissingService, complete, expectedFalse));
 
     }
 

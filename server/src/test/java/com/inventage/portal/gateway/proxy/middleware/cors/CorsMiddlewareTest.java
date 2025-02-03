@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.netty.handler.codec.http.HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS;
@@ -14,20 +18,74 @@ import static io.vertx.core.http.HttpHeaders.ORIGIN;
 import static io.vertx.core.http.HttpHeaders.VARY;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class CorsMiddlewareTest {
+public class CorsMiddlewareTest extends MiddlewareTestBase {
 
     private static final String host = "localhost";
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject minimal = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                    withMiddlewareOpts(JsonObject.of(
+                        CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
+
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                    withMiddlewareOpts(JsonObject.of(
+                        CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
+                        CorsMiddlewareFactory.CORS_ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
+                        CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                        CorsMiddlewareFactory.CORS_EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                        CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, 42,
+                        CorsMiddlewareFactory.CORS_ALLOW_CREDENTIALS, false,
+                        CorsMiddlewareFactory.CORS_ALLOW_PRIVATE_NETWORK, false)))));
+
+        final JsonObject emptyOrigin = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                    withMiddlewareOpts(JsonObject.of(
+                        CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, JsonArray.of(""))))));
+
+        final JsonObject unknownMethod = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                    withMiddlewareOpts(JsonObject.of(
+                        CorsMiddlewareFactory.CORS_ALLOWED_METHODS, JsonArray.of("BLUB"))))));
+
+        final JsonObject illegalMaxAgeType = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                    withMiddlewareOpts(JsonObject.of(
+                        CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, false)))));
+
+        return Stream.of(
+            Arguments.of("accept simple cors", minimal, complete, expectedTrue),
+            Arguments.of("accept full cors", simple, complete, expectedTrue),
+            Arguments.of("reject cors with empty origin", emptyOrigin, complete, expectedFalse),
+            Arguments.of("reject cors with unknown method", unknownMethod, complete, expectedFalse),
+            Arguments.of("reject cors with illegal max age type", illegalMaxAgeType, complete, expectedFalse)
+
+        );
+    }
 
     @Test
     public void test_GET_no_origin(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {

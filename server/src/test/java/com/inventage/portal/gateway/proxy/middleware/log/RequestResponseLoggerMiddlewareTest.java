@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.RequestOptions;
@@ -15,13 +20,35 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(VertxExtension.class)
-public class RequestResponseLoggerMiddlewareTest {
+public class RequestResponseLoggerMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER,
+                    withMiddlewareOpts(JsonObject.of(
+                        RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_FILTER_REGEX, ".*/health.*|.*/ready.*")))));
+
+        final JsonObject minimal = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER)));
+
+        return Stream.of(
+            Arguments.of("accept request response logger middleware", simple, complete, expectedTrue),
+            Arguments.of("accept minimal request response logger middleware", minimal, complete, expectedTrue)
+
+        );
+    }
 
     @Test
     public void decodeJWT() {

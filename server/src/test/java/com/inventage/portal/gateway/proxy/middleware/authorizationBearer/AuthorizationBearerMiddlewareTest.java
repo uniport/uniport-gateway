@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertEquals;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertFalse;
@@ -7,7 +11,9 @@ import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.asse
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertTrue;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.vertx.core.Handler;
@@ -25,13 +31,36 @@ import io.vertx.junit5.VertxTestContext;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class AuthorizationBearerMiddlewareTest {
+public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
 
     String host = "localhost";
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)));
+
+        final JsonObject minimal = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
+                    withMiddlewareOpts(
+                        JsonObject.of(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+
+        return Stream.of(
+            Arguments.of("accept authorization bearer middleware", minimal, complete, expectedTrue),
+            Arguments.of("reject authorization bearer with missing options", missingOptions, complete, expectedFalse)
+
+        );
+    }
 
     /*
     Example of a principal returned by Keycloak after a successfull login:

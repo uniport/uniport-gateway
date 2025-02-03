@@ -1,11 +1,16 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
@@ -35,14 +40,39 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class SessionBagMiddlewareTest {
+public class SessionBagMiddlewareTest extends MiddlewareTestBase {
 
     static final String HOST = "localhost";
     static final String SESSION_COOKIE_NAME = "portal-gateway-test.session";
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject sessionBagHttpMiddlewareWithMissingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG)));
+
+        final JsonObject sessionBagHttpMiddleware = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
+                            JsonObject.of(
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo",
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar")))))));
+
+        return Stream.of(
+            Arguments.of("accept session bag middleware", sessionBagHttpMiddleware, complete, expectedTrue),
+            Arguments.of("reject session bag middleware with missing options", sessionBagHttpMiddlewareWithMissingOptions, complete, expectedFalse)
+
+        );
+    }
 
     @Test
     void cookiesAreRemovedInResponses(Vertx vertx, VertxTestContext testCtx) {

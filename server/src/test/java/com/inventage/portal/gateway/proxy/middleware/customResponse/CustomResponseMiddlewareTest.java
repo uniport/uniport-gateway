@@ -1,15 +1,21 @@
 package com.inventage.portal.gateway.proxy.middleware.customResponse;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.Map;
@@ -20,7 +26,65 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
-public class CustomResponseMiddlewareTest {
+public class CustomResponseMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200,
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, JsonObject.of(
+                            "foo", "bar"))))));
+
+        final JsonObject wrongStatusCodeType = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, "200")))));
+
+        final JsonObject wrongContentType = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, 200,
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+
+        final JsonObject wrongHeaders = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200,
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, JsonObject.of(
+                            "X-FOO", 2))))));
+
+        final JsonObject wrongStatusCodeMin = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 99)))));
+
+        final JsonObject wrongStatusCodeMax = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 600)))));
+
+        return Stream.of(
+            Arguments.of("custom response middleware", simple, complete, expectedTrue),
+            Arguments.of("reject custom response middleware with wrong status code type", wrongStatusCodeType, complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong status code (min)", wrongStatusCodeMin, complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong status code (max)", wrongStatusCodeMax, complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong content type", wrongContentType, complete, expectedFalse),
+            Arguments.of("reject custom response middleware with wrong headers", wrongHeaders, complete, expectedFalse));
+    }
 
     static Stream<Arguments> contentTestData() {
         return Stream.of(

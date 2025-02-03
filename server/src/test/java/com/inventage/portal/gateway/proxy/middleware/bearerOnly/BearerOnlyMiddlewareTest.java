@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,8 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
@@ -16,6 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -23,20 +30,78 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class BearerOnlyMiddlewareTest {
+public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "blub")))));
+
+        final JsonObject invalidPublicKey = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "notbase64*oraurl")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray().add("blub"))))));
+
+        final JsonObject iInvalidPublicKeyFormat = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+
+        final JsonObject invalidAudience = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("valid", 123, true))))));
+
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                            new JsonObject()
+                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")))
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+
+        return Stream.of(
+            Arguments.of("accept bearer only middleware", simple, complete, expectedTrue),
+            Arguments.of("reject bearer only with missing options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject bearer with invalid public key", invalidPublicKey, complete, expectedFalse),
+            Arguments.of("reject bearer with invalid public key format", iInvalidPublicKeyFormat, complete, expectedFalse),
+            Arguments.of("reject bearer with invalid audience", invalidAudience, complete, expectedFalse)
+
+        );
+    }
 
     private static final String HOST = "localhost";
     private static final String PUBLIC_KEY_PATH = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
     private static final String PUBLIC_KEY_ALGORITHM = "RS256";
-    private static final JsonObject VALID_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
+    private static final jakarta.json.JsonObject VALID_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
         .add("typ", "Bearer")
         .add("exp", 1893452400)
         .add("iat", 1627053747)
@@ -90,7 +155,7 @@ public class BearerOnlyMiddlewareTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("iss", "http://malory.issuer:1234/auth/realms/test")
             .build();
 
@@ -118,7 +183,7 @@ public class BearerOnlyMiddlewareTest {
 
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject validPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject validPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("iss", additionalIssuer)
             .build();
 
@@ -145,7 +210,7 @@ public class BearerOnlyMiddlewareTest {
 
         final List<String> expectedAudience = List.of("test-audience");
 
-        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("iss", "http://malory.issuer:1234/auth/realms/test")
             .build();
 
@@ -167,7 +232,7 @@ public class BearerOnlyMiddlewareTest {
     @Test
     public void audienceMismatch(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("aud", "malory-audience")
             .build();
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);

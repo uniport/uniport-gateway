@@ -1,23 +1,48 @@
 package com.inventage.portal.gateway.proxy.middleware.claimToHeader;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class ClaimToHeaderMiddlewareTest {
+public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("claimToHeader", ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
+                    withMiddlewareOpts(
+                        new JsonObject()
+                            .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, "claimPath")
+                            .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, "headerName")))));
+
+        return Stream.of(
+            Arguments.of("accept claimToHeader middleware", simple, complete, expectedTrue)
+
+        );
+    }
 
     @Test
     public void withAuthorizationBearerValue(Vertx vertx, VertxTestContext testCtx) {

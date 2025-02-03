@@ -1,17 +1,23 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertFalse;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertTrue;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -23,7 +29,25 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
-public class HeaderMiddlewareTest {
+public class HeaderMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", HeaderMiddlewareFactory.HEADERS,
+                    withMiddlewareOpts(
+                        JsonObject.of(HeaderMiddlewareFactory.HEADERS_REQUEST, JsonObject.of("foo", "bar"))))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", HeaderMiddlewareFactory.HEADERS)));
+
+        return Stream.of(
+            Arguments.of("valid config", simple, complete, expectedTrue),
+            Arguments.of("invalid config with missing options", missingOptions, complete, expectedFalse));
+    }
 
     @Test
     public void test_redirect_has_custom_response_headers(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {

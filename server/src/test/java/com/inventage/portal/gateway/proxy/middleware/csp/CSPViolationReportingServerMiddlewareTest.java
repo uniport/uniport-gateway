@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -8,6 +12,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
@@ -15,14 +20,45 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(VertxExtension.class)
-class CSPViolationReportingServerMiddlewareTest {
+class CSPViolationReportingServerMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject logLevelTrace = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "TRACE")))));
+
+        final JsonObject logLevelWithWeirdCaps = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "eRroR")))));
+
+        final JsonObject invalidValues = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                    withMiddlewareOpts(new JsonObject().put(
+                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "blub")))));
+
+        return Stream.of(
+            Arguments.of("accept csp violation reporting middleware with log level", logLevelTrace, complete, expectedTrue),
+            Arguments.of("reject csp violation reporting middleware with log level with weird caps", logLevelWithWeirdCaps, complete, expectedFalse),
+            Arguments.of("reject csp violation reporting middleware with invalid log level", invalidValues, complete, expectedFalse)
+
+        );
+    }
 
     @ParameterizedTest
     @ValueSource(strings = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR" })

@@ -1,11 +1,18 @@
 package com.inventage.portal.gateway.proxy.middleware.redirectRegex;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
+
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
@@ -17,7 +24,28 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(VertxExtension.class)
-public class RedirectRegexMiddlewareTest {
+public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX,
+                    withMiddlewareOpts(JsonObject.of(
+                        RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, "^$",
+                        RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT, "foobar")))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX)));
+
+        return Stream.of(
+            Arguments.of("accept redirect regex middleware", simple, complete, expectedTrue),
+            Arguments.of("reject redirect regex middleware with missing options", missingOptions, complete, expectedFalse)
+
+        );
+    }
 
     static Stream<Arguments> redirectTestData() {
         // name, regex, replacement, URL, expectedStatusCode, expectedURL

@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertFalse;
 import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.assertNotNull;
@@ -8,6 +12,7 @@ import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.asse
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -18,14 +23,46 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-class CSPMiddlewareTest {
+class CSPMiddlewareTest extends MiddlewareTestBase {
 
     private static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
     private static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject defaultSrcSelf = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPMiddlewareFactory.CSP,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(CSPMiddlewareFactory.CSP_DIRECTIVES, JsonArray.of(
+                            new JsonObject()
+                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, "default-src")
+                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, JsonArray.of("self"))))))));
+
+        final JsonObject invalidValues = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPMiddlewareFactory.CSP,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(CSPMiddlewareFactory.CSP_DIRECTIVES, JsonArray.of(new JsonObject()
+                            .put(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, "foo")
+                            .put(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, new JsonArray()
+                                .add("valid")
+                                .add(123)
+                                .add(true))))))));
+
+        return Stream.of(
+            Arguments.of("accept csp middleware with default-src=[self]", defaultSrcSelf, complete, expectedTrue),
+            Arguments.of("reject csp middleware with invalid values", invalidValues, complete, expectedFalse)
+
+        );
+    }
 
     @Test
     void checkForCspInHTTPHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
