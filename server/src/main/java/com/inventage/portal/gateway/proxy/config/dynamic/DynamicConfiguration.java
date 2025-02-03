@@ -377,7 +377,7 @@ public class DynamicConfiguration {
                     if (validMiddlewares.failed()) {
                         LOGGER.warn("invalid middleware configuration: {}", validMiddlewares.cause().getMessage());
                     }
-                    if (validMiddlewares.failed()) {
+                    if (validServices.failed()) {
                         LOGGER.warn("invalid service configuration: {}", validServices.cause().getMessage());
                     }
                     return Future.failedFuture("invalid configuration");

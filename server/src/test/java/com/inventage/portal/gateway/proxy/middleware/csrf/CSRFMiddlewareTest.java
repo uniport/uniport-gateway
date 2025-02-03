@@ -1,11 +1,16 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.Vertx;
@@ -13,6 +18,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.CSRFHandler;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -20,12 +26,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-class CSRFMiddlewareTest {
+class CSRFMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSRFMiddlewareFactory.CSRF,
+                    withMiddlewareOpts(JsonObject.of(
+                        CSRFMiddlewareFactory.CSRF_COOKIE, JsonObject.of(
+                            CSRFMiddlewareFactory.CSRF_COOKIE_NAME, "bar",
+                            CSRFMiddlewareFactory.CSRF_COOKIE_PATH, "/abc",
+                            CSRFMiddlewareFactory.CSRF_COOKIE_SECURE, true),
+                        CSRFMiddlewareFactory.CSRF_HEADER_NAME, "X-XSRF-TOKEN",
+                        CSRFMiddlewareFactory.CSRF_NAG_HTTPS, true,
+                        CSRFMiddlewareFactory.CSRF_ORIGIN, "example.com",
+                        CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES, 42)))));
+
+        final JsonObject minimal = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSRFMiddlewareFactory.CSRF)));
+
+        return Stream.of(
+            Arguments.of("valid config", simple, complete, expectedTrue),
+            Arguments.of("minimal config", minimal, complete, expectedTrue));
+    }
 
     @Test
     void receiveCsrfCookieOnGetRequest(Vertx vertx, VertxTestContext testCtx) {

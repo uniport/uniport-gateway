@@ -1,5 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY;
@@ -12,13 +16,17 @@ import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME
 import com.google.common.io.Resources;
 import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -26,21 +34,45 @@ import io.vertx.ext.web.sstore.impl.SharedDataSessionImpl;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-public class BackChannelLogoutMiddlewareTest {
+public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT,
+                    withMiddlewareOpts(JsonObject.of(
+                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                            JsonObject.of(
+                                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=",
+                                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")),
+                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar",
+                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT)));
+
+        return Stream.of(
+            Arguments.of("valid config", simple, complete, expectedTrue),
+            Arguments.of("invalid config with missing options", missingOptions, complete, expectedFalse));
+    }
 
     final String SSO_SID = "d452ed42-33ec-4a59-b110-0aa0280101bc";
     // Token format see: https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
-    final JsonObject VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
+    final jakarta.json.JsonObject VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
         .add("typ", "Logout")
         .add("exp", 1893452400) // expires at (1.1.2023)
         .add("iat", 1627053747) // issued at (23.7.2021)
@@ -177,7 +209,7 @@ public class BackChannelLogoutMiddlewareTest {
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final JsonObject logoutTokenWithoutSubClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithoutSubClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
             .remove("sub")
             .build();
         final String signedLogoutTokenWithoutSubClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithoutSubClaim);
@@ -199,7 +231,7 @@ public class BackChannelLogoutMiddlewareTest {
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final JsonObject logoutTokenWithoutSidClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithoutSidClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
             .remove("sid")
             .build();
         final String signedLogoutTokenWithoutSidClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithoutSidClaim);
@@ -221,7 +253,7 @@ public class BackChannelLogoutMiddlewareTest {
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final JsonObject logoutTokenWithoutEventsClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithoutEventsClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
             .remove("events")
             .build();
         final String signedLogoutTokenWithoutEventsClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithoutEventsClaim);
@@ -243,7 +275,7 @@ public class BackChannelLogoutMiddlewareTest {
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final JsonObject logoutTokenWithIncorrectEventsClaimValue = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithIncorrectEventsClaimValue = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
             .remove("events")
             .add("events", "test")
             .build();
@@ -266,7 +298,7 @@ public class BackChannelLogoutMiddlewareTest {
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final JsonObject logoutTokenWithIncorrectEventsClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithIncorrectEventsClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
             .remove("events")
             .add("events", Json.createObjectBuilder()
                 .add("test", JsonValue.EMPTY_JSON_OBJECT)
@@ -291,7 +323,7 @@ public class BackChannelLogoutMiddlewareTest {
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final JsonObject logoutTokenWithNonceClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithNonceClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
             .add("nonce", "123456")
             .build();
         final String signedLogoutTokenWithNonceClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithNonceClaim);

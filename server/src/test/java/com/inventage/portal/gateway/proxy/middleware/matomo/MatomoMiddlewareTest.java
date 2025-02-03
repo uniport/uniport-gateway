@@ -1,9 +1,14 @@
 package com.inventage.portal.gateway.proxy.middleware.matomo;
 
+import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
+import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import io.vertx.core.MultiMap;
@@ -11,16 +16,40 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
-class MatomoMiddlewareTest {
+class MatomoMiddlewareTest extends MiddlewareTestBase {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Stream<Arguments> provideConfigValidationTestData() {
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO,
+                    withMiddlewareOpts(JsonObject.of(
+                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_ROLES, "$.resource_access.Example.roles",
+                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_GROUP, "$.tenant",
+                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_EMAIL, "$.email",
+                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_USERNAME, "$.preferred_username")))));
+
+        final JsonObject minimal = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO)));
+
+        return Stream.of(
+            Arguments.of("valid config", simple, complete, expectedTrue),
+            Arguments.of("minimal config", minimal, complete, expectedTrue));
+    }
 
     private static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";
     private static final String DEFAULT_JWT_PATH_GROUP = "$.tenant";
