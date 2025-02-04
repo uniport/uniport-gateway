@@ -195,7 +195,7 @@ public final class MiddlewareServerBuilder {
         KeycloakServer mockKeycloakServer,
         String issuer, List<String> audience, JsonArray publicKeys
     ) {
-        return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILATION_INTERVAL_MS));
+        return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JsonObject bearerOnlyConfig) {

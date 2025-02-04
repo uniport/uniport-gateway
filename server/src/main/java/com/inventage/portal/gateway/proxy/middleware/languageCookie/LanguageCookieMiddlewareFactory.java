@@ -33,7 +33,7 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }

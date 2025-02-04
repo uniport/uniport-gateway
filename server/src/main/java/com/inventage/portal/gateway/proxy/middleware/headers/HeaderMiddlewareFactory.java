@@ -10,7 +10,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +33,14 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(HEADERS_REQUEST, Schemas.objectSchema())
-            .property(HEADERS_RESPONSE, Schemas.objectSchema())
+            .optionalProperty(HEADERS_REQUEST, Schemas.objectSchema()
+                .additionalProperties(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .allowAdditionalProperties(false))
+            .optionalProperty(HEADERS_RESPONSE, Schemas.objectSchema()
+                .additionalProperties(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .allowAdditionalProperties(false))
             .allowAdditionalProperties(false);
     }
 
@@ -46,26 +51,12 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             if (requestHeaders.isEmpty()) {
                 return Future.failedFuture(String.format("%s: Empty request headers defined", HEADERS));
             }
-
-            for (Entry<String, Object> entry : requestHeaders) {
-                if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
-                    return Future.failedFuture(String
-                        .format("%s: Request header and value can only be of type string", HEADERS));
-                }
-            }
         }
 
         final JsonObject responseHeaders = options.getJsonObject(HEADERS_RESPONSE);
         if (responseHeaders != null) {
             if (responseHeaders.isEmpty()) {
                 return Future.failedFuture(String.format("%s: Empty response headers defined", HEADERS));
-            }
-
-            for (Entry<String, Object> entry : responseHeaders) {
-                if (entry.getKey() == null || !(entry.getValue() instanceof String)) {
-                    return Future.failedFuture(String
-                        .format("%s: Response header and value can only be of type string", HEADERS));
-                }
             }
         }
 

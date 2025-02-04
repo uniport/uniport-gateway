@@ -20,7 +20,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     // schema
     public static final String SESSION_BAG = "sessionBag";
-    public static final String SESSION_BAG_COOKIE_NAME = "cookieName";
+    public static final String SESSION_BAG_SESSION_COOKIE_NAME = "cookieName";
     public static final String SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
     public static final String SESSION_BAG_WHITELISTED_COOKIE_NAME = "name";
     public static final String SESSION_BAG_WHITELISTED_COOKIE_PATH = "path";
@@ -38,32 +38,20 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(SESSION_BAG_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(SESSION_BAG_SESSION_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema())
+            .requiredProperty(SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema()
+                .items(Schemas.objectSchema()
+                    .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_NAME, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_PATH, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final JsonArray whitelistedCookies = options.getJsonArray(SESSION_BAG_WHITELISTED_COOKIES);
-        if (whitelistedCookies == null) {
-            return Future.failedFuture("No whitelisted cookies defined.");
-        }
-        for (int j = 0; j < whitelistedCookies.size(); j++) {
-            final JsonObject whitelistedCookie = whitelistedCookies.getJsonObject(j);
-            if (!whitelistedCookie.containsKey(SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                || whitelistedCookie.getString(SESSION_BAG_WHITELISTED_COOKIE_NAME)
-                    .isEmpty()) {
-                return Future.failedFuture("whitelisted cookie name has to contain a value");
-            }
-            if (!whitelistedCookie.containsKey(SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                || whitelistedCookie.getString(SESSION_BAG_WHITELISTED_COOKIE_PATH)
-                    .isEmpty()) {
-                return Future.failedFuture("whitelisted cookie path has to contain a value");
-            }
-        }
-
         return Future.succeededFuture();
     }
 
@@ -74,11 +62,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     public Future<Middleware> create(Vertx vertx, String name, JsonObject middlewareOptions) {
         final JsonArray whitelistedCookies = middlewareOptions.getJsonArray(SESSION_BAG_WHITELISTED_COOKIES);
-
-        String sessionCookieName = middlewareOptions.getString(SESSION_BAG_COOKIE_NAME);
-        if (sessionCookieName == null) {
-            sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
-        }
+        final String sessionCookieName = middlewareOptions.getString(SESSION_BAG_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
         LOGGER.info("Created '{}' middleware successfully", SESSION_BAG);
         return Future.succeededFuture(new SessionBagMiddleware(name, whitelistedCookies, sessionCookieName));
     }

@@ -20,6 +20,8 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     public static final String BEARER_ONLY = "bearerOnly";
     public static final String BEARER_ONLY_OPTIONAL = "optional";
 
+    public static final boolean DEFAULT_OPTIONAL = false;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
 
     @Override
@@ -30,7 +32,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
-            .property(BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
+            .optionalProperty(BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH));
     }
 
@@ -42,7 +44,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     @Override
     protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig) {
         final String optionalStr = middlewareConfig.getString(BEARER_ONLY_OPTIONAL);
-        final boolean optional = optionalStr != null ? Boolean.parseBoolean(optionalStr) : false;
+        final boolean optional = optionalStr != null ? Boolean.parseBoolean(optionalStr) : DEFAULT_OPTIONAL;
 
         final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, optional);
         LOGGER.debug("Created '{}' middleware", BEARER_ONLY);

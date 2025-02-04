@@ -30,7 +30,7 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
-            .property(PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
+            .requiredProperty(PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH));
     }
 
@@ -38,10 +38,6 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     public Future<Void> validate(JsonObject options) {
         return super.validate(options)
             .compose(v -> {
-                final String sessionScope = options.getString(PASS_AUTHORIZATION_SESSION_SCOPE);
-                if (sessionScope == null || sessionScope.length() == 0) {
-                    return Future.failedFuture("No session scope defined");
-                }
                 return Future.succeededFuture();
             });
     }

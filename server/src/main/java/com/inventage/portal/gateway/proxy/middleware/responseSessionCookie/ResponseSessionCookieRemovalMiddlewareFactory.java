@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -20,6 +21,8 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     public static final String RESPONSE_SESSION_COOKIE_REMOVAL = "responseSessionCookieRemoval";
     public static final String RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
 
+    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieRemovalMiddlewareFactory.class);
 
     @Override
@@ -30,7 +33,7 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
+            .optionalProperty(RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
@@ -42,7 +45,8 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String sessionCookieName = middlewareConfig.getString(RESPONSE_SESSION_COOKIE_REMOVAL_NAME);
+        final String sessionCookieName = middlewareConfig.getString(RESPONSE_SESSION_COOKIE_REMOVAL_NAME, DEFAULT_SESSION_COOKIE_NAME);
+
         LOGGER.debug("Created '{}' middleware successfully", RESPONSE_SESSION_COOKIE_REMOVAL);
         return Future.succeededFuture(new ResponseSessionCookieRemovalMiddleware(name, sessionCookieName));
     }

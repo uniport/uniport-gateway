@@ -40,13 +40,13 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             // matomo
-            .property(MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
+            .optionalProperty(MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
+            .optionalProperty(MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
+            .optionalProperty(MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
+            .optionalProperty(MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }

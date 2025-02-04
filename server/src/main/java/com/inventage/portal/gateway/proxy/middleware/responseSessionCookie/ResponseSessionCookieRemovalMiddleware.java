@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
@@ -28,8 +27,7 @@ public class ResponseSessionCookieRemovalMiddleware extends TraceMiddleware {
 
     public ResponseSessionCookieRemovalMiddleware(String name, String sessionCookieName) {
         this.name = name;
-        this.sessionCookieName = (sessionCookieName == null) ? SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME
-            : sessionCookieName;
+        this.sessionCookieName = sessionCookieName;
     }
 
     /**

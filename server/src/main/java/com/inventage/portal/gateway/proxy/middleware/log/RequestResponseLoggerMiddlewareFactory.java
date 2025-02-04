@@ -35,7 +35,9 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema())
-            .optionalProperty(REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .optionalProperty(REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema()
+                .items(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
             .optionalProperty(REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, Schemas.booleanSchema())
             .optionalProperty(REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, Schemas.booleanSchema())
             .allowAdditionalProperties(false);

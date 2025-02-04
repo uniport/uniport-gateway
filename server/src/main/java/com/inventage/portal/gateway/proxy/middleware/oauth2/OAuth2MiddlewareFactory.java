@@ -67,56 +67,36 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(OAUTH2_CLIENTID, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_CLIENTID, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(OAUTH2_CLIENTSECRET, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_CLIENTSECRET, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(OAUTH2_DISCOVERYURL, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_DISCOVERYURL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(OAUTH2_RESPONSE_MODE, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
-            .property(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
+            .optionalProperty(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
+            .optionalProperty(OAUTH2_PUBLIC_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
-            .property(OAUTH2_PUBLIC_URL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
-            .property(OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
-                .additionalProperties(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .optionalProperty(OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
+                .items(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
+                .additionalProperties(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
                 .allowAdditionalProperties(true))
-            .property(OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
+            .optionalProperty(OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String clientID = options.getString(OAUTH2_CLIENTID);
-        if (clientID == null || clientID.length() == 0) {
-            return Future.failedFuture("No client ID defined");
-        }
-
-        final String clientSecret = options.getString(OAUTH2_CLIENTSECRET);
-        if (clientSecret == null || clientSecret.length() == 0) {
-            return Future.failedFuture("No client secret defined");
-        }
-
-        final String discoveryUrl = options.getString(OAUTH2_DISCOVERYURL);
-        if (discoveryUrl == null || discoveryUrl.length() == 0) {
-            return Future.failedFuture("No discovery URL defined");
-        }
-
-        final String sessionScope = options.getString(OAUTH2_SESSION_SCOPE);
-        if (sessionScope == null || sessionScope.length() == 0) {
-            return Future.failedFuture("No session scope defined");
-        }
-
         final String responseMode = options.getString(OAUTH2_RESPONSE_MODE);
         if (responseMode == null) {
             LOGGER.debug(String.format("No response mode specified. Use default value: %s", OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
-        } else if (!OIDC_RESPONSE_MODES.contains(responseMode)) {
-            return Future.failedFuture(String.format("response mode '%s' not allowed, must be one of %s", responseMode, OIDC_RESPONSE_MODES));
         }
 
         return Future.succeededFuture();

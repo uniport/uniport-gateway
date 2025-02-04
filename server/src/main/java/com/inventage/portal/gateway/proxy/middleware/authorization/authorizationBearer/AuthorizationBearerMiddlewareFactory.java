@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Factory for {@link AuthorizationBearerMiddleware}.
  */
 public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
 
@@ -29,17 +30,13 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema()
+            .requiredProperty(AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String sessionScope = options.getString(AUTHORIZATION_BEARER_SESSION_SCOPE);
-        if (sessionScope == null || sessionScope.length() == 0) {
-            return Future.failedFuture("No session scope defined");
-        }
         return Future.succeededFuture();
     }
 

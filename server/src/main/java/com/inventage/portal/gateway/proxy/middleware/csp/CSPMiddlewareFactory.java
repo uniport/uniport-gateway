@@ -50,9 +50,16 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(CSP_DIRECTIVES, Schemas.arraySchema())
-            .property(CSP_REPORT_ONLY, Schemas.booleanSchema())
-            .property(CSP_MERGE_STRATEGY, Schemas.stringSchema()
+            .requiredProperty(CSP_DIRECTIVES, Schemas.arraySchema()
+                .items(Schemas.objectSchema()
+                    .requiredProperty(CSP_DIRECTIVE_NAME, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .requiredProperty(CSP_DIRECTIVE_VALUES, Schemas.arraySchema()
+                        .items(Schemas.stringSchema()
+                            .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                    .allowAdditionalProperties(false)))
+            .optionalProperty(CSP_REPORT_ONLY, Schemas.booleanSchema())
+            .optionalProperty(CSP_MERGE_STRATEGY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
             .allowAdditionalProperties(false);
     }
@@ -62,34 +69,27 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
         final JsonArray directives = options.getJsonArray(CSP_DIRECTIVES);
         if (directives == null) {
             return Future.failedFuture("Directive is not defined as JsonObject");
-        } else {
-            boolean hasReportToOrUriDirective = false;
-            for (Object directive : directives) {
-                if (directive instanceof JsonObject) {
-                    final String directiveName = ((JsonObject) directive)
-                        .getString(CSP_DIRECTIVE_NAME);
-                    if (directiveName == null) {
-                        return Future.failedFuture("Directive name is not defined");
-                    }
-                    if (directiveName.equals(CompositeCSPHandler.REPORT_URI) || directiveName.equals(CompositeCSPHandler.REPORT_TO)) {
-                        hasReportToOrUriDirective = true;
-                    }
-                    final JsonArray directiveValues = ((JsonObject) directive)
-                        .getJsonArray(CSP_DIRECTIVE_VALUES);
-                    if (directiveValues == null) {
-                        return Future.failedFuture("Directive values is not defined");
-                    }
-                    for (Object a : directiveValues.getList()) {
-                        if (!(a instanceof String)) {
-                            return Future.failedFuture("Directive values is required to be a list of strings.");
-                        }
-                    }
-                }
+        }
+
+        boolean hasReportToOrUriDirective = false;
+        for (Object d : directives.getList()) {
+            if (!(d instanceof JsonObject)) {
+                return Future.failedFuture("Directive must be a JsonObject");
             }
-            final Boolean reportOnly = options.getBoolean(CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
-            if (reportOnly && !hasReportToOrUriDirective) {
-                return Future.failedFuture("Reporting enabled, but no report-uri or report-to set");
+            final JsonObject directive = (JsonObject) d;
+
+            final String name = directive.getString(CSP_DIRECTIVE_NAME);
+            if (name == null) {
+                return Future.failedFuture("Directive name is not defined");
             }
+            if (name.equals(CompositeCSPHandler.REPORT_URI) || name.equals(CompositeCSPHandler.REPORT_TO)) {
+                hasReportToOrUriDirective = true;
+            }
+        }
+
+        final Boolean reportOnly = options.getBoolean(CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
+        if (reportOnly && !hasReportToOrUriDirective) {
+            return Future.failedFuture("Reporting enabled, but no report-uri or report-to set");
         }
 
         return Future.succeededFuture();

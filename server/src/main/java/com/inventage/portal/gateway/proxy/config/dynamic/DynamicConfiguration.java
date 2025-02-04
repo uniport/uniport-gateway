@@ -70,7 +70,6 @@ public class DynamicConfiguration {
     private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
     private static final String KEYWORD_TYPE = "type";
     private static final String KEYWORD_PATTERN = "pattern";
-    private static final String INT_TYPE = "integer";
     private static final String STRING_TYPE = "string";
     private static final String ENV_VARIABLE_PATTERN = "^\\$\\{.*\\}$";
 
@@ -89,12 +88,12 @@ public class DynamicConfiguration {
         final ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
             .requiredProperty(ROUTER_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
-            .property(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .optionalProperty(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
+            .optionalProperty(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
             .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
-            .property(ROUTER_RULE, Schemas.stringSchema()
+            .requiredProperty(ROUTER_RULE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(ROUTER_PRIORITY, Schemas.intSchema())
+            .optionalProperty(ROUTER_PRIORITY, Schemas.intSchema())
             .allowAdditionalProperties(false);
         return routerSchema;
     }
@@ -107,7 +106,7 @@ public class DynamicConfiguration {
                     .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                     .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
                         .withKeyword(KEYWORD_CONST, factory.provides()))
-                    .property(MIDDLEWARE_OPTIONS, factory.optionsSchema())
+                    .optionalProperty(MIDDLEWARE_OPTIONS, factory.optionsSchema())
                     .allowAdditionalProperties(false);
             })
             .toArray(ObjectSchemaBuilder[]::new);
@@ -123,7 +122,7 @@ public class DynamicConfiguration {
                     .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema())
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                     .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(
-                        Schemas.schema().withKeyword(KEYWORD_TYPE, INT_TYPE),
+                        Schemas.intSchema(),
                         Schemas.schema()
                             .withKeyword(KEYWORD_TYPE, STRING_TYPE)
                             .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN)))
@@ -138,11 +137,11 @@ public class DynamicConfiguration {
         ObjectSchemaBuilder serviceSchema
     ) {
         final ObjectSchemaBuilder httpSchema = Schemas.objectSchema()
-            .property(ROUTERS, Schemas.arraySchema()
+            .optionalProperty(ROUTERS, Schemas.arraySchema()
                 .items(routerSchema))
-            .property(MIDDLEWARES, Schemas.arraySchema()
+            .optionalProperty(MIDDLEWARES, Schemas.arraySchema()
                 .items(Schemas.anyOf(middlewareSchema)))
-            .property(SERVICES, Schemas.arraySchema()
+            .optionalProperty(SERVICES, Schemas.arraySchema()
                 .items(serviceSchema))
             .allowAdditionalProperties(false);
         return httpSchema;

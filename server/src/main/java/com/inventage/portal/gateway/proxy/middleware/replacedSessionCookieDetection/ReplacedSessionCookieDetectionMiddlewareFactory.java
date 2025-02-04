@@ -40,11 +40,11 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
+            .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
-            .property(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, Schemas.intSchema()
+            .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .allowAdditionalProperties(false);
     }
@@ -54,18 +54,12 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
         final Integer waitTimeRetryInMs = options.getInteger(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
         if (waitTimeRetryInMs == null) {
             LOGGER.debug(String.format("No wait time for redirect specified. Use default value: %s", ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS));
-        } else {
-            if (waitTimeRetryInMs <= 0) {
-                return Future.failedFuture("wait time for retry required to be positive");
-            }
         }
-        final Integer maxRetries = options
-            .getInteger(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
+        final Integer maxRetries = options.getInteger(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES);
         if (maxRetries == null) {
             LOGGER.debug(String.format("No max retries for redirect specified. Use default value: %s", ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES));
         }
-        final String detectionCookieName = options
-            .getString(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
+        final String detectionCookieName = options.getString(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
         if (detectionCookieName == null) {
             LOGGER.debug(String.format("No detection cookie name. Use default value: %s", ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME));
         }
@@ -75,7 +69,8 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String sessionCookieName = DEFAULT_SESSION_COOKIE_NAME;
+        final String sessionCookieName = DEFAULT_SESSION_COOKIE_NAME; // not configurable as it must fit
+
         final String detectionCookieName = middlewareConfig.getString(
             REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME,
             DEFAULT_DETECTION_COOKIE_NAME);

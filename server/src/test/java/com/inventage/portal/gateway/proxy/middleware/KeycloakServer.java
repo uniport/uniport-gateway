@@ -234,9 +234,9 @@ public class KeycloakServer {
         config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys);
         config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, issuer);
         config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(audience));
-        config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION, JsonObject.of(
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, reconcilationEnabled,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, reconcilationIntervalMs));
+        config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, JsonObject.of(
+            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, reconcilationEnabled,
+            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, reconcilationIntervalMs));
         config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
         config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
         config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);

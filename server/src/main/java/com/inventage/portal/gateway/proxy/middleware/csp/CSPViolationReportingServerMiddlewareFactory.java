@@ -37,19 +37,13 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
+            .requiredProperty(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.toArray())))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String logLevel = options.getString(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL);
-        if (logLevel != null && !CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.contains(logLevel)) {
-            return Future.failedFuture(String.format("%s: value '%s' not allowed, must be one on %s",
-                CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel, CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS));
-        }
-
         return Future.succeededFuture();
     }
 

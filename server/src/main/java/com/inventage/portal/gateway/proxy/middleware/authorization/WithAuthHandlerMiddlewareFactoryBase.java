@@ -5,7 +5,6 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
-import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.path.PathCompiler;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -49,9 +48,9 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     public static final String WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
     public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
     public static final String WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION = "publicKeysReconcilation";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED = "enabled";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS = "intervalMs";
+    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION = "publicKeysReconcilation";
+    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED = "enabled";
+    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS = "intervalMs";
 
     public static final List<String> AUTH_HANDLER_CLAIM_OPERATORS = List.of(
         WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
@@ -60,33 +59,42 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
 
     // defaults
-    public static final boolean DEFAULT_RECONCILATION_ENABLED_VALUE = true;
-    public static final long DEFAULT_RECONCILATION_INTERVAL_MS = 60_000;
+    public static final boolean DEFAULT_RECONCILIATION_ENABLED_VALUE = true;
+    public static final long DEFAULT_RECONCILIATION_INTERVAL_MS = 60_000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema())
-            .property(WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema()
+            .requiredProperty(WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema()
+                .items(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .requiredProperty(WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
-                    .property(WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.stringSchema()
+                    .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .allowAdditionalProperties(false)))
+            .optionalProperty(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, Schemas.arraySchema()
+                .items(Schemas.stringSchema()
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+            .optionalProperty(WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema()
+                .items(Schemas.objectSchema()
+                    .requiredProperty(WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.stringSchema()
                         .withKeyword(KEYWORD_ENUM, JsonArray.of(AUTH_HANDLER_CLAIM_OPERATORS.toArray())))
-                    .property(WITH_AUTH_HANDLER_CLAIM_PATH, Schemas.stringSchema())
-                    .property(WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())))
-            .property(WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, Schemas.arraySchema().items(Schemas.stringSchema()))
-            .property(WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema())
-            .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION, Schemas.objectSchema()
-                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED, Schemas.booleanSchema())
-                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS, Schemas.intSchema()
-                    .withKeyword(KEYWORD_INT_MIN, INT_MIN)))
+                    .requiredProperty(WITH_AUTH_HANDLER_CLAIM_PATH, Schemas.stringSchema()
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .requiredProperty(WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())
+                    .allowAdditionalProperties(false)))
+            .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, Schemas.objectSchema()
+                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, Schemas.booleanSchema())
+                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
+                    .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+                .allowAdditionalProperties(false))
             .allowAdditionalProperties(false);
     }
 
@@ -143,22 +151,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             }
         }
 
-        final String issuer = options.getString(WITH_AUTH_HANDLER_ISSUER);
-        if (issuer != null && issuer.length() == 0) {
-            return Future.failedFuture("Empty issuer defined");
-        }
-
-        final JsonArray audience = options.getJsonArray(WITH_AUTH_HANDLER_AUDIENCE);
-        if (audience != null) {
-            if (audience.size() == 0) {
-                return Future.failedFuture("Empty audience defined.");
-            }
-            for (Object a : audience.getList()) {
-                if (!(a instanceof String)) {
-                    return Future.failedFuture("Audience is required to be a list of strings.");
-                }
-            }
-        }
         final JsonArray claims = options.getJsonArray(WITH_AUTH_HANDLER_CLAIMS);
         if (claims == null) {
             LOGGER.debug("No custom claims defined!");
@@ -175,47 +167,30 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             }
             if (!(claim instanceof JsonObject)) {
                 return Future.failedFuture("Claim is required to be a JsonObject");
-            } else {
-                final JsonObject cObj = (JsonObject) claim;
-                if (cObj.size() != 3) {
-                    return Future.failedFuture("Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value");
-                }
-                if (!(cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_PATH)
-                    && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_OPERATOR)
-                    && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_VALUE))) {
-                    return Future.failedFuture(String.format(
-                        "Claim is missing at least 1 key. Required keys: %s, %s, %s",
-                        WITH_AUTH_HANDLER_CLAIM_OPERATOR, WITH_AUTH_HANDLER_CLAIM_PATH,
-                        WITH_AUTH_HANDLER_CLAIM_VALUE));
-                }
+            }
 
-                if (cObj.getString(WITH_AUTH_HANDLER_CLAIM_PATH) == null) {
-                    return Future.failedFuture("%s value is required to be a String");
-                } else {
-                    final String path = cObj.getString(WITH_AUTH_HANDLER_CLAIM_PATH);
-                    try {
-                        final Path p = PathCompiler.compile(path);
-                        LOGGER.debug(p.toString());
-                    } catch (RuntimeException e) {
-                        LOGGER.debug(String.format("Invalid claimpath %s", path));
-                        return Future.failedFuture("Invalid claimpath %s");
-                    }
-                }
-                if (cObj.getString(WITH_AUTH_HANDLER_CLAIM_OPERATOR) == null) {
-                    return Future.failedFuture(String.format("%s value is required to be a String", WITH_AUTH_HANDLER_CLAIM_OPERATOR));
-                } else {
-                    final String operator = cObj.getString(WITH_AUTH_HANDLER_CLAIM_OPERATOR);
-                    if (!(operator.equals(WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS)
-                        || operator.equals(WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS))) {
-                        return Future.failedFuture(String.format(
-                            "Lllegal %s: actual operator: %s, allowed operators: %s, %s",
-                            WITH_AUTH_HANDLER_CLAIM_OPERATOR,
-                            operator,
-                            WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS,
-                            WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS));
-                    }
-                }
+            final JsonObject cObj = (JsonObject) claim;
+            if (cObj.size() != 3) {
+                return Future.failedFuture("Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value");
+            }
 
+            if (!(cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_PATH)
+                && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_OPERATOR)
+                && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_VALUE))) {
+                return Future.failedFuture(String.format(
+                    "Claim is missing at least 1 key. Required keys: %s, %s, %s",
+                    WITH_AUTH_HANDLER_CLAIM_OPERATOR,
+                    WITH_AUTH_HANDLER_CLAIM_PATH,
+                    WITH_AUTH_HANDLER_CLAIM_VALUE));
+            }
+
+            final String path = cObj.getString(WITH_AUTH_HANDLER_CLAIM_PATH);
+            try {
+                PathCompiler.compile(path);
+            } catch (RuntimeException e) {
+                final String errMsg = String.format("Invalid claim path %s", path);
+                LOGGER.debug(errMsg);
+                return Future.failedFuture(errMsg);
             }
         }
 
@@ -250,14 +225,14 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final JsonArray additionalIssuers = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS);
 
         final JsonObject publicKeysReconcilation = middlewareConfig.getJsonObject(
-            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION,
-            new JsonObject());
+            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION,
+            JsonObject.of());
         final boolean publicKeysReconcilationEnabled = publicKeysReconcilation.getBoolean(
-            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_ENABLED,
-            DEFAULT_RECONCILATION_ENABLED_VALUE);
+            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED,
+            DEFAULT_RECONCILIATION_ENABLED_VALUE);
         final long publicKeysReconcilationIntervalMs = publicKeysReconcilation.getLong(
-            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILATION_INTERVAL_MS,
-            DEFAULT_RECONCILATION_INTERVAL_MS);
+            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS,
+            DEFAULT_RECONCILIATION_INTERVAL_MS);
 
         final JWTOptions jwtOptions = new JWTOptions();
         if (issuer != null) {

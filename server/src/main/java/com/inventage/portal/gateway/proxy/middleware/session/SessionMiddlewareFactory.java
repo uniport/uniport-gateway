@@ -10,7 +10,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,24 +78,25 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             // session
-            .property(SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
+            .optionalProperty(SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
-            .property(SESSION_ID_MIN_LENGTH, Schemas.intSchema()
+            .optionalProperty(SESSION_ID_MIN_LENGTH, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             // session lifetime
-            .property(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
-            .property(SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
-            .property(SESSION_NAG_HTTPS, Schemas.booleanSchema())
+            .optionalProperty(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
+            .optionalProperty(SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
+            .optionalProperty(SESSION_NAG_HTTPS, Schemas.booleanSchema())
             .optionalProperty(SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             // session cookie
-            .property(SESSION_COOKIE, Schemas.objectSchema()
-                .property(SESSION_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(SESSION_COOKIE, Schemas.objectSchema()
+                .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, INT_MIN))
-                .property(SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
-                .property(SESSION_COOKIE_SECURE, Schemas.booleanSchema())
-                .property(SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray()))))
+                .optionalProperty(SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
+                .optionalProperty(SESSION_COOKIE_SECURE, Schemas.booleanSchema())
+                .optionalProperty(SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
+                    .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray())))
+                .allowAdditionalProperties(false))
             // session store
             .optionalProperty(CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
@@ -105,22 +105,13 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final Integer sessionIdleTimeoutInMinutes = options
-            .getInteger(SESSION_IDLE_TIMEOUT_IN_MINUTES);
+        final Integer sessionIdleTimeoutInMinutes = options.getInteger(SESSION_IDLE_TIMEOUT_IN_MINUTES);
         if (sessionIdleTimeoutInMinutes == null) {
             LOGGER.debug(String.format("Session idle timeout not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE));
-        } else {
-            if (sessionIdleTimeoutInMinutes <= 0) {
-                return Future.failedFuture("Session idle timeout is required to be positive number");
-            }
         }
         final Integer sessionIdMinLength = options.getInteger(SESSION_ID_MIN_LENGTH);
         if (sessionIdMinLength == null) {
             LOGGER.debug(String.format("Minimum session id length not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH));
-        } else {
-            if (sessionIdMinLength <= 0) {
-                return Future.failedFuture(String.format("Minimum session id length is required to be positive number"));
-            }
         }
         final Boolean nagHttps = options.getBoolean(SESSION_NAG_HTTPS);
         if (nagHttps == null) {
@@ -138,6 +129,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         if (uriWithoutSessionTimeoutReset == null) {
             LOGGER.debug("URI without session timeout reset not specified.");
         }
+
         final JsonObject cookie = options.getJsonObject(SESSION_COOKIE);
         if (cookie == null) {
             LOGGER.debug("Cookie settings not specified. Use default setting");
@@ -153,16 +145,6 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
             final String cookieSameSite = cookie.getString(SESSION_COOKIE_SAME_SITE);
             if (cookieSameSite == null) {
                 LOGGER.debug(String.format("Cookie SameSite not specified. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE));
-            } else {
-                try {
-                    CookieSameSite.valueOf(cookieSameSite);
-                } catch (RuntimeException exception) {
-                    final List<String> allowedPolicies = new LinkedList<>();
-                    for (CookieSameSite value : CookieSameSite.values()) {
-                        allowedPolicies.add(value.toString().toUpperCase());
-                    }
-                    return Future.failedFuture(String.format("invalid cookie same site value. Allowed values: %s", allowedPolicies));
-                }
             }
         }
 

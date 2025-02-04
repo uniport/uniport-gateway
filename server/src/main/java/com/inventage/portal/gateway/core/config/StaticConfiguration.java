@@ -81,10 +81,10 @@ public class StaticConfiguration {
                 Schemas.schema()
                     .withKeyword(KEYWORD_TYPE, STRING_TYPE)
                     .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT)))
-            .property(DynamicConfiguration.MIDDLEWARES,
+            .optionalProperty(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema()
                     .items(Schemas.anyOf(DynamicConfiguration.getBuildMiddlewareSchema())))
-            .property(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+            .optionalProperty(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
@@ -102,24 +102,24 @@ public class StaticConfiguration {
         final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
             .requiredProperty(PROVIDER_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(PROVIDER_FILE_FILENAME, Schemas.stringSchema()
+            .optionalProperty(PROVIDER_FILE_FILENAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema()
+            .optionalProperty(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
-            .property(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema()
+            .optionalProperty(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
+            .optionalProperty(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
-            .property(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema()
+            .optionalProperty(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
+            .optionalProperty(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()
+            .optionalProperty(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
-            .property(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
-            .property(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
-            .property(PROVIDERS, Schemas.arraySchema().items(providerSchema));
+            .optionalProperty(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
+            .optionalProperty(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
+            .optionalProperty(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
         return staticConfigBuilder;
     }

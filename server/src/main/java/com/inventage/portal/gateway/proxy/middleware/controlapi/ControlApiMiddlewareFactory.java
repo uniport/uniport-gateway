@@ -43,7 +43,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(CONTROL_API_ACTION, Schemas.stringSchema()
+            .requiredProperty(CONTROL_API_ACTION, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CONTROL_API_ACTIONS.toArray())))
             .optionalProperty(CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
@@ -52,15 +52,6 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String action = options.getString(CONTROL_API_ACTION);
-        if (action == null) {
-            return Future.failedFuture("No control api action defined");
-        }
-
-        if (!MIDDLEWARE_CONTROL_API_ACTIONS.contains(action)) {
-            return Future.failedFuture("Not supported control api action defined.");
-        }
-
         return Future.succeededFuture();
     }
 

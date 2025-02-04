@@ -27,25 +27,15 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
+            .requiredProperty(REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
+            .requiredProperty(REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String regex = options.getString(REPLACE_PATH_REGEX_REGEX);
-        if (regex == null || regex.length() == 0) {
-            return Future.failedFuture("No regex defined");
-        }
-
-        final String replacement = options.getString(REPLACE_PATH_REGEX_REPLACEMENT);
-        if (replacement == null || replacement.length() == 0) {
-            return Future.failedFuture("No replacement defined");
-        }
-
         return Future.succeededFuture();
     }
 

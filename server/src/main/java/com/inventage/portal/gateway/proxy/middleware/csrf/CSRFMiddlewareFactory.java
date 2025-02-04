@@ -37,6 +37,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
     public static final long DEFAULT_TIMEOUT_IN_MINUTES = 15;
     public static final boolean DEFAULT_COOKIE_SECURE = true;
     public static final boolean DEFAULT_NAG_HTTPS = true;
+    public static final String DEFAULT_ORIGIN = null;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareFactory.class);
 
@@ -48,32 +49,28 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .property(CSRF_COOKIE, Schemas.objectSchema()
-                .property(CSRF_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(CSRF_COOKIE, Schemas.objectSchema()
+                .optionalProperty(CSRF_COOKIE_NAME, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-                .property(CSRF_COOKIE_PATH, Schemas.stringSchema()
+                .optionalProperty(CSRF_COOKIE_PATH, Schemas.stringSchema()
                     .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-                .property(CSRF_COOKIE_SECURE, Schemas.booleanSchema()))
-            .property(CSRF_HEADER_NAME, Schemas.stringSchema()
+                .optionalProperty(CSRF_COOKIE_SECURE, Schemas.booleanSchema())
+                .allowAdditionalProperties(false))
+            .optionalProperty(CSRF_HEADER_NAME, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(CSRF_NAG_HTTPS, Schemas.booleanSchema())
-            .property(CSRF_ORIGIN, Schemas.stringSchema()
+            .optionalProperty(CSRF_NAG_HTTPS, Schemas.booleanSchema())
+            .optionalProperty(CSRF_ORIGIN, Schemas.stringSchema()
                 .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
-            .property(CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
+            .optionalProperty(CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .withKeyword(KEYWORD_INT_MIN, INT_MIN))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final Integer timeoutInMinutes = options
-            .getInteger(CSRF_TIMEOUT_IN_MINUTES);
+        final Integer timeoutInMinutes = options.getInteger(CSRF_TIMEOUT_IN_MINUTES);
         if (timeoutInMinutes == null) {
             LOGGER.debug("csrf token timeout not specified. Use default value: %s");
-        } else {
-            if (timeoutInMinutes <= 0) {
-                return Future.failedFuture("csrf token timeout is required to be a positive number");
-            }
         }
         final String origin = options.getString(CSRF_ORIGIN);
         if (origin != null && (origin.isEmpty() || origin.isBlank())) {
@@ -117,7 +114,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         final boolean cookieSecure = cookie.getBoolean(CSRF_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
         final String headerName = middlewareConfig.getString(CSRF_HEADER_NAME, DEFAULT_HEADER_NAME);
         final long timeoutInMinute = middlewareConfig.getLong(CSRF_TIMEOUT_IN_MINUTES, DEFAULT_TIMEOUT_IN_MINUTES);
-        final String origin = middlewareConfig.getString(CSRF_ORIGIN, null);
+        final String origin = middlewareConfig.getString(CSRF_ORIGIN, DEFAULT_ORIGIN);
         final boolean nagHttps = middlewareConfig.getBoolean(CSRF_NAG_HTTPS, DEFAULT_NAG_HTTPS);
 
         LOGGER.info("Created '{}' middleware successfully", CSRF);
