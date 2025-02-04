@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Configures keycloak as the OAuth2 provider. It patches the authorization path to ensure all
- * follow up requests are routed through this application as well, if configured.
+ * follow-up requests are routed through this application as well, if configured.
  */
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
@@ -77,7 +77,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     /**
      * Additional request parameters for the OAuth 2.0 Authentication Request to the Authorization Server.
-     * See https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">AuthRequest</a>
      */
     private JsonObject getAdditionalAuthRequestParams(JsonObject middlewareConfig, String responseMode) {
         JsonObject additionalParameters = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OAUTH2_ADDITIONAL_PARAMETERS);
@@ -100,15 +101,15 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     @SuppressWarnings("unchecked")
     private List<String> getPassthroughParameters(JsonObject middlewareConfig) {
-        final JsonArray passthroughParamaters = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS);
-        if (passthroughParamaters == null) {
+        final JsonArray passthroughParameters = middlewareConfig.getJsonArray(DynamicConfiguration.MIDDLEWARE_OAUTH2_PASSTHROUGH_PARAMETERS);
+        if (passthroughParameters == null) {
             return List.of();
         }
-        return passthroughParamaters.getList();
+        return passthroughParameters.getList();
     }
 
     /**
-     * 
+     *
      * the protocol, hostname or port can be different from what the portal-gateway knows, therefore
      * in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
      * configuration
@@ -122,7 +123,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PROTOCOL_KEY),
             getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_HOSTNAME_KEY));
 
-        // only include port if its not already fixed by the protocol
+        // only include port if it is not already fixed by the protocol
         final String publicPort = getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PORT_KEY);
         if (!publicPort.equals("80") && !publicPort.equals("443")) {
             publicUrl = String.format("%s:%s", publicUrl, publicPort);
@@ -213,7 +214,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     /**
-     * By patching the issuer and the authorization path, ensure that Keycloak is only visible from the outside as runing behind the portal-gateway.
+     * By patching the issuer and the authorization path, ensure that Keycloak is only visible from the outside as running behind the portal-gateway.
      */
     private void patchPublicKeycloakURIs(OAuth2Auth authProvider, String publicUrl) throws URISyntaxException {
         final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();
