@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
@@ -53,10 +55,10 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
             .requiredProperty(CSP_DIRECTIVES, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .requiredProperty(CSP_DIRECTIVE_NAME, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                     .requiredProperty(CSP_DIRECTIVE_VALUES, Schemas.arraySchema()
                         .items(Schemas.stringSchema()
-                            .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                            .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
                     .allowAdditionalProperties(false)))
             .optionalProperty(CSP_REPORT_ONLY, Schemas.booleanSchema())
             .optionalProperty(CSP_MERGE_STRATEGY, Schemas.stringSchema()
@@ -68,19 +70,19 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
     public Future<Void> validate(JsonObject options) {
         final JsonArray directives = options.getJsonArray(CSP_DIRECTIVES);
         if (directives == null) {
-            return Future.failedFuture("Directive is not defined as JsonObject");
+            return Future.failedFuture(new IllegalStateException("Directive is not defined as JsonObject"));
         }
 
         boolean hasReportToOrUriDirective = false;
         for (Object d : directives.getList()) {
             if (!(d instanceof JsonObject)) {
-                return Future.failedFuture("Directive must be a JsonObject");
+                return Future.failedFuture(new IllegalStateException("Directive must be a JsonObject"));
             }
             final JsonObject directive = (JsonObject) d;
 
             final String name = directive.getString(CSP_DIRECTIVE_NAME);
             if (name == null) {
-                return Future.failedFuture("Directive name is not defined");
+                return Future.failedFuture(new IllegalStateException("Directive name is not defined"));
             }
             if (name.equals(CompositeCSPHandler.REPORT_URI) || name.equals(CompositeCSPHandler.REPORT_TO)) {
                 hasReportToOrUriDirective = true;
@@ -89,8 +91,11 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
 
         final Boolean reportOnly = options.getBoolean(CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
         if (reportOnly && !hasReportToOrUriDirective) {
-            return Future.failedFuture("Reporting enabled, but no report-uri or report-to set");
+            return Future.failedFuture("Reporting enabled, but no report-uri or report-to is configured");
         }
+
+        logDefaultIfNotConfigured(LOGGER, options, CSP_REPORT_ONLY, DEFAULT_REPORT_ONLY);
+        logDefaultIfNotConfigured(LOGGER, options, CSP_MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY);
 
         return Future.succeededFuture();
     }

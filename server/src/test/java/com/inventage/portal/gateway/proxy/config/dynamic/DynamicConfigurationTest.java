@@ -496,7 +496,8 @@ public class DynamicConfigurationTest {
                     CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
                     withMiddlewareOpts(
                         JsonObject.of(
-                            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))),
+                            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200,
+                            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")))),
             withServices(
                 withService("sA",
                     withServers(

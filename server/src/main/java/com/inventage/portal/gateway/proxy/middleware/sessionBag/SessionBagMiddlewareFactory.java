@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
@@ -39,19 +41,21 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(SESSION_BAG_SESSION_COOKIE_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .requiredProperty(SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_NAME, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                     .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_PATH, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                     .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        logDefaultIfNotConfigured(LOGGER, options, SESSION_BAG_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
+
         return Future.succeededFuture();
     }
 

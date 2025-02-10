@@ -1,8 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -51,56 +52,36 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             .optionalProperty(CSRF_COOKIE, Schemas.objectSchema()
                 .optionalProperty(CSRF_COOKIE_NAME, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                 .optionalProperty(CSRF_COOKIE_PATH, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                 .optionalProperty(CSRF_COOKIE_SECURE, Schemas.booleanSchema())
                 .allowAdditionalProperties(false))
             .optionalProperty(CSRF_HEADER_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .optionalProperty(CSRF_NAG_HTTPS, Schemas.booleanSchema())
             .optionalProperty(CSRF_ORIGIN, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .optionalProperty(CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, ZERO))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final Integer timeoutInMinutes = options.getInteger(CSRF_TIMEOUT_IN_MINUTES);
-        if (timeoutInMinutes == null) {
-            LOGGER.debug("csrf token timeout not specified. Use default value: %s");
-        }
-        final String origin = options.getString(CSRF_ORIGIN);
-        if (origin != null && (origin.isEmpty() || origin.isBlank())) {
-            return Future.failedFuture("if origin is defined it should not be empty or blank!");
-        }
-        final Boolean nagHttps = options.getBoolean(CSRF_NAG_HTTPS);
-        if (nagHttps == null) {
-            LOGGER.debug(String.format("NagHttps not specified. Use default value: %s", CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
-        }
-        final String headerName = options.getString(CSRF_HEADER_NAME);
-        if (headerName == null) {
-            LOGGER.debug(String.format(": header name not specified. Use default value: %s", CSRFMiddlewareFactory.DEFAULT_HEADER_NAME));
-        }
         final JsonObject cookie = options.getJsonObject(CSRF_COOKIE);
-        if (cookie == null) {
-            LOGGER.debug("%s: Cookie settings not specified. Use default setting");
-        } else {
-            final String cookieName = cookie.getString(CSRF_COOKIE_NAME);
-            if (cookieName == null) {
-                LOGGER.debug(String.format("No session cookie name specified to be removed. Use default value: %s", SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME));
-            }
-            final String cookiePath = cookie.getString(CSRF_COOKIE_PATH);
-            if (cookiePath == null) {
-                LOGGER.debug(String.format("No session cookie name specified to be removed. Use default value: %s", CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME));
-            }
-            final Boolean cookieSecure = cookie.getBoolean(CSRF_COOKIE_SECURE);
-            if (cookieSecure == null) {
-                LOGGER.debug(String.format("No session cookie name specified to be removed. Use default value: %s", CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE));
-            }
+        logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE, String.format("Name=%s, Path=%s, Secure=%s", DEFAULT_COOKIE_NAME, DEFAULT_COOKIE_PATH, DEFAULT_COOKIE_SECURE));
+
+        if (cookie != null) {
+            logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE_NAME, DEFAULT_COOKIE_NAME);
+            logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE_PATH, DEFAULT_COOKIE_PATH);
+            logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
         }
+
+        logDefaultIfNotConfigured(LOGGER, options, CSRF_HEADER_NAME, DEFAULT_HEADER_NAME);
+        logDefaultIfNotConfigured(LOGGER, options, CSRF_TIMEOUT_IN_MINUTES, DEFAULT_TIMEOUT_IN_MINUTES);
+        logDefaultIfNotConfigured(LOGGER, options, CSRF_ORIGIN, DEFAULT_ORIGIN);
+        logDefaultIfNotConfigured(LOGGER, options, CSRF_NAG_HTTPS, DEFAULT_NAG_HTTPS);
 
         return Future.succeededFuture();
     }
@@ -108,7 +89,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final String secret = UUID.randomUUID().toString();
-        final JsonObject cookie = middlewareConfig.getJsonObject(CSRF_COOKIE, new JsonObject());
+        final JsonObject cookie = middlewareConfig.getJsonObject(CSRF_COOKIE, JsonObject.of());
         final String cookieName = cookie.getString(CSRF_COOKIE_NAME, DEFAULT_COOKIE_NAME);
         final String cookiePath = cookie.getString(CSRF_COOKIE_PATH, DEFAULT_COOKIE_PATH);
         final boolean cookieSecure = cookie.getBoolean(CSRF_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);

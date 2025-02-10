@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
@@ -33,11 +35,13 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
             .optionalProperty(BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH));
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE));
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        logDefaultIfNotConfigured(LOGGER, options, BEARER_ONLY_OPTIONAL, DEFAULT_OPTIONAL);
+
         return super.validate(options);
     }
 

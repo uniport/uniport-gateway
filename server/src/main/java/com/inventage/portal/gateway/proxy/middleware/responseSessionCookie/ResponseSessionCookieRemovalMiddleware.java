@@ -34,7 +34,7 @@ public class ResponseSessionCookieRemovalMiddleware extends TraceMiddleware {
      * @param ctx
      */
     public static void addSignal(RoutingContext ctx) {
-        ctx.put(ResponseSessionCookieRemovalMiddleware.REMOVE_SESSION_COOKIE_SIGNAL, new Object());
+        ctx.put(REMOVE_SESSION_COOKIE_SIGNAL, new Object());
     }
 
     @Override

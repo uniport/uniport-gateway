@@ -127,7 +127,7 @@ public final class MiddlewareServerBuilder {
                 SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_HTTP_ONLY,
                 SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SECURE,
                 SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SAME_SITE,
-                SessionMiddlewareFactory.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILISECONDS));
+                SessionMiddlewareFactory.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -284,11 +284,11 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withResponseSessionCookieRemovalMiddleware() {
-        return withMiddleware(new ResponseSessionCookieRemovalMiddleware("responseSessionCookieRemoval", null));
+        return withMiddleware(new ResponseSessionCookieRemovalMiddleware("responseSessionCookieRemoval", DEFAULT_SESSION_COOKIE_NAME));
     }
 
     public MiddlewareServerBuilder withRequestResponseLoggerMiddleware(String uriPatternForIgnoringRequests) {
-        return withMiddleware(new RequestResponseLoggerMiddleware("requestResponseLogger", uriPatternForIgnoringRequests, null, null, null));
+        return withMiddleware(new RequestResponseLoggerMiddleware("requestResponseLogger", uriPatternForIgnoringRequests, null, true, true));
     }
 
     public MiddlewareServerBuilder withAuthenticationTriggerMiddleware() {

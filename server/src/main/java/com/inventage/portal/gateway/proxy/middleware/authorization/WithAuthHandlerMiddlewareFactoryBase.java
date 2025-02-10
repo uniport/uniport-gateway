@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
@@ -69,31 +71,32 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return Schemas.objectSchema()
             .requiredProperty(WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .requiredProperty(WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema()
+                .withKeyword(KEYWORD_ARRAY_MIN_ITEMS, 1)
                 .items(Schemas.objectSchema()
                     .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                     .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                     .allowAdditionalProperties(false)))
             .optionalProperty(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .optionalProperty(WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .requiredProperty(WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.stringSchema()
                         .withKeyword(KEYWORD_ENUM, JsonArray.of(AUTH_HANDLER_CLAIM_OPERATORS.toArray())))
                     .requiredProperty(WITH_AUTH_HANDLER_CLAIM_PATH, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                     .requiredProperty(WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())
                     .allowAdditionalProperties(false)))
             .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, Schemas.objectSchema()
                 .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, Schemas.booleanSchema())
                 .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
-                    .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+                    .withKeyword(KEYWORD_INT_MIN, ZERO))
                 .allowAdditionalProperties(false))
             .allowAdditionalProperties(false);
     }
@@ -102,22 +105,21 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     public Future<Void> validate(JsonObject options) {
         final JsonArray publicKeys = options.getJsonArray(WITH_AUTH_HANDLER_PUBLIC_KEYS);
         if (publicKeys == null || publicKeys.size() == 0) {
-            return Future.failedFuture("No public keys defined");
+            return Future.failedFuture(new IllegalStateException("No public keys defined"));
         }
-
         for (int j = 0; j < publicKeys.size(); j++) {
             final JsonObject pk;
             try {
                 pk = publicKeys.getJsonObject(j);
             } catch (ClassCastException e) {
-                return Future.failedFuture("%s: Invalid publickeys format");
+                return Future.failedFuture(new IllegalStateException("Invalid publickeys format"));
             }
 
             final String publicKey = pk.getString(WITH_AUTH_HANDLER_PUBLIC_KEY);
             if (publicKey == null) {
-                return Future.failedFuture("No public key defined");
+                return Future.failedFuture(new IllegalStateException("No public key defined"));
             } else if (publicKey.length() == 0) {
-                return Future.failedFuture("Empty public key defined");
+                return Future.failedFuture(new IllegalStateException("Empty public key defined"));
             }
 
             // the public key has to be either a valid URL to fetch it from or base64
@@ -147,52 +149,52 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
             final String publicKeyAlgorithm = pk.getString(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM);
             if (isBase64 && publicKeyAlgorithm.length() == 0) {
                 // only needed when the public key is given directly
-                return Future.failedFuture("Invalid public key algorithm");
+                return Future.failedFuture("No public key algorithm");
             }
         }
 
         final JsonArray claims = options.getJsonArray(WITH_AUTH_HANDLER_CLAIMS);
-        if (claims == null) {
-            LOGGER.debug("No custom claims defined!");
-            return Future.succeededFuture();
-        }
-
-        if (claims.size() == 0) {
-            LOGGER.debug("Claims is empty");
-        }
-
-        for (Object claim : claims.getList()) {
-            if (claim instanceof Map) {
-                claim = new JsonObject((Map<String, Object>) claim);
+        if (claims != null) {
+            if (claims.size() == 0) {
+                LOGGER.debug("Claims is empty");
             }
-            if (!(claim instanceof JsonObject)) {
-                return Future.failedFuture("Claim is required to be a JsonObject");
-            }
+            for (Object claim : claims.getList()) {
+                if (claim instanceof Map) {
+                    claim = new JsonObject((Map<String, Object>) claim);
+                }
+                if (!(claim instanceof JsonObject)) {
+                    return Future.failedFuture("Claim is required to be a JsonObject");
+                }
 
-            final JsonObject cObj = (JsonObject) claim;
-            if (cObj.size() != 3) {
-                return Future.failedFuture("Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value");
-            }
+                final JsonObject cObj = (JsonObject) claim;
+                if (cObj.size() != 3) {
+                    return Future.failedFuture("Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value");
+                }
 
-            if (!(cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_PATH)
-                && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_OPERATOR)
-                && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_VALUE))) {
-                return Future.failedFuture(String.format(
-                    "Claim is missing at least 1 key. Required keys: %s, %s, %s",
-                    WITH_AUTH_HANDLER_CLAIM_OPERATOR,
-                    WITH_AUTH_HANDLER_CLAIM_PATH,
-                    WITH_AUTH_HANDLER_CLAIM_VALUE));
-            }
+                if (!(cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_PATH)
+                    && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_OPERATOR)
+                    && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_VALUE))) {
+                    return Future.failedFuture(String.format(
+                        "Claim is missing at least 1 key. Required keys: %s, %s, %s",
+                        WITH_AUTH_HANDLER_CLAIM_OPERATOR,
+                        WITH_AUTH_HANDLER_CLAIM_PATH,
+                        WITH_AUTH_HANDLER_CLAIM_VALUE));
+                }
 
-            final String path = cObj.getString(WITH_AUTH_HANDLER_CLAIM_PATH);
-            try {
-                PathCompiler.compile(path);
-            } catch (RuntimeException e) {
-                final String errMsg = String.format("Invalid claim path %s", path);
-                LOGGER.debug(errMsg);
-                return Future.failedFuture(errMsg);
+                final String path = cObj.getString(WITH_AUTH_HANDLER_CLAIM_PATH);
+                try {
+                    PathCompiler.compile(path);
+                } catch (RuntimeException e) {
+                    final String errMsg = String.format("Invalid claim path %s", path);
+                    LOGGER.debug(errMsg);
+                    return Future.failedFuture(errMsg);
+                }
             }
         }
+
+        logDefaultIfNotConfigured(LOGGER, options, WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, null);
+        logDefaultIfNotConfigured(LOGGER, options, WITH_AUTH_HANDLER_CLAIMS, null);
+        logDefaultIfNotConfigured(LOGGER, options, WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, null);
 
         return Future.succeededFuture();
     }
@@ -224,13 +226,13 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final JsonArray publicKeySources = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_PUBLIC_KEYS);
         final JsonArray additionalIssuers = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS);
 
-        final JsonObject publicKeysReconcilation = middlewareConfig.getJsonObject(
+        final JsonObject publicKeysReconciliation = middlewareConfig.getJsonObject(
             WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION,
             JsonObject.of());
-        final boolean publicKeysReconcilationEnabled = publicKeysReconcilation.getBoolean(
+        final boolean publicKeysReconciliationEnabled = publicKeysReconciliation.getBoolean(
             WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED,
             DEFAULT_RECONCILIATION_ENABLED_VALUE);
-        final long publicKeysReconcilationIntervalMs = publicKeysReconcilation.getLong(
+        final long publicKeysReconciliationIntervalMs = publicKeysReconciliation.getLong(
             WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS,
             DEFAULT_RECONCILIATION_INTERVAL_MS);
 
@@ -261,7 +263,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 final JWTAuthOptions jwtAuthOptions = new JWTAuthOptions(authOpts).setJWTOptions(jwtOptions);
 
                 final JWTAuthPublicKeysReconcilerHandler reconciler = JWTAuthPublicKeysReconcilerHandler.create(
-                    vertx, jwtAuthOptions, additionalIssuersOptions, additionalClaimsOptions, publicKeySources, publicKeysReconcilationEnabled, publicKeysReconcilationIntervalMs);
+                    vertx, jwtAuthOptions, additionalIssuersOptions, additionalClaimsOptions, publicKeySources, publicKeysReconciliationEnabled, publicKeysReconciliationIntervalMs);
 
                 handler.handle(Future.succeededFuture(create(vertx, name, reconciler, middlewareConfig)));
             })

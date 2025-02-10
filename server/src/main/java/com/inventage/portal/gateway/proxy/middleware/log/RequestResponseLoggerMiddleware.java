@@ -39,17 +39,12 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
     private final boolean isLoggingResponseEnabled;
 
-    // Default values if not configured otherwise
-    private static final List<String> DEFAULT_CONTENT_TYPES_TO_LOG = List.of();
-    private static final boolean DEFAULT_LOGGING_REQUEST_ENABLED = true;
-    private static final boolean DEFAULT_LOGGING_RESPONSE_ENABLED = true;
-
-    public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests, List<String> contentTypesToLog, Boolean isLoggingRequestEnabled, Boolean isLoggingResponseEnabled) {
+    public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests, List<String> contentTypesToLog, boolean isLoggingRequestEnabled, boolean isLoggingResponseEnabled) {
         this.name = name;
         this.uriPatternForIgnoringRequests = uriPatternForIgnoringRequests == null ? null : Pattern.compile(uriPatternForIgnoringRequests);
-        this.contentTypesToLog = contentTypesToLog == null ? DEFAULT_CONTENT_TYPES_TO_LOG : contentTypesToLog;
-        this.isLoggingRequestEnabled = isLoggingRequestEnabled == null ? DEFAULT_LOGGING_REQUEST_ENABLED : isLoggingRequestEnabled;
-        this.isLoggingResponseEnabled = isLoggingResponseEnabled == null ? DEFAULT_LOGGING_RESPONSE_ENABLED : isLoggingResponseEnabled;
+        this.contentTypesToLog = contentTypesToLog;
+        this.isLoggingRequestEnabled = isLoggingRequestEnabled;
+        this.isLoggingResponseEnabled = isLoggingResponseEnabled;
     }
 
     @Override

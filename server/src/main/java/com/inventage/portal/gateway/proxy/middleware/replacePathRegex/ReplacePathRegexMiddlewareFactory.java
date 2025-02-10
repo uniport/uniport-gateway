@@ -28,9 +28,9 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .requiredProperty(REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .requiredProperty(REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .allowAdditionalProperties(false);
     }
 

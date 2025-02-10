@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
@@ -51,16 +53,16 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(CORS_ALLOWED_ORIGINS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .optionalProperty(CORS_ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .optionalProperty(CORS_ALLOWED_METHODS, Schemas.arraySchema()
                 .items(Schemas.stringSchema().withKeyword(KEYWORD_ENUM, JsonArray.of(HTTP_METHODS.toArray()))))
             .optionalProperty(CORS_ALLOWED_HEADERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .optionalProperty(CORS_EXPOSED_HEADERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
-            .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, INT_MIN))
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+            .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, ZERO))
             .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema())
             .optionalProperty(CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema())
             .allowAdditionalProperties(false);
@@ -68,6 +70,15 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGINS, allowedOrigins(null));
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGIN_PATTERNS, allowedOriginPatterns(null));
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_METHODS, allowedMethods(null));
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_HEADERS, toSet(null));
+        logDefaultIfNotConfigured(LOGGER, options, CORS_EXPOSED_HEADERS, toSet(null));
+        logDefaultIfNotConfigured(LOGGER, options, CORS_MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
+
         return Future.succeededFuture();
     }
 

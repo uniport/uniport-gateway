@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
@@ -41,28 +43,19 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, ZERO))
             .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, INT_MIN))
+                .withKeyword(KEYWORD_INT_MIN, ZERO))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final Integer waitTimeRetryInMs = options.getInteger(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS);
-        if (waitTimeRetryInMs == null) {
-            LOGGER.debug(String.format("No wait time for redirect specified. Use default value: %s", ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS));
-        }
-        final Integer maxRetries = options.getInteger(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES);
-        if (maxRetries == null) {
-            LOGGER.debug(String.format("No max retries for redirect specified. Use default value: %s", ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES));
-        }
-        final String detectionCookieName = options.getString(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME);
-        if (detectionCookieName == null) {
-            LOGGER.debug(String.format("No detection cookie name. Use default value: %s", ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME));
-        }
+        logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, DEFAULT_DETECTION_COOKIE_NAME);
+        logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, DEFAULT_WAIT_BEFORE_RETRY_MS);
+        logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, DEFAULT_MAX_REDIRECT_RETRIES);
 
         return Future.succeededFuture();
     }

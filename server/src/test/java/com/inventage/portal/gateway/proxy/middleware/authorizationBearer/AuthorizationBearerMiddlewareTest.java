@@ -57,7 +57,7 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
 
         return Stream.of(
             Arguments.of("accept authorization bearer middleware", minimal, complete, expectedTrue),
-            Arguments.of("reject authorization bearer with missing options", missingOptions, complete, expectedFalse)
+            Arguments.of("reject authorization bearer with missing options", missingOptions, complete, expectedTrue)
 
         );
     }

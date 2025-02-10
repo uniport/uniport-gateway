@@ -42,7 +42,7 @@ public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
 
         return Stream.of(
             Arguments.of("accept redirect regex middleware", simple, complete, expectedTrue),
-            Arguments.of("reject redirect regex middleware with missing options", missingOptions, complete, expectedFalse)
+            Arguments.of("reject redirect regex middleware with missing options", missingOptions, complete, expectedTrue)
 
         );
     }

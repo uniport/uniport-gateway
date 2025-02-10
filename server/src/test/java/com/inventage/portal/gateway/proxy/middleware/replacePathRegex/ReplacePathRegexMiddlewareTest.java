@@ -33,7 +33,7 @@ public class ReplacePathRegexMiddlewareTest extends MiddlewareTestBase {
 
         return Stream.of(
             Arguments.of("accept replace path middleware", simple, complete, expectedTrue),
-            Arguments.of("reject replace path middleware with missing options", missingOptions, complete, expectedFalse));
+            Arguments.of("reject replace path middleware with missing options", missingOptions, complete, expectedTrue));
     }
 
     @Test

@@ -21,19 +21,26 @@ public interface MiddlewareFactory {
     Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
     // schema keywords
-    String KEYWORD_ENUM = "enum";
     String KEYWORD_STRING_MIN_LENGTH = "minLength";
-    String KEYWORD_INT_MIN = "minimum";
-    String KEYWORD_INT_MAX = "maximum";
-    int NON_EMPTY_STRING_MIN_LENGTH = 1;
-    int INT_MIN = 0;
-    int HTTP_STATUS_CODE_MIN = 100;
-    int HTTP_STATUS_CODE_MAX = 599;
+    String KEYWORD_OBJECT_MIN_PROPERTIES = "minProperties";
+    String KEYWORD_ARRAY_MIN_ITEMS = "minItems";
+
+    String KEYWORD_ENUM = "enum";
     String KEYWORD_TYPE = "type";
     String KEYWORD_PATTERN = "pattern";
+
+    String KEYWORD_INT_MIN = "minimum";
+    String KEYWORD_INT_MAX = "maximum";
+
     String INT_TYPE = "integer";
     String STRING_TYPE = "string";
     String ENV_VARIABLE_PATTERN = "^\\$\\{.*\\}$";
+
+    int ZERO = 0;
+    int ONE = 1;
+
+    int HTTP_STATUS_CODE_MIN = 100;
+    int HTTP_STATUS_CODE_MAX = 599;
 
     String provides();
 
@@ -42,6 +49,21 @@ public interface MiddlewareFactory {
     Future<Void> validate(JsonObject options);
 
     Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
+
+    /**
+     * A middleware factory commonly needs to validate a middleware configuration and is responsible for setting default values.
+     * This method can be used to log the absence of optional configuration values and what default values are set instead.
+     * 
+     * @param logger
+     * @param name
+     * @param value
+     * @param defaultValue
+     */
+    static void logDefaultIfNotConfigured(Logger logger, JsonObject options, String key, Object defaultValue) {
+        if (!options.containsKey(key)) {
+            logger.debug("No '{}' configured. Using default value: '{}'", key, defaultValue);
+        }
+    }
 
     class Loader {
         public static List<MiddlewareFactory> listFactories() {

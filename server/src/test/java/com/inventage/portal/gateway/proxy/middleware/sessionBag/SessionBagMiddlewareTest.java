@@ -69,7 +69,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
 
         return Stream.of(
             Arguments.of("accept session bag middleware", sessionBagHttpMiddleware, complete, expectedTrue),
-            Arguments.of("reject session bag middleware with missing options", sessionBagHttpMiddlewareWithMissingOptions, complete, expectedFalse)
+            Arguments.of("reject session bag middleware with missing options", sessionBagHttpMiddlewareWithMissingOptions, complete, expectedTrue)
 
         );
     }

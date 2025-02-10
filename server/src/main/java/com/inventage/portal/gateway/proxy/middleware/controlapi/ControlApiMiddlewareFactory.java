@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
@@ -46,19 +48,19 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
             .requiredProperty(CONTROL_API_ACTION, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CONTROL_API_ACTIONS.toArray())))
             .optionalProperty(CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        logDefaultIfNotConfigured(LOGGER, options, CONTROL_API_SESSION_RESET_URL, null);
+
         return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully", CONTROL_API);
-
         if (webClient == null) {
             webClient = WebClient.create(vertx);
         }
@@ -66,6 +68,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
         final String action = middlewareConfig.getString(CONTROL_API_ACTION);
         final String iamSessionResetURI = middlewareConfig.getString(CONTROL_API_SESSION_RESET_URL);
 
+        LOGGER.debug("Created '{}' middleware successfully", CONTROL_API);
         return Future.succeededFuture(new ControlApiMiddleware(vertx, name, ControlApiAction.valueOf(action), iamSessionResetURI, webClient));
     }
 

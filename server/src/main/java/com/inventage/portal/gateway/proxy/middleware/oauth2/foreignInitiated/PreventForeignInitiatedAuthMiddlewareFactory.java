@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2.foreignInitiated;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
@@ -18,6 +20,8 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
     public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
 
+    private static final String DEFAULT_REDIRECT = null;
+
     @Override
     public String provides() {
         return PREVENT_FOREIGN_INITIATED_AUTHENTICATION;
@@ -27,16 +31,13 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String redirect = options.getString(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
-        if (redirect == null) {
-            LOGGER.debug("No URI for redirect specified.");
-        }
+        logDefaultIfNotConfigured(LOGGER, options, PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, DEFAULT_REDIRECT);
 
         return Future.succeededFuture();
     }

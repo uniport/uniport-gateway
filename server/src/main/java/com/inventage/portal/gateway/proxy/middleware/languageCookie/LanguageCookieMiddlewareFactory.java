@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
@@ -34,20 +36,22 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        logDefaultIfNotConfigured(LOGGER, options, LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
+
         return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully",
-            LANGUAGE_COOKIE);
         final String languageCookieName = middlewareConfig.getString(LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
+
+        LOGGER.debug("Created '{}' middleware successfully", LANGUAGE_COOKIE);
         return Future.succeededFuture(new LanguageCookieMiddleware(name, languageCookieName));
     }
 }

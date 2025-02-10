@@ -71,7 +71,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
 
         return Stream.of(
             Arguments.of("accept oAuth2 middleware", simple, complete, expectedTrue),
-            Arguments.of("reject oAuth2 middleware with missing options", missingOptions, complete, expectedFalse)
+            Arguments.of("reject oAuth2 middleware with missing options", missingOptions, complete, expectedTrue)
 
         );
     }

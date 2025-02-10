@@ -57,6 +57,7 @@
                         }
                       },
                       "publicKeys" : {
+                        "minItems" : 1,
                         "type" : "array",
                         "items" : {
                           "additionalProperties" : false,
@@ -149,6 +150,7 @@
                         }
                       },
                       "publicKeys" : {
+                        "minItems" : 1,
                         "type" : "array",
                         "items" : {
                           "additionalProperties" : false,
@@ -511,7 +513,10 @@
                     "type" : "object",
                     "properties" : {
                       "headers" : {
-                        "additionalProperties" : false,
+                        "additionalProperties" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        },
                         "type" : "object"
                       },
                       "content" : {
@@ -560,12 +565,34 @@
                     "type" : "object",
                     "properties" : {
                       "customRequestHeaders" : {
-                        "additionalProperties" : false,
-                        "type" : "object"
+                        "additionalProperties" : {
+                          "anyOf" : [ {
+                            "type" : "string"
+                          }, {
+                            "type" : "array",
+                            "items" : {
+                              "minLength" : 1,
+                              "type" : "string"
+                            }
+                          } ]
+                        },
+                        "type" : "object",
+                        "minProperties" : 1
                       },
                       "customResponseHeaders" : {
-                        "additionalProperties" : false,
-                        "type" : "object"
+                        "additionalProperties" : {
+                          "anyOf" : [ {
+                            "type" : "string"
+                          }, {
+                            "type" : "array",
+                            "items" : {
+                              "minLength" : 1,
+                              "type" : "string"
+                            }
+                          } ]
+                        },
+                        "type" : "object",
+                        "minProperties" : 1
                       }
                     }
                   },
@@ -1073,6 +1100,7 @@
                         }
                       },
                       "publicKeys" : {
+                        "minItems" : 1,
                         "type" : "array",
                         "items" : {
                           "additionalProperties" : false,

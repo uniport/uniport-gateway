@@ -39,8 +39,7 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.debug("Created '{}' middleware successfully",
-            SHOW_SESSION_CONTENT);
+        LOGGER.debug("Created '{}' middleware successfully", SHOW_SESSION_CONTENT);
         return Future.succeededFuture(new ShowSessionContentMiddleware(name));
     }
 

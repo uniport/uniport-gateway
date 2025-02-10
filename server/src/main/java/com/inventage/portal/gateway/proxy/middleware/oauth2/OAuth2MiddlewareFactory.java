@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
+
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
@@ -57,6 +59,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
 
+    // defaults
+    public static final boolean DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW = true;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
     @Override
@@ -68,27 +73,27 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .requiredProperty(OAUTH2_CLIENTID, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .requiredProperty(OAUTH2_CLIENTSECRET, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .requiredProperty(OAUTH2_DISCOVERYURL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .requiredProperty(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.stringSchema()
                 .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
             .optionalProperty(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
             .optionalProperty(OAUTH2_PUBLIC_URL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
             .optionalProperty(OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .optionalProperty(OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
                 .additionalProperties(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
                 .allowAdditionalProperties(true))
             .optionalProperty(OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
             .allowAdditionalProperties(false);
     }
 
@@ -99,12 +104,19 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             LOGGER.debug(String.format("No response mode specified. Use default value: %s", OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
         }
 
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_RESPONSE_MODE, OIDC_RESPONSE_MODE_DEFAULT);
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PUBLIC_URL, "unknown"); // options may not contain PUBLIC_PROTOCOL_KEY/PUBLIC_HOSTNAME_KEY
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_SCOPES, getAdditionalScopes(options));
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_PARAMETERS, getAdditionalAuthRequestParams(options));
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PASSTHROUGH_PARAMETERS, getPassthroughParameters(options));
+
         return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(OAUTH2_PROXY_AUTHENTICATION_FLOW, true);
+        final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
         final String sessionScope = middlewareConfig.getString(OAUTH2_SESSION_SCOPE);
         final String responseMode = middlewareConfig.getString(OAUTH2_RESPONSE_MODE, OIDC_RESPONSE_MODE_DEFAULT);
 
@@ -122,7 +134,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 callbackPath,
                 sessionScope,
                 getAdditionalScopes(middlewareConfig),
-                getAdditionalAuthRequestParams(middlewareConfig, responseMode),
+                getAdditionalAuthRequestParams(middlewareConfig)
+                    .put(OIDC_RESPONSE_MODE, responseMode),
                 getPassthroughParameters(middlewareConfig)))
             .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", OAUTH2))
             .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
@@ -137,10 +150,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      *
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">AuthRequest</a>
      */
-    private JsonObject getAdditionalAuthRequestParams(JsonObject middlewareConfig, String responseMode) {
-        final JsonObject additionalParameters = middlewareConfig.getJsonObject(OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of());
-        return new JsonObject(additionalParameters.getMap())
-            .put(OIDC_RESPONSE_MODE, responseMode);
+    private JsonObject getAdditionalAuthRequestParams(JsonObject middlewareConfig) {
+        return middlewareConfig.getJsonObject(OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of());
     }
 
     @SuppressWarnings("unchecked")
