@@ -49,6 +49,8 @@ containers:
         value: "portal-gateway-headless.ips.svc.cluster.local"
       PORTAL_GATEWAY_ANALYTICS_HOST:
         value: analytics.analytics
+      PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
+        value: "grafana-grafana-service.monitoring.svc.cluster.local"
     storages:
       proxy-config:
         type: configMap
