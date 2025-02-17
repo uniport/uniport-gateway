@@ -182,9 +182,24 @@ public class TestUtils {
         return server -> {
             server.put(DynamicConfiguration.SERVICE_SERVER_HOST, host);
             server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
+
+            JsonObject httpOptions = new JsonObject();
             for (Handler<JsonObject> opt : opts) {
-                opt.handle(server);
+                opt.handle(httpOptions);
             }
+            if (httpOptions.isEmpty()) {
+                return;
+            }
+            server.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS, httpOptions);
+        };
+    }
+
+    public static Handler<JsonObject> withServerHttpOptions(boolean verifyHostname, boolean trustAll, String trustStorePath, String trustStorePassword) {
+        return httpOptions -> {
+            httpOptions.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, verifyHostname);
+            httpOptions.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, trustAll);
+            httpOptions.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, trustStorePath);
+            httpOptions.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, trustStorePassword);
         };
     }
 

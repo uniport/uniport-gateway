@@ -67,6 +67,7 @@ public class DockerContainerProviderTest {
     one container with label port on two services
     */
 
+    @SuppressWarnings("unchecked")
     static Stream<Arguments> defaultRuleTestData() {
         JsonObject record = buildRecord("simple-container",
             withMetadata(withId("abc123"), withName("simple-container"),
@@ -85,10 +86,15 @@ public class DockerContainerProviderTest {
                     }
                 }, //
                 TestUtils.buildConfiguration(
-                    TestUtils.withRouters(TestUtils.withRouter("simple-router", TestUtils.withRouterRule("Host('foo.bar')"),
-                        TestUtils.withRouterService("simple-service"))),
-                    TestUtils.withMiddlewares(), TestUtils.withServices(TestUtils.withService("simple-service",
-                        TestUtils.withServers(TestUtils.withServer("172.0.0.1", 8080)))))//
+                    TestUtils.withRouters(
+                        TestUtils.withRouter("simple-router",
+                            TestUtils.withRouterRule("Host('foo.bar')"),
+                            TestUtils.withRouterService("simple-service"))),
+                    TestUtils.withMiddlewares(),
+                    TestUtils.withServices(
+                        TestUtils.withService("simple-service",
+                            TestUtils.withServers(
+                                TestUtils.withServer("172.0.0.1", 8080)))))//
             ), //
             Arguments.of(//
                 "default rule with service name", //
@@ -100,10 +106,14 @@ public class DockerContainerProviderTest {
                 }, //
                 TestUtils.buildConfiguration(
                     TestUtils.withRouters(
-                        TestUtils.withRouter("simple-router", TestUtils.withRouterRule("Host('simple-container.foo.bar')"),
+                        TestUtils.withRouter("simple-router",
+                            TestUtils.withRouterRule("Host('simple-container.foo.bar')"),
                             TestUtils.withRouterService("simple-service"))),
-                    TestUtils.withMiddlewares(), TestUtils.withServices(TestUtils.withService("simple-service",
-                        TestUtils.withServers(TestUtils.withServer("172.0.0.1", 8080)))))//
+                    TestUtils.withMiddlewares(),
+                    TestUtils.withServices(
+                        TestUtils.withService("simple-service",
+                            TestUtils.withServers(
+                                TestUtils.withServer("172.0.0.1", 8080)))))//
             ), //
             Arguments.of(//
                 "default rule with label", //
@@ -114,10 +124,15 @@ public class DockerContainerProviderTest {
                     }
                 }, //
                 TestUtils.buildConfiguration(
-                    TestUtils.withRouters(TestUtils.withRouter("simple-router",
-                        TestUtils.withRouterRule("Host('true.foo.bar')"), TestUtils.withRouterService("simple-service"))),
-                    TestUtils.withMiddlewares(), TestUtils.withServices(TestUtils.withService("simple-service",
-                        TestUtils.withServers(TestUtils.withServer("172.0.0.1", 8080)))))//
+                    TestUtils.withRouters(
+                        TestUtils.withRouter("simple-router",
+                            TestUtils.withRouterService("simple-service"),
+                            TestUtils.withRouterRule("Host('true.foo.bar')"))),
+                    TestUtils.withMiddlewares(),
+                    TestUtils.withServices(
+                        TestUtils.withService("simple-service",
+                            TestUtils.withServers(
+                                TestUtils.withServer("172.0.0.1", 8080)))))//
             ), //
             Arguments.of(//
                 "default rule template", //
@@ -129,10 +144,14 @@ public class DockerContainerProviderTest {
                 }, //
                 TestUtils.buildConfiguration(
                     TestUtils.withRouters(
-                        TestUtils.withRouter("simple-router", TestUtils.withRouterRule("Host('simple-container')"),
-                            TestUtils.withRouterService("simple-service"))),
-                    TestUtils.withMiddlewares(), TestUtils.withServices(TestUtils.withService("simple-service",
-                        TestUtils.withServers(TestUtils.withServer("172.0.0.1", 8080)))))//
+                        TestUtils.withRouter("simple-router",
+                            TestUtils.withRouterService("simple-service"),
+                            TestUtils.withRouterRule("Host('simple-container')"))),
+                    TestUtils.withMiddlewares(),
+                    TestUtils.withServices(
+                        TestUtils.withService("simple-service",
+                            TestUtils.withServers(
+                                TestUtils.withServer("172.0.0.1", 8080)))))//
             )//
         );//
     }
