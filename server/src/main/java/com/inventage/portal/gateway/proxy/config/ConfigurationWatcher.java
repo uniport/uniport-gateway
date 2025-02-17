@@ -234,11 +234,12 @@ public class ConfigurationWatcher extends AbstractVerticle {
         listenProviders();
         listenConfigurations();
 
-        this.vertx.deployVerticle(this.provider).onComplete(ar -> {
-            startPromise.complete();
-        }).onFailure(err -> {
-            startPromise.fail(err);
-        });
+        this.vertx.deployVerticle(this.provider)
+            .onSuccess(ar -> {
+                startPromise.complete();
+            }).onFailure(err -> {
+                startPromise.fail(err);
+            });
     }
 
     @Override
