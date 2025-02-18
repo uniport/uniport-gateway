@@ -59,9 +59,29 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
                     withMiddlewareOpts(
                         JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_RESET)))));
 
+        final JsonObject invalidAction = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                    withMiddlewareOpts(
+                        JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, "blub")))));
+
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                    withMiddlewareOpts(JsonObject.of()))));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept control api with 'SESSION_TERMINATE' action middleware", sessionTermination, complete, expectedTrue),
-            Arguments.of("accept control api with 'SESSION_RESET' action middleware", sessionReset, complete, expectedTrue)
+            Arguments.of("accept config with 'SESSION_TERMINATE' action", sessionTermination, complete, expectedTrue),
+            Arguments.of("accept config with 'SESSION_RESET' action", sessionReset, complete, expectedTrue),
+            Arguments.of("reject config with invalid action", invalidAction, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

@@ -51,8 +51,8 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
                 withMiddleware("foo", PassAuthorizationMiddlewareFactory.PASS_AUTHORIZATION)));
 
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("invalid config with missing options", missingOptions, complete, expectedFalse));
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse));
     }
 
     @Test

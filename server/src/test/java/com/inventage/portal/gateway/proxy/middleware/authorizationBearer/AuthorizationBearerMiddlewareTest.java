@@ -45,19 +45,32 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
     @Override
     protected Stream<Arguments> provideConfigValidationTestData() {
 
-        final JsonObject missingOptions = buildConfiguration(
-            withMiddlewares(
-                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)));
-
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
                     withMiddlewareOpts(
                         JsonObject.of(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
 
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
+                    withMiddlewareOpts(JsonObject.of()))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept authorization bearer middleware", minimal, complete, expectedTrue),
-            Arguments.of("reject authorization bearer with missing options", missingOptions, complete, expectedTrue)
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

@@ -77,12 +77,24 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
                     withMiddlewareOpts(JsonObject.of(
                         CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, false)))));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
             Arguments.of("accept simple cors", minimal, complete, expectedTrue),
             Arguments.of("accept full cors", simple, complete, expectedTrue),
             Arguments.of("reject cors with empty origin", emptyOrigin, complete, expectedFalse),
             Arguments.of("reject cors with unknown method", unknownMethod, complete, expectedFalse),
-            Arguments.of("reject cors with illegal max age type", illegalMaxAgeType, complete, expectedFalse)
+            Arguments.of("reject cors with illegal max age type", illegalMaxAgeType, complete, expectedFalse),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

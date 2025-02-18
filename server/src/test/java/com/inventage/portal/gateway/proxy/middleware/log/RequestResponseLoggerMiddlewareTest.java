@@ -43,9 +43,21 @@ public class RequestResponseLoggerMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER)));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept request response logger middleware", simple, complete, expectedTrue),
-            Arguments.of("accept minimal request response logger middleware", minimal, complete, expectedTrue)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

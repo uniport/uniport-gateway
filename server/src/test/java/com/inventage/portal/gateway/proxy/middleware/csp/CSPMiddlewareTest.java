@@ -57,9 +57,21 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                                 .add(123)
                                 .add(true))))))));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPMiddlewareFactory.CSP)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPMiddlewareFactory.CSP,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept csp middleware with default-src=[self]", defaultSrcSelf, complete, expectedTrue),
-            Arguments.of("reject csp middleware with invalid values", invalidValues, complete, expectedFalse)
+            Arguments.of("accept config with default-src=[self]", defaultSrcSelf, complete, expectedTrue),
+            Arguments.of("reject config with invalid values", invalidValues, complete, expectedFalse),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

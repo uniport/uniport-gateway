@@ -77,13 +77,34 @@ public class CustomResponseMiddlewareTest extends MiddlewareTestBase {
                         CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
                         CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 600)))));
 
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(JsonObject.of(
+                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
             Arguments.of("custom response middleware", simple, complete, expectedTrue),
             Arguments.of("reject custom response middleware with wrong status code type", wrongStatusCodeType, complete, expectedFalse),
             Arguments.of("reject custom response middleware with wrong status code (min)", wrongStatusCodeMin, complete, expectedFalse),
             Arguments.of("reject custom response middleware with wrong status code (max)", wrongStatusCodeMax, complete, expectedFalse),
             Arguments.of("reject custom response middleware with wrong content type", wrongContentType, complete, expectedFalse),
-            Arguments.of("reject custom response middleware with wrong headers", wrongHeaders, complete, expectedFalse));
+            Arguments.of("reject custom response middleware with wrong headers", wrongHeaders, complete, expectedFalse),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
+
+        );
     }
 
     static Stream<Arguments> contentTestData() {

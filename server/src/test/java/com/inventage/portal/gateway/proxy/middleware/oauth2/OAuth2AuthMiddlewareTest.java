@@ -55,10 +55,6 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     @SuppressWarnings("unchecked")
     @Override
     protected Stream<Arguments> provideConfigValidationTestData() {
-        final JsonObject missingOptions = buildConfiguration(
-            withMiddlewares(
-                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2)));
-
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
@@ -69,9 +65,42 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
                         OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
                         OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
 
+        final JsonObject invalidResponseMode = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                    withMiddlewareOpts(JsonObject.of(
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, "bar",
+                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234",
+                        OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
+                        OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false,
+                        OAuth2MiddlewareFactory.OAUTH2_RESPONSE_MODE, "blub")))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2)));
+
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                    withMiddlewareOpts(JsonObject.of(
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo",
+                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234",
+                        OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
+                        OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                    withMiddlewareOpts(JsonObject.of(
+                        "bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept oAuth2 middleware", simple, complete, expectedTrue),
-            Arguments.of("reject oAuth2 middleware with missing options", missingOptions, complete, expectedTrue)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with invalid response mode", invalidResponseMode, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

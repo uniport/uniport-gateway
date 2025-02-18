@@ -48,9 +48,30 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
             withMiddlewares(
                 withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION)));
 
+        final JsonObject invalidTimeout = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION,
+                    withMiddlewareOpts(JsonObject.of(
+                        ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, -1)))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("minimal config", minimal, complete, expectedTrue));
+            Arguments.of("accept valid config", simple, complete, expectedTrue),
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse),
+            Arguments.of("reject config with invalid timeout", invalidTimeout, complete, expectedFalse)
+
+        );
     }
 
     @Test

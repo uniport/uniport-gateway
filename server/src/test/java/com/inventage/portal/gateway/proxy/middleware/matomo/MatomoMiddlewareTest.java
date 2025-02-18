@@ -46,9 +46,23 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", MatomoMiddlewareFactory.MATOMO)));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("minimal config", minimal, complete, expectedTrue));
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
+
+        );
     }
 
     private static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";

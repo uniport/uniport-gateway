@@ -31,9 +31,25 @@ public class ReplacePathRegexMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX)));
 
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX,
+                    withMiddlewareOpts(JsonObject.of(
+                        ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REGEX, "^$")))));
+
         return Stream.of(
-            Arguments.of("accept replace path middleware", simple, complete, expectedTrue),
-            Arguments.of("reject replace path middleware with missing options", missingOptions, complete, expectedTrue));
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse)
+
+        );
     }
 
     @Test

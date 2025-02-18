@@ -44,9 +44,18 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", HeaderMiddlewareFactory.HEADERS)));
 
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", HeaderMiddlewareFactory.HEADERS,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("invalid config with missing options", missingOptions, complete, expectedFalse));
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with missing options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
+
+        );
     }
 
     @Test

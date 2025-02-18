@@ -40,9 +40,23 @@ public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX)));
 
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX,
+                    withMiddlewareOpts(JsonObject.of(
+                        RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, "^$")))));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept redirect regex middleware", simple, complete, expectedTrue),
-            Arguments.of("reject redirect regex middleware with missing options", missingOptions, complete, expectedTrue)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with missing options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

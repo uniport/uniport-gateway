@@ -54,11 +54,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
     @SuppressWarnings("unchecked")
     @Override
     protected Stream<Arguments> provideConfigValidationTestData() {
-        final JsonObject sessionBagHttpMiddlewareWithMissingOptions = buildConfiguration(
-            withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG)));
-
-        final JsonObject sessionBagHttpMiddleware = buildConfiguration(
+        final JsonObject minimal = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
                     withMiddlewareOpts(JsonObject.of(
@@ -67,9 +63,49 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
                                 SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo",
                                 SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar")))))));
 
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
+                            JsonObject.of(
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo",
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar"),
+                            JsonObject.of(
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "blub",
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/baz")))))));
+
+        final JsonObject missingCookiePath = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
+                            JsonObject.of(
+                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo")))))));
+
+        final JsonObject missingRequiredProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME, "blub")))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept session bag middleware", sessionBagHttpMiddleware, complete, expectedTrue),
-            Arguments.of("reject session bag middleware with missing options", sessionBagHttpMiddlewareWithMissingOptions, complete, expectedTrue)
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with missing cookie path", missingCookiePath, complete, expectedFalse),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

@@ -37,25 +37,37 @@ class CSPViolationReportingServerMiddlewareTest extends MiddlewareTestBase {
         final JsonObject logLevelTrace = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
-                    withMiddlewareOpts(new JsonObject()
-                        .put(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "TRACE")))));
+                    withMiddlewareOpts(JsonObject.of(
+                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "TRACE")))));
 
         final JsonObject logLevelWithWeirdCaps = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
-                    withMiddlewareOpts(new JsonObject()
-                        .put(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "eRroR")))));
+                    withMiddlewareOpts(JsonObject.of(
+                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "eRroR")))));
 
         final JsonObject invalidValues = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
-                    withMiddlewareOpts(new JsonObject().put(
+                    withMiddlewareOpts(JsonObject.of(
                         CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "blub")))));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept csp violation reporting middleware with log level", logLevelTrace, complete, expectedTrue),
-            Arguments.of("reject csp violation reporting middleware with log level with weird caps", logLevelWithWeirdCaps, complete, expectedFalse),
-            Arguments.of("reject csp violation reporting middleware with invalid log level", invalidValues, complete, expectedFalse)
+            Arguments.of("accept config with log level", logLevelTrace, complete, expectedTrue),
+            Arguments.of("reject config with log level with weird caps", logLevelWithWeirdCaps, complete, expectedFalse),
+            Arguments.of("reject config with invalid log level", invalidValues, complete, expectedFalse),
+            Arguments.of("reject config with no options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

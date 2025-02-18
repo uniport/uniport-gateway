@@ -55,9 +55,30 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", CSRFMiddlewareFactory.CSRF)));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSRFMiddlewareFactory.CSRF)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSRFMiddlewareFactory.CSRF,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
+        final JsonObject invalidTimeout = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CSRFMiddlewareFactory.CSRF,
+                    withMiddlewareOpts(
+                        JsonObject.of(CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES, -1)))));
+
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("minimal config", minimal, complete, expectedTrue));
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse),
+            Arguments.of("reject config with invalid timeout", invalidTimeout, complete, expectedFalse)
+
+        );
     }
 
     @Test

@@ -57,36 +57,56 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware(
                     "sessionMiddleware", SessionMiddlewareFactory.SESSION,
-                    withMiddlewareOpts(
-                        new JsonObject()
-                            .put(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
-                            .put(SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32)
-                            .put(SessionMiddlewareFactory.SESSION_NAG_HTTPS, true)
-                            .put(SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*")
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE, new JsonObject()
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session")
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true)
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false)
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15,
+                        SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32,
+                        SessionMiddlewareFactory.SESSION_NAG_HTTPS, true,
+                        SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*",
+                        SessionMiddlewareFactory.SESSION_COOKIE, JsonObject.of(
+                            SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session",
+                            SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true,
+                            SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false,
+                            SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
 
-        final JsonObject minimal = buildConfiguration(
+        final JsonObject invalidTimeout = buildConfiguration(
             withMiddlewares(
                 withMiddleware(
                     "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, -1)))));
+
+        final JsonObject invalidIdLength = buildConfiguration(
+            withMiddlewares(
+                withMiddleware(
+                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, -1)))));
+
+        final JsonObject invalidCookieSameSite = buildConfiguration(
+            withMiddlewares(
+                withMiddleware(
+                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    withMiddlewareOpts(JsonObject.of(
+                        SessionMiddlewareFactory.SESSION_COOKIE, JsonObject.of(
+                            SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "blub"))))));
+
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionMiddlewareFactory.SESSION)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", SessionMiddlewareFactory.SESSION,
                     withMiddlewareOpts(
-                        new JsonObject()
-                            .put(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15)
-                            .put(SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32)
-                            .put(SessionMiddlewareFactory.SESSION_NAG_HTTPS, true)
-                            .put(SessionMiddlewareFactory.SESSION_COOKIE, new JsonObject()
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session")
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true)
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SECURE, false)
-                                .put(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "STRICT"))))));
+                        JsonObject.of("bar", "blub")))));
 
         return Stream.of(
-            Arguments.of("accept session middleware", simple, complete, expectedTrue),
-            Arguments.of("accept minimal session middleware", minimal, complete, expectedTrue)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with invalid timeout", invalidTimeout, complete, expectedFalse),
+            Arguments.of("reject config with invalid id length", invalidIdLength, complete, expectedFalse),
+            Arguments.of("reject config with invalid cookie same site", invalidCookieSameSite, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

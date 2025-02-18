@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.checkRoute;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
@@ -27,12 +28,26 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
     @SuppressWarnings("unchecked")
     @Override
     protected Stream<Arguments> provideConfigValidationTestData() {
-        final JsonObject simple = buildConfiguration(
+        final JsonObject minimal = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", CheckRouteMiddlewareFactory.CHECK_ROUTE)));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CheckRouteMiddlewareFactory.CHECK_ROUTE)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", CheckRouteMiddlewareFactory.CHECK_ROUTE,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue));
+            Arguments.of("accept minimal config", minimal, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
+
+        );
     }
 
     @ParameterizedTest

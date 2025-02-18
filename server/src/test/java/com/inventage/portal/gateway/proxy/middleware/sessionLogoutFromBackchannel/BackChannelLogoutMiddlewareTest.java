@@ -65,9 +65,18 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT)));
 
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("invalid config with missing options", missingOptions, complete, expectedFalse));
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with missing options", missingOptions, complete, expectedFalse),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
+
+        );
     }
 
     final String SSO_SID = "d452ed42-33ec-4a59-b110-0aa0280101bc";

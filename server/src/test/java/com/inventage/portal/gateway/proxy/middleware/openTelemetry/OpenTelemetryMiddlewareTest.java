@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.openTelemetry;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
+import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
@@ -21,8 +22,20 @@ public class OpenTelemetryMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("openTelemetry", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY)));
 
+        final JsonObject missingOptions = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY)));
+
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
-            Arguments.of("accept openTelemetry middleware", simple, complete, expectedTrue)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("accept config with no options", missingOptions, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
 
         );
     }

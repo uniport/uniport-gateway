@@ -44,7 +44,18 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
     @SuppressWarnings("unchecked")
     @Override
     protected Stream<Arguments> provideConfigValidationTestData() {
-        final JsonObject missingOptions = buildConfiguration(
+        final JsonObject simple = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                    withMiddlewareOpts(new JsonObject()
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                            new JsonObject()
+                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
+                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")))
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+
+        final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
                     withMiddlewareOpts(new JsonObject()
@@ -59,7 +70,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                         .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
                         .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray().add("blub"))))));
 
-        final JsonObject iInvalidPublicKeyFormat = buildConfiguration(
+        final JsonObject invalidPublicKeyFormat = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
                     withMiddlewareOpts(new JsonObject()
@@ -77,23 +88,12 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                         .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
                         .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("valid", 123, true))))));
 
-        final JsonObject simple = buildConfiguration(
-            withMiddlewares(
-                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
-                    withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
-                            new JsonObject()
-                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")))
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
-
         return Stream.of(
-            Arguments.of("accept bearer only middleware", simple, complete, expectedTrue),
-            Arguments.of("reject bearer only with missing options", missingOptions, complete, expectedFalse),
-            Arguments.of("reject bearer with invalid public key", invalidPublicKey, complete, expectedFalse),
-            Arguments.of("reject bearer with invalid public key format", iInvalidPublicKeyFormat, complete, expectedFalse),
-            Arguments.of("reject bearer with invalid audience", invalidAudience, complete, expectedFalse)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config with missing required property", missingRequiredProperty, complete, expectedFalse),
+            Arguments.of("reject config with invalid public key", invalidPublicKey, complete, expectedFalse),
+            Arguments.of("reject config with invalid public key format", invalidPublicKeyFormat, complete, expectedFalse),
+            Arguments.of("reject config with invalid audience", invalidAudience, complete, expectedFalse)
 
         );
     }

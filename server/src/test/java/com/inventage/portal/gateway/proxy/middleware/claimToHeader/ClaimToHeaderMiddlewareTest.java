@@ -38,8 +38,22 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
                             .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, "claimPath")
                             .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, "headerName")))));
 
+        final JsonObject missingRequiredPropertyPath = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
+                    withMiddlewareOpts(JsonObject.of(
+                        ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, "blub")))));
+
+        final JsonObject missingRequiredPropertyName = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
+                    withMiddlewareOpts(JsonObject.of(
+                        ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, "blub")))));
+
         return Stream.of(
-            Arguments.of("accept claimToHeader middleware", simple, complete, expectedTrue)
+            Arguments.of("accept simple config", simple, complete, expectedTrue),
+            Arguments.of("reject config missing required property (path)", missingRequiredPropertyPath, complete, expectedFalse),
+            Arguments.of("reject config missing required property (name)", missingRequiredPropertyName, complete, expectedFalse)
 
         );
     }

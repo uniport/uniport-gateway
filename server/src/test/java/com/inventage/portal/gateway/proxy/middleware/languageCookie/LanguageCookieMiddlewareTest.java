@@ -42,9 +42,18 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE)));
 
+        final JsonObject unknownProperty = buildConfiguration(
+            withMiddlewares(
+                withMiddleware("foo", LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE,
+                    withMiddlewareOpts(
+                        JsonObject.of("bar", "blub")))));
+
         return Stream.of(
             Arguments.of("valid config", simple, complete, expectedTrue),
-            Arguments.of("minimal config", minimal, complete, expectedTrue));
+            Arguments.of("minimal config", minimal, complete, expectedTrue),
+            Arguments.of("reject config with unknown property", unknownProperty, complete, expectedFalse)
+
+        );
     }
 
     @Test
