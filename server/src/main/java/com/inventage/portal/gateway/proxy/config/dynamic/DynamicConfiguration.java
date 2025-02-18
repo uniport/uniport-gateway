@@ -99,18 +99,31 @@ public class DynamicConfiguration {
     }
 
     private static ObjectSchemaBuilder[] buildMiddlewareSchema() {
-        final ObjectSchemaBuilder[] middlewareSchema = MiddlewareFactory.Loader.listFactories()
+        final ObjectSchemaBuilder[] middlewareSchemas = MiddlewareFactory.Loader.listFactories()
             .stream()
             .map(factory -> {
-                return Schemas.objectSchema()
+                final ObjectSchemaBuilder optionsSchema = factory.optionsSchema();
+                final boolean optionsHasAtLeastOneRequiredProperty = optionsSchema.getProperties()
+                    .keySet()
+                    .stream()
+                    .anyMatch(keyword -> optionsSchema.isPropertyRequired(keyword));
+
+                final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
                     .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
                     .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
                         .withKeyword(KEYWORD_CONST, factory.provides()))
-                    .optionalProperty(MIDDLEWARE_OPTIONS, factory.optionsSchema())
                     .allowAdditionalProperties(false);
+
+                if (optionsHasAtLeastOneRequiredProperty) {
+                    middlewareSchema.requiredProperty(MIDDLEWARE_OPTIONS, optionsSchema);
+                } else {
+                    middlewareSchema.optionalProperty(MIDDLEWARE_OPTIONS, optionsSchema);
+                }
+
+                return middlewareSchema;
             })
             .toArray(ObjectSchemaBuilder[]::new);
-        return middlewareSchema;
+        return middlewareSchemas;
     }
 
     private static ObjectSchemaBuilder buildServiceSchema() {

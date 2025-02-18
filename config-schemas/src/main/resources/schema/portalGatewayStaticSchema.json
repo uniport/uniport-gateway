@@ -37,7 +37,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -130,7 +130,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -223,7 +223,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -285,7 +285,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -313,7 +313,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -425,7 +425,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -449,7 +449,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -535,7 +535,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -759,7 +759,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -824,7 +824,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -892,7 +892,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -920,7 +920,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -1080,7 +1080,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               }, {
                 "additionalProperties" : false,
                 "type" : "object",
@@ -1169,7 +1169,7 @@
                     "type" : "string"
                   }
                 },
-                "required" : [ "name", "type" ]
+                "required" : [ "name", "options", "type" ]
               } ]
             }
           },
