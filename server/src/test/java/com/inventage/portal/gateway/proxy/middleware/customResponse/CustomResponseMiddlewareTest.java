@@ -5,7 +5,6 @@ import static com.inventage.portal.gateway.TestUtils.withMiddleware;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,10 +108,10 @@ public class CustomResponseMiddlewareTest extends MiddlewareTestBase {
 
     static Stream<Arguments> contentTestData() {
         return Stream.of(
-            Arguments.of("test", "test", 200, (new HeadersMultiMap()).setAll(Map.ofEntries(entry("X-Foo", "bar"), entry("X-Bar", "baz")))),
-            Arguments.of("test", "test", 400, null),
-            Arguments.of("", "", 204, (new HeadersMultiMap()).setAll(Map.ofEntries(entry("X-Bar", "baz")))),
-            Arguments.of(null, "", 204, null));
+            Arguments.of("test", "test", 200, HeadersMultiMap.headers().add("X-Foo", "bar").add("X-Bar", "baz")),
+            Arguments.of("test", "test", 400, HeadersMultiMap.headers()),
+            Arguments.of("", "", 204, HeadersMultiMap.headers().add("X-Bar", "baz")),
+            Arguments.of(null, "", 204, HeadersMultiMap.headers()));
     }
 
     @ParameterizedTest

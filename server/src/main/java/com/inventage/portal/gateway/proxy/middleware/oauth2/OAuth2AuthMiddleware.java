@@ -19,6 +19,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,11 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
     private final String sessionScope;
 
     public OAuth2AuthMiddleware(Vertx vertx, String name, AuthenticationHandler authHandler, String sessionScope) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(authHandler, "authHandler must not be null");
+        Objects.requireNonNull(sessionScope, "sessionScope must not be null");
+
         LOGGER.debug("For session scope '{}'", sessionScope);
         this.name = name;
         this.authHandler = authHandler;

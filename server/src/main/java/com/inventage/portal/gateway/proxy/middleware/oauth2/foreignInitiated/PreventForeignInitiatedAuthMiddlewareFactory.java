@@ -20,7 +20,8 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
     public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
 
-    private static final String DEFAULT_REDIRECT = null;
+    // defaults
+    private static final String DEFAULT_REDIRECT_URI = "/";
 
     @Override
     public String provides() {
@@ -37,15 +38,14 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, DEFAULT_REDIRECT);
-
+        logDefaultIfNotConfigured(LOGGER, options, PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, DEFAULT_REDIRECT_URI);
         return Future.succeededFuture();
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, PREVENT_FOREIGN_INITIATED_AUTHENTICATION);
-        final String redirect = middlewareConfig.getString(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT);
+        final String redirect = middlewareConfig.getString(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, DEFAULT_REDIRECT_URI);
         return Future.succeededFuture(new PreventForeignInitiatedAuthMiddleware(name, redirect));
     }
 }

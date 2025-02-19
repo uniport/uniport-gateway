@@ -4,6 +4,7 @@ import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,9 @@ public class ResponseSessionCookieRemovalMiddleware extends TraceMiddleware {
     private final String sessionCookieName;
 
     public ResponseSessionCookieRemovalMiddleware(String name, String sessionCookieName) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
+
         this.name = name;
         this.sessionCookieName = sessionCookieName;
     }

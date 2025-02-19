@@ -53,6 +53,12 @@ public class ControlApiMiddleware extends TraceMiddleware {
     }
 
     public ControlApiMiddleware(Vertx vertx, String name, final ControlApiAction action, String resetUri, final WebClient webClient) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(action, "action must not be null");
+        Objects.requireNonNull(webClient, "webClient must not be null");
+        // resetUri is allowed to be null
+
         this.vertx = vertx;
         this.name = name;
         this.action = action;

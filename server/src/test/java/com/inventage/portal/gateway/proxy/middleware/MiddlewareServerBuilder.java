@@ -20,6 +20,7 @@ import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiAction
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
@@ -134,28 +135,30 @@ public final class MiddlewareServerBuilder {
         return withCorsMiddleware(List.of(allowedOrigin));
     }
 
+    // (String name, List<String> allowedOrigin, List<String> allowedOriginPattern, Set<HttpMethod> allowedMethods, Set<String> allowedHeaders, Set<String> exposedHeaders, int maxAgeSeconds, boolean allowCredentials, boolean allowPrivateNetwork)
+
     public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, null, -1, false, false));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, List.of(), Set.of(), Set.of(), Set.of(), -1, false, false));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, List<String> allowedOriginPatterns) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, allowedOriginPatterns, null, null, null, -1, false, false));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, allowedOriginPatterns, Set.of(), Set.of(), Set.of(), -1, false, false));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, Set<HttpMethod> allowedMethods, Set<String> allowedHeaders) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, allowedMethods, allowedHeaders, null, -1, false, false));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, List.of(), allowedMethods, allowedHeaders, Set.of(), -1, false, false));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, Set<String> exposedHeaders) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, exposedHeaders, -1, false, false));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, List.of(), Set.of(), Set.of(), exposedHeaders, -1, false, false));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, int maxAge) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, null, maxAge, false, false));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, List.of(), Set.of(), Set.of(), Set.of(), maxAge, false, false));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(List<String> allowedOrigins, boolean allowCredentials) {
-        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, null, null, null, null, -1, allowCredentials, false));
+        return withMiddleware(new CorsMiddleware("cors", allowedOrigins, List.of(), Set.of(), Set.of(), Set.of(), -1, allowCredentials, false));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) {
@@ -218,7 +221,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly) {
-        return withMiddleware(new CSPMiddleware("csp", directives, reportOnly));
+        return withMiddleware(new CSPMiddleware("csp", directives, reportOnly, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY));
     }
 
     public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
@@ -235,7 +238,7 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
-            new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, null, CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE, headerName, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES, null, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
+            new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, "/", CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE, headerName, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES, null, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
     }
 
     public MiddlewareServerBuilder withHeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
@@ -288,7 +291,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withRequestResponseLoggerMiddleware(String uriPatternForIgnoringRequests) {
-        return withMiddleware(new RequestResponseLoggerMiddleware("requestResponseLogger", uriPatternForIgnoringRequests, null, true, true));
+        return withMiddleware(new RequestResponseLoggerMiddleware("requestResponseLogger", uriPatternForIgnoringRequests, List.of(), true, true));
     }
 
     public MiddlewareServerBuilder withAuthenticationTriggerMiddleware() {

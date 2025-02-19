@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,9 @@ public class BearerOnlyMiddleware extends TraceMiddleware {
     private final boolean optional;
 
     public BearerOnlyMiddleware(String name, AuthenticationHandler authHandler, boolean optional) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(authHandler, "authHandler must not be null");
+
         this.name = name;
         this.authHandler = authHandler;
 

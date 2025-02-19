@@ -6,6 +6,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,10 @@ public class ClaimToHeaderMiddleware extends TraceMiddleware {
      *            name of the HTTP header to be set
      */
     public ClaimToHeaderMiddleware(String name, String claimPath, String headerName) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(claimPath, "claimPath must not be null");
+        Objects.requireNonNull(headerName, "headerName must not be null");
+
         this.name = name;
         this.claimPath = claimPath;
         this.headerName = headerName;

@@ -13,6 +13,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,17 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
     private final boolean isLoggingResponseEnabled;
 
-    public RequestResponseLoggerMiddleware(String name, String uriPatternForIgnoringRequests, List<String> contentTypesToLog, boolean isLoggingRequestEnabled, boolean isLoggingResponseEnabled) {
+    public RequestResponseLoggerMiddleware(
+        String name,
+        String uriPatternForIgnoringRequests,
+        List<String> contentTypesToLog,
+        boolean isLoggingRequestEnabled,
+        boolean isLoggingResponseEnabled
+    ) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(contentTypesToLog, "contentTypesToLog must not be null");
+        // uriPatternForIgnoringRequests is allowed to be null
+
         this.name = name;
         this.uriPatternForIgnoringRequests = uriPatternForIgnoringRequests == null ? null : Pattern.compile(uriPatternForIgnoringRequests);
         this.contentTypesToLog = contentTypesToLog;
@@ -174,10 +185,10 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
         final HttpServerRequest request = routingContext.request();
         long contentLength = 0;
-        final Object obj = request.headers().get("content-length");
-        if (obj != null) {
+        final String contentLengthStr = request.headers().get("content-length");
+        if (contentLengthStr != null) {
             try {
-                contentLength = Long.parseLong(obj.toString());
+                contentLength = Long.parseLong(contentLengthStr);
             } catch (NumberFormatException e) {
                 // ignore it and continue
             }

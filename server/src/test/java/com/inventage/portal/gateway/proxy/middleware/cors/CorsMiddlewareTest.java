@@ -153,7 +153,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void test_GET_origin_allowed_pattern(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         portalGateway(vertx, host, testCtx)
-            .withCorsMiddleware(null, List.of("http://(a|b).example.com"))
+            .withCorsMiddleware(List.of(), List.of("http://(a|b).example.com"))
             .build().start()
             // when
             .incomingRequest(HttpMethod.GET, "/",
@@ -189,7 +189,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void test_GET_all_allowed_pattern(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         portalGateway(vertx, host, testCtx)
-            .withCorsMiddleware(null, List.of(".*"))
+            .withCorsMiddleware(List.of(), List.of(".*"))
             .build().start()
             // when
             .incomingRequest(HttpMethod.GET, "/",
@@ -224,7 +224,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void test_GET_origin_not_allowed_pattern(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         portalGateway(vertx, host, testCtx)
-            .withCorsMiddleware(null, List.of("http://(a|b).example.com"))
+            .withCorsMiddleware(List.of(), List.of("http://(a|b).example.com"))
             .build().start()
             // when
             .incomingRequest(HttpMethod.GET, "/",
@@ -344,7 +344,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 Set.of(HttpMethod.GET, HttpMethod.POST),
-                null)
+                Set.of())
             .build().start()
             // when
             .incomingRequest(HttpMethod.OPTIONS, "/",
@@ -391,7 +391,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 Set.of(HttpMethod.GET),
-                null)
+                Set.of())
             .build().start()
             // when
             .incomingRequest(HttpMethod.OPTIONS, "/",

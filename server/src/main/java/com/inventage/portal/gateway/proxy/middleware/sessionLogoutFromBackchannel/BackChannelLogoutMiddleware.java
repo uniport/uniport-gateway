@@ -25,6 +25,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.sstore.SessionStore;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +65,10 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
      *            the URI path, which should be used as the backchannel logout request
      */
     public BackChannelLogoutMiddleware(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(authHandler, "authHandler must not be null");
+
         this.name = name;
         this.jwkFetcher = authHandler;
 

@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Map;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,26 +17,29 @@ public class CustomResponseMiddleware extends TraceMiddleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomResponseMiddleware.class);
 
     private final String name;
-    private final String content;
     private final Integer statusCode;
     private final MultiMap headers;
+    private final String content;
 
     public CustomResponseMiddleware(String name, String content, Integer statusCode, MultiMap headers) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(statusCode, "statusCode must not be null");
+        Objects.requireNonNull(headers, "headers must not be null");
+        // content is allowed to be null
+
         this.name = name;
-        this.content = content;
         this.statusCode = statusCode;
         this.headers = headers;
+        this.content = content;
     }
 
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        if (this.headers != null) {
-            for (Map.Entry<String, String> header : this.headers.entries()) {
-                LOGGER.debug("Setting response header '{}:{}'", header.getKey(), header.getValue());
-                ctx.response().headers().add(header.getKey(), header.getValue());
-            }
+        for (Map.Entry<String, String> header : this.headers.entries()) {
+            LOGGER.debug("Setting response header '{}:{}'", header.getKey(), header.getValue());
+            ctx.response().headers().add(header.getKey(), header.getValue());
         }
 
         ctx.response().setStatusCode(this.statusCode);

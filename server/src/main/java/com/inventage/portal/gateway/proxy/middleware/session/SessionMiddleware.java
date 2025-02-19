@@ -18,6 +18,7 @@ import io.vertx.ext.web.sstore.ClusteredSessionStore;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +121,16 @@ public class SessionMiddleware extends TraceMiddleware {
         // session store
         int clusteredSessionStoreRetryTimeoutMiliSeconds
     ) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
+        Objects.requireNonNull(sessionCookieSameSite, "sessionCookieSameSite must not be null");
+        Objects.requireNonNull(lifetimeHeaderName, "lifetimeHeaderName must not be null");
+        Objects.requireNonNull(lifetimeCookieName, "lifetimeCookieName must not be null");
+        Objects.requireNonNull(lifetimeCookiePath, "lifetimeCookiePath must not be null");
+        Objects.requireNonNull(lifetimeCookieSameSite, "lifetimeCookieSameSite must not be null");
+        // uriWithoutSessionIdleTimeoutReset is allowed to be null
+
         this.name = name;
         this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MINUTE_MS;
         this.uriPatternForIgnoringSessionTimeoutReset = uriWithoutSessionIdleTimeoutReset == null ? null : Pattern.compile(uriWithoutSessionIdleTimeoutReset);

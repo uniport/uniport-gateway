@@ -5,6 +5,7 @@ import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,8 @@ public class CheckRouteMiddleware extends TraceMiddleware {
     private final String name;
 
     public CheckRouteMiddleware(String name) {
+        Objects.requireNonNull(name, "name must not be null");
+
         this.name = name;
     }
 

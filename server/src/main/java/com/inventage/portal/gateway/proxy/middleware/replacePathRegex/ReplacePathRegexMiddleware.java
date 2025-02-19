@@ -4,6 +4,7 @@ import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,10 @@ public class ReplacePathRegexMiddleware extends TraceMiddleware {
     private final String replacement;
 
     public ReplacePathRegexMiddleware(String name, String regex, String replacement) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(regex, "regex must not be null");
+        Objects.requireNonNull(replacement, "replacement must not be null");
+
         this.name = name;
         this.pattern = Pattern.compile(regex);
         this.replacement = replacement;

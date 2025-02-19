@@ -16,10 +16,14 @@ import org.slf4j.LoggerFactory;
  */
 public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddlewareFactory.class);
+
     // schema
     public static final String SHOW_SESSION_CONTENT = "_session_";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShowSessionContentMiddlewareFactory.class);
+    // defaults
+    private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
+    private static final String DEFAULT_INSTANCE_NAME = "unknown";
 
     @Override
     public String provides() {
@@ -40,7 +44,9 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         LOGGER.debug("Created '{}' middleware successfully", SHOW_SESSION_CONTENT);
-        return Future.succeededFuture(new ShowSessionContentMiddleware(name));
+
+        final String instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);
+        return Future.succeededFuture(new ShowSessionContentMiddleware(name, instanceName));
     }
 
 }

@@ -21,6 +21,7 @@ import io.vertx.httpproxy.ProxyInterceptor;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,15 @@ public class ProxyMiddleware extends TraceMiddleware {
         String httpsTrustStorePath,
         String httpsTrustStorePassword
     ) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(serverHost, "serverHost must not be null");
+        Objects.requireNonNull(serverProtocol, "serverProtocol must not be null");
+        Objects.requireNonNull(httpsTrustAll, "httpsTrustAll must not be null");
+        Objects.requireNonNull(httpsVerifyHostname, "httpsVerifyHostname must not be null");
+        // httpsTrustStorePath is allowed to be null
+        // httpsTrustStorePassword is allowed to be null
+
         this.name = name;
         this.serverHost = serverHost;
         this.serverPort = serverPort;

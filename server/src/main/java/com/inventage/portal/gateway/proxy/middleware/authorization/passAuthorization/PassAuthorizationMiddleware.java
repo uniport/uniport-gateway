@@ -6,6 +6,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,8 @@ public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
 
     public PassAuthorizationMiddleware(Vertx vertx, String name, String sessionScope, AuthenticationHandler authHandler) {
         super(vertx, name, sessionScope);
+
+        Objects.requireNonNull(authHandler, "authHandler must not be null");
         this.authHandler = authHandler;
     }
 

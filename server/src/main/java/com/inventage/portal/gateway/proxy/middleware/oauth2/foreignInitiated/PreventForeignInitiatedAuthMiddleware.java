@@ -5,6 +5,7 @@ import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,22 +21,23 @@ public class PreventForeignInitiatedAuthMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreventForeignInitiatedAuthMiddleware.class);
 
-    private static final String DEFAULT_REDIRECT_URI = "/";
-
     private final String name;
 
-    private final String fallbackURI;
+    private final String redirectURI;
 
-    public PreventForeignInitiatedAuthMiddleware(String name, String fallbackURI) {
+    public PreventForeignInitiatedAuthMiddleware(String name, String redirectURI) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(redirectURI, "redirectURI must not be null");
+
         this.name = name;
-        this.fallbackURI = fallbackURI != null ? fallbackURI : DEFAULT_REDIRECT_URI;
+        this.redirectURI = redirectURI;
     }
 
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         if (isAuthenticationRequestInitiatedByForeign(ctx)) {
             LOGGER.warn("foreign authentication request detected for '{}' in '{}'", ctx.request().uri(), name);
-            HttpResponder.respondWithRedirect(fallbackURI, ctx);
+            HttpResponder.respondWithRedirect(redirectURI, ctx);
             return;
         }
         ctx.next();

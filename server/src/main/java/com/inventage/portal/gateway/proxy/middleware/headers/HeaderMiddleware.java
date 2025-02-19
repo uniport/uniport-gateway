@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Map.Entry;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,10 @@ public class HeaderMiddleware extends TraceMiddleware {
     private final MultiMap responseHeaderModifiers;
 
     public HeaderMiddleware(String name, MultiMap requestHeaders, MultiMap responseHeaders) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(requestHeaders, "requestHeaders must not be null");
+        Objects.requireNonNull(responseHeaders, "responseHeaders must not be null");
+
         this.name = name;
         this.requestHeaderModifiers = requestHeaders;
         this.responseHeaderModifiers = responseHeaders;

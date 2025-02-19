@@ -12,6 +12,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.PlatformHandler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -44,6 +45,10 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     private final String sessionCookieName;
 
     public SessionBagMiddleware(String name, JsonArray whitelistedCookies, String sessionCookieName) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(whitelistedCookies, "whitelistedCookies must not be null");
+        Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
+
         this.name = name;
         this.whitelistedCookies = new JsonArray(whitelistedCookies.getList());
         this.sessionCookieName = sessionCookieName;

@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -30,12 +31,12 @@ public class ShowSessionContentMiddleware extends TraceMiddleware {
     private final String name;
     private final String instanceName;
 
-    private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
-    private static final String DEFAULT_INSTANCE_NAME = "unknown";
+    public ShowSessionContentMiddleware(String name, String instanceName) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(instanceName, "instanceName must not be null");
 
-    public ShowSessionContentMiddleware(String name) {
         this.name = name;
-        this.instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);
+        this.instanceName = instanceName;
     }
 
     @Override

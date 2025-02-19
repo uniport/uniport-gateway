@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,22 +36,29 @@ public class CorsMiddleware extends TraceMiddleware {
         boolean allowCredentials,
         boolean allowPrivateNetwork
     ) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(allowedOrigin, "allowedOrigin must not be null");
+        Objects.requireNonNull(allowedOriginPattern, "allowedOriginPattern must not be null");
+        Objects.requireNonNull(allowedMethods, "allowedMethods must not be null");
+        Objects.requireNonNull(allowedHeaders, "allowedHeaders must not be null");
+        Objects.requireNonNull(exposedHeaders, "exposedHeaders must not be null");
+
         this.name = name;
         this.corsHandler = CorsHandler.create();
 
-        if (allowedOrigin != null && !allowedOrigin.isEmpty()) {
+        if (!allowedOrigin.isEmpty()) {
             corsHandler.addOrigins(allowedOrigin);
         }
-        if (allowedOriginPattern != null && !allowedOriginPattern.isEmpty()) {
+        if (!allowedOriginPattern.isEmpty()) {
             corsHandler.addRelativeOrigins(allowedOriginPattern);
         }
-        if (allowedMethods != null && !allowedMethods.isEmpty()) {
+        if (!allowedMethods.isEmpty()) {
             corsHandler.allowedMethods(allowedMethods);
         }
-        if (allowedHeaders != null && !allowedHeaders.isEmpty()) {
+        if (!allowedHeaders.isEmpty()) {
             corsHandler.allowedHeaders(allowedHeaders);
         }
-        if (exposedHeaders != null && !exposedHeaders.isEmpty()) {
+        if (!exposedHeaders.isEmpty()) {
             corsHandler.exposedHeaders(exposedHeaders);
         }
 

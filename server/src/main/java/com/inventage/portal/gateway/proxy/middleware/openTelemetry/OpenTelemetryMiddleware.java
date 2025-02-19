@@ -5,6 +5,7 @@ import com.inventage.portal.gateway.proxy.middleware.log.ContextualDataAdapter;
 import com.inventage.portal.gateway.proxy.middleware.log.SessionAdapter;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,8 @@ public class OpenTelemetryMiddleware extends TraceMiddleware {
 
     private final String name;
 
-    /**
-     */
     public OpenTelemetryMiddleware(String name) {
+        Objects.requireNonNull(name, "name must not be null");
         this.name = name;
     }
 

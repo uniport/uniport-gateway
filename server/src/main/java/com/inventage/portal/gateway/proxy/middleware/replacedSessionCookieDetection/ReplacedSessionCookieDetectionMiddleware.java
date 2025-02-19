@@ -12,6 +12,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,10 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         int waitBeforeRetryInMs,
         int maxRedirectRetries
     ) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(detectionCookieName, "detectionCookieName must not be null");
+        Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
+
         this.name = name;
         this.detectionCookieName = detectionCookieName;
         this.sessionCookieName = sessionCookieName;

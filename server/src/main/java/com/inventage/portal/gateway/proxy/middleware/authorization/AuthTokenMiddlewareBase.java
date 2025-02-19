@@ -11,6 +11,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Session;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,10 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
     protected final String sessionScope;
 
     protected AuthTokenMiddlewareBase(Vertx vertx, String name, String sessionScope) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(sessionScope, "sessionScope must not be null");
+
         this.vertx = vertx;
         this.name = name;
         this.sessionScope = sessionScope;

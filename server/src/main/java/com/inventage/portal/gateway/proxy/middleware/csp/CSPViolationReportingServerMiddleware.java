@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -21,6 +22,9 @@ public class CSPViolationReportingServerMiddleware extends TraceMiddleware {
     private final Level level;
 
     public CSPViolationReportingServerMiddleware(final String name, final Level level) {
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(level, "level must not be null");
+
         this.name = name;
         this.level = level;
     }
