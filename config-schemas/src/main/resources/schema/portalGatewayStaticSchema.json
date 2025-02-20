@@ -79,10 +79,12 @@
                         "type" : "object",
                         "properties" : {
                           "intervalMs" : {
+                            "default" : 60000,
                             "type" : "integer",
                             "minimum" : 0.0
                           },
                           "enabled" : {
+                            "default" : true,
                             "type" : "boolean"
                           }
                         }
@@ -113,6 +115,7 @@
                         }
                       },
                       "optional" : {
+                        "default" : false,
                         "minLength" : 1,
                         "type" : "string"
                       },
@@ -170,10 +173,12 @@
                         "type" : "object",
                         "properties" : {
                           "intervalMs" : {
+                            "default" : 60000,
                             "type" : "integer",
                             "minimum" : 0.0
                           },
                           "enabled" : {
+                            "default" : true,
                             "type" : "boolean"
                           }
                         }
@@ -316,6 +321,7 @@
                     "type" : "object",
                     "properties" : {
                       "allowPrivateNetwork" : {
+                        "default" : false,
                         "type" : "boolean"
                       },
                       "allowedOrigins" : {
@@ -357,6 +363,7 @@
                         "minimum" : 0.0
                       },
                       "allowCredentials" : {
+                        "default" : false,
                         "type" : "boolean"
                       }
                     }
@@ -378,6 +385,7 @@
                     "type" : "object",
                     "properties" : {
                       "mergeStrategy" : {
+                        "default" : "UNION",
                         "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
                       },
                       "policyDirectives" : {
@@ -402,6 +410,7 @@
                         }
                       },
                       "reportOnly" : {
+                        "default" : false,
                         "type" : "boolean"
                       }
                     },
@@ -446,6 +455,7 @@
                     "type" : "object",
                     "properties" : {
                       "headerName" : {
+                        "default" : "X-XSRF-TOKEN",
                         "minLength" : 1,
                         "type" : "string"
                       },
@@ -454,14 +464,17 @@
                         "type" : "object",
                         "properties" : {
                           "path" : {
+                            "default" : "/",
                             "minLength" : 1,
                             "type" : "string"
                           },
                           "name" : {
+                            "default" : "XSRF-TOKEN",
                             "minLength" : 1,
                             "type" : "string"
                           },
                           "secure" : {
+                            "default" : true,
                             "type" : "boolean"
                           }
                         }
@@ -471,9 +484,11 @@
                         "type" : "string"
                       },
                       "nagHttps" : {
+                        "default" : true,
                         "type" : "boolean"
                       },
                       "timeoutInMinute" : {
+                        "default" : 15,
                         "type" : "integer",
                         "minimum" : 0.0
                       }
@@ -594,6 +609,7 @@
                     "type" : "object",
                     "properties" : {
                       "name" : {
+                        "default" : "uniport.language",
                         "minLength" : 1,
                         "type" : "string"
                       }
@@ -616,9 +632,11 @@
                     "type" : "object",
                     "properties" : {
                       "loggingRequestEnabled" : {
+                        "default" : true,
                         "type" : "boolean"
                       },
                       "uriWithoutLoggingRegex" : {
+                        "minLength" : 1,
                         "type" : "string"
                       },
                       "contentTypes" : {
@@ -629,6 +647,7 @@
                         }
                       },
                       "loggingResponseEnabled" : {
+                        "default" : true,
                         "type" : "boolean"
                       }
                     }
@@ -650,18 +669,22 @@
                     "type" : "object",
                     "properties" : {
                       "pathGroup" : {
+                        "default" : "$.tenant",
                         "minLength" : 1,
                         "type" : "string"
                       },
                       "pathUsername" : {
+                        "default" : "$.preferred_username",
                         "minLength" : 1,
                         "type" : "string"
                       },
                       "pathEmail" : {
+                        "default" : "$.email",
                         "minLength" : 1,
                         "type" : "string"
                       },
                       "pathRoles" : {
+                        "default" : "$.resource_access.Analytics.roles",
                         "minLength" : 1,
                         "type" : "string"
                       }
@@ -684,6 +707,7 @@
                     "type" : "object",
                     "properties" : {
                       "responseMode" : {
+                        "default" : "form_post",
                         "enum" : [ "query", "fragment", "form_post" ]
                       },
                       "clientId" : {
@@ -717,6 +741,7 @@
                         "type" : "string"
                       },
                       "proxyAuthenticationFlow" : {
+                        "default" : true,
                         "type" : "boolean"
                       },
                       "additionalParameters" : {
@@ -747,6 +772,7 @@
                     "type" : "object",
                     "properties" : {
                       "responseMode" : {
+                        "default" : "form_post",
                         "enum" : [ "query", "fragment", "form_post" ]
                       },
                       "clientId" : {
@@ -780,6 +806,7 @@
                         "type" : "string"
                       },
                       "proxyAuthenticationFlow" : {
+                        "default" : true,
                         "type" : "boolean"
                       },
                       "additionalParameters" : {
@@ -810,6 +837,7 @@
                     "type" : "object",
                     "properties" : {
                       "redirectUri" : {
+                        "default" : "/",
                         "minLength" : 1,
                         "type" : "string"
                       }
@@ -902,14 +930,17 @@
                     "type" : "object",
                     "properties" : {
                       "waitTimeInMillisecond" : {
+                        "default" : 50,
                         "type" : "integer",
                         "minimum" : 0.0
                       },
                       "name" : {
+                        "default" : "uniport.state",
                         "minLength" : 1,
                         "type" : "string"
                       },
                       "maxRedirectRetries" : {
+                        "default" : 5,
                         "type" : "integer",
                         "minimum" : 0.0
                       }
@@ -932,6 +963,7 @@
                     "type" : "object",
                     "properties" : {
                       "name" : {
+                        "default" : "uniport.session",
                         "minLength" : 1,
                         "type" : "string"
                       }
@@ -962,38 +994,48 @@
                         "type" : "object",
                         "properties" : {
                           "sameSite" : {
+                            "default" : "STRICT",
                             "enum" : [ "NONE", "STRICT", "LAX" ]
                           },
                           "name" : {
+                            "default" : "uniport.session",
                             "minLength" : 1,
                             "type" : "string"
                           },
                           "httpOnly" : {
+                            "default" : true,
                             "type" : "boolean"
                           },
                           "secure" : {
+                            "default" : false,
                             "type" : "boolean"
                           }
                         }
                       },
                       "lifetimeCookie" : {
+                        "default" : false,
                         "type" : "boolean"
                       },
                       "nagHttps" : {
+                        "default" : true,
                         "type" : "boolean"
                       },
                       "idMinimumLength" : {
+                        "default" : 32,
                         "type" : "integer",
                         "minimum" : 0.0
                       },
                       "idleTimeoutInMinute" : {
+                        "default" : 15,
                         "type" : "integer",
                         "minimum" : 0.0
                       },
                       "lifetimeHeader" : {
+                        "default" : false,
                         "type" : "boolean"
                       },
                       "clusteredSessionStoreRetryTimeoutInMiliseconds" : {
+                        "default" : 5000,
                         "type" : "integer",
                         "minimum" : 0.0
                       }
@@ -1034,6 +1076,7 @@
                         }
                       },
                       "cookieName" : {
+                        "default" : "uniport.session",
                         "minLength" : 1,
                         "type" : "string"
                       }
@@ -1087,10 +1130,12 @@
                         "type" : "object",
                         "properties" : {
                           "intervalMs" : {
+                            "default" : 60000,
                             "type" : "integer",
                             "minimum" : 0.0
                           },
                           "enabled" : {
+                            "default" : true,
                             "type" : "boolean"
                           }
                         }

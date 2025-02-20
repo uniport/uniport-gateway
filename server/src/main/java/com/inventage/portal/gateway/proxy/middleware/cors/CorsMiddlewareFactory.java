@@ -75,8 +75,10 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
                 .items(Schemas.stringSchema().with(Keywords.minLength(1))))
             .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
-            .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema())
-            .optionalProperty(CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema())
+            .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_ALLOW_CREDENTIALS))
+            .optionalProperty(CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_ALLOW_PRIVATE_NETWORKS))
             .allowAdditionalProperties(false);
     }
 

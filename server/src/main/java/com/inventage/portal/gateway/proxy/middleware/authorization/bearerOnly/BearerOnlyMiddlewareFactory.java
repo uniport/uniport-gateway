@@ -36,7 +36,8 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
             .optionalProperty(BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
-                .with(Keywords.minLength(1)));
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_OPTIONAL));
     }
 
     @Override

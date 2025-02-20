@@ -32,6 +32,9 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
         CONTROL_API_ACTION_SESSION_RESET
     };
 
+    // defaults
+    private static final String DEFAULT_RESET_URL = null;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddlewareFactory.class);
 
     // reusable instance
@@ -65,7 +68,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
         }
 
         final String action = middlewareConfig.getString(CONTROL_API_ACTION);
-        final String iamSessionResetURI = middlewareConfig.getString(CONTROL_API_SESSION_RESET_URL);
+        final String iamSessionResetURI = middlewareConfig.getString(CONTROL_API_SESSION_RESET_URL, DEFAULT_RESET_URL);
 
         LOGGER.debug("Created '{}' middleware successfully", CONTROL_API);
         return Future.succeededFuture(new ControlApiMiddleware(vertx, name, ControlApiAction.valueOf(action), iamSessionResetURI, webClient));

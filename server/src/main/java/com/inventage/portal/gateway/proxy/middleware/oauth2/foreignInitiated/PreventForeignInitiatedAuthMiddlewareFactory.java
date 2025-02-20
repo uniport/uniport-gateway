@@ -33,7 +33,8 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_REDIRECT_URI))
             .allowAdditionalProperties(false);
     }
 

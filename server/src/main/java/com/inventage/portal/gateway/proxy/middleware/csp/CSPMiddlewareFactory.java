@@ -61,8 +61,10 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
                         .items(Schemas.stringSchema()
                             .with(Keywords.minLength(1))))
                     .allowAdditionalProperties(false)))
-            .optionalProperty(CSP_REPORT_ONLY, Schemas.booleanSchema())
-            .optionalProperty(CSP_MERGE_STRATEGY, Schemas.enumSchema((Object[]) CSP_MERGE_STRATEGIES))
+            .optionalProperty(CSP_REPORT_ONLY, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_REPORT_ONLY))
+            .optionalProperty(CSP_MERGE_STRATEGY, Schemas.enumSchema((Object[]) CSP_MERGE_STRATEGIES)
+                .defaultValue(DEFAULT_MERGE_STRATEGY))
             .allowAdditionalProperties(false);
     }
 

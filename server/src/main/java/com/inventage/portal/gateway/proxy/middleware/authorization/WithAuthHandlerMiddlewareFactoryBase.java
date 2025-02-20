@@ -94,9 +94,11 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                     .requiredProperty(WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())
                     .allowAdditionalProperties(false)))
             .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, Schemas.objectSchema()
-                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, Schemas.booleanSchema())
+                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, Schemas.booleanSchema()
+                    .defaultValue(DEFAULT_RECONCILIATION_ENABLED_VALUE))
                 .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
-                    .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
+                    .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                    .defaultValue(DEFAULT_RECONCILIATION_INTERVAL_MS))
                 .allowAdditionalProperties(false))
             .allowAdditionalProperties(false);
     }

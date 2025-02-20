@@ -43,13 +43,17 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_JWT_PATH_USERNAME))
             .optionalProperty(MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_JWT_PATH_EMAIL))
             .optionalProperty(MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_JWT_PATH_ROLES))
             .optionalProperty(MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_JWT_PATH_GROUP))
             .allowAdditionalProperties(false);
     }
 

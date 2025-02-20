@@ -23,12 +23,12 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     // schema
     // session
     public static final String SESSION = "session";
-    public static final String SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String SESSION_ID_MIN_LENGTH = "idMinimumLength";
-    public static final String SESSION_LIFETIME_COOKIE = "lifetimeCookie";
+    public static final String SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
     public static final String SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
-    public static final String SESSION_LIFETIME_HEADER = "lifetimeHeader";
     public static final String SESSION_NAG_HTTPS = "nagHttps";
+    public static final String SESSION_LIFETIME_COOKIE = "lifetimeCookie";
+    public static final String SESSION_LIFETIME_HEADER = "lifetimeHeader";
 
     // session cookie
     public static final String SESSION_COOKIE = "cookie";
@@ -44,6 +44,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     // session
     public static final int DEFAULT_SESSION_ID_MINIMUM_LENGTH = 32;
     public static final int DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE = 15;
+    public static final String DEFAULT_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = null;
     public static final boolean DEFAULT_NAG_HTTPS = true;
 
     // session cookie
@@ -84,26 +85,36 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             // session
             .optionalProperty(SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                .defaultValue(DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE))
             .optionalProperty(SESSION_ID_MIN_LENGTH, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
-            .optionalProperty(SESSION_NAG_HTTPS, Schemas.booleanSchema())
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                .defaultValue(DEFAULT_SESSION_ID_MINIMUM_LENGTH))
+            .optionalProperty(SESSION_NAG_HTTPS, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_NAG_HTTPS))
             .optionalProperty(SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             // session lifetime
-            .optionalProperty(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
-            .optionalProperty(SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
+            .optionalProperty(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_SESSION_LIFETIME_COOKIE))
+            .optionalProperty(SESSION_LIFETIME_HEADER, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_SESSION_LIFETIME_HEADER))
             // session cookie
             .optionalProperty(SESSION_COOKIE, Schemas.objectSchema()
                 .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
-                    .with(Keywords.minLength(1)))
-                .optionalProperty(SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
-                .optionalProperty(SESSION_COOKIE_SECURE, Schemas.booleanSchema())
-                .optionalProperty(SESSION_COOKIE_SAME_SITE, Schemas.enumSchema((Object[]) COOKIE_SAME_SITE_POLICIES))
+                    .with(Keywords.minLength(1))
+                    .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
+                .optionalProperty(SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema()
+                    .defaultValue(DEFAULT_SESSION_COOKIE_HTTP_ONLY))
+                .optionalProperty(SESSION_COOKIE_SECURE, Schemas.booleanSchema()
+                    .defaultValue(DEFAULT_SESSION_COOKIE_SECURE))
+                .optionalProperty(SESSION_COOKIE_SAME_SITE, Schemas.enumSchema((Object[]) COOKIE_SAME_SITE_POLICIES)
+                    .defaultValue(DEFAULT_SESSION_COOKIE_SAME_SITE))
                 .allowAdditionalProperties(false))
             // session store
             .optionalProperty(CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                .defaultValue(DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS))
             .allowAdditionalProperties(false);
     }
 
@@ -113,7 +124,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, SESSION_IDLE_TIMEOUT_IN_MINUTES, DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
         logDefaultIfNotConfigured(LOGGER, options, SESSION_ID_MIN_LENGTH, DEFAULT_SESSION_ID_MINIMUM_LENGTH);
         logDefaultIfNotConfigured(LOGGER, options, SESSION_NAG_HTTPS, DEFAULT_NAG_HTTPS);
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, null);
+        logDefaultIfNotConfigured(LOGGER, options, SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, DEFAULT_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
 
         // session lifetime
         logDefaultIfNotConfigured(LOGGER, options, SESSION_LIFETIME_COOKIE, DEFAULT_SESSION_LIFETIME_COOKIE);

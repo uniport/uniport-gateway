@@ -53,7 +53,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     public static final String OIDC_RESPONSE_MODE = "response_mode";
     public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
-    public static final String OIDC_RESPONSE_MODE_DEFAULT = OIDC_RESPONSE_MODE_FORM_POST;
+    public static final String DEFAULT_OIDC_RESPONSE_MODE = OIDC_RESPONSE_MODE_FORM_POST;
 
     private static final String[] OIDC_RESPONSE_MODES = new String[] {
         "query",
@@ -85,8 +85,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .with(Keywords.minLength(1)))
             .requiredProperty(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.enumSchema((Object[]) OIDC_RESPONSE_MODES))
-            .optionalProperty(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
+            .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.enumSchema((Object[]) OIDC_RESPONSE_MODES)
+                .defaultValue(DEFAULT_OIDC_RESPONSE_MODE))
+            .optionalProperty(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW))
             .optionalProperty(OAUTH2_PUBLIC_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
@@ -105,10 +107,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public Future<Void> validate(JsonObject options) {
         final String responseMode = options.getString(OAUTH2_RESPONSE_MODE);
         if (responseMode == null) {
-            LOGGER.debug(String.format("No response mode specified. Use default value: %s", OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT));
+            LOGGER.debug(String.format("No response mode specified. Use default value: %s", OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE));
         }
 
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_RESPONSE_MODE, OIDC_RESPONSE_MODE_DEFAULT);
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_RESPONSE_MODE, DEFAULT_OIDC_RESPONSE_MODE);
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PUBLIC_URL, "unknown"); // options may not contain PUBLIC_PROTOCOL_KEY/PUBLIC_HOSTNAME_KEY
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_SCOPES, getAdditionalScopes(options));
@@ -122,7 +124,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
         final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
         final String sessionScope = middlewareConfig.getString(OAUTH2_SESSION_SCOPE);
-        final String responseMode = middlewareConfig.getString(OAUTH2_RESPONSE_MODE, OIDC_RESPONSE_MODE_DEFAULT);
+        final String responseMode = middlewareConfig.getString(OAUTH2_RESPONSE_MODE, DEFAULT_OIDC_RESPONSE_MODE);
 
         final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
         final List<Route> callbacks = mountCallbackRoutes(router, callbackPath, responseMode);

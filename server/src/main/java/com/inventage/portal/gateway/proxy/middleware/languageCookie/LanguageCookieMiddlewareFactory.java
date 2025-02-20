@@ -37,7 +37,8 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_LANGUAGE_COOKIE_NAME))
             .allowAdditionalProperties(false);
     }
 

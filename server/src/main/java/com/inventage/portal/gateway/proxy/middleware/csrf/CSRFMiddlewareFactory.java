@@ -34,12 +34,12 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
 
     // defaults
     public static final String DEFAULT_COOKIE_NAME = CSRFHandler.DEFAULT_COOKIE_NAME;
-    public static final String DEFAULT_HEADER_NAME = CSRFHandler.DEFAULT_HEADER_NAME;
     public static final String DEFAULT_COOKIE_PATH = CSRFHandler.DEFAULT_COOKIE_PATH;
-    public static final long DEFAULT_TIMEOUT_IN_MINUTES = 15;
     public static final boolean DEFAULT_COOKIE_SECURE = true;
+    public static final String DEFAULT_HEADER_NAME = CSRFHandler.DEFAULT_HEADER_NAME;
     public static final boolean DEFAULT_NAG_HTTPS = true;
     public static final String DEFAULT_ORIGIN = null;
+    public static final long DEFAULT_TIMEOUT_IN_MINUTES = 15;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareFactory.class);
 
@@ -53,18 +53,24 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             .optionalProperty(CSRF_COOKIE, Schemas.objectSchema()
                 .optionalProperty(CSRF_COOKIE_NAME, Schemas.stringSchema()
-                    .with(Keywords.minLength(1)))
+                    .with(Keywords.minLength(1))
+                    .defaultValue(DEFAULT_COOKIE_NAME))
                 .optionalProperty(CSRF_COOKIE_PATH, Schemas.stringSchema()
-                    .with(Keywords.minLength(1)))
-                .optionalProperty(CSRF_COOKIE_SECURE, Schemas.booleanSchema())
+                    .with(Keywords.minLength(1))
+                    .defaultValue(DEFAULT_COOKIE_PATH))
+                .optionalProperty(CSRF_COOKIE_SECURE, Schemas.booleanSchema()
+                    .defaultValue(DEFAULT_COOKIE_SECURE))
                 .allowAdditionalProperties(false))
             .optionalProperty(CSRF_HEADER_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
-            .optionalProperty(CSRF_NAG_HTTPS, Schemas.booleanSchema())
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_HEADER_NAME))
+            .optionalProperty(CSRF_NAG_HTTPS, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_NAG_HTTPS))
             .optionalProperty(CSRF_ORIGIN, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                .defaultValue(DEFAULT_TIMEOUT_IN_MINUTES))
             .allowAdditionalProperties(false);
     }
 

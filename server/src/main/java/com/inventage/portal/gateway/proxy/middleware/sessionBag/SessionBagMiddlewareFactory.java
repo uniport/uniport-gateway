@@ -42,7 +42,8 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(SESSION_BAG_SESSION_COOKIE_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
             .requiredProperty(SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_NAME, Schemas.stringSchema()

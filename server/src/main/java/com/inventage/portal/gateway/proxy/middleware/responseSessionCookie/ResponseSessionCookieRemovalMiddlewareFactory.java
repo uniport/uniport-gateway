@@ -37,7 +37,8 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
             .allowAdditionalProperties(false);
     }
 

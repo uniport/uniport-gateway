@@ -44,11 +44,14 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_DETECTION_COOKIE_NAME))
             .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                .defaultValue(DEFAULT_WAIT_BEFORE_RETRY_MS))
             .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
+                .defaultValue(DEFAULT_MAX_REDIRECT_RETRIES))
             .allowAdditionalProperties(false);
     }
 

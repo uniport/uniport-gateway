@@ -6,8 +6,8 @@ import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMid
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_PLAIN;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.PKCE_METHOD_S256;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2AuthMiddlewareTest.SCOPE;
+import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE;
 import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE;
-import static com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_DEFAULT;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
@@ -96,7 +96,7 @@ public class AuthenticationRedirectRequestAssert
 
     public AuthenticationRedirectRequestAssert isUsingFormPost() {
         final Map<String, String> locationParameters = extractParametersFromHeader(actual.getHeader(LOCATION));
-        VertxAssertions.assertEquals(testCtx, OIDC_RESPONSE_MODE_DEFAULT, locationParameters.get(OIDC_RESPONSE_MODE));
+        VertxAssertions.assertEquals(testCtx, DEFAULT_OIDC_RESPONSE_MODE, locationParameters.get(OIDC_RESPONSE_MODE));
         return this;
     }
 
