@@ -10,6 +10,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.Map.Entry;
@@ -27,6 +28,9 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
     public static final String CUSTOM_RESPONSE_STATUS_CODE = "statusCode";
     public static final String CUSTOM_RESPONSE_HEADERS = "headers";
 
+    private static final int HTTP_STATUS_CODE_MIN = 100;
+    private static final int HTTP_STATUS_CODE_MAX = 599;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomResponseMiddlewareFactory.class);
 
     @Override
@@ -38,12 +42,12 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .requiredProperty(CUSTOM_RESPONSE_STATUS_CODE, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, HTTP_STATUS_CODE_MIN)
-                .withKeyword(KEYWORD_INT_MAX, HTTP_STATUS_CODE_MAX))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(HTTP_STATUS_CODE_MIN))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.maximum(HTTP_STATUS_CODE_MAX)))
             .requiredProperty(CUSTOM_RESPONSE_CONTENT, Schemas.stringSchema())
             .optionalProperty(CUSTOM_RESPONSE_HEADERS, Schemas.objectSchema()
                 .additionalProperties(Schemas.stringSchema() // technically this should be an array to allow multi header values
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                    .with(Keywords.minLength(1))))
             .allowAdditionalProperties(false);
     }
 

@@ -20,28 +20,6 @@ public interface MiddlewareFactory {
 
     Logger LOGGER = LoggerFactory.getLogger(MiddlewareFactory.class);
 
-    // schema keywords
-    String KEYWORD_STRING_MIN_LENGTH = "minLength";
-    String KEYWORD_OBJECT_MIN_PROPERTIES = "minProperties";
-    String KEYWORD_ARRAY_MIN_ITEMS = "minItems";
-
-    String KEYWORD_ENUM = "enum";
-    String KEYWORD_TYPE = "type";
-    String KEYWORD_PATTERN = "pattern";
-
-    String KEYWORD_INT_MIN = "minimum";
-    String KEYWORD_INT_MAX = "maximum";
-
-    String INT_TYPE = "integer";
-    String STRING_TYPE = "string";
-    String ENV_VARIABLE_PATTERN = "^\\$\\{.*\\}$";
-
-    int ZERO = 0;
-    int ONE = 1;
-
-    int HTTP_STATUS_CODE_MIN = 100;
-    int HTTP_STATUS_CODE_MAX = 599;
-
     String provides();
 
     ObjectSchemaBuilder optionsSchema();

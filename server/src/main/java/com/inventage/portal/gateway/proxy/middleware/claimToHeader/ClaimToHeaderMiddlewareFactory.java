@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import org.slf4j.Logger;
@@ -32,9 +33,9 @@ public class ClaimToHeaderMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .requiredProperty(CLAIM_TO_HEADER_PATH, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .requiredProperty(CLAIM_TO_HEADER_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
 

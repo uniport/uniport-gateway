@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.HashSet;
@@ -40,7 +41,17 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public static final boolean DEFAULT_ALLOW_PRIVATE_NETWORKS = false;
 
     private static final String ORIGIN_LOCALHOST = "http://localhost";
-    private static final List<String> HTTP_METHODS = List.of("GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT");
+    private static final String[] HTTP_METHODS = new String[] {
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH",
+        "OPTIONS",
+        "TRACE",
+        "CONNECT"
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CorsMiddlewareFactory.class);
 
@@ -53,16 +64,17 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(CORS_ALLOWED_ORIGINS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
             .optionalProperty(CORS_ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
             .optionalProperty(CORS_ALLOWED_METHODS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_ENUM, JsonArray.of(HTTP_METHODS.toArray()))))
+                .items(Schemas.enumSchema((Object[]) HTTP_METHODS)))
             .optionalProperty(CORS_ALLOWED_HEADERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
             .optionalProperty(CORS_EXPOSED_HEADERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
-            .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, ZERO))
+                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
+            .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema()
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema())
             .optionalProperty(CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema())
             .allowAdditionalProperties(false);

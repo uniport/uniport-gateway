@@ -11,9 +11,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +33,11 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
     public static final String CSP_MERGE_STRATEGY_EXTERNAL = "EXTERNAL";
     public static final String CSP_MERGE_STRATEGY_INTERNAL = "INTERNAL";
 
-    public static final List<String> CSP_MERGE_STRATEGIES = List.of(
+    public static final String[] CSP_MERGE_STRATEGIES = new String[] {
         CSP_MERGE_STRATEGY_UNION,
         CSP_MERGE_STRATEGY_EXTERNAL,
-        CSP_MERGE_STRATEGY_INTERNAL);
+        CSP_MERGE_STRATEGY_INTERNAL
+    };
 
     // defaults
     public static final boolean DEFAULT_REPORT_ONLY = false;
@@ -55,14 +56,13 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
             .requiredProperty(CSP_DIRECTIVES, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .requiredProperty(CSP_DIRECTIVE_NAME, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                        .with(Keywords.minLength(1)))
                     .requiredProperty(CSP_DIRECTIVE_VALUES, Schemas.arraySchema()
                         .items(Schemas.stringSchema()
-                            .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                            .with(Keywords.minLength(1))))
                     .allowAdditionalProperties(false)))
             .optionalProperty(CSP_REPORT_ONLY, Schemas.booleanSchema())
-            .optionalProperty(CSP_MERGE_STRATEGY, Schemas.stringSchema()
-                .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_MERGE_STRATEGIES.toArray())))
+            .optionalProperty(CSP_MERGE_STRATEGY, Schemas.enumSchema((Object[]) CSP_MERGE_STRATEGIES))
             .allowAdditionalProperties(false);
     }
 

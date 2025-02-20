@@ -10,6 +10,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.Map.Entry;
@@ -37,19 +38,19 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(HEADERS_REQUEST, Schemas.objectSchema()
-                .withKeyword(KEYWORD_OBJECT_MIN_PROPERTIES, 1)
+                .with(Keywords.minProperties(1))
                 .additionalProperties(Schemas.anyOf(
                     Schemas.stringSchema(),
                     Schemas.arraySchema()
                         .items(Schemas.stringSchema()
-                            .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))))
+                            .with(Keywords.minLength(1))))))
             .optionalProperty(HEADERS_RESPONSE, Schemas.objectSchema()
-                .withKeyword(KEYWORD_OBJECT_MIN_PROPERTIES, 1)
+                .with(Keywords.minProperties(1))
                 .additionalProperties(Schemas.anyOf(
                     Schemas.stringSchema(),
                     Schemas.arraySchema()
                         .items(Schemas.stringSchema()
-                            .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))))
+                            .with(Keywords.minLength(1))))))
             .allowAdditionalProperties(false);
     }
 

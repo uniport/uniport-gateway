@@ -9,7 +9,7 @@
         "properties" : {
           "sessionIdleTimeout" : {
             "type" : "integer",
-            "minimum" : 1
+            "minimum" : 1.0
           },
           "middlewares" : {
             "type" : "array",
@@ -33,8 +33,7 @@
                     "required" : [ "sessionScope" ]
                   },
                   "type" : {
-                    "const" : "authorizationBearer",
-                    "type" : "string"
+                    "const" : "authorizationBearer"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -81,7 +80,7 @@
                         "properties" : {
                           "intervalMs" : {
                             "type" : "integer",
-                            "minimum" : 0
+                            "minimum" : 0.0
                           },
                           "enabled" : {
                             "type" : "boolean"
@@ -107,7 +106,6 @@
                             },
                             "value" : { },
                             "operator" : {
-                              "type" : "string",
                               "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
                             }
                           },
@@ -126,8 +124,7 @@
                     "required" : [ "audience", "publicKeys", "issuer" ]
                   },
                   "type" : {
-                    "const" : "bearerOnly",
-                    "type" : "string"
+                    "const" : "bearerOnly"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -174,7 +171,7 @@
                         "properties" : {
                           "intervalMs" : {
                             "type" : "integer",
-                            "minimum" : 0
+                            "minimum" : 0.0
                           },
                           "enabled" : {
                             "type" : "boolean"
@@ -200,7 +197,6 @@
                             },
                             "value" : { },
                             "operator" : {
-                              "type" : "string",
                               "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
                             }
                           },
@@ -219,8 +215,7 @@
                     "required" : [ "audience", "publicKeys", "sessionScope", "issuer" ]
                   },
                   "type" : {
-                    "const" : "passAuthorization",
-                    "type" : "string"
+                    "const" : "passAuthorization"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -236,8 +231,7 @@
                     "type" : "object"
                   },
                   "type" : {
-                    "const" : "bodyHandler",
-                    "type" : "string"
+                    "const" : "bodyHandler"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -253,8 +247,7 @@
                     "type" : "object"
                   },
                   "type" : {
-                    "const" : "checkRoute",
-                    "type" : "string"
+                    "const" : "checkRoute"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -281,8 +274,7 @@
                     "required" : [ "headerName", "claimPath" ]
                   },
                   "type" : {
-                    "const" : "claimToHeader",
-                    "type" : "string"
+                    "const" : "claimToHeader"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -302,15 +294,13 @@
                         "type" : "string"
                       },
                       "action" : {
-                        "type" : "string",
                         "enum" : [ "SESSION_TERMINATE", "SESSION_RESET" ]
                       }
                     },
                     "required" : [ "action" ]
                   },
                   "type" : {
-                    "const" : "controlApi",
-                    "type" : "string"
+                    "const" : "controlApi"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -359,13 +349,12 @@
                       "allowedMethods" : {
                         "type" : "array",
                         "items" : {
-                          "type" : "string",
                           "enum" : [ "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT" ]
                         }
                       },
                       "maxAgeSeconds" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       },
                       "allowCredentials" : {
                         "type" : "boolean"
@@ -373,8 +362,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "cors",
-                    "type" : "string"
+                    "const" : "cors"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -390,7 +378,6 @@
                     "type" : "object",
                     "properties" : {
                       "mergeStrategy" : {
-                        "type" : "string",
                         "enum" : [ "UNION", "EXTERNAL", "INTERNAL" ]
                       },
                       "policyDirectives" : {
@@ -421,8 +408,7 @@
                     "required" : [ "policyDirectives" ]
                   },
                   "type" : {
-                    "const" : "csp",
-                    "type" : "string"
+                    "const" : "csp"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -438,15 +424,13 @@
                     "type" : "object",
                     "properties" : {
                       "logLevel" : {
-                        "type" : "string",
                         "enum" : [ "TRACE", "DEBUG", "INFO", "WARN", "ERROR" ]
                       }
                     },
                     "required" : [ "logLevel" ]
                   },
                   "type" : {
-                    "const" : "cspViolationReportingServer",
-                    "type" : "string"
+                    "const" : "cspViolationReportingServer"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -491,13 +475,12 @@
                       },
                       "timeoutInMinute" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       }
                     }
                   },
                   "type" : {
-                    "const" : "csrf",
-                    "type" : "string"
+                    "const" : "csrf"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -523,16 +506,15 @@
                         "type" : "string"
                       },
                       "statusCode" : {
-                        "maximum" : 599,
+                        "maximum" : 599.0,
                         "type" : "integer",
-                        "minimum" : 100
+                        "minimum" : 100.0
                       }
                     },
                     "required" : [ "content", "statusCode" ]
                   },
                   "type" : {
-                    "const" : "customResponse",
-                    "type" : "string"
+                    "const" : "customResponse"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -548,8 +530,7 @@
                     "type" : "object"
                   },
                   "type" : {
-                    "const" : "_session_",
-                    "type" : "string"
+                    "const" : "_session_"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -597,8 +578,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "headers",
-                    "type" : "string"
+                    "const" : "headers"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -620,8 +600,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "languageCookie",
-                    "type" : "string"
+                    "const" : "languageCookie"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -655,8 +634,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "requestResponseLogger",
-                    "type" : "string"
+                    "const" : "requestResponseLogger"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -690,8 +668,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "matomo",
-                    "type" : "string"
+                    "const" : "matomo"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -707,7 +684,6 @@
                     "type" : "object",
                     "properties" : {
                       "responseMode" : {
-                        "type" : "string",
                         "enum" : [ "query", "fragment", "form_post" ]
                       },
                       "clientId" : {
@@ -755,8 +731,7 @@
                     "required" : [ "clientId", "sessionScope", "clientSecret", "discoveryUrl" ]
                   },
                   "type" : {
-                    "const" : "oauth2",
-                    "type" : "string"
+                    "const" : "oauth2"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -772,7 +747,6 @@
                     "type" : "object",
                     "properties" : {
                       "responseMode" : {
-                        "type" : "string",
                         "enum" : [ "query", "fragment", "form_post" ]
                       },
                       "clientId" : {
@@ -820,8 +794,7 @@
                     "required" : [ "clientId", "sessionScope", "clientSecret", "discoveryUrl" ]
                   },
                   "type" : {
-                    "const" : "oauth2registration",
-                    "type" : "string"
+                    "const" : "oauth2registration"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -843,8 +816,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "checkInitiatedAuth",
-                    "type" : "string"
+                    "const" : "checkInitiatedAuth"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -860,8 +832,7 @@
                     "type" : "object"
                   },
                   "type" : {
-                    "const" : "openTelemetry",
-                    "type" : "string"
+                    "const" : "openTelemetry"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -888,8 +859,7 @@
                     "required" : [ "regex", "replacement" ]
                   },
                   "type" : {
-                    "const" : "redirectRegex",
-                    "type" : "string"
+                    "const" : "redirectRegex"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -916,8 +886,7 @@
                     "required" : [ "regex", "replacement" ]
                   },
                   "type" : {
-                    "const" : "replacePathRegex",
-                    "type" : "string"
+                    "const" : "replacePathRegex"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -934,7 +903,7 @@
                     "properties" : {
                       "waitTimeInMillisecond" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       },
                       "name" : {
                         "minLength" : 1,
@@ -942,13 +911,12 @@
                       },
                       "maxRedirectRetries" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       }
                     }
                   },
                   "type" : {
-                    "const" : "replacedSessionCookieDetection",
-                    "type" : "string"
+                    "const" : "replacedSessionCookieDetection"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -970,8 +938,7 @@
                     }
                   },
                   "type" : {
-                    "const" : "responseSessionCookieRemoval",
-                    "type" : "string"
+                    "const" : "responseSessionCookieRemoval"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -995,11 +962,10 @@
                         "type" : "object",
                         "properties" : {
                           "sameSite" : {
-                            "type" : "string",
                             "enum" : [ "NONE", "STRICT", "LAX" ]
                           },
                           "name" : {
-                            "minLength" : 0,
+                            "minLength" : 1,
                             "type" : "string"
                           },
                           "httpOnly" : {
@@ -1018,24 +984,23 @@
                       },
                       "idMinimumLength" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       },
                       "idleTimeoutInMinute" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       },
                       "lifetimeHeader" : {
                         "type" : "boolean"
                       },
                       "clusteredSessionStoreRetryTimeoutInMiliseconds" : {
                         "type" : "integer",
-                        "minimum" : 0
+                        "minimum" : 0.0
                       }
                     }
                   },
                   "type" : {
-                    "const" : "session",
-                    "type" : "string"
+                    "const" : "session"
                   }
                 },
                 "required" : [ "name", "type" ]
@@ -1076,8 +1041,7 @@
                     "required" : [ "whitelistedCookies" ]
                   },
                   "type" : {
-                    "const" : "sessionBag",
-                    "type" : "string"
+                    "const" : "sessionBag"
                   }
                 },
                 "required" : [ "name", "options", "type" ]
@@ -1124,7 +1088,7 @@
                         "properties" : {
                           "intervalMs" : {
                             "type" : "integer",
-                            "minimum" : 0
+                            "minimum" : 0.0
                           },
                           "enabled" : {
                             "type" : "boolean"
@@ -1150,7 +1114,6 @@
                             },
                             "value" : { },
                             "operator" : {
-                              "type" : "string",
                               "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
                             }
                           },
@@ -1165,8 +1128,7 @@
                     "required" : [ "audience", "publicKeys", "issuer" ]
                   },
                   "type" : {
-                    "const" : "backChannelLogout",
-                    "type" : "string"
+                    "const" : "backChannelLogout"
                   }
                 },
                 "required" : [ "name", "options", "type" ]

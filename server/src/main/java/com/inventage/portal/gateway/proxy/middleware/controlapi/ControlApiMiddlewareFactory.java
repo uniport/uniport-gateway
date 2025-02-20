@@ -6,13 +6,12 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +27,10 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     public static final String CONTROL_API_ACTION_SESSION_TERMINATE = "SESSION_TERMINATE";
     public static final String CONTROL_API_ACTION_SESSION_RESET = "SESSION_RESET";
 
-    public static final List<String> MIDDLEWARE_CONTROL_API_ACTIONS = List.of(
+    public static final String[] MIDDLEWARE_CONTROL_API_ACTIONS = new String[] {
         CONTROL_API_ACTION_SESSION_TERMINATE,
-        CONTROL_API_ACTION_SESSION_RESET);
+        CONTROL_API_ACTION_SESSION_RESET
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddlewareFactory.class);
 
@@ -45,10 +45,9 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(CONTROL_API_ACTION, Schemas.stringSchema()
-                .withKeyword(KEYWORD_ENUM, JsonArray.of(MIDDLEWARE_CONTROL_API_ACTIONS.toArray())))
+            .requiredProperty(CONTROL_API_ACTION, Schemas.enumSchema((Object[]) MIDDLEWARE_CONTROL_API_ACTIONS))
             .optionalProperty(CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
 

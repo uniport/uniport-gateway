@@ -18,6 +18,7 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.OAuth2AuthHandler;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.net.URI;
@@ -54,7 +55,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
     public static final String OIDC_RESPONSE_MODE_DEFAULT = OIDC_RESPONSE_MODE_FORM_POST;
 
-    private static final List<String> OIDC_RESPONSE_MODES = List.of("query", "fragment", "form_post");
+    private static final String[] OIDC_RESPONSE_MODES = new String[] {
+        "query",
+        "fragment",
+        "form_post"
+    };
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
@@ -73,27 +78,26 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .requiredProperty(OAUTH2_CLIENTID, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .requiredProperty(OAUTH2_CLIENTSECRET, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .requiredProperty(OAUTH2_DISCOVERYURL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .requiredProperty(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
-            .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_ENUM, JsonArray.of(OIDC_RESPONSE_MODES.toArray())))
+                .with(Keywords.minLength(1)))
+            .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.enumSchema((Object[]) OIDC_RESPONSE_MODES))
             .optionalProperty(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema())
             .optionalProperty(OAUTH2_PUBLIC_URL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .optionalProperty(OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                    .with(Keywords.minLength(1))))
             .optionalProperty(OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
                 .additionalProperties(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                    .with(Keywords.minLength(1)))
                 .allowAdditionalProperties(true))
             .optionalProperty(OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
             .allowAdditionalProperties(false);
     }
 

@@ -8,6 +8,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import org.slf4j.Logger;
@@ -42,13 +43,13 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .optionalProperty(MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .optionalProperty(MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .optionalProperty(MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
 

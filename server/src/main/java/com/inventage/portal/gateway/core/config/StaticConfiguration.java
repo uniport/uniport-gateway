@@ -13,10 +13,13 @@ import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.SchemaException;
 import io.vertx.json.schema.ValidationException;
 import io.vertx.json.schema.Validator;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.SchemaType;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,17 +54,13 @@ public class StaticConfiguration {
     public static final String PROVIDER_DOCKER_NETWORK = "network";
     public static final String PROVIDER_DOCKER_DEFAULT_RULE = "defaultRule";
     public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
+
     private static Validator validator;
-    private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
-    private static final String KEYWORD_INT_MIN = "minimum";
-    private static final String KEYWORD_TYPE = "type";
-    private static final String KEYWORD_PATTERN = "pattern";
-    private static final String INT_TYPE = "integer";
-    private static final String STRING_TYPE = "string";
-    private static final String ENV_VARIABLE_PATTERN_STRING_TO_INT = "^\\$\\{.*\\}$";
-    private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
-    private static final int NON_ZERO_INT_MIN = 1;
+
+    // schema
+    private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
 
     private StaticConfiguration() {
     }
@@ -75,45 +74,47 @@ public class StaticConfiguration {
 
     public static ObjectSchemaBuilder buildSchema() {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
-            .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+            .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema()
+                .with(Keywords.minLength(1)))
             .requiredProperty(ENTRYPOINT_PORT, Schemas.anyOf(Schemas.schema()
-                .withKeyword(KEYWORD_TYPE, INT_TYPE),
+                .with(Keywords.type(SchemaType.INTEGER)),
                 Schemas.schema()
-                    .withKeyword(KEYWORD_TYPE, STRING_TYPE)
-                    .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN_STRING_TO_INT)))
+                    .with(Keywords.type(SchemaType.STRING))
+                    .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
             .optionalProperty(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema()
                     .items(Schemas.anyOf(DynamicConfiguration.getBuildMiddlewareSchema())))
-            .optionalProperty(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema().withKeyword(KEYWORD_INT_MIN, NON_ZERO_INT_MIN))
+            .optionalProperty(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
             .requiredProperty(APPLICATION_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .requiredProperty(APPLICATION_REQUEST_SELECTOR,
                 Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
-                    Schemas.stringSchema().withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH)))
+                    Schemas.stringSchema().with(Keywords.minLength(1))))
             .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
             .requiredProperty(PROVIDER_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_FILE_FILENAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
             .optionalProperty(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
             .optionalProperty(PROVIDER_DOCKER_NETWORK, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()

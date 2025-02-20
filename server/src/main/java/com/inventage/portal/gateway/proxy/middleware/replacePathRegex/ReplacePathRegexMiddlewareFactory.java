@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 
@@ -28,9 +29,9 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .requiredProperty(REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .requiredProperty(REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
 

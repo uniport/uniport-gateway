@@ -9,6 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CSRFHandler;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.UUID;
@@ -52,18 +53,18 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             .optionalProperty(CSRF_COOKIE, Schemas.objectSchema()
                 .optionalProperty(CSRF_COOKIE_NAME, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                    .with(Keywords.minLength(1)))
                 .optionalProperty(CSRF_COOKIE_PATH, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                    .with(Keywords.minLength(1)))
                 .optionalProperty(CSRF_COOKIE_SECURE, Schemas.booleanSchema())
                 .allowAdditionalProperties(false))
             .optionalProperty(CSRF_HEADER_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .optionalProperty(CSRF_NAG_HTTPS, Schemas.booleanSchema())
             .optionalProperty(CSRF_ORIGIN, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .optionalProperty(CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, ZERO))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .allowAdditionalProperties(false);
     }
 

@@ -6,6 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandl
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
             .requiredProperty(PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE));
+                .with(Keywords.minLength(1)));
     }
 
     @Override

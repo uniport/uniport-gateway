@@ -4,12 +4,10 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -22,7 +20,13 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     // schema
     public static final String CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
     public static final String CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL = "logLevel";
-    public static final List<String> CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = List.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
+    public static final String[] CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = new String[] {
+        "TRACE",
+        "DEBUG",
+        "INFO",
+        "WARN",
+        "ERROR"
+    };
 
     // defaults
     public static final String DEFAULT_LOG_LEVEL = "WARN";
@@ -37,8 +41,7 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.stringSchema()
-                .withKeyword(KEYWORD_ENUM, JsonArray.of(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS.toArray())))
+            .requiredProperty(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.enumSchema((Object[]) CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS))
             .allowAdditionalProperties(false);
     }
 

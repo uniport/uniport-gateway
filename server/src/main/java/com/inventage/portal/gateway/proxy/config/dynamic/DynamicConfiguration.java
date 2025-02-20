@@ -14,7 +14,9 @@ import io.vertx.json.schema.JsonSchemaOptions;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.SchemaException;
 import io.vertx.json.schema.Validator;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.SchemaType;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,14 +67,8 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HOST = ProxyMiddlewareFactory.SERVICE_SERVER_HOST;
     public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVICE_SERVER_PORT;
 
-    // schema keywords
-    private static final String KEYWORD_CONST = "const";
-    private static final String KEYWORD_STRING_MIN_LENGTH = "minLength";
-    private static final int NON_EMPTY_STRING_MIN_LENGTH = 1;
-    private static final String KEYWORD_TYPE = "type";
-    private static final String KEYWORD_PATTERN = "pattern";
-    private static final String STRING_TYPE = "string";
-    private static final String ENV_VARIABLE_PATTERN = "^\\$\\{.*\\}$";
+    // schema
+    private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
 
     private static Validator validator;
 
@@ -87,12 +84,12 @@ public class DynamicConfiguration {
     private static ObjectSchemaBuilder buildRouterSchema() {
         final ObjectSchemaBuilder routerSchema = Schemas.objectSchema()
             .requiredProperty(ROUTER_NAME, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(ROUTER_ENTRYPOINTS, Schemas.arraySchema().items(Schemas.stringSchema()))
             .optionalProperty(ROUTER_MIDDLEWARES, Schemas.arraySchema().items(Schemas.stringSchema()))
             .requiredProperty(ROUTER_SERVICE, Schemas.stringSchema())
             .requiredProperty(ROUTER_RULE, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, NON_EMPTY_STRING_MIN_LENGTH))
+                .with(Keywords.minLength(1)))
             .optionalProperty(ROUTER_PRIORITY, Schemas.intSchema())
             .allowAdditionalProperties(false);
         return routerSchema;
@@ -110,8 +107,7 @@ public class DynamicConfiguration {
 
                 final ObjectSchemaBuilder middlewareSchema = Schemas.objectSchema()
                     .requiredProperty(MIDDLEWARE_NAME, Schemas.stringSchema())
-                    .requiredProperty(MIDDLEWARE_TYPE, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_CONST, factory.provides()))
+                    .requiredProperty(MIDDLEWARE_TYPE, Schemas.constSchema(factory.provides()))
                     .allowAdditionalProperties(false);
 
                 if (optionsHasAtLeastOneRequiredProperty) {
@@ -137,8 +133,8 @@ public class DynamicConfiguration {
                     .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(
                         Schemas.intSchema(),
                         Schemas.schema()
-                            .withKeyword(KEYWORD_TYPE, STRING_TYPE)
-                            .withKeyword(KEYWORD_PATTERN, ENV_VARIABLE_PATTERN)))
+                            .with(Keywords.type(SchemaType.STRING))
+                            .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
                     .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
         return serviceSchema;

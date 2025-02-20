@@ -19,13 +19,13 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +54,12 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED = "enabled";
     public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS = "intervalMs";
 
-    public static final List<String> AUTH_HANDLER_CLAIM_OPERATORS = List.of(
+    public static final String[] AUTH_HANDLER_CLAIM_OPERATORS = new String[] {
         WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
         WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
         WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS,
-        WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
+        WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE
+    };
 
     // defaults
     public static final boolean DEFAULT_RECONCILIATION_ENABLED_VALUE = true;
@@ -71,32 +72,31 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         return Schemas.objectSchema()
             .requiredProperty(WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                    .with(Keywords.minLength(1))))
             .requiredProperty(WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS, Schemas.arraySchema()
-                .withKeyword(KEYWORD_ARRAY_MIN_ITEMS, 1)
+                .with(Keywords.minItems(1))
                 .items(Schemas.objectSchema()
                     .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                        .with(Keywords.minLength(1)))
                     .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                        .with(Keywords.minLength(1)))
                     .allowAdditionalProperties(false)))
             .optionalProperty(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE)))
+                    .with(Keywords.minLength(1))))
             .optionalProperty(WITH_AUTH_HANDLER_CLAIMS, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
-                    .requiredProperty(WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_ENUM, JsonArray.of(AUTH_HANDLER_CLAIM_OPERATORS.toArray())))
+                    .requiredProperty(WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.enumSchema((Object[]) AUTH_HANDLER_CLAIM_OPERATORS))
                     .requiredProperty(WITH_AUTH_HANDLER_CLAIM_PATH, Schemas.stringSchema()
-                        .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                        .with(Keywords.minLength(1)))
                     .requiredProperty(WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())
                     .allowAdditionalProperties(false)))
             .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, Schemas.objectSchema()
                 .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, Schemas.booleanSchema())
                 .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
-                    .withKeyword(KEYWORD_INT_MIN, ZERO))
+                    .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
                 .allowAdditionalProperties(false))
             .allowAdditionalProperties(false);
     }

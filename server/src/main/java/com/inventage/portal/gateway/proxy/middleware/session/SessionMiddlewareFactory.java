@@ -7,12 +7,11 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.CookieSameSite;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +66,11 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     // session store
     public static final int DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS = 5 * 1000;
 
-    private static final List<String> COOKIE_SAME_SITE_POLICIES = List.of("NONE", "STRICT", "LAX");
+    private static final String[] COOKIE_SAME_SITE_POLICIES = new String[] {
+        "NONE",
+        "STRICT",
+        "LAX"
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddlewareFactory.class);
 
@@ -81,27 +84,26 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             // session
             .optionalProperty(SESSION_IDLE_TIMEOUT_IN_MINUTES, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, ZERO))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .optionalProperty(SESSION_ID_MIN_LENGTH, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, ZERO))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .optionalProperty(SESSION_NAG_HTTPS, Schemas.booleanSchema())
             .optionalProperty(SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
-                .withKeyword(KEYWORD_STRING_MIN_LENGTH, ONE))
+                .with(Keywords.minLength(1)))
             // session lifetime
             .optionalProperty(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema())
             .optionalProperty(SESSION_LIFETIME_HEADER, Schemas.booleanSchema())
             // session cookie
             .optionalProperty(SESSION_COOKIE, Schemas.objectSchema()
                 .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_STRING_MIN_LENGTH, ZERO))
+                    .with(Keywords.minLength(1)))
                 .optionalProperty(SESSION_COOKIE_HTTP_ONLY, Schemas.booleanSchema())
                 .optionalProperty(SESSION_COOKIE_SECURE, Schemas.booleanSchema())
-                .optionalProperty(SESSION_COOKIE_SAME_SITE, Schemas.stringSchema()
-                    .withKeyword(KEYWORD_ENUM, JsonArray.of(COOKIE_SAME_SITE_POLICIES.toArray())))
+                .optionalProperty(SESSION_COOKIE_SAME_SITE, Schemas.enumSchema((Object[]) COOKIE_SAME_SITE_POLICIES))
                 .allowAdditionalProperties(false))
             // session store
             .optionalProperty(CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, Schemas.intSchema()
-                .withKeyword(KEYWORD_INT_MIN, ZERO))
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .allowAdditionalProperties(false);
     }
 
