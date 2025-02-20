@@ -76,7 +76,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
         }
 
         boolean hasReportToOrUriDirective = false;
-        for (Object d : directives.getList()) {
+        for (Object d : directives) {
             if (!(d instanceof JsonObject)) {
                 return Future.failedFuture(new IllegalStateException("Directive must be a JsonObject"));
             }
