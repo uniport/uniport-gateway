@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validate router rule as part of the global configuration validation ([PORTAL-2109](https://inventage-all.atlassian.net/browse/PORTAL-2109)).
 - Apply "fail-fast", if the initial configuration is invalid ([PORTAL-2109](https://inventage-all.atlassian.net/browse/PORTAL-2109)).
 - Ignore a router if its configuration is malformed or any referenced configuration (such as middlewares and services) is malformed ([PORTAL-2109](https://inventage-all.atlassian.net/browse/PORTAL-2109)).
+- Split up Middleware Options validation [PORTAL-2366](https://inventage-all.atlassian.net/browse/PORTAL-2366).
+- Split up Schema [PORTAL-2367](https://inventage-all.atlassian.net/browse/PORTAL-2367).
+- Cleanup redundant schema/validation [PORTAL-2370](https://inventage-all.atlassian.net/browse/PORTAL-2370).
+- Use requiredProperty and optionalProperty for clarification [PORTAL-2371](https://inventage-all.atlassian.net/browse/PORTAL-2371).
+- Consistent logging of default values [PORTAL-2372](https://inventage-all.atlassian.net/browse/PORTAL-2372).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
