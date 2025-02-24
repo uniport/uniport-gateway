@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.core.config;
 
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +11,6 @@ import io.vertx.json.schema.JsonSchemaOptions;
 import io.vertx.json.schema.OutputFormat;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.SchemaException;
-import io.vertx.json.schema.ValidationException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
@@ -133,27 +131,32 @@ public class StaticConfiguration {
             validator = buildValidator();
         }
 
-        final Promise<Void> validPromise = Promise.promise();
+        final OutputUnit result;
         try {
-            final OutputUnit result = validator.validate(json);
-            if (!result.getValid()) {
-                throw result.toException(json);
+            result = validator.validate(json);
+        } catch (SchemaException e) {
+            return Future.failedFuture(e);
+        }
+        if (result.getValid() == null || !result.getValid()) {
+            // the error message for items/oneOf validation failure is unusable, so we try being more helpful
+            if (result.getErrors() != null) {
+                for (final OutputUnit error : result.getErrors()) {
+                    final String keyword = error.getKeywordLocation();
+                    final String instance = error.getInstanceLocation();
+                    final String message = error.getError();
+
+                    if (keyword.endsWith("items/oneOf")) {
+                        LOGGER.warn("{} at '{}'", message, instance);
+                    }
+                }
             }
-        } catch (SchemaException | ValidationException e) {
-            validPromise.fail(e);
-            return validPromise.future();
+
+            return Future.failedFuture(result.toJson().encodePrettily());
         }
 
         final List<Future<Void>> futures = validateEntrypoints(json.getJsonArray(ENTRYPOINTS));
         futures.add(validateProviders(json.getJsonArray(PROVIDERS)));
-        Future.all(futures)
-            .onSuccess(cf -> {
-                validPromise.complete();
-            }).onFailure(cfErr -> {
-                validPromise.fail(cfErr.getMessage());
-            });
-
-        return validPromise.future();
+        return Future.all(futures).mapEmpty();
     }
 
     private static List<Future<Void>> validateEntrypoints(JsonArray entrypoints) {

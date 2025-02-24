@@ -370,7 +370,20 @@ public class DynamicConfiguration {
             return Future.failedFuture(e);
         }
         if (result.getValid() == null || !result.getValid()) {
-            return Future.failedFuture(result.toString());
+            // the error message for items/oneOf validation failure is unusable, so we try being more helpful
+            if (result.getErrors() != null) {
+                for (final OutputUnit error : result.getErrors()) {
+                    final String keyword = error.getKeywordLocation();
+                    final String instance = error.getInstanceLocation();
+                    final String message = error.getError();
+
+                    if (keyword.endsWith("items/oneOf")) {
+                        LOGGER.warn("{} at '{}'", message, instance);
+                    }
+                }
+            }
+
+            return Future.failedFuture(result.toJson().encodePrettily());
         }
 
         // validate possible dependencies first
@@ -378,7 +391,7 @@ public class DynamicConfiguration {
         final Future<JsonArray> validMiddlewares = validateMiddlewares(httpConfig.getJsonArray(MIDDLEWARES), omitInvalidRouters);
         final Future<JsonArray> validServices = validateServices(httpConfig.getJsonArray(SERVICES), omitInvalidRouters);
 
-        return Future.join(List.of(validMiddlewares, validServices))
+        return Future.all(List.of(validMiddlewares, validServices))
             .compose(
                 cf -> {
                     final JsonArray routers = httpConfig.getJsonArray(ROUTERS);
