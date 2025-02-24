@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;
 import io.vertx.json.schema.JsonSchema;
 import io.vertx.json.schema.JsonSchemaOptions;
+import io.vertx.json.schema.OutputFormat;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.SchemaException;
 import io.vertx.json.schema.ValidationException;
@@ -67,7 +68,9 @@ public class StaticConfiguration {
 
     private static Validator buildValidator() {
         final JsonSchema schema = JsonSchema.of(buildSchema().toJson());
-        final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
+        final JsonSchemaOptions options = new JsonSchemaOptions()
+            .setDraft(Draft.DRAFT202012)
+            .setOutputFormat(OutputFormat.Basic)
             .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
         return Validator.create(schema, options);
     }
@@ -83,7 +86,7 @@ public class StaticConfiguration {
                     .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
             .optionalProperty(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema()
-                    .items(Schemas.anyOf(DynamicConfiguration.getBuildMiddlewareSchema())))
+                    .items(Schemas.oneOf(DynamicConfiguration.getBuildMiddlewareSchema())))
             .optionalProperty(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)))
             .allowAdditionalProperties(false);

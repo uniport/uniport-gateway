@@ -9,7 +9,7 @@
         "middlewares" : {
           "type" : "array",
           "items" : {
-            "anyOf" : [ {
+            "oneOf" : [ {
               "additionalProperties" : false,
               "type" : "object",
               "properties" : {

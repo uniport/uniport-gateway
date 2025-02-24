@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;
 import io.vertx.json.schema.JsonSchema;
 import io.vertx.json.schema.JsonSchemaOptions;
+import io.vertx.json.schema.OutputFormat;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.SchemaException;
 import io.vertx.json.schema.Validator;
@@ -76,7 +77,9 @@ public class DynamicConfiguration {
 
     private static Validator buildValidator() {
         final JsonSchema schema = JsonSchema.of(buildSchema().toJson());
-        final JsonSchemaOptions options = new JsonSchemaOptions().setDraft(Draft.DRAFT202012)
+        final JsonSchemaOptions options = new JsonSchemaOptions()
+            .setDraft(Draft.DRAFT202012)
+            .setOutputFormat(OutputFormat.Basic)
             .setBaseUri("https://inventage.com/portal-gateway/dynamic-configuration");
         return Validator.create(schema, options);
     }
@@ -149,7 +152,7 @@ public class DynamicConfiguration {
             .optionalProperty(ROUTERS, Schemas.arraySchema()
                 .items(routerSchema))
             .optionalProperty(MIDDLEWARES, Schemas.arraySchema()
-                .items(Schemas.anyOf(middlewareSchema)))
+                .items(Schemas.oneOf(middlewareSchema)))
             .optionalProperty(SERVICES, Schemas.arraySchema()
                 .items(serviceSchema))
             .allowAdditionalProperties(false);
