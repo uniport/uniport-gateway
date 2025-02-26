@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support to configure `additionalScopes` and `additionalParameters` in the `oauth2` middleware ([PORTAL-2312](https://inventage-all.atlassian.net/browse/PORTAL-2312))
 - Added `customResponse` middleware for delivering static responses with ease (#5).
 - Added support to configure `passthroughParameters` in the `oauth2` middleware ([PORTAL-2327](https://inventage-all.atlassian.net/browse/PORTAL-2327))
+- Added support to configure allowing malformed cookies in the `session` middleware [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
 
 ### Fixed
 
@@ -41,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consistent logging of default values [PORTAL-2372](https://inventage-all.atlassian.net/browse/PORTAL-2372).
 - Log error message more verbosely, in case config schema validation fails [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
 - Improve schema validation error message [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
+- Should be capable of handling received malformed cookie and pass them on [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 

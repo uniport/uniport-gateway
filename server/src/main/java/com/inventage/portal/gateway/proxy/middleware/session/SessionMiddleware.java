@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 import static io.vertx.ext.web.handler.impl.SessionHandlerImpl.SESSION_FLUSHED_KEY;
 
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
+import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Handler;
@@ -19,6 +19,7 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public class SessionMiddleware extends TraceMiddleware {
      *            switch if the session lifetime cookie is marked as secure
      * @param lifetimeCookieSameSite
      *            same site settings for the session lifetime cookie
-     * @param clusteredSessionStoreRetryTimeoutMiliSeconds
+     * @param clusteredSessionStoreRetryTimeoutMilliSeconds
      *            default retry time out, in ms, for a session not found in the clustered store.
      */
     public SessionMiddleware(
@@ -119,7 +120,7 @@ public class SessionMiddleware extends TraceMiddleware {
         boolean lifetimeCookieSecure,
         CookieSameSite lifetimeCookieSameSite,
         // session store
-        int clusteredSessionStoreRetryTimeoutMiliSeconds
+        int clusteredSessionStoreRetryTimeoutMilliSeconds
     ) {
         Objects.requireNonNull(vertx, "vertx must not be null");
         Objects.requireNonNull(name, "name must not be null");
@@ -148,7 +149,7 @@ public class SessionMiddleware extends TraceMiddleware {
 
         if (vertx.isClustered()) {
             LOGGER.info("Running clustered session store");
-            sessionStore = ClusteredSessionStore.create(vertx, clusteredSessionStoreRetryTimeoutMiliSeconds);
+            sessionStore = ClusteredSessionStore.create(vertx, clusteredSessionStoreRetryTimeoutMilliSeconds);
         } else {
             LOGGER.info("Running local session store");
             sessionStore = LocalSessionStore.create(vertx);
@@ -228,24 +229,31 @@ public class SessionMiddleware extends TraceMiddleware {
      *            of a request
      */
     private void removeSessionCookieFromRequestBeforeProxying(MultiMap headers) {
-        final List<String> filteredCookies = headers
+        // improve this, once this issue is resolved: https://github.com/eclipse-vertx/vertx-http-proxy/issues/100
+        final List<String> filteredCookieHeaders = headers
             .getAll(HttpHeaders.COOKIE)
             .stream()
-            .map(cookieHeader -> ServerCookieDecoder.LAX.decode(cookieHeader).stream()
-                .map(CookieUtil::fromNettyCookie)
-                .filter(cookie -> !cookie.getName().equals(sessionCookieName))
-                .map(cookie -> cookie.encode())
+            .map(cookieHeader -> decodeCookieHeader(cookieHeader).stream()
+                .filter(cookie -> cookie != null)
+                .filter(cookie -> !cookie.name().equals(sessionCookieName))
+                .map(cookie -> encodeCookie(cookie))
                 .toList())
             .map(cookies -> String.join(COOKIE_DELIMITER, cookies))
+            .filter(cookieHeader -> !cookieHeader.isEmpty())
             .toList();
 
         headers.remove(HttpHeaders.COOKIE);
-        for (String cookieHeader : filteredCookies) {
-            if (cookieHeader.length() == 0) {
-                continue;
-            }
-            headers.add(HttpHeaders.COOKIE.toString(), cookieHeader);
+        for (String cookieHeader : filteredCookieHeaders) {
+            headers.add(HttpHeaders.COOKIE, cookieHeader);
         }
+    }
+
+    private Set<io.netty.handler.codec.http.cookie.Cookie> decodeCookieHeader(String header) {
+        return ServerCookieDecoder.LAX.decode(header);
+    }
+
+    private String encodeCookie(io.netty.handler.codec.http.cookie.Cookie cookie) {
+        return ClientCookieEncoder.LAX.encode(cookie);
     }
 
     /**

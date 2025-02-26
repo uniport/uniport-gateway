@@ -19,7 +19,10 @@ import com.inventage.portal.gateway.proxy.middleware.BrowserConnected;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
@@ -471,5 +474,38 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             .map(item -> (SharedDataSessionImpl) item)
             .findFirst()
             .orElseThrow();
+    }
+
+    @Test
+    public void shouldHandleMalformedCookiePORTAL2380(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final int backendPort = TestUtils.findFreePort();
+        final String cookieName = "whatsNew:1.01";
+        final MultiMap headers = HeadersMultiMap.httpHeaders()
+            .set(HttpHeaders.COOKIE, cookieName + "=true"); // malformed cookie: contains illegal column
+        final BrowserConnected browser = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withProxyMiddleware(backendPort)
+            .withBackend(vertx, backendPort, ctx -> {
+                // then
+                final Set<io.netty.handler.codec.http.cookie.Cookie> nettyCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE).stream()
+                    .filter(header -> header != null)
+                    .flatMap(header -> ServerCookieDecoder.LAX.decode(header).stream())
+                    .filter(cookie -> cookie != null)
+                    .collect(Collectors.toSet());
+                VertxAssertions.assertTrue(testCtx, nettyCookies.stream().anyMatch(cookie -> cookie.name().equals(cookieName)));
+                ctx.end("ok");
+            })
+            .build().start()
+            .connectBrowser();
+
+        // when
+        browser.request(GET, "/", headers)
+            .whenComplete((response, error) -> {
+                // then
+                assertThat(testCtx, response)
+                    .hasStatusCode(HttpResponseStatus.OK.code());
+                testCtx.completeNow();
+            });
     }
 }

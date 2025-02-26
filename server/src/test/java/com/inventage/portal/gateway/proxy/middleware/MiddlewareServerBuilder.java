@@ -100,7 +100,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(String uriWithoutSessionTimeoutReset) {
-        return withSessionMiddleware(uriWithoutSessionTimeoutReset, SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER, false);
+        return withSessionMiddleware(uriWithoutSessionTimeoutReset, false, false);
     }
 
     public MiddlewareServerBuilder withSessionMiddleware(boolean withLifetimeHeader, boolean withLifetimeCookie) {
