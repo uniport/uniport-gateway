@@ -208,7 +208,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
     private Optional<Cookie> getCookieFromHeader(RoutingContext ctx, String cookieName) {
         final List<String> cookieHeaders = ctx.request().headers().getAll(HttpHeaders.COOKIE);
         final Cookie cookie = CookieUtil.cookieMapFromRequestHeader(cookieHeaders).get(cookieName);
-        return cookie != null ? Optional.of(cookie) : Optional.empty();
+        return Optional.ofNullable(cookie);
     }
 
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {

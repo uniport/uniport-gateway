@@ -65,8 +65,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         }
 
         // load request cookies
-        final Set<Cookie> requestCookies = CookieUtil
-            .fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+        final Set<Cookie> requestCookies = CookieUtil.fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         // on incoming request: set cookie from session bag if present
@@ -199,11 +198,11 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     private void storeCookiesInSessionBag(RoutingContext ctx, MultiMap headers) {
         final List<String> cookiesToSet = headers.getAll(HttpHeaders.SET_COOKIE);
         if (cookiesToSet == null || cookiesToSet.isEmpty()) {
-            LOGGER.debug("No cookies received in header.");
+            LOGGER.debug("No Set-Cookie received in header.");
             return;
         }
 
-        LOGGER.debug("Set-Cookie detected. Removing and storing in session with  id '{}'.", ctx.session().id());
+        LOGGER.debug("Set-Cookie detected. Removing and storing in session with id '{}'.", ctx.session().id());
         headers.remove(HttpHeaders.SET_COOKIE);
 
         Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
@@ -213,6 +212,11 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
 
         for (String cookieToSet : cookiesToSet) {
             final Cookie decodedCookieToSet = CookieUtil.fromNettyCookie(ClientCookieDecoder.STRICT.decode(cookieToSet));
+            if (decodedCookieToSet == null) {
+                // decoding strictly returns null, if the cookie contains illegal characters or the header is empty
+                LOGGER.debug("Ignoring malformed Cookie: '{}'", cookieToSet);
+                continue;
+            }
             if (isSessionCookie(decodedCookieToSet)) {
                 // special-case: session cookie should always be passed to the user-agent
                 continue;
@@ -222,9 +226,8 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
                 LOGGER.debug("Passing cookie to user agent: '{}'", cookieToSet);
                 headers.add(HttpHeaders.SET_COOKIE, cookieToSet);
                 continue;
-            } else {
-                LOGGER.debug("Cookie removed from response: '{}'", cookieToSet);
             }
+            LOGGER.debug("Cookie removed from response: '{}'", cookieToSet);
             updateSessionBag(storedCookies, decodedCookieToSet);
         }
         ctx.session().put(SESSION_BAG_COOKIES, storedCookies);

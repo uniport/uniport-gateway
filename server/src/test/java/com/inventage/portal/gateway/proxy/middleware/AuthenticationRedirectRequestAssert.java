@@ -13,6 +13,7 @@ import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddl
 import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
 
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpClientResponse;
@@ -211,17 +212,8 @@ public class AuthenticationRedirectRequestAssert
         // LAX, otherwise cookies like "app-platform=iOS App Store" are not returned
         return cookieHeaders.stream()
             .flatMap(cookieEntry -> ServerCookieDecoder.LAX.decode(cookieEntry).stream())
-            .map(cookie -> fromNettyCookie(cookie))
+            .map(cookie -> CookieUtil.fromNettyCookie(cookie))
             .collect(Collectors.toSet());
-    }
-
-    private Cookie fromNettyCookie(io.netty.handler.codec.http.cookie.Cookie nettyCookie) {
-        return Cookie.cookie(nettyCookie.name(), nettyCookie.value())
-            .setDomain(nettyCookie.domain())
-            .setHttpOnly(nettyCookie.isHttpOnly())
-            .setMaxAge(nettyCookie.maxAge())
-            .setPath(nettyCookie.path())
-            .setSecure(nettyCookie.isSecure());
     }
 
     public AuthenticationRedirectRequestAssert hasStatusCode(int expectedStatusCode) {
