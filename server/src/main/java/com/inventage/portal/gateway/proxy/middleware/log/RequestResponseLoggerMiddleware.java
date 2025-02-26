@@ -6,13 +6,13 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.http.HttpVersion;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -178,12 +178,13 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
     private String generateHttpRequestLogMessage(RoutingContext routingContext) {
         final long timestamp = System.currentTimeMillis();
-        final String remoteClient = getClientAddress(routingContext.request().remoteAddress());
-        final HttpMethod method = routingContext.request().method();
-        final String uri = routingContext.request().uri();
-        final HttpVersion version = routingContext.request().version();
-
         final HttpServerRequest request = routingContext.request();
+
+        final String remoteClient = getClientAddress(request.remoteAddress());
+        final HttpMethod method = request.method();
+        final String uri = request.uri();
+        final String version = request.version().alpnName();
+
         long contentLength = 0;
         final String contentLengthStr = request.headers().get("content-length");
         if (contentLengthStr != null) {
@@ -194,26 +195,10 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
             }
         }
 
-        String versionFormatted = "-";
-        switch (version) {
-            case HTTP_1_0:
-                versionFormatted = "HTTP/1.0";
-                break;
-            case HTTP_1_1:
-                versionFormatted = "HTTP/1.1";
-                break;
-            case HTTP_2:
-                versionFormatted = "HTTP/2.0";
-                break;
-            default:
-                versionFormatted = "UNKNOWN_HTTP_VERSION";
-                break;
-        }
-
         final MultiMap headers = request.headers();
 
         // as per RFC1945 the header is referer but it is not mandatory some
-        // implementations use referrer
+        // implementations use referrer (due to a typo in the original specification)
         String referrer = headers.contains("referrer") ? headers.get("referrer") : headers.get("referer");
         String userAgent = request.headers().get("user-agent");
         referrer = referrer == null ? "-" : referrer;
@@ -222,7 +207,7 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
         return String.format("\"%s %s %s\" %d \"%s\" \"%s\" - %dms %s",
             method,
             uri,
-            versionFormatted,
+            version,
             contentLength,
             referrer,
             userAgent,
@@ -232,8 +217,11 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
     private String generateHttpHeaderLogMessage(MultiMap headers) {
         final StringBuilder headerBuilder = new StringBuilder();
-        for (String headerName : headers.names()) {
-            headerBuilder.append(headerName).append(": ").append(headers.get(headerName)).append(" - ");
+        for (Entry<String, String> nameValue : headers.entries()) {
+            headerBuilder.append(nameValue.getKey())
+                .append(": ")
+                .append(nameValue.getValue())
+                .append(" - ");
         }
         return headerBuilder.toString();
     }

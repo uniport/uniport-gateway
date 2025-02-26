@@ -286,16 +286,17 @@ public class RouterFactory {
         }
 
         final String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
-        final JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services,
-            DynamicConfiguration.SERVICE_NAME, serviceName);
+        final JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services, DynamicConfiguration.SERVICE_NAME, serviceName);
         final JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-        // TODO support multiple servers
-        final JsonObject serverConfig = serverConfigs.getJsonObject(0);
-        serverConfig.put(DynamicConfiguration.SERVICE_NAME, serviceName);
+        final JsonObject serverConfig = serverConfigs.getJsonObject(0); // TODO support multiple servers
+
+        final Boolean serviceVerbose = serviceConfig.getBoolean(DynamicConfiguration.SERVICE_VERBOSE);
+        if (serviceVerbose != null) {
+            serverConfig.put(DynamicConfiguration.SERVICE_VERBOSE, serviceVerbose);
+        }
 
         // required to be the last middleware
-        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, "proxy", router,
-            serverConfig);
+        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, serviceName, router, serverConfig);
         middlewareFutures.add(proxyMiddlewareFuture);
 
         // Handlers will get called if and only if

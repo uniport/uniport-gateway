@@ -2,6 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
@@ -20,6 +23,7 @@ import io.vertx.junit5.VertxTestContext;
 import java.io.File;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.LoggerFactory;
 
 @ExtendWith(VertxExtension.class)
 public class ProxyMiddlewareTest {
@@ -116,6 +120,53 @@ public class ProxyMiddlewareTest {
                     testCtx.completeNow();
                 });
             });
+    }
+
+    @Test
+    void shouldLogRequest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final ListAppender<ILoggingEvent> listAppender = new ListAppender<ILoggingEvent>();
+        final Logger logger = setupLogger(listAppender);
+        final int backendPort = TestUtils.findFreePort();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(backendPort, true)
+            .withBackend(vertx, backendPort, ctx -> ctx.response().end("ok"))
+            .build().start();
+
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
+            //then
+            VertxAssertions.assertTrue(testCtx, listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().matches(".*" + "http/1.1 GET / - Host: " + ".*")));
+            testCtx.completeNow();
+            logger.detachAppender(listAppender);
+        });
+    }
+
+    @Test
+    void shouldLogResponse(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final ListAppender<ILoggingEvent> listAppender = new ListAppender<ILoggingEvent>();
+        final Logger logger = setupLogger(listAppender);
+        final int backendPort = TestUtils.findFreePort();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(backendPort, true)
+            .withBackend(vertx, backendPort, ctx -> ctx.response().end("ok"))
+            .build().start();
+
+        //when
+        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
+            //then
+            VertxAssertions.assertTrue(testCtx, listAppender.list.stream().anyMatch(event -> event.getFormattedMessage().matches(".*" + "200 OK -" + ".*")));
+            testCtx.completeNow();
+            logger.detachAppender(listAppender);
+        });
+    }
+
+    private Logger setupLogger(ListAppender<ILoggingEvent> listAppender) {
+        final Logger logger = (Logger) LoggerFactory.getLogger(ProxyMiddleware.class);
+        logger.addAppender(listAppender);
+        listAppender.start();
+        return logger;
     }
 
     @Test

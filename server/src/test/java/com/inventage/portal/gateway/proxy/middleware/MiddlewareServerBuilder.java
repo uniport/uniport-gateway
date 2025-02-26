@@ -357,18 +357,27 @@ public final class MiddlewareServerBuilder {
         return withProxyMiddleware(host, port);
     }
 
+    public MiddlewareServerBuilder withProxyMiddleware(int port, boolean verbose) {
+        return withProxyMiddleware(host, port, verbose);
+    }
+
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port) {
+        return withProxyMiddleware(host, port, false);
+    }
+
+    public MiddlewareServerBuilder withProxyMiddleware(String host, int port, boolean verbose) {
         return withMiddleware(new ProxyMiddleware(vertx, "proxy",
             host, port,
             ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
             ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
             ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
             ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
-            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD));
+            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD,
+            verbose));
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port, String serverProtocol, boolean httpsTrustAll, boolean verifyHost, String httpsTrustStorePath, String httpsTrustStorePassword) {
-        return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port, serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword));
+        return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port, serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword, false));
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {

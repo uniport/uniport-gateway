@@ -1210,6 +1210,9 @@
               },
               "name" : {
                 "type" : "string"
+              },
+              "verbose" : {
+                "type" : "boolean"
               }
             },
             "required" : [ "servers", "name" ]

@@ -21,6 +21,7 @@ import io.vertx.httpproxy.ProxyInterceptor;
 import io.vertx.httpproxy.ProxyRequest;
 import io.vertx.httpproxy.ProxyResponse;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,8 @@ public class ProxyMiddleware extends TraceMiddleware {
     private final HttpProxy httpProxy;
 
     private final String name;
+
+    private final String serverProto;
     private final String serverHost;
     private final int serverPort;
 
@@ -53,7 +56,8 @@ public class ProxyMiddleware extends TraceMiddleware {
         Boolean httpsTrustAll,
         Boolean httpsVerifyHostname,
         String httpsTrustStorePath,
-        String httpsTrustStorePassword
+        String httpsTrustStorePassword,
+        boolean verbose
     ) {
         Objects.requireNonNull(vertx, "vertx must not be null");
         Objects.requireNonNull(name, "name must not be null");
@@ -65,6 +69,7 @@ public class ProxyMiddleware extends TraceMiddleware {
         // httpsTrustStorePassword is allowed to be null
 
         this.name = name;
+        this.serverProto = serverProtocol;
         this.serverHost = serverHost;
         this.serverPort = serverPort;
 
@@ -76,13 +81,16 @@ public class ProxyMiddleware extends TraceMiddleware {
                 httpsVerifyHostname,
                 httpsTrustStorePath,
                 httpsTrustStorePassword,
-                vertx));
-        httpProxy.origin(serverPort, serverHost);
+                vertx))
+            .origin(serverPort, serverHost);
 
         lowercaseHostHeader(httpProxy);
         setHostHeader(httpProxy);
         setXForwardedHeaders(httpProxy);
         applyModifiers(httpProxy);
+        if (verbose) {
+            logRequestResponse(httpProxy);
+        }
     }
 
     protected HttpClient createHttpClient(
@@ -116,7 +124,7 @@ public class ProxyMiddleware extends TraceMiddleware {
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        LOGGER.debug("'{}' is proxying to '{}:{}{}'", name, serverHost, serverPort, ctx.request().uri());
+        LOGGER.debug("'{}' is proxying to '{}://{}:{}{}'", name, serverProto, serverHost, serverPort, ctx.request().uri());
         try {
             httpProxy.handle(new ContextAwareHttpServerRequest(ctx.request(), ctx));
         } catch (Exception e) {
@@ -263,6 +271,65 @@ public class ProxyMiddleware extends TraceMiddleware {
 
                 // continue the interception chain
                 return proxyContext.sendRequest();
+            }
+        });
+    }
+
+    protected void logRequestResponse(HttpProxy proxy) {
+        proxy.addInterceptor(new ProxyInterceptor() {
+            @Override
+            public Future<ProxyResponse> handleProxyRequest(ProxyContext proxyContext) {
+                final ProxyRequest outgoingRequest = proxyContext.request();
+
+                final String version = outgoingRequest.version().alpnName();
+                final String method = outgoingRequest.getMethod().name();
+                final String uri = outgoingRequest.getURI();
+                final String authority = outgoingRequest.getAuthority().toString();
+                final String headers = headersToString(outgoingRequest.headers());
+
+                log(String.format("%s %s %s - Host: %s - %s",
+                    version,
+                    method,
+                    uri,
+                    authority,
+                    headers));
+
+                return proxyContext.sendRequest();
+            }
+
+            @Override
+            public Future<Void> handleProxyResponse(ProxyContext proxyContext) {
+                final ProxyResponse incomingResponse = proxyContext.response();
+
+                final int statusCode = incomingResponse.getStatusCode();
+                final String statusMessage = incomingResponse.getStatusMessage();
+                final String headers = headersToString(incomingResponse.headers());
+
+                log(String.format("%d %s - %s",
+                    statusCode,
+                    statusMessage,
+                    headers));
+
+                return proxyContext.sendResponse();
+            }
+
+            private String headersToString(MultiMap headers) {
+                final StringBuilder headerBuilder = new StringBuilder();
+                for (Entry<String, String> nameValue : headers.entries()) {
+                    headerBuilder.append(nameValue.getKey())
+                        .append(": ")
+                        .append(nameValue.getValue())
+                        .append(" - ");
+                }
+                return headerBuilder.toString();
+            }
+
+            private void log(String message) {
+                if (LOGGER.isTraceEnabled() || LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(message);
+                } else if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(message);
+                }
             }
         });
     }

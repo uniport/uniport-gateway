@@ -328,7 +328,8 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
                 ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
                 ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
                 ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
-                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
+                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD,
+                false);
 
             final Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);

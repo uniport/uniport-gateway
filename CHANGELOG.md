@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `customResponse` middleware for delivering static responses with ease (#5).
 - Added support to configure `passthroughParameters` in the `oauth2` middleware ([PORTAL-2327](https://inventage-all.atlassian.net/browse/PORTAL-2327))
 - Added support to configure allowing malformed cookies in the `session` middleware [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
+- Added support to log request and responses verbosely in the `proxy` middleware [PORTAL-2358](https://inventage-all.atlassian.net/browse/PORTAL-2358).
 
 ### Fixed
 

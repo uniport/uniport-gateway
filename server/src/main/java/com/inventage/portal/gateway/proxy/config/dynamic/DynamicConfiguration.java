@@ -67,6 +67,7 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD;
     public static final String SERVICE_SERVER_HOST = ProxyMiddlewareFactory.SERVICE_SERVER_HOST;
     public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVICE_SERVER_PORT;
+    public static final String SERVICE_VERBOSE = ProxyMiddlewareFactory.SERVICE_VERBOSE;
 
     // schema
     private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
@@ -139,6 +140,7 @@ public class DynamicConfiguration {
                             .with(Keywords.type(SchemaType.STRING))
                             .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
                     .allowAdditionalProperties(false)))
+            .optionalProperty(SERVICE_VERBOSE, Schemas.booleanSchema())
             .allowAdditionalProperties(false);
         return serviceSchema;
     }
