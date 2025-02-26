@@ -5,6 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -62,6 +63,11 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
         logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, DEFAULT_MAX_REDIRECT_RETRIES);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return ReplacedSessionCookieDetectionMiddlewareOptions.class;
     }
 
     @Override

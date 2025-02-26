@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -59,6 +60,11 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, CONTROL_API_SESSION_RESET_URL, null);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return ControlApiMiddlewareOptions.class;
     }
 
     @Override

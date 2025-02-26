@@ -6,6 +6,7 @@ import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -100,6 +101,11 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, CSP_MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return CSPMiddlewareOptions.class;
     }
 
     @Override

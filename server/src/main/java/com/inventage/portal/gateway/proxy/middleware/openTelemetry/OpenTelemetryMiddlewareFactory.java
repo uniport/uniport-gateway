@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.openTelemetry;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -35,6 +36,11 @@ public class OpenTelemetryMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Void> validate(JsonObject options) {
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return OpenTelemetryMiddlewareOptions.class;
     }
 
     @Override

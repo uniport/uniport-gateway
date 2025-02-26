@@ -5,6 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -39,9 +40,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     // schema
     public static final String OAUTH2 = "oauth2";
-    public static final String OAUTH2_CLIENTID = "clientId";
-    public static final String OAUTH2_CLIENTSECRET = "clientSecret";
-    public static final String OAUTH2_DISCOVERYURL = "discoveryUrl";
+    public static final String OAUTH2_CLIENT_ID = "clientId";
+    public static final String OAUTH2_CLIENT_SECRET = "clientSecret";
+    public static final String OAUTH2_DISCOVERY_URL = "discoveryUrl";
     public static final String OAUTH2_RESPONSE_MODE = "responseMode";
     public static final String OAUTH2_SESSION_SCOPE = "sessionScope";
     public static final String OAUTH2_SESSION_SCOPE_ID = "id";
@@ -77,11 +78,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(OAUTH2_CLIENTID, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_CLIENT_ID, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(OAUTH2_CLIENTSECRET, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_CLIENT_SECRET, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(OAUTH2_DISCOVERYURL, Schemas.stringSchema()
+            .requiredProperty(OAUTH2_DISCOVERY_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .requiredProperty(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
@@ -99,7 +100,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                     .with(Keywords.minLength(1)))
                 .allowAdditionalProperties(true))
             .optionalProperty(OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
+                .items(Schemas.stringSchema()
+                    .with(Keywords.minLength(1))))
             .allowAdditionalProperties(false);
     }
 
@@ -118,6 +120,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PASSTHROUGH_PARAMETERS, getPassthroughParameters(options));
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return OAuth2MiddlewareOptions.class;
     }
 
     @Override
@@ -232,9 +239,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     private OAuth2Options oAuth2Options(JsonObject middlewareConfig) {
         return new OAuth2Options()
-            .setClientId(middlewareConfig.getString(OAUTH2_CLIENTID))
-            .setClientSecret(middlewareConfig.getString(OAUTH2_CLIENTSECRET))
-            .setSite(middlewareConfig.getString(OAUTH2_DISCOVERYURL))
+            .setClientId(middlewareConfig.getString(OAUTH2_CLIENT_ID))
+            .setClientSecret(middlewareConfig.getString(OAUTH2_CLIENT_SECRET))
+            .setSite(middlewareConfig.getString(OAUTH2_DISCOVERY_URL))
             .setValidateIssuer(false);
     }
 

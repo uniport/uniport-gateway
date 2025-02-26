@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.CookieSameSite;
@@ -145,6 +146,11 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return SessionMiddlewareOptions.class;
     }
 
     @Override

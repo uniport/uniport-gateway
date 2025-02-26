@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -91,6 +92,11 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, CSRF_NAG_HTTPS, DEFAULT_NAG_HTTPS);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return CSRFMiddlewareOptions.class;
     }
 
     @Override

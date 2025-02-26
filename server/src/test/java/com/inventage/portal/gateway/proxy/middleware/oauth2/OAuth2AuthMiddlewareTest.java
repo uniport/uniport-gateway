@@ -59,9 +59,9 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
                     withMiddlewareOpts(JsonObject.of(
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo",
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, "bar",
-                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "foo",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, "bar",
+                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "localhost:1234",
                         OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
                         OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
 
@@ -69,9 +69,9 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
                     withMiddlewareOpts(JsonObject.of(
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo",
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, "bar",
-                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "foo",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, "bar",
+                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "localhost:1234",
                         OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
                         OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false,
                         OAuth2MiddlewareFactory.OAUTH2_RESPONSE_MODE, "blub")))));
@@ -84,8 +84,8 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
                     withMiddlewareOpts(JsonObject.of(
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "foo",
-                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "localhost:1234",
+                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "foo",
+                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "localhost:1234",
                         OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
                         OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
 
@@ -114,10 +114,10 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     @Test
     void discoveryFailure(Vertx vertx, VertxTestContext testCtx) throws Throwable {
         final JsonObject config = new JsonObject()
-            .put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, "http://inexistent.host")
+            .put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "http://inexistent.host")
             .put(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "scopee")
-            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENTID, "id")
-            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, "secret")
+            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "id")
+            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, "secret")
             .put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http")
             .put(RouterFactory.PUBLIC_HOSTNAME_KEY, "host")
             .put(RouterFactory.PUBLIC_PORT_KEY, 1234);

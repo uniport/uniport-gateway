@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchann
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -33,6 +34,11 @@ public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewar
     @Override
     public Future<Void> validate(JsonObject options) {
         return super.validate(options);
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return BackChannelLogoutMiddlewareOptions.class;
     }
 
     @Override

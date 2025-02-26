@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -64,6 +65,11 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, MATOMO_JWT_PATH_ROLES, DEFAULT_JWT_PATH_ROLES);
         logDefaultIfNotConfigured(LOGGER, options, MATOMO_JWT_PATH_GROUP, DEFAULT_JWT_PATH_GROUP);
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return MatomoMiddlewareOptions.class;
     }
 
     @Override

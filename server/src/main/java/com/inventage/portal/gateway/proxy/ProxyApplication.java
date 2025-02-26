@@ -5,6 +5,7 @@ import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
+import com.inventage.portal.gateway.proxy.model.ModelBuilderListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
@@ -122,6 +123,7 @@ public class ProxyApplication implements Application {
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort, entrypointName);
 
         watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
+        watcher.addListener(new ModelBuilderListener());
 
         return vertx.deployVerticle(watcher);
     }

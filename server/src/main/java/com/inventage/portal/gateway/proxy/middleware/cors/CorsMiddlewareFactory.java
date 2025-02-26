@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -64,15 +65,19 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
             .optionalProperty(CORS_ALLOWED_ORIGINS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
+                .items(Schemas.stringSchema()
+                    .with(Keywords.minLength(1))))
             .optionalProperty(CORS_ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
+                .items(Schemas.stringSchema()
+                    .with(Keywords.minLength(1))))
             .optionalProperty(CORS_ALLOWED_METHODS, Schemas.arraySchema()
                 .items(Schemas.enumSchema((Object[]) HTTP_METHODS)))
             .optionalProperty(CORS_ALLOWED_HEADERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
+                .items(Schemas.stringSchema()
+                    .with(Keywords.minLength(1))))
             .optionalProperty(CORS_EXPOSED_HEADERS, Schemas.arraySchema()
-                .items(Schemas.stringSchema().with(Keywords.minLength(1))))
+                .items(Schemas.stringSchema()
+                    .with(Keywords.minLength(1))))
             .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema()
@@ -94,6 +99,11 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return CorsMiddlewareOptions.class;
     }
 
     @Override

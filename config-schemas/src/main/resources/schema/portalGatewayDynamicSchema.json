@@ -1202,7 +1202,21 @@
                       "type" : "string"
                     },
                     "httpsOptions" : {
-                      "type" : "object"
+                      "type" : "object",
+                      "properties" : {
+                        "verifyHostname" : {
+                          "type" : "boolean"
+                        },
+                        "trustStorePassword" : {
+                          "type" : "string"
+                        },
+                        "trustAll" : {
+                          "type" : "boolean"
+                        },
+                        "trustStorePath" : {
+                          "type" : "string"
+                        }
+                      }
                     }
                   },
                   "required" : [ "port", "host" ]

@@ -215,9 +215,9 @@ public class KeycloakServer {
     public JsonObject getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl) {
         final JsonObject config = new JsonObject();
         config.put(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, scope);
-        config.put(OAuth2MiddlewareFactory.OAUTH2_CLIENTID, EMPTY_STRING);
-        config.put(OAuth2MiddlewareFactory.OAUTH2_CLIENTSECRET, EMPTY_STRING);
-        config.put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERYURL, getDefaultDiscoveryUrl());
+        config.put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, EMPTY_STRING);
+        config.put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, EMPTY_STRING);
+        config.put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, getDefaultDiscoveryUrl());
         config.put(OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow);
         if (publicUrl != null) {
             config.put(OAuth2MiddlewareFactory.OAUTH2_PUBLIC_URL, publicUrl);

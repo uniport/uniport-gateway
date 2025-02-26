@@ -132,7 +132,11 @@ public class DynamicConfiguration {
             .requiredProperty(SERVICE_SERVERS, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .optionalProperty(SERVICE_SERVER_PROTOCOL, Schemas.stringSchema())
-                    .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema())
+                    .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS, Schemas.objectSchema()
+                        .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, Schemas.booleanSchema())
+                        .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, Schemas.booleanSchema())
+                        .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, Schemas.stringSchema())
+                        .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, Schemas.stringSchema()))
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                     .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(
                         Schemas.intSchema(),

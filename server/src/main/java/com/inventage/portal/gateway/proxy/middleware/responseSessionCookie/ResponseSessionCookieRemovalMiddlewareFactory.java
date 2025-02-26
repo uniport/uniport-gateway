@@ -5,6 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -47,6 +48,11 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
         logDefaultIfNotConfigured(LOGGER, options, RESPONSE_SESSION_COOKIE_REMOVAL_NAME, DEFAULT_SESSION_COOKIE_NAME);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return ResponseSessionCookieRemovalMiddlewareOptions.class;
     }
 
     @Override

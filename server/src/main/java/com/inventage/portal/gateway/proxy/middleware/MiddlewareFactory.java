@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -25,6 +26,8 @@ public interface MiddlewareFactory {
     ObjectSchemaBuilder optionsSchema();
 
     Future<Void> validate(JsonObject options);
+
+    Class<? extends GatewayMiddlewareOptions> modelType();
 
     Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
 

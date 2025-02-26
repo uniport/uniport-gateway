@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthoriz
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -41,6 +42,11 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
             .compose(v -> {
                 return Future.succeededFuture();
             });
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return PassAuthorizationMiddlewareOptions.class;
     }
 
     @Override

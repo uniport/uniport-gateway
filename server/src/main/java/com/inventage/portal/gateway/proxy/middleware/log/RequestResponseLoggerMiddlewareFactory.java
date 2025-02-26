@@ -4,6 +4,7 @@ import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.lo
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -63,6 +64,11 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
         logDefaultIfNotConfigured(LOGGER, options, REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, null);
 
         return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<? extends GatewayMiddlewareOptions> modelType() {
+        return RequestResponseLoggerMiddlewareOptions.class;
     }
 
     @Override
