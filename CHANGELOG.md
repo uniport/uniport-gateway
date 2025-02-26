@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support to configure `additionalScopes` and `additionalParameters` in the `oauth2` middleware ([PORTAL-2312](https://inventage-all.atlassian.net/browse/PORTAL-2312))
 - Added `customResponse` middleware for delivering static responses with ease (#5).
 - Added support to configure `passthroughParameters` in the `oauth2` middleware ([PORTAL-2327](https://inventage-all.atlassian.net/browse/PORTAL-2327))
-- Added support to configure allowing malformed cookies in the `session` middleware [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
 - Added support to log request and responses verbosely in the `proxy` middleware [PORTAL-2358](https://inventage-all.atlassian.net/browse/PORTAL-2358).
 
 ### Fixed
@@ -24,12 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use fresh public keys to verify the logout token in the back channel logout ([PORTAL-2175](https://inventage-all.atlassian.net/browse/PORTAL-2175)).
 - On back channel logout, remove session directly from the session store, instead of destroying it to invalidate it immediately ([PORTAL-2175](https://inventage-all.atlassian.net/browse/PORTAL-2175)).
 - Don't forward the session cookie to the backend service ([PORTAL-2119](https://inventage-all.atlassian.net/browse/PORTAL-2119)).
-- Keep overall cookie header structure, when filterting out the session cookie from an outgoing request ([PORTAL-2349](https://inventage-all.atlassian.net/browse/PORTAL-2349)).
+- Keep overall cookie header structure, when filtering out the session cookie from an outgoing request ([PORTAL-2349](https://inventage-all.atlassian.net/browse/PORTAL-2349)).
 - Don't shadow OAuth2 callback routes by a catch-all router ([PORTAL-2302](https://inventage-all.atlassian.net/browse/PORTAL-2302)).
 - Set `response_mode` to `query`, in case the request does not accept `text/html` ([PORTAL-2321](https://inventage-all.atlassian.net/browse/PORTAL-2321)).
 - Make the `cors` middleware available and configurable ([PORTAL-2330](https://inventage-all.atlassian.net/browse/PORTAL-2330)).
 - To ensure a custom response header is always written to the response, the `addHeadersEndHandler` is to be used, instead of only adding it on proxied incoming responses with the help of `ProxyInterceptor`s ([PORTAL-2329](https://inventage-all.atlassian.net/browse/PORTAL-2329)).
 - Respecting all accept headers to determine, if `prompt=none` should be set in the authentication request in the `oauth2` middleware ([PORTAL-2333](https://inventage-all.atlassian.net/browse/PORTAL-2333)).
+- Should be capable of handling received malformed cookie and pass them on [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
 
 ### Changed
 
@@ -44,7 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consistent logging of default values [PORTAL-2372](https://inventage-all.atlassian.net/browse/PORTAL-2372).
 - Log error message more verbosely, in case config schema validation fails [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
 - Improve schema validation error message [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
-- Should be capable of handling received malformed cookie and pass them on [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
