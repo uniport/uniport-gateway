@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
+package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 import static io.vertx.core.http.HttpMethod.GET;

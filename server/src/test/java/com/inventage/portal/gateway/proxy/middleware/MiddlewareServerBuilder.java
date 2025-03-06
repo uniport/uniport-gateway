@@ -5,6 +5,7 @@ import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCooki
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
+import com.inventage.portal.gateway.proxy.middleware.authorization.MockOAuth2Auth;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
@@ -12,7 +13,6 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.Be
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.authorizationBearer.MockOAuth2Auth;
 import com.inventage.portal.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddleware;

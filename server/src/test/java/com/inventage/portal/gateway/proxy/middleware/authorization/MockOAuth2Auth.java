@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
+package com.inventage.portal.gateway.proxy.middleware.authorization;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

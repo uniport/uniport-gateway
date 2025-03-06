@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.bearerOnly;
+package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
@@ -14,7 +14,6 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import com.inventage.portal.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;

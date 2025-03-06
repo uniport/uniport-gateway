@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.controlApi;
+package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
@@ -12,8 +12,6 @@ import static io.vertx.core.http.HttpMethod.GET;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
-import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiAction;
-import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;

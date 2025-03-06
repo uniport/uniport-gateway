@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.authorizationBearer;
+package com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
@@ -12,8 +12,7 @@ import static com.inventage.portal.gateway.proxy.middleware.VertxAssertions.asse
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
-import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.authorization.MockOAuth2Auth;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.vertx.core.Handler;
