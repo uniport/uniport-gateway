@@ -1,12 +1,19 @@
 package com.inventage.portal.gateway.proxy.middleware.openTelemetry;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OpenTelemetryMiddlewareOptions implements GatewayMiddlewareOptions {
+@JsonDeserialize(builder = OpenTelemetryMiddlewareOptions.Builder.class)
+public final class OpenTelemetryMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    public OpenTelemetryMiddlewareOptions() {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private OpenTelemetryMiddlewareOptions(Builder builder) {
     }
 
     @Override
@@ -15,6 +22,13 @@ public class OpenTelemetryMiddlewareOptions implements GatewayMiddlewareOptions 
             return (OpenTelemetryMiddlewareOptions) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @JsonPOJOBuilder
+    public static final class Builder {
+        public OpenTelemetryMiddlewareOptions build() {
+            return new OpenTelemetryMiddlewareOptions(this);
         }
     }
 }

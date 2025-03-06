@@ -2,6 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.headers;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class HeaderMiddlewareOptions implements GatewayMiddlewareOptions {
+@JsonDeserialize(builder = HeaderMiddlewareOptions.Builder.class)
+public final class HeaderMiddlewareOptions implements GatewayMiddlewareOptions {
 
     @JsonProperty(HeaderMiddlewareFactory.HEADERS_REQUEST)
     private Map<String, Object> requestHeaders;
@@ -17,7 +20,13 @@ public class HeaderMiddlewareOptions implements GatewayMiddlewareOptions {
     @JsonProperty(HeaderMiddlewareFactory.HEADERS_RESPONSE)
     private Map<String, Object> responseHeaders;
 
-    public HeaderMiddlewareOptions() {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private HeaderMiddlewareOptions(Builder builder) {
+        this.requestHeaders = builder.requestHeaders;
+        this.responseHeaders = builder.responseHeaders;
     }
 
     public Map<String, List<String>> getRequestHeaders() {
@@ -54,6 +63,26 @@ public class HeaderMiddlewareOptions implements GatewayMiddlewareOptions {
             return options;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @JsonPOJOBuilder
+    public static final class Builder {
+        private Map<String, Object> requestHeaders;
+        private Map<String, Object> responseHeaders;
+
+        public Builder withRequestHeaders(Map<String, Object> requestHeaders) {
+            this.requestHeaders = requestHeaders;
+            return this;
+        }
+
+        public Builder withResponseHeaders(Map<String, Object> responseHeaders) {
+            this.responseHeaders = responseHeaders;
+            return this;
+        }
+
+        public HeaderMiddlewareOptions build() {
+            return new HeaderMiddlewareOptions(this);
         }
     }
 }

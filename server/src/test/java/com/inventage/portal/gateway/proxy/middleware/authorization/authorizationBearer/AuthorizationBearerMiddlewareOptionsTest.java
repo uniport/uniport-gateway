@@ -12,15 +12,28 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 public class AuthorizationBearerMiddlewareOptionsTest {
 
     @Test
-    public void shouldParse() {
+    public void shouldCreateFromBuilder() {
         // given
-        final ObjectMapper codec = new ObjectMapper();
+        final String sessionScope = "aSessionScope";
+
+        // when
+        final AuthorizationBearerMiddlewareOptions options = new AuthorizationBearerMiddlewareOptions.Builder()
+            .withSessionScope(sessionScope)
+            .build();
+
+        // then
+        assertEquals(sessionScope, options.getSessionScope());
+    }
+
+    @Test
+    public void shouldCreateFromJson() {
+        // given
         final String sessionScope = "aSessionScope";
         final JsonObject json = JsonObject.of(
             AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, sessionScope);
 
         // when
-        final ThrowingSupplier<AuthorizationBearerMiddlewareOptions> parse = () -> codec.readValue(json.encode(), AuthorizationBearerMiddlewareOptions.class);
+        final ThrowingSupplier<AuthorizationBearerMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), AuthorizationBearerMiddlewareOptions.class);
 
         // then
         final AuthorizationBearerMiddlewareOptions options = assertDoesNotThrow(parse);
@@ -32,12 +45,13 @@ public class AuthorizationBearerMiddlewareOptionsTest {
     public void shouldDeepCopy() {
         // given
         final String sessionScope = "aSessionScope";
-        final AuthorizationBearerMiddlewareOptions options = new AuthorizationBearerMiddlewareOptions(sessionScope);
+        final AuthorizationBearerMiddlewareOptions options = AuthorizationBearerMiddlewareOptions.builder()
+            .withSessionScope(sessionScope)
+            .build();
 
         // when
         final AuthorizationBearerMiddlewareOptions copy = options.clone();
         // then
         assertEquals(copy.getSessionScope(), options.getSessionScope());
-
     }
 }

@@ -2,10 +2,13 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SessionMiddlewareOptions implements GatewayMiddlewareOptions {
+@JsonDeserialize(builder = SessionMiddlewareOptions.Builder.class)
+public final class SessionMiddlewareOptions implements GatewayMiddlewareOptions {
 
     @JsonProperty(SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES)
     private Integer idleTimeoutMinutes;
@@ -31,7 +34,19 @@ public class SessionMiddlewareOptions implements GatewayMiddlewareOptions {
     @JsonProperty(SessionMiddlewareFactory.CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS)
     private Integer clusteredSessionStoreRetryTimeoutMs;
 
-    public SessionMiddlewareOptions() {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private SessionMiddlewareOptions(Builder builder) {
+        this.idleTimeoutMinutes = builder.idleTimeoutMinutes;
+        this.idMinLength = builder.idMinLength;
+        this.nagHttps = builder.nagHttps;
+        this.ignoreSessionTimeoutResetForURI = builder.ignoreSessionTimeoutResetForURI;
+        this.useCookie = builder.useCookie;
+        this.useHeader = builder.useHeader;
+        this.cookie = builder.cookie;
+        this.clusteredSessionStoreRetryTimeoutMs = builder.clusteredSessionStoreRetryTimeoutMs;
     }
 
     public Integer getIdleTimeoutMinutes() {
@@ -77,6 +92,7 @@ public class SessionMiddlewareOptions implements GatewayMiddlewareOptions {
         }
     }
 
+    @JsonDeserialize(builder = CookieOptions.Builder.class)
     public static final class CookieOptions implements GatewayMiddlewareOptions {
 
         @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE_NAME)
@@ -91,7 +107,11 @@ public class SessionMiddlewareOptions implements GatewayMiddlewareOptions {
         @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE)
         private String sameSite;
 
-        private CookieOptions() {
+        private CookieOptions(Builder builder) {
+            this.name = builder.name;
+            this.httpOnly = builder.httpOnly;
+            this.secure = builder.secure;
+            this.sameSite = builder.sameSite;
         }
 
         public String getName() {
@@ -117,6 +137,95 @@ public class SessionMiddlewareOptions implements GatewayMiddlewareOptions {
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        @JsonPOJOBuilder
+        public static final class Builder {
+
+            private String name;
+            private Boolean httpOnly;
+            private Boolean secure;
+            private String sameSite;
+
+            public Builder withName(String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder withHttpOnly(Boolean httpOnly) {
+                this.httpOnly = httpOnly;
+                return this;
+            }
+
+            public Builder withSecure(Boolean secure) {
+                this.secure = secure;
+                return this;
+            }
+
+            public Builder withSameSite(String sameSite) {
+                this.sameSite = sameSite;
+                return this;
+            }
+
+            public CookieOptions build() {
+                return new CookieOptions(this);
+            }
+        }
+    }
+
+    @JsonPOJOBuilder
+    public static final class Builder {
+        private Integer idleTimeoutMinutes;
+        private Integer idMinLength;
+        private Boolean nagHttps;
+        private String ignoreSessionTimeoutResetForURI;
+        private Boolean useCookie;
+        private Boolean useHeader;
+        private CookieOptions cookie;
+        private Integer clusteredSessionStoreRetryTimeoutMs;
+
+        public Builder withIdleTimeoutMinutes(Integer idleTimeoutMinutes) {
+            this.idleTimeoutMinutes = idleTimeoutMinutes;
+            return this;
+        }
+
+        public Builder withIdMinLength(Integer idMinLength) {
+            this.idMinLength = idMinLength;
+            return this;
+        }
+
+        public Builder withNagHttps(Boolean nagHttps) {
+            this.nagHttps = nagHttps;
+            return this;
+        }
+
+        public Builder withIgnoreSessionTimeoutResetForURI(String ignoreSessionTimeoutResetForURI) {
+            this.ignoreSessionTimeoutResetForURI = ignoreSessionTimeoutResetForURI;
+            return this;
+        }
+
+        public Builder withUseCookie(Boolean useCookie) {
+            this.useCookie = useCookie;
+            return this;
+        }
+
+        public Builder withUseHeader(Boolean useHeader) {
+            this.useHeader = useHeader;
+            return this;
+        }
+
+        public Builder withCookie(CookieOptions cookie) {
+            this.cookie = cookie;
+            return this;
+        }
+
+        public Builder withClusteredSessionStoreRetryTimeoutMs(Integer clusteredSessionStoreRetryTimeoutMs) {
+            this.clusteredSessionStoreRetryTimeoutMs = clusteredSessionStoreRetryTimeoutMs;
+            return this;
+        }
+
+        public SessionMiddlewareOptions build() {
+            return new SessionMiddlewareOptions(this);
         }
     }
 }
