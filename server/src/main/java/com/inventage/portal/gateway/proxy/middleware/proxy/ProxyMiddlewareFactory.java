@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     // schema
+    public static final String SERVICE_NAME = "name";
     public static final String SERVICE_SERVERS = "servers";
     public static final String SERVICE_SERVER_PROTOCOL = "protocol";
     public static final String SERVICE_SERVER_HTTPS_OPTIONS = "httpsOptions";

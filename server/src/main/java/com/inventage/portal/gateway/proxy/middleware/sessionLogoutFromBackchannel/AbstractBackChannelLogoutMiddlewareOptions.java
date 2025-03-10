@@ -2,11 +2,11 @@ package com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchann
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayMiddlewareStyle
+@GatewayStyle
 @JsonDeserialize(builder = BackChannelLogoutMiddlewareOptions.Builder.class)
 public abstract class AbstractBackChannelLogoutMiddlewareOptions extends WithAuthHandlerMiddlewareOptionsBase {
 

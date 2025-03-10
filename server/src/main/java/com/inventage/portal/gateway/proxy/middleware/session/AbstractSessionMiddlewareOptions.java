@@ -3,14 +3,14 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import io.vertx.core.http.CookieSameSite;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayMiddlewareStyle
+@GatewayStyle
 @JsonDeserialize(builder = SessionMiddlewareOptions.Builder.class)
 public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlewareOptions {
 
@@ -69,7 +69,7 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
     }
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = CookieOptions.Builder.class)
     public abstract static class AbstractCookieOptions implements GatewayMiddlewareOptions {
 

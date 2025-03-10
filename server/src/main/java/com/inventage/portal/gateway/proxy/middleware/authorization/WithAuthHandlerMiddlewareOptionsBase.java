@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Check;
@@ -39,7 +39,7 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     public abstract ReconciliationOptions getReconciliation();
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = PublicKeyOptions.Builder.class)
     public abstract static class AbstractPublicKeyOptions implements GatewayMiddlewareOptions {
 
@@ -52,7 +52,7 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     }
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = ClaimOptions.Builder.class)
     public abstract static class AbstractClaimOptions implements GatewayMiddlewareOptions {
 
@@ -67,7 +67,7 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     }
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = ReconciliationOptions.Builder.class)
     public abstract static class AbstractReconciliationOptions implements GatewayMiddlewareOptions {
 

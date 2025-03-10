@@ -17,11 +17,22 @@ public class GatewayMiddlewareJsonDeserializer extends JsonDeserializer<GatewayM
 
     @Override
     public GatewayMiddleware deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+        final GatewayMiddleware.Builder builder = GatewayMiddleware.builder();
+
         final ObjectCodec codec = p.getCodec();
         final JsonNode node = codec.readTree(p);
 
+        final JsonNode nameNode = node.get(DynamicConfiguration.MIDDLEWARE_NAME);
+        final String name = nameNode.asText();
+        builder.withName(name);
+
         final JsonNode typeNode = node.get(DynamicConfiguration.MIDDLEWARE_TYPE);
         final String type = typeNode.asText();
+        builder.withType(type);
+
+        if (!node.has(DynamicConfiguration.MIDDLEWARE_OPTIONS)) {
+            return builder.build();
+        }
 
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(type);
         if (middlewareFactory.isEmpty()) {
@@ -29,13 +40,11 @@ public class GatewayMiddlewareJsonDeserializer extends JsonDeserializer<GatewayM
             throw new IllegalArgumentException(errMsg);
         }
 
-        final JsonNode nameNode = node.get(DynamicConfiguration.MIDDLEWARE_NAME);
-        final String name = nameNode.asText();
-
         final JsonNode optionsNode = node.get(DynamicConfiguration.MIDDLEWARE_OPTIONS);
         final GatewayMiddlewareOptions options = codec.treeToValue(optionsNode, middlewareFactory.get().modelType());
+        builder.withOptions(options);
 
-        return new GatewayMiddleware(name, type, options);
+        return builder.build();
     }
 
 }

@@ -1226,6 +1226,7 @@
                 "type" : "string"
               },
               "verbose" : {
+                "default" : false,
                 "type" : "boolean"
               }
             },

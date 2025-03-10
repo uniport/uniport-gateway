@@ -2,17 +2,27 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.Preconditions;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayMiddlewareStyle
+@GatewayStyle
 @JsonDeserialize(builder = ProxyMiddlewareOptions.Builder.class)
 public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewareOptions {
+
+    @Check
+    protected void validate() {
+        Preconditions.checkState(!getServers().isEmpty(), "'getServers' must have at least one element");
+    }
+
+    @JsonProperty(ProxyMiddlewareFactory.SERVICE_NAME)
+    public abstract String getName();
 
     @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVERS)
     public abstract List<ServerOptions> getServers();
@@ -24,7 +34,7 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
     }
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = ServerOptions.Builder.class)
     public abstract static class AbstractServerOptions implements GatewayMiddlewareOptions {
 
@@ -46,7 +56,7 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
     }
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = HTTPsOptions.Builder.class)
     public abstract static class AbstractHTTPsOptions implements GatewayMiddlewareOptions {
 

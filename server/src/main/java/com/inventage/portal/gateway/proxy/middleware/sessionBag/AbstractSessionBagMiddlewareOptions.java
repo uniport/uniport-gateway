@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayMiddlewareStyle
+@GatewayStyle
 @JsonDeserialize(builder = SessionBagMiddlewareOptions.Builder.class)
 public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMiddlewareOptions {
 
@@ -30,7 +30,7 @@ public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMidd
     public abstract List<WhitelistedCookieOption> getWhitelistedCookieOptions();
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = WhitelistedCookieOption.Builder.class)
     public abstract static class AbstractWhitelistedCookieOption implements GatewayMiddlewareOptions {
 

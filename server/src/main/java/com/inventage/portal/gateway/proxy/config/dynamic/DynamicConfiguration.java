@@ -56,7 +56,7 @@ public class DynamicConfiguration {
         .toList();
     // services
     public static final String SERVICES = "services";
-    public static final String SERVICE_NAME = "name";
+    public static final String SERVICE_NAME = ProxyMiddlewareFactory.SERVICE_NAME;
     // proxying configuration to keep the sovereignty close to the implementation
     public static final String SERVICE_SERVERS = ProxyMiddlewareFactory.SERVICE_SERVERS;
     public static final String SERVICE_SERVER_PROTOCOL = ProxyMiddlewareFactory.SERVICE_SERVER_PROTOCOL;
@@ -68,6 +68,9 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HOST = ProxyMiddlewareFactory.SERVICE_SERVER_HOST;
     public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVICE_SERVER_PORT;
     public static final String SERVICE_VERBOSE = ProxyMiddlewareFactory.SERVICE_VERBOSE;
+
+    // default
+    public static final boolean DEFAULT_SERVICE_VERBOSE = ProxyMiddlewareFactory.DEFAULT_VERBOSE;
 
     // schema
     private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
@@ -144,7 +147,8 @@ public class DynamicConfiguration {
                             .with(Keywords.type(SchemaType.STRING))
                             .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
                     .allowAdditionalProperties(false)))
-            .optionalProperty(SERVICE_VERBOSE, Schemas.booleanSchema())
+            .optionalProperty(SERVICE_VERBOSE, Schemas.booleanSchema()
+                .defaultValue(DEFAULT_SERVICE_VERBOSE))
             .allowAdditionalProperties(false);
         return serviceSchema;
     }

@@ -15,14 +15,20 @@ import static com.inventage.portal.gateway.TestUtils.withServerHttpOptions;
 import static com.inventage.portal.gateway.TestUtils.withServers;
 import static com.inventage.portal.gateway.TestUtils.withService;
 import static com.inventage.portal.gateway.TestUtils.withServices;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.middleware.proxy.HTTPsOptions;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,36 +39,97 @@ public class GatewayTest {
     @SuppressWarnings("unchecked")
     @Test
     public void parseJsonTest() {
+        // given
+        final String aRouterName = "rA";
+        final String aRouterRule = "rA";
+        final String aRouterEp = "rA";
+
+        final String aMiddlewareName = "rA";
+        final String aMiddlewareType = "headers";
+        final String aHeaderName = "X-Foo";
+        final String aHeaderValue = "bar";
+        final JsonObject aMiddlewareOpts = JsonObject.of(
+            HeaderMiddlewareFactory.HEADERS_REQUEST, JsonObject.of(
+                aHeaderName, aHeaderValue));
+
+        final String aServiceName = "rA";
+        final String aHost = "example.com";
+        final int aPort = 1234;
+        final boolean aVerify = true;
+        final boolean aTrust = false;
+        final String aPath = "/path";
+        final String aPassword = "password";
 
         final JsonObject json = buildConfiguration(
             withRouters(
-                withRouter("rA",
-                    withRouterRule("Path('/')"),
-                    withRouterEntrypoints("eA"),
-                    withRouterMiddlewares("mwA"),
-                    withRouterService("sA"))),
+                withRouter(aRouterName,
+                    withRouterRule(aRouterRule),
+                    withRouterEntrypoints(aRouterEp),
+                    withRouterMiddlewares(aMiddlewareName),
+                    withRouterService(aServiceName))),
             withMiddlewares(
-                withMiddleware("mwA", "headers",
-                    withMiddlewareOpts(JsonObject.of(
-                        "customRequestHeaders", JsonObject.of(
-                            "X-Foo", "bar"))))),
+                withMiddleware(aMiddlewareName, aMiddlewareType,
+                    withMiddlewareOpts(aMiddlewareOpts))),
             withServices(
-                withService("sA",
+                withService(aServiceName,
                     withServers(
-                        withServer("example.com", 1234,
-                            withServerHttpOptions(false, true, "/abc", "1234"))))));
+                        withServer(aHost, aPort,
+                            withServerHttpOptions(aVerify, aTrust, aPath, aPassword))))));
         System.out.println(json.encodePrettily());
 
+        // when
         final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
-        final ObjectMapper codec = new ObjectMapper();
-        Gateway gateway = null;
-        try {
-            gateway = codec.readValue(httpJson.encode(), Gateway.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            assertNull(e);
-        }
+        final ThrowingSupplier<Gateway> parse = () -> new ObjectMapper().readValue(httpJson.encode(), Gateway.class);
+
+        // then
+        final Gateway gateway = assertDoesNotThrow(parse);
         System.out.println(gateway.toString());
-        assertEquals(httpJson, new JsonObject(gateway.toString()));
+
+        assertNotNull(gateway.getRouters());
+        final GatewayRouter router = gateway.getRouters().get(0);
+        assertNotNull(router);
+        assertEquals(aRouterName, router.getName());
+
+        assertNotNull(router.getEntrypoints());
+        assertEquals(aRouterEp, router.getEntrypoints().get(0));
+        assertEquals(aRouterRule, router.getRule());
+
+        assertNotNull(router.getMiddlewares());
+        assertEquals(aMiddlewareName, router.getMiddlewares().get(0));
+        assertEquals(aServiceName, router.getService());
+
+        assertNotNull(gateway.getMiddlewares());
+        final GatewayMiddleware middleware = gateway.getMiddlewares().get(0);
+        assertNotNull(middleware);
+        assertEquals(aMiddlewareName, middleware.getName());
+        assertEquals(aMiddlewareType, middleware.getType());
+
+        final GatewayMiddlewareOptions options = middleware.getOptions();
+        assertNotNull(options);
+        assertTrue(options instanceof HeaderMiddlewareOptions);
+        final HeaderMiddlewareOptions headerOptions = (HeaderMiddlewareOptions) options;
+        assertNotNull(headerOptions.getRequestHeaders());
+        assertTrue(headerOptions.getRequestHeaders().containsKey(aHeaderName));
+        assertEquals(aHeaderValue, headerOptions.getRequestHeaders().get(aHeaderName));
+        assertNotNull(headerOptions.getResponseHeaders());
+        assertTrue(headerOptions.getResponseHeaders().isEmpty());
+
+        assertNotNull(gateway.getServices());
+        final GatewayService service = gateway.getServices().get(0);
+        assertNotNull(service);
+        assertEquals(aServiceName, service.getName());
+
+        assertNotNull(service.getServers());
+        final ServerOptions server = service.getServers().get(0);
+        assertNotNull(server);
+        assertEquals(aHost, server.getHost());
+        assertEquals(aPort, server.getPort());
+
+        final HTTPsOptions httpsOptions = server.getHTTPs();
+        assertNotNull(httpsOptions);
+        assertEquals(aVerify, httpsOptions.verifyHostname());
+        assertEquals(aTrust, httpsOptions.trustAll());
+        assertEquals(aPath, httpsOptions.getTrustStorePath());
+        assertEquals(aPassword, httpsOptions.getTrustStorePassword());
     }
 }

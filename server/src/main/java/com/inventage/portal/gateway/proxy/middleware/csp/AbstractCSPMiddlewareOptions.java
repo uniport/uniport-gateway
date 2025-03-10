@@ -5,14 +5,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayMiddlewareStyle
+@GatewayStyle
 @JsonDeserialize(builder = CSPMiddlewareOptions.Builder.class)
 public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareOptions {
 
@@ -37,7 +37,7 @@ public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareO
     }
 
     @Immutable
-    @GatewayMiddlewareStyle
+    @GatewayStyle
     @JsonDeserialize(builder = DirectiveOptions.Builder.class)
     public abstract static class AbstractDirectiveOptions implements GatewayMiddlewareOptions {
 

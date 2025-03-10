@@ -15,6 +15,6 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
     typeImmutable = "*", // No prefix or suffix for generated immutable type
     visibility = ImplementationVisibility.PUBLIC // Generated class will be always public
 )
-public @interface GatewayMiddlewareStyle {
+public @interface GatewayStyle {
 
 }

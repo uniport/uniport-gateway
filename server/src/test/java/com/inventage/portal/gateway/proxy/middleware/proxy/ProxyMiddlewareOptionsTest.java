@@ -16,6 +16,7 @@ public class ProxyMiddlewareOptionsTest {
     @Test
     public void shouldParse() {
         // given
+        final String aName = "aName";
         final String serverProto = "aServerProto";
         final String serverHost = "aServerHost";
         final Integer serverPort = 1234;
@@ -26,6 +27,7 @@ public class ProxyMiddlewareOptionsTest {
         final Boolean verbose = true;
 
         final JsonObject json = JsonObject.of(
+            ProxyMiddlewareFactory.SERVICE_NAME, aName,
             ProxyMiddlewareFactory.SERVICE_SERVERS, List.of(
                 Map.of(
                     ProxyMiddlewareFactory.SERVICE_SERVER_PROTOCOL, serverProto,
