@@ -35,9 +35,9 @@ public class CustomResponseMiddlewareOptionsTest {
         assertNotNull(options);
         assertEquals(statusCode, options.getStatusCode());
 
-        assertNotNull(options.getHedaers());
-        assertTrue(options.getHedaers().containsKey(headerName));
-        assertEquals(headerValue, options.getHedaers().get(headerName));
+        assertNotNull(options.getHeaders());
+        assertTrue(options.getHeaders().containsKey(headerName));
+        assertEquals(headerValue, options.getHeaders().get(headerName));
 
         assertEquals(content, options.getContent());
     }

@@ -34,7 +34,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     };
 
     // defaults
-    private static final String DEFAULT_RESET_URL = null;
+    public static final String DEFAULT_RESET_URL = null;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddlewareFactory.class);
 

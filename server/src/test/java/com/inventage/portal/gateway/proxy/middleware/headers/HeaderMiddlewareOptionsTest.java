@@ -46,14 +46,14 @@ public class HeaderMiddlewareOptionsTest {
 
         assertNotNull(options.getRequestHeaders());
         assertTrue(options.getRequestHeaders().containsKey(reqHeaderName));
-        assertEquals(List.of(reqHeaderValue), options.getRequestHeaders().get(reqHeaderName));
+        assertEquals(reqHeaderValue, options.getRequestHeaders().get(reqHeaderName));
 
         assertTrue(options.getRequestHeaders().containsKey(reqHeaderNames));
         assertEquals(reqHeaderValues, options.getRequestHeaders().get(reqHeaderNames));
 
         assertNotNull(options.getResponseHeaders());
         assertTrue(options.getResponseHeaders().containsKey(respHeaderName));
-        assertEquals(List.of(respHeaderValue), options.getResponseHeaders().get(respHeaderName));
+        assertEquals(respHeaderValue, options.getResponseHeaders().get(respHeaderName));
 
         assertTrue(options.getResponseHeaders().containsKey(respHeaderNames));
         assertEquals(respHeaderValues, options.getResponseHeaders().get(respHeaderNames));

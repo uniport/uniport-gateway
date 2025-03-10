@@ -30,7 +30,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     public static final String SESSION_BAG_WHITELISTED_COOKIE_PATH = "path";
 
     // defaults
-    private static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
 

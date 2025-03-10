@@ -1,0 +1,55 @@
+package com.inventage.portal.gateway.proxy.middleware.csp;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.Preconditions;
+import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareStyle;
+import java.util.List;
+import org.immutables.value.Value.Check;
+import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Immutable;
+
+@Immutable
+@GatewayMiddlewareStyle
+@JsonDeserialize(builder = CSPMiddlewareOptions.Builder.class)
+public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareOptions {
+
+    @Check
+    protected void validate() {
+        Preconditions.checkState(!getDirectives().isEmpty(), "'getDirectives' must have at least one element");
+    }
+
+    @JsonProperty(CSPMiddlewareFactory.CSP_DIRECTIVES)
+    public abstract List<DirectiveOptions> getDirectives();
+
+    @Default
+    @JsonProperty(CSPMiddlewareFactory.CSP_REPORT_ONLY)
+    public boolean isReportOnly() {
+        return CSPMiddlewareFactory.DEFAULT_REPORT_ONLY;
+    }
+
+    @Default
+    @JsonProperty(CSPMiddlewareFactory.CSP_MERGE_STRATEGY)
+    public CSPMergeStrategy getMergeStrategy() {
+        return CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY;
+    }
+
+    @Immutable
+    @GatewayMiddlewareStyle
+    @JsonDeserialize(builder = DirectiveOptions.Builder.class)
+    public abstract static class AbstractDirectiveOptions implements GatewayMiddlewareOptions {
+
+        @Check
+        protected void validate() {
+            Preconditions.checkState(!getValues().isEmpty(), "'getValues' must have at least one element");
+        }
+
+        @JsonProperty(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME)
+        public abstract String getName();
+
+        @JsonProperty(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES)
+        public abstract List<String> getValues();
+    }
+}

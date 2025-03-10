@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class CSPMiddlewareOptionsTest {
         final String directiveName = "aName";
         final String directiveValue = "aValue";
         final Boolean reportOnly = true;
-        final String mergeStrategy = "aMergeStrategy";
+        final CSPMergeStrategy mergeStrategy = CSPMergeStrategy.INTERNAL;
 
         final JsonObject json = JsonObject.of(
             CSPMiddlewareFactory.CSP_DIRECTIVES, List.of(

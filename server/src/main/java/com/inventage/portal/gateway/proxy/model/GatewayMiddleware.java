@@ -30,7 +30,7 @@ public class GatewayMiddleware {
     }
 
     public GatewayMiddlewareOptions getOptions() {
-        return options.clone();
+        return options;
     }
 
 }

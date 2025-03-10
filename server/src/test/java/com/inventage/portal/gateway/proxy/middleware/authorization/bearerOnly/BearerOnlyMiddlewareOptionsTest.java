@@ -6,18 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventage.portal.gateway.proxy.middleware.authorization.ClaimOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.ReconciliationOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase.ClaimOptions;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase.PublicKeyOptions;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase.ReconciliationOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareOptions.Builder;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,7 +25,7 @@ public class BearerOnlyMiddlewareOptionsTest {
     static Stream<Arguments> validOptionsValues() {
         return Stream.of(
             Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of("anotherIssuer"), "anOperator", "aPath", "aValue", true, 1234, true)),
-            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", null, null, null, null, null, null, true))
+            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of(), null, null, null, null, null, true))
 
         );
     }
@@ -42,33 +39,35 @@ public class BearerOnlyMiddlewareOptionsTest {
                 .withAlgorithm(given.publicKeyAlgorithm)
                 .build());
 
-        List<ClaimOptions> claims = null;
-        if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
-            claims = List.of(
-                ClaimOptions.builder()
-                    .withOperator(given.claimOperator)
-                    .withPath(given.claimPath)
-                    .withValue(given.claimValue)
-                    .build());
-        }
-
-        ReconciliationOptions reconciliation = null;
-        if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
-            reconciliation = ReconciliationOptions.builder()
-                .withEnabled(given.reconciliationEnabled)
-                .withIntervalMs(given.reconciliationIntervalMs)
-                .build();
-        }
-
-        final BearerOnlyMiddlewareOptions actual = BearerOnlyMiddlewareOptions.builder()
+        final Builder builder = BearerOnlyMiddlewareOptions.builder()
             .withAudience(given.audience)
             .withIssuer(given.issuer)
             .withPublicKeys(publicKeys)
-            .withAdditionalIssuers(given.additionalIssuers)
-            .withClaims(claims)
-            .withReconciliation(reconciliation)
-            .withOptional(given.optional)
-            .build();
+            .withOptional(given.optional);
+
+        if (given.additionalIssuers != null) {
+            builder.withAdditionalIssuers(given.additionalIssuers);
+        }
+
+        if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
+            builder.withClaims(
+                List.of(
+                    ClaimOptions.builder()
+                        .withOperator(given.claimOperator)
+                        .withPath(given.claimPath)
+                        .withValue(given.claimValue)
+                        .build()));
+        }
+
+        if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
+            builder.withReconciliation(
+                ReconciliationOptions.builder()
+                    .withEnabled(given.reconciliationEnabled)
+                    .withIntervalMs(given.reconciliationIntervalMs)
+                    .build());
+        }
+
+        final BearerOnlyMiddlewareOptions actual = builder.build();
 
         assertCorrectness(actual, given);
     }
@@ -81,32 +80,28 @@ public class BearerOnlyMiddlewareOptionsTest {
                 WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, given.publicKey,
                 WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, given.publicKeyAlgorithm));
 
-        JsonArray claims = null;
-        if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
-            claims = JsonArray.of(
-                JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR, given.claimOperator,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH, given.claimPath,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_VALUE, given.claimValue));
-        }
-
-        JsonObject reconciliation = null;
-        if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
-            reconciliation = JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, given.reconciliationEnabled,
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs)
-
-            ;
-        }
-
-        final JsonObject json = JsonObject.of(
+        final JsonObject json = new JsonObject(JsonObject.of(
             WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, given.audience,
             WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, given.issuer,
             WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys,
             WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, given.additionalIssuers,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIMS, claims,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, reconciliation,
-            BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL, given.optional);
+            BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL, given.optional).getMap());
+
+        if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
+            JsonArray claims = JsonArray.of(
+                JsonObject.of(
+                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR, given.claimOperator,
+                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH, given.claimPath,
+                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_VALUE, given.claimValue));
+            json.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIMS, claims);
+        }
+
+        if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
+            JsonObject reconciliation = JsonObject.of(
+                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, given.reconciliationEnabled,
+                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs);
+            json.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, reconciliation);
+        }
 
         // when
         final ThrowingSupplier<BearerOnlyMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), BearerOnlyMiddlewareOptions.class);
@@ -117,32 +112,32 @@ public class BearerOnlyMiddlewareOptionsTest {
     }
 
     static void assertCorrectness(BearerOnlyMiddlewareOptions options, Options expected) {
-        assertNotNull(options);
-        assertEquals(expected.audience, options.getAudience());
-        assertEquals(expected.issuer, options.getIssuer());
+        assertNotNull(options, "options");
+        assertEquals(expected.audience, options.getAudience(), "audience");
+        assertEquals(expected.issuer, options.getIssuer(), "issuer");
 
-        assertNotNull(options.getPublicKeys());
-        assertNotNull(options.getPublicKeys().get(0));
-        assertEquals(expected.publicKey, options.getPublicKeys().get(0).getKey());
-        assertEquals(expected.publicKeyAlgorithm, options.getPublicKeys().get(0).getAlgorithm());
+        assertNotNull(options.getPublicKeys(), "public keys");
+        assertNotNull(options.getPublicKeys().get(0), "public key");
+        assertEquals(expected.publicKey, options.getPublicKeys().get(0).getKey(), "key");
+        assertEquals(expected.publicKeyAlgorithm, options.getPublicKeys().get(0).getAlgorithm(), "algorithm");
 
-        assertEquals(expected.additionalIssuers, options.getAdditionalIssuers());
+        assertEquals(expected.additionalIssuers, options.getAdditionalIssuers(), "additional issuer");
 
         if (expected.claimOperator != null || expected.claimValue != null || expected.claimPath != null) {
-            assertNotNull(options.getClaims());
-            assertNotNull(options.getClaims().get(0));
-            assertEquals(expected.claimOperator, options.getClaims().get(0).getOperator());
-            assertEquals(expected.claimPath, options.getClaims().get(0).getPath());
-            assertEquals(expected.claimValue, options.getClaims().get(0).getValue());
+            assertNotNull(options.getClaims(), "claims");
+            assertNotNull(options.getClaims().get(0), "claim");
+            assertEquals(expected.claimOperator, options.getClaims().get(0).getOperator(), "oeprator");
+            assertEquals(expected.claimPath, options.getClaims().get(0).getPath(), "path");
+            assertEquals(expected.claimValue, options.getClaims().get(0).getValue(), "value");
         }
 
         if (expected.reconciliationEnabled != null || expected.reconciliationIntervalMs != null) {
-            assertNotNull(options.getReconciliation());
-            assertEquals(expected.reconciliationEnabled, options.getReconciliation().isEnabled());
-            assertEquals(expected.reconciliationIntervalMs, options.getReconciliation().getIntervalMs());
+            assertNotNull(options.getReconciliation(), "reconciliation");
+            assertEquals(expected.reconciliationEnabled, options.getReconciliation().isEnabled(), "enabled");
+            assertEquals(expected.reconciliationIntervalMs.intValue(), options.getReconciliation().getIntervalMs(), "interval");
         }
 
-        assertEquals(expected.optional, options.isOptional());
+        assertEquals(expected.optional, options.isOptional(), "optional");
     }
 
     static class Options {
@@ -179,7 +174,7 @@ public class BearerOnlyMiddlewareOptionsTest {
     static Stream<Arguments> invalidOptionsValues() {
         final List<String> audience = List.of("anAudience");
         final String issuer = "anIssuer";
-        final PublicKeyOptions publicKey = WithAuthHandlerMiddlewareOptionsBase.PublicKeyOptions.builder()
+        final PublicKeyOptions publicKey = PublicKeyOptions.builder()
             .withKey("aPublicKey")
             .withAlgorithm("aPublicKeyAlgorithm")
             .build();
@@ -208,29 +203,6 @@ public class BearerOnlyMiddlewareOptionsTest {
     @ParameterizedTest
     @MethodSource("invalidOptionsValues")
     public void shouldFailIfRequiredPropertiesAreMissing(Builder builder) {
-        assertThrows(IllegalArgumentException.class, () -> builder.build());
-    }
-
-    @Test
-    public void shouldDeepCopy() {
-        // given
-        final String audience = "anAudience";
-        final String issuer = "anIssuer";
-        final PublicKeyOptions publicKey = WithAuthHandlerMiddlewareOptionsBase.PublicKeyOptions.builder()
-            .withKey("aPublicKey")
-            .withAlgorithm("aPublicKeyAlgorithm")
-            .build();
-
-        final BearerOnlyMiddlewareOptions options = BearerOnlyMiddlewareOptions.builder()
-            .withAudience(Arrays.asList(audience))
-            .withIssuer(issuer)
-            .withPublicKeys(Arrays.asList(publicKey))
-            .build();
-
-        // when
-        final BearerOnlyMiddlewareOptions copy = options.clone();
-        // then
-        assertThrows(UnsupportedOperationException.class, () -> options.getAudience().add("another"));
-        assertThrows(UnsupportedOperationException.class, () -> options.getPublicKeys().add(null));
+        assertThrows(IllegalStateException.class, () -> builder.build());
     }
 }

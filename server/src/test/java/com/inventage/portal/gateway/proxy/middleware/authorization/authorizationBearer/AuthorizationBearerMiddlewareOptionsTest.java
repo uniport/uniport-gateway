@@ -17,7 +17,7 @@ public class AuthorizationBearerMiddlewareOptionsTest {
         final String sessionScope = "aSessionScope";
 
         // when
-        final AuthorizationBearerMiddlewareOptions options = new AuthorizationBearerMiddlewareOptions.Builder()
+        final AuthorizationBearerMiddlewareOptions options = AuthorizationBearerMiddlewareOptions.builder()
             .withSessionScope(sessionScope)
             .build();
 
@@ -39,19 +39,5 @@ public class AuthorizationBearerMiddlewareOptionsTest {
         final AuthorizationBearerMiddlewareOptions options = assertDoesNotThrow(parse);
         assertNotNull(options);
         assertEquals(sessionScope, options.getSessionScope());
-    }
-
-    @Test
-    public void shouldDeepCopy() {
-        // given
-        final String sessionScope = "aSessionScope";
-        final AuthorizationBearerMiddlewareOptions options = AuthorizationBearerMiddlewareOptions.builder()
-            .withSessionScope(sessionScope)
-            .build();
-
-        // when
-        final AuthorizationBearerMiddlewareOptions copy = options.clone();
-        // then
-        assertEquals(copy.getSessionScope(), options.getSessionScope());
     }
 }

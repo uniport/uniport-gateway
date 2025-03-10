@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.JsonObject;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ public class SessionMiddlewareOptionsTest {
         final String cookieName = "aCookieName";
         final Boolean cookieHttpOnly = true;
         final Boolean cookieSecure = true;
-        final String cookieSameSite = "aSite";
+        final CookieSameSite cookieSameSite = CookieSameSite.LAX;
         final Integer clusteredSessionStoreTimeout = 1234;
 
         final JsonObject json = JsonObject.of(

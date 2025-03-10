@@ -23,7 +23,7 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
 
     // defaults
-    private static final String DEFAULT_REDIRECT_URI = "/";
+    public static final String DEFAULT_REDIRECT_URI = "/";
 
     @Override
     public String provides() {

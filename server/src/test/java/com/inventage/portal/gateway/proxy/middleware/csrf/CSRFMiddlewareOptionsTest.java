@@ -48,6 +48,6 @@ public class CSRFMiddlewareOptionsTest {
         assertEquals(headerName, options.getHeaderName());
         assertEquals(nagHttps, options.nagHTTPs());
         assertEquals(origin, options.getOrigin());
-        assertEquals(timeoutMins, options.getTimeoutMinutes());
+        assertEquals(timeoutMins.intValue(), options.getTimeoutMinutes());
     }
 }

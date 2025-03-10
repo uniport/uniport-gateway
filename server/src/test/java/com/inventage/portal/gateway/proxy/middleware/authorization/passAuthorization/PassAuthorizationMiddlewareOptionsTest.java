@@ -71,7 +71,7 @@ public class PassAuthorizationMiddlewareOptionsTest {
 
         assertNotNull(options.getReconciliation());
         assertEquals(reconciliationEnabled, options.getReconciliation().isEnabled());
-        assertEquals(reconciliationIntervalMs, options.getReconciliation().getIntervalMs());
+        assertEquals(reconciliationIntervalMs.intValue(), options.getReconciliation().getIntervalMs());
 
         assertEquals(sessionScope, options.getSessionScope());
     }

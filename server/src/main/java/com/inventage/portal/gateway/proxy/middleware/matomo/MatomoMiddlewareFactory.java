@@ -28,10 +28,10 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     public static final String MATOMO_JWT_PATH_GROUP = "pathGroup";
 
     // defaults
-    private static final String DEFAULT_JWT_PATH_USERNAME = "$.preferred_username";
-    private static final String DEFAULT_JWT_PATH_EMAIL = "$.email";
-    private static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";
-    private static final String DEFAULT_JWT_PATH_GROUP = "$.tenant";
+    public static final String DEFAULT_JWT_PATH_USERNAME = "$.preferred_username";
+    public static final String DEFAULT_JWT_PATH_EMAIL = "$.email";
+    public static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";
+    public static final String DEFAULT_JWT_PATH_GROUP = "$.tenant";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatomoMiddlewareFactory.class);
 
