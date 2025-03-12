@@ -9,7 +9,6 @@ import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
@@ -24,8 +23,10 @@ import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,41 +116,40 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_RESPONSE_MODE, DEFAULT_OIDC_RESPONSE_MODE);
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
         logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PUBLIC_URL, "unknown"); // options may not contain PUBLIC_PROTOCOL_KEY/PUBLIC_HOSTNAME_KEY
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_SCOPES, getAdditionalScopes(options));
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_PARAMETERS, getAdditionalAuthRequestParams(options));
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PASSTHROUGH_PARAMETERS, getPassthroughParameters(options));
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_SCOPES, List.of());
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_PARAMETERS, Map.of());
+        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PASSTHROUGH_PARAMETERS, List.of());
 
         return Future.succeededFuture();
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<OAuth2MiddlewareOptions> modelType() {
         return OAuth2MiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final boolean proxyAuthenticationFlow = middlewareConfig.getBoolean(OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
-        final String sessionScope = middlewareConfig.getString(OAUTH2_SESSION_SCOPE);
-        final String responseMode = middlewareConfig.getString(OAUTH2_RESPONSE_MODE, DEFAULT_OIDC_RESPONSE_MODE);
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final OAuth2MiddlewareOptions options = castOptions(config, modelType());
+        final String sessionScope = options.getSessionScope();
+        final String responseMode = options.getResponseMode();
 
         final String callbackPath = OAUTH2_CALLBACK_PREFIX + sessionScope.toLowerCase();
         final List<Route> callbacks = mountCallbackRoutes(router, callbackPath, responseMode);
 
-        return KeycloakAuth.discover(vertx, oAuth2Options(middlewareConfig))
+        return KeycloakAuth.discover(vertx, oAuth2Options(options))
             .onFailure(err -> LOGGER.error("Failed to create OAuth2 Middleware due to failing Keycloak discovery '{}'", err.getMessage()))
             .compose(createMiddleware(
                 vertx,
                 name,
-                getPublicURL(middlewareConfig),
-                proxyAuthenticationFlow,
+                getPublicURL(options),
+                options.proxyAuthenticationFlow(),
                 callbacks,
                 callbackPath,
                 sessionScope,
-                getAdditionalScopes(middlewareConfig),
-                getAdditionalAuthRequestParams(middlewareConfig)
-                    .put(OIDC_RESPONSE_MODE, responseMode),
-                getPassthroughParameters(middlewareConfig)))
+                options.getAdditionalScopes(),
+                getAdditionalAuthRequestParams(options, responseMode),
+                options.getPassthroughParameters()))
             .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", OAUTH2))
             .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
     }
@@ -163,23 +163,10 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      *
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">AuthRequest</a>
      */
-    private JsonObject getAdditionalAuthRequestParams(JsonObject middlewareConfig) {
-        return middlewareConfig.getJsonObject(OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of());
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> getAdditionalScopes(JsonObject middlewareConfig) {
-        final JsonArray additionalScopes = middlewareConfig.getJsonArray(OAUTH2_ADDITIONAL_SCOPES, JsonArray.of());
-        return additionalScopes.getList();
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> getPassthroughParameters(JsonObject middlewareConfig) {
-        final JsonArray passthroughParameters = middlewareConfig.getJsonArray(OAUTH2_PASSTHROUGH_PARAMETERS);
-        if (passthroughParameters == null) {
-            return List.of();
-        }
-        return passthroughParameters.getList();
+    private Map<String, String> getAdditionalAuthRequestParams(OAuth2MiddlewareOptions options, String responseMode) {
+        final Map<String, String> params = new HashMap<>(options.getAdditionalAuthRequestParameters());
+        params.put(OIDC_RESPONSE_MODE, responseMode);
+        return params;
     }
 
     /**
@@ -188,29 +175,28 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      * in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
      * configuration
      */
-    private String getPublicURL(JsonObject middlewareConfig) {
-        if (middlewareConfig.containsKey(OAUTH2_PUBLIC_URL)) {
-            return middlewareConfig.getString(OAUTH2_PUBLIC_URL);
+    private String getPublicURL(OAuth2MiddlewareOptions options) {
+        if (options.getPublicURL() != null) {
+            return options.getPublicURL();
         }
 
         String publicUrl = String.format("%s://%s",
-            getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PROTOCOL_KEY),
-            getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_HOSTNAME_KEY));
+            getValueByKeyOrFail(options.env(), RouterFactory.PUBLIC_PROTOCOL_KEY),
+            getValueByKeyOrFail(options.env(), RouterFactory.PUBLIC_HOSTNAME_KEY));
 
         // only include port if it is not already fixed by the protocol
-        final String publicPort = getValueByKeyOrFail(middlewareConfig, RouterFactory.PUBLIC_PORT_KEY);
+        final String publicPort = getValueByKeyOrFail(options.env(), RouterFactory.PUBLIC_PORT_KEY);
         if (!publicPort.equals("80") && !publicPort.equals("443")) {
             publicUrl = String.format("%s:%s", publicUrl, publicPort);
         }
         return publicUrl;
     }
 
-    private String getValueByKeyOrFail(JsonObject config, String key) {
-        final String value = config.getString(key);
-        if (value == null) {
+    private String getValueByKeyOrFail(Map<String, String> env, String key) {
+        if (!env.containsKey(key)) {
             throw new IllegalArgumentException("missing key in config: '" + key + "'");
         }
-        return value;
+        return env.get(key);
     }
 
     private List<Route> mountCallbackRoutes(Router router, String callbackPath, String responseMode) {
@@ -237,11 +223,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         return OIDC_RESPONSE_MODE_FORM_POST.equals(responseMode);
     }
 
-    private OAuth2Options oAuth2Options(JsonObject middlewareConfig) {
+    private OAuth2Options oAuth2Options(OAuth2MiddlewareOptions options) {
         return new OAuth2Options()
-            .setClientId(middlewareConfig.getString(OAUTH2_CLIENT_ID))
-            .setClientSecret(middlewareConfig.getString(OAUTH2_CLIENT_SECRET))
-            .setSite(middlewareConfig.getString(OAUTH2_DISCOVERY_URL))
+            .setClientId(options.getClientId())
+            .setClientSecret(options.getClientSecret())
+            .setSite(options.getDiscoveryURL())
             .setValidateIssuer(false);
     }
 
@@ -254,7 +240,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         String callbackPath,
         String sessionScope,
         List<String> additionalScopes,
-        JsonObject additionalAuthRequestParams,
+        Map<String, String> additionalAuthRequestParams,
         List<String> passthroughParameters
     ) {
         return authProvider -> {

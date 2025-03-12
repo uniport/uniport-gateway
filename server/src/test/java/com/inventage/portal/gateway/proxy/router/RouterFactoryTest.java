@@ -1,11 +1,18 @@
 package com.inventage.portal.gateway.proxy.router;
 
+import static com.inventage.portal.gateway.TestUtils.toModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.Gateway;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
+import com.inventage.portal.gateway.proxy.model.GatewayRouter;
+import com.inventage.portal.gateway.proxy.model.GatewayService;
+import com.inventage.portal.gateway.proxy.router.additionalRoutes.AdditionalRoutesMiddlewareFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -21,6 +28,7 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -98,9 +106,11 @@ public class RouterFactoryTest {
                     TestUtils.withRouterRule("Path('/path')"),
                     TestUtils.withRouterEntrypoints(entrypointName))),
             TestUtils.withServices(
-                TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+                TestUtils.withService("bar",
+                    TestUtils.withServers(
+                        TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config)
+        routerFactory.createRouter(toModel(config))
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when
@@ -121,7 +131,7 @@ public class RouterFactoryTest {
             TestUtils.withMiddlewares(),
             TestUtils.withServices());
 
-        routerFactory.createRouter(config)
+        routerFactory.createRouter(toModel(config))
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when
@@ -152,7 +162,7 @@ public class RouterFactoryTest {
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config)
+        routerFactory.createRouter(toModel(config))
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when
@@ -177,7 +187,7 @@ public class RouterFactoryTest {
             TestUtils.withServices(
                 TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config)
+        routerFactory.createRouter(toModel(config))
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when
@@ -243,7 +253,7 @@ public class RouterFactoryTest {
                     TestUtils.withServers(
                         TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config)
+        routerFactory.createRouter(toModel(config))
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when
@@ -275,7 +285,7 @@ public class RouterFactoryTest {
                 TestUtils.withService("noServer",
                     TestUtils.withServers(TestUtils.withServer("some.host", 1234)))));
 
-        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+        routerFactory.createRouter(toModel(config)).onComplete(testCtx.succeeding(router -> {
             proxyRouter = router;
             // when
             doRequest(vertx, host, "/path/long")
@@ -308,7 +318,7 @@ public class RouterFactoryTest {
                     TestUtils.withService("noServer",
                         TestUtils.withServers(TestUtils.withServer("some.host", 1234)))));
 
-        routerFactory.createRouter(config).onComplete(testCtx.succeeding(router -> {
+        routerFactory.createRouter(toModel(config)).onComplete(testCtx.succeeding(router -> {
             proxyRouter = router;
             // when
             doRequest(vertx, host, "/path/long")
@@ -322,18 +332,32 @@ public class RouterFactoryTest {
 
     @Test
     public void failingMiddlewareCreation(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject config = TestUtils.buildConfiguration(
-            TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/path')"),
-                TestUtils.withRouterMiddlewares("unknownMiddleware"), TestUtils.withRouterEntrypoints(entrypointName))),
-            TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("unknownMiddleware", "unknownMiddleware",
-                    TestUtils.withMiddlewareOpts(new JsonObject()))),
-            TestUtils.withServices(
-                TestUtils.withService("bar",
-                    TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
+        final Gateway model = Gateway.builder()
+            .withRouters(List.of(
+                GatewayRouter.builder()
+                    .withName("foo")
+                    .withService("bar")
+                    .withRule("Path('/path')")
+                    .withEntrypoints(List.of(entrypointName))
+                    .withMiddlewares(List.of("unknownMiddleware"))
+                    .build()))
+            .withMiddlewares(List.of(
+                GatewayMiddleware.builder()
+                    .withName("unknownMiddleware")
+                    .withType("unknownMiddleware")
+                    .build()))
+            .withServices(List.of(
+                GatewayService.builder()
+                    .withName("bar")
+                    .withServers(List.of(
+                        ServerOptions.builder()
+                            .withHost(host)
+                            .withPort(serverPort)
+                            .build()))
+                    .build()))
+            .build();
 
-        routerFactory.createRouter(config).onComplete(testCtx.failing(router -> {
+        routerFactory.createRouter(model).onComplete(testCtx.failing(router -> {
             testCtx.completeNow();
         }));
     }
@@ -429,16 +453,16 @@ public class RouterFactoryTest {
             TestUtils.withRouters(TestUtils.withRouter("foo",
                 TestUtils.withRouterEntrypoints(entrypointName),
                 TestUtils.withRouterRule("PathPrefix('/')"), // shadowing /callback/test
-                TestUtils.withRouterMiddlewares("middleware"),
+                TestUtils.withRouterMiddlewares("aMiddleware"),
                 TestUtils.withRouterService("bar"))),
             TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("middleware", "additionalRoutes",
+                TestUtils.withMiddleware("aMiddleware", AdditionalRoutesMiddlewareFactory.ADDITIONAL_ROUTES,
                     TestUtils.withMiddlewareOpts(JsonObject.of("path", additionalRoutePath)))),
             TestUtils.withServices(
                 TestUtils.withService("bar",
                     TestUtils.withServers(TestUtils.withServer(host, serverPort)))));
 
-        routerFactory.createRouter(config)
+        routerFactory.createRouter(toModel(config))
             .onComplete(testCtx.succeeding(router -> {
                 proxyRouter = router;
                 // when

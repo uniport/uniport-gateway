@@ -22,11 +22,11 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     public static final String CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
     public static final String CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL = "logLevel";
     public static final String[] CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = new String[] {
-        "TRACE",
-        "DEBUG",
-        "INFO",
-        "WARN",
-        "ERROR"
+        Level.TRACE.toString(),
+        Level.DEBUG.toString(),
+        Level.INFO.toString(),
+        Level.WARN.toString(),
+        Level.ERROR.toString()
     };
 
     // defaults
@@ -52,15 +52,15 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<CSPViolationReportingServerMiddlewareOptions> modelType() {
         return CSPViolationReportingServerMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(final Vertx vertx, final String name, final Router router, final JsonObject middlewareConfig) {
-        final String logLevel = middlewareConfig.getString(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, DEFAULT_LOG_LEVEL);
-
+    public Future<Middleware> create(final Vertx vertx, final String name, final Router router, GatewayMiddlewareOptions config) {
+        final CSPViolationReportingServerMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.info("Created '{}' middleware successfully", CSP_VIOLATION_REPORTING_SERVER);
-        return Future.succeededFuture(new CSPViolationReportingServerMiddleware(name, Level.valueOf(logLevel)));
+        return Future.succeededFuture(
+            new CSPViolationReportingServerMiddleware(name, options.getLogLevel()));
     }
 }

@@ -13,7 +13,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,20 +66,16 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<RequestResponseLoggerMiddlewareOptions> modelType() {
         return RequestResponseLoggerMiddlewareOptions.class;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String requestFilterPattern = middlewareConfig.getString(REQUEST_RESPONSE_LOGGER_FILTER_REGEX);
-        final List<String> contentTypesToLog = middlewareConfig.getJsonArray(REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, DEFAULT_CONTENT_TYPES_TO_LOG).getList();
-        final boolean loggingRequestEnabled = middlewareConfig.getBoolean(REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, DEFAULT_LOGGING_REQUEST_ENABLED);
-        final boolean loggingResponseEnabled = middlewareConfig.getBoolean(REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, DEFAULT_LOGGING_RESPONSE_ENABLED);
-
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final RequestResponseLoggerMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", REQUEST_RESPONSE_LOGGER);
-        return Future.succeededFuture(new RequestResponseLoggerMiddleware(name, requestFilterPattern, contentTypesToLog, loggingRequestEnabled, loggingResponseEnabled));
+        return Future.succeededFuture(
+            new RequestResponseLoggerMiddleware(name, options.getFilterRegex(), options.getContentTypes(), options.isRequestEnabled(), options.isResponseEnabled()));
     }
 
 }

@@ -6,8 +6,6 @@ import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.PlatformHandler;
 import java.util.ArrayList;
@@ -41,16 +39,16 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     // These cookies are allowed to be passed back to the user agent.
     // This is required for some frontend logic to work properly
     // (e.g. for keycloak login logic of its admin console)
-    private final JsonArray whitelistedCookies;
+    private final List<WhitelistedCookieOption> whitelistedCookies;
     private final String sessionCookieName;
 
-    public SessionBagMiddleware(String name, JsonArray whitelistedCookies, String sessionCookieName) {
+    public SessionBagMiddleware(String name, List<WhitelistedCookieOption> whitelistedCookies, String sessionCookieName) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(whitelistedCookies, "whitelistedCookies must not be null");
         Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
 
         this.name = name;
-        this.whitelistedCookies = new JsonArray(whitelistedCookies.getList());
+        this.whitelistedCookies = whitelistedCookies;
         this.sessionCookieName = sessionCookieName;
     }
 
@@ -292,10 +290,9 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     }
 
     private boolean isWhitelisted(Cookie cookie) {
-        for (int i = 0; i < this.whitelistedCookies.size(); i++) {
-            final JsonObject whitelistedCookie = this.whitelistedCookies.getJsonObject(i);
-            final String whitelistedCookieName = whitelistedCookie.getString(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME);
-            final String whitelistedCookiePath = whitelistedCookie.getString(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH);
+        for (WhitelistedCookieOption whitelistedCookie : whitelistedCookies) {
+            final String whitelistedCookieName = whitelistedCookie.getName();
+            final String whitelistedCookiePath = whitelistedCookie.getPath();
             if (whitelistedCookieName.equals(cookie.getName()) && whitelistedCookiePath.equals(cookie.getPath())) {
                 return true;
             }

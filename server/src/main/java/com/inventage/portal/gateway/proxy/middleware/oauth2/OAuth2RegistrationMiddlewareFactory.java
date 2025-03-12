@@ -1,9 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import java.net.URI;
 
 /**
@@ -23,21 +19,6 @@ public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory
     @Override
     public String provides() {
         return OAUTH2_REGISTRATION;
-    }
-
-    @Override
-    public ObjectSchemaBuilder optionsSchema() {
-        return super.optionsSchema();
-    }
-
-    @Override
-    public Future<Void> validate(JsonObject options) {
-        return super.validate(options);
-    }
-
-    @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
-        return OAuth2RegistrationMiddlewareOptions.class;
     }
 
     /**

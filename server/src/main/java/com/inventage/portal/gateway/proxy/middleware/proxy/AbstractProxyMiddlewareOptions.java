@@ -50,9 +50,11 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_PORT)
         public abstract int getPort();
 
-        @Nullable
+        @Default
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS)
-        public abstract HTTPsOptions getHTTPs();
+        public HTTPsOptions getHTTPs() {
+            return HTTPsOptions.builder().build();
+        }
     }
 
     @Immutable

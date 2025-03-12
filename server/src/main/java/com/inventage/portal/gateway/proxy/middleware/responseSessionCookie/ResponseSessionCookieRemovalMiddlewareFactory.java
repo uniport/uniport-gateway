@@ -51,15 +51,14 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<ResponseSessionCookieRemovalMiddlewareOptions> modelType() {
         return ResponseSessionCookieRemovalMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String sessionCookieName = middlewareConfig.getString(RESPONSE_SESSION_COOKIE_REMOVAL_NAME, DEFAULT_SESSION_COOKIE_NAME);
-
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final ResponseSessionCookieRemovalMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", RESPONSE_SESSION_COOKIE_REMOVAL);
-        return Future.succeededFuture(new ResponseSessionCookieRemovalMiddleware(name, sessionCookieName));
+        return Future.succeededFuture(new ResponseSessionCookieRemovalMiddleware(name, options.getSessionCookieName()));
     }
 }

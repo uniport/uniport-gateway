@@ -40,9 +40,9 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
     }
 
     @Default
-    @JsonProperty(SessionMiddlewareFactory.SESSION_LIFETIME_COOKIE)
-    public boolean useLifetimeCookie() {
-        return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE;
+    @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE)
+    public SessionCookieOptions getSessionCookie() {
+        return SessionCookieOptions.builder().build();
     }
 
     @Default
@@ -52,14 +52,19 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
     }
 
     @Default
-    @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE)
-    public CookieOptions getCookie() {
-        return CookieOptions.builder()
-            .withName(SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME)
-            .withHTTPOnly(SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY)
-            .withSecure(SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SECURE)
-            .withSameSite(SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE)
-            .build();
+    public String getLifetimeHeader() {
+        return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME;
+    }
+
+    @Default
+    @JsonProperty(SessionMiddlewareFactory.SESSION_LIFETIME_COOKIE)
+    public boolean useLifetimeCookie() {
+        return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE;
+    }
+
+    @Default
+    public LifetimeCookieOptions getLifetimeCookie() {
+        return LifetimeCookieOptions.builder().build();
     }
 
     @Default
@@ -70,8 +75,8 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
 
     @Immutable
     @GatewayStyle
-    @JsonDeserialize(builder = CookieOptions.Builder.class)
-    public abstract static class AbstractCookieOptions implements GatewayMiddlewareOptions {
+    @JsonDeserialize(builder = SessionCookieOptions.Builder.class)
+    public abstract static class AbstractSessionCookieOptions implements GatewayMiddlewareOptions {
 
         @Default
         @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE_NAME)
@@ -95,6 +100,37 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
         @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE)
         public CookieSameSite getSameSite() {
             return SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE;
+        }
+    }
+
+    @Immutable
+    @GatewayStyle
+    @JsonDeserialize(builder = LifetimeCookieOptions.Builder.class)
+    public abstract static class AbstractLifetimeCookieOptions implements GatewayMiddlewareOptions {
+
+        @Default
+        public String getName() {
+            return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_NAME;
+        }
+
+        @Default
+        public String getPath() {
+            return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_PATH;
+        }
+
+        @Default
+        public boolean isHTTPOnly() {
+            return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_HTTP_ONLY;
+        }
+
+        @Default
+        public boolean isSecure() {
+            return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SECURE;
+        }
+
+        @Default
+        public CookieSameSite getSameSite() {
+            return SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SAME_SITE;
         }
     }
 }

@@ -43,17 +43,17 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<AuthorizationBearerMiddlewareOptions> modelType() {
         return AuthorizationBearerMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final AuthorizationBearerMiddlewareOptions options = castOptions(config, modelType());
+
         LOGGER.debug("Created '{}' middleware successfully", AUTHORIZATION_BEARER);
-        return Future.succeededFuture(new AuthorizationBearerMiddleware(
-            vertx,
-            name,
-            middlewareConfig.getString(AUTHORIZATION_BEARER_SESSION_SCOPE)));
+        return Future.succeededFuture(
+            new AuthorizationBearerMiddleware(vertx, name, options.getSessionScope()));
     }
 
 }

@@ -8,7 +8,6 @@ import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFa
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.Keywords;
@@ -63,20 +62,20 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<SessionBagMiddlewareOptions> modelType() {
         return SessionBagMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareOptions) {
-        return this.create(vertx, name, middlewareOptions);
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final SessionBagMiddlewareOptions options = castOptions(config, modelType());
+        return this.create(vertx, name, options);
     }
 
-    public Future<Middleware> create(Vertx vertx, String name, JsonObject middlewareOptions) {
-        final JsonArray whitelistedCookies = middlewareOptions.getJsonArray(SESSION_BAG_WHITELISTED_COOKIES);
-        final String sessionCookieName = middlewareOptions.getString(SESSION_BAG_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
+    public Future<Middleware> create(Vertx vertx, String name, SessionBagMiddlewareOptions options) {
         LOGGER.info("Created '{}' middleware successfully", SESSION_BAG);
-        return Future.succeededFuture(new SessionBagMiddleware(name, whitelistedCookies, sessionCookieName));
+        return Future.succeededFuture(
+            new SessionBagMiddleware(name, options.getWhitelistedCookieOptions(), options.getSessionCookieName()));
     }
 
 }

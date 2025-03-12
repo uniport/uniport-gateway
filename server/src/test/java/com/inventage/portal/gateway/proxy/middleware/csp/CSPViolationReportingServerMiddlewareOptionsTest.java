@@ -8,13 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
+import org.slf4j.event.Level;
 
 public class CSPViolationReportingServerMiddlewareOptionsTest {
 
     @Test
     public void shouldParse() {
         // given
-        final String logLevel = "aLogLevel";
+        final Level logLevel = Level.TRACE;
         final JsonObject json = JsonObject.of(
             CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel);
 

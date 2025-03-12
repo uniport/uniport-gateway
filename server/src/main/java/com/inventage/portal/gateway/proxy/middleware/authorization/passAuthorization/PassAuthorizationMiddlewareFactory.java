@@ -45,13 +45,14 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<PassAuthorizationMiddlewareOptions> modelType() {
         return PassAuthorizationMiddlewareOptions.class;
     }
 
     @Override
-    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig) {
-        final String sessionScope = middlewareConfig.getString(PASS_AUTHORIZATION_SESSION_SCOPE);
+    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config) {
+        final PassAuthorizationMiddlewareOptions options = castOptions(config, modelType());
+        final String sessionScope = options.getSessionScope();
 
         final Middleware passAuthorizationMiddleware = new PassAuthorizationMiddleware(vertx, name, sessionScope, authHandler);
         LOGGER.debug("Created '{}' middleware", PASS_AUTHORIZATION);

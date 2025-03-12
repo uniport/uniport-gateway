@@ -7,6 +7,7 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.jayway.jsonpath.internal.path.PathCompiler;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -27,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     // defaults
     public static final boolean DEFAULT_RECONCILIATION_ENABLED_VALUE = true;
     public static final long DEFAULT_RECONCILIATION_INTERVAL_MS = 60_000;
+    public static final String DEFAULT_PUBLIC_KEY_ALGORITHM = "RS256";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
 
@@ -76,7 +79,8 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
                     .with(Keywords.minLength(1)))
                 .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
-                    .with(Keywords.minLength(1)))
+                    .with(Keywords.minLength(1))
+                    .defaultValue(DEFAULT_PUBLIC_KEY_ALGORITHM))
                 .allowAdditionalProperties(false));
 
         final ArraySchemaBuilder claimsSchema = Schemas.arraySchema()
@@ -217,56 +221,50 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
      *            The config for the middleware
      * @return Your {@link Middleware}
      */
-    protected abstract Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig);
+    protected abstract Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config);
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final Promise<Middleware> promise = Promise.promise();
-        this.create(vertx, name, router, middlewareConfig, promise);
+        this.create(vertx, name, router, config, promise);
         return promise.future();
     }
 
-    public void create(Vertx vertx, String name, Router router, JsonObject middlewareConfig, Handler<AsyncResult<Middleware>> handler) {
+    public void create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config, Handler<AsyncResult<Middleware>> handler) {
         LOGGER.debug("Creating '{}' middleware", provides());
-
-        final String issuer = middlewareConfig.getString(WITH_AUTH_HANDLER_ISSUER);
-        final JsonArray audience = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_AUDIENCE);
-        final JsonArray additionalClaims = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_CLAIMS);
-        final JsonArray publicKeySources = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_PUBLIC_KEYS);
-        final JsonArray additionalIssuers = middlewareConfig.getJsonArray(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS);
-
-        final JsonObject publicKeysReconciliation = middlewareConfig.getJsonObject(
-            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION,
-            JsonObject.of());
-        final boolean publicKeysReconciliationEnabled = publicKeysReconciliation.getBoolean(
-            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED,
-            DEFAULT_RECONCILIATION_ENABLED_VALUE);
-        final long publicKeysReconciliationIntervalMs = publicKeysReconciliation.getLong(
-            WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS,
-            DEFAULT_RECONCILIATION_INTERVAL_MS);
+        final WithAuthHandlerMiddlewareOptionsBase options = castOptions(config, WithAuthHandlerMiddlewareOptionsBase.class);
 
         final JWTOptions jwtOptions = new JWTOptions();
+        final String issuer = options.getIssuer();
         if (issuer != null) {
             jwtOptions.setIssuer(issuer);
             LOGGER.debug("With issuer '{}'", issuer);
         }
-        if (audience != null) {
-            jwtOptions.setAudience(audience.getList());
+
+        final List<String> audience = options.getAudience();
+        if (audience != null && !audience.isEmpty()) {
+            jwtOptions.setAudience(audience);
             LOGGER.debug("With audience '{}'", audience);
         }
 
+        final List<String> additionalIssuers = options.getAdditionalIssuers();
         final JWTAuthMultipleIssuersOptions additionalIssuersOptions = new JWTAuthMultipleIssuersOptions();
-        if (additionalIssuers != null) {
+        if (additionalIssuers != null && !additionalIssuers.isEmpty()) {
             additionalIssuersOptions.setAdditionalIssuers(additionalIssuers);
             LOGGER.debug("With additional issuers '{}'", additionalIssuers);
         }
 
+        final List<ClaimOptions> additionalClaims = options.getClaims();
         final JWTAuthAdditionalClaimsOptions additionalClaimsOptions = new JWTAuthAdditionalClaimsOptions();
-        if (additionalClaims != null) {
-            additionalClaimsOptions.setAdditionalClaims(additionalClaims);
+        if (additionalClaims != null && !additionalClaims.isEmpty()) {
+            additionalClaimsOptions.addAdditionalClaims(additionalClaims);
             LOGGER.debug("With claims '{}'", additionalClaims);
         }
 
+        final List<PublicKeyOptions> publicKeySources = options.getPublicKeys();
+        final ReconciliationOptions publicKeysReconciliation = options.getReconciliation();
+        final boolean publicKeysReconciliationEnabled = publicKeysReconciliation.isEnabled();
+        final long publicKeysReconciliationIntervalMs = publicKeysReconciliation.getIntervalMs();
         JWTAuthPublicKeysReconcilerHandler.fetchPublicKeys(vertx, publicKeySources)
             .onSuccess(authOpts -> {
                 final JWTAuthOptions jwtAuthOptions = new JWTAuthOptions(authOpts).setJWTOptions(jwtOptions);
@@ -274,7 +272,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 final JWTAuthPublicKeysReconcilerHandler reconciler = JWTAuthPublicKeysReconcilerHandler.create(
                     vertx, jwtAuthOptions, additionalIssuersOptions, additionalClaimsOptions, publicKeySources, publicKeysReconciliationEnabled, publicKeysReconciliationIntervalMs);
 
-                handler.handle(Future.succeededFuture(create(vertx, name, reconciler, middlewareConfig)));
+                handler.handle(Future.succeededFuture(create(vertx, name, reconciler, config)));
             })
             .onFailure(err -> handler.handle(Future.failedFuture(err.getMessage())));
 

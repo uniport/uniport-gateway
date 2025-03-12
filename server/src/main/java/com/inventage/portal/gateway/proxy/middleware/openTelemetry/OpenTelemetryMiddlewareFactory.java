@@ -39,13 +39,14 @@ public class OpenTelemetryMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<OpenTelemetryMiddlewareOptions> modelType() {
         return OpenTelemetryMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, OPEN_TELEMETRY);
-        return Future.succeededFuture(new OpenTelemetryMiddleware(name));
+        return Future.succeededFuture(
+            new OpenTelemetryMiddleware(name));
     }
 }

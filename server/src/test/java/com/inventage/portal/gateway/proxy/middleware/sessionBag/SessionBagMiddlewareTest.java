@@ -118,17 +118,17 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
         final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
+        testHarness(vertx, testCtx, sessionStore, List.of(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
                 isFirstReq.set(false);
             }
             ctx.response().end();
         }, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         });
     }
@@ -141,7 +141,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
         final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
+        testHarness(vertx, testCtx, sessionStore, List.of(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
                 isFirstReq.set(false);
@@ -154,10 +154,10 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             }
             ctx.response().end();
         }, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         });
     }
@@ -171,7 +171,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
         final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
+        testHarness(vertx, testCtx, sessionStore, List.of(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
                 isFirstReq.set(false);
@@ -180,10 +180,10 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             }
             ctx.response().end();
         }, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Arrays.asList(cookie, followUpCookie)));
         });
     }
@@ -197,7 +197,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
         final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
+        testHarness(vertx, testCtx, sessionStore, List.of(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(cookie);
                 isFirstReq.set(false);
@@ -206,10 +206,10 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             }
             ctx.response().end();
         }, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(cookie)));
         }, null, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp, new ArrayList<Cookie>());
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp, new ArrayList<Cookie>());
         });
     }
 
@@ -219,13 +219,15 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final Cookie masterRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/master/").setMaxAge(3600);
         final Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/portal/")
             .setMaxAge(3600);
-        final JsonArray whitelistedCookies = new JsonArray().add(new JsonObject()
-            .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
-            .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/auth/realms/master/"))
-            .add(new JsonObject()
-                .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "KEYCLOAK_SESSION")
-                .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH,
-                    "/auth/realms/portal/"));
+        final List<WhitelistedCookieOption> whitelistedCookies = List.of(
+            WhitelistedCookieOption.builder()
+                .withName("KEYCLOAK_SESSION")
+                .withPath("/auth/realms/master/")
+                .build(),
+            WhitelistedCookieOption.builder()
+                .withName("KEYCLOAK_SESSION")
+                .withPath("/auth/realms/portal/")
+                .build());
         final SessionStore sessionStore = LocalSessionStore.create(vertx);
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
         final AtomicReference<String> sessionId = new AtomicReference<>();
@@ -270,7 +272,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final AtomicBoolean isFirstReq = new AtomicBoolean(true);
         final AtomicReference<String> sessionId = new AtomicReference<>();
 
-        testHarness(vertx, testCtx, sessionStore, new JsonArray(), ctx -> {
+        testHarness(vertx, testCtx, sessionStore, List.of(), ctx -> {
             if (isFirstReq.get()) {
                 ctx.response().addCookie(storedCookie);
                 isFirstReq.set(false);
@@ -287,17 +289,17 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             }
             ctx.response().end();
         }, resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(storedCookie)));
         }, new ArrayList<Cookie>(Collections.singletonList(reqCookie)), resp -> {
-            expectedCookies(testCtx, errMsg, sessionStore, sessionId, new JsonArray(), resp,
+            expectedCookies(testCtx, errMsg, sessionStore, sessionId, List.of(), resp,
                 new ArrayList<Cookie>(Collections.singletonList(storedCookie)));
         });
 
     }
 
     void testHarness(
-        Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, JsonArray whitelistedCookies,
+        Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, List<WhitelistedCookieOption> whitelistedCookies,
         Handler<RoutingContext> serverReqHandler, Handler<HttpClientResponse> respHandler,
         List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler
     ) {
@@ -320,8 +322,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
 
             // setup proxy
             final SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(SESSION_COOKIE_NAME);
-            final SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies,
-                "uniport.session");
+            final SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session");
             final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy",
                 HOST, servicePort,
                 ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
@@ -393,7 +394,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
      */
     void expectedCookies(
         VertxTestContext testCtx, String errMsg, SessionStore sessionStore,
-        AtomicReference<String> sessionId, JsonArray whitelistedCookies, HttpClientResponse resp,
+        AtomicReference<String> sessionId, List<WhitelistedCookieOption> whitelistedCookies, HttpClientResponse resp,
         List<Cookie> expectedSessionBagCookies
     ) {
         testCtx.verify(() -> {
@@ -408,9 +409,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
                 }
 
                 assertTrue(
-                    whitelistedCookies.contains(new JsonObject()
-                        .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, decodedRespCookie.getName())
-                        .put(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, decodedRespCookie.getPath())),
+                    whitelistedCookies.stream().anyMatch(cookie -> cookie.getName().equals(decodedRespCookie.getName()) && cookie.getPath().equals(decodedRespCookie.getPath())),
                     String.format("%s: Not whitelisted cookie was passed to user agent '%s'", errMsg, respCookie));
             }
 

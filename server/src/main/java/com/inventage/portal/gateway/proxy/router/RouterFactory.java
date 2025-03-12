@@ -1,19 +1,25 @@
 package com.inventage.portal.gateway.proxy.router;
 
-import com.inventage.portal.gateway.GatewayRouter;
+import com.google.common.collect.ImmutableList;
+import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.Gateway;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.model.GatewayRouter;
+import com.inventage.portal.gateway.proxy.model.GatewayService;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
 import io.vertx.ext.healthchecks.HealthChecks;
@@ -24,7 +30,9 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.spi.cluster.hazelcast.ClusterHealthCheck;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -188,28 +196,25 @@ public class RouterFactory {
         this.entrypointName = other.entrypointName;
     }
 
-    public Future<Router> createRouter(JsonObject dynamicConfig) {
+    public Future<Router> createRouter(Gateway model) {
         final Promise<Router> promise = Promise.promise();
-        createRouter(dynamicConfig, promise);
+        createRouter(model, promise);
         return promise.future();
     }
 
-    private void createRouter(JsonObject dynamicConfig, Handler<AsyncResult<Router>> handler) {
-        final JsonObject httpConfig = dynamicConfig.getJsonObject(DynamicConfiguration.HTTP);
-
-        final JsonArray routers = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-        final JsonArray middlewares = httpConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES);
-        final JsonArray services = httpConfig.getJsonArray(DynamicConfiguration.SERVICES);
-
+    private void createRouter(Gateway model, Handler<AsyncResult<Router>> handler) {
+        final List<GatewayRouter> routers = new LinkedList<GatewayRouter>(model.getRouters());
         sortByRuleLength(routers);
+
+        final ImmutableList<GatewayMiddleware> middlewares = model.getMiddlewares();
+        final ImmutableList<GatewayService> services = model.getServices();
 
         LOGGER.debug("Creating router from config");
         final List<Future<Router>> subRouterFutures = new ArrayList<>();
-        for (int i = 0; i < routers.size(); i++) {
-            final JsonObject routerConfig = routers.getJsonObject(i);
+        for (GatewayRouter r : routers) {
 
-            final JsonArray routerEntrypointNamesJson = routerConfig.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
-            if (routerEntrypointNamesJson == null) {
+            final ImmutableList<String> entrypoints = r.getEntrypoints();
+            if (entrypoints.isEmpty()) {
                 final String errMsg = "Router has no entrypoints";
                 handler.handle(Future.failedFuture(errMsg));
 
@@ -218,16 +223,14 @@ public class RouterFactory {
                 return;
             }
 
-            @SuppressWarnings("unchecked")
-            final List<String> routerEntrypointNames = (List<String>) routerEntrypointNamesJson.getList();
-            if (!routerEntrypointNames.contains(entrypointName)) {
+            if (!entrypoints.contains(entrypointName)) {
                 continue;
             }
 
-            subRouterFutures.add(createSubRouter(routerConfig, middlewares, services));
+            subRouterFutures.add(createSubRouter(r, middlewares, services));
         }
 
-        final GatewayRouter router = GatewayRouter.router(this.vertx, "root");
+        final GatewayRouterInternal router = GatewayRouterInternal.router(this.vertx, "root");
 
         // has to be first route, so no other paths are shadowing it
         addHealthRoute(router);
@@ -252,20 +255,17 @@ public class RouterFactory {
         });
     }
 
-    private Future<Router> createSubRouter(JsonObject routerConfig, JsonArray middlewares, JsonArray services) {
+    private Future<Router> createSubRouter(GatewayRouter routerConfig, ImmutableList<GatewayMiddleware> middlewares, ImmutableList<GatewayService> services) {
         final Promise<Router> promise = Promise.promise();
         createSubRouter(routerConfig, middlewares, services, promise);
         return promise.future();
     }
 
-    private void createSubRouter(
-        JsonObject routerConfig, JsonArray middlewares, JsonArray services,
-        Handler<AsyncResult<Router>> handler
-    ) {
-        final String routerName = routerConfig.getString(DynamicConfiguration.ROUTER_NAME);
-        final Router router = GatewayRouter.router(this.vertx, String.format("rule matcher %s", routerName));
+    private void createSubRouter(GatewayRouter routerConfig, ImmutableList<GatewayMiddleware> middlewares, ImmutableList<GatewayService> services, Handler<AsyncResult<Router>> handler) {
+        final String routerName = routerConfig.getName();
+        final Router router = GatewayRouterInternal.router(this.vertx, String.format("rule matcher %s", routerName));
 
-        final String rule = routerConfig.getString(DynamicConfiguration.ROUTER_RULE);
+        final String rule = routerConfig.getRule();
         final RoutingRule routingRule = parseRule(rule);
         if (routingRule == null) {
             final String errMsg = String.format("Failed to parse rule of router '%s'", routerName);
@@ -277,26 +277,36 @@ public class RouterFactory {
 
         final List<Future<Middleware>> middlewareFutures = new ArrayList<>();
 
-        final JsonArray middlewareNames = routerConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, new JsonArray());
-        for (int j = 0; j < middlewareNames.size(); j++) {
-            final String middlewareName = middlewareNames.getString(j);
-            final JsonObject middlewareConfig = DynamicConfiguration.getObjByKeyWithValue(middlewares,
-                DynamicConfiguration.MIDDLEWARE_NAME, middlewareName);
-            middlewareFutures.add(createMiddleware(middlewareConfig, router));
+        final ImmutableList<String> middlewareNames = routerConfig.getMiddlewares();
+        for (String middlewareName : middlewareNames) {
+            final Optional<GatewayMiddleware> middlewareConfig = middlewares.stream()
+                .filter(m -> m.getName().equals(middlewareName))
+                .findFirst();
+
+            if (middlewareConfig.isEmpty()) {
+                final String errMsg = String.format("Failed to find middleware '%s' in router '%s'", middlewareName, routerName);
+                LOGGER.warn("{}", errMsg);
+                handler.handle(Future.failedFuture(errMsg));
+                return;
+            }
+
+            middlewareFutures.add(createMiddleware(middlewareConfig.get(), router));
         }
 
-        final String serviceName = routerConfig.getString(DynamicConfiguration.ROUTER_SERVICE);
-        final JsonObject serviceConfig = DynamicConfiguration.getObjByKeyWithValue(services, DynamicConfiguration.SERVICE_NAME, serviceName);
-        final JsonArray serverConfigs = serviceConfig.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
-        final JsonObject serverConfig = serverConfigs.getJsonObject(0); // TODO support multiple servers
+        final String serviceName = routerConfig.getService();
+        final Optional<GatewayService> serviceConfig = services.stream()
+            .filter(s -> s.getName().equals(serviceName))
+            .findFirst();
 
-        final Boolean serviceVerbose = serviceConfig.getBoolean(DynamicConfiguration.SERVICE_VERBOSE);
-        if (serviceVerbose != null) {
-            serverConfig.put(DynamicConfiguration.SERVICE_VERBOSE, serviceVerbose);
+        if (serviceConfig.isEmpty()) {
+            final String errMsg = String.format("Failed to find service '%s' in router '%s'", serviceConfig, routerName);
+            LOGGER.warn("{}", errMsg);
+            handler.handle(Future.failedFuture(errMsg));
+            return;
         }
 
         // required to be the last middleware
-        final Future<Middleware> proxyMiddlewareFuture = (new ProxyMiddlewareFactory()).create(vertx, serviceName, router, serverConfig);
+        final Future<Middleware> proxyMiddlewareFuture = new ProxyMiddlewareFactory().create(vertx, serviceName, router, serviceConfig.get());
         middlewareFutures.add(proxyMiddlewareFuture);
 
         // Handlers will get called if and only if
@@ -314,26 +324,15 @@ public class RouterFactory {
             });
     }
 
-    private Future<Middleware> createMiddleware(JsonObject middlewareConfig, Router router) {
+    private Future<Middleware> createMiddleware(GatewayMiddleware middlewareConfig, Router router) {
         final Promise<Middleware> promise = Promise.promise();
         createMiddleware(middlewareConfig, router, promise);
         return promise.future();
     }
 
-    private void createMiddleware(
-        JsonObject middlewareConfig, Router router,
-        Handler<AsyncResult<Middleware>> handler
-    ) {
-        final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject());
-
-        // needed to ensure authenticating requests are routed through this application
-        if (middlewareType.equals(OAuth2MiddlewareFactory.OAUTH2)
-            || middlewareType.equals(OAuth2RegistrationMiddlewareFactory.OAUTH2_REGISTRATION)) {
-            middlewareOptions.put(PUBLIC_PROTOCOL_KEY, this.publicProtocol);
-            middlewareOptions.put(PUBLIC_HOSTNAME_KEY, this.publicHostname);
-            middlewareOptions.put(PUBLIC_PORT_KEY, this.publicPort);
-        }
+    private void createMiddleware(GatewayMiddleware middlewareConfig, Router router, Handler<AsyncResult<Middleware>> handler) {
+        final String middlewareType = middlewareConfig.getType();
+        final GatewayMiddlewareOptions middlewareOptions = injectPublicProtocolHostPort(middlewareType, middlewareConfig.getOptions());
 
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
@@ -343,10 +342,28 @@ public class RouterFactory {
             return;
         }
 
-        final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        final String middlewareName = middlewareConfig.getName();
         middlewareFactory.get()
             .create(this.vertx, middlewareName, router, middlewareOptions)
             .onComplete(handler);
+    }
+
+    private GatewayMiddlewareOptions injectPublicProtocolHostPort(String type, GatewayMiddlewareOptions options) {
+        if (!(type.equals(OAuth2MiddlewareFactory.OAUTH2) || type.equals(OAuth2RegistrationMiddlewareFactory.OAUTH2_REGISTRATION))) {
+            return options;
+        }
+
+        if (!(options instanceof OAuth2MiddlewareOptions)) {
+            throw new IllegalStateException(String.format("unexpected middleware options type: '%s'", options.getClass()));
+        }
+        final OAuth2MiddlewareOptions oauth2options = (OAuth2MiddlewareOptions) options;
+
+        // needed to ensure authenticating requests are routed through this application
+        return oauth2options.withEnv(
+            Map.of(
+                PUBLIC_PROTOCOL_KEY, publicProtocol,
+                PUBLIC_HOSTNAME_KEY, publicHostname,
+                PUBLIC_PORT_KEY, publicPort));
     }
 
     private void addHealthRoute(Router router) {
@@ -379,33 +396,28 @@ public class RouterFactory {
      * priority calculates
      * by the length of the rule.
      */
-    private void sortByRuleLength(JsonArray routers) {
-        final List<JsonObject> routerList = routers.getList();
-
-        Collections.sort(routerList, (a, b) -> {
-            final String ruleA = a.getString(DynamicConfiguration.ROUTER_RULE);
-            final String ruleB = b.getString(DynamicConfiguration.ROUTER_RULE);
+    private void sortByRuleLength(List<GatewayRouter> routers) {
+        Collections.sort(routers, (a, b) -> {
+            final String ruleA = a.getRule();
+            final String ruleB = b.getRule();
 
             int priorityA = ruleA.length();
             int priorityB = ruleB.length();
 
-            if (a.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
-                priorityA = a.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+            if (a.getPriority() > 0) {
+                priorityA = a.getPriority();
             }
 
-            if (b.containsKey(DynamicConfiguration.ROUTER_PRIORITY)) {
-                priorityB = b.getInteger(DynamicConfiguration.ROUTER_PRIORITY);
+            if (b.getPriority() > 0) {
+                priorityB = b.getPriority();
             }
 
             return priorityB - priorityA;
         });
 
         LOGGER.debug("Routing requests in the following order:");
-        for (JsonObject r : routerList) {
-            LOGGER.debug("Router '{}': rule '{}', priority '{}'",
-                r.getString(DynamicConfiguration.ROUTER_NAME),
-                r.getString(DynamicConfiguration.ROUTER_RULE),
-                r.getInteger(DynamicConfiguration.ROUTER_PRIORITY) != null ? r.getInteger(DynamicConfiguration.ROUTER_PRIORITY) : r.getString(DynamicConfiguration.ROUTER_RULE).length());
+        for (GatewayRouter r : routers) {
+            LOGGER.debug("Router '{}': rule '{}', priority '{}'", r.getName(), r.getRule(), r.getPriority() > 0 ? r.getPriority() : r.getRule().length());
         }
     }
 

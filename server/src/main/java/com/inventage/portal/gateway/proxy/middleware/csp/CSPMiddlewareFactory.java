@@ -104,17 +104,15 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<CSPMiddlewareOptions> modelType() {
         return CSPMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final Boolean reportOnly = middlewareConfig.getBoolean(CSP_REPORT_ONLY, DEFAULT_REPORT_ONLY);
-        final JsonArray directives = middlewareConfig.getJsonArray(CSP_DIRECTIVES);
-        final String mergeStrategy = middlewareConfig.getString(CSP_MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY.toString());
-
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final CSPMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.info("Created '{}' middleware successfully", CSP);
-        return Future.succeededFuture(new CSPMiddleware(name, directives, reportOnly.booleanValue(), CSPMergeStrategy.valueOf(mergeStrategy)));
+        return Future.succeededFuture(
+            new CSPMiddleware(name, options.getDirectives(), options.isReportOnly(), options.getMergeStrategy()));
     }
 }

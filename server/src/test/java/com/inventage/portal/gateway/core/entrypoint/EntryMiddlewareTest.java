@@ -3,7 +3,13 @@ package com.inventage.portal.gateway.core.entrypoint;
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.ProxyApplication;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.model.Gateway;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
+import com.inventage.portal.gateway.proxy.model.GatewayRouter;
+import com.inventage.portal.gateway.proxy.model.GatewayService;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -17,7 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
@@ -84,13 +90,41 @@ public class EntryMiddlewareTest {
         final String entryPointIdentifier = ENTRYPOINT_PREFIX + proxyPort;
         final String expectedRedirect = "/to/some/page";
 
-        final Map<String, JsonObject> configuration = oneEntryRedirectMiddlewareTwoRoutesConfiguration(entryPointIdentifier,
-            expectedRedirect);
-        final JsonObject dynamicConfig = configuration.get("dynamic");
-        final JsonObject entryMiddlewareConfig = configuration.get("entryMiddleware");
+        final GatewayMiddleware entryMiddlewareConfig = GatewayMiddleware.builder()
+            .withName("redirect")
+            .withType(RedirectRegexMiddlewareFactory.REDIRECT_REGEX)
+            .withOptions(RedirectRegexMiddlewareOptions.builder()
+                .withRegex("/.*")
+                .withReplacement(expectedRedirect)
+                .build())
+            .build();
 
-        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort,
-            new JsonArray().add(entryMiddlewareConfig));
+        final Gateway dynamicConfig = Gateway.builder()
+            .withRouters(List.of(
+                GatewayRouter.builder()
+                    .withName("foo")
+                    .withService("bar")
+                    .withRule("Path('/pathA')")
+                    .withEntrypoints(List.of(entryPointIdentifier))
+                    .build(),
+                GatewayRouter.builder()
+                    .withName("foo2")
+                    .withService("bar")
+                    .withRule("Path('/pathB')")
+                    .withEntrypoints(List.of(entryPointIdentifier))
+                    .build()))
+            .withServices(List.of(
+                GatewayService.builder()
+                    .withName("bar")
+                    .withServers(List.of(
+                        ServerOptions.builder()
+                            .withHost(HOST)
+                            .withPort(serverPort)
+                            .build()))
+                    .build()))
+            .build();
+
+        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, List.of(entryMiddlewareConfig));
         final ProxyApplication proxyApplication = new ProxyApplication(vertx, "proxy", entryPointIdentifier, 1234, JsonArray.of(), JsonObject.of());
         entrypoint.mount(proxyApplication);
 
@@ -135,28 +169,6 @@ public class EntryMiddlewareTest {
         } catch (InterruptedException e) {
             testCtx.failNow(e);
         }
-    }
-
-    private Map<String, JsonObject> oneEntryRedirectMiddlewareTwoRoutesConfiguration(
-        String entryPointIdentifier,
-        String redirect
-    ) {
-        final JsonObject dynamicConfig = TestUtils.buildConfiguration(
-            TestUtils.withRouters(TestUtils.withRouter("foo", TestUtils.withRouterService("bar"),
-                TestUtils.withRouterRule("Path('/pathA')"), TestUtils.withRouterMiddlewares(), TestUtils.withRouterEntrypoints(entryPointIdentifier)),
-                TestUtils.withRouter("foo2", TestUtils.withRouterService("bar"),
-                    TestUtils.withRouterRule("Path('/pathB')"), TestUtils.withRouterMiddlewares(), TestUtils.withRouterEntrypoints(entryPointIdentifier))),
-            TestUtils.withServices(
-                TestUtils.withService("bar", TestUtils.withServers(TestUtils.withServer(HOST, serverPort)))));
-
-        final JsonObject entryMiddlewareConfig = TestUtils.buildStaticConfiguration(
-            TestUtils.withMiddleware("redirect", "redirectRegex",
-                TestUtils.withMiddlewareOpts(
-                    new JsonObject()
-                        .put(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, "/.*")
-                        .put(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT, redirect))));
-
-        return Map.of("dynamic", dynamicConfig, "entryMiddleware", entryMiddlewareConfig);
     }
 
 }

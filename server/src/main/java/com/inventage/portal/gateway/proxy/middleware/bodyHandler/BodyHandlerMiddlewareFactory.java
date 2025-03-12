@@ -39,13 +39,14 @@ public class BodyHandlerMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<BodyHandlerMiddlewareOptions> modelType() {
         return BodyHandlerMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         LOGGER.info("Created '{}' middleware successfully", BODY_HANDLER);
-        return Future.succeededFuture(new BodyHandlerMiddleware(vertx, name));
+        return Future.succeededFuture(
+            new BodyHandlerMiddleware(vertx, name));
     }
 }

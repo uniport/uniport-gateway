@@ -333,6 +333,12 @@ public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> im
         return this;
     }
 
+    // NOTE: this can be removed once issue #2602 has been resolved
+    public OAuth2AuthHandler extraParams(Map<String, String> extraParams) {
+        this.extraParams = new HashMap<String, String>(extraParams);
+        return this;
+    }
+
     public RelyingPartyHandler passthroughParameters(List<String> passthroughParams) {
         this.passthroughParams = new HashSet<String>(passthroughParams);
         return this;

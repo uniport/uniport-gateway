@@ -149,85 +149,31 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<SessionMiddlewareOptions> modelType() {
         return SessionMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        // session
-        final int sessionIdMinLength = middlewareConfig.getInteger(
-            SESSION_ID_MIN_LENGTH,
-            DEFAULT_SESSION_ID_MINIMUM_LENGTH);
-        final int sessionIdleTimeoutInMinutes = middlewareConfig.getInteger(
-            SESSION_IDLE_TIMEOUT_IN_MINUTES,
-            DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
-        final String pathWithoutSessionTimeoutReset = middlewareConfig.getString(
-            SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
-        final Boolean nagHttps = middlewareConfig.getBoolean(
-            SESSION_NAG_HTTPS,
-            DEFAULT_NAG_HTTPS);
-
-        // session cookie
-        final JsonObject sessionCookieConfig = middlewareConfig.getJsonObject(
-            SESSION_COOKIE,
-            new JsonObject());
-        final String sessionCookieName = sessionCookieConfig.getString(
-            SESSION_COOKIE_NAME,
-            DEFAULT_SESSION_COOKIE_NAME);
-        final boolean sessionCookieHttpOnly = sessionCookieConfig.getBoolean(
-            SESSION_COOKIE_HTTP_ONLY,
-            DEFAULT_SESSION_COOKIE_HTTP_ONLY);
-        final boolean sessionCookieSecure = sessionCookieConfig.getBoolean(
-            SESSION_COOKIE_SECURE,
-            DEFAULT_SESSION_COOKIE_SECURE);
-        final String sessionCookieSameSiteValue = sessionCookieConfig.getString(
-            SESSION_COOKIE_SAME_SITE,
-            DEFAULT_SESSION_COOKIE_SAME_SITE.toString());
-        final CookieSameSite sessionCookieSameSite = CookieSameSite.valueOf(
-            sessionCookieSameSiteValue.toUpperCase());
-
-        // session lifetime
-        final Boolean lifetimeHeader = middlewareConfig.getBoolean(
-            SESSION_LIFETIME_HEADER,
-            DEFAULT_SESSION_LIFETIME_HEADER);
-        final String lifetimeHeaderName = DEFAULT_SESSION_LIFETIME_HEADER_NAME;
-
-        final Boolean lifetimeCookie = middlewareConfig.getBoolean(
-            SESSION_LIFETIME_COOKIE,
-            DEFAULT_SESSION_LIFETIME_COOKIE);
-        final String lifetimeCookieName = DEFAULT_SESSION_LIFETIME_COOKIE_NAME;
-        final String lifetimeCookiePath = DEFAULT_SESSION_LIFETIME_COOKIE_PATH;
-        final boolean lifetimeCookieHttpOnly = DEFAULT_SESSION_LIFETIME_COOKIE_HTTP_ONLY;
-        final boolean lifetimeCookieSecure = DEFAULT_SESSION_LIFETIME_COOKIE_SECURE;
-        final CookieSameSite lifetimeCookieSameSite = DEFAULT_SESSION_LIFETIME_COOKIE_SAME_SITE;
-
-        // session store
-        final int clusteredSessionStoreRetryTimeoutMilliSeconds = middlewareConfig.getInteger(
-            CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS,
-            DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS);
-
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final SessionMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.info("Created '{}' middleware successfully", SESSION);
         return Future.succeededFuture(
             new SessionMiddleware(
                 vertx,
                 name,
-                sessionIdMinLength,
-                sessionIdleTimeoutInMinutes,
-                pathWithoutSessionTimeoutReset,
-                nagHttps,
-                sessionCookieName,
-                sessionCookieHttpOnly,
-                sessionCookieSecure,
-                sessionCookieSameSite,
-                lifetimeHeader,
-                lifetimeHeaderName,
-                lifetimeCookie,
-                lifetimeCookieName,
-                lifetimeCookiePath,
-                lifetimeCookieHttpOnly,
-                lifetimeCookieSecure,
-                lifetimeCookieSameSite,
-                clusteredSessionStoreRetryTimeoutMilliSeconds));
+                // session
+                options.getIdMinLength(),
+                options.getIdleTimeoutMinutes(),
+                options.getIgnoreSessionTimeoutResetForURI(),
+                options.nagHttps(),
+                // session cookie
+                options.getSessionCookie(),
+                // lifetime
+                options.useLifetimeHeader(),
+                options.getLifetimeHeader(),
+                options.useLifetimeCookie(),
+                options.getLifetimeCookie(),
+                // session store
+                options.getClusteredSessionStoreRetryTimeoutMs()));
     }
 }

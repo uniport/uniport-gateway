@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
 
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import io.vertx.core.json.JsonObject;
+import com.inventage.portal.gateway.proxy.middleware.authorization.ClaimOptions;
 import org.apache.commons.lang3.Validate;
 
 public class JWTClaim {
@@ -17,11 +16,11 @@ public class JWTClaim {
      *            operator: The operator that defines the rule for the check.
      *            value: The claim value, that is compared to the payload entry
      */
-    public JWTClaim(JsonObject claimObject) {
+    public JWTClaim(ClaimOptions options) {
         this(
-            claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH),
-            JWTClaimOperator.valueOf(claimObject.getString(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR)),
-            claimObject.getValue(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_VALUE));
+            options.getPath(),
+            options.getOperator(),
+            options.getValue());
     }
 
     public JWTClaim(String path, JWTClaimOperator operator, Object value) {

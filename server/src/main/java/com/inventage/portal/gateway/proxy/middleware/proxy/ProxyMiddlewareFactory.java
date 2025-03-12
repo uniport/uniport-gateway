@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.proxy;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.model.GatewayService;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -62,43 +63,31 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
-        return ProxyMiddlewareOptions.class;
+    public Class<GatewayService> modelType() {
+        return GatewayService.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject serverConfig) {
-        LOGGER.debug("Created '{}' middleware successfully", PROXY);
-
-        final String serverProtocol = serverConfig.getString(SERVICE_SERVER_PROTOCOL, DEFAULT_SERVER_PROTOCOL);
-        final String serverHost = serverConfig.getString(SERVICE_SERVER_HOST);
-        final Integer serverPort = serverConfig.getInteger(SERVICE_SERVER_PORT);
-
-        Boolean trustAll = DEFAULT_HTTPS_TRUST_ALL;
-        Boolean verifyHost = DEFAULT_HTTPS_VERIFY_HOSTNAME;
-        String storePath = DEFAULT_HTTPS_TRUST_STORE_PATH;
-        String storePassword = DEFAULT_HTTPS_TRUST_STORE_PASSWORD;
-
-        final JsonObject httpsOptions = serverConfig.getJsonObject(SERVICE_SERVER_HTTPS_OPTIONS);
-        if (httpsOptions != null) {
-            trustAll = httpsOptions.getBoolean(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, DEFAULT_HTTPS_TRUST_ALL);
-            verifyHost = httpsOptions.getBoolean(SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, DEFAULT_HTTPS_VERIFY_HOSTNAME);
-            storePath = httpsOptions.getString(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, DEFAULT_HTTPS_TRUST_STORE_PATH);
-            storePassword = httpsOptions.getString(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, DEFAULT_HTTPS_TRUST_STORE_PASSWORD);
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final GatewayService options = castOptions(config, modelType());
+        final ServerOptions serverConfig = options.getServers().get(0); // TODO support multiple servers
+        final HTTPsOptions httpsOptions = serverConfig.getHTTPs();
+        if (httpsOptions == null) {
+            return Future.failedFuture(
+                new IllegalStateException("expected https options to be non-empty"));
         }
 
-        final boolean verbose = serverConfig.getBoolean(SERVICE_VERBOSE, DEFAULT_VERBOSE);
-
+        LOGGER.debug("Created '{}' middleware successfully", PROXY);
         return Future.succeededFuture(
             new ProxyMiddleware(vertx,
                 name,
-                serverHost,
-                serverPort,
-                serverProtocol,
-                trustAll,
-                verifyHost,
-                storePath,
-                storePassword,
-                verbose));
+                serverConfig.getHost(),
+                serverConfig.getPort(),
+                serverConfig.getProtocol(),
+                httpsOptions.trustAll(),
+                httpsOptions.verifyHostname(),
+                httpsOptions.getTrustStorePath(),
+                httpsOptions.getTrustStorePassword(),
+                options.isVerbose()));
     }
 }

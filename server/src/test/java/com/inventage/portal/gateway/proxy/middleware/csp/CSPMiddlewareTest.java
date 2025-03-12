@@ -23,6 +23,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,7 +85,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String defaultSrcValue = "self";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(defaultSrc, defaultSrcValue)), false)
+            .withCspMiddleware(List.of(createDirective(defaultSrc, defaultSrcValue)), false)
             .build().start();
 
         // when
@@ -109,7 +111,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String reportToValue = "www.example.com";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(
+            .withCspMiddleware(List.of(
                 createDirective(defaultSrc, defaultSrcValue),
                 createDirective(reportTo, reportToValue)), true)
             .build().start();
@@ -143,8 +145,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String mediaValue = "self";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(mediaDirective, mediaValue)), false)
-            .withCspMiddleware(JsonArray.of(createDirective(styleDirective, styleValue)), false)
+            .withCspMiddleware(List.of(createDirective(mediaDirective, mediaValue)), false)
+            .withCspMiddleware(List.of(createDirective(styleDirective, styleValue)), false)
             .build().start();
 
         // when
@@ -170,8 +172,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String differentStyleValue = "https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net";
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(styleDirective, differentStyleValue)), false)
-            .withCspMiddleware(JsonArray.of(createDirective(styleDirective, styleValue)), false)
+            .withCspMiddleware(List.of(createDirective(styleDirective, differentStyleValue)), false)
+            .withCspMiddleware(List.of(createDirective(styleDirective, styleValue)), false)
             .build().start();
 
         // when
@@ -207,7 +209,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
@@ -244,8 +246,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -285,8 +287,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.INTERNAL)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.INTERNAL)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -326,8 +328,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.EXTERNAL)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -366,7 +368,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -403,7 +405,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -440,7 +442,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -476,7 +478,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withCspMiddleware(JsonArray.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
+            .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
             .build().start();
@@ -496,9 +498,10 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         }));
     }
 
-    private JsonObject createDirective(String directive, String... values) {
-        return JsonObject.of(
-            CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, directive,
-            CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, JsonArray.of((Object[]) values));
+    private DirectiveOptions createDirective(String directive, String... values) {
+        return DirectiveOptions.builder()
+            .withName(directive)
+            .withValues(Arrays.asList(values))
+            .build();
     }
 }

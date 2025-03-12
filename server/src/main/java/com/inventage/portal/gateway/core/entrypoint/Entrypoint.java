@@ -1,12 +1,13 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
-import com.inventage.portal.gateway.GatewayRouter;
+import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -33,22 +34,17 @@ public class Entrypoint {
     private final Vertx vertx;
     private final String name;
     private final int port;
-    private final JsonArray entryMiddlewares;
-    private GatewayRouter router;
+    private final List<GatewayMiddleware> entryMiddlewares;
+    private GatewayRouterInternal router;
     private boolean enabled;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, JsonArray entryMiddlewares) {
+    public Entrypoint(Vertx vertx, String name, int port, List<GatewayMiddleware> entryMiddlewares) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
         this.enabled = true;
-
-        if (entryMiddlewares == null) {
-            this.entryMiddlewares = null;
-        } else {
-            this.entryMiddlewares = new JsonArray(entryMiddlewares.getList());
-        }
+        this.entryMiddlewares = entryMiddlewares;
     }
 
     public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
@@ -68,11 +64,11 @@ public class Entrypoint {
         return port;
     }
 
-    public GatewayRouter router() {
+    public GatewayRouterInternal router() {
         if (router != null) {
             return router;
         }
-        router = GatewayRouter.router(vertx, String.format("entrypoint %s", name));
+        router = GatewayRouterInternal.router(vertx, String.format("entrypoint %s", name));
         if (this.entryMiddlewares != null) {
             LOGGER.info("Setup EntryMiddlewares");
             this.setupEntryMiddlewares(this.entryMiddlewares, router);
@@ -116,38 +112,36 @@ public class Entrypoint {
         enabled = false;
     }
 
-    private void setupEntryMiddlewares(JsonArray entryMiddlewares, Router router) {
+    private void setupEntryMiddlewares(List<GatewayMiddleware> entryMiddlewares, Router router) {
 
         final List<Future<Middleware>> entryMiddlewaresFuture = new ArrayList<>();
-        for (int i = 0; i < entryMiddlewares.size(); i++) {
-            entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddlewares.getJsonObject(i), router));
+        for (GatewayMiddleware entryMiddleware : entryMiddlewares) {
+            entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddleware, router));
         }
 
-        Future.all(entryMiddlewaresFuture).onSuccess(cf -> {
-            entryMiddlewaresFuture
-                .forEach(mf -> {
+        Future.all(entryMiddlewaresFuture)
+            .onSuccess(cf -> {
+                entryMiddlewaresFuture.forEach(mf -> {
                     final Middleware middleware = mf.result();
-                    router.route().setName(middleware.getClass().getSimpleName()).handler((Handler<RoutingContext>) middleware);
+                    router.route()
+                        .setName(middleware.getClass().getSimpleName())
+                        .handler((Handler<RoutingContext>) middleware);
                 });
-            LOGGER.info("EntryMiddlewares created successfully");
-        }).onFailure(err -> {
-            Runtime.fatal(vertx, err.getMessage());
-        });
+                LOGGER.info("EntryMiddlewares created successfully");
+            }).onFailure(err -> {
+                Runtime.fatal(vertx, err.getMessage());
+            });
     }
 
-    private Future<Middleware> createEntryMiddleware(JsonObject middlewareConfig, Router router) {
+    private Future<Middleware> createEntryMiddleware(GatewayMiddleware middlewareConfig, Router router) {
         final Promise<Middleware> promise = Promise.promise();
         createEntryMiddleware(middlewareConfig, router, promise);
         return promise.future();
     }
 
-    private void createEntryMiddleware(
-        JsonObject middlewareConfig, Router router,
-        Handler<AsyncResult<Middleware>> handler
-    ) {
-        final String middlewareType = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_TYPE);
-        final JsonObject middlewareOptions = middlewareConfig.getJsonObject(DynamicConfiguration.MIDDLEWARE_OPTIONS,
-            new JsonObject());
+    private void createEntryMiddleware(GatewayMiddleware middlewareConfig, Router router, Handler<AsyncResult<Middleware>> handler) {
+        final String middlewareType = middlewareConfig.getType();
+        final GatewayMiddlewareOptions middlewareOptions = middlewareConfig.getOptions();
 
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
@@ -157,7 +151,7 @@ public class Entrypoint {
             return;
         }
 
-        final String middlewareName = middlewareConfig.getString(DynamicConfiguration.MIDDLEWARE_NAME);
+        final String middlewareName = middlewareConfig.getName();
         middlewareFactory.get()
             .create(this.vertx, middlewareName, router, middlewareOptions)
             .onComplete(handler);

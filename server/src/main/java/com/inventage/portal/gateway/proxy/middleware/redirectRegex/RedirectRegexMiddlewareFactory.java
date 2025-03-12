@@ -46,16 +46,18 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<RedirectRegexMiddlewareOptions> modelType() {
         return RedirectRegexMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final RedirectRegexMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", REDIRECT_REGEX);
-        return Future.succeededFuture(new RedirectRegexMiddleware(
-            name,
-            middlewareConfig.getString(REDIRECT_REGEX_REGEX),
-            middlewareConfig.getString(REDIRECT_REGEX_REPLACEMENT)));
+        return Future.succeededFuture(
+            new RedirectRegexMiddleware(
+                name,
+                options.getRegex(),
+                options.getReplacement()));
     }
 }

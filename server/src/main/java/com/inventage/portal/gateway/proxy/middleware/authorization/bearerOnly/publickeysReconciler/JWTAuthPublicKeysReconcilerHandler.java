@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import io.vertx.core.AsyncResult;
@@ -45,9 +45,9 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
         JWTAuthOptions jwtAuthOptions,
         JWTAuthMultipleIssuersOptions additionalIssuersOptions,
         JWTAuthAdditionalClaimsOptions additionalClaimsOptions,
-        JsonArray publicKeys,
-        boolean reconcilationEnabled,
-        long reconcilationIntervalMs
+        List<PublicKeyOptions> publicKeys,
+        boolean reconciliationEnabled,
+        long reconciliationIntervalMs
     ) {
         return new JWTAuthPublicKeysReconcilerHandlerImpl(
             vertx,
@@ -55,8 +55,8 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
             additionalIssuersOptions,
             additionalClaimsOptions,
             publicKeys,
-            reconcilationEnabled,
-            reconcilationIntervalMs);
+            reconciliationEnabled,
+            reconciliationIntervalMs);
     }
 
     Future<AuthenticationHandler> getOrRefreshPublicKeys();
@@ -70,24 +70,19 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
      */
     List<JsonObject> getJwks();
 
-    static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, JsonArray publicKeySources) {
+    static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, List<PublicKeyOptions> publicKeySources) {
         final Promise<JWTAuthOptions> promise = Promise.promise();
         fetchPublicKeys(vertx, publicKeySources, promise);
         return promise.future();
     }
 
-    private static void fetchPublicKeys(
-        Vertx vertx, JsonArray rawPublicKeys,
-        Handler<AsyncResult<JWTAuthOptions>> handler
-    ) {
-
-        final List<JsonObject> publicKeys = rawPublicKeys.getList();
+    private static void fetchPublicKeys(Vertx vertx, List<PublicKeyOptions> publicKeys, Handler<AsyncResult<JWTAuthOptions>> handler) {
 
         final JWTAuthOptions authOpts = new JWTAuthOptions();
         final List<Future<List<JsonObject>>> futures = new LinkedList<>();
 
         publicKeys.forEach(pk -> {
-            final String publicKey = pk.getString(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY);
+            final String publicKey = pk.getKey();
             boolean isURL = false;
             try {
                 new URL(publicKey).toURI();
@@ -110,9 +105,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
             } else {
                 LOGGER.info("Public key provided directly");
 
-                final String publicKeyAlgorithm = pk.getString(
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM,
-                    "RS256");
+                final String publicKeyAlgorithm = pk.getAlgorithm();
                 authOpts.addPubSecKey(
                     new PubSecKeyOptions()
                         .setAlgorithm(publicKeyAlgorithm)

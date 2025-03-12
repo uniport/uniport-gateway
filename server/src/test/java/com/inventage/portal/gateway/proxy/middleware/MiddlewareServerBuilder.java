@@ -6,6 +6,7 @@ import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCooki
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
 import com.inventage.portal.gateway.proxy.middleware.authorization.MockOAuth2Auth;
+import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
@@ -23,6 +24,7 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.csp.DirectiveOptions;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
@@ -39,11 +41,15 @@ import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactor
 import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.LifetimeCookieOptions;
+import com.inventage.portal.gateway.proxy.middleware.session.SessionCookieOptions;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.WhitelistedCookieOption;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.MockJWKAuthHandler;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -51,7 +57,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.impl.UserImpl;
@@ -116,18 +121,11 @@ public final class MiddlewareServerBuilder {
                 SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
                 uriWithoutSessionTimeoutReset,
                 SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
-                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME,
-                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_HTTP_ONLY,
-                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SECURE,
-                SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_SAME_SITE,
+                SessionCookieOptions.builder().build(),
                 withLifetimeHeader,
                 SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME,
                 withLifetimeCookie,
-                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_NAME,
-                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_PATH,
-                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_HTTP_ONLY,
-                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SECURE,
-                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_COOKIE_SAME_SITE,
+                LifetimeCookieOptions.builder().build(),
                 SessionMiddlewareFactory.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS));
     }
 
@@ -179,10 +177,10 @@ public final class MiddlewareServerBuilder {
      */
     public MiddlewareServerBuilder withBearerOnlyMiddleware(
         KeycloakServer mockKeycloakServer,
-        String issuer, List<String> audience, JsonArray publicKeys, long reconcilationIntervalMs
+        String issuer, List<String> audience, List<PublicKeyOptions> publicKeys, long reconciliationIntervalMs
     ) {
         try {
-            withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, true, reconcilationIntervalMs));
+            withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, true, reconciliationIntervalMs));
         } catch (Throwable t) {
             if (mockKeycloakServer != null) {
                 mockKeycloakServer.closeServer();
@@ -196,12 +194,12 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(
         KeycloakServer mockKeycloakServer,
-        String issuer, List<String> audience, JsonArray publicKeys
+        String issuer, List<String> audience, List<PublicKeyOptions> publicKeys
     ) {
         return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS));
     }
 
-    public MiddlewareServerBuilder withBearerOnlyMiddleware(JsonObject bearerOnlyConfig) {
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(GatewayMiddlewareOptions bearerOnlyConfig) {
         final BearerOnlyMiddlewareFactory factory = new BearerOnlyMiddlewareFactory();
         final Future<Middleware> middlewareFuture = factory.create(vertx, "bearerOnly", router, bearerOnlyConfig);
         final int atMost = 50;
@@ -220,11 +218,11 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(middlewareFuture.result());
     }
 
-    public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly) {
+    public MiddlewareServerBuilder withCspMiddleware(List<DirectiveOptions> directives, boolean reportOnly) {
         return withMiddleware(new CSPMiddleware("csp", directives, reportOnly, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY));
     }
 
-    public MiddlewareServerBuilder withCspMiddleware(JsonArray directives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
+    public MiddlewareServerBuilder withCspMiddleware(List<DirectiveOptions> directives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
         return withMiddleware(new CSPMiddleware("csp", directives, reportOnly, mergeStrategy));
     }
 
@@ -277,12 +275,12 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new ControlApiMiddleware(vertx, "controlAPI", action, resetUri, client));
     }
 
-    public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies) {
+    public MiddlewareServerBuilder withSessionBagMiddleware(List<WhitelistedCookieOption> whitelistedCookies) {
         return withMiddleware(
             new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session"));
     }
 
-    public MiddlewareServerBuilder withSessionBagMiddleware(JsonArray whitelistedCookies, String sessionCookieName) {
+    public MiddlewareServerBuilder withSessionBagMiddleware(List<WhitelistedCookieOption> whitelistedCookies, String sessionCookieName) {
         return withMiddleware(new SessionBagMiddleware("sessionBag", whitelistedCookies, sessionCookieName));
     }
 
@@ -322,11 +320,11 @@ public final class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig) throws Throwable {
+    public MiddlewareServerBuilder withOAuth2AuthMiddleware(GatewayMiddlewareOptions oAuth2AuthConfig) throws Throwable {
         return withOAuth2AuthMiddleware(oAuth2AuthConfig, null);
     }
 
-    private MiddlewareServerBuilder withOAuth2AuthMiddleware(JsonObject oAuth2AuthConfig, String scope) throws Throwable {
+    private MiddlewareServerBuilder withOAuth2AuthMiddleware(GatewayMiddlewareOptions oAuth2AuthConfig, String scope) throws Throwable {
         final OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         final Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
 

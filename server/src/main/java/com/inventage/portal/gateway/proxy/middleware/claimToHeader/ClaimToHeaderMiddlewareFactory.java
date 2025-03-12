@@ -41,7 +41,7 @@ public class ClaimToHeaderMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<ClaimToHeaderMiddlewareOptions> modelType() {
         return ClaimToHeaderMiddlewareOptions.class;
     }
 
@@ -51,10 +51,10 @@ public class ClaimToHeaderMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final ClaimToHeaderMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", CLAIM_TO_HEADER);
-        return Future.succeededFuture(new ClaimToHeaderMiddleware(name,
-            middlewareConfig.getString(CLAIM_TO_HEADER_PATH),
-            middlewareConfig.getString(CLAIM_TO_HEADER_NAME)));
+        return Future.succeededFuture(
+            new ClaimToHeaderMiddleware(name, options.getPath(), options.getName()));
     }
 }

@@ -66,31 +66,20 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<ReplacedSessionCookieDetectionMiddlewareOptions> modelType() {
         return ReplacedSessionCookieDetectionMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String sessionCookieName = DEFAULT_SESSION_COOKIE_NAME; // not configurable as it must fit
-
-        final String detectionCookieName = middlewareConfig.getString(
-            REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME,
-            DEFAULT_DETECTION_COOKIE_NAME);
-        final Integer waitTimeRetryInMs = middlewareConfig.getInteger(
-            REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS,
-            DEFAULT_WAIT_BEFORE_RETRY_MS);
-        final Integer maxRedirectRetries = middlewareConfig.getInteger(
-            REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES,
-            DEFAULT_MAX_REDIRECT_RETRIES);
-
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final ReplacedSessionCookieDetectionMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", REPLACED_SESSION_COOKIE_DETECTION);
         return Future.succeededFuture(
             new ReplacedSessionCookieDetectionMiddleware(
                 name,
-                detectionCookieName,
-                sessionCookieName,
-                waitTimeRetryInMs,
-                maxRedirectRetries));
+                options.getCookieName(),
+                DEFAULT_SESSION_COOKIE_NAME, // not configurable as it must fit
+                options.getWaitBeforeRetryMs(),
+                options.getMaxRetries()));
     }
 }

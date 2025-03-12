@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
@@ -22,7 +23,7 @@ public class PassAuthorizationMiddlewareOptionsTest {
         final String publicKey = "aPublicKey";
         final String publicKeyAlgorithm = "aPublicKeyAlgorithm";
         final List<String> additionalIssuers = List.of("anotherIssuer");
-        final String claimOperator = "anOperator";
+        final JWTClaimOperator claimOperator = JWTClaimOperator.EQUALS;
         final String claimPath = "aPath";
         final String claimValue = "aValue";
         final Boolean reconciliationEnabled = true;

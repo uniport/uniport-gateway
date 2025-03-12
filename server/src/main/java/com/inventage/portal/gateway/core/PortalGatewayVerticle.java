@@ -1,5 +1,7 @@
 package com.inventage.portal.gateway.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.application.ApplicationFactory;
@@ -8,6 +10,7 @@ import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -137,21 +140,34 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private List<Entrypoint> entrypoints(JsonArray entrypointConfigs) {
         LOGGER.debug("Reading from config key '{}'", StaticConfiguration.ENTRYPOINTS);
+        if (entrypointConfigs == null) {
+            return List.of();
+        }
         try {
-            final List<Entrypoint> entrypoints = new ArrayList<>();
-            if (entrypointConfigs != null) {
-                entrypointConfigs.stream().map(object -> new JsonObject(Json.encode(object)))
-                    .map(entrypointConfig -> new Entrypoint(vertx,
-                        entrypointConfig.getString(StaticConfiguration.ENTRYPOINT_NAME),
-                        entrypointConfig.getInteger(StaticConfiguration.ENTRYPOINT_PORT),
-                        entrypointConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, JsonArray.of()).copy()))
-                    .forEach(entrypoints::add);
-            }
-            return entrypoints;
+            return entrypointConfigs.stream()
+                .map(object -> new JsonObject(Json.encode(object)))
+                .map(entrypointConfig -> {
+                    final String name = entrypointConfig.getString(StaticConfiguration.ENTRYPOINT_NAME);
+                    final int port = entrypointConfig.getInteger(StaticConfiguration.ENTRYPOINT_PORT);
+                    final JsonArray middlewares = entrypointConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, JsonArray.of());
+                    return new Entrypoint(vertx, name, port, mapMiddlewaresToModel(middlewares));
+                })
+                .toList();
         } catch (Exception e) {
             throw new IllegalStateException(
                 String.format("Couldn't read '%s' configuration '%s'", StaticConfiguration.ENTRYPOINTS, e.getMessage()));
         }
+    }
+
+    private List<GatewayMiddleware> mapMiddlewaresToModel(JsonArray config) {
+        final ObjectMapper codec = new ObjectMapper();
+        List<GatewayMiddleware> middlewares = null;
+        try {
+            middlewares = codec.readValue(config.encode(), codec.getTypeFactory().constructCollectionType(List.class, GatewayMiddleware.class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return middlewares;
     }
 
     private List<Application> applications(JsonArray entrypointConfigs, JsonArray applicationConfigs, JsonArray providerConfigs, JsonObject env) {

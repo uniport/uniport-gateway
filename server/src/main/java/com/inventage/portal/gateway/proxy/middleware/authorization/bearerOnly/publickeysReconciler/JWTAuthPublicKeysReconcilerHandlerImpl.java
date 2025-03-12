@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler;
 
+import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
@@ -8,7 +9,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -29,9 +29,9 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthPublicKeysReconcilerHandlerImpl.class);
 
     private final Vertx vertx;
-    private final JsonArray publicKeySources;
-    private final boolean reconcilationEnabled;
-    private final long reconcilationIntervalMs;
+    private final List<PublicKeyOptions> publicKeySources;
+    private final boolean reconciliationEnabled;
+    private final long reconciliationIntervalMs;
 
     private final JWTOptions jwtOptions;
     private final JWTAuthMultipleIssuersOptions additionalIssuersOptions;
@@ -47,9 +47,9 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         JWTAuthOptions jwtAuthOptions,
         JWTAuthMultipleIssuersOptions additionalIssuersOptions,
         JWTAuthAdditionalClaimsOptions additionalClaimsOptions,
-        JsonArray publicKeySources,
-        boolean reconcilationEnabled,
-        long reconcilationIntervalMs
+        List<PublicKeyOptions> publicKeySources,
+        boolean reconciliationEnabled,
+        long reconciliationIntervalMs
     ) {
         this.vertx = vertx;
         this.jwtAuthOptions = jwtAuthOptions;
@@ -58,11 +58,11 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         this.additionalClaimsOptions = additionalClaimsOptions;
 
         this.publicKeySources = publicKeySources;
-        this.reconcilationEnabled = reconcilationEnabled;
-        this.reconcilationIntervalMs = reconcilationIntervalMs;
+        this.reconciliationEnabled = reconciliationEnabled;
+        this.reconciliationIntervalMs = reconciliationIntervalMs;
 
         this.authHandler = createAuthHandlerWithFreshPublicKeys(jwtAuthOptions);
-        if (this.reconcilationEnabled) {
+        if (this.reconciliationEnabled) {
             this.startReconciler();
         }
     }
@@ -91,7 +91,7 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
         }
 
         LOGGER.info("Starting public keys reconciler loop");
-        this.timerId = this.vertx.setPeriodic(this.reconcilationIntervalMs, tId -> {
+        this.timerId = this.vertx.setPeriodic(this.reconciliationIntervalMs, tId -> {
             getOrRefreshPublicKeys();
         });
         this.reconcilerStarted = true;
@@ -126,7 +126,7 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
                 promise.fail(errMsg);
             });
 
-        if (this.reconcilationEnabled) {
+        if (this.reconciliationEnabled) {
             startReconciler();
         }
 

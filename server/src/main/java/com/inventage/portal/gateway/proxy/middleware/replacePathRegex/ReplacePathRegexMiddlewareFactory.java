@@ -42,16 +42,18 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<ReplacePathRegexMiddlewareOptions> modelType() {
         return ReplacePathRegexMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final ReplacePathRegexMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", REPLACE_PATH_REGEX);
-        return Future.succeededFuture(new ReplacePathRegexMiddleware(
-            name,
-            middlewareConfig.getString(REPLACE_PATH_REGEX_REGEX),
-            middlewareConfig.getString(REPLACE_PATH_REGEX_REPLACEMENT)));
+        return Future.succeededFuture(
+            new ReplacePathRegexMiddleware(
+                name,
+                options.getRegex(),
+                options.getReplacement()));
     }
 }

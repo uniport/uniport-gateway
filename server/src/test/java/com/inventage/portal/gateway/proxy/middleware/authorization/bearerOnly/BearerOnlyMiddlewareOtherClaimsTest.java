@@ -243,7 +243,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     }
 
     private JWTAuthAdditionalClaimsOptions jwtAdditionalClaims(List<JWTClaim> claims) {
-        return new JWTAuthAdditionalClaimsOptions().setAdditionalClaims(claims);
+        return new JWTAuthAdditionalClaimsOptions(claims);
     }
 
     private String bearer(String value) {

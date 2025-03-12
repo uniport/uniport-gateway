@@ -57,11 +57,11 @@ public class SessionMiddlewareOptionsTest {
         assertEquals(lifetimeCookie, options.useLifetimeCookie());
         assertEquals(lifetimeHeader, options.useLifetimeHeader());
 
-        assertNotNull(options.getCookie());
-        assertEquals(cookieName, options.getCookie().getName());
-        assertEquals(cookieSecure, options.getCookie().isSecure());
-        assertEquals(cookieHttpOnly, options.getCookie().isHTTPOnly());
-        assertEquals(cookieSameSite, options.getCookie().getSameSite());
+        assertNotNull(options.getSessionCookie());
+        assertEquals(cookieName, options.getSessionCookie().getName());
+        assertEquals(cookieSecure, options.getSessionCookie().isSecure());
+        assertEquals(cookieHttpOnly, options.getSessionCookie().isHTTPOnly());
+        assertEquals(cookieSameSite, options.getSessionCookie().getSameSite());
 
         assertEquals(clusteredSessionStoreTimeout, options.getClusteredSessionStoreRetryTimeoutMs());
     }

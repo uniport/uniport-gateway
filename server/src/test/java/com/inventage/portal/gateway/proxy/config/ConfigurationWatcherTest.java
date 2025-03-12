@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.config;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
-import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.TestUtils.withRouter;
 import static com.inventage.portal.gateway.TestUtils.withRouterEntrypoints;
 import static com.inventage.portal.gateway.TestUtils.withRouterRule;
@@ -15,6 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.inventage.portal.gateway.proxy.listener.Listener;
+import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
+import com.inventage.portal.gateway.proxy.model.Gateway;
+import com.inventage.portal.gateway.proxy.model.GatewayRouter;
+import com.inventage.portal.gateway.proxy.model.GatewayService;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
@@ -53,16 +56,24 @@ public class ConfigurationWatcherTest {
                     withService("svc",
                         withServers(withServer("host", 1234)))))));
 
-        JsonObject expected = buildConfiguration(
-            withRouters(
-                withRouter("test@mock",
-                    withRouterEntrypoints("ep"),
-                    withRouterRule("Path('/')"),
-                    withRouterService("svc@mock"))),
-            withMiddlewares(),
-            withServices(
-                withService("svc@mock",
-                    withServers(withServer("host", 1234)))));
+        final Gateway expected = Gateway.builder()
+            .withRouters(List.of(
+                GatewayRouter.builder()
+                    .withName("test@mock")
+                    .withEntrypoints(List.of("ep"))
+                    .withRule("Path('/')")
+                    .withService("svc@mock")
+                    .build()))
+            .withServices(List.of(
+                GatewayService.builder()
+                    .withName("svc@mock")
+                    .withServers(List.of(
+                        ServerOptions.builder()
+                            .withHost("host")
+                            .withPort(1234)
+                            .build()))
+                    .build()))
+            .build();
 
         int providersThrottleIntervalMs = 1000;
         Provider pvd = new MockProvider(vertx, configurationAddress, messages);
@@ -71,7 +82,7 @@ public class ConfigurationWatcherTest {
         // when
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 // then
                 testCtx.verify(() -> assertEquals(expected, actual, errMsg));
                 testCtx.completeNow();
@@ -110,7 +121,7 @@ public class ConfigurationWatcherTest {
         // when
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 testCtx.failNow(String.format("%s: %s", errMsg, "no message expected"));
             }
         });
@@ -155,7 +166,7 @@ public class ConfigurationWatcherTest {
         final AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 publishedConfigCount.incrementAndGet();
             }
         });
@@ -205,7 +216,7 @@ public class ConfigurationWatcherTest {
         AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 publishedConfigCount.incrementAndGet();
             }
         });
@@ -247,7 +258,7 @@ public class ConfigurationWatcherTest {
 
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 testCtx.failNow("An empty configuration was published but it should not");
             }
         });
@@ -294,7 +305,7 @@ public class ConfigurationWatcherTest {
         AtomicBoolean isFirst = new AtomicBoolean(true);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 if (isFirst.get()) {
                     testCtx.verify(() -> assertNotNull(actual, errMsg));
                 } else {
@@ -345,10 +356,10 @@ public class ConfigurationWatcherTest {
         ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
-        AtomicReference<JsonObject> publishedProviderConfig = new AtomicReference<JsonObject>();
+        AtomicReference<Gateway> publishedProviderConfig = new AtomicReference<Gateway>();
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 publishedProviderConfig.set(actual);
             }
         });
@@ -364,20 +375,34 @@ public class ConfigurationWatcherTest {
         });
 
         vertx.setTimer(2000, timerID -> {
-            JsonObject expected = buildConfiguration(
-                withRouters(
-                    withRouter("foo@mock",
-                        withRouterRule("Path('/')"),
-                        withRouterEntrypoints(),
-                        withRouterService("bar@mock")),
-                    withRouter("foo@mock2",
-                        withRouterRule("Path('/')"),
-                        withRouterEntrypoints(),
-                        withRouterService("bar@mock2"))),
-                withMiddlewares(),
-                withServices(
-                    withService("bar@mock", withServers(withServer("host", 1234))),
-                    withService("bar@mock2", withServers(withServer("host", 1234)))));
+            final GatewayRouter.Builder routerBuilder = GatewayRouter.builder()
+                .withRule("Path('/')");
+
+            final GatewayService.Builder serviceBuilder = GatewayService.builder()
+                .withServers(List.of(
+                    ServerOptions.builder()
+                        .withHost("host")
+                        .withPort(1234)
+                        .build()));
+
+            final Gateway expected = Gateway.builder()
+                .withRouters(List.of(
+                    routerBuilder
+                        .withName("foo@mock")
+                        .withService("bar@mock")
+                        .build(),
+                    routerBuilder
+                        .withName("foo@mock2")
+                        .withService("bar@mock2")
+                        .build()))
+                .withServices(List.of(
+                    serviceBuilder
+                        .withName("bar@mock")
+                        .build(),
+                    serviceBuilder
+                        .withName("bar@mock2")
+                        .build()))
+                .build();
 
             testCtx.verify(() -> assertEquals(expected, publishedProviderConfig.get()));
             testCtx.completeNow();
@@ -420,7 +445,7 @@ public class ConfigurationWatcherTest {
         AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(JsonObject actual) {
+            public void listen(Gateway actual) {
                 publishedConfigCount.getAndIncrement();
             }
         });

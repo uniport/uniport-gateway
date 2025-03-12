@@ -8,20 +8,20 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GatewayRouter extends RouterImpl {
+public class GatewayRouterInternal extends RouterImpl {
 
     private static final String ROUTER_NAME_KEY = "name";
     private static final String ROUTER_PARENT_KEY = "parent";
     private static final String ROUTER_LEVEL_KEY = "level";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayRouter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayRouterInternal.class);
 
-    public static GatewayRouter router(Vertx vertx, String name) {
-        return (GatewayRouter) new GatewayRouter(vertx)
+    public static GatewayRouterInternal router(Vertx vertx, String name) {
+        return (GatewayRouterInternal) new GatewayRouterInternal(vertx)
             .putMetadata(ROUTER_NAME_KEY, name);
     }
 
-    public GatewayRouter(Vertx vertx) {
+    public GatewayRouterInternal(Vertx vertx) {
         super(vertx);
     }
 

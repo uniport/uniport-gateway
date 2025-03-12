@@ -1,7 +1,10 @@
 package com.inventage.portal.gateway;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.model.Gateway;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -17,7 +20,11 @@ import java.util.stream.Collectors;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 
-public class TestUtils {
+public final class TestUtils {
+
+    private TestUtils() {
+    }
+
     /**
      * Returns a free port number on localhost.
      * <p>
@@ -49,6 +56,18 @@ public class TestUtils {
             }
         }
         throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
+    }
+
+    public static Gateway toModel(JsonObject config) {
+        final JsonObject httpJson = config.getJsonObject(DynamicConfiguration.HTTP);
+        final ObjectMapper codec = new ObjectMapper();
+        Gateway gateway = null;
+        try {
+            gateway = codec.readValue(httpJson.encode(), Gateway.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return gateway;
     }
 
     // buildConfiguration is a helper to create a configuration.

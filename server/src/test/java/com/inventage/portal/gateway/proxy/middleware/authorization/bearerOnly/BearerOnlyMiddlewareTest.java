@@ -13,6 +13,7 @@ import com.inventage.portal.gateway.proxy.middleware.KeycloakServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
@@ -284,10 +285,10 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
 
-        final JsonArray publicKeys = new JsonArray()
-            .add(
-                new io.vertx.core.json.JsonObject()
-                    .put("publicKey", "http://localhost:" + keycloakServer.port() + "/auth/realms/test"));
+        final List<PublicKeyOptions> publicKeys = List.of(
+            PublicKeyOptions.builder()
+                .withKey("http://localhost:" + keycloakServer.port() + "/auth/realms/test")
+                .build());
 
         portalGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
@@ -314,15 +315,15 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
 
-        final JsonArray publicKeys = new JsonArray()
-            .add(
-                new io.vertx.core.json.JsonObject()
-                    .put("publicKey", "http://localhost:" + keycloakServer.port() + "/auth/realms/test"));
+        final List<PublicKeyOptions> publicKeys = List.of(
+            PublicKeyOptions.builder()
+                .withKey("http://localhost:" + keycloakServer.port() + "/auth/realms/test")
+                .build());
 
-        final long reconcilationIntervalMs = 100;
+        final long reconciliationIntervalMs = 100;
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys, reconcilationIntervalMs)
+            .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys, reconciliationIntervalMs)
             .build().start();
 
         // when
@@ -334,7 +335,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                 keycloakServer.serveInvalidPublicKeys();
 
                 // give the middleware time to refetch the public keys
-                vertx.setTimer(reconcilationIntervalMs, (timerID) -> {
+                vertx.setTimer(reconciliationIntervalMs, (timerID) -> {
                     gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)), (outgoingResponse2) -> {
                         // then
                         assertEquals(401, outgoingResponse2.statusCode(), "unexpected status code");
@@ -358,10 +359,10 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
             .startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler();
         keycloakServer.serveInvalidPublicKeys(); // make the token invalid
 
-        final JsonArray publicKeys = new JsonArray()
-            .add(
-                new io.vertx.core.json.JsonObject()
-                    .put("publicKey", "http://localhost:" + keycloakServer.port() + "/auth/realms/test"));
+        final List<PublicKeyOptions> publicKeys = List.of(
+            PublicKeyOptions.builder()
+                .withKey("http://localhost:" + keycloakServer.port() + "/auth/realms/test")
+                .build());
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
@@ -387,15 +388,18 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
-        final JsonArray publicKeys = new JsonArray()
-            .add(new io.vertx.core.json.JsonObject()
-                .put("publicKey",
-                    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5hnB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQIDAQAB"));
 
-        final io.vertx.core.json.JsonObject bearerOnlyConfig = new io.vertx.core.json.JsonObject()
-            .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys)
-            .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, expectedIssuer)
-            .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(expectedAudience));
+        final List<PublicKeyOptions> publicKeys = List.of(
+            PublicKeyOptions.builder()
+                .withKey(
+                    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFJ0A754CTB9+mhomn9Z1aVCiSliTm7Mow3PkWko7PCRVshrqqJEHNg6fgl4KNH+u0ZBjq4L5AKtTuwhsx2vIcJ8aJ3mQNdyxFU02nLaNzOVm+rOwytUPflAnYIgqinmiFpqyQ8vwj/L82F5kN5hnB+G2heMXSep4uoq++2ogdyLtRi4CCr2tuFdPMcdvozsafRJjgJrmKkGggoembuIN5mvuJ/YySMmE3F+TxXOVbhZqAuH4A2+9l0d1rbjghJnv9xCS8Tc7apusoK0q8jWyBHp6p12m1IFkrKSSRiXXCmoMIQO8ZTCzpyqCQEgOXHKvxvSPRWsSa4GZWHzH3hvRQIDAQAB")
+                .build());
+
+        final BearerOnlyMiddlewareOptions bearerOnlyConfig = BearerOnlyMiddlewareOptions.builder()
+            .withPublicKeys(publicKeys)
+            .withIssuer(expectedIssuer)
+            .withAudience(expectedAudience)
+            .build();
 
         portalGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(bearerOnlyConfig)

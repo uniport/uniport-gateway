@@ -11,6 +11,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOpti
 import com.inventage.portal.gateway.proxy.middleware.authorization.ReconciliationOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareOptions.Builder;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
@@ -24,8 +25,8 @@ public class BearerOnlyMiddlewareOptionsTest {
 
     static Stream<Arguments> validOptionsValues() {
         return Stream.of(
-            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of("anotherIssuer"), "anOperator", "aPath", "aValue", true, 1234, true)),
-            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of(), null, null, null, null, null, true))
+            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of("anotherIssuer"), JWTClaimOperator.CONTAINS, "aPath", "aValue", true, 1234, "true")),
+            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of(), null, null, null, null, null, "true"))
 
         );
     }
@@ -146,16 +147,25 @@ public class BearerOnlyMiddlewareOptionsTest {
         String publicKey;
         String publicKeyAlgorithm;
         List<String> additionalIssuers;
-        String claimOperator;
+        JWTClaimOperator claimOperator;
         String claimPath;
         String claimValue;
         Boolean reconciliationEnabled;
         Integer reconciliationIntervalMs;
-        Boolean optional;
+        String optional;
 
         Options(
-            List<String> audience, String issuer, String publicKey, String publicKeyAlgorithm, List<String> additionalIssuers, String claimOperator, String claimPath, String claimValue, Boolean reconciliationEnabled,
-            Integer reconciliationIntervalMs, Boolean optional
+            List<String> audience,
+            String issuer,
+            String publicKey,
+            String publicKeyAlgorithm,
+            List<String> additionalIssuers,
+            JWTClaimOperator claimOperator,
+            String claimPath,
+            String claimValue,
+            Boolean reconciliationEnabled,
+            Integer reconciliationIntervalMs,
+            String optional
         ) {
             this.audience = audience;
             this.issuer = issuer;

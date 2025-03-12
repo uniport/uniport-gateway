@@ -20,7 +20,6 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
@@ -112,7 +111,7 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
         portalGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContextHolder)
             .withSessionMiddleware()
-            .withSessionBagMiddleware(new JsonArray())
+            .withSessionBagMiddleware(List.of())
             .withMockOAuth2Middleware(HOST, sessionTerminationPort)
             .withControlApiMiddleware(ControlApiAction.SESSION_TERMINATE, webclient)
             .withProxyMiddleware(backendPort)
@@ -173,7 +172,7 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
             .withRoutingContextHolder(routingContextHolder)
             .withSessionMiddleware()
             .withMockOAuth2Middleware()
-            .withSessionBagMiddleware(new JsonArray())
+            .withSessionBagMiddleware(List.of())
             .withMiddleware(prefilledSessionBag(routingContextHolder, keycloakIdentityCookie))
             .withControlApiMiddleware(ControlApiAction.SESSION_RESET, String.format("http://%s:%d/", HOST, sessionResetPort), WebClient.create(vertx))
             .withBackend(vertx, backendPort, cookieInsertionHandler)

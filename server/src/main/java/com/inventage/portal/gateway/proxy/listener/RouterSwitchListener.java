@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.listener;
 
-import com.inventage.portal.gateway.GatewayRouter;
+import com.inventage.portal.gateway.GatewayRouterInternal;
+import com.inventage.portal.gateway.proxy.model.Gateway;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,23 +17,23 @@ public class RouterSwitchListener implements Listener {
 
     private static final String NAME = "RouterSwitchListener";
 
-    private final GatewayRouter router;
+    private final GatewayRouterInternal router;
     private final RouterFactory routerFactory;
 
-    public RouterSwitchListener(GatewayRouter router, RouterFactory routerFactory) {
+    public RouterSwitchListener(GatewayRouterInternal router, RouterFactory routerFactory) {
         this.router = router;
         this.routerFactory = new RouterFactory(routerFactory);
     }
 
     @Override
-    public void listen(JsonObject config) {
-        routerFactory.createRouter(config)
+    public void listen(Gateway model) {
+        routerFactory.createRouter(model)
             .onSuccess(this::setSubRouter)
-            .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", config,
-                err.getMessage()));
+            .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", model, err.getMessage()));
 
     }
 
+    @Override
     public String toString() {
         return NAME;
     }

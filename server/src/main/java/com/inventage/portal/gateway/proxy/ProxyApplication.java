@@ -1,11 +1,10 @@
 package com.inventage.portal.gateway.proxy;
 
-import com.inventage.portal.gateway.GatewayRouter;
+import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
-import com.inventage.portal.gateway.proxy.model.ModelBuilderListener;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
@@ -62,7 +61,7 @@ public class ProxyApplication implements Application {
     /**
      * the router on which the routes for this application will be added
      */
-    private final GatewayRouter router;
+    private final GatewayRouterInternal router;
 
     /**
      * the providers that should be launched for this application to retrieve the dynamic
@@ -77,17 +76,15 @@ public class ProxyApplication implements Application {
     public ProxyApplication(Vertx vertx, String name, String entrypointName, int entrypointPort, JsonArray providerConfigs, JsonObject env) {
         this.name = name;
         this.entrypointName = entrypointName;
-        this.router = GatewayRouter.router(vertx, String.format("application %s", name));
+        this.router = GatewayRouterInternal.router(vertx, String.format("application %s", name));
 
         this.providerConfigs = providerConfigs.copy();
         this.providersThrottleDuration = env.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);
 
         this.env = env.copy();
 
-        this.publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL,
-            PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
-        this.publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME,
-            PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        this.publicProtocol = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL, PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+        this.publicHostname = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
         this.publicPort = env.getString(PORTAL_GATEWAY_PUBLIC_PORT, String.format("%d", entrypointPort));
     }
 
@@ -123,7 +120,6 @@ public class ProxyApplication implements Application {
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtocol, publicHostname, publicPort, entrypointName);
 
         watcher.addListener(new RouterSwitchListener(this.router, routerFactory));
-        watcher.addListener(new ModelBuilderListener());
 
         return vertx.deployVerticle(watcher);
     }

@@ -71,17 +71,18 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<HeaderMiddlewareOptions> modelType() {
         return HeaderMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final MultiMap requestHeaders = new HeadersMultiMap();
-        final MultiMap responseHeaders = new HeadersMultiMap();
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final HeaderMiddlewareOptions options = castOptions(config, modelType());
+        final MultiMap requestHeaders = HeadersMultiMap.httpHeaders();
+        final MultiMap responseHeaders = HeadersMultiMap.httpHeaders();
 
-        if (middlewareConfig.getJsonObject(HEADERS_REQUEST) != null) {
-            for (Entry<String, Object> entry : middlewareConfig.getJsonObject(HEADERS_REQUEST).getMap().entrySet()) {
+        if (options.getRequestHeaders() != null) {
+            for (Entry<String, Object> entry : options.getRequestHeaders().entrySet()) {
                 if (entry.getValue() instanceof String) {
                     requestHeaders.set(entry.getKey(), (String) entry.getValue());
                 } else if (entry.getValue() instanceof Iterable) {
@@ -92,8 +93,8 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             }
         }
 
-        if (middlewareConfig.getJsonObject(HEADERS_RESPONSE) != null) {
-            for (Entry<String, Object> entry : middlewareConfig.getJsonObject(HEADERS_RESPONSE).getMap().entrySet()) {
+        if (options.getResponseHeaders() != null) {
+            for (Entry<String, Object> entry : options.getResponseHeaders().entrySet()) {
                 if (entry.getValue() instanceof String) {
                     responseHeaders.set(entry.getKey(), (String) entry.getValue());
                 } else if (entry.getValue() instanceof Iterable) {
@@ -105,7 +106,8 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
         }
 
         LOGGER.debug("Created '{}' middleware successfully", HEADERS);
-        return Future.succeededFuture(new HeaderMiddleware(name, requestHeaders, responseHeaders));
+        return Future.succeededFuture(
+            new HeaderMiddleware(name, requestHeaders, responseHeaders));
     }
 
 }

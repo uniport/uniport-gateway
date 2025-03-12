@@ -43,16 +43,16 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<ShowSessionContentMiddlewareOptions> modelType() {
         return ShowSessionContentMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final String instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME); // TODO move into Runtime
         LOGGER.debug("Created '{}' middleware successfully", SHOW_SESSION_CONTENT);
-
-        final String instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);
-        return Future.succeededFuture(new ShowSessionContentMiddleware(name, instanceName));
+        return Future.succeededFuture(
+            new ShowSessionContentMiddleware(name, instanceName));
     }
 
 }

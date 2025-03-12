@@ -51,15 +51,15 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<LanguageCookieMiddlewareOptions> modelType() {
         return LanguageCookieMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        final String languageCookieName = middlewareConfig.getString(LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
-
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final LanguageCookieMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}' middleware successfully", LANGUAGE_COOKIE);
-        return Future.succeededFuture(new LanguageCookieMiddleware(name, languageCookieName));
+        return Future.succeededFuture(
+            new LanguageCookieMiddleware(name, options.getCookieName()));
     }
 }

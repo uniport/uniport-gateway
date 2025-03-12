@@ -63,21 +63,21 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<ControlApiMiddlewareOptions> modelType() {
         return ControlApiMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final ControlApiMiddlewareOptions options = castOptions(config, modelType());
+
         if (webClient == null) {
             webClient = WebClient.create(vertx);
         }
 
-        final String action = middlewareConfig.getString(CONTROL_API_ACTION);
-        final String iamSessionResetURI = middlewareConfig.getString(CONTROL_API_SESSION_RESET_URL, DEFAULT_RESET_URL);
-
         LOGGER.debug("Created '{}' middleware successfully", CONTROL_API);
-        return Future.succeededFuture(new ControlApiMiddleware(vertx, name, ControlApiAction.valueOf(action), iamSessionResetURI, webClient));
+        return Future.succeededFuture(
+            new ControlApiMiddleware(vertx, name, options.getAction(), options.getSessionResetURL(), webClient));
     }
 
 }

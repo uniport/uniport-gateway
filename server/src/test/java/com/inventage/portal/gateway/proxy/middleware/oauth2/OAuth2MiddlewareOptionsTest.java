@@ -59,9 +59,9 @@ public class OAuth2MiddlewareOptionsTest {
         assertNotNull(options.getAdditionalScopes());
         assertEquals(additionalScope, options.getAdditionalScopes().get(0));
 
-        assertNotNull(options.getAdditionalParameters());
-        assertTrue(options.getAdditionalParameters().containsKey(additionalParameterName));
-        assertEquals(additionalParameterValue, options.getAdditionalParameters().get(additionalParameterName));
+        assertNotNull(options.getAdditionalAuthRequestParameters());
+        assertTrue(options.getAdditionalAuthRequestParameters().containsKey(additionalParameterName));
+        assertEquals(additionalParameterValue, options.getAdditionalAuthRequestParameters().get(additionalParameterName));
 
         assertNotNull(options.getPassthroughParameters());
         assertEquals(passthroughParameter, options.getPassthroughParameters().get(0));

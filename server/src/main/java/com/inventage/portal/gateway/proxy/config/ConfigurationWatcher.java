@@ -1,10 +1,14 @@
 package com.inventage.portal.gateway.proxy.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.listener.Listener;
+import com.inventage.portal.gateway.proxy.model.Gateway;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -379,10 +383,11 @@ public class ConfigurationWatcher extends AbstractVerticle {
         applyEntrypoints(mergedConfig, this.defaultEntrypoints);
 
         DynamicConfiguration.validate(vertx, mergedConfig)
-            .onSuccess(v -> {
-                LOGGER.debug("Informing listeners about new configuration: '{}'", mergedConfig);
+            .compose(v -> mapToModel(mergedConfig))
+            .onSuccess(model -> {
+                LOGGER.debug("Informing listeners about new configuration: '{}'", model);
                 for (Listener listener : this.configurationListeners) {
-                    listener.listen(mergedConfig);
+                    listener.listen(model);
                 }
                 anyConfigurationPublished.set(true);
             }).onFailure(err -> {
@@ -393,5 +398,17 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
                 LOGGER.warn("Ignoring invalid configuration for '{}': '{}'", providerName, err.getMessage());
             });
+    }
+
+    private Future<Gateway> mapToModel(JsonObject config) {
+        final JsonObject httpJson = config.getJsonObject(DynamicConfiguration.HTTP);
+        final ObjectMapper codec = new ObjectMapper();
+        Gateway gateway = null;
+        try {
+            gateway = codec.readValue(httpJson.encode(), Gateway.class);
+        } catch (JsonProcessingException e) {
+            return Future.failedFuture(e);
+        }
+        return Future.succeededFuture(gateway);
     }
 }

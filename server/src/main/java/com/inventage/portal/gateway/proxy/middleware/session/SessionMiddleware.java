@@ -10,7 +10,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.Cookie;
-import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -40,17 +39,13 @@ public class SessionMiddleware extends TraceMiddleware {
     private final String name;
 
     private final String sessionCookieName;
-    private final long sessionIdleTimeoutInMilliSeconds;
+    private final long sessionIdleTimeoutMs;
 
     private final boolean withLifetimeHeader;
     private final String lifetimeHeaderName;
 
     private final boolean withLifetimeCookie;
-    private final String lifetimeCookieName;
-    private final String lifetimeCookiePath;
-    private final boolean lifetimeCookieHttpOnly;
-    private final boolean lifetimeCookieSecure;
-    private final CookieSameSite lifetimeCookieSameSite;
+    private final LifetimeCookieOptions lifetimeCookie;
 
     private final Handler<RoutingContext> sessionHandler;
     private final SessionStore sessionStore;
@@ -70,30 +65,16 @@ public class SessionMiddleware extends TraceMiddleware {
      *            null or regex for specifying uri with no session timeout reset
      * @param nagHttps
      *            switch if a nagging log should be written when access is not via HTTPS
-     * @param sessionCookieName
-     *            name of the session cookie
-     * @param sessionCookieHttpOnly
-     *            switch if the session cookie can only be accessed by the browser (and not via JS)
-     * @param sessionCookieSecure
-     *            switch if the session cookie is marked as secure
-     * @param sessionCookieSameSite
-     *            same site settings for the session cookie
+     * @param sessionCookie
+     *            options of the session cookie
      * @param withLifetimeHeader
      *            switch if session lifetime header should be set
      * @param lifetimeHeaderName
      *            name of the session life time header
      * @param withLifetimeCookie
      *            switch if session lifetime cookie should be set
-     * @param lifetimeCookieName
-     *            name of the session life time cookie
-     * @param lifetimeCookiePath
-     *            path of the session life time cookie
-     * @param lifetimeCookieHttpOnly
-     *            switch if the session lifetime cookie can only be accessed by the browser (and not via JS)
-     * @param lifetimeCookieSecure
-     *            switch if the session lifetime cookie is marked as secure
-     * @param lifetimeCookieSameSite
-     *            same site settings for the session lifetime cookie
+     * @param lifetimeCookie
+     *            options of the session life time cookie
      * @param clusteredSessionStoreRetryTimeoutMilliSeconds
      *            default retry time out, in ms, for a session not found in the clustered store.
      */
@@ -106,46 +87,36 @@ public class SessionMiddleware extends TraceMiddleware {
         String uriWithoutSessionIdleTimeoutReset,
         boolean nagHttps,
         // session cookie
-        String sessionCookieName,
-        boolean sessionCookieHttpOnly,
-        boolean sessionCookieSecure,
-        CookieSameSite sessionCookieSameSite,
+        SessionCookieOptions sessionCookie,
         // lifetime
         boolean withLifetimeHeader,
         String lifetimeHeaderName,
+
         boolean withLifetimeCookie,
-        String lifetimeCookieName,
-        String lifetimeCookiePath,
-        boolean lifetimeCookieHttpOnly,
-        boolean lifetimeCookieSecure,
-        CookieSameSite lifetimeCookieSameSite,
+        LifetimeCookieOptions lifetimeCookie,
         // session store
         int clusteredSessionStoreRetryTimeoutMilliSeconds
     ) {
         Objects.requireNonNull(vertx, "vertx must not be null");
         Objects.requireNonNull(name, "name must not be null");
-        Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
-        Objects.requireNonNull(sessionCookieSameSite, "sessionCookieSameSite must not be null");
+        Objects.requireNonNull(sessionCookie.getName(), "sessionCookieName must not be null");
+        Objects.requireNonNull(sessionCookie.getSameSite(), "sessionCookieSameSite must not be null");
         Objects.requireNonNull(lifetimeHeaderName, "lifetimeHeaderName must not be null");
-        Objects.requireNonNull(lifetimeCookieName, "lifetimeCookieName must not be null");
-        Objects.requireNonNull(lifetimeCookiePath, "lifetimeCookiePath must not be null");
-        Objects.requireNonNull(lifetimeCookieSameSite, "lifetimeCookieSameSite must not be null");
+        Objects.requireNonNull(lifetimeCookie.getName(), "lifetimeCookieName must not be null");
+        Objects.requireNonNull(lifetimeCookie.getPath(), "lifetimeCookiePath must not be null");
+        Objects.requireNonNull(lifetimeCookie.getSameSite(), "lifetimeCookieSameSite must not be null");
         // uriWithoutSessionIdleTimeoutReset is allowed to be null
 
         this.name = name;
-        this.sessionIdleTimeoutInMilliSeconds = sessionIdleTimeoutInMinutes * MINUTE_MS;
+        this.sessionIdleTimeoutMs = sessionIdleTimeoutInMinutes * MINUTE_MS;
         this.uriPatternForIgnoringSessionTimeoutReset = uriWithoutSessionIdleTimeoutReset == null ? null : Pattern.compile(uriWithoutSessionIdleTimeoutReset);
-        this.sessionCookieName = sessionCookieName;
+        this.sessionCookieName = sessionCookie.getName();
 
         this.withLifetimeHeader = withLifetimeHeader;
         this.lifetimeHeaderName = lifetimeHeaderName;
 
         this.withLifetimeCookie = withLifetimeCookie;
-        this.lifetimeCookieName = lifetimeCookieName;
-        this.lifetimeCookiePath = lifetimeCookiePath;
-        this.lifetimeCookieHttpOnly = lifetimeCookieHttpOnly;
-        this.lifetimeCookieSecure = lifetimeCookieSecure;
-        this.lifetimeCookieSameSite = lifetimeCookieSameSite;
+        this.lifetimeCookie = lifetimeCookie;
 
         if (vertx.isClustered()) {
             LOGGER.info("Running clustered session store");
@@ -156,11 +127,11 @@ public class SessionMiddleware extends TraceMiddleware {
         }
 
         sessionHandler = SessionHandler.create(sessionStore)
-            .setSessionTimeout(this.sessionIdleTimeoutInMilliSeconds)
+            .setSessionTimeout(this.sessionIdleTimeoutMs)
             .setSessionCookieName(this.sessionCookieName)
-            .setCookieHttpOnlyFlag(sessionCookieHttpOnly)
-            .setCookieSecureFlag(sessionCookieSecure)
-            .setCookieSameSite(sessionCookieSameSite)
+            .setCookieHttpOnlyFlag(sessionCookie.isHTTPOnly())
+            .setCookieSecureFlag(sessionCookie.isSecure())
+            .setCookieSameSite(sessionCookie.getSameSite())
             .setMinLength(sessionIdMinLength)
             .setNagHttps(nagHttps);
     }
@@ -191,19 +162,19 @@ public class SessionMiddleware extends TraceMiddleware {
     }
 
     private void responseWithSessionLifetime(RoutingContext ctx) {
-        final String sessionLifetime = new SessionLifetimeValue(ctx.session().lastAccessed(), this.sessionIdleTimeoutInMilliSeconds).toString();
+        final String sessionLifetime = new SessionLifetimeValue(ctx.session().lastAccessed(), this.sessionIdleTimeoutMs).toString();
         if (withLifetimeHeader) {
             LOGGER.debug("Adding header '{}'", this.lifetimeHeaderName);
             ctx.response().putHeader(this.lifetimeHeaderName, sessionLifetime);
         }
         if (withLifetimeCookie) {
-            LOGGER.debug("Adding cookie '{}'", this.lifetimeCookieName);
+            LOGGER.debug("Adding cookie '{}'", this.lifetimeCookie.getName());
             ctx.response().addCookie(
-                Cookie.cookie(this.lifetimeCookieName, sessionLifetime)
-                    .setPath(this.lifetimeCookiePath)
-                    .setHttpOnly(this.lifetimeCookieHttpOnly)
-                    .setSecure(this.lifetimeCookieSecure)
-                    .setSameSite(this.lifetimeCookieSameSite));
+                Cookie.cookie(this.lifetimeCookie.getName(), sessionLifetime)
+                    .setPath(this.lifetimeCookie.getPath())
+                    .setHttpOnly(this.lifetimeCookie.isHTTPOnly())
+                    .setSecure(this.lifetimeCookie.isSecure())
+                    .setSameSite(this.lifetimeCookie.getSameSite()));
         }
     }
 
@@ -282,7 +253,7 @@ public class SessionMiddleware extends TraceMiddleware {
     }
 
     private void setSessionIdleTimeoutOnRoutingContext(RoutingContext ctx) {
-        ctx.put(SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY, this.sessionIdleTimeoutInMilliSeconds);
+        ctx.put(SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY, this.sessionIdleTimeoutMs);
     }
 
     /**

@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
  */
 public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
 
-    private static final String ADDITIONAL_ROUTES = "additionalRoutes";
-    private static final String ADDITIONAL_ROUTES_PATH = "path";
+    public static final String ADDITIONAL_ROUTES = "additionalRoutes";
+    public static final String ADDITIONAL_ROUTES_PATH = "path";
 
-    private static final String DEFAULT_ADDITIONAL_ROUTES_PATH = "/some-path";
+    public static final String DEFAULT_ADDITIONAL_ROUTES_PATH = "/some-path";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalRoutesMiddlewareFactory.class);
 
@@ -41,17 +41,16 @@ public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
-        return null;
+    public Class<AdditionalRoutesMiddlewareOptions> modelType() {
+        return AdditionalRoutesMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-        LOGGER.info("Created '{}' middleware successfully", ADDITIONAL_ROUTES);
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final AdditionalRoutesMiddlewareOptions options = castOptions(config, modelType());
 
-        final String path = middlewareConfig.getString(ADDITIONAL_ROUTES_PATH, DEFAULT_ADDITIONAL_ROUTES_PATH);
         router.route()
-            .path(path)
+            .path(options.getPath())
             .handler(ctx -> {
                 LOGGER.debug("I'm a teapot");
                 ctx.response()
@@ -59,6 +58,8 @@ public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
                     .end();
             });
 
-        return Future.succeededFuture(new AdditionalRoutesMiddleware(name));
+        LOGGER.info("Created '{}' middleware successfully", ADDITIONAL_ROUTES);
+        return Future.succeededFuture(
+            new AdditionalRoutesMiddleware(name));
     }
 }

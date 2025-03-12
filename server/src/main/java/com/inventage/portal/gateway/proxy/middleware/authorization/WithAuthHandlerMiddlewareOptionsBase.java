@@ -3,10 +3,10 @@ package com.inventage.portal.gateway.proxy.middleware.authorization;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
@@ -34,9 +34,11 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIMS)
     public abstract List<ClaimOptions> getClaims();
 
-    @Nullable
+    @Default
     @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION)
-    public abstract ReconciliationOptions getReconciliation();
+    public ReconciliationOptions getReconciliation() {
+        return ReconciliationOptions.builder().build();
+    }
 
     @Immutable
     @GatewayStyle
@@ -46,9 +48,11 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY)
         public abstract String getKey();
 
-        @Nullable
+        @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM)
-        public abstract String getAlgorithm();
+        public String getAlgorithm() {
+            return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_PUBLIC_KEY_ALGORITHM;
+        }
     }
 
     @Immutable
@@ -57,7 +61,7 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     public abstract static class AbstractClaimOptions implements GatewayMiddlewareOptions {
 
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR)
-        public abstract String getOperator();
+        public abstract JWTClaimOperator getOperator();
 
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH)
         public abstract String getPath();

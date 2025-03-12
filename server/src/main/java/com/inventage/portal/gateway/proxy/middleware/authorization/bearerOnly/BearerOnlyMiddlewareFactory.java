@@ -24,7 +24,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     public static final String BEARER_ONLY = "bearerOnly";
     public static final String BEARER_ONLY_OPTIONAL = "optional";
 
-    public static final boolean DEFAULT_OPTIONAL = false;
+    public static final String DEFAULT_OPTIONAL = "false"; // TODO fix this and make it a real boolean
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
 
@@ -44,19 +44,19 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     @Override
     public Future<Void> validate(JsonObject options) {
         logDefaultIfNotConfigured(LOGGER, options, BEARER_ONLY_OPTIONAL, DEFAULT_OPTIONAL);
-
         return super.validate(options);
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<BearerOnlyMiddlewareOptions> modelType() {
         return BearerOnlyMiddlewareOptions.class;
     }
 
     @Override
-    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, JsonObject middlewareConfig) {
-        final String optionalStr = middlewareConfig.getString(BEARER_ONLY_OPTIONAL);
-        final boolean optional = optionalStr != null ? Boolean.parseBoolean(optionalStr) : DEFAULT_OPTIONAL;
+    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config) {
+        final BearerOnlyMiddlewareOptions options = castOptions(config, modelType());
+
+        final boolean optional = Boolean.parseBoolean(options.isOptional());
 
         final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, optional);
         LOGGER.debug("Created '{}' middleware", BEARER_ONLY);

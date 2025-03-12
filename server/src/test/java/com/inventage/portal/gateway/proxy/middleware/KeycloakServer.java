@@ -1,8 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.ReconciliationOptions;
+import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOptions;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -17,6 +19,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 public class KeycloakServer {
@@ -204,43 +207,43 @@ public class KeycloakServer {
         return this;
     }
 
-    public JsonObject getDefaultOAuth2AuthConfig() {
+    public OAuth2MiddlewareOptions getDefaultOAuth2AuthConfig() {
         return getOAuth2AuthConfig(SESSION_SCOPE, true, null);
     }
 
-    public JsonObject getOAuth2AuthConfig(String scope) {
+    public OAuth2MiddlewareOptions getOAuth2AuthConfig(String scope) {
         return getOAuth2AuthConfig(scope, true, null);
     }
 
-    public JsonObject getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl) {
-        final JsonObject config = new JsonObject();
-        config.put(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, scope);
-        config.put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, EMPTY_STRING);
-        config.put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, EMPTY_STRING);
-        config.put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, getDefaultDiscoveryUrl());
-        config.put(OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow);
+    public OAuth2MiddlewareOptions getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl) {
+        final OAuth2MiddlewareOptions.Builder builder = OAuth2MiddlewareOptions.builder()
+            .withSessionScope(scope)
+            .withClientId(EMPTY_STRING)
+            .withClientSecret(EMPTY_STRING)
+            .withDiscoveryURL(getDefaultDiscoveryUrl())
+            .withProxyAuthenticationFlow(proxyAuthenticationFlow)
+            .withEnv(Map.<String, String>of(
+                RouterFactory.PUBLIC_PROTOCOL_KEY, "http",
+                RouterFactory.PUBLIC_HOSTNAME_KEY, host,
+                RouterFactory.PUBLIC_PORT_KEY, Integer.toString(port)));
+
         if (publicUrl != null) {
-            config.put(OAuth2MiddlewareFactory.OAUTH2_PUBLIC_URL, publicUrl);
+            builder.withPublicURL(publicUrl);
         }
 
-        config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
-        config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
-        config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
-        return config;
+        return builder.build();
     }
 
-    public JsonObject getBearerOnlyConfig(String issuer, List<String> audience, JsonArray publicKeys, boolean reconcilationEnabled, long reconcilationIntervalMs) {
-        final JsonObject config = new JsonObject();
-        config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys);
-        config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, issuer);
-        config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray(audience));
-        config.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, JsonObject.of(
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, reconcilationEnabled,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, reconcilationIntervalMs));
-        config.put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http");
-        config.put(RouterFactory.PUBLIC_HOSTNAME_KEY, this.host);
-        config.put(RouterFactory.PUBLIC_PORT_KEY, this.port);
-        return config;
+    public BearerOnlyMiddlewareOptions getBearerOnlyConfig(String issuer, List<String> audience, List<PublicKeyOptions> publicKeys, boolean reconciliationEnabled, long reconciliationIntervalMs) {
+        return BearerOnlyMiddlewareOptions.builder()
+            .withPublicKeys(publicKeys)
+            .withIssuer(issuer)
+            .withAudience(audience)
+            .withReconciliation(ReconciliationOptions.builder()
+                .withEnabled(reconciliationEnabled)
+                .withIntervalMs(reconciliationIntervalMs)
+                .build())
+            .build();
     }
 
     private String getDefaultDiscoveryUrl() {

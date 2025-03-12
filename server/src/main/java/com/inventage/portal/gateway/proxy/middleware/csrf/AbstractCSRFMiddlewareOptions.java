@@ -15,11 +15,7 @@ public abstract class AbstractCSRFMiddlewareOptions implements GatewayMiddleware
     @Default
     @JsonProperty(CSRFMiddlewareFactory.CSRF_COOKIE)
     public CookieOptions getCookie() {
-        return CookieOptions.builder()
-            .withName(CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME)
-            .withPath(CSRFMiddlewareFactory.DEFAULT_COOKIE_PATH)
-            .withSecure(CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE)
-            .build();
+        return CookieOptions.builder().build();
     }
 
     @Default

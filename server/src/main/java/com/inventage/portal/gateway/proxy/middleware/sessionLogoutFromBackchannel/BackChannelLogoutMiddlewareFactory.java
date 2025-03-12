@@ -37,12 +37,12 @@ public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewar
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<BackChannelLogoutMiddlewareOptions> modelType() {
         return BackChannelLogoutMiddlewareOptions.class;
     }
 
     @Override
-    protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, final JsonObject middlewareConfig) {
+    protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config) {
         LOGGER.info("Created '{}' middleware successfully", BACK_CHANNEL_LOGOUT);
         return new BackChannelLogoutMiddleware(vertx, name, authHandler);
     }

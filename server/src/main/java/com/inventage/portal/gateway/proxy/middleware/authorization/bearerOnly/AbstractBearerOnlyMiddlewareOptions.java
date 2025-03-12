@@ -14,7 +14,7 @@ public abstract class AbstractBearerOnlyMiddlewareOptions extends WithAuthHandle
 
     @Default
     @JsonProperty(BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL)
-    public boolean isOptional() {
+    public String isOptional() {
         return BearerOnlyMiddlewareFactory.DEFAULT_OPTIONAL;
     }
 }

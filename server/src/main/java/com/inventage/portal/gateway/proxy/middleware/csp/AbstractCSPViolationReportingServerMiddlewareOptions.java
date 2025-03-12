@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.event.Level;
 
 @Immutable
 @GatewayStyle
@@ -12,6 +13,6 @@ import org.immutables.value.Value.Immutable;
 public abstract class AbstractCSPViolationReportingServerMiddlewareOptions implements GatewayMiddlewareOptions {
 
     @JsonProperty(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL)
-    public abstract String getLogLevel();
+    public abstract Level getLogLevel();
 
 }

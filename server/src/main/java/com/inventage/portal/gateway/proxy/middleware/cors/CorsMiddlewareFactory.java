@@ -8,16 +8,14 @@ import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +41,15 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
 
     private static final String ORIGIN_LOCALHOST = "http://localhost";
     private static final String[] HTTP_METHODS = new String[] {
-        "GET",
-        "HEAD",
-        "POST",
-        "PUT",
-        "DELETE",
-        "PATCH",
-        "OPTIONS",
-        "TRACE",
-        "CONNECT"
+        HttpMethod.GET.toString(),
+        HttpMethod.HEAD.toString(),
+        HttpMethod.POST.toString(),
+        HttpMethod.PUT.toString(),
+        HttpMethod.DELETE.toString(),
+        HttpMethod.PATCH.toString(),
+        HttpMethod.OPTIONS.toString(),
+        HttpMethod.TRACE.toString(),
+        HttpMethod.CONNECT.toString()
     };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CorsMiddlewareFactory.class);
@@ -90,10 +88,10 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Void> validate(JsonObject options) {
         logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGINS, allowedOrigins(null));
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGIN_PATTERNS, allowedOriginPatterns(null));
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_METHODS, allowedMethods(null));
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_HEADERS, toSet(null));
-        logDefaultIfNotConfigured(LOGGER, options, CORS_EXPOSED_HEADERS, toSet(null));
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGIN_PATTERNS, List.of());
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_METHODS, Set.of());
+        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_HEADERS, Set.of());
+        logDefaultIfNotConfigured(LOGGER, options, CORS_EXPOSED_HEADERS, Set.of());
         logDefaultIfNotConfigured(LOGGER, options, CORS_MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
         logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
         logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
@@ -102,82 +100,44 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<CorsMiddlewareOptions> modelType() {
         return CorsMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
-
-        final JsonArray allowedOrigin = middlewareConfig.getJsonArray(CORS_ALLOWED_ORIGINS);
-        final JsonArray allowedOriginPatterns = middlewareConfig.getJsonArray(CORS_ALLOWED_ORIGIN_PATTERNS);
-
-        final JsonArray allowedMethods = middlewareConfig.getJsonArray(CORS_ALLOWED_METHODS);
-        final JsonArray allowedHeaders = middlewareConfig.getJsonArray(CORS_ALLOWED_HEADERS);
-        final JsonArray exposedHeaders = middlewareConfig.getJsonArray(CORS_EXPOSED_HEADERS);
-
-        final int maxAgeSeconds = middlewareConfig.getInteger(CORS_MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
-        final boolean allowCredentials = middlewareConfig.getBoolean(CORS_ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
-        final boolean allowPrivateNetwork = middlewareConfig.getBoolean(CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final CorsMiddlewareOptions options = castOptions(config, modelType());
 
         LOGGER.info("Created '{}' middleware successfully", CORS);
-        return Future.succeededFuture(new CorsMiddleware(
-            name,
-            allowedOrigins(allowedOrigin),
-            allowedOriginPatterns(allowedOriginPatterns),
-            allowedMethods(allowedMethods),
-            toSet(allowedHeaders),
-            toSet(exposedHeaders),
-            maxAgeSeconds,
-            allowCredentials,
-            allowPrivateNetwork));
+        return Future.succeededFuture(
+            new CorsMiddleware(
+                name,
+                allowedOrigins(options.getAllowedOrigins()),
+                options.getAllowedOriginPatterns(),
+                options.getAllowedMethods(),
+                options.getAllowedHeaders(),
+                options.getExposedHeaders(),
+                options.getMaxAgeSeconds(),
+                options.allowCredentials(),
+                options.allowPrivateNetworks()));
     }
 
     /**
      * Allowed origins always contains the 'http;//localhost' origin
      * 
-     * @param originsJSON
+     * @param origins
      * @return
      */
-    @SuppressWarnings("unchecked")
-    private List<String> allowedOrigins(JsonArray originsJSON) {
-        if (originsJSON == null || originsJSON.isEmpty()) {
+    private List<String> allowedOrigins(List<String> origins) {
+        if (origins == null || origins.isEmpty()) {
             return List.of(ORIGIN_LOCALHOST);
         }
 
-        final List<String> origins = originsJSON.getList();
+        origins = new LinkedList<>(origins);
         if (!origins.contains(ORIGIN_LOCALHOST)) {
             origins.add(ORIGIN_LOCALHOST);
         }
 
         return origins;
     }
-
-    @SuppressWarnings("unchecked")
-    private List<String> allowedOriginPatterns(JsonArray originPatterns) {
-        if (originPatterns == null || originPatterns.isEmpty()) {
-            return List.of();
-        }
-        return originPatterns.getList();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<HttpMethod> allowedMethods(JsonArray methods) {
-        if (methods == null || methods.isEmpty()) {
-            return Set.of();
-        }
-
-        return (Set<HttpMethod>) methods.getList().stream()
-            .map(m -> HttpMethod.valueOf((String) m))
-            .collect(Collectors.<HttpMethod>toSet());
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<String> toSet(JsonArray list) {
-        if (list == null || list.isEmpty()) {
-            return Set.of();
-        }
-        return new HashSet<String>(list.getList());
-    }
-
 }

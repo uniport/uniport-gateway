@@ -68,19 +68,15 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<? extends GatewayMiddlewareOptions> modelType() {
+    public Class<MatomoMiddlewareOptions> modelType() {
         return MatomoMiddlewareOptions.class;
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+        final MatomoMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.info("Created '{}' middleware successfully", MATOMO);
-
-        final String jwtPathUsername = middlewareConfig.getString(MATOMO_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_USERNAME);
-        final String jwtPathEmail = middlewareConfig.getString(MATOMO_JWT_PATH_EMAIL, DEFAULT_JWT_PATH_EMAIL);
-        final String jwtPathRoles = middlewareConfig.getString(MATOMO_JWT_PATH_ROLES, DEFAULT_JWT_PATH_ROLES);
-        final String jwtPathGroup = middlewareConfig.getString(MATOMO_JWT_PATH_GROUP, DEFAULT_JWT_PATH_GROUP);
-
-        return Future.succeededFuture(new MatomoMiddleware(name, jwtPathRoles, jwtPathGroup, jwtPathUsername, jwtPathEmail));
+        return Future.succeededFuture(
+            new MatomoMiddleware(name, options.getJWTPathRoles(), options.getJWTPathGroup(), options.getJWTPathUsername(), options.getJWTPathEMail()));
     }
 }

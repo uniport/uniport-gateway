@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayStyle;
+import io.vertx.core.http.HttpMethod;
 import java.util.List;
+import java.util.Set;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
@@ -20,13 +22,13 @@ public abstract class AbstractCorsMiddlewareOptions implements GatewayMiddleware
     public abstract List<String> getAllowedOriginPatterns();
 
     @JsonProperty(CorsMiddlewareFactory.CORS_ALLOWED_METHODS)
-    public abstract List<String> getAllowedMethods();
+    public abstract Set<HttpMethod> getAllowedMethods();
 
     @JsonProperty(CorsMiddlewareFactory.CORS_ALLOWED_HEADERS)
-    public abstract List<String> getAllowedHeaders();
+    public abstract Set<String> getAllowedHeaders();
 
     @JsonProperty(CorsMiddlewareFactory.CORS_EXPOSED_HEADERS)
-    public abstract List<String> getExposedHeaders();
+    public abstract Set<String> getExposedHeaders();
 
     @Default
     @JsonProperty(CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS)

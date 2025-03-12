@@ -30,7 +30,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -113,14 +112,16 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
 
     @Test
     void discoveryFailure(Vertx vertx, VertxTestContext testCtx) throws Throwable {
-        final JsonObject config = new JsonObject()
-            .put(OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "http://inexistent.host")
-            .put(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "scopee")
-            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "id")
-            .put(OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, "secret")
-            .put(RouterFactory.PUBLIC_PROTOCOL_KEY, "http")
-            .put(RouterFactory.PUBLIC_HOSTNAME_KEY, "host")
-            .put(RouterFactory.PUBLIC_PORT_KEY, 1234);
+        final OAuth2MiddlewareOptions config = OAuth2MiddlewareOptions.builder()
+            .withSessionScope("scope")
+            .withClientId("id")
+            .withClientSecret("secret")
+            .withDiscoveryURL("http://inexistent.host")
+            .withEnv(Map.<String, String>of(
+                RouterFactory.PUBLIC_PROTOCOL_KEY, "http",
+                RouterFactory.PUBLIC_HOSTNAME_KEY, "host",
+                RouterFactory.PUBLIC_PORT_KEY, "1234"))
+            .build();
 
         try {
             portalGateway(vertx, testCtx)
@@ -312,8 +313,10 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
-            .put(OAuth2MiddlewareFactory.OAUTH2_ADDITIONAL_PARAMETERS, JsonObject.of("extra", "parameter"));
+        final OAuth2MiddlewareOptions middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
+            .withAdditionalAuthRequestParameters(Map.<String, String>of(
+                "extra", "parameter"));
+
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
@@ -337,8 +340,9 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final List<String> scopes = List.of("scopeA", "scopeB", "scopeC");
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
-            .put(OAuth2MiddlewareFactory.OAUTH2_ADDITIONAL_SCOPES, new JsonArray(scopes));
+        final OAuth2MiddlewareOptions middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
+            .withAdditionalScopes(scopes);
+
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
@@ -433,8 +437,9 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final JsonObject middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
-            .put(OAuth2MiddlewareFactory.OAUTH2_PASSTHROUGH_PARAMETERS, new JsonArray(passthrough));
+        final OAuth2MiddlewareOptions middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
+            .withPassthroughParameters(passthrough);
+
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)

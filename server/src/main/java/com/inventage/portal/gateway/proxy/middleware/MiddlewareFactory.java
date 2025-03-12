@@ -29,7 +29,19 @@ public interface MiddlewareFactory {
 
     Class<? extends GatewayMiddlewareOptions> modelType();
 
-    Future<Middleware> create(Vertx vertx, String name, Router router, JsonObject middlewareConfig);
+    Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config);
+
+    @SuppressWarnings("unchecked")
+    default <T extends GatewayMiddlewareOptions> T castOptions(GatewayMiddlewareOptions options, Class<T> clazz) {
+        if (options == null) {
+            return null;
+        }
+        if (!modelType().isInstance(options)) {
+            throw new IllegalStateException(
+                String.format("unexpected middleware options type: '%s'", options.getClass()));
+        }
+        return (T) options;
+    }
 
     /**
      * A middleware factory commonly needs to validate a middleware configuration and is responsible for setting default values.

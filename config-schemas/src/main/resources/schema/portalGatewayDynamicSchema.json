@@ -58,6 +58,7 @@
                         "type" : "object",
                         "properties" : {
                           "publicKeyAlgorithm" : {
+                            "default" : "RS256",
                             "minLength" : 1,
                             "type" : "string"
                           },
@@ -110,7 +111,7 @@
                       }
                     },
                     "optional" : {
-                      "default" : false,
+                      "default" : "false",
                       "minLength" : 1,
                       "type" : "string"
                     },
@@ -152,6 +153,7 @@
                         "type" : "object",
                         "properties" : {
                           "publicKeyAlgorithm" : {
+                            "default" : "RS256",
                             "minLength" : 1,
                             "type" : "string"
                           },
@@ -1109,6 +1111,7 @@
                         "type" : "object",
                         "properties" : {
                           "publicKeyAlgorithm" : {
+                            "default" : "RS256",
                             "minLength" : 1,
                             "type" : "string"
                           },

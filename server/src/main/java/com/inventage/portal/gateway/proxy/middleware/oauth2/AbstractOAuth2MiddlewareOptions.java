@@ -49,8 +49,11 @@ public abstract class AbstractOAuth2MiddlewareOptions implements GatewayMiddlewa
     public abstract List<String> getAdditionalScopes();
 
     @JsonProperty(OAuth2MiddlewareFactory.OAUTH2_ADDITIONAL_PARAMETERS)
-    public abstract Map<String, String> getAdditionalParameters();
+    public abstract Map<String, String> getAdditionalAuthRequestParameters();
 
     @JsonProperty(OAuth2MiddlewareFactory.OAUTH2_PASSTHROUGH_PARAMETERS)
     public abstract List<String> getPassthroughParameters();
+
+    // dynamically added during runtime
+    public abstract Map<String, String> env();
 }
