@@ -52,22 +52,22 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT,
+                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                        WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                             JsonObject.of(
-                                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=",
-                                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")),
-                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar",
-                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=",
+                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")),
+                        WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar",
+                        WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT)));
+                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.BACK_CHANNEL_LOGOUT,
+                withMiddleware("foo", BackChannelLogoutMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

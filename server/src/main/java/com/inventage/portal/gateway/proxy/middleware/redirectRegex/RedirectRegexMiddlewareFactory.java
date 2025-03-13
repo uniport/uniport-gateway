@@ -19,23 +19,23 @@ import org.slf4j.LoggerFactory;
 public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String REDIRECT_REGEX = "redirectRegex";
-    public static final String REDIRECT_REGEX_REGEX = "regex";
-    public static final String REDIRECT_REGEX_REPLACEMENT = "replacement";
+    public static final String TYPE = "redirectRegex";
+    public static final String REGEX = "regex";
+    public static final String REPLACEMENT = "replacement";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedirectRegexMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return REDIRECT_REGEX;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(REDIRECT_REGEX_REGEX, Schemas.stringSchema()
+            .requiredProperty(REGEX, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(REDIRECT_REGEX_REPLACEMENT, Schemas.stringSchema()
+            .requiredProperty(REPLACEMENT, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
@@ -53,7 +53,7 @@ public class RedirectRegexMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final RedirectRegexMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", REDIRECT_REGEX);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new RedirectRegexMiddleware(
                 name,

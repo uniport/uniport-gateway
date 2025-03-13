@@ -35,24 +35,24 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO,
+                withMiddleware("foo", MatomoMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_ROLES, "$.resource_access.Example.roles",
-                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_GROUP, "$.tenant",
-                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_EMAIL, "$.email",
-                        MatomoMiddlewareFactory.MATOMO_JWT_PATH_USERNAME, "$.preferred_username")))));
+                        MatomoMiddlewareFactory.JWT_PATH_ROLES, "$.resource_access.Example.roles",
+                        MatomoMiddlewareFactory.JWT_PATH_GROUP, "$.tenant",
+                        MatomoMiddlewareFactory.JWT_PATH_EMAIL, "$.email",
+                        MatomoMiddlewareFactory.JWT_PATH_USERNAME, "$.preferred_username")))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO)));
+                withMiddleware("foo", MatomoMiddlewareFactory.TYPE)));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO)));
+                withMiddleware("foo", MatomoMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", MatomoMiddlewareFactory.MATOMO,
+                withMiddleware("foo", MatomoMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

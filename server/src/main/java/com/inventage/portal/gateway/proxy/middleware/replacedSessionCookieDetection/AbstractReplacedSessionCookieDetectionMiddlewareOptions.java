@@ -16,23 +16,23 @@ public abstract class AbstractReplacedSessionCookieDetectionMiddlewareOptions im
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME)
+    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME)
     public String getCookieName() {
-        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
+        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
         return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     }
 
     @Default
-    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS)
+    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS)
     public int getWaitBeforeRetryMs() {
-        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS);
+        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS);
         return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
     }
 
     @Default
-    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES)
+    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.MAX_REDIRECT_RETRIES)
     public int getMaxRetries() {
-        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES);
+        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.MAX_REDIRECT_RETRIES, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES);
         return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES;
     }
 }

@@ -11,6 +11,6 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = PassAuthorizationMiddlewareOptions.Builder.class)
 public abstract class AbstractPassAuthorizationMiddlewareOptions extends WithAuthHandlerMiddlewareOptionsBase {
 
-    @JsonProperty(PassAuthorizationMiddlewareFactory.PASS_AUTHORIZATION_SESSION_SCOPE)
+    @JsonProperty(PassAuthorizationMiddlewareFactory.SESSION_SCOPE)
     public abstract String getSessionScope();
 }

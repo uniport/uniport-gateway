@@ -19,9 +19,9 @@ public class ReplacedSessionCookieDetectionMiddlewareOptionsTest {
         final Integer maxRetries = 3;
 
         final JsonObject json = JsonObject.of(
-            ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, cookieName,
-            ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, waitBeforeRetry,
-            ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, maxRetries);
+            ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, cookieName,
+            ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, waitBeforeRetry,
+            ReplacedSessionCookieDetectionMiddlewareFactory.MAX_REDIRECT_RETRIES, maxRetries);
 
         // when
         final ThrowingSupplier<ReplacedSessionCookieDetectionMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ReplacedSessionCookieDetectionMiddlewareOptions.class);

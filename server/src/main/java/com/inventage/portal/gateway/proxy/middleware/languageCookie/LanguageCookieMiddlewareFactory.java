@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String LANGUAGE_COOKIE = "languageCookie";
-    public static final String LANGUAGE_COOKIE_NAME = "name";
+    public static final String TYPE = "languageCookie";
+    public static final String NAME = "name";
 
     // defaults
     public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
@@ -29,13 +29,13 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return LANGUAGE_COOKIE;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_LANGUAGE_COOKIE_NAME))
             .allowAdditionalProperties(false);
@@ -54,7 +54,7 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final LanguageCookieMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", LANGUAGE_COOKIE);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new LanguageCookieMiddleware(name, options.getCookieName()));
     }

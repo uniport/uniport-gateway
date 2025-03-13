@@ -46,30 +46,30 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject sessionTermination = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                withMiddleware("foo", ControlApiMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_TERMINATE)))));
+                        JsonObject.of(ControlApiMiddlewareFactory.ACTION, ControlApiMiddlewareFactory.ACTION_SESSION_TERMINATE)))));
 
         final JsonObject sessionReset = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                withMiddleware("foo", ControlApiMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_RESET)))));
+                        JsonObject.of(ControlApiMiddlewareFactory.ACTION, ControlApiMiddlewareFactory.ACTION_SESSION_RESET)))));
 
         final JsonObject invalidAction = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                withMiddleware("foo", ControlApiMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(ControlApiMiddlewareFactory.CONTROL_API_ACTION, "blub")))));
+                        JsonObject.of(ControlApiMiddlewareFactory.ACTION, "blub")))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                withMiddleware("foo", ControlApiMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of()))));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ControlApiMiddlewareFactory.CONTROL_API,
+                withMiddleware("foo", ControlApiMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

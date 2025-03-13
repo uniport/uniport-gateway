@@ -36,21 +36,21 @@ public class RequestResponseLoggerMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER,
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_FILTER_REGEX, ".*/health.*|.*/ready.*")))));
+                        RequestResponseLoggerMiddlewareFactory.FILTER_REGEX, ".*/health.*|.*/ready.*")))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER)));
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.TYPE)));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER)));
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER,
+                withMiddleware("foo", RequestResponseLoggerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

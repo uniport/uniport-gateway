@@ -22,26 +22,26 @@ public class ReplacePathRegexMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX,
+                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REGEX, "^$",
-                        ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REPLACEMENT, "foobar")))));
+                        ReplacePathRegexMiddlewareFactory.REGEX, "^$",
+                        ReplacePathRegexMiddlewareFactory.REPLACEMENT, "foobar")))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX)));
+                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX,
+                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX,
+                withMiddleware("foo", ReplacePathRegexMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REGEX, "^$")))));
+                        ReplacePathRegexMiddlewareFactory.REGEX, "^$")))));
 
         return Stream.of(
             Arguments.of("accept simple config", simple, complete, expectedTrue),

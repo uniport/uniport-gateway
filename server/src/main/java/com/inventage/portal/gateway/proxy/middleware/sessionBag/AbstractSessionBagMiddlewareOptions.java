@@ -24,13 +24,13 @@ public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMidd
     }
 
     @Default
-    @JsonProperty(SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME)
+    @JsonProperty(SessionBagMiddlewareFactory.SESSION_COOKIE_NAME)
     public String getSessionCookieName() {
-        logDefault(LOGGER, SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME, SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
+        logDefault(LOGGER, SessionBagMiddlewareFactory.SESSION_COOKIE_NAME, SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
         return SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     }
 
-    @JsonProperty(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES)
+    @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIES)
     public abstract List<WhitelistedCookieOption> getWhitelistedCookieOptions();
 
     @Immutable
@@ -38,10 +38,10 @@ public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMidd
     @JsonDeserialize(builder = WhitelistedCookieOption.Builder.class)
     public abstract static class AbstractWhitelistedCookieOption implements GatewayMiddlewareOptions {
 
-        @JsonProperty(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME)
+        @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME)
         public abstract String getName();
 
-        @JsonProperty(SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH)
+        @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIE_PATH)
         public abstract String getPath();
     }
 }

@@ -24,14 +24,14 @@ public class CSRFMiddlewareOptionsTest {
         final Integer timeoutMins = 42;
 
         final JsonObject json = JsonObject.of(
-            CSRFMiddlewareFactory.CSRF_COOKIE, Map.of(
-                CSRFMiddlewareFactory.CSRF_COOKIE_NAME, cookieName,
-                CSRFMiddlewareFactory.CSRF_COOKIE_PATH, cookiePath,
-                CSRFMiddlewareFactory.CSRF_COOKIE_SECURE, cookieSecure),
-            CSRFMiddlewareFactory.CSRF_HEADER_NAME, headerName,
-            CSRFMiddlewareFactory.CSRF_NAG_HTTPS, nagHttps,
-            CSRFMiddlewareFactory.CSRF_ORIGIN, origin,
-            CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES, timeoutMins);
+            CSRFMiddlewareFactory.COOKIE, Map.of(
+                CSRFMiddlewareFactory.COOKIE_NAME, cookieName,
+                CSRFMiddlewareFactory.COOKIE_PATH, cookiePath,
+                CSRFMiddlewareFactory.COOKIE_SECURE, cookieSecure),
+            CSRFMiddlewareFactory.HEADER_NAME, headerName,
+            CSRFMiddlewareFactory.NAG_HTTPS, nagHttps,
+            CSRFMiddlewareFactory.ORIGIN, origin,
+            CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES, timeoutMins);
 
         // when
         final ThrowingSupplier<CSRFMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), CSRFMiddlewareOptions.class);

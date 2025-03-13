@@ -17,21 +17,21 @@ import io.vertx.json.schema.common.dsl.Schemas;
 public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String REPLACE_PATH_REGEX = "replacePathRegex";
-    public static final String REPLACE_PATH_REGEX_REGEX = "regex";
-    public static final String REPLACE_PATH_REGEX_REPLACEMENT = "replacement";
+    public static final String TYPE = "replacePathRegex";
+    public static final String REGEX = "regex";
+    public static final String REPLACEMENT = "replacement";
 
     @Override
     public String provides() {
-        return REPLACE_PATH_REGEX;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(REPLACE_PATH_REGEX_REGEX, Schemas.stringSchema()
+            .requiredProperty(REGEX, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(REPLACE_PATH_REGEX_REPLACEMENT, Schemas.stringSchema()
+            .requiredProperty(REPLACEMENT, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
@@ -49,7 +49,7 @@ public class ReplacePathRegexMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final ReplacePathRegexMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", REPLACE_PATH_REGEX);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new ReplacePathRegexMiddleware(
                 name,

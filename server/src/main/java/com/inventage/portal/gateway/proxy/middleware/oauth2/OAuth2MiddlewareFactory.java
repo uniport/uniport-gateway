@@ -38,18 +38,18 @@ import org.slf4j.LoggerFactory;
 public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String OAUTH2 = "oauth2";
-    public static final String OAUTH2_CLIENT_ID = "clientId";
-    public static final String OAUTH2_CLIENT_SECRET = "clientSecret";
-    public static final String OAUTH2_DISCOVERY_URL = "discoveryUrl";
-    public static final String OAUTH2_RESPONSE_MODE = "responseMode";
-    public static final String OAUTH2_SESSION_SCOPE = "sessionScope";
-    public static final String OAUTH2_SESSION_SCOPE_ID = "id";
-    public static final String OAUTH2_PROXY_AUTHENTICATION_FLOW = "proxyAuthenticationFlow";
-    public static final String OAUTH2_PUBLIC_URL = "publicUrl";
-    public static final String OAUTH2_ADDITIONAL_SCOPES = "additionalScopes";
-    public static final String OAUTH2_ADDITIONAL_PARAMETERS = "additionalParameters";
-    public static final String OAUTH2_PASSTHROUGH_PARAMETERS = "passthroughParameters";
+    public static final String TYPE = "oauth2";
+    public static final String CLIENT_ID = "clientId";
+    public static final String CLIENT_SECRET = "clientSecret";
+    public static final String DISCOVERY_URL = "discoveryUrl";
+    public static final String RESPONSE_MODE = "responseMode";
+    public static final String SESSION_SCOPE = "sessionScope";
+    public static final String SESSION_SCOPE_ID = "id";
+    public static final String PROXY_AUTHENTICATION_FLOW = "proxyAuthenticationFlow";
+    public static final String PUBLIC_URL = "publicUrl";
+    public static final String ADDITIONAL_SCOPES = "additionalScopes";
+    public static final String ADDITIONAL_PARAMETERS = "additionalParameters";
+    public static final String PASSTHROUGH_PARAMETERS = "passthroughParameters";
 
     public static final String OIDC_RESPONSE_MODE = "response_mode";
     public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
@@ -71,34 +71,34 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return OAUTH2;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(OAUTH2_CLIENT_ID, Schemas.stringSchema()
+            .requiredProperty(CLIENT_ID, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(OAUTH2_CLIENT_SECRET, Schemas.stringSchema()
+            .requiredProperty(CLIENT_SECRET, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(OAUTH2_DISCOVERY_URL, Schemas.stringSchema()
+            .requiredProperty(DISCOVERY_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(OAUTH2_SESSION_SCOPE, Schemas.stringSchema()
+            .requiredProperty(SESSION_SCOPE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .optionalProperty(OAUTH2_RESPONSE_MODE, Schemas.enumSchema((Object[]) OIDC_RESPONSE_MODES)
+            .optionalProperty(RESPONSE_MODE, Schemas.enumSchema((Object[]) OIDC_RESPONSE_MODES)
                 .defaultValue(DEFAULT_OIDC_RESPONSE_MODE))
-            .optionalProperty(OAUTH2_PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema()
+            .optionalProperty(PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW))
-            .optionalProperty(OAUTH2_PUBLIC_URL, Schemas.stringSchema()
+            .optionalProperty(PUBLIC_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .optionalProperty(OAUTH2_ADDITIONAL_SCOPES, Schemas.arraySchema()
+            .optionalProperty(ADDITIONAL_SCOPES, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(OAUTH2_ADDITIONAL_PARAMETERS, Schemas.objectSchema()
+            .optionalProperty(ADDITIONAL_PARAMETERS, Schemas.objectSchema()
                 .additionalProperties(Schemas.stringSchema()
                     .with(Keywords.minLength(1)))
                 .allowAdditionalProperties(true))
-            .optionalProperty(OAUTH2_PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
+            .optionalProperty(PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
             .allowAdditionalProperties(false);
@@ -136,7 +136,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 options.getAdditionalScopes(),
                 getAdditionalAuthRequestParams(options, responseMode),
                 options.getPassthroughParameters()))
-            .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", OAUTH2))
+            .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", TYPE))
             .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
     }
 

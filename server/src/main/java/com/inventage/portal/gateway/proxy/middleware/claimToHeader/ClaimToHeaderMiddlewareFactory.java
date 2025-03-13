@@ -19,23 +19,23 @@ import org.slf4j.LoggerFactory;
 public class ClaimToHeaderMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String CLAIM_TO_HEADER = "claimToHeader";
-    public static final String CLAIM_TO_HEADER_PATH = "claimPath";
-    public static final String CLAIM_TO_HEADER_NAME = "headerName";
+    public static final String TYPE = "claimToHeader";
+    public static final String PATH = "claimPath";
+    public static final String NAME = "headerName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClaimToHeaderMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return CLAIM_TO_HEADER;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(CLAIM_TO_HEADER_PATH, Schemas.stringSchema()
+            .requiredProperty(PATH, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(CLAIM_TO_HEADER_NAME, Schemas.stringSchema()
+            .requiredProperty(NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
@@ -53,7 +53,7 @@ public class ClaimToHeaderMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final ClaimToHeaderMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", CLAIM_TO_HEADER);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new ClaimToHeaderMiddleware(name, options.getPath(), options.getName()));
     }

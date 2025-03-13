@@ -19,20 +19,20 @@ import org.slf4j.LoggerFactory;
 public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String AUTHORIZATION_BEARER = "authorizationBearer";
-    public static final String AUTHORIZATION_BEARER_SESSION_SCOPE = "sessionScope";
+    public static final String TYPE = "authorizationBearer";
+    public static final String SESSION_SCOPE = "sessionScope";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationBearerMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return AUTHORIZATION_BEARER;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(AUTHORIZATION_BEARER_SESSION_SCOPE, Schemas.stringSchema()
+            .requiredProperty(SESSION_SCOPE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
@@ -51,7 +51,7 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final AuthorizationBearerMiddlewareOptions options = castOptions(config, modelType());
 
-        LOGGER.debug("Created '{}' middleware successfully", AUTHORIZATION_BEARER);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new AuthorizationBearerMiddleware(vertx, name, options.getSessionScope()));
     }

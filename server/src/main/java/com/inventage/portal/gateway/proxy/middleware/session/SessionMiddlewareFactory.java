@@ -21,11 +21,11 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     // schema
     // session
-    public static final String SESSION = "session";
+    public static final String TYPE = "session";
     public static final String SESSION_ID_MIN_LENGTH = "idMinimumLength";
     public static final String SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
-    public static final String SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
-    public static final String SESSION_NAG_HTTPS = "nagHttps";
+    public static final String IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
+    public static final String NAG_HTTPS = "nagHttps";
     public static final String SESSION_LIFETIME_COOKIE = "lifetimeCookie";
     public static final String SESSION_LIFETIME_HEADER = "lifetimeHeader";
 
@@ -76,7 +76,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return SESSION;
+        return TYPE;
     }
 
     @Override
@@ -89,9 +89,9 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
             .optionalProperty(SESSION_ID_MIN_LENGTH, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
                 .defaultValue(DEFAULT_SESSION_ID_MINIMUM_LENGTH))
-            .optionalProperty(SESSION_NAG_HTTPS, Schemas.booleanSchema()
+            .optionalProperty(NAG_HTTPS, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_NAG_HTTPS))
-            .optionalProperty(SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
+            .optionalProperty(IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             // session lifetime
             .optionalProperty(SESSION_LIFETIME_COOKIE, Schemas.booleanSchema()
@@ -130,7 +130,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final SessionMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.info("Created '{}' middleware successfully", SESSION);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new SessionMiddleware(
                 vertx,

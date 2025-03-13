@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory;
 public class BodyHandlerMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String BODY_HANDLER = "bodyHandler";
+    public static final String TYPE = "bodyHandler";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BodyHandlerMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return BODY_HANDLER;
+        return TYPE;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class BodyHandlerMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
-        LOGGER.info("Created '{}' middleware successfully", BODY_HANDLER);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new BodyHandlerMiddleware(vertx, name));
     }

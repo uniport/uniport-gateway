@@ -24,20 +24,20 @@ public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareO
         Preconditions.checkState(!getDirectives().isEmpty(), "'getDirectives' must have at least one element");
     }
 
-    @JsonProperty(CSPMiddlewareFactory.CSP_DIRECTIVES)
+    @JsonProperty(CSPMiddlewareFactory.DIRECTIVES)
     public abstract List<DirectiveOptions> getDirectives();
 
     @Default
-    @JsonProperty(CSPMiddlewareFactory.CSP_REPORT_ONLY)
+    @JsonProperty(CSPMiddlewareFactory.REPORT_ONLY)
     public boolean isReportOnly() {
-        logDefault(LOGGER, CSPMiddlewareFactory.CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
+        logDefault(LOGGER, CSPMiddlewareFactory.REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
         return CSPMiddlewareFactory.DEFAULT_REPORT_ONLY;
     }
 
     @Default
-    @JsonProperty(CSPMiddlewareFactory.CSP_MERGE_STRATEGY)
+    @JsonProperty(CSPMiddlewareFactory.MERGE_STRATEGY)
     public CSPMergeStrategy getMergeStrategy() {
-        logDefault(LOGGER, CSPMiddlewareFactory.CSP_MERGE_STRATEGY, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY);
+        logDefault(LOGGER, CSPMiddlewareFactory.MERGE_STRATEGY, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY);
         return CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY;
     }
 
@@ -51,10 +51,10 @@ public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareO
             Preconditions.checkState(!getValues().isEmpty(), "'getValues' must have at least one element");
         }
 
-        @JsonProperty(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME)
+        @JsonProperty(CSPMiddlewareFactory.DIRECTIVE_NAME)
         public abstract String getName();
 
-        @JsonProperty(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES)
+        @JsonProperty(CSPMiddlewareFactory.DIRECTIVE_VALUES)
         public abstract List<String> getValues();
     }
 }

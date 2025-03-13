@@ -16,9 +16,9 @@ public abstract class AbstractBearerOnlyMiddlewareOptions extends WithAuthHandle
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL)
+    @JsonProperty(BearerOnlyMiddlewareFactory.OPTIONAL)
     public String isOptional() {
-        logDefault(LOGGER, BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL, BearerOnlyMiddlewareFactory.DEFAULT_OPTIONAL);
+        logDefault(LOGGER, BearerOnlyMiddlewareFactory.OPTIONAL, BearerOnlyMiddlewareFactory.DEFAULT_OPTIONAL);
         return BearerOnlyMiddlewareFactory.DEFAULT_OPTIONAL;
     }
 }

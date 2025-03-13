@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String SESSION_BAG = "sessionBag";
-    public static final String SESSION_BAG_SESSION_COOKIE_NAME = "cookieName";
-    public static final String SESSION_BAG_WHITELISTED_COOKIES = "whitelistedCookies";
-    public static final String SESSION_BAG_WHITELISTED_COOKIE_NAME = "name";
-    public static final String SESSION_BAG_WHITELISTED_COOKIE_PATH = "path";
+    public static final String TYPE = "sessionBag";
+    public static final String SESSION_COOKIE_NAME = "cookieName";
+    public static final String WHITELISTED_COOKIES = "whitelistedCookies";
+    public static final String WHITELISTED_COOKIE_NAME = "name";
+    public static final String WHITELISTED_COOKIE_PATH = "path";
 
     // defaults
     public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
@@ -33,20 +33,20 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return SESSION_BAG;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(SESSION_BAG_SESSION_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
-            .requiredProperty(SESSION_BAG_WHITELISTED_COOKIES, Schemas.arraySchema()
+            .requiredProperty(WHITELISTED_COOKIES, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
-                    .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_NAME, Schemas.stringSchema()
+                    .requiredProperty(WHITELISTED_COOKIE_NAME, Schemas.stringSchema()
                         .with(Keywords.minLength(1)))
-                    .requiredProperty(SESSION_BAG_WHITELISTED_COOKIE_PATH, Schemas.stringSchema()
+                    .requiredProperty(WHITELISTED_COOKIE_PATH, Schemas.stringSchema()
                         .with(Keywords.minLength(1)))
                     .allowAdditionalProperties(false)))
             .allowAdditionalProperties(false);
@@ -69,7 +69,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     }
 
     public Future<Middleware> create(Vertx vertx, String name, SessionBagMiddlewareOptions options) {
-        LOGGER.info("Created '{}' middleware successfully", SESSION_BAG);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new SessionBagMiddleware(name, options.getWhitelistedCookieOptions(), options.getSessionCookieName()));
     }

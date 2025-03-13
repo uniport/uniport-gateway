@@ -31,8 +31,8 @@ public class SessionMiddlewareOptionsTest {
         final JsonObject json = JsonObject.of(
             SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, idleTime,
             SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, idMinLength,
-            SessionMiddlewareFactory.SESSION_NAG_HTTPS, nagHttps,
-            SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, ignoreSessionTimeoutResetForURI,
+            SessionMiddlewareFactory.NAG_HTTPS, nagHttps,
+            SessionMiddlewareFactory.IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, ignoreSessionTimeoutResetForURI,
             SessionMiddlewareFactory.SESSION_LIFETIME_COOKIE, lifetimeCookie,
             SessionMiddlewareFactory.SESSION_LIFETIME_HEADER, lifetimeHeader,
             SessionMiddlewareFactory.SESSION_COOKIE, Map.of(

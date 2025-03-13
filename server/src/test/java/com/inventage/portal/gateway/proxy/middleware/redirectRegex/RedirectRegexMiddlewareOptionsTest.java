@@ -18,8 +18,8 @@ public class RedirectRegexMiddlewareOptionsTest {
         final String replacement = "aReplacement";
 
         final JsonObject json = JsonObject.of(
-            RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, regex,
-            RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT, replacement);
+            RedirectRegexMiddlewareFactory.REGEX, regex,
+            RedirectRegexMiddlewareFactory.REPLACEMENT, replacement);
 
         // when
         final ThrowingSupplier<RedirectRegexMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), RedirectRegexMiddlewareOptions.class);

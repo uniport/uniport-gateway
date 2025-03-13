@@ -367,10 +367,10 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new ProxyMiddleware(vertx, "proxy",
             host, port,
             ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
-            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
-            ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
-            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
-            ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD,
+            ProxyMiddlewareFactory.DEFAULT_TRUST_ALL,
+            ProxyMiddlewareFactory.DEFAULT_VERIFY_HOSTNAME,
+            ProxyMiddlewareFactory.DEFAULT_TRUST_STORE_PATH,
+            ProxyMiddlewareFactory.DEFAULT_TRUST_STORE_PASSWORD,
             verbose));
     }
 

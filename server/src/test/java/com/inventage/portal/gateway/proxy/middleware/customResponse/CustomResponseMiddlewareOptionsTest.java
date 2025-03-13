@@ -22,10 +22,10 @@ public class CustomResponseMiddlewareOptionsTest {
         final String content = "someContent";
 
         final JsonObject json = JsonObject.of(
-            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, statusCode,
-            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, Map.of(
+            CustomResponseMiddlewareFactory.STATUS_CODE, statusCode,
+            CustomResponseMiddlewareFactory.HEADERS, Map.of(
                 headerName, headerValue),
-            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, content);
+            CustomResponseMiddlewareFactory.CONTENT, content);
 
         // when
         final ThrowingSupplier<CustomResponseMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), CustomResponseMiddlewareOptions.class);

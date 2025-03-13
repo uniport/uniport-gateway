@@ -38,29 +38,29 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION,
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, "uniport-test.state",
-                        ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, 4242,
-                        ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, 42)))));
+                        ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, "uniport-test.state",
+                        ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, 4242,
+                        ReplacedSessionCookieDetectionMiddlewareFactory.MAX_REDIRECT_RETRIES, 42)))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION)));
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.TYPE)));
 
         final JsonObject invalidTimeout = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION,
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, -1)))));
+                        ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, -1)))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION)));
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.REPLACED_SESSION_COOKIE_DETECTION,
+                withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

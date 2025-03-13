@@ -19,9 +19,9 @@ import org.slf4j.event.Level;
 public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String CSP_VIOLATION_REPORTING_SERVER = "cspViolationReportingServer";
-    public static final String CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL = "logLevel";
-    public static final String[] CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS = new String[] {
+    public static final String TYPE = "cspViolationReportingServer";
+    public static final String LOG_LEVEL = "logLevel";
+    public static final String[] LOG_LEVELS = new String[] {
         Level.TRACE.toString(),
         Level.DEBUG.toString(),
         Level.INFO.toString(),
@@ -36,13 +36,13 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
 
     @Override
     public String provides() {
-        return CSP_VIOLATION_REPORTING_SERVER;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, Schemas.enumSchema((Object[]) CSP_VIOLATION_REPORTING_SERVER_LOG_LEVELS))
+            .requiredProperty(LOG_LEVEL, Schemas.enumSchema((Object[]) LOG_LEVELS))
             .allowAdditionalProperties(false);
     }
 
@@ -59,7 +59,7 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     @Override
     public Future<Middleware> create(final Vertx vertx, final String name, final Router router, GatewayMiddlewareOptions config) {
         final CSPViolationReportingServerMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.info("Created '{}' middleware successfully", CSP_VIOLATION_REPORTING_SERVER);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new CSPViolationReportingServerMiddleware(name, options.getLogLevel()));
     }

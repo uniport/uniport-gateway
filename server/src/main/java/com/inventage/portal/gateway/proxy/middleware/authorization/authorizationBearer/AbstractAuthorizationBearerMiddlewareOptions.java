@@ -11,6 +11,6 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = AuthorizationBearerMiddlewareOptions.Builder.class)
 public abstract class AbstractAuthorizationBearerMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    @JsonProperty(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE)
+    @JsonProperty(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE)
     public abstract String getSessionScope();
 }

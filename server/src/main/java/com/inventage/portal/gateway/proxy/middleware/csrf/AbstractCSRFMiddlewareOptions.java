@@ -16,37 +16,37 @@ public abstract class AbstractCSRFMiddlewareOptions implements GatewayMiddleware
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(CSRFMiddlewareFactory.CSRF_COOKIE)
+    @JsonProperty(CSRFMiddlewareFactory.COOKIE)
     public CookieOptions getCookie() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_COOKIE);
+        logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE);
         return CookieOptions.builder().build();
     }
 
     @Default
-    @JsonProperty(CSRFMiddlewareFactory.CSRF_HEADER_NAME)
+    @JsonProperty(CSRFMiddlewareFactory.HEADER_NAME)
     public String getHeaderName() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_HEADER_NAME, CSRFMiddlewareFactory.DEFAULT_HEADER_NAME);
+        logDefault(LOGGER, CSRFMiddlewareFactory.HEADER_NAME, CSRFMiddlewareFactory.DEFAULT_HEADER_NAME);
         return CSRFMiddlewareFactory.DEFAULT_HEADER_NAME;
     }
 
     @Default
-    @JsonProperty(CSRFMiddlewareFactory.CSRF_NAG_HTTPS)
+    @JsonProperty(CSRFMiddlewareFactory.NAG_HTTPS)
     public boolean nagHTTPs() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_NAG_HTTPS, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS);
+        logDefault(LOGGER, CSRFMiddlewareFactory.NAG_HTTPS, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS);
         return CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS;
     }
 
     @Default
-    @JsonProperty(CSRFMiddlewareFactory.CSRF_ORIGIN)
+    @JsonProperty(CSRFMiddlewareFactory.ORIGIN)
     public String getOrigin() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_ORIGIN, CSRFMiddlewareFactory.DEFAULT_ORIGIN);
+        logDefault(LOGGER, CSRFMiddlewareFactory.ORIGIN, CSRFMiddlewareFactory.DEFAULT_ORIGIN);
         return CSRFMiddlewareFactory.DEFAULT_ORIGIN;
     }
 
     @Default
-    @JsonProperty(CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES)
+    @JsonProperty(CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES)
     public long getTimeoutMinutes() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES);
+        logDefault(LOGGER, CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES);
         return CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES;
     }
 
@@ -56,23 +56,23 @@ public abstract class AbstractCSRFMiddlewareOptions implements GatewayMiddleware
     public abstract static class AbstractCookieOptions implements GatewayMiddlewareOptions {
 
         @Default
-        @JsonProperty(CSRFMiddlewareFactory.CSRF_COOKIE_NAME)
+        @JsonProperty(CSRFMiddlewareFactory.COOKIE_NAME)
         public String getName() {
-            logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_COOKIE_NAME, CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME);
+            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_NAME, CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME);
             return CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME;
         }
 
         @Default
-        @JsonProperty(CSRFMiddlewareFactory.CSRF_COOKIE_PATH)
+        @JsonProperty(CSRFMiddlewareFactory.COOKIE_PATH)
         public String getPath() {
-            logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_COOKIE_PATH, CSRFMiddlewareFactory.DEFAULT_COOKIE_PATH);
+            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_PATH, CSRFMiddlewareFactory.DEFAULT_COOKIE_PATH);
             return CSRFMiddlewareFactory.DEFAULT_COOKIE_PATH;
         }
 
         @Default
-        @JsonProperty(CSRFMiddlewareFactory.CSRF_COOKIE_SECURE)
+        @JsonProperty(CSRFMiddlewareFactory.COOKIE_SECURE)
         public boolean isSecure() {
-            logDefault(LOGGER, CSRFMiddlewareFactory.CSRF_COOKIE_SECURE, CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE);
+            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_SECURE, CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE);
             return CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE;
         }
     }

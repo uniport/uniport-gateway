@@ -18,8 +18,8 @@ public class ClaimToHeaderMiddlewareOptionsTest {
         final String path = "aPath";
 
         final JsonObject json = JsonObject.of(
-            ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, name,
-            ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, path);
+            ClaimToHeaderMiddlewareFactory.NAME, name,
+            ClaimToHeaderMiddlewareFactory.PATH, path);
 
         // when
         final ThrowingSupplier<ClaimToHeaderMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ClaimToHeaderMiddlewareOptions.class);

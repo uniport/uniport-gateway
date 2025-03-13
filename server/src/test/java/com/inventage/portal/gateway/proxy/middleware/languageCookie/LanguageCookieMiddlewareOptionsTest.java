@@ -17,7 +17,7 @@ public class LanguageCookieMiddlewareOptionsTest {
         final String cookieName = "aCookieName";
 
         final JsonObject json = JsonObject.of(
-            LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE_NAME, cookieName);
+            LanguageCookieMiddlewareFactory.NAME, cookieName);
 
         // when
         final ThrowingSupplier<LanguageCookieMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), LanguageCookieMiddlewareOptions.class);

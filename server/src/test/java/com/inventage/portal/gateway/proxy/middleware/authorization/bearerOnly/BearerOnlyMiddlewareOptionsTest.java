@@ -78,30 +78,30 @@ public class BearerOnlyMiddlewareOptionsTest {
     public void shouldCreateFromJson(Options given) {
         final JsonArray publicKeys = JsonArray.of(
             JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, given.publicKey,
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, given.publicKeyAlgorithm));
+                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, given.publicKey,
+                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, given.publicKeyAlgorithm));
 
         final JsonObject json = new JsonObject(JsonObject.of(
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, given.audience,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, given.issuer,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeys,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, given.additionalIssuers,
-            BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL, given.optional).getMap());
+            WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, given.audience,
+            WithAuthHandlerMiddlewareFactoryBase.ISSUER, given.issuer,
+            WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, publicKeys,
+            WithAuthHandlerMiddlewareFactoryBase.ADDITIONAL_ISSUERS, given.additionalIssuers,
+            BearerOnlyMiddlewareFactory.OPTIONAL, given.optional).getMap());
 
         if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
             JsonArray claims = JsonArray.of(
                 JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR, given.claimOperator,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH, given.claimPath,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_VALUE, given.claimValue));
-            json.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIMS, claims);
+                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR, given.claimOperator,
+                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_PATH, given.claimPath,
+                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_VALUE, given.claimValue));
+            json.put(WithAuthHandlerMiddlewareFactoryBase.CLAIMS, claims);
         }
 
         if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
             JsonObject reconciliation = JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, given.reconciliationEnabled,
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs);
-            json.put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, reconciliation);
+                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, given.reconciliationEnabled,
+                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs);
+            json.put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, reconciliation);
         }
 
         // when

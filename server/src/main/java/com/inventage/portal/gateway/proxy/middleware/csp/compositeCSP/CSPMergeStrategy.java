@@ -4,11 +4,11 @@ import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 
 public enum CSPMergeStrategy {
 
-    EXTERNAL(CSPMiddlewareFactory.CSP_MERGE_STRATEGY_EXTERNAL),
+    EXTERNAL(CSPMiddlewareFactory.MERGE_STRATEGY_EXTERNAL),
 
-    INTERNAL(CSPMiddlewareFactory.CSP_MERGE_STRATEGY_INTERNAL),
+    INTERNAL(CSPMiddlewareFactory.MERGE_STRATEGY_INTERNAL),
 
-    UNION(CSPMiddlewareFactory.CSP_MERGE_STRATEGY_UNION);
+    UNION(CSPMiddlewareFactory.MERGE_STRATEGY_UNION);
 
     private final String name;
 

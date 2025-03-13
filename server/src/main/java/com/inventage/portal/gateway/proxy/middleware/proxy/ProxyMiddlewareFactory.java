@@ -22,24 +22,24 @@ import org.slf4j.LoggerFactory;
 public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String SERVICE_NAME = "name";
-    public static final String SERVICE_SERVERS = "servers";
-    public static final String SERVICE_SERVER_PROTOCOL = "protocol";
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS = "httpsOptions";
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME = "verifyHostname";
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL = "trustAll";
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH = "trustStorePath";
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = "trustStorePassword";
-    public static final String SERVICE_SERVER_HOST = "host";
-    public static final String SERVICE_SERVER_PORT = "port";
-    public static final String SERVICE_VERBOSE = "verbose";
+    public static final String NAME = "name";
+    public static final String SERVERS = "servers";
+    public static final String SERVER_PROTOCOL = "protocol";
+    public static final String SERVER_HOST = "host";
+    public static final String SERVER_PORT = "port";
+    public static final String SERVER_HTTPS_OPTIONS = "httpsOptions";
+    public static final String VERIFY_HOSTNAME = "verifyHostname";
+    public static final String TRUST_ALL = "trustAll";
+    public static final String TRUST_STORE_PATH = "trustStorePath";
+    public static final String TRUST_STORE_PASSWORD = "trustStorePassword";
+    public static final String VERBOSE = "verbose";
 
     // defaults
     public static final String DEFAULT_SERVER_PROTOCOL = "http";
-    public static final boolean DEFAULT_HTTPS_TRUST_ALL = true;
-    public static final boolean DEFAULT_HTTPS_VERIFY_HOSTNAME = false;
-    public static final String DEFAULT_HTTPS_TRUST_STORE_PATH = null;
-    public static final String DEFAULT_HTTPS_TRUST_STORE_PASSWORD = null;
+    public static final boolean DEFAULT_TRUST_ALL = true;
+    public static final boolean DEFAULT_VERIFY_HOSTNAME = false;
+    public static final String DEFAULT_TRUST_STORE_PATH = null;
+    public static final String DEFAULT_TRUST_STORE_PASSWORD = null;
     public static final boolean DEFAULT_VERBOSE = false;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);

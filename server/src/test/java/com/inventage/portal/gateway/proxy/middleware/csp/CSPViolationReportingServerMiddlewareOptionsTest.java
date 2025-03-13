@@ -17,7 +17,7 @@ public class CSPViolationReportingServerMiddlewareOptionsTest {
         // given
         final Level logLevel = Level.TRACE;
         final JsonObject json = JsonObject.of(
-            CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, logLevel);
+            CSPViolationReportingServerMiddlewareFactory.LOG_LEVEL, logLevel);
 
         // when
         final ThrowingSupplier<CSPViolationReportingServerMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), CSPViolationReportingServerMiddlewareOptions.class);

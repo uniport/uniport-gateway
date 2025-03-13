@@ -29,21 +29,21 @@ public class ResponseSessionCookieRemovalMiddlewareTest extends MiddlewareTestBa
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL,
+                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL_NAME, "blub")))));
+                        JsonObject.of(ResponseSessionCookieRemovalMiddlewareFactory.SESSION_COOKIE_NAME, "blub")))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL)));
+                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.TYPE)));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL)));
+                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL,
+                withMiddleware("foo", ResponseSessionCookieRemovalMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

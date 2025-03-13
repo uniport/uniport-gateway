@@ -11,9 +11,9 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = RedirectRegexMiddlewareOptions.Builder.class)
 public abstract class AbstractRedirectRegexMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    @JsonProperty(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX)
+    @JsonProperty(RedirectRegexMiddlewareFactory.REGEX)
     public abstract String getRegex();
 
-    @JsonProperty(RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT)
+    @JsonProperty(RedirectRegexMiddlewareFactory.REPLACEMENT)
     public abstract String getReplacement();
 }

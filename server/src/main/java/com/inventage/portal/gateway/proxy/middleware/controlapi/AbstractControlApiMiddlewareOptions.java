@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractControlApiMiddlewareOptions implements GatewayMiddlewareOptions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddlewareOptions.class);
 
-    @JsonProperty(ControlApiMiddlewareFactory.CONTROL_API_ACTION)
+    @JsonProperty(ControlApiMiddlewareFactory.ACTION)
     public abstract ControlApiAction getAction();
 
     @Default
     @Nullable
-    @JsonProperty(ControlApiMiddlewareFactory.CONTROL_API_SESSION_RESET_URL)
+    @JsonProperty(ControlApiMiddlewareFactory.SESSION_RESET_URL)
     public String getSessionResetURL() {
-        logDefault(LOGGER, ControlApiMiddlewareFactory.CONTROL_API_SESSION_RESET_URL, ControlApiMiddlewareFactory.DEFAULT_RESET_URL);
+        logDefault(LOGGER, ControlApiMiddlewareFactory.SESSION_RESET_URL, ControlApiMiddlewareFactory.DEFAULT_RESET_URL);
         return ControlApiMiddlewareFactory.DEFAULT_RESET_URL;
     }
 }

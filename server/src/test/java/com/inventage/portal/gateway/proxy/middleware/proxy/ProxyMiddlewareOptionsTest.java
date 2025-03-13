@@ -27,18 +27,18 @@ public class ProxyMiddlewareOptionsTest {
         final Boolean verbose = true;
 
         final JsonObject json = JsonObject.of(
-            ProxyMiddlewareFactory.SERVICE_NAME, aName,
-            ProxyMiddlewareFactory.SERVICE_SERVERS, List.of(
+            ProxyMiddlewareFactory.NAME, aName,
+            ProxyMiddlewareFactory.SERVERS, List.of(
                 Map.of(
-                    ProxyMiddlewareFactory.SERVICE_SERVER_PROTOCOL, serverProto,
-                    ProxyMiddlewareFactory.SERVICE_SERVER_HOST, serverHost,
-                    ProxyMiddlewareFactory.SERVICE_SERVER_PORT, serverPort,
-                    ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS, Map.of(
-                        ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, httpsVerifyHostname,
-                        ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, httpsTrustAll,
-                        ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, httpsTrustStorePath,
-                        ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, httpsTrustStorePassword))),
-            ProxyMiddlewareFactory.SERVICE_VERBOSE, verbose);
+                    ProxyMiddlewareFactory.SERVER_PROTOCOL, serverProto,
+                    ProxyMiddlewareFactory.SERVER_HOST, serverHost,
+                    ProxyMiddlewareFactory.SERVER_PORT, serverPort,
+                    ProxyMiddlewareFactory.SERVER_HTTPS_OPTIONS, Map.of(
+                        ProxyMiddlewareFactory.VERIFY_HOSTNAME, httpsVerifyHostname,
+                        ProxyMiddlewareFactory.TRUST_ALL, httpsTrustAll,
+                        ProxyMiddlewareFactory.TRUST_STORE_PATH, httpsTrustStorePath,
+                        ProxyMiddlewareFactory.TRUST_STORE_PASSWORD, httpsTrustStorePassword))),
+            ProxyMiddlewareFactory.VERBOSE, verbose);
 
         // when
         final ThrowingSupplier<ProxyMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ProxyMiddlewareOptions.class);

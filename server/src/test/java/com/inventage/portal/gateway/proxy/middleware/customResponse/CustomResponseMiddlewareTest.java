@@ -32,63 +32,63 @@ public class CustomResponseMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200,
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, JsonObject.of(
+                        CustomResponseMiddlewareFactory.CONTENT, "test",
+                        CustomResponseMiddlewareFactory.STATUS_CODE, 200,
+                        CustomResponseMiddlewareFactory.HEADERS, JsonObject.of(
                             "foo", "bar"))))));
 
         final JsonObject wrongStatusCodeType = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, "200")))));
+                        CustomResponseMiddlewareFactory.CONTENT, "test",
+                        CustomResponseMiddlewareFactory.STATUS_CODE, "200")))));
 
         final JsonObject wrongContentType = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, 200,
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+                        CustomResponseMiddlewareFactory.CONTENT, 200,
+                        CustomResponseMiddlewareFactory.STATUS_CODE, 200)))));
 
         final JsonObject wrongHeaders = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200,
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS, JsonObject.of(
+                        CustomResponseMiddlewareFactory.CONTENT, "test",
+                        CustomResponseMiddlewareFactory.STATUS_CODE, 200,
+                        CustomResponseMiddlewareFactory.HEADERS, JsonObject.of(
                             "X-FOO", 2))))));
 
         final JsonObject wrongStatusCodeMin = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 99)))));
+                        CustomResponseMiddlewareFactory.CONTENT, "test",
+                        CustomResponseMiddlewareFactory.STATUS_CODE, 99)))));
 
         final JsonObject wrongStatusCodeMax = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test",
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 600)))));
+                        CustomResponseMiddlewareFactory.CONTENT, "test",
+                        CustomResponseMiddlewareFactory.STATUS_CODE, 600)))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200)))));
+                        CustomResponseMiddlewareFactory.STATUS_CODE, 200)))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE)));
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                withMiddleware("foo", CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

@@ -46,22 +46,22 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+                        JsonObject.of(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub")))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of()))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)));
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER,
+                withMiddleware("foo", AuthorizationBearerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 
@@ -108,7 +108,7 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(injectTokenHandler)
-            .withAuthorizationBearerMiddleware(OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE_ID)
+            .withAuthorizationBearerMiddleware(OAuth2MiddlewareFactory.SESSION_SCOPE_ID)
             .build(ctx -> {
                 // then
                 assertAuthorizationBearer(testCtx, ctx.request(), rawIdToken);

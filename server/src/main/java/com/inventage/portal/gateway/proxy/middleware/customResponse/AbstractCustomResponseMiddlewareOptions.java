@@ -12,12 +12,12 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = CustomResponseMiddlewareOptions.Builder.class)
 public abstract class AbstractCustomResponseMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    @JsonProperty(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE)
+    @JsonProperty(CustomResponseMiddlewareFactory.STATUS_CODE)
     public abstract int getStatusCode();
 
-    @JsonProperty(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_HEADERS)
+    @JsonProperty(CustomResponseMiddlewareFactory.HEADERS)
     public abstract Map<String, String> getHeaders();
 
-    @JsonProperty(CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT)
+    @JsonProperty(CustomResponseMiddlewareFactory.CONTENT)
     public abstract String getContent();
 }

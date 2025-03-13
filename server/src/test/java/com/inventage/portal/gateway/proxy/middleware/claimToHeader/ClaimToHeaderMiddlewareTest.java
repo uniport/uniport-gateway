@@ -32,23 +32,23 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("claimToHeader", ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
+                withMiddleware("claimToHeader", ClaimToHeaderMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         new JsonObject()
-                            .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, "claimPath")
-                            .put(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, "headerName")))));
+                            .put(ClaimToHeaderMiddlewareFactory.PATH, "claimPath")
+                            .put(ClaimToHeaderMiddlewareFactory.NAME, "headerName")))));
 
         final JsonObject missingRequiredPropertyPath = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
+                withMiddleware("foo", ClaimToHeaderMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME, "blub")))));
+                        ClaimToHeaderMiddlewareFactory.NAME, "blub")))));
 
         final JsonObject missingRequiredPropertyName = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER,
+                withMiddleware("foo", ClaimToHeaderMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH, "blub")))));
+                        ClaimToHeaderMiddlewareFactory.PATH, "blub")))));
 
         return Stream.of(
             Arguments.of("accept simple config", simple, complete, expectedTrue),

@@ -19,20 +19,20 @@ import org.slf4j.LoggerFactory;
 public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 
     // schema
-    public static final String PASS_AUTHORIZATION = "passAuthorization";
-    public static final String PASS_AUTHORIZATION_SESSION_SCOPE = "sessionScope";
+    public static final String TYPE = "passAuthorization";
+    public static final String SESSION_SCOPE = "sessionScope";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PassAuthorizationMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return PASS_AUTHORIZATION;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
-            .requiredProperty(PASS_AUTHORIZATION_SESSION_SCOPE, Schemas.stringSchema()
+            .requiredProperty(SESSION_SCOPE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)));
     }
 
@@ -55,7 +55,7 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
         final String sessionScope = options.getSessionScope();
 
         final Middleware passAuthorizationMiddleware = new PassAuthorizationMiddleware(vertx, name, sessionScope, authHandler);
-        LOGGER.debug("Created '{}' middleware", PASS_AUTHORIZATION);
+        LOGGER.debug("Created '{}' middleware", TYPE);
         return passAuthorizationMiddleware;
     }
 

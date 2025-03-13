@@ -92,7 +92,7 @@ public class EntryMiddlewareTest {
 
         final GatewayMiddleware entryMiddlewareConfig = GatewayMiddleware.builder()
             .withName("redirect")
-            .withType(RedirectRegexMiddlewareFactory.REDIRECT_REGEX)
+            .withType(RedirectRegexMiddlewareFactory.TYPE)
             .withOptions(RedirectRegexMiddlewareOptions.builder()
                 .withRegex("/.*")
                 .withReplacement(expectedRedirect)

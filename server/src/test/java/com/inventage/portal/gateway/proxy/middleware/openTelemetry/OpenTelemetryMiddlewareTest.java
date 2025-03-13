@@ -20,15 +20,15 @@ public class OpenTelemetryMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("openTelemetry", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY)));
+                withMiddleware("openTelemetry", OpenTelemetryMiddlewareFactory.TYPE)));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY)));
+                withMiddleware("foo", OpenTelemetryMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OpenTelemetryMiddlewareFactory.OPEN_TELEMETRY,
+                withMiddleware("foo", OpenTelemetryMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

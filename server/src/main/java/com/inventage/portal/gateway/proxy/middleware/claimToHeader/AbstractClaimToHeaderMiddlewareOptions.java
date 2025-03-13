@@ -11,9 +11,9 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = ClaimToHeaderMiddlewareOptions.Builder.class)
 public abstract class AbstractClaimToHeaderMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    @JsonProperty(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_NAME)
+    @JsonProperty(ClaimToHeaderMiddlewareFactory.NAME)
     public abstract String getName();
 
-    @JsonProperty(ClaimToHeaderMiddlewareFactory.CLAIM_TO_HEADER_PATH)
+    @JsonProperty(ClaimToHeaderMiddlewareFactory.PATH)
     public abstract String getPath();
 }

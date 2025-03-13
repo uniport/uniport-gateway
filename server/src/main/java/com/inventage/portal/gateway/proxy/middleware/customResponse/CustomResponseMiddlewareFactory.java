@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String CUSTOM_RESPONSE = "customResponse";
-    public static final String CUSTOM_RESPONSE_CONTENT = "content";
-    public static final String CUSTOM_RESPONSE_STATUS_CODE = "statusCode";
-    public static final String CUSTOM_RESPONSE_HEADERS = "headers";
+    public static final String TYPE = "customResponse";
+    public static final String CONTENT = "content";
+    public static final String STATUS_CODE = "statusCode";
+    public static final String HEADERS = "headers";
 
     private static final int HTTP_STATUS_CODE_MIN = 100;
     private static final int HTTP_STATUS_CODE_MAX = 599;
@@ -33,17 +33,17 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return CUSTOM_RESPONSE;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(CUSTOM_RESPONSE_STATUS_CODE, Schemas.intSchema()
+            .requiredProperty(STATUS_CODE, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(HTTP_STATUS_CODE_MIN))
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.maximum(HTTP_STATUS_CODE_MAX)))
-            .requiredProperty(CUSTOM_RESPONSE_CONTENT, Schemas.stringSchema())
-            .optionalProperty(CUSTOM_RESPONSE_HEADERS, Schemas.objectSchema()
+            .requiredProperty(CONTENT, Schemas.stringSchema())
+            .optionalProperty(HEADERS, Schemas.objectSchema()
                 .additionalProperties(Schemas.stringSchema() // TODO technically this should be an array to allow multi header values
                     .with(Keywords.minLength(1))))
             .allowAdditionalProperties(false);
@@ -63,7 +63,7 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final CustomResponseMiddlewareOptions options = castOptions(config, modelType());
         final MultiMap headers = HeadersMultiMap.httpHeaders().addAll(options.getHeaders());
-        LOGGER.debug("Created '{}' middleware successfully", CUSTOM_RESPONSE);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new CustomResponseMiddleware(name, options.getContent(), options.getStatusCode(), headers));
     }

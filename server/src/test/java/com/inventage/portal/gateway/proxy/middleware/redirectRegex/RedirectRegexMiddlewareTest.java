@@ -31,24 +31,24 @@ public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX,
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, "^$",
-                        RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REPLACEMENT, "foobar")))));
+                        RedirectRegexMiddlewareFactory.REGEX, "^$",
+                        RedirectRegexMiddlewareFactory.REPLACEMENT, "foobar")))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX)));
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.TYPE)));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX,
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        RedirectRegexMiddlewareFactory.REDIRECT_REGEX_REGEX, "^$")))));
+                        RedirectRegexMiddlewareFactory.REGEX, "^$")))));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", RedirectRegexMiddlewareFactory.REDIRECT_REGEX,
+                withMiddleware("foo", RedirectRegexMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

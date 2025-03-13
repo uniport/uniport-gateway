@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory;
 public class OpenTelemetryMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String OPEN_TELEMETRY = "openTelemetry";
+    public static final String TYPE = "openTelemetry";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenTelemetryMiddlewareFactory.class);
 
     @Override
     public String provides() {
-        return OPEN_TELEMETRY;
+        return TYPE;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class OpenTelemetryMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
-        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, OPEN_TELEMETRY);
+        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, TYPE);
         return Future.succeededFuture(
             new OpenTelemetryMiddleware(name));
     }

@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
 
     // schema
-    public static final String BEARER_ONLY = "bearerOnly";
-    public static final String BEARER_ONLY_OPTIONAL = "optional";
+    public static final String TYPE = "bearerOnly";
+    public static final String OPTIONAL = "optional";
 
     public static final String DEFAULT_OPTIONAL = "false"; // TODO fix this and make it a real boolean
 
@@ -28,13 +28,13 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
 
     @Override
     public String provides() {
-        return BEARER_ONLY;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
-            .optionalProperty(BEARER_ONLY_OPTIONAL, Schemas.stringSchema()
+            .optionalProperty(OPTIONAL, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_OPTIONAL));
     }
@@ -56,7 +56,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
         final boolean optional = Boolean.parseBoolean(options.isOptional());
 
         final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, optional);
-        LOGGER.debug("Created '{}' middleware", BEARER_ONLY);
+        LOGGER.debug("Created '{}' middleware", TYPE);
         return bearerOnlyMiddleware;
     }
 }

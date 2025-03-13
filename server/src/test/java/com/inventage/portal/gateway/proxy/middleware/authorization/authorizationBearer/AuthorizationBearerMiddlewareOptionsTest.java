@@ -30,7 +30,7 @@ public class AuthorizationBearerMiddlewareOptionsTest {
         // given
         final String sessionScope = "aSessionScope";
         final JsonObject json = JsonObject.of(
-            AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, sessionScope);
+            AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, sessionScope);
 
         // when
         final ThrowingSupplier<AuthorizationBearerMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), AuthorizationBearerMiddlewareOptions.class);

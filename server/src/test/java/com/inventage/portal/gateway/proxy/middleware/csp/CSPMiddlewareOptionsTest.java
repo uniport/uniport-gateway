@@ -23,12 +23,12 @@ public class CSPMiddlewareOptionsTest {
         final CSPMergeStrategy mergeStrategy = CSPMergeStrategy.INTERNAL;
 
         final JsonObject json = JsonObject.of(
-            CSPMiddlewareFactory.CSP_DIRECTIVES, List.of(
+            CSPMiddlewareFactory.DIRECTIVES, List.of(
                 Map.of(
-                    CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, directiveName,
-                    CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, List.of(directiveValue))),
-            CSPMiddlewareFactory.CSP_REPORT_ONLY, reportOnly,
-            CSPMiddlewareFactory.CSP_MERGE_STRATEGY, mergeStrategy);
+                    CSPMiddlewareFactory.DIRECTIVE_NAME, directiveName,
+                    CSPMiddlewareFactory.DIRECTIVE_VALUES, List.of(directiveValue))),
+            CSPMiddlewareFactory.REPORT_ONLY, reportOnly,
+            CSPMiddlewareFactory.MERGE_STRATEGY, mergeStrategy);
 
         // when
         final ThrowingSupplier<CSPMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), CSPMiddlewareOptions.class);

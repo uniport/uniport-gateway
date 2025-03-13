@@ -21,10 +21,10 @@ public class RequestResponseLoggerMiddlewareOptionsTest {
         final Boolean responseEnabled = true;
 
         final JsonObject json = JsonObject.of(
-            RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_FILTER_REGEX, filterRegex,
-            RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, List.of(contentType),
-            RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, requestEnabled,
-            RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, responseEnabled);
+            RequestResponseLoggerMiddlewareFactory.FILTER_REGEX, filterRegex,
+            RequestResponseLoggerMiddlewareFactory.CONTENT_TYPES, List.of(contentType),
+            RequestResponseLoggerMiddlewareFactory.LOGGING_REQUEST_ENABLED, requestEnabled,
+            RequestResponseLoggerMiddlewareFactory.LOGGING_RESPONSE_ENABLED, responseEnabled);
 
         // when
         final ThrowingSupplier<RequestResponseLoggerMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), RequestResponseLoggerMiddlewareOptions.class);

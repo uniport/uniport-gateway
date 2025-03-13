@@ -20,15 +20,15 @@ import org.slf4j.LoggerFactory;
 public class ControlApiMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String CONTROL_API = "controlApi";
-    public static final String CONTROL_API_SESSION_RESET_URL = "iamSessionResetUrl";
-    public static final String CONTROL_API_ACTION = "action";
-    public static final String CONTROL_API_ACTION_SESSION_TERMINATE = "SESSION_TERMINATE";
-    public static final String CONTROL_API_ACTION_SESSION_RESET = "SESSION_RESET";
+    public static final String TYPE = "controlApi";
+    public static final String SESSION_RESET_URL = "iamSessionResetUrl";
+    public static final String ACTION = "action";
+    public static final String ACTION_SESSION_TERMINATE = "SESSION_TERMINATE";
+    public static final String ACTION_SESSION_RESET = "SESSION_RESET";
 
-    public static final String[] MIDDLEWARE_CONTROL_API_ACTIONS = new String[] {
-        CONTROL_API_ACTION_SESSION_TERMINATE,
-        CONTROL_API_ACTION_SESSION_RESET
+    public static final String[] ACTIONS = new String[] {
+        ACTION_SESSION_TERMINATE,
+        ACTION_SESSION_RESET
     };
 
     // defaults
@@ -41,14 +41,14 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return CONTROL_API;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(CONTROL_API_ACTION, Schemas.enumSchema((Object[]) MIDDLEWARE_CONTROL_API_ACTIONS))
-            .optionalProperty(CONTROL_API_SESSION_RESET_URL, Schemas.stringSchema()
+            .requiredProperty(ACTION, Schemas.enumSchema((Object[]) ACTIONS))
+            .optionalProperty(SESSION_RESET_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
     }
@@ -71,7 +71,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
             webClient = WebClient.create(vertx);
         }
 
-        LOGGER.debug("Created '{}' middleware successfully", CONTROL_API);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new ControlApiMiddleware(vertx, name, options.getAction(), options.getSessionResetURL(), webClient));
     }

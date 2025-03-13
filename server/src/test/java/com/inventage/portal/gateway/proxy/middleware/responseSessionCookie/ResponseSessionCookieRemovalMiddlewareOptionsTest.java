@@ -16,7 +16,7 @@ public class ResponseSessionCookieRemovalMiddlewareOptionsTest {
         // given
         final String sessionCookieName = "aSessionCookieName";
         final JsonObject json = JsonObject.of(
-            ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL_NAME, sessionCookieName);
+            ResponseSessionCookieRemovalMiddlewareFactory.SESSION_COOKIE_NAME, sessionCookieName);
 
         // when
         final ThrowingSupplier<ResponseSessionCookieRemovalMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ResponseSessionCookieRemovalMiddlewareOptions.class);

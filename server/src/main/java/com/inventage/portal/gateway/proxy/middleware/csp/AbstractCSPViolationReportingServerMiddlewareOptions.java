@@ -12,7 +12,7 @@ import org.slf4j.event.Level;
 @JsonDeserialize(builder = CSPViolationReportingServerMiddlewareOptions.Builder.class)
 public abstract class AbstractCSPViolationReportingServerMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    @JsonProperty(CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL)
+    @JsonProperty(CSPViolationReportingServerMiddlewareFactory.LOG_LEVEL)
     public abstract Level getLogLevel();
 
 }

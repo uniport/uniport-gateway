@@ -21,11 +21,11 @@ public class SessionBagMiddlewareOptionsTest {
         final String whitelistedCookiePath = "aName";
 
         final JsonObject json = JsonObject.of(
-            SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME, sessionCookieName,
-            SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, List.of(
+            SessionBagMiddlewareFactory.SESSION_COOKIE_NAME, sessionCookieName,
+            SessionBagMiddlewareFactory.WHITELISTED_COOKIES, List.of(
                 Map.of(
-                    SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, whitelistedCookieName,
-                    SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, whitelistedCookiePath))
+                    SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME, whitelistedCookieName,
+                    SessionBagMiddlewareFactory.WHITELISTED_COOKIE_PATH, whitelistedCookiePath))
 
         );
 

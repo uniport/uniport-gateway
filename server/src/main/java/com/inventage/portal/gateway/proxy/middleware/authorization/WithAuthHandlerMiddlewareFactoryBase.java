@@ -37,29 +37,29 @@ import org.slf4j.LoggerFactory;
 public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
 
     // schema
-    public static final String WITH_AUTH_HANDLER_AUDIENCE = "audience";
-    public static final String WITH_AUTH_HANDLER_CLAIMS = "claims";
-    public static final String WITH_AUTH_HANDLER_CLAIM_OPERATOR = "operator";
-    public static final String WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS = "CONTAINS";
-    public static final String WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
-    public static final String WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS = "EQUALS";
-    public static final String WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
-    public static final String WITH_AUTH_HANDLER_CLAIM_PATH = "claimPath";
-    public static final String WITH_AUTH_HANDLER_CLAIM_VALUE = "value";
-    public static final String WITH_AUTH_HANDLER_ISSUER = "issuer";
-    public static final String WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS = "additionalIssuers";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEY = "publicKey";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS = "publicKeys";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION = "publicKeysReconcilation";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED = "enabled";
-    public static final String WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS = "intervalMs";
+    public static final String AUDIENCE = "audience";
+    public static final String CLAIMS = "claims";
+    public static final String CLAIM_OPERATOR = "operator";
+    public static final String CLAIM_OPERATOR_CONTAINS = "CONTAINS";
+    public static final String CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE = "CONTAINS_SUBSTRING_WHITESPACE";
+    public static final String CLAIM_OPERATOR_EQUALS = "EQUALS";
+    public static final String CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE = "EQUALS_SUBSTRING_WHITESPACE";
+    public static final String CLAIM_PATH = "claimPath";
+    public static final String CLAIM_VALUE = "value";
+    public static final String ISSUER = "issuer";
+    public static final String ADDITIONAL_ISSUERS = "additionalIssuers";
+    public static final String PUBLIC_KEYS = "publicKeys";
+    public static final String PUBLIC_KEY = "publicKey";
+    public static final String PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
+    public static final String PUBLIC_KEYS_RECONCILIATION = "publicKeysReconcilation";
+    public static final String RECONCILIATION_ENABLED = "enabled";
+    public static final String RECONCILIATION_INTERVAL_MS = "intervalMs";
 
-    public static final String[] AUTH_HANDLER_CLAIM_OPERATORS = new String[] {
-        WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS,
-        WITH_AUTH_HANDLER_CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
-        WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS,
-        WITH_AUTH_HANDLER_CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE
+    public static final String[] OPERATORS = new String[] {
+        CLAIM_OPERATOR_CONTAINS,
+        CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
+        CLAIM_OPERATOR_EQUALS,
+        CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE
     };
 
     // defaults
@@ -74,47 +74,47 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final ArraySchemaBuilder publicKeysSchema = Schemas.arraySchema()
             .with(Keywords.minItems(1))
             .items(Schemas.objectSchema()
-                .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEY, Schemas.stringSchema()
+                .requiredProperty(PUBLIC_KEY, Schemas.stringSchema()
                     .with(Keywords.minLength(1)))
-                .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
+                .optionalProperty(PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
                     .with(Keywords.minLength(1))
                     .defaultValue(DEFAULT_PUBLIC_KEY_ALGORITHM))
                 .allowAdditionalProperties(false));
 
         final ArraySchemaBuilder claimsSchema = Schemas.arraySchema()
             .items(Schemas.objectSchema()
-                .requiredProperty(WITH_AUTH_HANDLER_CLAIM_OPERATOR, Schemas.enumSchema((Object[]) AUTH_HANDLER_CLAIM_OPERATORS))
-                .requiredProperty(WITH_AUTH_HANDLER_CLAIM_PATH, Schemas.stringSchema()
+                .requiredProperty(CLAIM_OPERATOR, Schemas.enumSchema((Object[]) OPERATORS))
+                .requiredProperty(CLAIM_PATH, Schemas.stringSchema()
                     .with(Keywords.minLength(1)))
-                .requiredProperty(WITH_AUTH_HANDLER_CLAIM_VALUE, Schemas.schema())
+                .requiredProperty(CLAIM_VALUE, Schemas.schema())
                 .allowAdditionalProperties(false));
 
         final ObjectSchemaBuilder reconciliationSchema = Schemas.objectSchema()
-            .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, Schemas.booleanSchema()
+            .optionalProperty(RECONCILIATION_ENABLED, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_RECONCILIATION_ENABLED_VALUE))
-            .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
+            .optionalProperty(RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
                 .defaultValue(DEFAULT_RECONCILIATION_INTERVAL_MS))
             .allowAdditionalProperties(false);
 
         return Schemas.objectSchema()
-            .requiredProperty(WITH_AUTH_HANDLER_AUDIENCE, Schemas.arraySchema()
+            .requiredProperty(AUDIENCE, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .requiredProperty(WITH_AUTH_HANDLER_ISSUER, Schemas.stringSchema()
+            .requiredProperty(ISSUER, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS, publicKeysSchema)
-            .optionalProperty(WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, Schemas.arraySchema()
+            .requiredProperty(PUBLIC_KEYS, publicKeysSchema)
+            .optionalProperty(ADDITIONAL_ISSUERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(WITH_AUTH_HANDLER_CLAIMS, claimsSchema)
-            .optionalProperty(WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, reconciliationSchema)
+            .optionalProperty(CLAIMS, claimsSchema)
+            .optionalProperty(PUBLIC_KEYS_RECONCILIATION, reconciliationSchema)
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final JsonArray publicKeys = options.getJsonArray(WITH_AUTH_HANDLER_PUBLIC_KEYS);
+        final JsonArray publicKeys = options.getJsonArray(PUBLIC_KEYS);
         if (publicKeys == null || publicKeys.size() == 0) {
             return Future.failedFuture(new IllegalStateException("No public keys defined"));
         }
@@ -126,7 +126,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 return Future.failedFuture(new IllegalStateException("Invalid publickeys format"));
             }
 
-            final String publicKey = pk.getString(WITH_AUTH_HANDLER_PUBLIC_KEY);
+            final String publicKey = pk.getString(PUBLIC_KEY);
             if (publicKey == null) {
                 return Future.failedFuture(new IllegalStateException("No public key defined"));
             } else if (publicKey.length() == 0) {
@@ -157,14 +157,14 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 return Future.failedFuture("Public key is required to either be base64 encoded or a valid URL");
             }
 
-            final String publicKeyAlgorithm = pk.getString(WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM);
+            final String publicKeyAlgorithm = pk.getString(PUBLIC_KEY_ALGORITHM);
             if (isBase64 && publicKeyAlgorithm.length() == 0) {
                 // only needed when the public key is given directly
                 return Future.failedFuture("No public key algorithm");
             }
         }
 
-        final JsonArray claims = options.getJsonArray(WITH_AUTH_HANDLER_CLAIMS);
+        final JsonArray claims = options.getJsonArray(CLAIMS);
         if (claims != null) {
             if (claims.size() == 0) {
                 LOGGER.debug("Claims is empty");
@@ -182,17 +182,17 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                     return Future.failedFuture("Claim is required to contain exactly 3 entries. Namely: claimPath, operator and value");
                 }
 
-                if (!(cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_PATH)
-                    && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_OPERATOR)
-                    && cObj.containsKey(WITH_AUTH_HANDLER_CLAIM_VALUE))) {
+                if (!(cObj.containsKey(CLAIM_PATH)
+                    && cObj.containsKey(CLAIM_OPERATOR)
+                    && cObj.containsKey(CLAIM_VALUE))) {
                     return Future.failedFuture(String.format(
                         "Claim is missing at least 1 key. Required keys: %s, %s, %s",
-                        WITH_AUTH_HANDLER_CLAIM_OPERATOR,
-                        WITH_AUTH_HANDLER_CLAIM_PATH,
-                        WITH_AUTH_HANDLER_CLAIM_VALUE));
+                        CLAIM_OPERATOR,
+                        CLAIM_PATH,
+                        CLAIM_VALUE));
                 }
 
-                final String path = cObj.getString(WITH_AUTH_HANDLER_CLAIM_PATH);
+                final String path = cObj.getString(CLAIM_PATH);
                 try {
                     PathCompiler.compile(path);
                 } catch (RuntimeException e) {

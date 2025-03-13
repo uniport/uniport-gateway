@@ -36,29 +36,29 @@ class CSPViolationReportingServerMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject logLevelTrace = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "TRACE")))));
+                        CSPViolationReportingServerMiddlewareFactory.LOG_LEVEL, "TRACE")))));
 
         final JsonObject logLevelWithWeirdCaps = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "eRroR")))));
+                        CSPViolationReportingServerMiddlewareFactory.LOG_LEVEL, "eRroR")))));
 
         final JsonObject invalidValues = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER_LOG_LEVEL, "blub")))));
+                        CSPViolationReportingServerMiddlewareFactory.LOG_LEVEL, "blub")))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER)));
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.CSP_VIOLATION_REPORTING_SERVER,
+                withMiddleware("foo", CSPViolationReportingServerMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

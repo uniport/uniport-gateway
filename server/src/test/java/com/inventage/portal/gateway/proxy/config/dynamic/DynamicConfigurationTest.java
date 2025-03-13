@@ -142,10 +142,10 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(
                     new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.TYPE)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS,
                             new JsonObject()
-                                .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))
+                                .put(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub"))
                         .put("blub", true))));
 
         final JsonObject doubleHttpMiddlewares = new JsonObject()
@@ -153,21 +153,21 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.HEADERS)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, HeaderMiddlewareFactory.TYPE)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
                             .put(HeaderMiddlewareFactory.HEADERS_REQUEST, new JsonObject()
                                 .put("foo", "bar"))))
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "bar")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.TYPE)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+                            .put(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub")))));
 
         final JsonObject duplicatedMiddleware = new JsonObject()
             .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-            .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
+            .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.TYPE)
             .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"));
+                .put(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub"));
         final JsonObject duplicatedHttpMiddlewares = new JsonObject()
             .put(DynamicConfiguration.HTTP, new JsonObject()
                 .put(DynamicConfiguration.MIDDLEWARES, JsonArray.of(duplicatedMiddleware, duplicatedMiddleware)));
@@ -177,9 +177,9 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "foo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.TYPE)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))
+                            .put(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub")))
                     .add(new JsonObject())));
 
         // http services
@@ -327,9 +327,9 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.TYPE)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub"))))
+                            .put(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub"))))
                 .put(DynamicConfiguration.SERVICES, new JsonArray()
                     .add(new JsonObject()
                         .put(DynamicConfiguration.SERVICE_NAME, "serviceFoo")
@@ -378,9 +378,9 @@ public class DynamicConfigurationTest {
                 .put(DynamicConfiguration.MIDDLEWARES,
                     new JsonArray().add(new JsonObject()
                         .put(DynamicConfiguration.MIDDLEWARE_NAME, "middlewareFoo")
-                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER)
+                        .put(DynamicConfiguration.MIDDLEWARE_TYPE, AuthorizationBearerMiddlewareFactory.TYPE)
                         .put(DynamicConfiguration.MIDDLEWARE_OPTIONS, new JsonObject()
-                            .put(AuthorizationBearerMiddlewareFactory.AUTHORIZATION_BEARER_SESSION_SCOPE, "blub")))));
+                            .put(AuthorizationBearerMiddlewareFactory.SESSION_SCOPE, "blub")))));
 
         // the sole purpose of the following variable are to improve readability
         final boolean expectedTrue = true;
@@ -493,11 +493,11 @@ public class DynamicConfigurationTest {
                     withRouterService("sA"))),
             withMiddlewares(
                 withMiddleware("mA",
-                    CustomResponseMiddlewareFactory.CUSTOM_RESPONSE,
+                    CustomResponseMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of(
-                            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_STATUS_CODE, 200,
-                            CustomResponseMiddlewareFactory.CUSTOM_RESPONSE_CONTENT, "test")))),
+                            CustomResponseMiddlewareFactory.STATUS_CODE, 200,
+                            CustomResponseMiddlewareFactory.CONTENT, "test")))),
             withServices(
                 withService("sA",
                     withServers(

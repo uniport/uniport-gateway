@@ -59,12 +59,12 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
                 withMiddleware(
-                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    "sessionMiddleware", SessionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
                         SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, 15,
                         SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, 32,
-                        SessionMiddlewareFactory.SESSION_NAG_HTTPS, true,
-                        SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*",
+                        SessionMiddlewareFactory.NAG_HTTPS, true,
+                        SessionMiddlewareFactory.IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, "^/polling/.*",
                         SessionMiddlewareFactory.SESSION_COOKIE, JsonObject.of(
                             SessionMiddlewareFactory.SESSION_COOKIE_NAME, "uniport.session",
                             SessionMiddlewareFactory.SESSION_COOKIE_HTTP_ONLY, true,
@@ -74,32 +74,32 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         final JsonObject invalidTimeout = buildConfiguration(
             withMiddlewares(
                 withMiddleware(
-                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    "sessionMiddleware", SessionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
                         SessionMiddlewareFactory.SESSION_IDLE_TIMEOUT_IN_MINUTES, -1)))));
 
         final JsonObject invalidIdLength = buildConfiguration(
             withMiddlewares(
                 withMiddleware(
-                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    "sessionMiddleware", SessionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
                         SessionMiddlewareFactory.SESSION_ID_MIN_LENGTH, -1)))));
 
         final JsonObject invalidCookieSameSite = buildConfiguration(
             withMiddlewares(
                 withMiddleware(
-                    "sessionMiddleware", SessionMiddlewareFactory.SESSION,
+                    "sessionMiddleware", SessionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
                         SessionMiddlewareFactory.SESSION_COOKIE, JsonObject.of(
                             SessionMiddlewareFactory.SESSION_COOKIE_SAME_SITE, "blub"))))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionMiddlewareFactory.SESSION)));
+                withMiddleware("foo", SessionMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionMiddlewareFactory.SESSION,
+                withMiddleware("foo", SessionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

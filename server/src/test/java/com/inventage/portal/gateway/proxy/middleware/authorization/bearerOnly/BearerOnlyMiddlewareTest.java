@@ -46,47 +46,47 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                             new JsonObject()
-                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                                .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")))
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+                                .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
+                                .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")))
+                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "blub")))));
+                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "blub")))));
 
         final JsonObject invalidPublicKey = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "notbase64*oraurl")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, new JsonArray().add("blub"))))));
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "notbase64*oraurl")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, new JsonArray().add("blub"))))));
 
         final JsonObject invalidPublicKeyFormat = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"))))));
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
 
         final JsonObject invalidAudience = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", BearerOnlyMiddlewareFactory.BEARER_ONLY,
+                withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("valid", 123, true))))));
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("valid", 123, true))))));
 
         return Stream.of(
             Arguments.of("accept simple config", simple, complete, expectedTrue),

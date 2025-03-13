@@ -40,36 +40,36 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSRFMiddlewareFactory.CSRF,
+                withMiddleware("foo", CSRFMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CSRFMiddlewareFactory.CSRF_COOKIE, JsonObject.of(
-                            CSRFMiddlewareFactory.CSRF_COOKIE_NAME, "bar",
-                            CSRFMiddlewareFactory.CSRF_COOKIE_PATH, "/abc",
-                            CSRFMiddlewareFactory.CSRF_COOKIE_SECURE, true),
-                        CSRFMiddlewareFactory.CSRF_HEADER_NAME, "X-XSRF-TOKEN",
-                        CSRFMiddlewareFactory.CSRF_NAG_HTTPS, true,
-                        CSRFMiddlewareFactory.CSRF_ORIGIN, "example.com",
-                        CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES, 42)))));
+                        CSRFMiddlewareFactory.COOKIE, JsonObject.of(
+                            CSRFMiddlewareFactory.COOKIE_NAME, "bar",
+                            CSRFMiddlewareFactory.COOKIE_PATH, "/abc",
+                            CSRFMiddlewareFactory.COOKIE_SECURE, true),
+                        CSRFMiddlewareFactory.HEADER_NAME, "X-XSRF-TOKEN",
+                        CSRFMiddlewareFactory.NAG_HTTPS, true,
+                        CSRFMiddlewareFactory.ORIGIN, "example.com",
+                        CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES, 42)))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSRFMiddlewareFactory.CSRF)));
+                withMiddleware("foo", CSRFMiddlewareFactory.TYPE)));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSRFMiddlewareFactory.CSRF)));
+                withMiddleware("foo", CSRFMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSRFMiddlewareFactory.CSRF,
+                withMiddleware("foo", CSRFMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 
         final JsonObject invalidTimeout = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSRFMiddlewareFactory.CSRF,
+                withMiddleware("foo", CSRFMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(CSRFMiddlewareFactory.CSRF_TIMEOUT_IN_MINUTES, -1)))));
+                        JsonObject.of(CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES, -1)))));
 
         return Stream.of(
             Arguments.of("accept simple config", simple, complete, expectedTrue),

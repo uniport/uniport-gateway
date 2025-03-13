@@ -56,41 +56,41 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                withMiddleware("foo", OAuth2MiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "foo",
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, "bar",
-                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "localhost:1234",
-                        OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
-                        OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
+                        OAuth2MiddlewareFactory.CLIENT_ID, "foo",
+                        OAuth2MiddlewareFactory.CLIENT_SECRET, "bar",
+                        OAuth2MiddlewareFactory.DISCOVERY_URL, "localhost:1234",
+                        OAuth2MiddlewareFactory.SESSION_SCOPE, "blub",
+                        OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, false)))));
 
         final JsonObject invalidResponseMode = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                withMiddleware("foo", OAuth2MiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "foo",
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, "bar",
-                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "localhost:1234",
-                        OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
-                        OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false,
-                        OAuth2MiddlewareFactory.OAUTH2_RESPONSE_MODE, "blub")))));
+                        OAuth2MiddlewareFactory.CLIENT_ID, "foo",
+                        OAuth2MiddlewareFactory.CLIENT_SECRET, "bar",
+                        OAuth2MiddlewareFactory.DISCOVERY_URL, "localhost:1234",
+                        OAuth2MiddlewareFactory.SESSION_SCOPE, "blub",
+                        OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, false,
+                        OAuth2MiddlewareFactory.RESPONSE_MODE, "blub")))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2)));
+                withMiddleware("foo", OAuth2MiddlewareFactory.TYPE)));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                withMiddleware("foo", OAuth2MiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, "foo",
-                        OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, "localhost:1234",
-                        OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, "blub",
-                        OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, false)))));
+                        OAuth2MiddlewareFactory.CLIENT_ID, "foo",
+                        OAuth2MiddlewareFactory.DISCOVERY_URL, "localhost:1234",
+                        OAuth2MiddlewareFactory.SESSION_SCOPE, "blub",
+                        OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, false)))));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", OAuth2MiddlewareFactory.OAUTH2,
+                withMiddleware("foo", OAuth2MiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
                         "bar", "blub")))));
 

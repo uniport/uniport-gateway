@@ -353,7 +353,7 @@ public class RouterFactory {
     }
 
     private GatewayMiddlewareOptions injectPublicProtocolHostPort(String type, GatewayMiddlewareOptions options) {
-        if (!(type.equals(OAuth2MiddlewareFactory.OAUTH2) || type.equals(OAuth2RegistrationMiddlewareFactory.OAUTH2_REGISTRATION))) {
+        if (!(type.equals(OAuth2MiddlewareFactory.TYPE) || type.equals(OAuth2RegistrationMiddlewareFactory.TYPE))) {
             return options;
         }
 

@@ -36,17 +36,17 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", HeaderMiddlewareFactory.HEADERS,
+                withMiddleware("foo", HeaderMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of(HeaderMiddlewareFactory.HEADERS_REQUEST, JsonObject.of("foo", "bar"))))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", HeaderMiddlewareFactory.HEADERS)));
+                withMiddleware("foo", HeaderMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", HeaderMiddlewareFactory.HEADERS,
+                withMiddleware("foo", HeaderMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

@@ -16,9 +16,9 @@ public abstract class AbstractPreventForeignInitiatedAuthMiddlewareOptions imple
     private static final Logger LOGGER = LoggerFactory.getLogger(PreventForeignInitiatedAuthMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(PreventForeignInitiatedAuthMiddlewareFactory.PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT)
+    @JsonProperty(PreventForeignInitiatedAuthMiddlewareFactory.REDIRECT_URI)
     public String getRedirectURI() {
-        logDefault(LOGGER, PreventForeignInitiatedAuthMiddlewareFactory.PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, PreventForeignInitiatedAuthMiddlewareFactory.DEFAULT_REDIRECT_URI);
+        logDefault(LOGGER, PreventForeignInitiatedAuthMiddlewareFactory.REDIRECT_URI, PreventForeignInitiatedAuthMiddlewareFactory.DEFAULT_REDIRECT_URI);
         return PreventForeignInitiatedAuthMiddlewareFactory.DEFAULT_REDIRECT_URI;
     }
 

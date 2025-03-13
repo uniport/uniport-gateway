@@ -16,9 +16,9 @@ public abstract class AbstractResponseSessionCookieRemovalMiddlewareOptions impl
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieRemovalMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL_NAME)
+    @JsonProperty(ResponseSessionCookieRemovalMiddlewareFactory.SESSION_COOKIE_NAME)
     public String getSessionCookieName() {
-        logDefault(LOGGER, ResponseSessionCookieRemovalMiddlewareFactory.RESPONSE_SESSION_COOKIE_REMOVAL_NAME, ResponseSessionCookieRemovalMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
+        logDefault(LOGGER, ResponseSessionCookieRemovalMiddlewareFactory.SESSION_COOKIE_NAME, ResponseSessionCookieRemovalMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
         return ResponseSessionCookieRemovalMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     }
 }

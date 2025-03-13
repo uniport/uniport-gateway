@@ -17,7 +17,7 @@ public class PreventForeignInitiatedAuthMiddlewareOptionsTest {
         final String redirectURI = "anURI";
 
         final JsonObject json = JsonObject.of(
-            PreventForeignInitiatedAuthMiddlewareFactory.PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, redirectURI);
+            PreventForeignInitiatedAuthMiddlewareFactory.REDIRECT_URI, redirectURI);
 
         // when
         final ThrowingSupplier<PreventForeignInitiatedAuthMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), PreventForeignInitiatedAuthMiddlewareOptions.class);

@@ -56,18 +56,18 @@ public class DynamicConfiguration {
         .toList();
     // services
     public static final String SERVICES = "services";
-    public static final String SERVICE_NAME = ProxyMiddlewareFactory.SERVICE_NAME;
+    public static final String SERVICE_NAME = ProxyMiddlewareFactory.NAME;
     // proxying configuration to keep the sovereignty close to the implementation
-    public static final String SERVICE_SERVERS = ProxyMiddlewareFactory.SERVICE_SERVERS;
-    public static final String SERVICE_SERVER_PROTOCOL = ProxyMiddlewareFactory.SERVICE_SERVER_PROTOCOL;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS = ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME = ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL = ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH = ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD;
-    public static final String SERVICE_SERVER_HOST = ProxyMiddlewareFactory.SERVICE_SERVER_HOST;
-    public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVICE_SERVER_PORT;
-    public static final String SERVICE_VERBOSE = ProxyMiddlewareFactory.SERVICE_VERBOSE;
+    public static final String SERVICE_SERVERS = ProxyMiddlewareFactory.SERVERS;
+    public static final String SERVICE_SERVER_PROTOCOL = ProxyMiddlewareFactory.SERVER_PROTOCOL;
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS = ProxyMiddlewareFactory.SERVER_HTTPS_OPTIONS;
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME = ProxyMiddlewareFactory.VERIFY_HOSTNAME;
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL = ProxyMiddlewareFactory.TRUST_ALL;
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH = ProxyMiddlewareFactory.TRUST_STORE_PATH;
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = ProxyMiddlewareFactory.TRUST_STORE_PASSWORD;
+    public static final String SERVICE_SERVER_HOST = ProxyMiddlewareFactory.SERVER_HOST;
+    public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVER_PORT;
+    public static final String SERVICE_VERBOSE = ProxyMiddlewareFactory.VERBOSE;
 
     // default
     public static final boolean DEFAULT_SERVICE_VERBOSE = ProxyMiddlewareFactory.DEFAULT_VERBOSE;

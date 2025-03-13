@@ -32,17 +32,17 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
     }
 
     @Default
-    @JsonProperty(SessionMiddlewareFactory.SESSION_NAG_HTTPS)
+    @JsonProperty(SessionMiddlewareFactory.NAG_HTTPS)
     public boolean nagHttps() {
-        logDefault(LOGGER, SessionMiddlewareFactory.SESSION_NAG_HTTPS, SessionMiddlewareFactory.DEFAULT_NAG_HTTPS);
+        logDefault(LOGGER, SessionMiddlewareFactory.NAG_HTTPS, SessionMiddlewareFactory.DEFAULT_NAG_HTTPS);
         return SessionMiddlewareFactory.DEFAULT_NAG_HTTPS;
     }
 
     @Default
     @Nullable
-    @JsonProperty(SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI)
+    @JsonProperty(SessionMiddlewareFactory.IGNORE_SESSION_TIMEOUT_RESET_FOR_URI)
     public String getIgnoreSessionTimeoutResetForURI() {
-        logDefault(LOGGER, SessionMiddlewareFactory.SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, SessionMiddlewareFactory.DEFAULT_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
+        logDefault(LOGGER, SessionMiddlewareFactory.IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, SessionMiddlewareFactory.DEFAULT_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
         return SessionMiddlewareFactory.DEFAULT_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI;
     }
 

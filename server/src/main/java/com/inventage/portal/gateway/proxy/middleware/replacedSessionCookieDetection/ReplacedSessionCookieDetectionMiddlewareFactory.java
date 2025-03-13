@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 public class ReplacedSessionCookieDetectionMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String REPLACED_SESSION_COOKIE_DETECTION = "replacedSessionCookieDetection";
-    public static final String REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME = "name";
-    public static final String REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
-    public static final String REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES = "maxRedirectRetries";
+    public static final String TYPE = "replacedSessionCookieDetection";
+    public static final String COOKIE_NAME = "name";
+    public static final String WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
+    public static final String MAX_REDIRECT_RETRIES = "maxRedirectRetries";
 
     // defaults
     public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
@@ -36,19 +36,19 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
 
     @Override
     public String provides() {
-        return REPLACED_SESSION_COOKIE_DETECTION;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_DETECTION_COOKIE_NAME))
-            .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
+            .optionalProperty(WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
                 .defaultValue(DEFAULT_WAIT_BEFORE_RETRY_MS))
-            .optionalProperty(REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, Schemas.intSchema()
+            .optionalProperty(MAX_REDIRECT_RETRIES, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
                 .defaultValue(DEFAULT_MAX_REDIRECT_RETRIES))
             .allowAdditionalProperties(false);
@@ -67,7 +67,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final ReplacedSessionCookieDetectionMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", REPLACED_SESSION_COOKIE_DETECTION);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new ReplacedSessionCookieDetectionMiddleware(
                 name,

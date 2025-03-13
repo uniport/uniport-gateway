@@ -2,9 +2,9 @@ package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
 public enum ControlApiAction {
 
-    SESSION_TERMINATE(ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_TERMINATE),
+    SESSION_TERMINATE(ControlApiMiddlewareFactory.ACTION_SESSION_TERMINATE),
 
-    SESSION_RESET(ControlApiMiddlewareFactory.CONTROL_API_ACTION_SESSION_RESET);
+    SESSION_RESET(ControlApiMiddlewareFactory.ACTION_SESSION_RESET);
 
     private final String name;
 

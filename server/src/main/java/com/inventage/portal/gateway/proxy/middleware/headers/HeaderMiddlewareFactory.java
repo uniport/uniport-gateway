@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String HEADERS = "headers";
+    public static final String TYPE = "headers";
     public static final String HEADERS_REQUEST = "customRequestHeaders";
     public static final String HEADERS_RESPONSE = "customResponseHeaders";
 
@@ -30,7 +30,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return HEADERS;
+        return TYPE;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
         final JsonObject responseHeaders = options.getJsonObject(HEADERS_RESPONSE);
         if (requestHeaders == null && responseHeaders == null) {
             return Future.failedFuture(
-                String.format("%s: at least one response or request header has to be defined", HEADERS));
+                String.format("%s: at least one response or request header has to be defined", TYPE));
         }
 
         return Future.succeededFuture();
@@ -100,7 +100,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             }
         }
 
-        LOGGER.debug("Created '{}' middleware successfully", HEADERS);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new HeaderMiddleware(name, requestHeaders, responseHeaders));
     }

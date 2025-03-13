@@ -43,47 +43,47 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
+                        CorsMiddlewareFactory.ALLOWED_ORIGINS, JsonArray.of("http://example.com"))))));
 
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
-                        CorsMiddlewareFactory.CORS_ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
-                        CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
-                        CorsMiddlewareFactory.CORS_EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
-                        CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, 42,
-                        CorsMiddlewareFactory.CORS_ALLOW_CREDENTIALS, false,
-                        CorsMiddlewareFactory.CORS_ALLOW_PRIVATE_NETWORK, false)))));
+                        CorsMiddlewareFactory.ALLOWED_ORIGINS, JsonArray.of("http://example.com", "https://example.org"),
+                        CorsMiddlewareFactory.ALLOWED_ORIGIN_PATTERNS, JsonArray.of("http://(a|b)\\.example.com"),
+                        CorsMiddlewareFactory.ALLOWED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                        CorsMiddlewareFactory.EXPOSED_HEADERS, JsonArray.of("HEADER-A", "HEADER-B"),
+                        CorsMiddlewareFactory.MAX_AGE_SECONDS, 42,
+                        CorsMiddlewareFactory.ALLOW_CREDENTIALS, false,
+                        CorsMiddlewareFactory.ALLOW_PRIVATE_NETWORK, false)))));
 
         final JsonObject emptyOrigin = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, JsonArray.of(""))))));
+                        CorsMiddlewareFactory.ALLOWED_HEADERS, JsonArray.of(""))))));
 
         final JsonObject unknownMethod = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CorsMiddlewareFactory.CORS_ALLOWED_METHODS, JsonArray.of("BLUB"))))));
+                        CorsMiddlewareFactory.ALLOWED_METHODS, JsonArray.of("BLUB"))))));
 
         final JsonObject illegalMaxAgeType = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, false)))));
+                        CorsMiddlewareFactory.MAX_AGE_SECONDS, false)))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS)));
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CorsMiddlewareFactory.CORS,
+                withMiddleware("foo", CorsMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

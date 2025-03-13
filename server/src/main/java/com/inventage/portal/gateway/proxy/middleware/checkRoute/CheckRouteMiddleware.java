@@ -41,7 +41,7 @@ public class CheckRouteMiddleware extends TraceMiddleware {
     }
 
     private boolean isCheckRoute(RoutingContext ctx) {
-        return ctx.request().uri().contains(CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH);
+        return ctx.request().uri().contains(CheckRouteMiddlewareFactory.PATH);
     }
 
 }

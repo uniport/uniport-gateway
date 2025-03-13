@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String REQUEST_RESPONSE_LOGGER = "requestResponseLogger";
-    public static final String REQUEST_RESPONSE_LOGGER_FILTER_REGEX = "uriWithoutLoggingRegex";
-    public static final String REQUEST_RESPONSE_LOGGER_CONTENT_TYPES = "contentTypes";
-    public static final String REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED = "loggingRequestEnabled";
-    public static final String REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED = "loggingResponseEnabled";
+    public static final String TYPE = "requestResponseLogger";
+    public static final String FILTER_REGEX = "uriWithoutLoggingRegex";
+    public static final String CONTENT_TYPES = "contentTypes";
+    public static final String LOGGING_REQUEST_ENABLED = "loggingRequestEnabled";
+    public static final String LOGGING_RESPONSE_ENABLED = "loggingResponseEnabled";
 
     // defaults
     public static final JsonArray DEFAULT_CONTENT_TYPES_TO_LOG = JsonArray.of();
@@ -35,20 +35,20 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
 
     @Override
     public String provides() {
-        return REQUEST_RESPONSE_LOGGER;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(REQUEST_RESPONSE_LOGGER_FILTER_REGEX, Schemas.stringSchema()
+            .optionalProperty(FILTER_REGEX, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .optionalProperty(REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, Schemas.arraySchema()
+            .optionalProperty(CONTENT_TYPES, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, Schemas.booleanSchema()
+            .optionalProperty(LOGGING_REQUEST_ENABLED, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_LOGGING_REQUEST_ENABLED))
-            .optionalProperty(REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, Schemas.booleanSchema()
+            .optionalProperty(LOGGING_RESPONSE_ENABLED, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_LOGGING_RESPONSE_ENABLED))
             .allowAdditionalProperties(false);
     }
@@ -66,7 +66,7 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final RequestResponseLoggerMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", REQUEST_RESPONSE_LOGGER);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new RequestResponseLoggerMiddleware(name, options.getFilterRegex(), options.getContentTypes(), options.isRequestEnabled(), options.isResponseEnabled()));
     }

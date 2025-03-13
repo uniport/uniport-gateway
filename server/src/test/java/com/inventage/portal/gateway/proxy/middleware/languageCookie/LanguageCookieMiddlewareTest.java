@@ -34,17 +34,17 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE,
+                withMiddleware("foo", LanguageCookieMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE_NAME, "blub")))));
+                        JsonObject.of(LanguageCookieMiddlewareFactory.NAME, "blub")))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE)));
+                withMiddleware("foo", LanguageCookieMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE,
+                withMiddleware("foo", LanguageCookieMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

@@ -36,19 +36,19 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", PassAuthorizationMiddlewareFactory.PASS_AUTHORIZATION,
+                withMiddleware("foo", PassAuthorizationMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+                        WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                             JsonObject.of(
-                                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, "Ymx1Ygo=",
-                                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, "RS256")),
-                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, "bar",
-                        WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, JsonArray.of("blub"),
-                        PassAuthorizationMiddlewareFactory.PASS_AUTHORIZATION_SESSION_SCOPE, "blub")))));
+                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=",
+                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")),
+                        WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar",
+                        WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"),
+                        PassAuthorizationMiddlewareFactory.SESSION_SCOPE, "blub")))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", PassAuthorizationMiddlewareFactory.PASS_AUTHORIZATION)));
+                withMiddleware("foo", PassAuthorizationMiddlewareFactory.TYPE)));
 
         return Stream.of(
             Arguments.of("accept simple config", simple, complete, expectedTrue),

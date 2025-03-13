@@ -17,21 +17,21 @@ import io.vertx.json.schema.common.dsl.Schemas;
 public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION = "checkInitiatedAuth";
-    public static final String PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT = "redirectUri";
+    public static final String TYPE = "checkInitiatedAuth";
+    public static final String REDIRECT_URI = "redirectUri";
 
     // defaults
     public static final String DEFAULT_REDIRECT_URI = "/";
 
     @Override
     public String provides() {
-        return PREVENT_FOREIGN_INITIATED_AUTHENTICATION;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, Schemas.stringSchema()
+            .optionalProperty(REDIRECT_URI, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_REDIRECT_URI))
             .allowAdditionalProperties(false);
@@ -50,7 +50,7 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final PreventForeignInitiatedAuthMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, PREVENT_FOREIGN_INITIATED_AUTHENTICATION);
+        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, TYPE);
         return Future.succeededFuture(
             new PreventForeignInitiatedAuthMiddleware(name, options.getRedirectURI()));
     }

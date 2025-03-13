@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory;
 public class MatomoMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String MATOMO = "matomo";
-    public static final String MATOMO_JWT_PATH_USERNAME = "pathUsername";
-    public static final String MATOMO_JWT_PATH_EMAIL = "pathEmail";
-    public static final String MATOMO_JWT_PATH_ROLES = "pathRoles";
-    public static final String MATOMO_JWT_PATH_GROUP = "pathGroup";
+    public static final String TYPE = "matomo";
+    public static final String JWT_PATH_USERNAME = "pathUsername";
+    public static final String JWT_PATH_EMAIL = "pathEmail";
+    public static final String JWT_PATH_ROLES = "pathRoles";
+    public static final String JWT_PATH_GROUP = "pathGroup";
 
     // defaults
     public static final String DEFAULT_JWT_PATH_USERNAME = "$.preferred_username";
@@ -35,22 +35,22 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return MATOMO;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(MATOMO_JWT_PATH_USERNAME, Schemas.stringSchema()
+            .optionalProperty(JWT_PATH_USERNAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_JWT_PATH_USERNAME))
-            .optionalProperty(MATOMO_JWT_PATH_EMAIL, Schemas.stringSchema()
+            .optionalProperty(JWT_PATH_EMAIL, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_JWT_PATH_EMAIL))
-            .optionalProperty(MATOMO_JWT_PATH_ROLES, Schemas.stringSchema()
+            .optionalProperty(JWT_PATH_ROLES, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_JWT_PATH_ROLES))
-            .optionalProperty(MATOMO_JWT_PATH_GROUP, Schemas.stringSchema()
+            .optionalProperty(JWT_PATH_GROUP, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_JWT_PATH_GROUP))
             .allowAdditionalProperties(false);
@@ -69,7 +69,7 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final MatomoMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.info("Created '{}' middleware successfully", MATOMO);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new MatomoMiddleware(name, options.getJWTPathRoles(), options.getJWTPathGroup(), options.getJWTPathUsername(), options.getJWTPathEMail()));
     }

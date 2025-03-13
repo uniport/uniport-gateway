@@ -27,14 +27,14 @@ public class CorsMiddlewareOptionsTest {
         final Boolean allowPrivateNetwork = true;
 
         final JsonObject json = JsonObject.of(
-            CorsMiddlewareFactory.CORS_ALLOWED_ORIGINS, List.of(allowedOrigin),
-            CorsMiddlewareFactory.CORS_ALLOWED_ORIGIN_PATTERNS, List.of(allowedOriginPattern),
-            CorsMiddlewareFactory.CORS_ALLOWED_METHODS, List.of(allowedMethod.toString()),
-            CorsMiddlewareFactory.CORS_ALLOWED_HEADERS, List.of(allowedHeader),
-            CorsMiddlewareFactory.CORS_EXPOSED_HEADERS, List.of(exposedHeader),
-            CorsMiddlewareFactory.CORS_MAX_AGE_SECONDS, maxAgeSeconds,
-            CorsMiddlewareFactory.CORS_ALLOW_CREDENTIALS, allowCredentials,
-            CorsMiddlewareFactory.CORS_ALLOW_PRIVATE_NETWORK, allowPrivateNetwork);
+            CorsMiddlewareFactory.ALLOWED_ORIGINS, List.of(allowedOrigin),
+            CorsMiddlewareFactory.ALLOWED_ORIGIN_PATTERNS, List.of(allowedOriginPattern),
+            CorsMiddlewareFactory.ALLOWED_METHODS, List.of(allowedMethod.toString()),
+            CorsMiddlewareFactory.ALLOWED_HEADERS, List.of(allowedHeader),
+            CorsMiddlewareFactory.EXPOSED_HEADERS, List.of(exposedHeader),
+            CorsMiddlewareFactory.MAX_AGE_SECONDS, maxAgeSeconds,
+            CorsMiddlewareFactory.ALLOW_CREDENTIALS, allowCredentials,
+            CorsMiddlewareFactory.ALLOW_PRIVATE_NETWORK, allowPrivateNetwork);
 
         // when
         final ThrowingSupplier<CorsMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), CorsMiddlewareOptions.class);

@@ -11,10 +11,10 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = ReplacePathRegexMiddlewareOptions.Builder.class)
 public abstract class AbstractReplacePathRegexMiddlewareOptions implements GatewayMiddlewareOptions {
 
-    @JsonProperty(ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REGEX)
+    @JsonProperty(ReplacePathRegexMiddlewareFactory.REGEX)
     public abstract String getRegex();
 
-    @JsonProperty(ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REPLACEMENT)
+    @JsonProperty(ReplacePathRegexMiddlewareFactory.REPLACEMENT)
     public abstract String getReplacement();
 
 }

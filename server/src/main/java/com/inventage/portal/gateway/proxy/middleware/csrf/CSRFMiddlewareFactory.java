@@ -21,15 +21,15 @@ import org.slf4j.LoggerFactory;
 public class CSRFMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String CSRF = "csrf";
-    public static final String CSRF_COOKIE = "cookie";
-    public static final String CSRF_COOKIE_NAME = "name";
-    public static final String CSRF_COOKIE_PATH = "path";
-    public static final String CSRF_COOKIE_SECURE = "secure";
-    public static final String CSRF_HEADER_NAME = "headerName";
-    public static final String CSRF_NAG_HTTPS = "nagHttps";
-    public static final String CSRF_ORIGIN = "origin";
-    public static final String CSRF_TIMEOUT_IN_MINUTES = "timeoutInMinute";
+    public static final String TYPE = "csrf";
+    public static final String COOKIE = "cookie";
+    public static final String COOKIE_NAME = "name";
+    public static final String COOKIE_PATH = "path";
+    public static final String COOKIE_SECURE = "secure";
+    public static final String HEADER_NAME = "headerName";
+    public static final String NAG_HTTPS = "nagHttps";
+    public static final String ORIGIN = "origin";
+    public static final String TIMEOUT_IN_MINUTES = "timeoutInMinute";
 
     // defaults
     public static final String DEFAULT_COOKIE_NAME = CSRFHandler.DEFAULT_COOKIE_NAME;
@@ -44,30 +44,30 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return CSRF;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(CSRF_COOKIE, Schemas.objectSchema()
-                .optionalProperty(CSRF_COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(COOKIE, Schemas.objectSchema()
+                .optionalProperty(COOKIE_NAME, Schemas.stringSchema()
                     .with(Keywords.minLength(1))
                     .defaultValue(DEFAULT_COOKIE_NAME))
-                .optionalProperty(CSRF_COOKIE_PATH, Schemas.stringSchema()
+                .optionalProperty(COOKIE_PATH, Schemas.stringSchema()
                     .with(Keywords.minLength(1))
                     .defaultValue(DEFAULT_COOKIE_PATH))
-                .optionalProperty(CSRF_COOKIE_SECURE, Schemas.booleanSchema()
+                .optionalProperty(COOKIE_SECURE, Schemas.booleanSchema()
                     .defaultValue(DEFAULT_COOKIE_SECURE))
                 .allowAdditionalProperties(false))
-            .optionalProperty(CSRF_HEADER_NAME, Schemas.stringSchema()
+            .optionalProperty(HEADER_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_HEADER_NAME))
-            .optionalProperty(CSRF_NAG_HTTPS, Schemas.booleanSchema()
+            .optionalProperty(NAG_HTTPS, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_NAG_HTTPS))
-            .optionalProperty(CSRF_ORIGIN, Schemas.stringSchema()
+            .optionalProperty(ORIGIN, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .optionalProperty(CSRF_TIMEOUT_IN_MINUTES, Schemas.intSchema()
+            .optionalProperty(TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
                 .defaultValue(DEFAULT_TIMEOUT_IN_MINUTES))
             .allowAdditionalProperties(false);
@@ -88,7 +88,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         final CSRFMiddlewareOptions options = castOptions(config, modelType());
         final String secret = UUID.randomUUID().toString();
 
-        LOGGER.info("Created '{}' middleware successfully", CSRF);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new CSRFMiddleware(vertx,
                 name,

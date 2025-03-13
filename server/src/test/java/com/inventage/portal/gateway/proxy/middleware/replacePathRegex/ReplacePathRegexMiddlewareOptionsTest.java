@@ -18,8 +18,8 @@ public class ReplacePathRegexMiddlewareOptionsTest {
         final String replacement = "aReplacement";
 
         final JsonObject json = JsonObject.of(
-            ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REGEX, regex,
-            ReplacePathRegexMiddlewareFactory.REPLACE_PATH_REGEX_REPLACEMENT, replacement);
+            ReplacePathRegexMiddlewareFactory.REGEX, regex,
+            ReplacePathRegexMiddlewareFactory.REPLACEMENT, replacement);
 
         // when
         final ThrowingSupplier<ReplacePathRegexMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ReplacePathRegexMiddlewareOptions.class);

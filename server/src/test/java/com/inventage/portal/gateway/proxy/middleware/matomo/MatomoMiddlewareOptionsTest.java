@@ -20,10 +20,10 @@ public class MatomoMiddlewareOptionsTest {
         final String groupJWTPath = "aGroupJWTPath";
 
         final JsonObject json = JsonObject.of(
-            MatomoMiddlewareFactory.MATOMO_JWT_PATH_USERNAME, usernameJWTPath,
-            MatomoMiddlewareFactory.MATOMO_JWT_PATH_EMAIL, emailJWTPath,
-            MatomoMiddlewareFactory.MATOMO_JWT_PATH_ROLES, rolesJWTPath,
-            MatomoMiddlewareFactory.MATOMO_JWT_PATH_GROUP, groupJWTPath);
+            MatomoMiddlewareFactory.JWT_PATH_USERNAME, usernameJWTPath,
+            MatomoMiddlewareFactory.JWT_PATH_EMAIL, emailJWTPath,
+            MatomoMiddlewareFactory.JWT_PATH_ROLES, rolesJWTPath,
+            MatomoMiddlewareFactory.JWT_PATH_GROUP, groupJWTPath);
 
         // when
         final ThrowingSupplier<MatomoMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), MatomoMiddlewareOptions.class);

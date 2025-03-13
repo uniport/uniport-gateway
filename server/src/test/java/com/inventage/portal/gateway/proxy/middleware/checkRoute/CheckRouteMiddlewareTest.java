@@ -30,15 +30,15 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CheckRouteMiddlewareFactory.CHECK_ROUTE)));
+                withMiddleware("foo", CheckRouteMiddlewareFactory.TYPE)));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CheckRouteMiddlewareFactory.CHECK_ROUTE)));
+                withMiddleware("foo", CheckRouteMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CheckRouteMiddlewareFactory.CHECK_ROUTE,
+                withMiddleware("foo", CheckRouteMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 
@@ -52,10 +52,10 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "/" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH,
-        "/a/b/" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH,
-        "/a/b/" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH + "/c/d",
-        "/prefix" + CheckRouteMiddlewareFactory.CHECK_ROUTE_PATH + "postfix"
+        "/" + CheckRouteMiddlewareFactory.PATH,
+        "/a/b/" + CheckRouteMiddlewareFactory.PATH,
+        "/a/b/" + CheckRouteMiddlewareFactory.PATH + "/c/d",
+        "/prefix" + CheckRouteMiddlewareFactory.PATH + "postfix"
     })
     public void isHandledByCheckRoute(String uri, Vertx vertx, VertxTestContext testCtx) {
         // given

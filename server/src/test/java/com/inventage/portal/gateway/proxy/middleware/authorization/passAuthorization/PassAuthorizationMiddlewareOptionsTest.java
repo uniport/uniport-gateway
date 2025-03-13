@@ -31,22 +31,22 @@ public class PassAuthorizationMiddlewareOptionsTest {
         final String sessionScope = "aSessionScope";
 
         final JsonObject json = JsonObject.of(
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_AUDIENCE, audience,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ISSUER, issuer,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS, JsonArray.of(
+            WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, audience,
+            WithAuthHandlerMiddlewareFactoryBase.ISSUER, issuer,
+            WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                 JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY, publicKey,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, publicKeyAlgorithm)),
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, additionalIssuers,
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIMS, JsonArray.of(
+                    WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, publicKey,
+                    WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, publicKeyAlgorithm)),
+            WithAuthHandlerMiddlewareFactoryBase.ADDITIONAL_ISSUERS, additionalIssuers,
+            WithAuthHandlerMiddlewareFactoryBase.CLAIMS, JsonArray.of(
                 JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_OPERATOR, claimOperator,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_PATH, claimPath,
-                    WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_CLAIM_VALUE, claimValue)),
-            WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, reconciliationEnabled,
-                WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, reconciliationIntervalMs),
-            PassAuthorizationMiddlewareFactory.PASS_AUTHORIZATION_SESSION_SCOPE, sessionScope);
+                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR, claimOperator,
+                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_PATH, claimPath,
+                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_VALUE, claimValue)),
+            WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, JsonObject.of(
+                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, reconciliationEnabled,
+                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, reconciliationIntervalMs),
+            PassAuthorizationMiddlewareFactory.SESSION_SCOPE, sessionScope);
 
         // when
         final ThrowingSupplier<PassAuthorizationMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), PassAuthorizationMiddlewareOptions.class);

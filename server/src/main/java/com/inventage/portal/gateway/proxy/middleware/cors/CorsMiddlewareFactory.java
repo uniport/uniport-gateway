@@ -22,15 +22,15 @@ import org.slf4j.LoggerFactory;
 public class CorsMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String CORS = "cors";
-    public static final String CORS_ALLOWED_ORIGINS = "allowedOrigins";
-    public static final String CORS_ALLOWED_ORIGIN_PATTERNS = "allowedOriginPatterns";
-    public static final String CORS_ALLOWED_METHODS = "allowedMethods";
-    public static final String CORS_ALLOWED_HEADERS = "allowedHeaders";
-    public static final String CORS_EXPOSED_HEADERS = "exposedHeaders";
-    public static final String CORS_MAX_AGE_SECONDS = "maxAgeSeconds";
-    public static final String CORS_ALLOW_CREDENTIALS = "allowCredentials";
-    public static final String CORS_ALLOW_PRIVATE_NETWORK = "allowPrivateNetwork";
+    public static final String TYPE = "cors";
+    public static final String ALLOWED_ORIGINS = "allowedOrigins";
+    public static final String ALLOWED_ORIGIN_PATTERNS = "allowedOriginPatterns";
+    public static final String ALLOWED_METHODS = "allowedMethods";
+    public static final String ALLOWED_HEADERS = "allowedHeaders";
+    public static final String EXPOSED_HEADERS = "exposedHeaders";
+    public static final String MAX_AGE_SECONDS = "maxAgeSeconds";
+    public static final String ALLOW_CREDENTIALS = "allowCredentials";
+    public static final String ALLOW_PRIVATE_NETWORK = "allowPrivateNetwork";
 
     public static final int DEFAULT_MAX_AGE_SECONDS = -1;
     public static final boolean DEFAULT_ALLOW_CREDENTIALS = false;
@@ -53,31 +53,31 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return CORS;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(CORS_ALLOWED_ORIGINS, Schemas.arraySchema()
+            .optionalProperty(ALLOWED_ORIGINS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(CORS_ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
+            .optionalProperty(ALLOWED_ORIGIN_PATTERNS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(CORS_ALLOWED_METHODS, Schemas.arraySchema()
+            .optionalProperty(ALLOWED_METHODS, Schemas.arraySchema()
                 .items(Schemas.enumSchema((Object[]) HTTP_METHODS)))
-            .optionalProperty(CORS_ALLOWED_HEADERS, Schemas.arraySchema()
+            .optionalProperty(ALLOWED_HEADERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(CORS_EXPOSED_HEADERS, Schemas.arraySchema()
+            .optionalProperty(EXPOSED_HEADERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
-            .optionalProperty(CORS_MAX_AGE_SECONDS, Schemas.intSchema()
+            .optionalProperty(MAX_AGE_SECONDS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
-            .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema()
+            .optionalProperty(ALLOW_CREDENTIALS, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_ALLOW_CREDENTIALS))
-            .optionalProperty(CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema()
+            .optionalProperty(ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_ALLOW_PRIVATE_NETWORK))
             .allowAdditionalProperties(false);
     }
@@ -96,7 +96,7 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final CorsMiddlewareOptions options = castOptions(config, modelType());
 
-        LOGGER.info("Created '{}' middleware successfully", CORS);
+        LOGGER.info("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(
             new CorsMiddleware(
                 name,

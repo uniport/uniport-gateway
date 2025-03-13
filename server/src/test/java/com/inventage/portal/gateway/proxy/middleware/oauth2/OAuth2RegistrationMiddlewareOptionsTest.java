@@ -28,17 +28,17 @@ public class OAuth2RegistrationMiddlewareOptionsTest {
         final String passthroughParameter = "aPassthroughParameter";
 
         final JsonObject json = JsonObject.of(
-            OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID, clientID,
-            OAuth2MiddlewareFactory.OAUTH2_CLIENT_SECRET, clientSecret,
-            OAuth2MiddlewareFactory.OAUTH2_DISCOVERY_URL, discoveryURL,
-            OAuth2MiddlewareFactory.OAUTH2_SESSION_SCOPE, sessionScope,
-            OAuth2MiddlewareFactory.OAUTH2_RESPONSE_MODE, responseMode,
-            OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow,
-            OAuth2MiddlewareFactory.OAUTH2_PUBLIC_URL, publicURL,
-            OAuth2MiddlewareFactory.OAUTH2_ADDITIONAL_SCOPES, List.of(additionalScope),
-            OAuth2MiddlewareFactory.OAUTH2_ADDITIONAL_PARAMETERS, Map.of(
+            OAuth2MiddlewareFactory.CLIENT_ID, clientID,
+            OAuth2MiddlewareFactory.CLIENT_SECRET, clientSecret,
+            OAuth2MiddlewareFactory.DISCOVERY_URL, discoveryURL,
+            OAuth2MiddlewareFactory.SESSION_SCOPE, sessionScope,
+            OAuth2MiddlewareFactory.RESPONSE_MODE, responseMode,
+            OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow,
+            OAuth2MiddlewareFactory.PUBLIC_URL, publicURL,
+            OAuth2MiddlewareFactory.ADDITIONAL_SCOPES, List.of(additionalScope),
+            OAuth2MiddlewareFactory.ADDITIONAL_PARAMETERS, Map.of(
                 additionalParameterName, additionalParameterValue),
-            OAuth2MiddlewareFactory.OAUTH2_PASSTHROUGH_PARAMETERS, List.of(passthroughParameter));
+            OAuth2MiddlewareFactory.PASSTHROUGH_PARAMETERS, List.of(passthroughParameter));
 
         // when
         final ThrowingSupplier<OAuth2RegistrationMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), OAuth2RegistrationMiddlewareOptions.class);

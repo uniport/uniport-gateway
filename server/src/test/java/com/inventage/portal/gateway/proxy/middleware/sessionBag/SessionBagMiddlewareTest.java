@@ -56,46 +56,46 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                withMiddleware("foo", SessionBagMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
+                        SessionBagMiddlewareFactory.WHITELISTED_COOKIES, JsonArray.of(
                             JsonObject.of(
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo",
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar")))))));
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME, "foo",
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_PATH, "/bar")))))));
 
         final JsonObject simple = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                withMiddleware("foo", SessionBagMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
+                        SessionBagMiddlewareFactory.WHITELISTED_COOKIES, JsonArray.of(
                             JsonObject.of(
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo",
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/bar"),
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME, "foo",
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_PATH, "/bar"),
                             JsonObject.of(
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "blub",
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_PATH, "/baz")))))));
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME, "blub",
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_PATH, "/baz")))))));
 
         final JsonObject missingCookiePath = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                withMiddleware("foo", SessionBagMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIES, JsonArray.of(
+                        SessionBagMiddlewareFactory.WHITELISTED_COOKIES, JsonArray.of(
                             JsonObject.of(
-                                SessionBagMiddlewareFactory.SESSION_BAG_WHITELISTED_COOKIE_NAME, "foo")))))));
+                                SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME, "foo")))))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                withMiddleware("foo", SessionBagMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME, "blub")))));
+                        SessionBagMiddlewareFactory.SESSION_COOKIE_NAME, "blub")))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG)));
+                withMiddleware("foo", SessionBagMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", SessionBagMiddlewareFactory.SESSION_BAG,
+                withMiddleware("foo", SessionBagMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 
@@ -326,10 +326,10 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             final ProxyMiddleware proxy = new ProxyMiddleware(vertx, "proxy",
                 HOST, servicePort,
                 ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
-                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL,
-                ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME,
-                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH,
-                ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PASSWORD,
+                ProxyMiddlewareFactory.DEFAULT_TRUST_ALL,
+                ProxyMiddlewareFactory.DEFAULT_VERIFY_HOSTNAME,
+                ProxyMiddlewareFactory.DEFAULT_TRUST_STORE_PATH,
+                ProxyMiddlewareFactory.DEFAULT_TRUST_STORE_PASSWORD,
                 false);
 
             final Router proxyRouter = Router.router(vertx);

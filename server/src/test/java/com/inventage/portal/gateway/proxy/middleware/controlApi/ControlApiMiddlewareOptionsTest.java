@@ -18,8 +18,8 @@ public class ControlApiMiddlewareOptionsTest {
         final String sessionResetURL = "anURL";
 
         final JsonObject json = JsonObject.of(
-            ControlApiMiddlewareFactory.CONTROL_API_ACTION, action,
-            ControlApiMiddlewareFactory.CONTROL_API_SESSION_RESET_URL, sessionResetURL);
+            ControlApiMiddlewareFactory.ACTION, action,
+            ControlApiMiddlewareFactory.SESSION_RESET_URL, sessionResetURL);
 
         // when
         final ThrowingSupplier<ControlApiMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ControlApiMiddlewareOptions.class);

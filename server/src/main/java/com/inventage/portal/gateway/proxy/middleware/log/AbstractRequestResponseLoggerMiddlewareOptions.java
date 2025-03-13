@@ -18,23 +18,23 @@ public abstract class AbstractRequestResponseLoggerMiddlewareOptions implements 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggerMiddlewareOptions.class);
 
     @Nullable
-    @JsonProperty(RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_FILTER_REGEX)
+    @JsonProperty(RequestResponseLoggerMiddlewareFactory.FILTER_REGEX)
     public abstract String getFilterRegex();
 
-    @JsonProperty(RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_CONTENT_TYPES)
+    @JsonProperty(RequestResponseLoggerMiddlewareFactory.CONTENT_TYPES)
     public abstract List<String> getContentTypes();
 
     @Default
-    @JsonProperty(RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED)
+    @JsonProperty(RequestResponseLoggerMiddlewareFactory.LOGGING_REQUEST_ENABLED)
     public boolean isRequestEnabled() {
-        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_REQUEST_ENABLED);
+        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.LOGGING_REQUEST_ENABLED, RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_REQUEST_ENABLED);
         return RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_REQUEST_ENABLED;
     }
 
     @Default
-    @JsonProperty(RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED)
+    @JsonProperty(RequestResponseLoggerMiddlewareFactory.LOGGING_RESPONSE_ENABLED)
     public boolean isResponseEnabled() {
-        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_RESPONSE_ENABLED);
+        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.LOGGING_RESPONSE_ENABLED, RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_RESPONSE_ENABLED);
         return RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_RESPONSE_ENABLED;
     }
 }

@@ -41,31 +41,31 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
     protected Stream<Arguments> provideConfigValidationTestData() {
         final JsonObject defaultSrcSelf = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPMiddlewareFactory.CSP,
+                withMiddleware("foo", CSPMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(CSPMiddlewareFactory.CSP_DIRECTIVES, JsonArray.of(
+                        .put(CSPMiddlewareFactory.DIRECTIVES, JsonArray.of(
                             new JsonObject()
-                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, "default-src")
-                                .put(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, JsonArray.of("self"))))))));
+                                .put(CSPMiddlewareFactory.DIRECTIVE_NAME, "default-src")
+                                .put(CSPMiddlewareFactory.DIRECTIVE_VALUES, JsonArray.of("self"))))))));
 
         final JsonObject invalidValues = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPMiddlewareFactory.CSP,
+                withMiddleware("foo", CSPMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(CSPMiddlewareFactory.CSP_DIRECTIVES, JsonArray.of(new JsonObject()
-                            .put(CSPMiddlewareFactory.CSP_DIRECTIVE_NAME, "foo")
-                            .put(CSPMiddlewareFactory.CSP_DIRECTIVE_VALUES, new JsonArray()
+                        .put(CSPMiddlewareFactory.DIRECTIVES, JsonArray.of(new JsonObject()
+                            .put(CSPMiddlewareFactory.DIRECTIVE_NAME, "foo")
+                            .put(CSPMiddlewareFactory.DIRECTIVE_VALUES, new JsonArray()
                                 .add("valid")
                                 .add(123)
                                 .add(true))))))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPMiddlewareFactory.CSP)));
+                withMiddleware("foo", CSPMiddlewareFactory.TYPE)));
 
         final JsonObject unknownProperty = buildConfiguration(
             withMiddlewares(
-                withMiddleware("foo", CSPMiddlewareFactory.CSP,
+                withMiddleware("foo", CSPMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
                         JsonObject.of("bar", "blub")))));
 

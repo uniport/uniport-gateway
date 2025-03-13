@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 public class ResponseSessionCookieRemovalMiddlewareFactory implements MiddlewareFactory {
 
     // schema
-    public static final String RESPONSE_SESSION_COOKIE_REMOVAL = "responseSessionCookieRemoval";
-    public static final String RESPONSE_SESSION_COOKIE_REMOVAL_NAME = "name";
+    public static final String TYPE = "responseSessionCookieRemoval";
+    public static final String SESSION_COOKIE_NAME = "name";
 
     public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
@@ -29,13 +29,13 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
 
     @Override
     public String provides() {
-        return RESPONSE_SESSION_COOKIE_REMOVAL;
+        return TYPE;
     }
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(RESPONSE_SESSION_COOKIE_REMOVAL_NAME, Schemas.stringSchema()
+            .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
             .allowAdditionalProperties(false);
@@ -54,7 +54,7 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final ResponseSessionCookieRemovalMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", RESPONSE_SESSION_COOKIE_REMOVAL);
+        LOGGER.debug("Created '{}' middleware successfully", TYPE);
         return Future.succeededFuture(new ResponseSessionCookieRemovalMiddleware(name, options.getSessionCookieName()));
     }
 }
