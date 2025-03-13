@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.cors;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -15,7 +13,6 @@ import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +34,7 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
 
     public static final int DEFAULT_MAX_AGE_SECONDS = -1;
     public static final boolean DEFAULT_ALLOW_CREDENTIALS = false;
-    public static final boolean DEFAULT_ALLOW_PRIVATE_NETWORKS = false;
+    public static final boolean DEFAULT_ALLOW_PRIVATE_NETWORK = false;
 
     private static final String ORIGIN_LOCALHOST = "http://localhost";
     private static final String[] HTTP_METHODS = new String[] {
@@ -81,21 +78,12 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
             .optionalProperty(CORS_ALLOW_CREDENTIALS, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_ALLOW_CREDENTIALS))
             .optionalProperty(CORS_ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_ALLOW_PRIVATE_NETWORKS))
+                .defaultValue(DEFAULT_ALLOW_PRIVATE_NETWORK))
             .allowAdditionalProperties(false);
     }
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGINS, allowedOrigins(null));
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_ORIGIN_PATTERNS, List.of());
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_METHODS, Set.of());
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOWED_HEADERS, Set.of());
-        logDefaultIfNotConfigured(LOGGER, options, CORS_EXPOSED_HEADERS, Set.of());
-        logDefaultIfNotConfigured(LOGGER, options, CORS_MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
-        logDefaultIfNotConfigured(LOGGER, options, CORS_ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORKS);
-
         return Future.succeededFuture();
     }
 

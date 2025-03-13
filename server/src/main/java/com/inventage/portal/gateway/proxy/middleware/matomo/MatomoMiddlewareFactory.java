@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.matomo;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -60,10 +58,6 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, MATOMO_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_USERNAME);
-        logDefaultIfNotConfigured(LOGGER, options, MATOMO_JWT_PATH_EMAIL, DEFAULT_JWT_PATH_EMAIL);
-        logDefaultIfNotConfigured(LOGGER, options, MATOMO_JWT_PATH_ROLES, DEFAULT_JWT_PATH_ROLES);
-        logDefaultIfNotConfigured(LOGGER, options, MATOMO_JWT_PATH_GROUP, DEFAULT_JWT_PATH_GROUP);
         return Future.succeededFuture();
     }
 

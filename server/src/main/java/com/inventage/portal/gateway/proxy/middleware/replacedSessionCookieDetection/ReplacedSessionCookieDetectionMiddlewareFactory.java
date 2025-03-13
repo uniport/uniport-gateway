@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
@@ -58,10 +56,6 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_COOKIE_NAME, DEFAULT_DETECTION_COOKIE_NAME);
-        logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_WAIT_BEFORE_RETRY_MS, DEFAULT_WAIT_BEFORE_RETRY_MS);
-        logDefaultIfNotConfigured(LOGGER, options, REPLACED_SESSION_COOKIE_DETECTION_MAX_REDIRECT_RETRIES, DEFAULT_MAX_REDIRECT_RETRIES);
-
         return Future.succeededFuture();
     }
 

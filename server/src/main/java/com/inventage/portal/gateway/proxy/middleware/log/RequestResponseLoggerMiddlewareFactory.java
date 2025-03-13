@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.log;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -57,11 +55,6 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, REQUEST_RESPONSE_LOGGER_FILTER_REGEX, null);
-        logDefaultIfNotConfigured(LOGGER, options, REQUEST_RESPONSE_LOGGER_CONTENT_TYPES, null);
-        logDefaultIfNotConfigured(LOGGER, options, REQUEST_RESPONSE_LOGGER_LOGGING_REQUEST_ENABLED, null);
-        logDefaultIfNotConfigured(LOGGER, options, REQUEST_RESPONSE_LOGGER_LOGGING_RESPONSE_ENABLED, null);
-
         return Future.succeededFuture();
     }
 

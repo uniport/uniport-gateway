@@ -1,6 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -10,12 +9,14 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Immutable
 @GatewayStyle
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonDeserialize(builder = OAuth2MiddlewareOptions.Builder.class)
 public abstract class AbstractOAuth2MiddlewareOptions implements GatewayMiddlewareOptions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareOptions.class);
 
     @JsonProperty(OAuth2MiddlewareFactory.OAUTH2_CLIENT_ID)
     public abstract String getClientId();
@@ -32,12 +33,14 @@ public abstract class AbstractOAuth2MiddlewareOptions implements GatewayMiddlewa
     @Default
     @JsonProperty(OAuth2MiddlewareFactory.OAUTH2_RESPONSE_MODE)
     public String getResponseMode() {
+        logDefault(LOGGER, OAuth2MiddlewareFactory.OAUTH2_RESPONSE_MODE, OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE);
         return OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE;
     }
 
     @Default
     @JsonProperty(OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW)
     public boolean proxyAuthenticationFlow() {
+        logDefault(LOGGER, OAuth2MiddlewareFactory.OAUTH2_PROXY_AUTHENTICATION_FLOW, OAuth2MiddlewareFactory.DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
         return OAuth2MiddlewareFactory.DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW;
     }
 

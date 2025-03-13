@@ -43,21 +43,6 @@ public interface MiddlewareFactory {
         return (T) options;
     }
 
-    /**
-     * A middleware factory commonly needs to validate a middleware configuration and is responsible for setting default values.
-     * This method can be used to log the absence of optional configuration values and what default values are set instead.
-     * 
-     * @param logger
-     * @param name
-     * @param value
-     * @param defaultValue
-     */
-    static void logDefaultIfNotConfigured(Logger logger, JsonObject options, String key, Object defaultValue) {
-        if (!options.containsKey(key)) {
-            logger.debug("No '{}' configured. Using default value: '{}'", key, defaultValue);
-        }
-    }
-
     class Loader {
         public static List<MiddlewareFactory> listFactories() {
             return ServiceLoader.load(MiddlewareFactory.class).stream()

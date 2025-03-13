@@ -9,11 +9,14 @@ import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Immutable
 @GatewayStyle
 @JsonDeserialize(builder = SessionBagMiddlewareOptions.Builder.class)
 public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMiddlewareOptions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareOptions.class);
 
     @Check
     protected void validate() {
@@ -23,6 +26,7 @@ public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMidd
     @Default
     @JsonProperty(SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME)
     public String getSessionCookieName() {
+        logDefault(LOGGER, SessionBagMiddlewareFactory.SESSION_BAG_SESSION_COOKIE_NAME, SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
         return SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
     }
 

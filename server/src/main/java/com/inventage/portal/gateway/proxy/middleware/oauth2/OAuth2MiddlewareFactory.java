@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
@@ -108,18 +106,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final String responseMode = options.getString(OAUTH2_RESPONSE_MODE);
-        if (responseMode == null) {
-            LOGGER.debug(String.format("No response mode specified. Use default value: %s", OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE));
-        }
-
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_RESPONSE_MODE, DEFAULT_OIDC_RESPONSE_MODE);
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PUBLIC_URL, "unknown"); // options may not contain PUBLIC_PROTOCOL_KEY/PUBLIC_HOSTNAME_KEY
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_SCOPES, List.of());
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_ADDITIONAL_PARAMETERS, Map.of());
-        logDefaultIfNotConfigured(LOGGER, options, OAUTH2_PASSTHROUGH_PARAMETERS, List.of());
-
         return Future.succeededFuture();
     }
 

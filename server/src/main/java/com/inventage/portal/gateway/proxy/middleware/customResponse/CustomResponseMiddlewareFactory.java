@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.customResponse;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -53,8 +51,6 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, CUSTOM_RESPONSE_HEADERS, null);
-
         return Future.succeededFuture();
     }
 

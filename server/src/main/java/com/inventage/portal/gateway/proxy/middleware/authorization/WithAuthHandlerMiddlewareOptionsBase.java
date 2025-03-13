@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
+import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMiddlewareOptions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareOptions.class);
 
     @Check
     protected void validate() {
@@ -37,6 +41,7 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     @Default
     @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION)
     public ReconciliationOptions getReconciliation() {
+        logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION);
         return ReconciliationOptions.builder().build();
     }
 
@@ -51,6 +56,7 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM)
         public String getAlgorithm() {
+            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEY_ALGORITHM, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_PUBLIC_KEY_ALGORITHM);
             return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_PUBLIC_KEY_ALGORITHM;
         }
     }
@@ -78,12 +84,14 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED)
         public boolean isEnabled() {
+            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_ENABLED, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_ENABLED_VALUE);
             return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_ENABLED_VALUE;
         }
 
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS)
         public long getIntervalMs() {
+            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION_INTERVAL_MS, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS);
             return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS;
         }
     }

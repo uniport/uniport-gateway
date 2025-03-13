@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.controlapi;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -57,8 +55,6 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, CONTROL_API_SESSION_RESET_URL, null);
-
         return Future.succeededFuture();
     }
 

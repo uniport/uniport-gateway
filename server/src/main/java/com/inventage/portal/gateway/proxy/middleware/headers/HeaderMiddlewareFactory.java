@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -63,9 +61,6 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             return Future.failedFuture(
                 String.format("%s: at least one response or request header has to be defined", HEADERS));
         }
-
-        logDefaultIfNotConfigured(LOGGER, options, HEADERS_REQUEST, null);
-        logDefaultIfNotConfigured(LOGGER, options, HEADERS_RESPONSE, null);
 
         return Future.succeededFuture();
     }

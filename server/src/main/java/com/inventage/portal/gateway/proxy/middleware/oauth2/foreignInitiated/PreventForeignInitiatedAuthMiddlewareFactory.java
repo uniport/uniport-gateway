@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2.foreignInitiated;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -41,7 +39,6 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, PREVENT_FOREIGN_INITIATED_AUTHENTICATION_REDIRECT, DEFAULT_REDIRECT_URI);
         return Future.succeededFuture();
     }
 

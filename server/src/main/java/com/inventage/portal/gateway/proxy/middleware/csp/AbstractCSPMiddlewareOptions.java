@@ -10,11 +10,14 @@ import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Immutable
 @GatewayStyle
 @JsonDeserialize(builder = CSPMiddlewareOptions.Builder.class)
 public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareOptions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddlewareOptions.class);
 
     @Check
     protected void validate() {
@@ -27,12 +30,14 @@ public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareO
     @Default
     @JsonProperty(CSPMiddlewareFactory.CSP_REPORT_ONLY)
     public boolean isReportOnly() {
+        logDefault(LOGGER, CSPMiddlewareFactory.CSP_REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
         return CSPMiddlewareFactory.DEFAULT_REPORT_ONLY;
     }
 
     @Default
     @JsonProperty(CSPMiddlewareFactory.CSP_MERGE_STRATEGY)
     public CSPMergeStrategy getMergeStrategy() {
+        logDefault(LOGGER, CSPMiddlewareFactory.CSP_MERGE_STRATEGY, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY);
         return CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY;
     }
 

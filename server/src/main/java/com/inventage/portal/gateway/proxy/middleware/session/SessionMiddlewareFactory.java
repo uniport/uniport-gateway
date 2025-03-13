@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.session;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -121,30 +119,6 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        // session
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_IDLE_TIMEOUT_IN_MINUTES, DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE);
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_ID_MIN_LENGTH, DEFAULT_SESSION_ID_MINIMUM_LENGTH);
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_NAG_HTTPS, DEFAULT_NAG_HTTPS);
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI, DEFAULT_IGNORE_SESSION_TIMEOUT_RESET_FOR_URI);
-
-        // session lifetime
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_LIFETIME_COOKIE, DEFAULT_SESSION_LIFETIME_COOKIE);
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_LIFETIME_HEADER, DEFAULT_SESSION_LIFETIME_HEADER);
-
-        // session cookie
-        final JsonObject cookie = options.getJsonObject(SESSION_COOKIE);
-        logDefaultIfNotConfigured(LOGGER, options, SESSION_COOKIE, String.format("Name=%s, HttpOnly=%s, SameSite=%s", DEFAULT_SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_HTTP_ONLY, DEFAULT_SESSION_COOKIE_SAME_SITE));
-
-        if (cookie != null) {
-            logDefaultIfNotConfigured(LOGGER, options, SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
-            logDefaultIfNotConfigured(LOGGER, options, SESSION_COOKIE_HTTP_ONLY, DEFAULT_SESSION_COOKIE_HTTP_ONLY);
-            logDefaultIfNotConfigured(LOGGER, options, SESSION_COOKIE_SECURE, DEFAULT_SESSION_COOKIE_SECURE);
-            logDefaultIfNotConfigured(LOGGER, options, SESSION_COOKIE_SAME_SITE, DEFAULT_SESSION_COOKIE_SAME_SITE);
-        }
-
-        // session store
-        logDefaultIfNotConfigured(LOGGER, options, CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS, DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS);
-
         return Future.succeededFuture();
     }
 

@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.csp;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
@@ -96,9 +94,6 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
         if (reportOnly && !hasReportToOrUriDirective) {
             return Future.failedFuture("Reporting enabled, but no report-uri or report-to is configured");
         }
-
-        logDefaultIfNotConfigured(LOGGER, options, CSP_REPORT_ONLY, DEFAULT_REPORT_ONLY);
-        logDefaultIfNotConfigured(LOGGER, options, CSP_MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY);
 
         return Future.succeededFuture();
     }

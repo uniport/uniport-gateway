@@ -10,11 +10,14 @@ import javax.annotation.Nullable;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Immutable
 @GatewayStyle
 @JsonDeserialize(builder = ProxyMiddlewareOptions.Builder.class)
 public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewareOptions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareOptions.class);
 
     @Check
     protected void validate() {
@@ -30,6 +33,7 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
     @Default
     @JsonProperty(ProxyMiddlewareFactory.SERVICE_VERBOSE)
     public boolean isVerbose() {
+        logDefault(LOGGER, ProxyMiddlewareFactory.SERVICE_VERBOSE, ProxyMiddlewareFactory.DEFAULT_VERBOSE);
         return ProxyMiddlewareFactory.DEFAULT_VERBOSE;
     }
 
@@ -53,6 +57,7 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
         @Default
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS)
         public HTTPsOptions getHTTPs() {
+            logDefault(LOGGER, ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS);
             return HTTPsOptions.builder().build();
         }
     }
@@ -65,12 +70,14 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
         @Default
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME)
         public boolean verifyHostname() {
+            logDefault(LOGGER, ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME);
             return ProxyMiddlewareFactory.DEFAULT_HTTPS_VERIFY_HOSTNAME;
         }
 
         @Default
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL)
         public boolean trustAll() {
+            logDefault(LOGGER, ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL);
             return ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_ALL;
         }
 
@@ -78,6 +85,7 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
         @Nullable
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH)
         public String getTrustStorePath() {
+            logDefault(LOGGER, ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH);
             return ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH;
         }
 
@@ -85,6 +93,7 @@ public abstract class AbstractProxyMiddlewareOptions implements GatewayMiddlewar
         @Nullable
         @JsonProperty(ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD)
         public String getTrustStorePassword() {
+            logDefault(LOGGER, ProxyMiddlewareFactory.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH);
             return ProxyMiddlewareFactory.DEFAULT_HTTPS_TRUST_STORE_PATH;
         }
     }

@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
@@ -204,10 +202,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 }
             }
         }
-
-        logDefaultIfNotConfigured(LOGGER, options, WITH_AUTH_HANDLER_ADDITIONAL_ISSUERS, null);
-        logDefaultIfNotConfigured(LOGGER, options, WITH_AUTH_HANDLER_CLAIMS, null);
-        logDefaultIfNotConfigured(LOGGER, options, WITH_AUTH_HANDLER_PUBLIC_KEYS_RECONCILIATION, null);
 
         return Future.succeededFuture();
     }

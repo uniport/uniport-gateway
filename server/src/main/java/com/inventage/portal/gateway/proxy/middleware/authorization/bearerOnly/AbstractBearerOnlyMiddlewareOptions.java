@@ -6,15 +6,19 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandl
 import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Immutable
 @GatewayStyle
 @JsonDeserialize(builder = BearerOnlyMiddlewareOptions.Builder.class)
 public abstract class AbstractBearerOnlyMiddlewareOptions extends WithAuthHandlerMiddlewareOptionsBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareOptions.class);
 
     @Default
     @JsonProperty(BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL)
     public String isOptional() {
+        logDefault(LOGGER, BearerOnlyMiddlewareFactory.BEARER_ONLY_OPTIONAL, BearerOnlyMiddlewareFactory.DEFAULT_OPTIONAL);
         return BearerOnlyMiddlewareFactory.DEFAULT_OPTIONAL;
     }
 }

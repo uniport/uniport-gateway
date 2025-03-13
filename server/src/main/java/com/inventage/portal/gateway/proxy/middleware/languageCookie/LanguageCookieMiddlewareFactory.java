@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -45,8 +43,6 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
-
         return Future.succeededFuture();
     }
 

@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
@@ -45,8 +43,6 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        logDefaultIfNotConfigured(LOGGER, options, RESPONSE_SESSION_COOKIE_REMOVAL_NAME, DEFAULT_SESSION_COOKIE_NAME);
-
         return Future.succeededFuture();
     }
 

@@ -1,7 +1,5 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
-import static com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory.logDefaultIfNotConfigured;
-
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -77,20 +75,6 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
-        final JsonObject cookie = options.getJsonObject(CSRF_COOKIE);
-        logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE, String.format("Name=%s, Path=%s, Secure=%s", DEFAULT_COOKIE_NAME, DEFAULT_COOKIE_PATH, DEFAULT_COOKIE_SECURE));
-
-        if (cookie != null) {
-            logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE_NAME, DEFAULT_COOKIE_NAME);
-            logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE_PATH, DEFAULT_COOKIE_PATH);
-            logDefaultIfNotConfigured(LOGGER, options, CSRF_COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
-        }
-
-        logDefaultIfNotConfigured(LOGGER, options, CSRF_HEADER_NAME, DEFAULT_HEADER_NAME);
-        logDefaultIfNotConfigured(LOGGER, options, CSRF_TIMEOUT_IN_MINUTES, DEFAULT_TIMEOUT_IN_MINUTES);
-        logDefaultIfNotConfigured(LOGGER, options, CSRF_ORIGIN, DEFAULT_ORIGIN);
-        logDefaultIfNotConfigured(LOGGER, options, CSRF_NAG_HTTPS, DEFAULT_NAG_HTTPS);
-
         return Future.succeededFuture();
     }
 
