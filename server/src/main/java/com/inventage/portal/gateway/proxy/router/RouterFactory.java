@@ -204,7 +204,11 @@ public class RouterFactory {
 
     private void createRouter(Gateway model, Handler<AsyncResult<Router>> handler) {
         final List<GatewayRouter> routers = new LinkedList<GatewayRouter>(model.getRouters());
-        sortByRuleLength(routers);
+        Collections.sort(routers);
+        LOGGER.debug("Routing requests in the following order:");
+        for (GatewayRouter r : routers) {
+            LOGGER.debug("Router '{}': rule '{}', priority '{}'", r.getName(), r.getRule(), r.getPriority() > 0 ? r.getPriority() : r.getRule().length());
+        }
 
         final ImmutableList<GatewayMiddleware> middlewares = model.getMiddlewares();
         final ImmutableList<GatewayService> services = model.getServices();
@@ -384,41 +388,6 @@ public class RouterFactory {
         final Handler<RoutingContext> healthChecksHandler = HealthCheckHandler.createWithHealthChecks(checks);
         router.get("/readiness").setName("readiness").handler(healthChecksHandler);
         router.route("/health").setName("health").handler(healthChecksHandler);
-    }
-
-    /**
-     * To avoid path overlap, routes are sorted, by default, in descending order
-     * using rules length.
-     * The priority is directly equal to the length of the rule, and so the longest
-     * length has the
-     * highest priority.
-     * Additionally, a priority for each router can be defined. This overwrites
-     * priority calculates
-     * by the length of the rule.
-     */
-    private void sortByRuleLength(List<GatewayRouter> routers) {
-        Collections.sort(routers, (a, b) -> {
-            final String ruleA = a.getRule();
-            final String ruleB = b.getRule();
-
-            int priorityA = ruleA.length();
-            int priorityB = ruleB.length();
-
-            if (a.getPriority() > 0) {
-                priorityA = a.getPriority();
-            }
-
-            if (b.getPriority() > 0) {
-                priorityB = b.getPriority();
-            }
-
-            return priorityB - priorityA;
-        });
-
-        LOGGER.debug("Routing requests in the following order:");
-        for (GatewayRouter r : routers) {
-            LOGGER.debug("Router '{}': rule '{}', priority '{}'", r.getName(), r.getRule(), r.getPriority() > 0 ? r.getPriority() : r.getRule().length());
-        }
     }
 
     /**
