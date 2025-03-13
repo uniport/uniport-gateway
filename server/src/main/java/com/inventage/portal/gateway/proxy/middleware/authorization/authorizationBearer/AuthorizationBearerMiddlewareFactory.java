@@ -51,7 +51,7 @@ public class AuthorizationBearerMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final AuthorizationBearerMiddlewareOptions options = castOptions(config, modelType());
 
-        LOGGER.debug("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new AuthorizationBearerMiddleware(vertx, name, options.getSessionScope()));
     }

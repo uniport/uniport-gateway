@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
 
-    public static final String ADDITIONAL_ROUTES = "additionalRoutes";
-    public static final String ADDITIONAL_ROUTES_PATH = "path";
+    public static final String TYPE = "additionalRoutes";
+    public static final String PATH = "path";
 
     public static final String DEFAULT_ADDITIONAL_ROUTES_PATH = "/some-path";
 
@@ -26,7 +26,7 @@ public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public String provides() {
-        return ADDITIONAL_ROUTES;
+        return TYPE;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
                     .end();
             });
 
-        LOGGER.info("Created '{}' middleware successfully", ADDITIONAL_ROUTES);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new AdditionalRoutesMiddleware(name));
     }

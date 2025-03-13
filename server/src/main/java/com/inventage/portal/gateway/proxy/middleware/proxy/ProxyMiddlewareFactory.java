@@ -44,11 +44,11 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddlewareFactory.class);
 
-    private static final String PROXY = "proxy";
+    private static final String TYPE = "proxy";
 
     @Override
     public String provides() {
-        return PROXY;
+        return TYPE;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ProxyMiddlewareFactory implements MiddlewareFactory {
                 new IllegalStateException("expected https options to be non-empty"));
         }
 
-        LOGGER.debug("Created '{}' middleware successfully", PROXY);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new ProxyMiddleware(vertx,
                 name,

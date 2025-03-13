@@ -136,7 +136,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 options.getAdditionalScopes(),
                 getAdditionalAuthRequestParams(options, responseMode),
                 options.getPassthroughParameters()))
-            .onSuccess(m -> LOGGER.debug("Created middleware '{}' successfully", TYPE))
+            .onSuccess(m -> LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name))
             .onFailure(err -> LOGGER.warn("Failed to create OAuth2 Middleware '{}'", err.getMessage()));
     }
 

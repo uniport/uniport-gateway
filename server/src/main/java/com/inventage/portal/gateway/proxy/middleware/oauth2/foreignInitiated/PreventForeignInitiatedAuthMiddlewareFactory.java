@@ -50,7 +50,7 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final PreventForeignInitiatedAuthMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' of type '{}' middleware successfully", name, TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new PreventForeignInitiatedAuthMiddleware(name, options.getRedirectURI()));
     }

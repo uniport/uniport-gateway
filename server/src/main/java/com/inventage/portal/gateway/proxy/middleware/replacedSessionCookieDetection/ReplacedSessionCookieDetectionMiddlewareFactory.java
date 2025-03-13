@@ -67,7 +67,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final ReplacedSessionCookieDetectionMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new ReplacedSessionCookieDetectionMiddleware(
                 name,

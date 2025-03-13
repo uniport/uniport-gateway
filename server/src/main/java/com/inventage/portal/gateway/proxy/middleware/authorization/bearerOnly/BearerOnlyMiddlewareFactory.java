@@ -56,7 +56,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
         final boolean optional = Boolean.parseBoolean(options.isOptional());
 
         final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, optional);
-        LOGGER.debug("Created '{}' middleware", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return bearerOnlyMiddleware;
     }
 }

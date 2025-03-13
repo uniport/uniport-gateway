@@ -100,7 +100,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
             }
         }
 
-        LOGGER.debug("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new HeaderMiddleware(name, requestHeaders, responseHeaders));
     }

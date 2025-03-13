@@ -16,9 +16,9 @@ public abstract class AbstractAdditionalRoutesMiddlewareOptions implements Gatew
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalRoutesMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(AdditionalRoutesMiddlewareFactory.ADDITIONAL_ROUTES_PATH)
+    @JsonProperty(AdditionalRoutesMiddlewareFactory.PATH)
     public String getPath() {
-        logDefault(LOGGER, AdditionalRoutesMiddlewareFactory.ADDITIONAL_ROUTES_PATH, AdditionalRoutesMiddlewareFactory.DEFAULT_ADDITIONAL_ROUTES_PATH);
+        logDefault(LOGGER, AdditionalRoutesMiddlewareFactory.PATH, AdditionalRoutesMiddlewareFactory.DEFAULT_ADDITIONAL_ROUTES_PATH);
         return AdditionalRoutesMiddlewareFactory.DEFAULT_ADDITIONAL_ROUTES_PATH;
     }
 

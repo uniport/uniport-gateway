@@ -66,7 +66,7 @@ public class RequestResponseLoggerMiddlewareFactory implements MiddlewareFactory
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final RequestResponseLoggerMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.debug("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new RequestResponseLoggerMiddleware(name, options.getFilterRegex(), options.getContentTypes(), options.isRequestEnabled(), options.isResponseEnabled()));
     }

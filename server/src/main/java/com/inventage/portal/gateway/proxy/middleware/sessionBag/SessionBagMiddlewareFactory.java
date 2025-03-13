@@ -69,7 +69,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     }
 
     public Future<Middleware> create(Vertx vertx, String name, SessionBagMiddlewareOptions options) {
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new SessionBagMiddleware(name, options.getWhitelistedCookieOptions(), options.getSessionCookieName()));
     }

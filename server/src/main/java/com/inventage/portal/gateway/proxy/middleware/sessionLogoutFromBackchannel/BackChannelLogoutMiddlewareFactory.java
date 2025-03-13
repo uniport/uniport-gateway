@@ -43,7 +43,7 @@ public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewar
 
     @Override
     protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config) {
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return new BackChannelLogoutMiddleware(vertx, name, authHandler);
     }
 }

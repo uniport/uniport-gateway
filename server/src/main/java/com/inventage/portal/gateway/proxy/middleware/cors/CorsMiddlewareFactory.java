@@ -96,7 +96,7 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final CorsMiddlewareOptions options = castOptions(config, modelType());
 
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new CorsMiddleware(
                 name,

@@ -106,7 +106,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final CSPMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new CSPMiddleware(name, options.getDirectives(), options.isReportOnly(), options.getMergeStrategy()));
     }

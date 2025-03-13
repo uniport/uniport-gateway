@@ -69,7 +69,7 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
         final MatomoMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new MatomoMiddleware(name, options.getJWTPathRoles(), options.getJWTPathGroup(), options.getJWTPathUsername(), options.getJWTPathEMail()));
     }

@@ -55,7 +55,7 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
         final String sessionScope = options.getSessionScope();
 
         final Middleware passAuthorizationMiddleware = new PassAuthorizationMiddleware(vertx, name, sessionScope, authHandler);
-        LOGGER.debug("Created '{}' middleware", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return passAuthorizationMiddleware;
     }
 

@@ -59,7 +59,7 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     @Override
     public Future<Middleware> create(final Vertx vertx, final String name, final Router router, GatewayMiddlewareOptions config) {
         final CSPViolationReportingServerMiddlewareOptions options = castOptions(config, modelType());
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new CSPViolationReportingServerMiddleware(name, options.getLogLevel()));
     }

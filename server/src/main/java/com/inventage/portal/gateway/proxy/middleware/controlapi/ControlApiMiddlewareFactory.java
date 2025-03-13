@@ -71,7 +71,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
             webClient = WebClient.create(vertx);
         }
 
-        LOGGER.debug("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new ControlApiMiddleware(vertx, name, options.getAction(), options.getSessionResetURL(), webClient));
     }

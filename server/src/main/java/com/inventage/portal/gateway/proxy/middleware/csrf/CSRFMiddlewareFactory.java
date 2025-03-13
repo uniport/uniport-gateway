@@ -88,7 +88,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
         final CSRFMiddlewareOptions options = castOptions(config, modelType());
         final String secret = UUID.randomUUID().toString();
 
-        LOGGER.info("Created '{}' middleware successfully", TYPE);
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new CSRFMiddleware(vertx,
                 name,

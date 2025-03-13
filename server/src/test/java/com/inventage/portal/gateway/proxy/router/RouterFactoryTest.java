@@ -456,7 +456,7 @@ public class RouterFactoryTest {
                 TestUtils.withRouterMiddlewares("aMiddleware"),
                 TestUtils.withRouterService("bar"))),
             TestUtils.withMiddlewares(
-                TestUtils.withMiddleware("aMiddleware", AdditionalRoutesMiddlewareFactory.ADDITIONAL_ROUTES,
+                TestUtils.withMiddleware("aMiddleware", AdditionalRoutesMiddlewareFactory.TYPE,
                     TestUtils.withMiddlewareOpts(JsonObject.of("path", additionalRoutePath)))),
             TestUtils.withServices(
                 TestUtils.withService("bar",
