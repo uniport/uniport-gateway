@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consistent logging of default values [PORTAL-2372](https://inventage-all.atlassian.net/browse/PORTAL-2372).
 - Log error message more verbosely, in case config schema validation fails [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
 - Improve schema validation error message [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
+- Change the internal representation of the dynamic configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
