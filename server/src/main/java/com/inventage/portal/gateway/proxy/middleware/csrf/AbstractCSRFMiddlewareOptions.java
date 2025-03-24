@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayStyle;
+import io.micrometer.common.lang.Nullable;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ public abstract class AbstractCSRFMiddlewareOptions implements GatewayMiddleware
         return CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS;
     }
 
+    @Nullable
     @Default
     @JsonProperty(CSRFMiddlewareFactory.ORIGIN)
     public String getOrigin() {
