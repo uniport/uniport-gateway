@@ -29,14 +29,9 @@ import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GatewayTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayTest.class);
-
-    @SuppressWarnings("unchecked")
     @Test
     public void parseJsonTest() {
         // given
@@ -44,7 +39,7 @@ public class GatewayTest {
         final String aRouterRule = "rA";
         final String aRouterEp = "rA";
 
-        final String aMiddlewareName = "rA";
+        final String aMiddlewareName = "mA";
         final String aMiddlewareType = "headers";
         final String aHeaderName = "X-Foo";
         final String aHeaderValue = "bar";
@@ -52,7 +47,7 @@ public class GatewayTest {
             HeaderMiddlewareFactory.HEADERS_REQUEST, JsonObject.of(
                 aHeaderName, aHeaderValue));
 
-        final String aServiceName = "rA";
+        final String aServiceName = "sA";
         final String aHost = "example.com";
         final int aPort = 1234;
         final boolean aVerify = true;
@@ -60,6 +55,7 @@ public class GatewayTest {
         final String aPath = "/path";
         final String aPassword = "password";
 
+        @SuppressWarnings("unchecked")
         final JsonObject json = buildConfiguration(
             withRouters(
                 withRouter(aRouterName,
@@ -75,7 +71,6 @@ public class GatewayTest {
                     withServers(
                         withServer(aHost, aPort,
                             withServerHttpOptions(aVerify, aTrust, aPath, aPassword))))));
-        System.out.println(json.encodePrettily());
 
         // when
         final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
@@ -83,7 +78,6 @@ public class GatewayTest {
 
         // then
         final Gateway gateway = assertDoesNotThrow(parse);
-        System.out.println(gateway.toString());
 
         assertNotNull(gateway.getRouters());
         final GatewayRouter router = gateway.getRouters().get(0);
@@ -131,5 +125,33 @@ public class GatewayTest {
         assertEquals(aTrust, httpsOptions.trustAll());
         assertEquals(aPath, httpsOptions.getTrustStorePath());
         assertEquals(aPassword, httpsOptions.getTrustStorePassword());
+    }
+
+    @Test
+    public void allowNullOptions() {
+        // given 
+        final String aMiddlewareName = "mA";
+        final String aMiddlewareType = "responseSessionCookieRemoval"; // allows no options in configuration
+
+        @SuppressWarnings("unchecked")
+        final JsonObject json = buildConfiguration(
+            withMiddlewares(
+                withMiddleware(aMiddlewareName, aMiddlewareType)));
+
+        // when
+        final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
+        final ThrowingSupplier<Gateway> parse = () -> new ObjectMapper().readValue(httpJson.encode(), Gateway.class);
+
+        // then
+        final Gateway gateway = assertDoesNotThrow(parse);
+
+        assertNotNull(gateway.getMiddlewares());
+        final GatewayMiddleware middleware = gateway.getMiddlewares().get(0);
+        assertNotNull(middleware);
+        assertEquals(aMiddlewareName, middleware.getName());
+        assertEquals(aMiddlewareType, middleware.getType());
+
+        final GatewayMiddlewareOptions options = middleware.getOptions();
+        assertNotNull(options);
     }
 }
