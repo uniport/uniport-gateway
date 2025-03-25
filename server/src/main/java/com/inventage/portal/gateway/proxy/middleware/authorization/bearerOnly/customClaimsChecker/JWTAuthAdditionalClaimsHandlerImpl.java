@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * TODO fix the type conversion chaos in this class
  */
 public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl implements JWTAuthAdditionalClaimsHandler {
 
@@ -42,6 +43,7 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
 
         // We need to convert the dynamic type of the payload to ensure compatibility when using method calls from external libraries.
         payloadValue = convertPayloadType(payloadValue);
+        claimValue = convertClaimType(claimValue);
 
         if (operator == JWTClaimOperator.EQUALS) {
             return verifyClaimEquals(payloadValue, claimValue);
@@ -121,6 +123,16 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
         return payloadValue;
     }
 
+    private static Object convertClaimType(Object claimValue) {
+        if (claimValue instanceof Map) {
+            claimValue = new JsonObject((Map<String, Object>) claimValue);
+        }
+        if (claimValue instanceof List) {
+            claimValue = new JsonArray((List<Object>) claimValue);
+        }
+        return claimValue;
+    }
+
     @Override
     public void postAuthentication(RoutingContext ctx) {
         final User user = ctx.user();
@@ -148,7 +160,7 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
                 // Claims are provided by the dynamic configuration file.
                 // We verify that each payload complies with the claims defined in the configuration
                 // Throws an exception if the path does not exist in the payload
-                final var payloadValue = JsonPath.read(jwt.toString(), additionalClaim.path);
+                final Object payloadValue = JsonPath.read(jwt.encode(), additionalClaim.path);
 
                 // Verify if the value stored in that path complies to the claim.
                 if (!verifyClaim(payloadValue, additionalClaim.value, additionalClaim.operator)) {

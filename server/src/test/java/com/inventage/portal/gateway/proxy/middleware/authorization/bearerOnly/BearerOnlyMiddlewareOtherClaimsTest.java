@@ -17,6 +17,7 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
@@ -24,6 +25,8 @@ import jakarta.json.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -60,31 +63,19 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             .build())
         .build();
 
+    @Timeout(value = 1, timeUnit = TimeUnit.HOURS)
     @Test
     public void validToken(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final JWTClaim claimEqualString = new JWTClaim("$['organisation']", JWTClaimOperator.EQUALS, "portal");
-        final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']",
-            JWTClaimOperator.CONTAINS,
-            Json.createArrayBuilder(List.of("ADMINISTRATOR", "TENANT"))
-                .build());
-        final JWTClaim claimEqualObject = new JWTClaim("$['http://hasura.io/jwt/claims']",
-            JWTClaimOperator.EQUALS,
-            Json.createObjectBuilder()
-                .add("x-hasura-allowed-roles",
-                    Json.createArrayBuilder(
-                        List.of("KEYCLOAK", "portaluser")))
-                .add("x-hasura-user-id", 1234)
-                .build());
-        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS,
-            Boolean.FALSE);
-        final JWTClaim claimContainInteger = new JWTClaim("$['acr']", JWTClaimOperator.CONTAINS,
-            Json.createArrayBuilder(List.of(1, 9)).build());
-        final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']",
-            JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
-            Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
-        final List<JWTClaim> expectedClaims = List.of(claimContainRole, claimEqualString, claimEqualObject,
-            claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
+        final JWTClaim claimContainRole = new JWTClaim("$['resource_access']['Organisation']['roles']", JWTClaimOperator.CONTAINS, List.of("ADMINISTRATOR", "TENANT"));
+        final JWTClaim claimEqualObject = new JWTClaim("$['http://hasura.io/jwt/claims']", JWTClaimOperator.EQUALS, Map.of(
+            "x-hasura-allowed-roles", List.of("KEYCLOAK", "portaluser"),
+            "x-hasura-user-id", 1234));
+        final JWTClaim claimEqualBoolean = new JWTClaim("$['email-verified']", JWTClaimOperator.EQUALS, Boolean.FALSE);
+        final JWTClaim claimContainInteger = new JWTClaim("$['acr']", JWTClaimOperator.CONTAINS, List.of(1, 9));
+        final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE, List.of("openid", "email", "profile", "Test"));
+        final List<JWTClaim> expectedClaims = List.of(claimContainRole, claimEqualString, claimEqualObject, claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
@@ -108,9 +99,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     public void validTokenContainsWhitespaceScope(Vertx vertx, VertxTestContext testCtx)
         throws InterruptedException {
         //given
-        final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']",
-            JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE,
-            Json.createArrayBuilder(List.of("openid", "email", "profile", "Test")).build());
+        final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE, List.of("openid", "email", "profile", "Test"));
         final List<JWTClaim> expectedClaims = List.of(claimContainSubstringWhitespace);
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);

@@ -86,7 +86,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 .requiredProperty(CLAIM_OPERATOR, Schemas.enumSchema((Object[]) OPERATORS))
                 .requiredProperty(CLAIM_PATH, Schemas.stringSchema()
                     .with(Keywords.minLength(1)))
-                .requiredProperty(CLAIM_VALUE, Schemas.schema())
+                .requiredProperty(CLAIM_VALUE, Schemas.schema()) // TODO be more restrictive here
                 .allowAdditionalProperties(false));
 
         final ObjectSchemaBuilder reconciliationSchema = Schemas.objectSchema()
