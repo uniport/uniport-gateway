@@ -18,8 +18,8 @@ public abstract class AbstractReplacedSessionCookieDetectionMiddlewareOptions im
     @Default
     @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME)
     public String getCookieName() {
-        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
-        return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME);
+        return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
     }
 
     @Default
