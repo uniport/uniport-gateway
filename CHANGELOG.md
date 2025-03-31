@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 9.5.0-[Unreleased] - ???
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D???)
 
 ### Fixed
 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.4.0]-202503211149-1294-26d95127 - 2025-03-21
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.4.0-202503211149-1294-26d95127)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D9.4.0-202503211149-1294-26d95127)
 
 ### Added
 
@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.3.0-202410161127-1201-84e80ee2)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D9.3.0-202410161127-1201-84e80ee2)
 
 ### Added
 
@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.2.0]-202408231733-1183-1f523dcd - 2024-08-23
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.2.0-202408231733-1183-1f523dcd)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D9.2.0-202408231733-1183-1f523dcd)
 
 ### Added
 
@@ -98,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.1.0]-202404300852-1126-7dcb42ab - 2024-04-30
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.1.0-202404300852-1126-7dcb42ab)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D9.1.0-202404300852-1126-7dcb42ab)
 
 ### Changed
 
@@ -116,7 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.0.0]-202401150956-1070-d0103604 - 2024-01-15
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.0.0-202401150956-1070-d0103604)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D9.0.0-202401150956-1070-d0103604)
 
 ### Changed
 
@@ -138,7 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.3.0]-202309071344-1005-8468f9f1 - 2023-09-07
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.3.0-202309071344-1005-8468f9f1)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D8.3.0-202309071344-1005-8468f9f1)
 
 ### Added
 
@@ -158,7 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.2.0]-202308021352-962-750876b6 - 2023-08-02
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.2.0-202308021352-962-750876b6)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/???) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D8.2.0-202308021352-962-750876b6)
 
 ### Changed
 
@@ -172,7 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.1.0]-202307270944-948-1cb69438 - 2023-07-27
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/18089) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.1.0-202307270944-948-1cb69438)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/18089) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D8.1.0-202307270944-948-1cb69438)
 
 ### Changed
 
@@ -203,7 +203,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.0.0]-202305240847-789-bdd58cd9 - 2023-05-24
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17887) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D8.0.0-202305240847-789-bdd58cd9)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17887) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D8.0.0-202305240847-789-bdd58cd9)
 
 ### Fixed
 
@@ -239,7 +239,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.0.2]-202304141241-4-576b35e4 - 2023-04-17
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/18068) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D7.0.2-202304141241-4-576b35e4)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/18068) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D7.0.2-202304141241-4-576b35e4)
 
 ### Fixed
 
@@ -247,7 +247,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.0.1]-202303091216-1-ee2c2a1 - 2023-03-09
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Nexus3](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17885) - [Artifacts](https://nexus3.inventage.com/#browse/search=keyword%3D7.0.1-202303091216-1-ee2c2a1)
 
 ### Fixed
 
@@ -256,7 +256,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.0.0]-202303080728-648-fe6be73 - 2023-03-08
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17863) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D7.0.0-202303080728-648-fe6be73)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17863) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D7.0.0-202303080728-648-fe6be73)
 
 ### Added
 
@@ -292,7 +292,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.0.0]-202302060855-584-ac9bd6a - 2023-02-06
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D6.0.0-202302060855-584-ac9bd6a)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D6.0.0-202302060855-584-ac9bd6a)
 
 ### Added
 
@@ -320,7 +320,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.1.0]-202212061653-531-6945ffd 2022-12-06
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17778) -
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D5.1.0-202212061653-531-6945ffd)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D5.1.0-202212061653-531-6945ffd)
 
 ### Changed
 
@@ -329,7 +329,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.0]-202212060911-525-5e0cfa8 - 2022-12-06
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17668) -
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D5.0.0-202212060911-525-5e0cfa8)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D5.0.0-202212060911-525-5e0cfa8)
 
 ### Added
 
@@ -358,7 +358,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.3.0]-202208121035-483-5b7b069 - 2022-08-12
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17574) -
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.3.0-202208121035-483-5b7b069)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D4.3.0-202208121035-483-5b7b069)
 
 ### Changed
 
@@ -376,7 +376,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.2.0]-202207191024-463-b0dd7e7 - 2022-07-19
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17561) -
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.2.0-202207191024-463-b0dd7e7)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D4.2.0-202207191024-463-b0dd7e7)
 
 ### Changed
 
@@ -385,7 +385,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.1.0]-202207080655-447-ed21a2a - 2022-07-08
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17484) -
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.1.0-202207080815-448-ed21a2a)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D4.1.0-202207080815-448-ed21a2a)
 
 ### Added
 
@@ -398,7 +398,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0]-202205231117-426-efc4093 - 2022-05-23
 
 [JIRA](https://issue.inventage.com/projects/PORTAL/versions/17350) -
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D4.0.0-202205231117-426-efc4093)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D4.0.0-202205231117-426-efc4093)
 
 ### Added
 
@@ -421,7 +421,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.0]-202203091113-353-e988dae - 2022-03-09
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D3.3.0-202203091113-353-e988dae)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D3.3.0-202203091113-353-e988dae)
 
 ### Fixed
 
@@ -430,7 +430,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.2.0]-202202200055-343-81de06f - 2022-02-21
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D3.2.0-202202200055-343-81de06f)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D3.2.0-202202200055-343-81de06f)
 
 ### Added
 
@@ -438,7 +438,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0]-202202071726-335-0975202 - 2022-02-07
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D3.1.0-202202071726-335-0975202)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D3.1.0-202202071726-335-0975202)
 
 ### Fixed
 
@@ -450,7 +450,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0]-202202071120-328-c8f8caa - 2022-02-07
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D3.0.0-202202071120-328-c8f8ca)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D3.0.0-202202071120-328-c8f8ca)
 
 ### Added
 
@@ -470,7 +470,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.7.0]-202112080733-264-ce3614d - 2021-12-08
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.7.0-202112080733-264-ce3614d)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.7.0-202112080733-264-ce3614d)
 
 ### Added
 
@@ -484,7 +484,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.0]-202111100757-232-3f0c716 - 2021-11-10
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.6.0-202111100757-232-3f0c716)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.6.0-202111100757-232-3f0c716)
 
 ### Removed
 
@@ -492,7 +492,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.0]-202110181145-223-2a0ba2a - 2021-10-18
 
-[Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.5.0-202110181145-223-2a0ba2a)
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.5.0-202110181145-223-2a0ba2a)
 
 ### Changed
 
@@ -506,7 +506,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0]-202110040810-216-85d8f83 - 2021-10-04
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17097) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.4.0-202110040810-216-85d8f83)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17097) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.4.0-202110040810-216-85d8f83)
 
 ### Added
 
@@ -517,7 +517,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.0]-202109100643-197-6a6ac10 - 2021-09-10
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17079) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.3.0-202109100643-197-6a6ac10)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17079) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.3.0-202109100643-197-6a6ac10)
 
 ### Added
 
@@ -526,7 +526,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.0]-202108231142-190-927586e - 2021-08-23
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17064) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.2.0-202108231142-190-927586e)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/17064) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.2.0-202108231142-190-927586e)
 
 ### Added
 
@@ -539,7 +539,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0]-202108060813-181-e0baeec - 2021-08-09
 
-[JIRA](https://issue.inventage.com/projects/PORTAL/versions/16990) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D2.1.0-202108060813-181-e0baeec)
+[JIRA](https://issue.inventage.com/projects/PORTAL/versions/16990) - [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D2.1.0-202108060813-181-e0baeec)
 
 ### Added
 
