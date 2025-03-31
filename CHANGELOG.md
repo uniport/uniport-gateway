@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D???)
 
+### Fixed
+
+- Unauthenticated `application/json`requests should be handled with a `401` directly instead of returning a redirect ([PORTAL-2332](https://inventage-all.atlassian.net/browse/PORTAL-2332)).
+
+### Changed
+
+- Change the internal representation of the dynamic configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
+
 ## [9.4.0]-202503211149-1294-26d95127 - 2025-03-21
 
 [Nexus2](https://nexus.inventage.com/#nexus-search;gav~~~???) - [Nexus3](https://nexus3.inventage.com/#browse/search=version%3D9.4.0-202503211149-1294-26d95127)
@@ -34,7 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - To ensure a custom response header is always written to the response, the `addHeadersEndHandler` is to be used, instead of only adding it on proxied incoming responses with the help of `ProxyInterceptor`s ([PORTAL-2329](https://inventage-all.atlassian.net/browse/PORTAL-2329)).
 - Respecting all accept headers to determine, if `prompt=none` should be set in the authentication request in the `oauth2` middleware ([PORTAL-2333](https://inventage-all.atlassian.net/browse/PORTAL-2333)).
 - Should be capable of handling received malformed cookie and pass them on [PORTAL-2380](https://inventage-all.atlassian.net/browse/PORTAL-2380).
-- Unauthenticated `application/json`requests should be handled with a `401` directly instead of returning a redirect ([PORTAL-2332](https://inventage-all.atlassian.net/browse/PORTAL-2332)).
 
 ### Changed
 
@@ -49,7 +56,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consistent logging of default values [PORTAL-2372](https://inventage-all.atlassian.net/browse/PORTAL-2372).
 - Log error message more verbosely, in case config schema validation fails [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
 - Improve schema validation error message [PORTAL-2381](https://inventage-all.atlassian.net/browse/PORTAL-2381).
-- Change the internal representation of the dynamic configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
 
 ## [9.3.0]-202410161127-1201-84e80ee2 - 2024-10-16
 
