@@ -110,13 +110,13 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Class<OAuth2MiddlewareOptions> modelType() {
+    public Class<? extends AbstractOAuth2MiddlewareOptionsBase> modelType() {
         return OAuth2MiddlewareOptions.class;
     }
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
-        final OAuth2MiddlewareOptions options = castOptions(config, modelType());
+        final AbstractOAuth2MiddlewareOptionsBase options = castOptions(config, modelType());
         final String sessionScope = options.getSessionScope();
         final String responseMode = options.getResponseMode();
 
@@ -149,7 +149,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      *
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">AuthRequest</a>
      */
-    private Map<String, String> getAdditionalAuthRequestParams(OAuth2MiddlewareOptions options, String responseMode) {
+    private Map<String, String> getAdditionalAuthRequestParams(AbstractOAuth2MiddlewareOptionsBase options, String responseMode) {
         final Map<String, String> params = new HashMap<>(options.getAdditionalAuthRequestParameters());
         params.put(OIDC_RESPONSE_MODE, responseMode);
         return params;
@@ -161,7 +161,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
      * in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
      * configuration
      */
-    private String getPublicURL(OAuth2MiddlewareOptions options) {
+    private String getPublicURL(AbstractOAuth2MiddlewareOptionsBase options) {
         if (options.getPublicURL() != null) {
             return options.getPublicURL();
         }
@@ -209,7 +209,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         return OIDC_RESPONSE_MODE_FORM_POST.equals(responseMode);
     }
 
-    private OAuth2Options oAuth2Options(OAuth2MiddlewareOptions options) {
+    private OAuth2Options oAuth2Options(AbstractOAuth2MiddlewareOptionsBase options) {
         return new OAuth2Options()
             .setClientId(options.getClientId())
             .setClientSecret(options.getClientSecret())

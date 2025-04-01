@@ -7,6 +7,6 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 @GatewayStyle
 @JsonDeserialize(builder = OAuth2RegistrationMiddlewareOptions.Builder.class)
-public abstract class AbstractOAuth2RegistrationMiddlewareOptions extends AbstractOAuth2MiddlewareOptions {
+public abstract class AbstractOAuth2RegistrationMiddlewareOptions extends AbstractOAuth2MiddlewareOptionsBase {
 
 }

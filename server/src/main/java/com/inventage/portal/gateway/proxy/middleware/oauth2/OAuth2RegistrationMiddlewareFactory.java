@@ -21,6 +21,11 @@ public class OAuth2RegistrationMiddlewareFactory extends OAuth2MiddlewareFactory
         return TYPE;
     }
 
+    @Override
+    public Class<? extends AbstractOAuth2MiddlewareOptionsBase> modelType() {
+        return OAuth2RegistrationMiddlewareOptions.class;
+    }
+
     /**
      * Replaces the {@link #AUTH_ENDPOINT} substring with {@link #REGISTRATION_ENDPOINT}.
      *
