@@ -1,0 +1,59 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "rootA",
+                "entrypoints": [
+                    "entrypointA"
+                ],
+                "middlewares": [
+                    "headerA"
+                ],
+                "rule": "Path('/')",
+                "service": "backend"
+            },
+            {
+                "name": "rootB",
+                "entrypoints": [
+                    "entrypointB"
+                ],
+                "middlewares": [
+                    "headerB"
+                ],
+                "rule": "Path('/')",
+                "service": "backend"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "headerA",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "entrypointA": "A"
+                    }
+                }
+            },
+            {
+                "name": "headerB",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "entrypointB": "B"
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "backend",
+                "servers": [
+                    {
+                        "host": "localdev.me",
+                        "port": "8081"
+                    }
+                ]
+            }
+        ]
+    }
+}

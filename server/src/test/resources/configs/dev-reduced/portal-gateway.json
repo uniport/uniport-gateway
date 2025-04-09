@@ -1,0 +1,174 @@
+{
+    "entrypoints": [
+        {
+            "name": "http20000",
+            "port": 20000,
+            "middlewares": [
+                {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
+                    "name": "responseSessionCookieRemoval",
+                    "type": "responseSessionCookieRemoval"
+                },
+                {
+                    "name": "session",
+                    "type": "session",
+                    "options": {
+                        "lifetimeCookie": true,
+                        "idleTimeoutInMinute": 30,
+                        "uriWithoutSessionTimeoutReset": "^/analytics/pmt.pmt\\?ping.*|.*_uniport-polling_.*|.*conversation/polling/v1/.*"
+                    }
+                },
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json",
+                            "application/x-www-form-urlencoded"
+                        ]
+                    }
+                },
+                {
+                    "name": "replacedSessionCookieDetection",
+                    "type": "replacedSessionCookieDetection"
+                },
+                {
+                    "name": "whitelistedCookiesInSessionBag",
+                    "type": "sessionBag",
+                    "options": {
+                        "whitelistedCookies": [
+                            {
+                                "name": "KEYCLOAK_SESSION",
+                                "path": "/auth/realms/master/"
+                            },
+                            {
+                                "name": "KEYCLOAK_SESSION_LEGACY",
+                                "path": "/auth/realms/master/"
+                            },
+                            {
+                                "name": "KEYCLOAK_SESSION",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "KEYCLOAK_SESSION_LEGACY",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "AUTH_SESSION_ID",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "AUTH_SESSION_ID_LEGACY",
+                                "path": "/auth/realms/portal/"
+                            },
+                            {
+                                "name": "uniport.language",
+                                "path": "/"
+                            },
+                            {
+                                "name": "uniport.amr",
+                                "path": "/"
+                            },
+                            {
+                                "name": "ips.language",
+                                "path": "/"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "csp",
+                    "type": "csp",
+                    "options": {
+                        "policyDirectives": [
+                            {
+                                "directive": "report-to",
+                                "values": [
+                                    "/csp-reports"
+                                ]
+                            },
+                            {
+                                "directive": "report-uri",
+                                "values": [
+                                    "/csp-reports"
+                                ]
+                            },
+                            {
+                                "directive": "default-src",
+                                "values": [
+                                    "self"
+                                ]
+                            },
+                            {
+                                "directive": "style-src",
+                                "values": [
+                                    "https://fonts.googleapis.com",
+                                    "https://fonts.gstatic.com",
+                                    "https://cdn.jsdelivr.net",
+                                    "self",
+                                    "unsafe-inline"
+                                ]
+                            },
+                            {
+                                "directive": "font-src",
+                                "values": [
+                                    "https://fonts.googleapis.com",
+                                    "https://fonts.gstatic.com",
+                                    "https://cdn.jsdelivr.net",
+                                    "self",
+                                    "data:"
+                                ]
+                            },
+                            {
+                                "directive": "script-src",
+                                "values": [
+                                    "self",
+                                    "blob:",
+                                    "unsafe-inline",
+                                    "unsafe-eval",
+                                    "https://cdn.jsdelivr.net"
+                                ]
+                            },
+                            {
+                                "directive": "img-src",
+                                "values": [
+                                    "self",
+                                    "data: https:"
+                                ]
+                            },
+                            {
+                                "directive": "connect-src",
+                                "values": [
+                                    "self",
+                                    "https://fonts.googleapis.com"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "applications": [
+        {
+            "name": "proxy",
+            "entrypoint": "http20000",
+            "requestSelector": {
+                "urlPrefix": "/"
+            },
+            "provider": "ProxyApplication"
+        }
+    ],
+    "providers": [
+        {
+            "name": "file",
+            "directory": "./dynamic-config",
+            "watch": true
+        }
+    ]
+}

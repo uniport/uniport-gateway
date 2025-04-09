@@ -1,0 +1,152 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "analytics-admin",
+                "middlewares": [
+                    "analyticsAdminRedirectRegex",
+                    "analyticsOauth2",
+                    "analyticsAuthBearer",
+                    "analyticsBearerOnly",
+                    "analyticsMatomo",
+                    "analyticsHeaders",
+                    "analyticsReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics-admin')",
+                "service": "analytics-proxy"
+            },
+            {
+                "name": "analytics-public-tracker",
+                "middlewares": [
+                    "analyticsPublicReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics/pmt.pmt')",
+                "service": "analytics-proxy"
+            },
+            {
+                "name": "analytics-heatmap-session-recorder",
+                "middlewares": [
+                    "analyticsPublicReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics/plugins/HeatmapSessionRecording/configs.php')",
+                "service": "analytics-proxy"
+            },
+            {
+                "name": "analytics-public-tracker-script",
+                "middlewares": [
+                    "analyticsPublicReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics/matomo.js')",
+                "service": "analytics-proxy"
+            },
+            {
+                "name": "analytics-public-tracker-script-alias",
+                "middlewares": [
+                    "analyticsPublicReplacePath"
+                ],
+                "rule": "PathPrefix('/analytics/pmt.js')",
+                "service": "analytics-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "analyticsAdminRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/analytics-admin)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "analyticsOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "${PORTAL_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${PORTAL_GATEWAY_CLIENT_SECRET}",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Analytics"
+                }
+            },
+            {
+                "name": "analyticsAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Analytics"
+                }
+            },
+            {
+                "name": "analyticsBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
+                            "publicKeyAlgorithm": "RS256"
+                        }
+                    ],
+                    "audience": [
+                        "Analytics"
+                    ],
+                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['Analytics']['roles']",
+                            "operator": "CONTAINS",
+                            "value": [
+                                "ADMIN",
+                                "SUPERUSER",
+                                "WRITE",
+                                "VIEW"
+                            ]
+                        }
+                    ],
+                    "publicKeysReconcilation": {
+                        "enabled": true,
+                        "intervalMs": 3600000
+                    }
+                }
+            },
+            {
+                "name": "analyticsReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/analytics-admin/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "analyticsPublicReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/analytics/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "analyticsMatomo",
+                "type": "matomo"
+            },
+            {
+                "name": "analyticsHeaders",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "X-Forwarded-Uri": "/analytics-admin"
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "analytics-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_ANALYTICS_HOST}",
+                        "port": "${PORTAL_GATEWAY_ANALYTICS_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

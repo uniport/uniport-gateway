@@ -1,0 +1,63 @@
+{
+    "entrypoints": [
+        {
+            "name": "entrypointA",
+            "port": 20000,
+            "middlewares": [
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "entrypointB",
+            "port": 21000,
+            "middlewares": [
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json"
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "applications": [
+        {
+            "name": "appA",
+            "entrypoint": "entrypointA",
+            "requestSelector": {
+                "urlPrefix": "/"
+            },
+            "provider": "ProxyApplication"
+        },
+        {
+            "name": "appB",
+            "entrypoint": "entrypointB",
+            "requestSelector": {
+                "urlPrefix": "/"
+            },
+            "provider": "ProxyApplication"
+        }
+    ],
+    "providers": [
+        {
+            "name": "file",
+            "directory": "./dynamic-config",
+            "watch": true
+        }
+    ]
+}
