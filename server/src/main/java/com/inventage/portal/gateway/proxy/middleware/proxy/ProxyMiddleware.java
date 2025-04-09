@@ -228,7 +228,7 @@ public class ProxyMiddleware extends TraceMiddleware {
         if (headers.contains(headerName)) { // use
             LOGGER.debug("using provided header '{}' with '{}'", headerName, headers.get(headerName));
         } else { // set
-            LOGGER.debug("setting header '{}' to '{}'", headerName, headers.get(headerName));
+            LOGGER.debug("setting header '{}' to '{}'", headerName, headerValue);
             headers.set(headerName, headerValue);
         }
     }
