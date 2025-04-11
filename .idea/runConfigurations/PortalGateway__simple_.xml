@@ -1,11 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PortalGateway" type="Application" factoryName="Application">
-    <module name="server" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-    <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.PortalGatewayLauncher" />
+  <configuration default="false" name="PortalGateway 'simple'" type="Application" factoryName="Application">
     <envs>
       <env name="development" value="true" />
     </envs>
+    <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.PortalGatewayLauncher" />
+    <module name="server" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.inventage.portal.gateway.setup.*" />
@@ -20,8 +19,7 @@
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false"
-          PATH="server/src/test/resources/configs/simple/portal-gateway.env" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/test/resources/configs/simple/portal-gateway.env" />
       </ENTRIES>
     </extension>
     <method v="2">
