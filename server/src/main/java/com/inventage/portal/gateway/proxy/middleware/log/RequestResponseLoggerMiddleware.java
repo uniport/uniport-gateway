@@ -53,7 +53,7 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
 
         this.name = name;
         this.uriPatternForIgnoringRequests = uriPatternForIgnoringRequests == null ? null : Pattern.compile(uriPatternForIgnoringRequests);
-        this.contentTypesToLog = contentTypesToLog;
+        this.contentTypesToLog = contentTypesToLog.stream().toList();
         this.isLoggingRequestEnabled = isLoggingRequestEnabled;
         this.isLoggingResponseEnabled = isLoggingResponseEnabled;
     }

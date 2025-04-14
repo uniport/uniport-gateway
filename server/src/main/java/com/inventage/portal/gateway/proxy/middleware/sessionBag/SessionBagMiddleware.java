@@ -48,7 +48,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
 
         this.name = name;
-        this.whitelistedCookies = whitelistedCookies;
+        this.whitelistedCookies = whitelistedCookies.stream().map(WhitelistedCookieOptions::copyOf).toList();
         this.sessionCookieName = sessionCookieName;
     }
 
