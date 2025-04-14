@@ -39,10 +39,10 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     // These cookies are allowed to be passed back to the user agent.
     // This is required for some frontend logic to work properly
     // (e.g. for keycloak login logic of its admin console)
-    private final List<WhitelistedCookieOption> whitelistedCookies;
+    private final List<WhitelistedCookieOptions> whitelistedCookies;
     private final String sessionCookieName;
 
-    public SessionBagMiddleware(String name, List<WhitelistedCookieOption> whitelistedCookies, String sessionCookieName) {
+    public SessionBagMiddleware(String name, List<WhitelistedCookieOptions> whitelistedCookies, String sessionCookieName) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(whitelistedCookies, "whitelistedCookies must not be null");
         Objects.requireNonNull(sessionCookieName, "sessionCookieName must not be null");
@@ -290,7 +290,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     }
 
     private boolean isWhitelisted(Cookie cookie) {
-        for (WhitelistedCookieOption whitelistedCookie : whitelistedCookies) {
+        for (WhitelistedCookieOptions whitelistedCookie : whitelistedCookies) {
             final String whitelistedCookieName = whitelistedCookie.getName();
             final String whitelistedCookiePath = whitelistedCookie.getPath();
             if (whitelistedCookieName.equals(cookie.getName()) && whitelistedCookiePath.equals(cookie.getPath())) {

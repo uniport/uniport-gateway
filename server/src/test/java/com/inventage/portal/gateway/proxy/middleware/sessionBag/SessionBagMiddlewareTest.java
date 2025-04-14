@@ -219,12 +219,12 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final Cookie masterRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/master/").setMaxAge(3600);
         final Cookie portalRealmCookie = Cookie.cookie("KEYCLOAK_SESSION", "foobar").setPath("/auth/realms/portal/")
             .setMaxAge(3600);
-        final List<WhitelistedCookieOption> whitelistedCookies = List.of(
-            WhitelistedCookieOption.builder()
+        final List<WhitelistedCookieOptions> whitelistedCookies = List.of(
+            WhitelistedCookieOptions.builder()
                 .withName("KEYCLOAK_SESSION")
                 .withPath("/auth/realms/master/")
                 .build(),
-            WhitelistedCookieOption.builder()
+            WhitelistedCookieOptions.builder()
                 .withName("KEYCLOAK_SESSION")
                 .withPath("/auth/realms/portal/")
                 .build());
@@ -299,7 +299,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
     }
 
     void testHarness(
-        Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, List<WhitelistedCookieOption> whitelistedCookies,
+        Vertx vertx, VertxTestContext testCtx, SessionStore sessionStore, List<WhitelistedCookieOptions> whitelistedCookies,
         Handler<RoutingContext> serverReqHandler, Handler<HttpClientResponse> respHandler,
         List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler
     ) {
@@ -394,7 +394,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
      */
     void expectedCookies(
         VertxTestContext testCtx, String errMsg, SessionStore sessionStore,
-        AtomicReference<String> sessionId, List<WhitelistedCookieOption> whitelistedCookies, HttpClientResponse resp,
+        AtomicReference<String> sessionId, List<WhitelistedCookieOptions> whitelistedCookies, HttpClientResponse resp,
         List<Cookie> expectedSessionBagCookies
     ) {
         testCtx.verify(() -> {

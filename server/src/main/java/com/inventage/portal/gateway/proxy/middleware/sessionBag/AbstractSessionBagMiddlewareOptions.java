@@ -31,12 +31,12 @@ public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMidd
     }
 
     @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIES)
-    public abstract List<WhitelistedCookieOption> getWhitelistedCookieOptions();
+    public abstract List<WhitelistedCookieOptions> getWhitelistedCookieOptions();
 
     @Immutable
     @GatewayStyle
-    @JsonDeserialize(builder = WhitelistedCookieOption.Builder.class)
-    public abstract static class AbstractWhitelistedCookieOption implements GatewayMiddlewareOptions {
+    @JsonDeserialize(builder = WhitelistedCookieOptions.Builder.class)
+    public abstract static class AbstractWhitelistedCookieOptions implements GatewayMiddlewareOptions {
 
         @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME)
         public abstract String getName();

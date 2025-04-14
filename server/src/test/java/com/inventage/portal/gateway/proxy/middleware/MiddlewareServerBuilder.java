@@ -44,7 +44,7 @@ import com.inventage.portal.gateway.proxy.middleware.session.SessionCookieOption
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.sessionBag.WhitelistedCookieOption;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.WhitelistedCookieOptions;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.MockJWKAuthHandler;
 import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
@@ -275,12 +275,12 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new ControlApiMiddleware(vertx, "controlAPI", action, resetUri, client));
     }
 
-    public MiddlewareServerBuilder withSessionBagMiddleware(List<WhitelistedCookieOption> whitelistedCookies) {
+    public MiddlewareServerBuilder withSessionBagMiddleware(List<WhitelistedCookieOptions> whitelistedCookies) {
         return withMiddleware(
             new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session"));
     }
 
-    public MiddlewareServerBuilder withSessionBagMiddleware(List<WhitelistedCookieOption> whitelistedCookies, String sessionCookieName) {
+    public MiddlewareServerBuilder withSessionBagMiddleware(List<WhitelistedCookieOptions> whitelistedCookies, String sessionCookieName) {
         return withMiddleware(new SessionBagMiddleware("sessionBag", whitelistedCookies, sessionCookieName));
     }
 
