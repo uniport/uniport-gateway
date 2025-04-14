@@ -91,17 +91,19 @@ public class Entrypoint {
         });
     }
 
-    /**
-     */
     public boolean isTls() {
         return tls != null;
+    }
+
+    public void setJksOptions(JksOptions jksOptions) {
+        this.tls = new Tls(jksOptions);
     }
 
     public JksOptions jksOptions() {
         if (isTls()) {
             return tls.jksOptions();
         }
-        return new JksOptions();
+        return null;
     }
 
     public boolean enabled() {
@@ -158,8 +160,14 @@ public class Entrypoint {
     }
 
     static class Tls {
+        private JksOptions jksOptions;
+
+        Tls(JksOptions jksOptions) {
+            this.jksOptions = jksOptions;
+        }
+
         public JksOptions jksOptions() {
-            return null;
+            return jksOptions;
         }
     }
 
