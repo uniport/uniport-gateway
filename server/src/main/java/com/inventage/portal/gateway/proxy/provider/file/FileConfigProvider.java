@@ -25,13 +25,14 @@ public class FileConfigProvider extends Provider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigProvider.class);
 
+    private static final int SCAN_PERIOD_MS = 5000;
+
     private final Vertx vertx;
 
     private final EventBus eb;
     private final String configurationAddress;
     private final Boolean watch;
     private final JsonObject env;
-    private final int scanPeriodMs = 5000;
     private Path staticConfigDir;
     private Path filename;
     private Path directory;
@@ -94,8 +95,8 @@ public class FileConfigProvider extends Provider {
     private ConfigRetrieverOptions getOptions() {
         final ConfigRetrieverOptions options = new ConfigRetrieverOptions();
         if (this.watch) {
-            LOGGER.info("Setting scan period to '{}'", this.scanPeriodMs);
-            options.setScanPeriod(this.scanPeriodMs);
+            LOGGER.info("Setting scan period to '{}'", SCAN_PERIOD_MS);
+            options.setScanPeriod(SCAN_PERIOD_MS);
         }
 
         if (this.filename != null) {

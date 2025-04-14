@@ -56,7 +56,7 @@ public class ProxyApplication implements Application {
     /**
      * the selection criteria for delegating incoming requests to this application
      */
-    private final String rootPath = "/";
+    private static final String ROOT_PATH = "/";
 
     /**
      * the router on which the routes for this application will be added
@@ -95,7 +95,7 @@ public class ProxyApplication implements Application {
 
     @Override
     public String rootPath() {
-        return rootPath;
+        return ROOT_PATH;
     }
 
     @Override
