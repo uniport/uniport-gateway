@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map.Entry;
@@ -255,7 +256,7 @@ public class RequestResponseLoggerMiddleware extends TraceMiddleware {
             final String[] chunks = jwt.split("\\.");
             // JWT: https://datatracker.ietf.org/doc/html/rfc7519#section-3
             final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
-            final String payload = new String(urlDecoder.decode(chunks[1]));
+            final String payload = new String(urlDecoder.decode(chunks[1]), StandardCharsets.UTF_8);
             return new JsonObject(payload);
         } catch (IllegalArgumentException e) {
             LOGGER.error("failed for JWT '{}' because of '{}'", jwt, e.getMessage());
