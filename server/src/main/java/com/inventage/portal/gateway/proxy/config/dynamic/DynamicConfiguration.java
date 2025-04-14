@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -56,21 +56,17 @@ public class DynamicConfiguration {
         .toList();
     // services
     public static final String SERVICES = "services";
-    public static final String SERVICE_NAME = ProxyMiddlewareFactory.NAME;
-    // proxying configuration to keep the sovereignty close to the implementation
-    public static final String SERVICE_SERVERS = ProxyMiddlewareFactory.SERVERS;
-    public static final String SERVICE_SERVER_PROTOCOL = ProxyMiddlewareFactory.SERVER_PROTOCOL;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS = ProxyMiddlewareFactory.SERVER_HTTPS_OPTIONS;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME = ProxyMiddlewareFactory.VERIFY_HOSTNAME;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL = ProxyMiddlewareFactory.TRUST_ALL;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH = ProxyMiddlewareFactory.TRUST_STORE_PATH;
-    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = ProxyMiddlewareFactory.TRUST_STORE_PASSWORD;
-    public static final String SERVICE_SERVER_HOST = ProxyMiddlewareFactory.SERVER_HOST;
-    public static final String SERVICE_SERVER_PORT = ProxyMiddlewareFactory.SERVER_PORT;
-    public static final String SERVICE_VERBOSE = ProxyMiddlewareFactory.VERBOSE;
-
-    // default
-    public static final boolean DEFAULT_SERVICE_VERBOSE = ProxyMiddlewareFactory.DEFAULT_VERBOSE;
+    public static final String SERVICE_NAME = "name";
+    public static final String SERVICE_SERVERS = "servers";
+    public static final String SERVICE_SERVER_PROTOCOL = "protocol";
+    public static final String SERVICE_SERVER_HOST = "host";
+    public static final String SERVICE_SERVER_PORT = "port";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS = "httpsOptions";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME = "verifyHostname";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL = "trustAll";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH = "trustStorePath";
+    public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = "trustStorePassword";
+    public static final String SERVICE_VERBOSE = "verbose";
 
     // schema
     private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
@@ -148,7 +144,7 @@ public class DynamicConfiguration {
                             .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
                     .allowAdditionalProperties(false)))
             .optionalProperty(SERVICE_VERBOSE, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_SERVICE_VERBOSE))
+                .defaultValue(AbstractGatewayService.DEFAULT_SERVICE_VERBOSE))
             .allowAdditionalProperties(false);
         return serviceSchema;
     }

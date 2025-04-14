@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.proxy;
+package com.inventage.portal.gateway.proxy.service;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 

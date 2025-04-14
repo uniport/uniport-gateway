@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.middleware.proxy.HTTPsOptions;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;

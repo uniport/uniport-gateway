@@ -9,12 +9,12 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.Gateway;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.GatewayRouter;
 import com.inventage.portal.gateway.proxy.model.GatewayService;
+import com.inventage.portal.gateway.proxy.service.ReverseProxyFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -279,7 +279,7 @@ public class RouterFactory {
         }
         final Route route = routingRule.apply(router).last();
 
-        final List<Future<Middleware>> middlewareFutures = new ArrayList<>();
+        final List<Future<?>> middlewareFutures = new ArrayList<>();
 
         final ImmutableList<String> middlewareNames = routerConfig.getMiddlewares();
         for (String middlewareName : middlewareNames) {
@@ -309,23 +309,28 @@ public class RouterFactory {
             return;
         }
 
-        // required to be the last middleware
-        final Future<Middleware> proxyMiddlewareFuture = new ProxyMiddlewareFactory().create(vertx, serviceName, router, serviceConfig.get());
-        middlewareFutures.add(proxyMiddlewareFuture);
+        // required to be the last element in th middleware chain
+        final Future<Handler<RoutingContext>> proxyFuture = ReverseProxyFactory.of(vertx, serviceName, serviceConfig.get());
+        middlewareFutures.add(proxyFuture);
 
         // Handlers will get called if and only if
         // - all futures are succeeded and completed
         // - any future is failed.
         Future.all(middlewareFutures)
             .onSuccess(cf -> {
-                middlewareFutures.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
+                mountMiddlewareChain(route, middlewareFutures);
                 LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
                 handler.handle(Future.succeededFuture(router));
             }).onFailure(cfErr -> {
-                final String errMsg = String.format("Failed to create middlewares of router '%s'", routerName);
+                final String errMsg = String.format("Failed to create middlewares of router '%s': %s", routerName, cfErr);
                 LOGGER.warn("{}", errMsg);
                 handler.handle(Future.failedFuture(errMsg));
             });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void mountMiddlewareChain(Route route, List<Future<?>> middlewares) {
+        middlewares.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
     }
 
     private Future<Middleware> createMiddleware(GatewayMiddleware middlewareConfig, Router router) {

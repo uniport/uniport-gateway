@@ -36,8 +36,6 @@ import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMi
 import com.inventage.portal.gateway.proxy.middleware.matomo.MatomoMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ProxyMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
@@ -49,7 +47,9 @@ import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddle
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.WhitelistedCookieOption;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.MockJWKAuthHandler;
+import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.service.ReverseProxy;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -364,18 +364,18 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port, boolean verbose) {
-        return withMiddleware(new ProxyMiddleware(vertx, "proxy",
+        return withMiddleware(new ReverseProxy(vertx, "proxy",
             host, port,
-            ProxyMiddlewareFactory.DEFAULT_SERVER_PROTOCOL,
-            ProxyMiddlewareFactory.DEFAULT_TRUST_ALL,
-            ProxyMiddlewareFactory.DEFAULT_VERIFY_HOSTNAME,
-            ProxyMiddlewareFactory.DEFAULT_TRUST_STORE_PATH,
-            ProxyMiddlewareFactory.DEFAULT_TRUST_STORE_PASSWORD,
+            AbstractGatewayService.DEFAULT_SERVICE_SERVER_PROTOCOL,
+            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
+            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
+            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
+            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
             verbose));
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port, String serverProtocol, boolean httpsTrustAll, boolean verifyHost, String httpsTrustStorePath, String httpsTrustStorePassword) {
-        return withMiddleware(new ProxyMiddleware(vertx, "proxy", host, port, serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword, false));
+        return withMiddleware(new ReverseProxy(vertx, "proxy", host, port, serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword, false));
     }
 
     public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {

@@ -1,8 +1,8 @@
-package com.inventage.portal.gateway.proxy.middleware.proxy;
+package com.inventage.portal.gateway.proxy.service;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.proxy.contextAware.ContextAwareHttpServerRequest;
+import com.inventage.portal.gateway.proxy.service.contextAware.ContextAwareHttpServerRequest;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
  * Proxies requests and set the FORWARDED headers.
  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling
  */
-public class ProxyMiddleware extends TraceMiddleware {
+public class ReverseProxy extends TraceMiddleware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyMiddleware.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReverseProxy.class);
 
     private static final CharSequence X_FORWARDED_PROTO = HttpHeaders.createOptimized("x-forwarded-proto");
     private static final CharSequence X_FORWARDED_PORT = HttpHeaders.createOptimized("x-forwarded-port");
@@ -47,7 +47,7 @@ public class ProxyMiddleware extends TraceMiddleware {
     private final String serverHost;
     private final int serverPort;
 
-    public ProxyMiddleware(
+    public ReverseProxy(
         Vertx vertx,
         String name,
         String serverHost,

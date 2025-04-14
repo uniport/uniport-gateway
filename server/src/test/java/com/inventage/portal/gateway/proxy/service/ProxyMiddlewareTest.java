@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.middleware.proxy;
+package com.inventage.portal.gateway.proxy.service;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
 
@@ -163,7 +163,7 @@ public class ProxyMiddlewareTest {
     }
 
     private Logger setupLogger(ListAppender<ILoggingEvent> listAppender) {
-        final Logger logger = (Logger) LoggerFactory.getLogger(ProxyMiddleware.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(ReverseProxy.class);
         logger.addAppender(listAppender);
         listAppender.start();
         return logger;

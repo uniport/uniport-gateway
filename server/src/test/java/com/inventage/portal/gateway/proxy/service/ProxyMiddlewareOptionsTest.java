@@ -1,10 +1,12 @@
-package com.inventage.portal.gateway.proxy.middleware.proxy;
+package com.inventage.portal.gateway.proxy.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.model.GatewayService;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Map;
@@ -27,24 +29,24 @@ public class ProxyMiddlewareOptionsTest {
         final Boolean verbose = true;
 
         final JsonObject json = JsonObject.of(
-            ProxyMiddlewareFactory.NAME, aName,
-            ProxyMiddlewareFactory.SERVERS, List.of(
+            DynamicConfiguration.SERVICE_NAME, aName,
+            DynamicConfiguration.SERVICE_SERVERS, List.of(
                 Map.of(
-                    ProxyMiddlewareFactory.SERVER_PROTOCOL, serverProto,
-                    ProxyMiddlewareFactory.SERVER_HOST, serverHost,
-                    ProxyMiddlewareFactory.SERVER_PORT, serverPort,
-                    ProxyMiddlewareFactory.SERVER_HTTPS_OPTIONS, Map.of(
-                        ProxyMiddlewareFactory.VERIFY_HOSTNAME, httpsVerifyHostname,
-                        ProxyMiddlewareFactory.TRUST_ALL, httpsTrustAll,
-                        ProxyMiddlewareFactory.TRUST_STORE_PATH, httpsTrustStorePath,
-                        ProxyMiddlewareFactory.TRUST_STORE_PASSWORD, httpsTrustStorePassword))),
-            ProxyMiddlewareFactory.VERBOSE, verbose);
+                    DynamicConfiguration.SERVICE_SERVER_PROTOCOL, serverProto,
+                    DynamicConfiguration.SERVICE_SERVER_HOST, serverHost,
+                    DynamicConfiguration.SERVICE_SERVER_PORT, serverPort,
+                    DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS, Map.of(
+                        DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, httpsVerifyHostname,
+                        DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, httpsTrustAll,
+                        DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, httpsTrustStorePath,
+                        DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, httpsTrustStorePassword))),
+            DynamicConfiguration.SERVICE_VERBOSE, verbose);
 
         // when
-        final ThrowingSupplier<ProxyMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), ProxyMiddlewareOptions.class);
+        final ThrowingSupplier<GatewayService> parse = () -> new ObjectMapper().readValue(json.encode(), GatewayService.class);
 
         // then
-        final ProxyMiddlewareOptions options = assertDoesNotThrow(parse);
+        final GatewayService options = assertDoesNotThrow(parse);
         assertNotNull(options);
 
         assertNotNull(options.getServers());

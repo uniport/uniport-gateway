@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.inventage.portal.gateway.proxy.listener.Listener;
-import com.inventage.portal.gateway.proxy.middleware.proxy.ServerOptions;
 import com.inventage.portal.gateway.proxy.model.Gateway;
 import com.inventage.portal.gateway.proxy.model.GatewayRouter;
 import com.inventage.portal.gateway.proxy.model.GatewayService;
+import com.inventage.portal.gateway.proxy.model.ServerOptions;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
