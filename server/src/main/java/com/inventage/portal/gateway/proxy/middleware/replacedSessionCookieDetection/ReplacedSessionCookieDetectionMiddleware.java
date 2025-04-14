@@ -98,7 +98,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         }
 
         final String sessionCookieId = sessionCookie.get().getValue();
-        return sessionCookieId != sessionId;
+        return !sessionCookieId.equals(sessionId);
     }
 
     /**
