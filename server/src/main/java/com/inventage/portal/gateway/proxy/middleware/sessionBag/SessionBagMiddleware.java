@@ -180,7 +180,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
      */
     private String appendEncodedConflictfreeCookies(String path, String cookieHeaderValue, Set<Cookie> requestCookies, Set<Cookie> storedCookies) {
         for (Cookie requestCookie : requestCookies) {
-            if (this.containsCookie(storedCookies, requestCookie, path) != null) {
+            if (this.containsCookieForPath(storedCookies, requestCookie, path) != null) {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
                 continue;
             }
@@ -272,32 +272,22 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
     }
 
     private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
-        for (Cookie c : set) {
-            if (c.getName().equals(cookie.getName()) && c.getPath().equals(cookie.getPath())) {
-                return c;
-            }
-        }
-        return null;
+        return set.stream()
+            .filter(c -> c.getName().equals(cookie.getName()) && c.getPath().equals(cookie.getPath()))
+            .findFirst()
+            .orElse(null);
     }
 
-    private Cookie containsCookie(Set<Cookie> set, Cookie cookie, String path) {
-        for (Cookie c : set) {
-            if (c.getName().equals(cookie.getName()) && path.startsWith(c.getPath())) {
-                return c;
-            }
-        }
-        return null;
+    private Cookie containsCookieForPath(Set<Cookie> set, Cookie cookie, String path) {
+        return set.stream()
+            .filter(c -> c.getName().equals(cookie.getName()) && path.startsWith(c.getPath()))
+            .findFirst()
+            .orElse(null);
     }
 
     private boolean isWhitelisted(Cookie cookie) {
-        for (WhitelistedCookieOptions whitelistedCookie : whitelistedCookies) {
-            final String whitelistedCookieName = whitelistedCookie.getName();
-            final String whitelistedCookiePath = whitelistedCookie.getPath();
-            if (whitelistedCookieName.equals(cookie.getName()) && whitelistedCookiePath.equals(cookie.getPath())) {
-                return true;
-            }
-        }
-        return false;
+        return whitelistedCookies.stream()
+            .anyMatch(c -> c.getName().equals(cookie.getName()) && c.getPath().equals(cookie.getPath()));
     }
 
     private boolean isSessionCookie(Cookie cookie) {
