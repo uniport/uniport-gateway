@@ -33,7 +33,7 @@ public class SessionMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddleware.class);
 
-    private static final int MINUTE_MS = 60_000;
+    private static final long MINUTE_MS = 60_000L;
     private static final String COOKIE_DELIMITER = "; "; // RFC 6265 4.2.1
 
     private final String name;
