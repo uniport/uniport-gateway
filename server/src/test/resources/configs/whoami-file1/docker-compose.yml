@@ -1,33 +1,31 @@
-version: "3"
-
 services:
-    whoami1:
-        image: traefik/whoami
-        expose:
-            - "80"
-        ports:
-            - "8001:80"
-        networks:
-            - portal-gateway-whoami1
-        labels:
-            - "portal.enable=true"
-            - "portal.docker.network=portal-gateway-whoami1"
-            - "portal.http.routers.root.rule=Path('/whoami1')"
-    whoami2:
-        image: traefik/whoami
-        expose:
-            - "80"
-        ports:
-            - "8002:80"
-        networks:
-            - portal-gateway-whoami2
-        labels:
-            - "portal.enable=true"
-            - "portal.docker.network=portal-gateway-whoami2"
-            - "portal.http.routers.root.rule=Path('/whoami2')"
+  whoami1:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8001:80"
+    networks:
+      - portal-gateway-whoami1
+    labels:
+      - "portal.enable=true"
+      - "portal.docker.network=portal-gateway-whoami1"
+      - "portal.http.routers.root.rule=Path('/whoami1')"
+  whoami2:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8002:80"
+    networks:
+      - portal-gateway-whoami2
+    labels:
+      - "portal.enable=true"
+      - "portal.docker.network=portal-gateway-whoami2"
+      - "portal.http.routers.root.rule=Path('/whoami2')"
 
 networks:
-    portal-gateway-whoami1:
-        name: portal-gateway-whoami1
-    portal-gateway-whoami2:
-        name: portal-gateway-whoami2
+  portal-gateway-whoami1:
+    name: portal-gateway-whoami1
+  portal-gateway-whoami2:
+    name: portal-gateway-whoami2

@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.6
@@ -35,7 +33,11 @@ services:
         source: ./realm-testrealm.json
         target: /opt/keycloak/data/import/realm-testrealm.json
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3; if [ $$? -eq 0 ]; then echo \"Success\"; exit 0; else echo \"Failed\"; exit 1; fi"]
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3; if [ $$? -eq 0 ]; then echo \"Success\"; exit 0; else echo \"Failed\"; exit 1; fi",
+        ]
       start_period: 30s
       timeout: 5s
       interval: 15s

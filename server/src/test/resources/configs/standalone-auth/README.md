@@ -11,12 +11,17 @@ docker-compose -f docker-compose.yml up -d
 **NOTE**: This may take a couple of minutes and may even timeout, because `keycloak` is setting up all its database tables and importing the `testrealm`. Further,
 *the `portal-gateway` service may also fail on creating its `oauth2` middleware, due to `keycloak` not being configured completely yet.
 
-Once everything is running, visit <http://localhost:8080> and login to `keycloak` with `admin`/`admin`. Create a test user in the `testrealm` realm and set a password.
+Once everything is running, visit <http://localhost:8080> and login to `keycloak` with `admin`/`admin`. Verify that there is:
+
+* a realm called `testrealm`
+* a user called `user1@mail.com` in `testrealm` (initial password `user1...`)
+* client called `testclient`, `whoami<N>` in `testrealm`
+
 Then visit <http://localhost:20000> (unprotected) or <http://localhost:20000/whoami1> (protected) and use the test user to login.
 
 ## Configuration
 
-## Portal-Gateway
+### Portal-Gateway
 
 The `portal-gateway` is configured such that it has a single entrypoint on port `20000`. The entrypoint has the following middleware:
 
@@ -34,7 +39,7 @@ Further, there are 4 routes configured:
 
 ### Keycloak
 
-`keycloak` is required to be configured to work with the example configuration of the `portal-gateway`. Apart from configuring a test user, the imported realm
+`keycloak` is required to be configured to work with the example configuration of the `portal-gateway`. The imported realm
 configuration should take care of everything. For the sake of completeness, the following list show the custom configuration that is applied by the import:
 
 * Create realm `testrealm` (the following configuration has to be applied in this realm)

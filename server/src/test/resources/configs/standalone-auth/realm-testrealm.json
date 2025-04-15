@@ -2175,5 +2175,18 @@
     },
     "clientPolicies": {
         "policies": []
-    }
+    },
+    "users": [
+        {
+            "username": "user1@mail.com",
+            "enabled": true,
+            "credentials": [
+                {
+                    "type": "password",
+                    "userLabel": "initial",
+                    "value": "user1..."
+                }
+            ]
+        }
+    ]
 }

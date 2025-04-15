@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   whoami:
     image: ${docker.registry}/traefik/whoami
