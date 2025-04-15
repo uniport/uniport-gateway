@@ -52,7 +52,6 @@ public class StaticConfiguration {
     public static final String PROVIDER_DOCKER_EXPOSED_BY_DEFAULT = "exposedByDefault";
     public static final String PROVIDER_DOCKER_NETWORK = "network";
     public static final String PROVIDER_DOCKER_DEFAULT_RULE = "defaultRule";
-    public static final String PROVIDER_KUBERNETES = "kubernetesIngress";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
 
