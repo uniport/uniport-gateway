@@ -55,12 +55,11 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     public static final String RECONCILIATION_ENABLED = "enabled";
     public static final String RECONCILIATION_INTERVAL_MS = "intervalMs";
 
-    public static final String[] OPERATORS = new String[] {
+    public static final List<String> OPERATORS = List.of(
         CLAIM_OPERATOR_CONTAINS,
         CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE,
         CLAIM_OPERATOR_EQUALS,
-        CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE
-    };
+        CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
 
     // defaults
     public static final boolean DEFAULT_RECONCILIATION_ENABLED_VALUE = true;
@@ -83,7 +82,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
         final ArraySchemaBuilder claimsSchema = Schemas.arraySchema()
             .items(Schemas.objectSchema()
-                .requiredProperty(CLAIM_OPERATOR, Schemas.enumSchema((Object[]) OPERATORS))
+                .requiredProperty(CLAIM_OPERATOR, Schemas.enumSchema(OPERATORS.toArray()))
                 .requiredProperty(CLAIM_PATH, Schemas.stringSchema()
                     .with(Keywords.minLength(1)))
                 .requiredProperty(CLAIM_VALUE, Schemas.schema()) // TODO be more restrictive here

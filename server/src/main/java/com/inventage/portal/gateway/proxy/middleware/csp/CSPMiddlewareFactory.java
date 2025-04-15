@@ -13,6 +13,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +33,10 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
     public static final String MERGE_STRATEGY_EXTERNAL = "EXTERNAL";
     public static final String MERGE_STRATEGY_INTERNAL = "INTERNAL";
 
-    public static final String[] MERGE_STRATEGIES = new String[] {
+    public static final List<String> MERGE_STRATEGIES = List.of(
         MERGE_STRATEGY_UNION,
         MERGE_STRATEGY_EXTERNAL,
-        MERGE_STRATEGY_INTERNAL
-    };
+        MERGE_STRATEGY_INTERNAL);
 
     // defaults
     public static final boolean DEFAULT_REPORT_ONLY = false;
@@ -62,7 +62,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
                     .allowAdditionalProperties(false)))
             .optionalProperty(REPORT_ONLY, Schemas.booleanSchema()
                 .defaultValue(DEFAULT_REPORT_ONLY))
-            .optionalProperty(MERGE_STRATEGY, Schemas.enumSchema((Object[]) MERGE_STRATEGIES)
+            .optionalProperty(MERGE_STRATEGY, Schemas.enumSchema(MERGE_STRATEGIES.toArray())
                 .defaultValue(DEFAULT_MERGE_STRATEGY))
             .allowAdditionalProperties(false);
     }

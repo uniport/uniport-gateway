@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -21,13 +22,12 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     // schema
     public static final String TYPE = "cspViolationReportingServer";
     public static final String LOG_LEVEL = "logLevel";
-    public static final String[] LOG_LEVELS = new String[] {
+    public static final List<String> LOG_LEVELS = List.of(
         Level.TRACE.toString(),
         Level.DEBUG.toString(),
         Level.INFO.toString(),
         Level.WARN.toString(),
-        Level.ERROR.toString()
-    };
+        Level.ERROR.toString());
 
     // defaults
     public static final String DEFAULT_LOG_LEVEL = "WARN";
@@ -42,7 +42,7 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(LOG_LEVEL, Schemas.enumSchema((Object[]) LOG_LEVELS))
+            .requiredProperty(LOG_LEVEL, Schemas.enumSchema(LOG_LEVELS.toArray()))
             .allowAdditionalProperties(false);
     }
 

@@ -11,6 +11,7 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +27,9 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     public static final String ACTION_SESSION_TERMINATE = "SESSION_TERMINATE";
     public static final String ACTION_SESSION_RESET = "SESSION_RESET";
 
-    public static final String[] ACTIONS = new String[] {
+    public static final List<String> ACTIONS = List.of(
         ACTION_SESSION_TERMINATE,
-        ACTION_SESSION_RESET
-    };
+        ACTION_SESSION_RESET);
 
     // defaults
     public static final String DEFAULT_RESET_URL = null;
@@ -47,7 +47,7 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .requiredProperty(ACTION, Schemas.enumSchema((Object[]) ACTIONS))
+            .requiredProperty(ACTION, Schemas.enumSchema(ACTIONS.toArray()))
             .optionalProperty(SESSION_RESET_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .allowAdditionalProperties(false);
