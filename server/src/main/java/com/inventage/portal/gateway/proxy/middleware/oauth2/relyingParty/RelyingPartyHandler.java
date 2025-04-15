@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @see OAuth2AuthHandlerImpl
  */
-public class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
+public final class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Auth> implements OAuth2AuthHandler, ScopedAuthentication<OAuth2AuthHandler> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelyingPartyHandler.class);
     private static final Set<String> OPENID_SCOPES = new HashSet<>();

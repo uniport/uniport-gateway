@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * private
  * https://github.com/vert-x3/vertx-config/blob/4.5.8/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
  */
-public class JsonDirectoryConfigStore implements ConfigStore {
+public final class JsonDirectoryConfigStore implements ConfigStore {
 
     private final VertxInternal vertx;
 

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * (optional) initial uri, which triggered the
  * authentication flow. Additionally, the String value is Base64 encoded.
  */
-public class StateWithUri {
+public final class StateWithUri {
     private static final Logger LOGGER = LoggerFactory.getLogger(StateWithUri.class);
     private static final String SPLITTER1 = ":";
     private static final String SPLITTER2 = "@";
@@ -84,7 +84,6 @@ public class StateWithUri {
      */
     public StateWithUri(String state, String uri) {
         this(state, uri, null);
-
     }
 
     public StateWithUri(String state, String uri, HttpMethod httpMethod) {
