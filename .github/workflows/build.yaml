@@ -1,0 +1,22 @@
+name: Maven Build
+run-name: 'Maven build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-java-helm-maven
+        env:
+          NEXUS_USER: ${{ vars.NEXUS3_USER }}
+          NEXUS_PW: ${{ secrets.NEXUS3_PW }}
+
+      - name: Maven build
+        run: |
+          ./mvnw -B -V --no-transfer-progress --update-snapshots verify

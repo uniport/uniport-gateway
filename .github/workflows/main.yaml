@@ -1,0 +1,20 @@
+name: Main Build
+run-name: 'Main build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Prevent running builds for the same branch in parallel
+# New workflows will cancel existing workflows…
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (main)
+    uses: ./.github/workflows/build.yaml
+    secrets: inherit
