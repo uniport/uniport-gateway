@@ -20,10 +20,6 @@
             <artifactId>vertx-json-schema</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.inventage.portal.gateway</groupId>
             <artifactId>server</artifactId>
             <version>${project.version}</version>

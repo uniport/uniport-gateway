@@ -15,13 +15,6 @@
         <chart.directory>${project.build.directory}/portal-gateway</chart.directory>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.inventage.portal.gateway</groupId>
-            <artifactId>config-schemas</artifactId>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
