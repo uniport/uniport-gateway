@@ -697,7 +697,7 @@
                     <excludes>
                         <exclude>io.vertx:vertx-stack-depchain</exclude>
                     </excludes>
-                    <ignoredVersions>.*[a|A]lpha.*,.*beta.*</ignoredVersions>
+                    <ignoredVersions>(?i).*[-.](alpha|beta|m|rc|cr)([-.]?\d+)?</ignoredVersions>
                 </configuration>
                 <executions>
                     <execution>
