@@ -1,4 +1,4 @@
-FROM ${docker.registry}/eclipse-temurin:17-jre
+FROM ${docker.registry}/eclipse-temurin:${maven.compiler.release}-jre
 
 WORKDIR /app
 
@@ -24,24 +24,24 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=50.0 -XX:+PrintFlagsFinal"
 # provide Hazelcast access to Java internal API
 # See https://docs.hazelcast.com/imdg/4.0/getting-started/running-in-modular-java
 ENV JAVA_OPTS="$JAVA_OPTS \
---add-modules java.se \
---add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
---add-opens java.base/java.lang=ALL-UNNAMED \
---add-opens java.base/java.nio=ALL-UNNAMED \
---add-opens java.base/sun.nio.ch=ALL-UNNAMED \
---add-opens java.management/sun.management=ALL-UNNAMED \
---add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED"
+    --add-modules java.se \
+    --add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/java.nio=ALL-UNNAMED \
+    --add-opens java.base/sun.nio.ch=ALL-UNNAMED \
+    --add-opens java.management/sun.management=ALL-UNNAMED \
+    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED"
 
 # for enabling remote debugging
 ENV JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=0.0.0.0:20009,server=y,suspend=n"
 # for enabling jmx for jconsole
 ENV JAVA_OPTS="$JAVA_OPTS \
--Dcom.sun.management.jmxremote \
--Dcom.sun.management.jmxremote.local.only=false \
--Dcom.sun.management.jmxremote.authenticate=false \
--Dcom.sun.management.jmxremote.port=9010 \
--Dcom.sun.management.jmxremote.rmi.port=9010 \
--Dcom.sun.management.jmxremote.ssl=false \
--Djava.rmi.server.hostname=0.0.0.0"
+    -Dcom.sun.management.jmxremote \
+    -Dcom.sun.management.jmxremote.local.only=false \
+    -Dcom.sun.management.jmxremote.authenticate=false \
+    -Dcom.sun.management.jmxremote.port=9010 \
+    -Dcom.sun.management.jmxremote.rmi.port=9010 \
+    -Dcom.sun.management.jmxremote.ssl=false \
+    -Djava.rmi.server.hostname=0.0.0.0"
 
 ENTRYPOINT java $JAVA_OPTS -jar /app/portal-gateway.jar 

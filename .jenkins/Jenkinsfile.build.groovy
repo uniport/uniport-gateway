@@ -4,7 +4,8 @@ library identifier: 'portal-jenkinsfile-library@stable', retriever: modernSCM([
 
 buildPipeline(
     // jenkins
-    nodeLabels: "java17 && docker && !northport",
+    nodeLabels: "java21 && docker && !northport",
+    jdkVersion: "OpenJDK-21",
     defaultBranch: "master",
     buildTimeoutMinutes: 60,
     notificationRecipientsConfigMapName: "default-email-recipients",
