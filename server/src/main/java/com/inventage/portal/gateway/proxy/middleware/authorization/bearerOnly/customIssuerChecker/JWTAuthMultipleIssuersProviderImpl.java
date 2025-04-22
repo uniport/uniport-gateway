@@ -12,7 +12,7 @@ import io.vertx.ext.auth.jwt.impl.JWTAuthProviderImpl;
 import java.util.List;
 
 /**
- * https://github.com/eclipse-vertx/vertx-auth/blob/4.5.8/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java
+ * https://github.com/eclipse-vertx/vertx-auth/blob/4.5.14/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java
  */
 public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 
@@ -36,7 +36,7 @@ public class JWTAuthMultipleIssuersProviderImpl extends JWTAuthProviderImpl {
 
         // Otherwise we manually check if the current jwt has one of our additional issuer included.
         // Copied from the JWTAuthProviderImpl#authenticate method.
-        // https://github.com/eclipse-vertx/vertx-auth/blob/4.5.8/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java#L146-L154
+        // https://github.com/eclipse-vertx/vertx-auth/blob/4.5.14/vertx-auth-jwt/src/main/java/io/vertx/ext/auth/jwt/impl/JWTAuthProviderImpl.java#L146-L154
         final TokenCredentials authInfo;
         try {
             // cast

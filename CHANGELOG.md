@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Change the internal representation of the dynamic configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
+- Upgrade the Vert.x stack from `4.5.8` to `4.5.14` ([PORTAL-2347](https://inventage-all.atlassian.net/browse/PORTAL-2347)).
+- Upgrade all used dependencies and plugins ([PORTAL-2347](https://inventage-all.atlassian.net/browse/PORTAL-2347)).
 
 ## [9.4.0]-202503211149-1294-26d95127 - 2025-03-21
 

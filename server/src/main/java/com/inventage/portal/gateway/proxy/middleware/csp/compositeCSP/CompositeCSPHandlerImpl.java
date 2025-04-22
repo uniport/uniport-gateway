@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * all CSPMiddlewares on the same route are enforced.
  *
  * The entire class, with exception to the handle method is copied from the default io.vertx.ext.web.handler.impl.CSPHandlerImpl in vertx-web
- * https://github.com/vert-x3/vertx-web/blob/4.5.8/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/CSPHandlerImpl.java
+ * https://github.com/vert-x3/vertx-web/blob/4.5.14/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/CSPHandlerImpl.java
  * 
  * The following changes were made:
  * - no default directive

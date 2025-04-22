@@ -19,6 +19,7 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
+import io.vertx.ext.web.UserContext;
 import io.vertx.ext.web.impl.RoutingContextInternal;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.Objects;
 
 /**
  * Wraps a {@link RoutingContext} and simply delegate all method calls to the wrapped handler
- * See: https://github.com/vert-x3/vertx-web/blob/4.5.8/vertx-web/src/main/java/io/vertx/ext/web/impl/RoutingContextInternal.java
+ * See: https://github.com/vert-x3/vertx-web/blob/4.5.14/vertx-web/src/main/java/io/vertx/ext/web/impl/RoutingContextInternal.java
  * 
  * Additionally, any call finishing the current handler, ends the span.
  *
@@ -260,6 +261,11 @@ public class TraceRoutingContext implements RoutingContextInternal {
     @Override
     public User user() {
         return ctx.user();
+    }
+
+    @Override
+    public UserContext userContext() {
+        return ctx.userContext();
     }
 
     @Override
