@@ -114,6 +114,11 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <!-- https://github.com/kokuwaio/helm-maven-plugin/issues/408 -->
+                        <id>default-clean</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
                         <id>default-cli</id>
                         <configuration>
                             <skipInstall>false</skipInstall>

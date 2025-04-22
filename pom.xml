@@ -438,7 +438,7 @@
                     <!-- See https://github.com/kokuwaio/helm-maven-plugin for documentation -->
                     <groupId>io.kokuwa.maven</groupId>
                     <artifactId>helm-maven-plugin</artifactId>
-                    <version>6.14.0</version>
+                    <version>6.17.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <chartVersion>${project.version}</chartVersion>
