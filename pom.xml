@@ -46,8 +46,6 @@
 
         <docker-java.version>3.5.0</docker-java.version>
         <junit-jupiter.version>5.11.0</junit-jupiter.version>
-        <!-- https://github.com/open-telemetry/opentelemetry-java/releases -->
-        <opentelemetry.version>1.38.0</opentelemetry.version>
 
         <nexus3.helm.registry.push.url>https://nexus3.inventage.com/repository</nexus3.helm.registry.push.url>
         <nexus3.helm.repository.push.id>inventage-portal-helm-staging</nexus3.helm.repository.push.id>
@@ -178,7 +176,7 @@
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-bom</artifactId>
-                <version>${opentelemetry.version}</version>
+                <version>1.49.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
