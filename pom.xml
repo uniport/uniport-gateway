@@ -692,12 +692,10 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <inherited>false</inherited>
                 <configuration>
-                    <excludes>
-                        <exclude>io.vertx:vertx-stack-depchain</exclude>
-                    </excludes>
                     <ignoredVersions>(?i).*[-.](alpha|beta|m|rc|cr)([-.]?\d+)?</ignoredVersions>
+                    <processDependencyManagement>false</processDependencyManagement>
+                    <processPluginDependenciesInPluginManagement>false</processPluginDependenciesInPluginManagement>
                 </configuration>
                 <executions>
                     <execution>
@@ -715,6 +713,7 @@
             <plugin>
                 <groupId>io.github.mfoo</groupId>
                 <artifactId>libyear-maven-plugin</artifactId>
+                <inherited>false</inherited>
                 <executions>
                     <execution>
                         <id>libyear-analysis</id>
