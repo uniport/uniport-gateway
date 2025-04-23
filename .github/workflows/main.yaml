@@ -16,5 +16,5 @@ concurrency:
 jobs:
   build:
     name: Build (main)
-    uses: ./.github/workflows/build.yaml
+    uses: ./.github/workflows/build.yml
     secrets: inherit
