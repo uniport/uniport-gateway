@@ -1,5 +1,5 @@
-name: Nexus Tag Create
-run-name: 'Nexus create tag workflow #${{ github.run_number }} triggered by ${{ github.actor }}'
+name: Nexus Tag Associate
+run-name: 'Nexus associate tag workflow #${{ github.run_number }} triggered by ${{ github.actor }}'
 
 on:
   workflow_call:
@@ -23,13 +23,11 @@ env:
   NEXUS3_USER: ${{ vars.NEXUS3_USER }}
 
 jobs:
-  register:
+  associate:
+    name: Tag Associate
     runs-on: ubuntu-latest
     steps:
-      - name: Create Nexus Tag
+      # https://help.sonatype.com/en/tagging.html
+      - name: Associate Components with Nexus Tag
         run: |
-          curl --request POST \
-            --url ${{ env.NEXUS3_URL }}/service/rest/v1/tags \
-            -u ${{ env.NEXUS3_USER }}:${{ secrets.NEXUS3_PW }}
-            --header 'content-type: application/json' \
-            --data '{"name":"${{ inputs.name }}"}'
+          echo hello
