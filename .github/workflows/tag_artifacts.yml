@@ -1,0 +1,66 @@
+name: Tag Artifacts
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'The version to create a tag and associate components for'
+        type: string
+        required: true
+      group_id:
+        description: 'The group ID attribute'
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version to create a tag and associate components for'
+        type: string
+        required: true
+      group_id:
+        description: 'The group ID attribute'
+        type: string
+        required: true
+
+# Prevent running checks for the same branch in parallel
+# New workflows will cancel existing workflows…
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TAG_NAME: ${{ inputs.group_id }}-${{ inputs.version }}
+
+jobs:
+#  tag_docker:
+#    name: Create Tag (docker)
+#    uses: ./.github/workflows/nexus_tag_create.yaml
+#    with:
+#      name: ${{ inputs.name }}-docker
+#    secrets:
+#      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+#
+#  tag_helm:
+#    name: Create Tag (helm)
+#    uses: ./.github/workflows/build.yaml
+#    with:
+#      name: ${{ inputs.name }}-helm
+#    secrets:
+#      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+
+  tag_mvn:
+    name: Create Tag (maven)
+    uses: ./.github/workflows/build.yaml
+    with:
+      name: ${{ env.TAG_NAME }}-mvn
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+
+  associate_mvn:
+    name: Associate Components (maven)
+    uses: ./.github/workflows/nexus_tag_associate.yaml
+    needs: [tag_mvn]
+    with:
+      repo_id: inventage-portal-maven-staging
+      tag_name: ${{ env.TAG_NAME }}-mvn
+      version: ${{ inputs.version }}
