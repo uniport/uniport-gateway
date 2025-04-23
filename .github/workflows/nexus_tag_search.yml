@@ -1,5 +1,5 @@
-name: Nexus Tag Associate
-run-name: 'Nexus associate tag workflow #${{ github.run_number }} triggered by ${{ github.actor }}'
+name: Nexus Tag Search
+run-name: 'Nexus search tag workflow #${{ github.run_number }} triggered by ${{ github.actor }}'
 
 on:
   workflow_dispatch:
