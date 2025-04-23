@@ -4,14 +4,11 @@ import com.inventage.portal.gateway.proxy.middleware.HttpResponder;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.http.Cookie;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -204,11 +201,19 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         return getCookieFromHeader(ctx, this.sessionCookieName);
     }
 
-    // we can't use ctx.request().cookies(), because vertx parses the request cookie header in netty's strict mode i.e. whitespaces are not allowed
+    /**
+     * Reads the cookie from the request and returns the FIRST with the supplied name.
+     * 
+     * This assumes there aren't multiple cookies with the same name (technically possible due to the name/host/path tuple)
+     * 
+     * @param ctx
+     * @param cookieName
+     * @return
+     */
     private Optional<Cookie> getCookieFromHeader(RoutingContext ctx, String cookieName) {
-        final List<String> cookieHeaders = ctx.request().headers().getAll(HttpHeaders.COOKIE);
-        final Cookie cookie = CookieUtil.cookieMapFromRequestHeader(cookieHeaders).get(cookieName);
-        return Optional.ofNullable(cookie);
+        return ctx.request().cookies().stream()
+            .filter(c -> c.getName().equals(cookieName))
+            .findFirst();
     }
 
     private void setDetectionCookieTo(HttpServerResponse response, Optional<DetectionCookieValue> cookieValue) {

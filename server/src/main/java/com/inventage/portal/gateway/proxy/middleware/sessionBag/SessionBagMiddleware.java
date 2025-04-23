@@ -6,6 +6,7 @@ import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.impl.ServerCookie;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.PlatformHandler;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         }
 
         // load request cookies
-        final Set<Cookie> requestCookies = CookieUtil.fromRequestHeader(ctx.request().headers().getAll(HttpHeaders.COOKIE));
+        final Set<ServerCookie> requestCookies = cookies(ctx);
         ctx.request().headers().remove(HttpHeaders.COOKIE);
 
         // on incoming request: set cookie from session bag if present
@@ -79,7 +80,16 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         ctx.next();
     }
 
-    private String loadCookiesFromSessionBag(RoutingContext ctx, Set<Cookie> requestCookies) {
+    private Set<ServerCookie> cookies(RoutingContext ctx) {
+        // we need to be able to handle invalid cookies as well, hence we parse the cookie header our self and use a custom cookie jar that disables validation
+        final String cookieHeader = ctx.request().headers().get(HttpHeaders.COOKIE);
+        if (cookieHeader == null) {
+            return new LaxCookieJar();
+        }
+        return new LaxCookieJar(cookieHeader);
+    }
+
+    private String loadCookiesFromSessionBag(RoutingContext ctx, Set<ServerCookie> requestCookies) {
         if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
             return null;
         }
@@ -178,7 +188,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
      * check for conflicting request and stored cookies
      * stored cookie have precedence to avoid cookie injection
      */
-    private String appendEncodedConflictFreeCookies(String path, String cookieHeaderValue, Set<Cookie> requestCookies, Set<Cookie> storedCookies) {
+    private String appendEncodedConflictFreeCookies(String path, String cookieHeaderValue, Set<ServerCookie> requestCookies, Set<Cookie> storedCookies) {
         for (Cookie requestCookie : requestCookies) {
             if (this.containsCookieForPath(storedCookies, requestCookie, path) != null) {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
