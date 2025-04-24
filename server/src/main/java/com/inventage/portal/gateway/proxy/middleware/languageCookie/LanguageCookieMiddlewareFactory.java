@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.languageCookie;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -43,6 +44,9 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        if (options.containsKey(LANGUAGE_COOKIE_NAME) && !CookieUtil.isValidCookieName(LOGGER, options.getString(LANGUAGE_COOKIE_NAME))) {
+            return Future.failedFuture("cookie name is invalid");
+        }
         return Future.succeededFuture();
     }
 

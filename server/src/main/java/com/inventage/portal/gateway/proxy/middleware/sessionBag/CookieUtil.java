@@ -5,12 +5,15 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
 
 public class CookieUtil {
 
@@ -76,6 +79,51 @@ public class CookieUtil {
         }
 
         return nettyCookie;
+    }
+
+    public static boolean isValidCookieName(Logger logger, String name) {
+        Objects.requireNonNull(name, "name must not be null");
+        final int invalidOctetPos = firstInvalidCookieNameOctet(name);
+        if (invalidOctetPos >= 0) {
+            logger.debug("Invalid cookie because name '{}' contains invalid char '{}'", name, name.charAt(invalidOctetPos));
+            return false;
+        }
+        return true;
+    }
+
+    // Taken from https://github.com/netty/netty/blob/netty-4.1.118.Final/codec-http/src/main/java/io/netty/handler/codec/http/cookie/CookieUtil.java#L134-L150
+    private static final BitSet VALID_COOKIE_NAME_OCTETS = validCookieNameOctets();
+
+    // See https://datatracker.ietf.org/doc/html/rfc2616#section-2.2
+    // token = 1*<any CHAR except CTLs or separators>
+    // separators = "(" | ")" | "<" | ">" | "@"
+    // | "," | ";" | ":" | "\" | <">
+    // | "/" | "[" | "]" | "?" | "="
+    // | "{" | "}" | SP | HT
+    private static BitSet validCookieNameOctets() {
+        final BitSet bits = new BitSet();
+        for (int i = 32; i < 127; i++) {
+            bits.set(i);
+        }
+        final int[] separators = new int[] { '(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', '?', '=', '{', '}', ' ', '\t' };
+        for (int separator : separators) {
+            bits.set(separator, false);
+        }
+        return bits;
+    }
+
+    private static int firstInvalidCookieNameOctet(CharSequence cs) {
+        return firstInvalidOctet(cs, VALID_COOKIE_NAME_OCTETS);
+    }
+
+    private static int firstInvalidOctet(CharSequence cs, BitSet bits) {
+        for (int i = 0; i < cs.length(); i++) {
+            final char c = cs.charAt(i);
+            if (!bits.get(c)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }

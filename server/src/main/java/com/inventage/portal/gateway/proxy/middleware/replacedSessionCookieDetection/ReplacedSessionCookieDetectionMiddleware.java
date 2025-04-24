@@ -204,7 +204,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
         return getCookieFromHeader(ctx, this.sessionCookieName);
     }
 
-    // we can't use ctx.request().cookies() (fbuetler: why not? probably: https://github.com/eclipse-vertx/vert.x/issues/5464), so we must read the HTTP header by ourselves
+    // we can't use ctx.request().cookies(), because vertx parses the request cookie header in netty's strict mode i.e. whitespaces are not allowed
     private Optional<Cookie> getCookieFromHeader(RoutingContext ctx, String cookieName) {
         final List<String> cookieHeaders = ctx.request().headers().getAll(HttpHeaders.COOKIE);
         final Cookie cookie = CookieUtil.cookieMapFromRequestHeader(cookieHeaders).get(cookieName);

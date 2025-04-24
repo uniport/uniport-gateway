@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.csrf;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -75,6 +76,11 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        if (options.containsKey(COOKIE) &&
+            options.getJsonObject(COOKIE).containsKey(COOKIE_NAME) &&
+            !CookieUtil.isValidCookieName(LOGGER, options.getJsonObject(COOKIE).getString(COOKIE_NAME))) {
+            return Future.failedFuture("cookie name is invalid");
+        }
         return Future.succeededFuture();
     }
 

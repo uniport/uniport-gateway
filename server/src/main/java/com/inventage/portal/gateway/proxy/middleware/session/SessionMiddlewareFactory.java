@@ -2,6 +2,7 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -119,6 +120,11 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        if (options.containsKey(SESSION_COOKIE) &&
+            options.getJsonObject(SESSION_COOKIE).containsKey(SESSION_COOKIE_NAME) &&
+            !CookieUtil.isValidCookieName(LOGGER, options.getJsonObject(SESSION_COOKIE).getString(SESSION_COOKIE_NAME))) {
+            return Future.failedFuture("cookie name is invalid");
+        }
         return Future.succeededFuture();
     }
 

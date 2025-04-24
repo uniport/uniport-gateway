@@ -3,6 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -56,6 +57,9 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
 
     @Override
     public Future<Void> validate(JsonObject options) {
+        if (options.containsKey(DETECTION_COOKIE_NAME) && !CookieUtil.isValidCookieName(LOGGER, options.getString(DETECTION_COOKIE_NAME))) {
+            return Future.failedFuture("cookie name is invalid");
+        }
         return Future.succeededFuture();
     }
 
