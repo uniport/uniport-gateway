@@ -84,7 +84,6 @@ public class ReverseProxy extends TraceMiddleware {
                 vertx))
             .origin(serverPort, serverHost);
 
-        lowercaseHostHeader(httpProxy);
         setHostHeader(httpProxy);
         setXForwardedHeaders(httpProxy);
         applyModifiers(httpProxy);
@@ -131,35 +130,6 @@ public class ReverseProxy extends TraceMiddleware {
             LOGGER.error("Error while proxying request", e);
             ctx.fail(e);
         }
-    }
-
-    /**
-     * Due to a bug in the vertx-http-proxy comparing the host header case-sensitive with "host",
-     * we have to make sure the incoming request host header is lowercase as well i.e. not "Host".
-     * Otherwise, we have a weird combination of having a host header value in the request.headers()
-     * and another host header value in the request.host.
-     * Apparently, the host header value in request.headers() has precedence.
-     * 
-     * The bug was already fixed and is probably available in the next release.
-     * This interceptor can then be removed.
-     * See: https://github.com/eclipse-vertx/vertx-http-proxy/issues/77
-     * 
-     * @param proxy
-     */
-    protected void lowercaseHostHeader(HttpProxy proxy) {
-        proxy.addInterceptor(new ProxyInterceptor() {
-            @Override
-            public Future<ProxyResponse> handleProxyRequest(ProxyContext proxyContext) {
-                final ProxyRequest incomingRequest = proxyContext.request();
-                if (incomingRequest.headers().contains("Host")) {
-                    LOGGER.debug("lowercasing the host header name");
-                    final String host = incomingRequest.headers().get("Host");
-                    incomingRequest.headers().remove("Host");
-                    incomingRequest.headers().set("host", host);
-                }
-                return proxyContext.sendRequest();
-            }
-        });
     }
 
     /**
