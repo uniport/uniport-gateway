@@ -39,7 +39,7 @@ public class ControlApiMiddleware extends TraceMiddleware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddleware.class);
 
-    private static final String KEYCOAK_COOKIE_NAME_PREFIX = "KEYCLOAK_";
+    private static final String KEYCLOAK_COOKIE_NAME_PREFIX = "KEYCLOAK_";
     private static final String KEYCLOAK_IDENTITY_COOKIE_NAME = "KEYCLOAK_IDENTITY";
 
     private final Vertx vertx;
@@ -219,7 +219,7 @@ public class ControlApiMiddleware extends TraceMiddleware {
 
     private Set<Cookie> getKeycloakCookiesFrom(Set<Cookie> cookiesInSessionBag) {
         return cookiesInSessionBag.stream()
-            .filter(cookie -> cookie.getName().startsWith(KEYCOAK_COOKIE_NAME_PREFIX))
+            .filter(cookie -> cookie.getName().startsWith(KEYCLOAK_COOKIE_NAME_PREFIX))
             .collect(Collectors.toCollection(CookieBag::new));
     }
 }

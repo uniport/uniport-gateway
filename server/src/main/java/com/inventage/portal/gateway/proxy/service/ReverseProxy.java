@@ -138,7 +138,7 @@ public class ReverseProxy extends TraceMiddleware {
      * we have to make sure the incoming request host header is lowercase as well i.e. not "Host".
      * Otherwise, we have a weird combination of having a host header value in the request.headers()
      * and another host header value in the request.host.
-     * Apparently, the host header value in request.headers() has presendence.
+     * Apparently, the host header value in request.headers() has precedence.
      * 
      * The bug was already fixed and is probably available in the next release.
      * This interceptor can then be removed.
@@ -187,7 +187,7 @@ public class ReverseProxy extends TraceMiddleware {
     /**
      * Since version 4.3.5, the vertx-http-proxy sets the 'x-forwarded-host', in case it detects that
      * the outgoing request has a different host header value than the incoming request.
-     * We previously set that header outself, alongside with 'x-forwarded-proto' and 'x-forwarded-port',
+     * We previously set that header ourself, alongside with 'x-forwarded-proto' and 'x-forwarded-port',
      * so we still need to set them here.
      * 
      * @param proxy
@@ -234,7 +234,7 @@ public class ReverseProxy extends TraceMiddleware {
     }
 
     /**
-     * Generally, the requests or responses should be modified by the repective middleware itself.
+     * Generally, the requests or responses should be modified by the respective middleware itself.
      * However, some operations are not possible on a HttpServerRequest, such as changing the request's path.
      * Similarly for some operations on the response, like operations on response headers.
      * To circumvent this, we do that here in the proxy middleware.

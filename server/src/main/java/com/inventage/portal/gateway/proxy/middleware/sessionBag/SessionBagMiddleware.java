@@ -89,7 +89,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
         final String cookieHeaderValue = encodeMatchingCookies(storedCookies, ctx.request().path(), ctx.request().isSSL());
 
-        return appendEncodedConflictfreeCookies(ctx.request().path(), cookieHeaderValue, requestCookies, storedCookies);
+        return appendEncodedConflictFreeCookies(ctx.request().path(), cookieHeaderValue, requestCookies, storedCookies);
     }
 
     private String encodeMatchingCookies(Set<Cookie> storedCookies, String path, boolean isSSL) {
@@ -178,7 +178,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
      * check for conflicting request and stored cookies
      * stored cookie have precedence to avoid cookie injection
      */
-    private String appendEncodedConflictfreeCookies(String path, String cookieHeaderValue, Set<Cookie> requestCookies, Set<Cookie> storedCookies) {
+    private String appendEncodedConflictFreeCookies(String path, String cookieHeaderValue, Set<Cookie> requestCookies, Set<Cookie> storedCookies) {
         for (Cookie requestCookie : requestCookies) {
             if (this.containsCookieForPath(storedCookies, requestCookie, path) != null) {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
