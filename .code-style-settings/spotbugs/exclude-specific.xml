@@ -17,5 +17,9 @@
         <Class name="~.*?proxy\.(middleware\..*?Options|model\..*?)" />
         <Bug pattern="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION" />
     </Match>
+    <Match>
+        <Class name="~.*(ConfigurationWatcher|CompositeCSPHandlerImpl|RelyingPartyHandler|DockerContainerServiceImporter)"/>
+        <Bug pattern="AT_NONATOMIC_64BIT_PRIMITIVE,AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
+    </Match>
 
 </FindBugsFilter>
