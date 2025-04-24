@@ -5,18 +5,14 @@ import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
-/**
- */
 public class SessionAdapter {
 
     private static final int SESSION_ID_DISPLAYED_LENGTH = 5;
 
     public static final String EMPTY_SESSION_DISPLAY = null;
 
-    /**
-     */
     public static String displaySessionId(RoutingContext context) {
-        final Cookie sessionCookie = context.request().getCookie(SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
+        final Cookie sessionCookie = context.request().getCookie(SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME); // TODO technically this is wrong as the session cookie name is configurable
         return sessionCookie == null ? EMPTY_SESSION_DISPLAY : firstCharactersOf(SESSION_ID_DISPLAYED_LENGTH, sessionCookie.getValue());
     }
 

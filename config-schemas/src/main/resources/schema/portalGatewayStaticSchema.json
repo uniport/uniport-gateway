@@ -945,6 +945,11 @@
                         "default" : 5,
                         "type" : "integer",
                         "minimum" : 0.0
+                      },
+                      "sessionCookieName" : {
+                        "default" : "uniport.session",
+                        "minLength" : 1,
+                        "type" : "string"
                       }
                     }
                   },

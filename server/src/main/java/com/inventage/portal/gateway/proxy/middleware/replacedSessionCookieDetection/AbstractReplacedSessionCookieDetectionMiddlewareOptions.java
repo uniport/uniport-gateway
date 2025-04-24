@@ -23,6 +23,13 @@ public abstract class AbstractReplacedSessionCookieDetectionMiddlewareOptions im
     }
 
     @Default
+    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.SESSION_COOKIE_NAME)
+    public String getSessionCookieName() {
+        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.SESSION_COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
+        return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+    }
+
+    @Default
     @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS)
     public int getWaitBeforeRetryMs() {
         logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS);

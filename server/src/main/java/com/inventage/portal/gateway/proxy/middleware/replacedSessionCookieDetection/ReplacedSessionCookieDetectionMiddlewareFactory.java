@@ -23,6 +23,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     // schema
     public static final String TYPE = "replacedSessionCookieDetection";
     public static final String DETECTION_COOKIE_NAME = "name";
+    public static final String SESSION_COOKIE_NAME = "sessionCookieName";
     public static final String WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
     public static final String MAX_REDIRECT_RETRIES = "maxRedirectRetries";
 
@@ -32,8 +33,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
     public static final int DEFAULT_MAX_REDIRECT_RETRIES = 5;
 
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(ReplacedSessionCookieDetectionMiddlewareFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddlewareFactory.class);
 
     @Override
     public String provides() {
@@ -46,6 +46,9 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
             .optionalProperty(DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_DETECTION_COOKIE_NAME))
+            .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
+                .with(Keywords.minLength(1))
+                .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
             .optionalProperty(WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
                 .defaultValue(DEFAULT_WAIT_BEFORE_RETRY_MS))
@@ -76,7 +79,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
             new ReplacedSessionCookieDetectionMiddleware(
                 name,
                 options.getCookieName(),
-                DEFAULT_SESSION_COOKIE_NAME, // not configurable as it must fit
+                options.getSessionCookieName(),
                 options.getWaitBeforeRetryMs(),
                 options.getMaxRetries()));
     }

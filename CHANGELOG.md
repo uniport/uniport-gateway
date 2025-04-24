@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Added
+
+- Added option `sessionCookieName` in the `replacedSessionCookieDetection` middleware to configure the session cookie name as it may be customized ([PORTAL-2420](https://inventage-all.atlassian.net/browse/PORTAL-2420)).
+
 ### Fixed
 
 - Unauthenticated `application/json`requests should be handled with a `401` directly instead of returning a redirect ([PORTAL-2332](https://inventage-all.atlassian.net/browse/PORTAL-2332)).
