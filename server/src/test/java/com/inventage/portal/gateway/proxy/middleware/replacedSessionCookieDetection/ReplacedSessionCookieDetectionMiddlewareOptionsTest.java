@@ -19,7 +19,7 @@ public class ReplacedSessionCookieDetectionMiddlewareOptionsTest {
         final Integer maxRetries = 3;
 
         final JsonObject json = JsonObject.of(
-            ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, cookieName,
+            ReplacedSessionCookieDetectionMiddlewareFactory.DETECTION_COOKIE_NAME, cookieName,
             ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, waitBeforeRetry,
             ReplacedSessionCookieDetectionMiddlewareFactory.MAX_REDIRECT_RETRIES, maxRetries);
 

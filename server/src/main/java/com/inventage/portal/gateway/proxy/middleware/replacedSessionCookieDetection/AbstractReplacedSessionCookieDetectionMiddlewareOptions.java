@@ -16,9 +16,9 @@ public abstract class AbstractReplacedSessionCookieDetectionMiddlewareOptions im
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddlewareOptions.class);
 
     @Default
-    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME)
+    @JsonProperty(ReplacedSessionCookieDetectionMiddlewareFactory.DETECTION_COOKIE_NAME)
     public String getCookieName() {
-        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME);
+        logDefault(LOGGER, ReplacedSessionCookieDetectionMiddlewareFactory.DETECTION_COOKIE_NAME, ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME);
         return ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
     }
 

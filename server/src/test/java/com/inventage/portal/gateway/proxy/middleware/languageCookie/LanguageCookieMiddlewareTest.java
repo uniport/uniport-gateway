@@ -36,7 +36,7 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", LanguageCookieMiddlewareFactory.TYPE,
                     withMiddlewareOpts(
-                        JsonObject.of(LanguageCookieMiddlewareFactory.NAME, "blub")))));
+                        JsonObject.of(LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE_NAME, "blub")))));
 
         final JsonObject minimal = buildConfiguration(
             withMiddlewares(

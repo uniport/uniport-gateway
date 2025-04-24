@@ -40,7 +40,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
             withMiddlewares(
                 withMiddleware("foo", ReplacedSessionCookieDetectionMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        ReplacedSessionCookieDetectionMiddlewareFactory.COOKIE_NAME, "uniport-test.state",
+                        ReplacedSessionCookieDetectionMiddlewareFactory.DETECTION_COOKIE_NAME, "uniport-test.state",
                         ReplacedSessionCookieDetectionMiddlewareFactory.WAIT_BEFORE_RETRY_MS, 4242,
                         ReplacedSessionCookieDetectionMiddlewareFactory.MAX_REDIRECT_RETRIES, 42)))));
 

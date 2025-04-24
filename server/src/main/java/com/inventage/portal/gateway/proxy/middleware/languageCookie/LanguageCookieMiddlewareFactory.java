@@ -20,7 +20,7 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
 
     // schema
     public static final String TYPE = "languageCookie";
-    public static final String NAME = "name";
+    public static final String LANGUAGE_COOKIE_NAME = "name";
 
     // defaults
     public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
@@ -35,7 +35,7 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(NAME, Schemas.stringSchema()
+            .optionalProperty(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_LANGUAGE_COOKIE_NAME))
             .allowAdditionalProperties(false);

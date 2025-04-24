@@ -21,7 +21,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
 
     // schema
     public static final String TYPE = "replacedSessionCookieDetection";
-    public static final String COOKIE_NAME = "name";
+    public static final String DETECTION_COOKIE_NAME = "name";
     public static final String WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
     public static final String MAX_REDIRECT_RETRIES = "maxRedirectRetries";
 
@@ -42,7 +42,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return Schemas.objectSchema()
-            .optionalProperty(COOKIE_NAME, Schemas.stringSchema()
+            .optionalProperty(DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
                 .defaultValue(DEFAULT_DETECTION_COOKIE_NAME))
             .optionalProperty(WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
