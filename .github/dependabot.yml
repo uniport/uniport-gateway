@@ -9,6 +9,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "io.micrometer:micrometer-registry-prometheus" # required to be in sync with vertx-micrometer-metrics
 
   - package-ecosystem: "github-actions"
     directory: "/"
