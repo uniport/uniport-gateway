@@ -13,7 +13,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 
-public class ProxyMiddlewareOptionsTest {
+public class ReverseProxyOptionsTest {
 
     @Test
     public void shouldParse() {

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(VertxExtension.class)
-public class ProxyMiddlewareTest {
+public class ReverseProxyTest {
 
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
@@ -263,7 +263,7 @@ public class ProxyMiddlewareTest {
     }
 
     private static File loadFile(String path) {
-        final ClassLoader classLoader = ProxyMiddlewareTest.class.getClassLoader();
+        final ClassLoader classLoader = ReverseProxyTest.class.getClassLoader();
         return new File(classLoader.getResource(path).getFile());
     }
 
