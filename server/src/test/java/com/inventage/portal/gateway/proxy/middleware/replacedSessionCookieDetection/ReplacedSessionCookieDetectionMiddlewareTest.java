@@ -15,6 +15,9 @@ import static io.vertx.core.http.HttpMethod.GET;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -24,6 +27,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -85,7 +90,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
             ctx.next();
         };
 
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(extractSessionLastAccessed)
             .withUser()
@@ -108,15 +113,24 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
 
     @Test
     public void shouldRedirect(Vertx vertx, VertxTestContext testCtx) {
-        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-        headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
-        long validTimestamp = System.currentTimeMillis() + 60_000;
-        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(0, validTimestamp));
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        // given
+        final long validTimestamp = System.currentTimeMillis() + 60_000;
+        final Set<Cookie> cookies = new HashSet<Cookie>();
+
+        cookies.add(createSessionCookie("a-session-id-which-has-been-replaced"));
+        cookies.add(createDetectionCookie(0, validTimestamp));
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
             .build().start();
+
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        final String encodedCookies = ClientCookieEncoder.STRICT.encode(cookies);
+        if (encodedCookies != null) {
+            headers.add(HttpHeaders.COOKIE, encodedCookies);
+        }
 
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
@@ -129,16 +143,25 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
     }
 
     @Test
-    public void shouldNotRedirect_when_session_is_regenerated(Vertx vertx, VertxTestContext testCtx) {
-        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-        headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
-        long expiredTimestamp = System.currentTimeMillis() - 1000;
-        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(0, expiredTimestamp));
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+    public void shouldNotRedirectWhenSessionIsRegenerated(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final long expiredTimestamp = System.currentTimeMillis() - 1000;
+        final Set<Cookie> cookies = new HashSet<Cookie>();
+
+        cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
+        cookies.add(createDetectionCookie(0, expiredTimestamp));
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
             .build().start();
+
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        final String encodedCookies = ClientCookieEncoder.STRICT.encode(cookies);
+        if (encodedCookies != null) {
+            headers.add(HttpHeaders.COOKIE, encodedCookies);
+        }
 
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
@@ -151,14 +174,22 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
     }
 
     @Test
-    public void shouldNotRedirect_when_uniport_state_cookie_is_missing(Vertx vertx, VertxTestContext testCtx) {
-        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-        headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+    public void shouldNotRedirectWhenUniportStateCookieIsMissing(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final Set<Cookie> cookies = new HashSet<Cookie>();
+        cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
             .build().start();
+
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        final String encodedCookies = ClientCookieEncoder.STRICT.encode(cookies);
+        if (encodedCookies != null) {
+            headers.add(HttpHeaders.COOKIE, encodedCookies);
+        }
 
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
@@ -171,16 +202,25 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
     }
 
     @Test
-    public void shouldNotRedirect_when_uniport_state_cookie_is_outdated(Vertx vertx, VertxTestContext testCtx) {
-        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-        headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
-        long expiredTimestamp = System.currentTimeMillis() - 1000;
-        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(DEFAULT_MAX_REDIRECT_RETRIES - 1, expiredTimestamp));
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+    public void shouldNotRedirectWhenUniportStateCookieIsOutdated(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final Set<Cookie> cookies = new HashSet<Cookie>();
+        final long expiredTimestamp = System.currentTimeMillis() - 1000;
+
+        cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
+        cookies.add(createDetectionCookie(DEFAULT_MAX_REDIRECT_RETRIES - 1, expiredTimestamp));
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
             .build().start();
+
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        final String encodedCookies = ClientCookieEncoder.STRICT.encode(cookies);
+        if (encodedCookies != null) {
+            headers.add(HttpHeaders.COOKIE, encodedCookies);
+        }
 
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
@@ -193,16 +233,25 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
     }
 
     @Test
-    public void shouldNotRedirect_when_uniport_state_cookie_is_out_of_counter(Vertx vertx, VertxTestContext testCtx) {
-        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-        headers.add(HttpHeaders.COOKIE, DEFAULT_SESSION_COOKIE_NAME + "=a-session-id-which-has-been-replaced");
-        long validTimestamp = System.currentTimeMillis() + 60_000;
-        headers.add(HttpHeaders.COOKIE, DEFAULT_DETECTION_COOKIE_NAME + createDetectionCookieString(DEFAULT_MAX_REDIRECT_RETRIES, validTimestamp));
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+    public void shouldNotRedirectWhenUniportStateCookieIsOutOfCounter(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final long validTimestamp = System.currentTimeMillis() + 60_000;
+        final Set<Cookie> cookies = new HashSet<Cookie>();
+
+        cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
+        cookies.add(createDetectionCookie(DEFAULT_MAX_REDIRECT_RETRIES, validTimestamp));
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
             .build().start();
+
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        final String encodedCookies = ClientCookieEncoder.STRICT.encode(cookies);
+        if (encodedCookies != null) {
+            headers.add(HttpHeaders.COOKIE, encodedCookies);
+        }
 
         // when
         gateway.incomingRequest(GET, "/", new RequestOptions().setHeaders(headers), (outgoingResponse) -> {
@@ -214,8 +263,14 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         });
     }
 
-    private String createDetectionCookieString(int retries, long validUntilUnixTimestamp) {
-        return "=" + new DetectionCookieValue(retries + SPLITTER + (validUntilUnixTimestamp / 1000)).toString();
+    private Cookie createSessionCookie(String value) {
+        return new DefaultCookie(DEFAULT_SESSION_COOKIE_NAME, value);
+    }
+
+    private Cookie createDetectionCookie(int retries, long validUntilUnixTimestamp) {
+        return new DefaultCookie(
+            DEFAULT_DETECTION_COOKIE_NAME,
+            new DetectionCookieValue(retries + SPLITTER + (validUntilUnixTimestamp / 1000)).toString());
     }
 
 }
