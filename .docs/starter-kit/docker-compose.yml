@@ -1,0 +1,39 @@
+services:
+  gateway:
+    image: docker-registry.inventage.com:10094/com.inventage.portal.gateway.portal-gateway:9.4.0-202503211149-1294-26d95127
+    environment:
+      - "PORTAL_GATEWAY_JSON=/config/portal-gateway.json"
+      - "PORTAL_GATEWAY_LOG_LEVEL=INFO"
+      - "OTEL_TRACES_EXPORTER=none"
+      - "OTEL_METRICS_EXPORTER=none"
+    volumes:
+      - ./step1:/config/
+    ports:
+      # API port
+      - "20000:20000"
+    networks:
+      - portal-gateway
+
+  # example resource server
+  whoami1:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8001:80"
+    networks:
+      - portal-gateway
+
+  # example resource server
+  whoami2:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8002:80"
+    networks:
+      - portal-gateway
+
+networks:
+  portal-gateway:
+    name: portal-gateway-starter-kit

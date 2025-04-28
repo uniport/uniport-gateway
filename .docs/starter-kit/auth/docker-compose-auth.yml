@@ -12,7 +12,7 @@ services:
       - "8080:8080"
     environment:
       # telemetry
-      KC_LOG_LEVEL: DEBUG
+      KC_LOG_LEVEL: INFO
       KC_HEALTH_ENABLED: "true"
       # bootstrap user
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -72,36 +72,9 @@ services:
     networks:
       - portal-gateway
 
-  whoami1:
-    image: traefik/whoami
-    expose:
-      - "80"
-    ports:
-      - "8081:80"
-    networks:
-      - portal-gateway
-
-  whoami2:
-    image: traefik/whoami
-    expose:
-      - "80"
-    ports:
-      - "8082:80"
-    networks:
-      - portal-gateway
-
-  whoami3:
-    image: traefik/whoami
-    expose:
-      - "80"
-    ports:
-      - "8083:80"
-    networks:
-      - portal-gateway
-
 networks:
   portal-gateway:
-    name: portal-gateway-standalone
+    name: portal-gateway-starter-kit
 
 volumes:
   postgres-data:

@@ -1,0 +1,60 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
+                "rule": "Path('/')",
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami1",
+                "rule": "PathPrefix('/whoami1')",
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami2",
+                "rule": "PathPrefix('/whoami2')",
+                "service": "whoami2"
+            },
+            {
+                "name": "whoami2-host",
+                "rule": "Host('localdev.me')",
+                "priority": 50,
+                "service": "whoami2"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootRedirectregex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/whoami1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami1",
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "whoami2",
+                "servers": [
+                    {
+                        "host": "whoami2",
+                        "port": 80
+                    }
+                ]
+            }
+        ]
+    }
+}
