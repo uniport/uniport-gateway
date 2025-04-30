@@ -129,6 +129,13 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         OAuth2Auth authProvider
     ) {
         final String stateParameter = ctx.request().getParam(OIDC_PARAM_STATE);
+        if (stateParameter == null) {
+            ctx.response()
+                .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
+                .end("missing required state parameter");
+            return;
+        }
+
         final String code = ctx.request().getParam(OIDC_PARAM_CODE);
         if (OAuth2AuthMiddleware.restoreStateParameterFromRequest(ctx, sessionScope)) {
             LOGGER.debug("processing for state '{}' and code '{}...'", stateParameter, code != null ? code.substring(0, 5) : null);
