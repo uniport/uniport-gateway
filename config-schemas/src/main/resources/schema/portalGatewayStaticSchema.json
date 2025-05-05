@@ -7,10 +7,6 @@
         "additionalProperties" : false,
         "type" : "object",
         "properties" : {
-          "sessionIdleTimeout" : {
-            "type" : "integer",
-            "minimum" : 1.0
-          },
           "middlewares" : {
             "type" : "array",
             "items" : {

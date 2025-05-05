@@ -31,7 +31,6 @@ public class StaticConfiguration {
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";
-    public static final String ENTRYPOINT_SESSION_IDLE_TIMEOUT = "sessionIdleTimeout"; // DEPRECATED has no functionality - remove
 
     // providers
     public static final String PROVIDERS = "providers";
@@ -84,8 +83,6 @@ public class StaticConfiguration {
             .optionalProperty(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema()
                     .items(Schemas.oneOf(DynamicConfiguration.getBuildMiddlewareSchema())))
-            .optionalProperty(ENTRYPOINT_SESSION_IDLE_TIMEOUT, Schemas.intSchema()
-                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
