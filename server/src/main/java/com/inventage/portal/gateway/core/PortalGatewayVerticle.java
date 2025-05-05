@@ -11,7 +11,6 @@ import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
 import com.inventage.portal.gateway.proxy.ProxyApplicationFactory;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
-import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -44,57 +43,82 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) throws Exception {
         LOGGER.info("Portal-Gateway verticle is starting...");
 
-        final ConfigRetriever retriever = PortalGatewayConfigRetriever.create(vertx);
-        retriever.getConfig().onSuccess(rawConfigWithEnv -> {
-            try {
-                final JsonObject env = rawConfigWithEnv.copy();
-                env.remove(StaticConfiguration.ENTRYPOINTS);
-                env.remove(StaticConfiguration.PROVIDERS);
-                LOGGER.debug("Environment variables:\n{}", env.stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(Object::toString)
-                    .collect(Collectors.joining("\n\t")));
+        PortalGatewayConfigRetriever.create(vertx).getConfig()
+            .onSuccess(rawConfigWithEnv -> handleRawConfig(rawConfigWithEnv.copy(), startPromise))
+            .onFailure(err -> {
+                final String errMsg = String.format("failed to retrieve static configuration '{}'", err.getMessage());
+                shutdownOnStartupFailure(new RuntimeException(errMsg));
+            });
+    }
 
-                final JsonObject config = substituteConfigurationVariables(env, rawConfigWithEnv);
-                final JsonArray entrypointConfigs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS, JsonArray.of());
-                final JsonArray providerConfigs = config.getJsonArray(StaticConfiguration.PROVIDERS, JsonArray.of());
-                LOGGER.debug("entrypoint configurations:\n{}", entrypointConfigs.encodePrettily());
-                LOGGER.debug("provider configurations:\n{}", providerConfigs.encodePrettily());
+    private void handleRawConfig(JsonObject rawConfigWithEnv, Promise<Void> startPromise) {
+        try {
+            final JsonObject env = filterEnvVars(rawConfigWithEnv);
+            final JsonObject rawConfig = filterStaticConfig(rawConfigWithEnv);
+            final JsonObject config = substituteConfigurationVariables(rawConfig, env);
 
-                StaticConfiguration.validate(vertx, config).onSuccess(handler -> {
-                    // get the entrypoints from the configuration
-                    final List<Entrypoint> entrypoints = entrypoints(entrypointConfigs);
-
-                    // get the applications from the configuration
-                    final List<Application> applications = applications(entrypointConfigs, providerConfigs, env);
-
-                    deployAndMountApplications(applications, entrypoints);
-                    createListenersForEntrypoints(entrypoints, startPromise);
-                }).onFailure(err -> {
+            StaticConfiguration.validate(vertx, config)
+                .onSuccess(handler -> runServer(config, env, startPromise))
+                .onFailure(err -> {
                     LOGGER.error("Failed to validate static configuration");
                     shutdownOnStartupFailure(err);
                 });
-            } catch (Exception e) {
-                shutdownOnStartupFailure(e);
-            }
-        }).onFailure(err -> {
-            final String errMsg = String.format("failed to retrieve static configuration '{}'", err.getMessage());
-            shutdownOnStartupFailure(new RuntimeException(errMsg));
-        });
+        } catch (Exception e) {
+            shutdownOnStartupFailure(e);
+        }
     }
 
-    private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
-        return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
+    private JsonObject filterEnvVars(JsonObject rawConfig) {
+        final JsonObject env = rawConfig.copy();
+        env.remove(StaticConfiguration.ENTRYPOINTS);
+        env.remove(StaticConfiguration.PROVIDERS);
+
+        LOGGER.debug("Environment variables:\n\t{}", env.stream()
+            .sorted(Map.Entry.comparingByKey())
+            .map(Object::toString)
+            .collect(Collectors.joining("\n\t")));
+        return env;
+    }
+
+    private JsonObject filterStaticConfig(JsonObject rawConfig) {
+        final JsonObject config = new JsonObject();
+
+        final JsonArray entrypoints = rawConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
+        if (entrypoints != null) {
+            config.put(StaticConfiguration.ENTRYPOINTS, entrypoints);
+        }
+
+        final JsonArray providers = rawConfig.getJsonArray(StaticConfiguration.PROVIDERS);
+        if (providers != null) {
+            config.put(StaticConfiguration.PROVIDERS, providers);
+        }
+
+        LOGGER.debug("Static configuration:\n{}", config.encodePrettily());
+        return config;
+    }
+
+    private JsonObject substituteConfigurationVariables(JsonObject config, JsonObject env) {
+        return new JsonObject(ConfigAdapter.replaceEnvVariables(config.encode(), env));
+    }
+
+    private void runServer(JsonObject config, JsonObject env, Promise<Void> startPromise) {
+        final JsonArray entrypointConfigs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS, JsonArray.of());
+        final List<Entrypoint> entrypoints = entrypoints(entrypointConfigs);
+
+        final JsonArray providerConfigs = config.getJsonArray(StaticConfiguration.PROVIDERS, JsonArray.of());
+        final List<Application> applications = applications(entrypointConfigs, providerConfigs, env);
+
+        deployAndMountApplications(applications, entrypoints);
+        createListenersForEntrypoints(entrypoints, startPromise);
     }
 
     private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
-        LOGGER.debug("Number of applications '{}' and entrypoints {}'", applications.size(),
-            entrypoints.size());
+        LOGGER.debug("Number of applications '{}' and entrypoints {}'", applications.size(), entrypoints.size());
         applications.stream()
             .forEach(application -> {
-                application.deployOn(vertx).onSuccess(handler -> {
-                    entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
-                }).onFailure(this::shutdownOnStartupFailure);
+                application.deployOn(vertx)
+                    .onSuccess(handler -> entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application)))
+                    .onFailure(this::shutdownOnStartupFailure);
             });
     }
 
@@ -130,8 +154,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 .listen(entrypoint.port());
         } else {
             entrypoint.disable();
-            LOGGER.warn("Disabling endpoint '{}' because its port ('{}') must be great 0",
-                entrypoint.name(), entrypoint.port());
+            LOGGER.warn("Disabling endpoint '{}' because its port ('{}') must be great 0", entrypoint.name(), entrypoint.port());
             return Future.succeededFuture();
         }
     }

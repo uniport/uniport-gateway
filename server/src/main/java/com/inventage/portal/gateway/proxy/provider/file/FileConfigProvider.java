@@ -71,7 +71,7 @@ public class FileConfigProvider extends Provider {
         final ConfigRetriever retriever = ConfigRetriever.create(vertx, getOptions());
         retriever.getConfig()
             .onSuccess(config -> {
-                this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
+                this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(config, env)));
             }).onFailure(err -> {
                 final String errMsg = String.format("failed to retrieve dynamic configuration '{}'", err.getMessage());
                 LOGGER.warn(errMsg);
@@ -81,7 +81,7 @@ public class FileConfigProvider extends Provider {
             LOGGER.info("Listening to configuration changes");
             retriever.listen(ar -> {
                 final JsonObject config = ar.getNewConfiguration();
-                this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(env, config)));
+                this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(config, env)));
             });
         }
         startPromise.complete();
@@ -161,9 +161,9 @@ public class FileConfigProvider extends Provider {
         return this.staticConfigDir.resolve(path).normalize();
     }
 
-    private JsonObject substituteConfigurationVariables(JsonObject env, JsonObject config) {
+    private JsonObject substituteConfigurationVariables(JsonObject config, JsonObject env) {
         // TODO parse parsable values like boolean and integers (then rm parseServerPorts and optionalStr)
-        return new JsonObject(ConfigAdapter.replaceEnvVariables(env, config.toString()));
+        return new JsonObject(ConfigAdapter.replaceEnvVariables(config.toString(), env));
     }
 
     // To allow variable substitution by environment variables in the file config
