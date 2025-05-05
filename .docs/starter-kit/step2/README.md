@@ -39,9 +39,6 @@ Entrypoint with `openTelemetry` and `requestResponseLogger` middlewares:
         ]
         },
     ],
-    "applications": [
-        // [..]
-    ],
     "providers": [
         // [..]
     ]

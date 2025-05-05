@@ -83,16 +83,6 @@
             ]
         }
     ],
-    "applications": [
-        {
-            "name": "proxy",
-            "entrypoint": "http20000",
-            "requestSelector": {
-                "urlPrefix": "/"
-            },
-            "provider": "ProxyApplication"
-        }
-    ],
     "providers": [
         {
             "name": "file",

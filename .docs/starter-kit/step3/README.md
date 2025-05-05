@@ -48,9 +48,6 @@ Entrypoint with `session` and `_session_` middlewares:
             ]
         },
     ],
-    "applications": [
-        // [..]
-    ],
     "providers": [
         // [..]
     ]

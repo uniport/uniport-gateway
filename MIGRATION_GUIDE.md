@@ -2,6 +2,10 @@
 
 ## `9.*.*` -> `10.*.*`
 
+### Static Configuration
+
+The configuration key `applications` in the static configuration was removed without replacement. It is no longer required. Please remove this entry in your configuration.
+
 ## `9.*.*` -> `9.3.*`
 
 ### Clustered Portal-Gateway

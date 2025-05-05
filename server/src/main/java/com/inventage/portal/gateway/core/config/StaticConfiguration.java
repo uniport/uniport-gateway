@@ -27,26 +27,26 @@ import org.slf4j.LoggerFactory;
  */
 public class StaticConfiguration {
     // keywords used for internal purpose only
+    // entrypoints
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";
-    public static final String APPLICATIONS = "applications";
-    public static final String APPLICATION_NAME = "name";
-    public static final String APPLICATION_ENTRYPOINT = "entrypoint";
-    public static final String ENTRYPOINT_SESSION_IDLE_TIMEOUT = "sessionIdleTimeout";
-    // TODO: the following two properties are currently not respected by this application
-    public static final String APPLICATION_REQUEST_SELECTOR = "requestSelector";
-    public static final String APPLICATION_REQUEST_SELECTOR_URL_PREFIX = "urlPrefix";
-    public static final String APPLICATION_PROVIDER = "provider";
+    public static final String ENTRYPOINT_SESSION_IDLE_TIMEOUT = "sessionIdleTimeout"; // DEPRECATED has no functionality - remove
+
+    // providers
     public static final String PROVIDERS = "providers";
     // TODO: the following property is currently not publicly available due to not fitting into the
     // usual provider schema
     public static final String PROVIDERS_THROTTLE_INTERVAL_MS = "providersThrottleIntervalMs";
     public static final String PROVIDER_NAME = "name";
+
+    // file provider
     public static final String PROVIDER_FILE = "file";
     public static final String PROVIDER_FILE_FILENAME = "filename";
     public static final String PROVIDER_FILE_DIRECTORY = "directory";
     public static final String PROVIDER_FILE_WATCH = "watch";
+
+    // docker provider
     public static final String PROVIDER_DOCKER = "docker";
     public static final String PROVIDER_DOCKER_ENDPOINT = "endpoint";
     public static final String PROVIDER_DOCKER_EXPOSED_BY_DEFAULT = "exposedByDefault";
@@ -88,18 +88,6 @@ public class StaticConfiguration {
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)))
             .allowAdditionalProperties(false);
 
-        final ObjectSchemaBuilder applicationSchema = Schemas.objectSchema()
-            .requiredProperty(APPLICATION_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
-            .requiredProperty(APPLICATION_ENTRYPOINT, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
-            .requiredProperty(APPLICATION_REQUEST_SELECTOR,
-                Schemas.objectSchema().requiredProperty(APPLICATION_REQUEST_SELECTOR_URL_PREFIX,
-                    Schemas.stringSchema().with(Keywords.minLength(1))))
-            .requiredProperty(APPLICATION_PROVIDER, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
-            .allowAdditionalProperties(false);
-
         final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
             .requiredProperty(PROVIDER_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
@@ -119,7 +107,6 @@ public class StaticConfiguration {
 
         final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
             .optionalProperty(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
-            .optionalProperty(APPLICATIONS, Schemas.arraySchema().items(applicationSchema))
             .optionalProperty(PROVIDERS, Schemas.arraySchema().items(providerSchema));
 
         return staticConfigBuilder;

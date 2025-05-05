@@ -1243,38 +1243,6 @@
         },
         "required" : [ "name" ]
       }
-    },
-    "applications" : {
-      "type" : "array",
-      "items" : {
-        "additionalProperties" : false,
-        "type" : "object",
-        "properties" : {
-          "provider" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "entrypoint" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "name" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "requestSelector" : {
-            "type" : "object",
-            "properties" : {
-              "urlPrefix" : {
-                "minLength" : 1,
-                "type" : "string"
-              }
-            },
-            "required" : [ "urlPrefix" ]
-          }
-        },
-        "required" : [ "provider", "entrypoint", "name", "requestSelector" ]
-      }
     }
   }
 }

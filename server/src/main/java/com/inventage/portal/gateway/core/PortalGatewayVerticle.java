@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.application.Application;
-import com.inventage.portal.gateway.core.application.ApplicationFactory;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
+import com.inventage.portal.gateway.proxy.ProxyApplicationFactory;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import io.vertx.config.ConfigRetriever;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The main verticle of the portal gateway. It reads the configuration for the entrypoints and
- * creates an HTTP listener for each of them. Additionally it reads the configuration for the
+ * creates an HTTP listener for each of them. Additionally, it reads the configuration for the
  * applications and mounts them using the entrypoints.
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
@@ -49,7 +49,6 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             try {
                 final JsonObject env = rawConfigWithEnv.copy();
                 env.remove(StaticConfiguration.ENTRYPOINTS);
-                env.remove(StaticConfiguration.APPLICATIONS);
                 env.remove(StaticConfiguration.PROVIDERS);
                 LOGGER.debug("Environment variables:\n{}", env.stream()
                     .sorted(Map.Entry.comparingByKey())
@@ -58,10 +57,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
                 final JsonObject config = substituteConfigurationVariables(env, rawConfigWithEnv);
                 final JsonArray entrypointConfigs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS, JsonArray.of());
-                final JsonArray applicationConfigs = config.getJsonArray(StaticConfiguration.APPLICATIONS, JsonArray.of());
                 final JsonArray providerConfigs = config.getJsonArray(StaticConfiguration.PROVIDERS, JsonArray.of());
                 LOGGER.debug("entrypoint configurations:\n{}", entrypointConfigs.encodePrettily());
-                LOGGER.debug("application configurations:\n{}", applicationConfigs.encodePrettily());
                 LOGGER.debug("provider configurations:\n{}", providerConfigs.encodePrettily());
 
                 StaticConfiguration.validate(vertx, config).onSuccess(handler -> {
@@ -69,7 +66,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                     final List<Entrypoint> entrypoints = entrypoints(entrypointConfigs);
 
                     // get the applications from the configuration
-                    final List<Application> applications = applications(entrypointConfigs, applicationConfigs, providerConfigs, env);
+                    final List<Application> applications = applications(entrypointConfigs, providerConfigs, env);
 
                     deployAndMountApplications(applications, entrypoints);
                     createListenersForEntrypoints(entrypoints, startPromise);
@@ -93,26 +90,31 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
         LOGGER.debug("Number of applications '{}' and entrypoints {}'", applications.size(),
             entrypoints.size());
-        applications.stream().forEach(application -> {
-            application.deployOn(vertx).onSuccess(handler -> {
-                entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
-            }).onFailure(this::shutdownOnStartupFailure);
-        });
+        applications.stream()
+            .forEach(application -> {
+                application.deployOn(vertx).onSuccess(handler -> {
+                    entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application));
+                }).onFailure(this::shutdownOnStartupFailure);
+            });
     }
 
     private void createListenersForEntrypoints(List<Entrypoint> entrypoints, Promise<Void> startPromise) {
         LOGGER.debug("Number of entrypoints {}'", entrypoints.size());
-        listenOnEntrypoints(entrypoints).onSuccess(handler -> {
-            startPromise.complete();
-            LOGGER.info("Start succeeded.");
-        }).onFailure(err -> {
-            startPromise.fail(err);
-            LOGGER.error("Start failed.");
-        });
+        listenOnEntrypoints(entrypoints)
+            .onSuccess(handler -> {
+                startPromise.complete();
+                LOGGER.info("Start succeeded.");
+            }).onFailure(err -> {
+                startPromise.fail(err);
+                LOGGER.error("Start failed.");
+            });
     }
 
     private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-        return Future.join(entrypoints.stream().map(this::listOnEntrypoint).collect(Collectors.toList()));
+        return Future.join(
+            entrypoints.stream()
+                .map(this::listOnEntrypoint)
+                .collect(Collectors.toList()));
     }
 
     private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
@@ -170,23 +172,19 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         return middlewares;
     }
 
-    private List<Application> applications(JsonArray entrypointConfigs, JsonArray applicationConfigs, JsonArray providerConfigs, JsonObject env) {
-        LOGGER.debug("Reading from config key '{}'", StaticConfiguration.APPLICATIONS);
-        try {
-            final List<Application> applications = new ArrayList<>();
-            if (applicationConfigs != null) {
-                applicationConfigs.stream().map(object -> new JsonObject(Json.encode(object)))
-                    .map(applicationConfig -> ApplicationFactory.Loader
-                        .getProvider(applicationConfig.getString(StaticConfiguration.APPLICATION_PROVIDER))
-                        .create(vertx, applicationConfig, entrypointConfigs, providerConfigs, env))
-                    .forEach(applications::add);
-            }
-            return applications;
-        } catch (IllegalStateException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                String.format("Couldn't read '%s' configuration '%s'", StaticConfiguration.APPLICATIONS, e.getMessage()));
+    private List<Application> applications(JsonArray entrypointConfigs, JsonArray providerConfigs, JsonObject env) {
+        final ProxyApplicationFactory factory = new ProxyApplicationFactory();
+        final List<Application> applications = new ArrayList<Application>();
+
+        for (int i = 0; i < entrypointConfigs.size(); i++) {
+            applications.add(
+                factory.create(
+                    vertx,
+                    entrypointConfigs.getJsonObject(i),
+                    providerConfigs,
+                    env));
         }
+
+        return applications;
     }
 }

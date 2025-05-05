@@ -35,24 +35,6 @@
             ]
         }
     ],
-    "applications": [
-        {
-            "name": "appA",
-            "entrypoint": "entrypointA",
-            "requestSelector": {
-                "urlPrefix": "/"
-            },
-            "provider": "ProxyApplication"
-        },
-        {
-            "name": "appB",
-            "entrypoint": "entrypointB",
-            "requestSelector": {
-                "urlPrefix": "/"
-            },
-            "provider": "ProxyApplication"
-        }
-    ],
     "providers": [
         {
             "name": "file",

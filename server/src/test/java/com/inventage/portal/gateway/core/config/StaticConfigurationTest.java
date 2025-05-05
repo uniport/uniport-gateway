@@ -20,16 +20,17 @@ public class StaticConfigurationTest {
 
     @Test
     public void rejectNullEntrypointsApplicationsProviders(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS, null)
-            .put(StaticConfiguration.APPLICATIONS, null).put(StaticConfiguration.PROVIDERS, null);
+        JsonObject json = new JsonObject()
+            .put(StaticConfiguration.ENTRYPOINTS, null)
+            .put(StaticConfiguration.PROVIDERS, null);
 
         StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
     }
 
     @Test
     public void acceptEmptyEntrypointsApplicationsProviders(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS, new JsonArray())
-            .put(StaticConfiguration.APPLICATIONS, new JsonArray())
+        JsonObject json = new JsonObject()
+            .put(StaticConfiguration.ENTRYPOINTS, new JsonArray())
             .put(StaticConfiguration.PROVIDERS, new JsonArray());
 
         StaticConfiguration.validate(vertx, json).onComplete(testCtx.succeedingThenComplete());
@@ -72,51 +73,6 @@ public class StaticConfigurationTest {
         JsonObject json = new JsonObject().put(StaticConfiguration.ENTRYPOINTS,
             new JsonArray().add(new JsonObject().put("blub", null)));
 
-        StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
-    }
-
-    @Test
-    public void acceptValidApplication(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.APPLICATIONS,
-            new JsonArray().add(new JsonObject().put(StaticConfiguration.APPLICATION_NAME, "app")
-                .put(StaticConfiguration.APPLICATION_ENTRYPOINT, "PoC")
-                .put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR, new JsonObject()
-                    .put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR_URL_PREFIX, "/app"))
-                .put(StaticConfiguration.APPLICATION_PROVIDER, "ProxyApplication")));
-        StaticConfiguration.validate(vertx, json).onComplete(testCtx.succeedingThenComplete());
-    }
-
-    @Test
-    public void rejectEmptyApplication(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.APPLICATIONS, new JsonArray().add(new JsonObject()));
-        StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
-    }
-
-    @Test
-    public void rejectApplicationWithMissingValues(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.APPLICATIONS,
-            new JsonArray().add(new JsonObject().put(StaticConfiguration.APPLICATION_NAME, "app")
-                .put(StaticConfiguration.APPLICATION_ENTRYPOINT, "PoC")));
-        StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
-    }
-
-    @Test
-    public void rejectApplicationWithInvalidValues(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.APPLICATIONS,
-            new JsonArray().add(new JsonObject().put(StaticConfiguration.APPLICATION_NAME, 123)
-                .put(StaticConfiguration.APPLICATION_ENTRYPOINT, true)
-                .put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR, -1)
-                .put(StaticConfiguration.APPLICATION_PROVIDER, 1.0)));
-        StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
-    }
-
-    @Test
-    public void rejectApplicationWithUnknownKey(Vertx vertx, VertxTestContext testCtx) {
-        JsonObject json = new JsonObject().put(StaticConfiguration.APPLICATIONS,
-            new JsonArray().add(new JsonObject().put(StaticConfiguration.APPLICATION_NAME, "app")
-                .put(StaticConfiguration.APPLICATION_ENTRYPOINT, "PoC")
-                .put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR, "/app")
-                .put(StaticConfiguration.APPLICATION_PROVIDER, "ProxyApplication").put("blub", null)));
         StaticConfiguration.validate(vertx, json).onComplete(testCtx.failingThenComplete());
     }
 

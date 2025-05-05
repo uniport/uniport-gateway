@@ -258,33 +258,6 @@ public final class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withApplications(Handler<JsonObject>... opts) {
-        return conf -> {
-            JsonArray applications = new JsonArray();
-            conf.put(StaticConfiguration.APPLICATIONS, applications);
-            for (Handler<JsonObject> opt : opts) {
-                JsonObject application = new JsonObject();
-                opt.handle(application);
-                applications.add(application);
-            }
-        };
-    }
-
-    public static Handler<JsonObject> withApplication(String name, String entrypoint, String provider, Handler<JsonObject> requestSelector) {
-        return application -> {
-            application.put(StaticConfiguration.APPLICATION_NAME, name);
-            application.put(StaticConfiguration.APPLICATION_ENTRYPOINT, entrypoint);
-            application.put(StaticConfiguration.APPLICATION_PROVIDER, provider);
-            requestSelector.handle(application);
-        };
-    }
-
-    public static Handler<JsonObject> withRequestSelector(String urlPrefix) {
-        return application -> {
-            application.put(StaticConfiguration.APPLICATION_REQUEST_SELECTOR_URL_PREFIX, urlPrefix);
-        };
-    }
-
     public static Handler<JsonObject> withProviders(Handler<JsonObject>... opts) {
         return conf -> {
             JsonArray providers = new JsonArray();
