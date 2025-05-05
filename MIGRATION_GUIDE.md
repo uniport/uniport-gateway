@@ -6,6 +6,10 @@
 
 The configuration key `applications` in the static configuration was removed without replacement. It is no longer required. Please remove this entry in your configuration.
 
+### Language Cookie Middleware
+
+The detection of the deprecated language cookie name `ips.language` was removed. Please use its replacement `uniport.language` or configure the language cookie middleware accordingly.
+
 ## `9.*.*` -> `9.3.*`
 
 ### Clustered Portal-Gateway

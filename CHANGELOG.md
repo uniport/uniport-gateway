@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **BREAKING**: Removed static configuration `applications` ([PORTAL-2144](https://inventage-all.atlassian.net/browse/PORTAL-2144)).
 - **BREAKING**: Removed entrypoint configuration `sessionIdleTimeout` ([PORTAL-2144](https://inventage-all.atlassian.net/browse/PORTAL-2144)).
+- **BREAKING**: Removed deprecated language middleware cookie name `ips.language` ([PORTAL-2144](https://inventage-all.atlassian.net/browse/PORTAL-2144)).
 
 ## [9.5.0]-202506100904-135-d216a4a - 2025-06-10
 

@@ -20,9 +20,6 @@ public class LanguageCookieMiddleware extends TraceMiddleware {
 
     private final String languageCookieName;
 
-    @Deprecated(forRemoval = true)
-    private static final String DEPRECATED_LANGUAGE_COOKIE_NAME = "ips.language";
-
     public LanguageCookieMiddleware(String name, String languageCookieName) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(languageCookieName, "languageCookieName must not be null");
@@ -35,13 +32,7 @@ public class LanguageCookieMiddleware extends TraceMiddleware {
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        Cookie cookie = ctx.request().getCookie(languageCookieName);
-
-        // DEPRECATED: backward compatibility because of cookie name change (https://inventage-all.atlassian.net/browse/PORTAL-718)
-        if (cookie == null) {
-            cookie = ctx.request().getCookie(DEPRECATED_LANGUAGE_COOKIE_NAME);
-        }
-
+        final Cookie cookie = ctx.request().getCookie(languageCookieName);
         if (cookie != null) {
             LOGGER.debug("Extracted '{}' cookie with following available iso-code: '{}'", languageCookieName, cookie.getValue());
             ctx.request().headers().set(HttpHeaders.ACCEPT_LANGUAGE, cookie.getValue());
