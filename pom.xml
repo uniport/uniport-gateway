@@ -425,7 +425,6 @@
                     <artifactId>spotbugs-maven-plugin</artifactId>
                     <version>4.9.3.0</version>
                     <configuration>
-                        <failOnError>false</failOnError>
                         <xmlOutput>true</xmlOutput>
                         <excludeFilterFiles>
                             <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
