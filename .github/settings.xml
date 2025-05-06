@@ -1,0 +1,28 @@
+<settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd" xmlns="http://maven.apache.org/SETTINGS/1.1.0">
+    <servers>
+        <server>
+            <id>uniportcr.artifacts.inventage.com</id>
+            <username>${env.CI_AUTH_USR}</username>
+            <password>${env.CI_AUTH_PSW}</password>
+        </server>
+        <server>
+            <id>inventage-portal-helm-staging</id>
+            <username>${env.CI_AUTH_USR}</username>
+            <password>${env.CI_AUTH_PSW}</password>
+        </server>
+        <server>
+            <id>inventage-portal-group</id>
+            <username>${env.CI_AUTH_USR}</username>
+            <password>${env.CI_AUTH_PSW}</password>
+        </server>
+    </servers>
+    <interactiveMode>false</interactiveMode>
+    <mirrors>
+        <mirror>
+            <id>inventage-portal-group</id>
+            <name>Inventage Central</name>
+            <url>https://nexus3.inventage.com/repository/inventage-portal-maven-group</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>

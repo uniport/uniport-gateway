@@ -2,21 +2,77 @@ name: Maven Build
 run-name: 'Maven build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
 
 on:
+  workflow_dispatch:
   workflow_call:
+    secrets:
+      NEXUS3_PW:
+        required: true
+    outputs:
+      VERSION:
+        description: 'Build version'
+        value: ${{ jobs.build.outputs.VERSION }}
+      GROUP_ID:
+        description: 'The maven groupId attribute'
+        value: ${{ jobs.build.outputs.GROUP_ID }}
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      CI_AUTH_USR: ${{ vars.NEXUS3_USER }}
+      CI_AUTH_PSW: ${{ secrets.NEXUS3_PW }}
+    outputs:
+      VERSION: ${{ steps.vars.outputs.RC_VERSION }}
+      GROUP_ID: ${{ steps.vars.outputs.GROUP_ID }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/master branch in the configuration
+          fetch-depth: 0
 
-      - uses: ./.github/actions/setup-java-helm-maven
-        env:
-          NEXUS_USER: ${{ vars.NEXUS3_USER }}
-          NEXUS_PW: ${{ secrets.NEXUS3_PW }}
+      - name: Setup Variables
+        id: vars
+        uses: uniport/workflows/.github/actions/setup-maven-build-variables@main
+
+      - name: Setup Java
+        uses: uniport/workflows/.github/actions/setup-java@main
+
+      - name: Setup Helm
+        uses: uniport/workflows/.github/actions/add-helm-repositories@main
+        with:
+          username: ${{ vars.NEXUS3_USER }}
+          password: ${{ secrets.NEXUS3_PW }}
+
+      - name: Set version
+        uses: uniport/workflows/.github/actions/set-maven-project-version@main
+        with:
+          version: ${{ steps.vars.outputs.RC_VERSION }}
+          settings-file: .github/settings.xml
 
       - name: Maven build
         run: |
-          ./mvnw -B -V --no-transfer-progress --update-snapshots verify
+          mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -P!local,ci -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
+
+      - name: Checkstyle
+        run: |
+          mvn -B --settings .github/settings.xml -P '!local,ci' initialize checkstyle:check
+
+      - name: Spotbugs
+        run: |
+          mvn -B --settings .github/settings.xml -P '!local,ci' initialize spotbugs:check
+
+      - name: Check uncommited code
+        run: ./.github/scripts/check_clean_working_directory.sh
+
+      - name: Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF  
+          ## Maven Build
+          This workflow ran successfully on **$(date)**.
+          ### Outputs
+          - **VERSION**: \`${{ steps.vars.outputs.RC_VERSION }}\`
+          - **GROUP_ID**: \`${{ steps.vars.outputs.GROUP_ID }}\`
+          EOF

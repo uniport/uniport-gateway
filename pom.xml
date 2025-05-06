@@ -32,7 +32,7 @@
         -->
         <docker.image.name>${project.groupId}.${project.artifactId}:${project.version}</docker.image.name>
         <docker.contextDir>${project.build.directory}/docker-context</docker.contextDir>
-        <docker.registry>docker-registry.inventage.com:10094</docker.registry>
+        <docker.registry>uniportcr.artifacts.inventage.com</docker.registry>
         <docker.verbose>true</docker.verbose>
         <!-- Allow overriding XML config with docker.* properties -->
         <docker.imagePropertyConfiguration>override</docker.imagePropertyConfiguration>
@@ -664,6 +664,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>git-hook-install</id>
                         <goals>
                             <goal>install</goal>
                         </goals>
@@ -718,7 +719,44 @@
             </activation>
         </profile>
         <profile>
-            <id>jenkins</id>
+            <id>ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.rudikershaw.gitbuildhook</groupId>
+                        <artifactId>git-build-hook-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Disable the execution -->
+                            <execution>
+                                <id>git-hook-install</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Disable the execution -->
+                            <execution>
+                                <id>display-updates</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.github.mfoo</groupId>
+                        <artifactId>libyear-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Disable the execution -->
+                            <execution>
+                                <id>libyear-analysis</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>multi-arch</id>
@@ -732,5 +770,4 @@
             </properties>
         </profile>
     </profiles>
-
 </project>

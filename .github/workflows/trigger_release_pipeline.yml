@@ -2,6 +2,12 @@ name: Trigger Release Pipeline
 run-name: 'Trigger release pipeline workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
 
 on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'The version string'
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       version:
@@ -14,8 +20,8 @@ env:
 
 jobs:
   trigger:
-    name: Setup Tag Name
-    runs-on: ubuntu-latest
+    name: Trigger Release Pipeline
+    runs-on: [self-hosted, macOS]
     env:
       WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
@@ -25,12 +31,14 @@ jobs:
           fetch-depth: 1 # Fetch only the latest commit
 
       - name: Validate version format
-        run: ./.github/scripts/validate_version.sh "${{ inputs.version }}"
+        uses: uniport/workflows/.github/actions/validate-version@main
+        with:
+          version: ${{ inputs.version }}
 
       - name: Trigger Jenkins Release Pipeline
         run: |
-          curl -X POST \
-          -u '${{ secrets.NEXUS3_USER }}:${{ secrets.NEXUS3_PW }}' \
+          curl -fSs -X POST \
+          -u '${{ vars.NEXUS3_USER }}:${{ secrets.JENKINS_AUTH_TOKEN }}' \
           --url '${{ env.RELEASE_JOB_URL }}' \
           --data GIT_RELEASE_BRANCH_NAME='${{ github.ref_name }}' \
           --data PACKAGE_VERSION='${{ inputs.version }}' \

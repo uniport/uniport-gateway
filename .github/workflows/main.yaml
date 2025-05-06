@@ -6,6 +6,17 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      deploy_to_dev:
+        description: 'Deploy to development environment'
+        required: true
+        type: boolean
+        default: true
+      update_archetype:
+        description: 'Whether to update the uniport archetype or not'
+        required: true
+        type: boolean
+        default: true
 
 # Prevent running builds for the same branch in parallel
 # New workflows will cancel existing workflows…
@@ -17,4 +28,39 @@ jobs:
   build:
     name: Build (main)
     uses: ./.github/workflows/build.yml
-    secrets: inherit
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+
+  deploy:
+    name: Trigger Deployment (dev)
+    if: ${{ inputs.deploy_to_dev }}
+    needs: [build]
+    uses: uniport/workflows/.github/workflows/deploy-dev.yml@main
+    with:
+      version: ${{ needs.build.outputs.VERSION }}
+      component_name: portal-gateway
+      branch: main
+    secrets:
+      UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
+
+  archetype:
+    name: Update Archetype
+    if: ${{ inputs.update_archetype }}
+    needs: [build]
+    uses: uniport/workflows/.github/workflows/update-archetype.yml@main
+    with:
+      version: ${{ needs.build.outputs.VERSION }}
+      component_name: portal-gateway
+    secrets:
+      UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
+
+  tag:
+    name: Nexus Tagging
+    needs: [build]
+    uses: uniport/workflows/.github/workflows/tag-nexus-artifacts.yml@main
+    with:
+      version: ${{ needs.build.outputs.VERSION }}
+      group_id: ${{ needs.build.outputs.GROUP_ID }}
+      tag_npm: false
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}

@@ -1,5 +1,7 @@
 # Portal Gateway
 
+[![Main build](https://github.com/uniport/portal-gateway/actions/workflows/main.yaml/badge.svg)](https://github.com/uniport/portal-gateway/actions/workflows/main.yaml)
+
 Der Portal Gateway Server agiert als Reverse Proxy für alle Request des Portals.
 
 ![Concept Overview](.docs/ConceptOverview.png)
