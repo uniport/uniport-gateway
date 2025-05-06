@@ -1,10 +1,8 @@
 name: Maven Build
 run-name: 'Maven build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
 
+# This workflow is designed to be used in another workflow (via call)
 on:
-  push:
-    branches:
-      - "*"
   workflow_dispatch:
   workflow_call:
     secrets:
@@ -17,12 +15,6 @@ on:
       GROUP_ID:
         description: 'The maven groupId attribute'
         value: ${{ jobs.build.outputs.GROUP_ID }}
-
-# Prevent running builds for the same branch in parallel
-# New workflows will cancel existing workflows…
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
