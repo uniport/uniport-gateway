@@ -1,17 +1,17 @@
 name: Trigger Release Pipeline
-run-name: 'Trigger release pipeline workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
+run-name: "Trigger release pipeline workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}"
 
 on:
   workflow_call:
     inputs:
       version:
-        description: 'The version string'
+        description: "The version string"
         required: true
         type: string
   workflow_dispatch:
     inputs:
       version:
-        description: 'The version string'
+        description: "The version string"
         required: true
         type: string
 

@@ -1,5 +1,5 @@
 name: Main Build
-run-name: 'Main build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}'
+run-name: "Main build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}"
 
 on:
   push:
@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       deploy_to_dev:
-        description: 'Deploy to development environment'
+        description: "Deploy to development environment"
         required: true
         type: boolean
         default: true
       update_archetype:
-        description: 'Whether to update the uniport archetype or not'
+        description: "Whether to update the uniport archetype or not"
         required: true
         type: boolean
         default: true
