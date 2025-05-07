@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.core.entrypoint;
 import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.application.Application;
-import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
@@ -13,9 +12,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -36,24 +32,13 @@ public class Entrypoint {
     private final int port;
     private final List<GatewayMiddleware> entryMiddlewares;
     private GatewayRouterInternal router;
-    private boolean enabled;
     private Tls tls;
 
     public Entrypoint(Vertx vertx, String name, int port, List<GatewayMiddleware> entryMiddlewares) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
-        this.enabled = true;
         this.entryMiddlewares = entryMiddlewares;
-    }
-
-    public static JsonObject entrypointConfigByName(String name, JsonObject globalConfig) {
-        final JsonArray configs = globalConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS);
-        return configs.stream().map(object -> new JsonObject(Json.encode(object)))
-            .filter(entrypoint -> entrypoint.getString(StaticConfiguration.ENTRYPOINT_NAME).equals(name))
-            .findFirst().orElseThrow(() -> {
-                throw new IllegalStateException(String.format("Entrypoint '%s' not found!", name));
-            });
     }
 
     public String name() {
@@ -80,13 +65,8 @@ public class Entrypoint {
         final Optional<Router> optionApplicationRouter = application.router();
         optionApplicationRouter.ifPresent(applicationRouter -> {
             if (name.equals(application.entrypoint())) {
-                if (enabled()) {
-                    router().mountSubRouter(application.rootPath(), applicationRouter);
-                    LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application, application.rootPath(), name);
-                } else {
-                    LOGGER.warn("Disabled endpoint '{}' can not mount application '{}' for '{}'", name,
-                        application, application.rootPath());
-                }
+                router().mountSubRouter(application.rootPath(), applicationRouter);
+                LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application, application.rootPath(), name);
             }
         });
     }
@@ -104,14 +84,6 @@ public class Entrypoint {
             return tls.jksOptions();
         }
         return null;
-    }
-
-    public boolean enabled() {
-        return enabled && port > 0;
-    }
-
-    public void disable() {
-        enabled = false;
     }
 
     private void setupEntryMiddlewares(List<GatewayMiddleware> entryMiddlewares, Router router) {

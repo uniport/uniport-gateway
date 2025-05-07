@@ -14,8 +14,8 @@ import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
@@ -141,22 +141,21 @@ public class PortalGatewayVerticle extends AbstractVerticle {
                 .collect(Collectors.toList()));
     }
 
-    private Future<?> listOnEntrypoint(Entrypoint entrypoint) {
-        if (entrypoint.port() > 0) {
-            final HttpServerOptions options = new HttpServerOptions()
-                .setMaxHeaderSize(DEFAULT_HEADER_LIMIT)
-                .setSsl(entrypoint.isTls())
-                .setKeyCertOptions(entrypoint.jksOptions());
-            LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
-            return vertx
-                .createHttpServer(options)
-                .requestHandler(entrypoint.router())
-                .listen(entrypoint.port());
-        } else {
-            entrypoint.disable();
-            LOGGER.warn("Disabling endpoint '{}' because its port ('{}') must be great 0", entrypoint.name(), entrypoint.port());
-            return Future.succeededFuture();
+    private Future<HttpServer> listOnEntrypoint(Entrypoint entrypoint) {
+        if (entrypoint.port() <= 0) {
+            return Future.failedFuture("invalid port %d".formatted(entrypoint.port()));
         }
+
+        final HttpServerOptions options = new HttpServerOptions()
+            .setMaxHeaderSize(DEFAULT_HEADER_LIMIT)
+            .setSsl(entrypoint.isTls())
+            .setKeyCertOptions(entrypoint.jksOptions());
+
+        LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
+        return vertx
+            .createHttpServer(options)
+            .requestHandler(entrypoint.router())
+            .listen(entrypoint.port());
     }
 
     private void shutdownOnStartupFailure(Throwable throwable) {
@@ -170,7 +169,7 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         }
         try {
             return entrypointConfigs.stream()
-                .map(object -> new JsonObject(Json.encode(object)))
+                .map(object -> JsonObject.mapFrom(object))
                 .map(entrypointConfig -> {
                     final String name = entrypointConfig.getString(StaticConfiguration.ENTRYPOINT_NAME);
                     final int port = entrypointConfig.getInteger(StaticConfiguration.ENTRYPOINT_PORT);

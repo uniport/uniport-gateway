@@ -17,7 +17,6 @@ import io.vertx.json.schema.SchemaException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
-import io.vertx.json.schema.common.dsl.SchemaType;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,9 +137,9 @@ public class DynamicConfiguration {
                         .optionalProperty(SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, Schemas.stringSchema()))
                     .requiredProperty(SERVICE_SERVER_HOST, Schemas.stringSchema())
                     .requiredProperty(SERVICE_SERVER_PORT, Schemas.anyOf(
-                        Schemas.intSchema(),
-                        Schemas.schema()
-                            .with(Keywords.type(SchemaType.STRING))
+                        Schemas.intSchema()
+                            .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)),
+                        Schemas.stringSchema()
                             .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
                     .allowAdditionalProperties(false)))
             .optionalProperty(SERVICE_VERBOSE, Schemas.booleanSchema()

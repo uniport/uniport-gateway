@@ -14,7 +14,6 @@ import io.vertx.json.schema.SchemaException;
 import io.vertx.json.schema.Validator;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
-import io.vertx.json.schema.common.dsl.SchemaType;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,10 +74,10 @@ public class StaticConfiguration {
         final ObjectSchemaBuilder entrypointSchema = Schemas.objectSchema()
             .requiredProperty(ENTRYPOINT_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
-            .requiredProperty(ENTRYPOINT_PORT, Schemas.anyOf(Schemas.schema()
-                .with(Keywords.type(SchemaType.INTEGER)),
-                Schemas.schema()
-                    .with(Keywords.type(SchemaType.STRING))
+            .requiredProperty(ENTRYPOINT_PORT, Schemas.anyOf(
+                Schemas.intSchema()
+                    .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)),
+                Schemas.stringSchema()
                     .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
             .optionalProperty(DynamicConfiguration.MIDDLEWARES,
                 Schemas.arraySchema()
