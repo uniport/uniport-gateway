@@ -17,7 +17,7 @@
                     "type": "session",
                     "options": {
                         "lifetimeCookie": true,
-                        "idleTimeoutInMinute": 30,
+                        "idleTimeoutInMinutes": 30,
                         "uriWithoutSessionTimeoutReset": "^/analytics/pmt.pmt\\?ping.*|.*_uniport-polling_.*|.*conversation/polling/v1/.*"
                     }
                 },

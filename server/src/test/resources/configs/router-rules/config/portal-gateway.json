@@ -3,6 +3,14 @@
         {
             "name": "http20000",
             "port": 20000
+        },
+        {
+            "name": "http20001",
+            "port": 20001
+        },
+        {
+            "name": "http20002",
+            "port": 20002
         }
     ],
     "providers": [

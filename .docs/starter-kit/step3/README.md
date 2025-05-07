@@ -37,7 +37,7 @@ Entrypoint with `session` and `_session_` middlewares:
                     "name": "session",
                     "type": "session",
                     "options": {
-                        "idleTimeoutInMinute": 30
+                        "idleTimeoutInMinutes": 30
                     }
                 },
                 {

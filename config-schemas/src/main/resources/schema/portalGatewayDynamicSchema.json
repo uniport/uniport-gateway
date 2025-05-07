@@ -1014,6 +1014,11 @@
                         }
                       }
                     },
+                    "idleTimeoutInMinutes" : {
+                      "default" : 15,
+                      "type" : "integer",
+                      "minimum" : 0.0
+                    },
                     "clusteredSessionStoreRetryTimeoutInMilliseconds" : {
                       "default" : 5000,
                       "type" : "integer",
@@ -1029,11 +1034,6 @@
                     },
                     "idMinimumLength" : {
                       "default" : 32,
-                      "type" : "integer",
-                      "minimum" : 0.0
-                    },
-                    "idleTimeoutInMinute" : {
-                      "default" : 15,
                       "type" : "integer",
                       "minimum" : 0.0
                     },

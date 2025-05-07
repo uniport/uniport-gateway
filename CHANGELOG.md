@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING** Changed the configuration JSON schema key in the `session` middleware from `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds` ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
+- **BREAKING** Changed the configuration JSON schema key in the `session` middleware from `idleTimeoutInMinute` to `idleTimeoutInMinutes` ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
 
 ### Removed
 

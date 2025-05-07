@@ -12,7 +12,8 @@ The detection of the deprecated language cookie name `ips.language` was removed.
 
 ## Session Middleware
 
-Rename the configuration key `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds`.
+* Rename the configuration key `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds`.
+* Rename the configuration key `idleTimeoutInMinute` to `idleTimeoutInMinutes`.
 
 ## `9.*.*` -> `9.3.*`
 

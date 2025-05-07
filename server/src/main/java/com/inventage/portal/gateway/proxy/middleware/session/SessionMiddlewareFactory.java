@@ -24,7 +24,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     // session
     public static final String TYPE = "session";
     public static final String SESSION_ID_MIN_LENGTH = "idMinimumLength";
-    public static final String SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinute";
+    public static final String SESSION_IDLE_TIMEOUT_IN_MINUTES = "idleTimeoutInMinutes";
     public static final String IGNORE_SESSION_TIMEOUT_RESET_FOR_URI = "uriWithoutSessionTimeoutReset";
     public static final String NAG_HTTPS = "nagHttps";
     public static final String SESSION_LIFETIME_COOKIE = "lifetimeCookie";
