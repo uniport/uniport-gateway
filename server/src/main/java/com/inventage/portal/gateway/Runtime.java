@@ -7,12 +7,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
 public class Runtime {
 
-    public static final String DEVELOPMENT_MODE_KEY = "development";
-    public static final String VERTICLE_INSTANCES_KEY = "verticle.instances";
+    public static final String DEVELOPMENT_MODE_KEY = "DEVELOPMENT";
+    public static final String VERTICLE_INSTANCES_KEY = "VERTICLE_INSTANCES";
 
     public static final String CLUSTERED_KEY = "PORTAL_GATEWAY_CLUSTERED";
 
@@ -29,8 +27,7 @@ public class Runtime {
     }
 
     /**
-     * Development mode can be activated by setting the system property 'development'
-     * (-Ddevelopment).
+     * Development mode can be activated by setting the environment variable 'DEVELOPMENT'.
      *
      * @return true if development mode is activated
      */

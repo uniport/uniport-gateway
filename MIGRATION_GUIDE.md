@@ -2,6 +2,13 @@
 
 ## `9.*.*` -> `10.*.*`
 
+### Environment variable
+
+The following environment variables are converted to screaming snake-case.
+
+* `development` to `DEVELOPMENT`
+* `verticle.instances` to `VERTICLE_INSTANCES`
+
 ### Static Configuration
 
 The configuration key `applications` in the static configuration was removed without replacement. It is no longer required. Please remove this entry in your configuration.
