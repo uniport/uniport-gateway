@@ -38,7 +38,7 @@ public class SessionMiddlewareFactory implements MiddlewareFactory {
     public static final String SESSION_COOKIE_SECURE = "secure";
 
     // session store
-    public static final String CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS = "clusteredSessionStoreRetryTimeoutInMiliseconds";
+    public static final String CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MS = "clusteredSessionStoreRetryTimeoutInMilliseconds";
 
     // defaults
     // session

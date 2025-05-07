@@ -1014,6 +1014,11 @@
                         }
                       }
                     },
+                    "clusteredSessionStoreRetryTimeoutInMilliseconds" : {
+                      "default" : 5000,
+                      "type" : "integer",
+                      "minimum" : 0.0
+                    },
                     "lifetimeCookie" : {
                       "default" : false,
                       "type" : "boolean"
@@ -1035,11 +1040,6 @@
                     "lifetimeHeader" : {
                       "default" : false,
                       "type" : "boolean"
-                    },
-                    "clusteredSessionStoreRetryTimeoutInMiliseconds" : {
-                      "default" : 5000,
-                      "type" : "integer",
-                      "minimum" : 0.0
                     }
                   }
                 },
