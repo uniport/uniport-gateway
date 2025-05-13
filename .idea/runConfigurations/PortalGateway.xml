@@ -1,0 +1,31 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PortalGateway" type="Application" factoryName="Application">
+    <envs>
+      <env name="development" value="true" />
+      <env name="PORTAL_GATEWAY_JSON" value="$PROJECT_DIR$/helm/src/main/resources/proxy-config.examples/portal-gateway.json" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.PortalGatewayLauncher" />
+    <module name="server" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.inventage.portal.gateway.setup.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/main/config/portal-gateway.common.env" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/main/config/portal-gateway.specific.env" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
