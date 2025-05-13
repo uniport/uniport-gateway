@@ -109,11 +109,19 @@ public class Runtime {
         String loggingConfigFilePath = System.getenv(LOGGING_CONFIG_PROPERTY);
         if (existsAsFile(loggingConfigFilePath)) {
             return Optional.of(Path.of(loggingConfigFilePath));
+        } else {
+            if (loggingConfigFilePath != null) {
+                System.err.println("File '" + new File(loggingConfigFilePath).getAbsoluteFile() + "' for system env '" + LOGGING_CONFIG_PROPERTY + "' not found");
+            }
         }
 
         loggingConfigFilePath = System.getProperty(LOGGING_CONFIG_PROPERTY);
         if (existsAsFile(loggingConfigFilePath)) {
             return Optional.of(Path.of(loggingConfigFilePath));
+        } else {
+            if (loggingConfigFilePath != null) {
+                System.err.println("File '" + new File(loggingConfigFilePath).getAbsoluteFile() + "' for system property '" + LOGGING_CONFIG_PROPERTY + "' not found");
+            }
         }
 
         final String loggingConfigFileName;
@@ -127,6 +135,8 @@ public class Runtime {
         loggingConfigFilePath = String.format("%s/%s", DEFAULT_LOGGING_CONFIG_FILE_PATH, loggingConfigFileName);
         if (existsAsFile(loggingConfigFilePath)) {
             return Optional.of(Path.of(loggingConfigFilePath));
+        } else {
+            System.err.println("File '" + new File(loggingConfigFilePath).getAbsoluteFile() + "' not found");
         }
 
         return Optional.empty();
