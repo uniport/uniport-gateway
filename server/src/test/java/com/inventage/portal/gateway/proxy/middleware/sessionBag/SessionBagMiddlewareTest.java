@@ -4,13 +4,17 @@ import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
+import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
+import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
 import com.inventage.portal.gateway.proxy.service.ReverseProxy;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
@@ -296,6 +300,31 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
                 new ArrayList<Cookie>(Collections.singletonList(storedCookie)));
         });
 
+    }
+
+    // https://inventage-all.atlassian.net/browse/PORTAL-2431
+    @Test
+    void propagateIncomingCookieToOutgoingRequest(Vertx vertx, VertxTestContext testCtx) {
+        // given
+        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+        final String cookieName = "cookie1";
+        final String cookieValue = "value1";
+        headers.add(HttpHeaders.COOKIE, cookieName + "=" + cookieValue);
+        final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withRoutingContextHolder(routingContext)
+            .withSessionMiddleware()
+            .withSessionBagMiddleware(List.of(
+                WhitelistedCookieOptions.builder().withName(cookieName).withPath("/").build()))
+            .build()
+            .start();
+        // when
+        gateway.incomingRequest(GET, "/secured", new RequestOptions().setHeaders(headers), (resp) -> {
+            // then
+            VertxAssertions.assertEquals(testCtx, true, routingContext.get().request().headers().contains(HttpHeaders.COOKIE),
+                "outgoing request should contain cookie from incoming request");
+            testCtx.completeNow();
+        });
     }
 
     void testHarness(

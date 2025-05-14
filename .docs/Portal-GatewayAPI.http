@@ -1,5 +1,11 @@
 
-### GET request on protected resource with accept application/json
-GET {{baseUrl}}/conversation
-Accept: application/json
+### https://inventage-all.atlassian.net/browse/PORTAL-2430
+### auth request without uniport.session cookie and with uniport.amr cookie
+#@no-cookie-jar
+GET {{baseUrl}}/auth/realms/portal/protocol/openid-connect/auth?state=1234567890&scope=openid+Organisation&response_type=code&client_id=Portal-Gateway&redirect_uri=http%3A%2F%2Flocalhost%3A20000%2Fcallback%2Forganisation&response_mode=form_post
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Language: en-US,en;q=0.9
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36
+Cookie: uniport.amr=passkey
+
 

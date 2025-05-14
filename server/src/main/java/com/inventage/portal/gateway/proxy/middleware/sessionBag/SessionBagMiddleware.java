@@ -89,28 +89,37 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         return new LaxCookieJar(cookieHeader);
     }
 
+    /**
+     *
+     * @param ctx
+     * @param requestCookies
+     * @return
+     */
     private String loadCookiesFromSessionBag(RoutingContext ctx, Set<ServerCookie> requestCookies) {
-        if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
-            return null;
-        }
-        LOGGER.debug("Cookies in session found. Setting as cookie header.");
+        //        if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
+        //            return null;
+        //        }
+        //        LOGGER.debug("Cookies in session found. Setting as cookie header.");
 
         // load stored cookies from session bag
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-        final String cookieHeaderValue = encodeMatchingCookies(storedCookies, ctx.request().path(), ctx.request().isSSL());
+        final List<String> outgoingCookies = encodeMatchingCookies(storedCookies, ctx.request().path(), ctx.request().isSSL());
 
-        return appendEncodedConflictFreeCookies(ctx.request().path(), cookieHeaderValue, requestCookies, storedCookies);
+        return appendEncodedConflictFreeCookies(ctx.request().path(), outgoingCookies, requestCookies, storedCookies);
     }
 
-    private String encodeMatchingCookies(Set<Cookie> storedCookies, String path, boolean isSSL) {
+    private List<String> encodeMatchingCookies(Set<Cookie> storedCookies, String path, boolean isSSL) {
         final List<String> encodedStoredCookies = new ArrayList<>();
-        for (Cookie storedCookie : storedCookies) {
-            if (cookieMatchesRequest(storedCookie, isSSL, path)) {
-                LOGGER.debug("Adding cookie '{}' to request", storedCookie.getName());
-                encodedStoredCookies.add(encodeCooke(storedCookie.getName(), storedCookie.getValue()));
+        if (storedCookies != null) {
+            for (Cookie storedCookie : storedCookies) {
+                if (cookieMatchesRequest(storedCookie, isSSL, path)) {
+                    LOGGER.debug("Adding cookie '{}' to request", storedCookie.getName());
+                    encodedStoredCookies.add(encodeCooke(storedCookie.getName(), storedCookie.getValue()));
+                }
             }
         }
-        return String.join(COOKIE_DELIMITER, encodedStoredCookies);
+        return encodedStoredCookies;
+        //return String.join(COOKIE_DELIMITER, encodedStoredCookies);
     }
 
     private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
@@ -188,15 +197,17 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
      * check for conflicting request and stored cookies
      * stored cookie have precedence to avoid cookie injection
      */
-    private String appendEncodedConflictFreeCookies(String path, String cookieHeaderValue, Set<ServerCookie> requestCookies, Set<Cookie> storedCookies) {
+    private String appendEncodedConflictFreeCookies(String path, List<String> outgoingCookies, Set<ServerCookie> requestCookies, Set<Cookie> storedCookies) {
         for (Cookie requestCookie : requestCookies) {
-            if (this.containsCookieForPath(storedCookies, requestCookie, path) != null) {
+            if (findSameCookie(requestCookie, storedCookies, path) == null) {
+                if (isWhitelistedIgnoringPath(requestCookie)) {
+                    outgoingCookies.add(encodeCooke(requestCookie.getName(), requestCookie.getValue()));
+                }
+            } else {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
-                continue;
             }
-            cookieHeaderValue = String.join(COOKIE_DELIMITER, cookieHeaderValue, encodeCooke(requestCookie.getName(), requestCookie.getValue()));
         }
-        return cookieHeaderValue;
+        return String.join(COOKIE_DELIMITER, outgoingCookies);
     }
 
     private String encodeCooke(String name, String value) {
@@ -257,7 +268,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
             newCookie.setPath("/");
         }
 
-        final Cookie foundCookie = this.containsCookie(storedCookies, newCookie);
+        final Cookie foundCookie = containsCookie(storedCookies, newCookie);
         if (foundCookie != null) {
             final boolean expired = (foundCookie.getMaxAge() == 0L);
             storedCookies.remove(foundCookie);
@@ -288,16 +299,25 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
             .orElse(null);
     }
 
-    private Cookie containsCookieForPath(Set<Cookie> set, Cookie cookie, String path) {
-        return set.stream()
-            .filter(c -> c.getName().equals(cookie.getName()) && path.startsWith(c.getPath()))
-            .findFirst()
-            .orElse(null);
+    private Cookie findSameCookie(Cookie cookie, Set<Cookie> set, String path) {
+        if (set == null) {
+            return null;
+        } else {
+            return set.stream()
+                .filter(c -> c.getName().equals(cookie.getName()) && path.startsWith(c.getPath()))
+                .findFirst()
+                .orElse(null);
+        }
     }
 
     private boolean isWhitelisted(Cookie cookie) {
         return whitelistedCookies.stream()
             .anyMatch(c -> c.getName().equals(cookie.getName()) && c.getPath().equals(cookie.getPath()));
+    }
+
+    private boolean isWhitelistedIgnoringPath(Cookie cookie) {
+        return whitelistedCookies.stream()
+            .anyMatch(c -> c.getName().equals(cookie.getName()));
     }
 
     private boolean isSessionCookie(Cookie cookie) {
