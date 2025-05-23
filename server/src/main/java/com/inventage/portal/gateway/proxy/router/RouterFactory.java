@@ -9,6 +9,7 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.model.Gateway;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
@@ -362,17 +363,16 @@ public class RouterFactory {
             return options;
         }
 
-        if (!(options instanceof OAuth2MiddlewareOptions)) {
-            throw new IllegalStateException(String.format("unexpected middleware options type: '%s'", options.getClass()));
+        final Map<String, String> env = Map.of(
+            PUBLIC_PROTOCOL_KEY, publicProtocol,
+            PUBLIC_HOSTNAME_KEY, publicHostname,
+            PUBLIC_PORT_KEY, publicPort);
+        if (options instanceof OAuth2MiddlewareOptions) {
+            return ((OAuth2MiddlewareOptions) options).withEnv(env);
+        } else if (options instanceof OAuth2RegistrationMiddlewareOptions) {
+            return ((OAuth2RegistrationMiddlewareOptions) options).withEnv(env);
         }
-        final OAuth2MiddlewareOptions oauth2options = (OAuth2MiddlewareOptions) options;
-
-        // needed to ensure authenticating requests are routed through this application
-        return oauth2options.withEnv(
-            Map.of(
-                PUBLIC_PROTOCOL_KEY, publicProtocol,
-                PUBLIC_HOSTNAME_KEY, publicHostname,
-                PUBLIC_PORT_KEY, publicPort));
+        throw new IllegalStateException(String.format("unexpected middleware options type: '%s'", options.getClass()));
     }
 
     private void addHealthRoute(Router router) {
