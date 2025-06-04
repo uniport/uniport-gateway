@@ -1,11 +1,10 @@
-
 initContainers:
   init-portal-iam:
     image:
       registry: docker-registry.inventage.com:10116
 
 ingress:
-  host: portal1.localdev.me
+  host: portal1.local.uniport.ch.
   className: nginx
   tls:
     enabled: false
@@ -59,7 +58,7 @@ containers:
         value: "false"
       # PORTAL_GATEWAY_PUBLIC_HOSTNAME is the HTTP host name for external access
       PORTAL_GATEWAY_PUBLIC_HOSTNAME:
-        value: "portal1.localdev.me"
+        value: "portal1.local.uniport.ch."
       # PORTAL_GATEWAY_PUBLIC_PORT is the HTTP port for external access
       PORTAL_GATEWAY_PUBLIC_PORT:
         value: "29000"
@@ -68,7 +67,7 @@ containers:
         value: "http"
       # PORTAL_GATEWAY_BEARER_TOKEN_ISSUER is the expected value for the "iss" claim
       PORTAL_GATEWAY_BEARER_TOKEN_ISSUER:
-        value: "http://portal1.localdev.me:29000/auth/realms/portal"
+        value: "http://portal1.local.uniport.ch.:29000/auth/realms/portal"
       PORTAL_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
       PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:

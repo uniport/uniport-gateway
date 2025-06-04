@@ -74,14 +74,14 @@ Router with `oauth2` and `authorizationBearer` middlewares:
             },
             {
                 "name": "whoami2",
-                "rule": "Host('localdev.me')",
+                "rule": "Host('local.uniport.ch.')",
                 "priority": 50,
                 "middlewares": [
                     "whoami2Oauth",
                     "whoami2AuthBearer"
                 ],
                 "service": "whoami2"
-            }            
+            }
             // [..]
         ],
         "middlewares": [

@@ -21,7 +21,6 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,6 @@ public class ReverseProxyTest {
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     @Test
-    @Disabled
     void correctHostHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final int backendPort = TestUtils.findFreePort();
@@ -42,13 +40,13 @@ public class ReverseProxyTest {
         final Checkpoint hostVerified = testCtx.checkpoint();
         final Handler<RoutingContext> backendHandler = ctx -> {
             // then
-            VertxAssertions.assertEquals(testCtx, "localdev.me" + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
+            VertxAssertions.assertEquals(testCtx, "local.uniport.ch" + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
             hostVerified.flag();
             ctx.response().end();
         };
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
-            .withProxyMiddleware("localdev.me", backendPort)
+            .withProxyMiddleware("local.uniport.ch", backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build().start();
 
