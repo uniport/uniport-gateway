@@ -96,30 +96,25 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
      * @return
      */
     private String loadCookiesFromSessionBag(RoutingContext ctx, Set<ServerCookie> requestCookies) {
-        //        if (!ctx.session().data().containsKey(SESSION_BAG_COOKIES)) {
-        //            return null;
-        //        }
-        //        LOGGER.debug("Cookies in session found. Setting as cookie header.");
-
-        // load stored cookies from session bag
         final Set<Cookie> storedCookies = ctx.session().get(SESSION_BAG_COOKIES);
-        final List<String> outgoingCookies = encodeMatchingCookies(storedCookies, ctx.request().path(), ctx.request().isSSL());
+        final List<String> outgoingCookies = loadMatchingCookies(storedCookies, ctx.request().path(), ctx.request().isSSL());
 
         return appendEncodedConflictFreeCookies(ctx.request().path(), outgoingCookies, requestCookies, storedCookies);
     }
 
-    private List<String> encodeMatchingCookies(Set<Cookie> storedCookies, String path, boolean isSSL) {
+    private List<String> loadMatchingCookies(Set<Cookie> storedCookies, String path, boolean isSSL) {
+        if (storedCookies == null) {
+            return new ArrayList<>();
+        }
+
         final List<String> encodedStoredCookies = new ArrayList<>();
-        if (storedCookies != null) {
-            for (Cookie storedCookie : storedCookies) {
-                if (cookieMatchesRequest(storedCookie, isSSL, path)) {
-                    LOGGER.debug("Adding cookie '{}' to request", storedCookie.getName());
-                    encodedStoredCookies.add(encodeCooke(storedCookie.getName(), storedCookie.getValue()));
-                }
+        for (Cookie storedCookie : storedCookies) {
+            if (cookieMatchesRequest(storedCookie, isSSL, path)) {
+                LOGGER.debug("Adding cookie '{}' to request", storedCookie.getName());
+                encodedStoredCookies.add(encodeCooke(storedCookie.getName(), storedCookie.getValue()));
             }
         }
         return encodedStoredCookies;
-        //return String.join(COOKIE_DELIMITER, encodedStoredCookies);
     }
 
     private boolean cookieMatchesRequest(Cookie cookie, boolean isSSL, String path) {
@@ -199,13 +194,11 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
      */
     private String appendEncodedConflictFreeCookies(String path, List<String> outgoingCookies, Set<ServerCookie> requestCookies, Set<Cookie> storedCookies) {
         for (Cookie requestCookie : requestCookies) {
-            if (findSameCookie(requestCookie, storedCookies, path) == null) {
-                if (isWhitelistedIgnoringPath(requestCookie)) {
-                    outgoingCookies.add(encodeCooke(requestCookie.getName(), requestCookie.getValue()));
-                }
-            } else {
+            if (hasMatchingCookieOnPath(storedCookies, requestCookie, path) || !isWhitelistedIgnoringPath(requestCookie)) {
                 LOGGER.debug("Ignoring cookie '{}' from request.", requestCookie.getName());
+                continue;
             }
+            outgoingCookies.add(encodeCooke(requestCookie.getName(), requestCookie.getValue()));
         }
         return String.join(COOKIE_DELIMITER, outgoingCookies);
     }
@@ -268,7 +261,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
             newCookie.setPath("/");
         }
 
-        final Cookie foundCookie = containsCookie(storedCookies, newCookie);
+        final Cookie foundCookie = findMatchingCookie(storedCookies, newCookie);
         if (foundCookie != null) {
             final boolean expired = (foundCookie.getMaxAge() == 0L);
             storedCookies.remove(foundCookie);
@@ -292,22 +285,22 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
             .replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}");
     }
 
-    private Cookie containsCookie(Set<Cookie> set, Cookie cookie) {
+    private Cookie findMatchingCookie(Set<Cookie> set, Cookie cookie) {
         return set.stream()
             .filter(c -> c.getName().equals(cookie.getName()) && c.getPath().equals(cookie.getPath()))
             .findFirst()
             .orElse(null);
     }
 
-    private Cookie findSameCookie(Cookie cookie, Set<Cookie> set, String path) {
+    private boolean hasMatchingCookieOnPath(Set<Cookie> set, Cookie cookie, String path) {
         if (set == null) {
-            return null;
-        } else {
-            return set.stream()
-                .filter(c -> c.getName().equals(cookie.getName()) && path.startsWith(c.getPath()))
-                .findFirst()
-                .orElse(null);
+            return false;
         }
+
+        return set.stream()
+            .filter(c -> c.getName().equals(cookie.getName()) && path.startsWith(c.getPath()))
+            .findFirst()
+            .isPresent();
     }
 
     private boolean isWhitelisted(Cookie cookie) {
