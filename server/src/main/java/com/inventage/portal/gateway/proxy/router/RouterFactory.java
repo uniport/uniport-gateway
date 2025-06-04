@@ -63,12 +63,6 @@ public class RouterFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
-    private final Vertx vertx;
-    private final String publicProtocol;
-    private final String publicHostname;
-    private final String publicPort;
-    private final String entrypointName;
-
     private static final String PATH_RULE_NAME = "Path";
     private static final String PATH_REGEX_RULE_NAME = "PathRegex";
     private static final String PATH_PREFIX_RULE_NAME = "PathPrefix";
@@ -130,6 +124,10 @@ public class RouterFactory {
     private static final Pattern HOST_PATTERN = Pattern.compile("^[" + IP_LITERAL + IPV4 + REG_NAME + "]+$");
     private static final Pattern PATH_PATTERN = Pattern.compile("^\\/[" + PCHAR + "\\/]*$");
 
+    private final Vertx vertx;
+    private final PublicProtoHostPort publicProtoHostPort;
+    private final String entrypointName;
+
     /**
      * Validates a router config i.e. with a valid rule.
      * 
@@ -181,19 +179,15 @@ public class RouterFactory {
         }
     }
 
-    public RouterFactory(Vertx vertx, String publicProtocol, String publicHostname, String publicPort, String entrypointName) {
+    public RouterFactory(Vertx vertx, PublicProtoHostPort publicProtoHostPort, String entrypointName) {
         this.vertx = vertx;
-        this.publicProtocol = publicProtocol;
-        this.publicHostname = publicHostname;
-        this.publicPort = publicPort;
+        this.publicProtoHostPort = PublicProtoHostPort.of(publicProtoHostPort);
         this.entrypointName = entrypointName;
     }
 
     public RouterFactory(RouterFactory other) {
         this.vertx = other.vertx;
-        this.publicProtocol = other.publicProtocol;
-        this.publicHostname = other.publicHostname;
-        this.publicPort = other.publicPort;
+        this.publicProtoHostPort = PublicProtoHostPort.of(other.publicProtoHostPort);
         this.entrypointName = other.entrypointName;
     }
 
@@ -228,6 +222,7 @@ public class RouterFactory {
                 return;
             }
 
+            // ignore routers that are not mounted on this entrypoint
             if (!entrypoints.contains(entrypointName)) {
                 continue;
             }
@@ -364,9 +359,9 @@ public class RouterFactory {
         }
 
         final Map<String, String> env = Map.of(
-            PUBLIC_PROTOCOL_KEY, publicProtocol,
-            PUBLIC_HOSTNAME_KEY, publicHostname,
-            PUBLIC_PORT_KEY, publicPort);
+            PUBLIC_PROTOCOL_KEY, publicProtoHostPort.getProto(),
+            PUBLIC_HOSTNAME_KEY, publicProtoHostPort.getHost(),
+            PUBLIC_PORT_KEY, publicProtoHostPort.getPort());
         if (options instanceof OAuth2MiddlewareOptions) {
             return ((OAuth2MiddlewareOptions) options).withEnv(env);
         } else if (options instanceof OAuth2RegistrationMiddlewareOptions) {

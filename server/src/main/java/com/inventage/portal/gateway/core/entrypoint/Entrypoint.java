@@ -2,7 +2,6 @@ package com.inventage.portal.gateway.core.entrypoint;
 
 import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
-import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
@@ -15,7 +14,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -27,10 +25,13 @@ import org.slf4j.LoggerFactory;
 public class Entrypoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
+
     private final Vertx vertx;
+
     private final String name;
     private final int port;
-    private final List<GatewayMiddleware> entryMiddlewares;
+    private final List<GatewayMiddleware> middlewares;
+
     private GatewayRouterInternal router;
     private Tls tls;
 
@@ -38,7 +39,7 @@ public class Entrypoint {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
-        this.entryMiddlewares = entryMiddlewares;
+        this.middlewares = entryMiddlewares;
     }
 
     public String name() {
@@ -54,57 +55,36 @@ public class Entrypoint {
             return router;
         }
         router = GatewayRouterInternal.router(vertx, String.format("entrypoint %s", name));
-        if (this.entryMiddlewares != null) {
+        if (middlewares != null) {
             LOGGER.info("Setup EntryMiddlewares");
-            this.setupEntryMiddlewares(this.entryMiddlewares, router);
+            createAndMountMiddlewares(middlewares, router)
+                .onSuccess(v -> LOGGER.info("EntryMiddlewares created successfully"))
+                .onFailure(err -> Runtime.fatal(vertx, err.getMessage()));
         }
         return router;
     }
 
-    public void mount(Application application) {
-        final Optional<Router> optionApplicationRouter = application.router();
-        optionApplicationRouter.ifPresent(applicationRouter -> {
-            if (name.equals(application.entrypoint())) {
-                router().mountSubRouter(application.rootPath(), applicationRouter);
-                LOGGER.info("Application '{}' for '{}' at endpoint '{}'", application, application.rootPath(), name);
-            }
-        });
+    private Future<Void> createAndMountMiddlewares(List<GatewayMiddleware> entryMiddlewares, Router router) {
+        final List<Future<Middleware>> entryMiddlewaresFutures = entryMiddlewares.stream()
+            .map(entryMiddleware -> createEntryMiddleware(entryMiddleware, router))
+            .toList();
+
+        return Future.all(entryMiddlewaresFutures)
+            .map(cf -> mountMiddlewares(
+                entryMiddlewaresFutures.stream()
+                    .map(Future::result)
+                    .toList(),
+                router))
+            .mapEmpty();
     }
 
-    public boolean isTls() {
-        return tls != null;
-    }
-
-    public void setJksOptions(JksOptions jksOptions) {
-        this.tls = new Tls(jksOptions);
-    }
-
-    public JksOptions jksOptions() {
-        if (isTls()) {
-            return tls.jksOptions();
+    private Future<Void> mountMiddlewares(List<Middleware> entryMiddlewares, Router router) {
+        for (Middleware mw : entryMiddlewares) {
+            router.route()
+                .setName(mw.getClass().getSimpleName())
+                .handler((Handler<RoutingContext>) mw);
         }
-        return null;
-    }
-
-    private void setupEntryMiddlewares(List<GatewayMiddleware> entryMiddlewares, Router router) {
-
-        final List<Future<Middleware>> entryMiddlewaresFuture = new ArrayList<>();
-        for (GatewayMiddleware entryMiddleware : entryMiddlewares) {
-            entryMiddlewaresFuture.add(createEntryMiddleware(entryMiddleware, router));
-        }
-
-        Future.all(entryMiddlewaresFuture)
-            .onSuccess(cf -> {
-                entryMiddlewaresFuture.forEach(mf -> {
-                    final Middleware middleware = mf.result();
-                    router.route()
-                        .setName(middleware.getClass().getSimpleName())
-                        .handler((Handler<RoutingContext>) middleware);
-                });
-                LOGGER.info("EntryMiddlewares created successfully");
-            }).onFailure(err -> {
-                Runtime.fatal(vertx, err.getMessage());
-            });
+        return Future.succeededFuture();
     }
 
     private Future<Middleware> createEntryMiddleware(GatewayMiddleware middlewareConfig, Router router) {
@@ -127,8 +107,23 @@ public class Entrypoint {
 
         final String middlewareName = middlewareConfig.getName();
         middlewareFactory.get()
-            .create(this.vertx, middlewareName, router, middlewareOptions)
+            .create(vertx, middlewareName, router, middlewareOptions)
             .onComplete(handler);
+    }
+
+    public boolean isTls() {
+        return tls != null;
+    }
+
+    public void setJksOptions(JksOptions jksOptions) {
+        tls = new Tls(jksOptions);
+    }
+
+    public JksOptions jksOptions() {
+        if (isTls()) {
+            return tls.jksOptions();
+        }
+        return null;
     }
 
     static class Tls {

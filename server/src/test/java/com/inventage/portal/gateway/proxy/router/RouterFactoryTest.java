@@ -87,7 +87,7 @@ public class RouterFactoryTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, "http", host, String.format("%d", proxyPort), entrypointName);
+        routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", host, String.format("%d", proxyPort)), entrypointName);
     }
 
     @AfterEach

@@ -2,15 +2,19 @@ package com.inventage.portal.gateway.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
-import com.inventage.portal.gateway.core.application.Application;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-import com.inventage.portal.gateway.proxy.ProxyApplicationFactory;
+import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
+import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
+import com.inventage.portal.gateway.proxy.router.PublicProtoHostPort;
+import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -18,21 +22,22 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The main verticle of the portal gateway. It reads the configuration for the entrypoints and
- * creates an HTTP listener for each of them. Additionally, it reads the configuration for the
- * applications and mounts them using the entrypoints.
+ * creates an HTTP listener for each of them.
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
+
+    private static final String CONFIGURATION_ADDRESS = "configuration-announce-address";
 
     /**
      * Default maximum length of all headers for HTTP/1.x in bytes = {@code 10240}, i.e. 10 kilobytes
@@ -58,11 +63,13 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             final JsonObject config = substituteConfigurationVariables(rawConfig, env);
 
             StaticConfiguration.validate(vertx, config)
-                .onSuccess(handler -> runServer(config, env, startPromise))
+                .onFailure(err -> LOGGER.error("Failed to validate static configuration"))
+                .compose(v -> runServer(config, env))
                 .onFailure(err -> {
-                    LOGGER.error("Failed to validate static configuration");
+                    LOGGER.error("Failed to run server");
                     shutdownOnStartupFailure(err);
-                });
+                })
+                .onSuccess(servers -> startPromise.complete());
         } catch (Exception e) {
             shutdownOnStartupFailure(e);
         }
@@ -101,51 +108,69 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         return new JsonObject(ConfigAdapter.replaceEnvVariables(config.encode(), env));
     }
 
-    private void runServer(JsonObject config, JsonObject env, Promise<Void> startPromise) {
-        final JsonArray entrypointConfigs = config.getJsonArray(StaticConfiguration.ENTRYPOINTS, JsonArray.of());
-        final List<Entrypoint> entrypoints = entrypoints(entrypointConfigs);
+    private Future<List<HttpServer>> runServer(JsonObject staticConfig, JsonObject env) {
+        final JsonArray entrypoints = staticConfig.getJsonArray(StaticConfiguration.ENTRYPOINTS, JsonArray.of());
+        final JsonArray providers = staticConfig.getJsonArray(StaticConfiguration.PROVIDERS, JsonArray.of());
 
-        final JsonArray providerConfigs = config.getJsonArray(StaticConfiguration.PROVIDERS, JsonArray.of());
-        final List<Application> applications = applications(entrypointConfigs, providerConfigs, env);
+        final Function<ConfigurationWatcher, List<Future<HttpServer>>> deployEntrypoints = w -> entrypoints.stream()
+            .map(object -> JsonObject.mapFrom(object))
+            .map(epConfig -> createEntrypoint(epConfig, env, w)
+                .compose(entrypoint -> entryPointListen(entrypoint)))
+            .toList();
 
-        deployAndMountApplications(applications, entrypoints);
-        createListenersForEntrypoints(entrypoints, startPromise);
+        return deployConfigurationWatcher(entrypoints, providers, env)
+            .map(w -> Future.join(deployEntrypoints.apply(w)))
+            .mapEmpty();
     }
 
-    private void deployAndMountApplications(List<Application> applications, List<Entrypoint> entrypoints) {
-        LOGGER.debug("Number of applications '{}' and entrypoints {}'", applications.size(), entrypoints.size());
-        applications.stream()
-            .forEach(application -> {
-                application.deployOn(vertx)
-                    .onSuccess(handler -> entrypoints.stream().forEach(entrypoint -> entrypoint.mount(application)))
-                    .onFailure(this::shutdownOnStartupFailure);
-            });
+    private Future<ConfigurationWatcher> deployConfigurationWatcher(JsonArray epConfigs, JsonArray providers, JsonObject env) {
+        final ProviderAggregator aggregator = new ProviderAggregator(vertx, CONFIGURATION_ADDRESS, providers, env);
+
+        final int pvdThrottleDuration = env.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);
+        final List<String> epNames = epConfigs.stream()
+            .map(object -> JsonObject.mapFrom(object))
+            .map(config -> config.getString(StaticConfiguration.ENTRYPOINT_NAME))
+            .toList();
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, CONFIGURATION_ADDRESS, pvdThrottleDuration, epNames);
+
+        return Future.succeededFuture(watcher);
     }
 
-    private void createListenersForEntrypoints(List<Entrypoint> entrypoints, Promise<Void> startPromise) {
-        LOGGER.debug("Number of entrypoints {}'", entrypoints.size());
-        listenOnEntrypoints(entrypoints)
-            .onSuccess(handler -> {
-                startPromise.complete();
-                LOGGER.info("Start succeeded.");
-            }).onFailure(err -> {
-                startPromise.fail(err);
-                LOGGER.error("Start failed.");
-            });
+    private Future<Entrypoint> createEntrypoint(JsonObject epConfig, JsonObject env, ConfigurationWatcher watcher) {
+        final String epName = epConfig.getString(StaticConfiguration.ENTRYPOINT_NAME);
+        final int epPort = epConfig.getInteger(StaticConfiguration.ENTRYPOINT_PORT);
+        final JsonArray epMiddlewares = epConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, JsonArray.of());
+
+        final PublicProtoHostPort publicProtoHostPort = PublicProtoHostPort.of(env, epPort);
+        final RouterFactory routerFactory = new RouterFactory(vertx, publicProtoHostPort, epName);
+
+        final Entrypoint entrypoint = new Entrypoint(vertx, epName, epPort, mapMiddlewaresToModel(epMiddlewares));
+
+        // this glues the entrypoint and the dynamic configuration
+        // there are 3 routers in play here:
+        // * the top level router containing the entrypoint middlewares created by the Entrypoint
+        // * the bottom level router containing the router middlewares created by the RouterFactory 
+        // * and the mid level router glueing the top and the bottom level router together that can be cleared on a dynamic configuration change without affecting the top level router  
+        final GatewayRouterInternal glueRouter = GatewayRouterInternal.router(vertx, "glue");
+        entrypoint.router().mountSubRouter("/", glueRouter);
+        watcher.addListener(new RouterSwitchListener(glueRouter, routerFactory));
+
+        return vertx.deployVerticle(watcher)
+            .map(id -> entrypoint);
     }
 
-    private Future<?> listenOnEntrypoints(List<Entrypoint> entrypoints) {
-        return Future.join(
-            entrypoints.stream()
-                .map(this::listOnEntrypoint)
-                .collect(Collectors.toList()));
-    }
-
-    private Future<HttpServer> listOnEntrypoint(Entrypoint entrypoint) {
-        if (entrypoint.port() <= 0) {
-            return Future.failedFuture("invalid port %d".formatted(entrypoint.port()));
+    private List<GatewayMiddleware> mapMiddlewaresToModel(JsonArray config) {
+        final ObjectMapper codec = new ObjectMapper();
+        List<GatewayMiddleware> middlewares = null;
+        try {
+            middlewares = codec.readValue(config.encode(), codec.getTypeFactory().constructCollectionType(List.class, GatewayMiddleware.class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
+        return middlewares;
+    }
 
+    private Future<HttpServer> entryPointListen(Entrypoint entrypoint) {
         final HttpServerOptions options = new HttpServerOptions()
             .setMaxHeaderSize(DEFAULT_HEADER_LIMIT)
             .setSsl(entrypoint.isTls())
@@ -160,53 +185,5 @@ public class PortalGatewayVerticle extends AbstractVerticle {
 
     private void shutdownOnStartupFailure(Throwable throwable) {
         Runtime.fatal(vertx, throwable.getMessage());
-    }
-
-    private List<Entrypoint> entrypoints(JsonArray entrypointConfigs) {
-        LOGGER.debug("Reading from config key '{}'", StaticConfiguration.ENTRYPOINTS);
-        if (entrypointConfigs == null) {
-            return List.of();
-        }
-        try {
-            return entrypointConfigs.stream()
-                .map(object -> JsonObject.mapFrom(object))
-                .map(entrypointConfig -> {
-                    final String name = entrypointConfig.getString(StaticConfiguration.ENTRYPOINT_NAME);
-                    final int port = entrypointConfig.getInteger(StaticConfiguration.ENTRYPOINT_PORT);
-                    final JsonArray middlewares = entrypointConfig.getJsonArray(DynamicConfiguration.MIDDLEWARES, JsonArray.of());
-                    return new Entrypoint(vertx, name, port, mapMiddlewaresToModel(middlewares));
-                })
-                .toList();
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                String.format("Couldn't read '%s' configuration '%s'", StaticConfiguration.ENTRYPOINTS, e.getMessage()));
-        }
-    }
-
-    private List<GatewayMiddleware> mapMiddlewaresToModel(JsonArray config) {
-        final ObjectMapper codec = new ObjectMapper();
-        List<GatewayMiddleware> middlewares = null;
-        try {
-            middlewares = codec.readValue(config.encode(), codec.getTypeFactory().constructCollectionType(List.class, GatewayMiddleware.class));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return middlewares;
-    }
-
-    private List<Application> applications(JsonArray entrypointConfigs, JsonArray providerConfigs, JsonObject env) {
-        final ProxyApplicationFactory factory = new ProxyApplicationFactory();
-        final List<Application> applications = new ArrayList<Application>();
-
-        for (int i = 0; i < entrypointConfigs.size(); i++) {
-            applications.add(
-                factory.create(
-                    vertx,
-                    entrypointConfigs.getJsonObject(i),
-                    providerConfigs,
-                    env));
-        }
-
-        return applications;
     }
 }

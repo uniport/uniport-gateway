@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.ProxyApplication;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareOptions;
@@ -10,6 +9,7 @@ import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import com.inventage.portal.gateway.proxy.model.GatewayRouter;
 import com.inventage.portal.gateway.proxy.model.GatewayService;
 import com.inventage.portal.gateway.proxy.model.ServerOptions;
+import com.inventage.portal.gateway.proxy.router.PublicProtoHostPort;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -18,9 +18,8 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.RequestOptions;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
@@ -70,7 +69,7 @@ public class EntryMiddlewareTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, "http", HOST, String.format("%d", proxyPort), ENTRYPOINT_PREFIX + proxyPort);
+        routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", HOST, String.format("%d", proxyPort)), ENTRYPOINT_PREFIX + proxyPort);
     }
 
     @AfterEach
@@ -125,8 +124,6 @@ public class EntryMiddlewareTest {
             .build();
 
         final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, List.of(entryMiddlewareConfig));
-        final ProxyApplication proxyApplication = new ProxyApplication(vertx, "proxy", entryPointIdentifier, 1234, JsonArray.of(), JsonObject.of());
-        entrypoint.mount(proxyApplication);
 
         routerFactory.createRouter(dynamicConfig).onComplete(testCtx.succeeding(router -> {
             entrypoint.router().route("/*").subRouter(router);
