@@ -47,20 +47,24 @@ public class EntryMiddlewareTest {
         final CountDownLatch latch = new CountDownLatch(2);
 
         proxyPort = TestUtils.findFreePort();
-        proxy = vertx.createHttpServer().requestHandler(req -> {
-            proxyRouter.handle(req);
-        }).listen(proxyPort, ready -> {
-            if (ready.failed()) {
-                throw new RuntimeException(ready.cause());
-            }
-            latch.countDown();
-        });
+        proxy = vertx.createHttpServer()
+            .requestHandler(req -> {
+                proxyRouter.handle(req);
+            })
+            .listen(proxyPort, ready -> {
+                if (ready.failed()) {
+                    throw new RuntimeException(ready.cause());
+                }
+                latch.countDown();
+            });
 
         serverPort = TestUtils.findFreePort();
-        server = vertx.createHttpServer().requestHandler(
-            req -> {
-                req.response().setStatusCode(200).end("ok");
-            }).listen(serverPort, ready -> {
+        server = vertx.createHttpServer()
+            .requestHandler(
+                req -> {
+                    req.response().setStatusCode(200).end("ok");
+                })
+            .listen(serverPort, ready -> {
                 if (ready.failed()) {
                     throw new RuntimeException(ready.cause());
                 }
@@ -126,25 +130,21 @@ public class EntryMiddlewareTest {
         final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, List.of(entryMiddlewareConfig));
 
         routerFactory.createRouter(dynamicConfig).onComplete(testCtx.succeeding(router -> {
-            entrypoint.router().route("/*").subRouter(router);
+            entrypoint.router().mountSubRouter("/", router);
             proxyRouter = entrypoint.router();
 
-            final RequestOptions optA = new RequestOptions().setURI("/pathA");
-            final RequestOptions optB = new RequestOptions().setURI("/pathB");
+            final Checkpoint c = testCtx.checkpoint(2);
+            List.of("/pathA", "/pathB").stream()
+                .forEach(path -> {
+                    final RequestOptions opt = new RequestOptions().setURI(path);
+                    doRequest(vertx, testCtx, opt, resp -> {
+                        //then
+                        VertxAssertions.assertEquals(testCtx, HttpResponseStatus.FOUND.code(), resp.statusCode(), "unexpected status code");
+                        VertxAssertions.assertEquals(testCtx, expectedRedirect, resp.headers().get("location"));
 
-            //when
-            doRequest(vertx, testCtx, optA, responsePathA -> {
-                //then
-                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.FOUND.code(), responsePathA.statusCode(), "unexpected status code");
-                VertxAssertions.assertEquals(testCtx, expectedRedirect, responsePathA.headers().get("location"));
-            });
-            doRequest(vertx, testCtx, optB, responsePathB -> {
-                //then
-                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.FOUND.code(), responsePathB.statusCode(), "unexpected status code");
-                VertxAssertions.assertEquals(testCtx, expectedRedirect, responsePathB.headers().get("location"));
-            });
-
-            testCtx.completeNow();
+                        c.flag();
+                    });
+                });
         }));
     }
 

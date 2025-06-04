@@ -71,39 +71,6 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     /**
-     * If a router has no entrypoint applied, the default entrypoints are set.
-     * 
-     * @param config
-     *            to inspect
-     * @param entrypoints
-     *            default entrypoints
-     * @return
-     */
-    private static JsonObject applyEntrypoints(JsonObject config, List<String> entrypoints) {
-        final JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
-
-        if (httpConfig == null) {
-            return config;
-        }
-
-        final JsonArray rs = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
-        for (int i = 0; i < rs.size(); i++) {
-            final JsonObject r = rs.getJsonObject(i);
-            final JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
-            final String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
-            if (rEntrypoints == null || rEntrypoints.size() == 0) {
-                LOGGER.debug(
-                    "No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
-                    routerName,
-                    entrypoints.toString());
-                r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
-            }
-        }
-
-        return config;
-    }
-
-    /**
      * Each provider supplies one configuration. Here, all configurations are merged into one aggregated configuration.
      * 
      * @param configurations
@@ -238,7 +205,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         listenProviders();
         listenConfigurations();
 
-        this.vertx.deployVerticle(this.provider)
+        vertx.deployVerticle(provider)
             .onSuccess(ar -> {
                 startPromise.complete();
             }).onFailure(err -> {
@@ -248,16 +215,16 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
     @Override
     public void stop(Promise<Void> stopPromise) {
-        this.vertx.cancelTimer(this.timerId);
+        vertx.cancelTimer(timerId);
         stopPromise.complete();
     }
 
     public void addListener(Listener listener) {
         LOGGER.debug("Adding listener '{}'", listener);
-        if (this.configurationListeners == null) {
-            this.configurationListeners = new ArrayList<>();
+        if (configurationListeners == null) {
+            configurationListeners = new ArrayList<>();
         }
-        this.configurationListeners.add(listener);
+        configurationListeners.add(listener);
     }
 
     /**
@@ -267,7 +234,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
      */
     private void listenProviders() {
         LOGGER.debug("Listening for new configuration...");
-        final MessageConsumer<JsonObject> configConsumer = this.eventBus.consumer(this.configurationAddress);
+        final MessageConsumer<JsonObject> configConsumer = eventBus.consumer(configurationAddress);
 
         configConsumer.handler(message -> onConfigurationAnnounce(message));
     }
@@ -298,14 +265,14 @@ public class ConfigurationWatcher extends AbstractVerticle {
         }
 
         // there is at most one config reload throttler per provider
-        if (!this.providerConfigReloadThrottler.contains(providerName)) {
-            this.providerConfigReloadThrottler.add(providerName);
+        if (!providerConfigReloadThrottler.contains(providerName)) {
+            providerConfigReloadThrottler.add(providerName);
 
-            this.throttleProviderConfigReload(this.providersThrottleIntervalMs, providerName);
+            throttleProviderConfigReload(providersThrottleIntervalMs, providerName);
         }
 
         LOGGER.info("Publishing next configuration from '{}' provider", providerName);
-        this.eventBus.publish(providerName, nextConfig);
+        eventBus.publish(providerName, nextConfig);
     }
 
     /**
@@ -321,7 +288,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
         final Queue<JsonObject> nextConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
         final Queue<JsonObject> prevConfigRing = QueueUtils.synchronizedQueue(new CircularFifoQueue<JsonObject>(1));
 
-        final MessageConsumer<JsonObject> consumer = this.eventBus.consumer(providerConfigReloadAddress);
+        final MessageConsumer<JsonObject> consumer = eventBus.consumer(providerConfigReloadAddress);
         consumer.handler(message -> onConfigReload(message, throttleMs, nextConfigRing, prevConfigRing));
     }
 
@@ -336,7 +303,7 @@ public class ConfigurationWatcher extends AbstractVerticle {
             prevConfigRing.add(nextConfig.copy());
             nextConfigRing.add(nextConfig.copy());
             publishConfiguration(nextConfigRing);
-            this.timerId = this.vertx.setPeriodic(throttleMs, tId -> {
+            timerId = vertx.setPeriodic(throttleMs, tId -> {
                 publishConfiguration(nextConfigRing);
             });
             return;
@@ -358,12 +325,12 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return;
         }
         LOGGER.info("Publishing configuration");
-        this.eventBus.publish(CONFIG_THROTTLED_ADDRESS, nextConfig);
+        eventBus.publish(CONFIG_THROTTLED_ADDRESS, nextConfig);
     }
 
     private void listenConfigurations() {
         LOGGER.debug("Listening for new configuration...");
-        final MessageConsumer<JsonObject> throttledProviderConfigUpdateConsumer = this.eventBus.consumer(CONFIG_THROTTLED_ADDRESS);
+        final MessageConsumer<JsonObject> throttledProviderConfigUpdateConsumer = eventBus.consumer(CONFIG_THROTTLED_ADDRESS);
         throttledProviderConfigUpdateConsumer.handler(message -> onThrottledConfiguration(message));
     }
 
@@ -377,16 +344,16 @@ public class ConfigurationWatcher extends AbstractVerticle {
             return;
         }
 
-        this.currentConfigurations.put(providerName, providerConfig);
+        currentConfigurations.put(providerName, providerConfig);
 
-        final JsonObject mergedConfig = mergeConfigurations(this.currentConfigurations);
-        applyEntrypoints(mergedConfig, this.defaultEntrypoints);
+        final JsonObject mergedConfig = mergeConfigurations(currentConfigurations);
+        applyDefaultEntrypoints(mergedConfig, defaultEntrypoints);
 
         DynamicConfiguration.validate(vertx, mergedConfig)
             .compose(v -> mapToModel(mergedConfig))
             .onSuccess(model -> {
                 LOGGER.debug("Informing listeners about new configuration: '{}'", model);
-                for (Listener listener : this.configurationListeners) {
+                for (Listener listener : configurationListeners) {
                     listener.listen(model);
                 }
                 anyConfigurationPublished.set(true);
@@ -398,6 +365,39 @@ public class ConfigurationWatcher extends AbstractVerticle {
 
                 LOGGER.warn("Ignoring invalid configuration for '{}': '{}'", providerName, err.getMessage());
             });
+    }
+
+    /**
+     * If a router has no entrypoint applied, the default entrypoints are set.
+     * 
+     * @param config
+     *            to inspect
+     * @param entrypoints
+     *            default entrypoints
+     * @return
+     */
+    private JsonObject applyDefaultEntrypoints(JsonObject config, List<String> entrypoints) {
+        final JsonObject httpConfig = config.getJsonObject(DynamicConfiguration.HTTP);
+
+        if (httpConfig == null) {
+            return config;
+        }
+
+        final JsonArray rs = httpConfig.getJsonArray(DynamicConfiguration.ROUTERS);
+        for (int i = 0; i < rs.size(); i++) {
+            final JsonObject r = rs.getJsonObject(i);
+            final JsonArray rEntrypoints = r.getJsonArray(DynamicConfiguration.ROUTER_ENTRYPOINTS);
+            final String routerName = r.getString(DynamicConfiguration.ROUTER_NAME);
+            if (rEntrypoints == null || rEntrypoints.size() == 0) {
+                LOGGER.debug(
+                    "No entryPoint defined for the router '{}', using the default one(s) instead '{}'",
+                    routerName,
+                    entrypoints.toString());
+                r.put(DynamicConfiguration.ROUTER_ENTRYPOINTS, new JsonArray(entrypoints));
+            }
+        }
+
+        return config;
     }
 
     private Future<Gateway> mapToModel(JsonObject config) {

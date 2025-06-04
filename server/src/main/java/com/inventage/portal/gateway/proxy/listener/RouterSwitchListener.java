@@ -30,7 +30,6 @@ public class RouterSwitchListener implements Listener {
         routerFactory.createRouter(model)
             .onSuccess(this::setSubRouter)
             .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", model, err.getMessage()));
-
     }
 
     @Override
