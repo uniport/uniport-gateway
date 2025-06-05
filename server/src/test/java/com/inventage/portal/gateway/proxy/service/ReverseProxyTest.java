@@ -1,6 +1,8 @@
 package com.inventage.portal.gateway.proxy.service;
 
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -10,18 +12,29 @@ import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.http.UpgradeRejectedException;
+import io.vertx.core.http.WebSocketClient;
+import io.vertx.core.http.WebSocketConnectOptions;
+import io.vertx.core.http.WebsocketVersion;
 import io.vertx.core.net.JksOptions;
+import io.vertx.core.net.NetServer;
+import io.vertx.core.net.NetSocket;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -287,4 +300,183 @@ public class ReverseProxyTest {
         return new File(classLoader.getResource(path).getFile());
     }
 
+    @Test
+    public void testWebSocketV00(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        testWebSocket(vertx, testCtx, WebsocketVersion.V00);
+    }
+
+    @Test
+    public void testWebSocketV07(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        testWebSocket(vertx, testCtx, WebsocketVersion.V07);
+    }
+
+    @Test
+    public void testWebSocketV08(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        testWebSocket(vertx, testCtx, WebsocketVersion.V08);
+    }
+
+    @Test
+    public void testWebSocketV13(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        testWebSocket(vertx, testCtx, WebsocketVersion.V13);
+    }
+
+    private void testWebSocket(Vertx vertx, VertxTestContext testCtx, WebsocketVersion version) throws InterruptedException {
+        // given
+        final String host = "localhost";
+        final int proxyPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
+        final String message = "ping";
+        final Checkpoint wsClosed = testCtx.checkpoint();
+
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            final Future<ServerWebSocket> fut = ctx.request().toWebSocket();
+            fut.onComplete(testCtx.succeeding(ws -> {
+                ws.handler(buff -> ws.write(buff)); // echo message
+                ws.closeHandler(v -> {
+                    wsClosed.flag();
+                });
+            }));
+        };
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build()
+            .start(proxyPort);
+
+        // when
+        final WebSocketClient client = vertx.createWebSocketClient();
+        final WebSocketConnectOptions options = new WebSocketConnectOptions()
+            .setHost(host)
+            .setPort(proxyPort)
+            .setURI("/ws")
+            .setVersion(version);
+        client.connect(options, testCtx.succeeding(ws -> {
+            ws.write(Buffer.buffer(message));
+            ws.handler(buff -> {
+                testCtx.verify(() -> assertEquals(message, buff.toString()));
+                ws.close();
+            });
+        }));
+    }
+
+    @Test
+    public void testWebSocketReject(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String host = "localhost";
+        final int proxyPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
+
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            ctx.response().setStatusCode(400).end();
+        };
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build()
+            .start(proxyPort);
+
+        final WebSocketClient client = vertx.createWebSocketClient();
+        final WebSocketConnectOptions options = new WebSocketConnectOptions()
+            .setHost(host)
+            .setPort(proxyPort)
+            .setURI("/ws");
+
+        // when
+        client.connect(options, testCtx.failing(err -> {
+            // then
+            testCtx.verify(() -> assertTrue(err.getClass() == UpgradeRejectedException.class));
+            testCtx.completeNow();
+        }));
+    }
+
+    @Test
+    public void testInboundClose(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String host = "localhost";
+        final int proxyPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
+
+        final Handler<NetSocket> backendHandler = so -> {
+            so.handler(buff -> {
+                so.close();
+            });
+        };
+        startNetBackend(vertx, backendPort, backendHandler);
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort)
+            .build()
+            .start(proxyPort);
+
+        final WebSocketClient client = vertx.createWebSocketClient();
+        final WebSocketConnectOptions options = new WebSocketConnectOptions()
+            .setHost(host)
+            .setPort(proxyPort)
+            .setURI("/ws");
+
+        // when
+        client.connect(options, testCtx.failing(err -> {
+            // then
+            testCtx.verify(() -> assertTrue(err.getClass() == UpgradeRejectedException.class));
+            testCtx.completeNow();
+        }));
+    }
+
+    protected void startNetBackend(Vertx vertx, int port, Handler<NetSocket> handler) throws InterruptedException {
+        final VertxTestContext testContext = new VertxTestContext();
+
+        final NetServer backendServer = vertx.createNetServer(new HttpServerOptions().setPort(port).setHost("localhost"));
+        backendServer.connectHandler(handler);
+        backendServer.listen(testContext.succeeding(s -> testContext.completeNow()));
+
+        if (!testContext.awaitCompletion(5, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Timeout: Server did not start in time.");
+        }
+    }
+
+    @Test
+    public void testWebSocketFirefox(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+        // given
+        final String host = "localhost";
+        final int proxyPort = TestUtils.findFreePort();
+        final int backendPort = TestUtils.findFreePort();
+        final Checkpoint wsClosed = testCtx.checkpoint();
+
+        final Handler<RoutingContext> backendHandler = ctx -> {
+            final Future<ServerWebSocket> fut = ctx.request().toWebSocket();
+            fut.onComplete(testCtx.succeeding(ws -> {
+                ws.closeHandler(v -> {
+                    wsClosed.flag();
+                });
+            }));
+        };
+
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withProxyMiddleware(host, backendPort)
+            .withBackend(vertx, backendPort, backendHandler)
+            .build()
+            .start(proxyPort);
+
+        final HttpClient httpClient = vertx.createHttpClient();
+        final RequestOptions options = new RequestOptions()
+            .setHost(host)
+            .setPort(proxyPort)
+            .setURI("/ws")
+            .putHeader("Origin", String.format("http://%s:%d", host, proxyPort))
+            .putHeader("Connection", "keep-alive, Upgrade")
+            .putHeader("Upgrade", "Websocket")
+            .putHeader("Sec-WebSocket-Version", "13")
+            .putHeader("Sec-WebSocket-Key", "xy6UoM3l3TcREmAeAhZuYQ==");
+
+        // when
+        httpClient.request(options).onComplete(testCtx.succeeding(clientRequest -> {
+            clientRequest.connect().onComplete(testCtx.succeeding(response -> {
+                // then
+                testCtx.verify(() -> assertEquals(101, response.statusCode()));
+                response.netSocket().close();
+            }));
+        }));
+    }
 }
