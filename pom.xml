@@ -45,7 +45,7 @@
         <docker.platforms/>
 
         <docker-java.version>3.5.1</docker-java.version>
-        <junit-jupiter.version>5.13.0</junit-jupiter.version>
+        <junit-jupiter.version>5.13.1</junit-jupiter.version>
 
         <nexus3.helm.registry.push.url>https://nexus3.inventage.com/repository</nexus3.helm.registry.push.url>
         <nexus3.helm.repository.push.id>inventage-portal-helm-staging</nexus3.helm.repository.push.id>
