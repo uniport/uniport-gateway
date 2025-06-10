@@ -14,6 +14,10 @@
 
 * OAuth2
 
+### Step 4
+
+* Multiple entrypoints
+
 ### Future Step Ideas
 
 * env vars in config

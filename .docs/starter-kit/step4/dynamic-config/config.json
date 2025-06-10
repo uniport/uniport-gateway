@@ -1,0 +1,72 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
+                "rule": "Path('/')",
+                "service": "whoami1"
+            },
+            {
+                "name": "listenOnAllEntrypoints",
+                "rule": "PathPrefix('/all')",
+                "middlewares": [
+                    "headersA"
+                ],
+                "service": "whoami1"
+            },
+            {
+                "name": "listenOn20001",
+                "entrypoints": [
+                    "http20001"
+                ],
+                "rule": "PathPrefix('/single')",
+                "middlewares": [
+                    "headersB"
+                ],
+                "service": "whoami1"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootRedirectregex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/all"
+                }
+            },
+            {
+                "name": "headersA",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "Router": "A"
+                    }
+                }
+            },
+            {
+                "name": "headersB",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "Router": "B"
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami1",
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": 80
+                    }
+                ]
+            }
+        ]
+    }
+}
