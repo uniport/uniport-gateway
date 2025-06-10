@@ -17,6 +17,8 @@ on:
         required: true
         type: boolean
         default: true
+  schedule:
+    - cron: "15 2 * * SUN"
 
 # Prevent running builds for the same branch in parallel
 # New workflows will cancel existing workflows…
