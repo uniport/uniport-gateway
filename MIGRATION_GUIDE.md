@@ -1,5 +1,7 @@
 # Migration Guide
 
+## `9.*.*` -> `10.*.*`
+
 ## `9.*.*` -> `9.3.*`
 
 ### Clustered Portal-Gateway
@@ -21,11 +23,13 @@ update. However, if the following error message appears, stop all instance and s
 ## `7.*.*` -> `8.*.*`
 
 ### Session cookie
+
 Breaking change if any of your client is dependent on the (now deprecated) session cookie name by default: `inventage-portal-gateway.session`. The new default for the session cookie name is: `uniport.session`.
 
 Concretely: Change any occurrence of the old session cookie name to `uniport.session`.
 
 ### `sessionDisabled`
+
 Breaking change if any of your static configuration file contains `sessionDisabled` in one of its entrypoint. Sessions are disabled per default and can be explicitly enabled by setting the session-middleware.
 
 Concretely: Delete any occurrence of `sessionDisabled` in your static configuration file.
@@ -37,6 +41,7 @@ Breaking change if `bearerOnly` middleware is configured in your portal-gateway 
 Concretely: Change your `bearerOnly` configuration in your dynamic configuration file as follows:
 
 Old:
+
 ```json
 {
     "name": "...",
@@ -53,6 +58,7 @@ Old:
 ```
 
 New:
+
 ```json
 {
     "name": "...",
@@ -79,6 +85,7 @@ Breaking change if `sessionBag`-middleware is configured in your portal-gateway 
 Concretely: Copy your `sessionBag` configuration from your dynamic configuration file and paste it in your `portal-gateway.json` file as the LAST entrymiddleware.
 
 As example:
+
 ```json
 {
     "entrypoints": [
@@ -143,4 +150,5 @@ the `portal-gateway.json` configuration file. The following changes need to be m
     ]
 }
 ```
+
 With this change, portal-gateway performs session handling identical to that in version `4.*.*`
