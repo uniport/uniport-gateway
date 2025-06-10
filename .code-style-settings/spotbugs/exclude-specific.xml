@@ -14,7 +14,7 @@
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <Class name="~.*?proxy\.(middleware\..*?Options|model\..*?)" />
+        <Class name="~.*?(middleware\..*?Options|model\..*?)" />
         <Bug pattern="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION" />
     </Match>
     <Match>

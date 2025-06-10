@@ -1,12 +1,11 @@
 package com.inventage.portal.gateway.proxy.provider.aggregator;
 
-import com.inventage.portal.gateway.core.config.StaticConfiguration;
+import com.inventage.portal.gateway.core.model.GatewayProvider;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +24,13 @@ public class ProviderAggregator extends Provider {
     private final Vertx vertx;
 
     private final String configurationAddress;
-    private final JsonArray providerConfigs;
+    private final List<GatewayProvider> providerConfigs;
     private final JsonObject env;
 
-    public ProviderAggregator(Vertx vertx, String configurationAddress, JsonArray providerConfigs, JsonObject env) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, List<GatewayProvider> providerConfigs, JsonObject env) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
-        this.providerConfigs = new JsonArray(providerConfigs.getList());
+        this.providerConfigs = providerConfigs;
         this.env = new JsonObject(env.getMap());
     }
 
@@ -43,10 +42,8 @@ public class ProviderAggregator extends Provider {
     @Override
     public void provide(Promise<Void> startPromise) {
         final List<Future<String>> futures = new ArrayList<>();
-        for (int i = 0; i < this.providerConfigs.size(); i++) {
-            final JsonObject providerConfig = this.providerConfigs.getJsonObject(i);
-
-            final String providerName = providerConfig.getString(StaticConfiguration.PROVIDER_NAME);
+        for (GatewayProvider providerConfig : providerConfigs) {
+            final String providerName = providerConfig.getName();
             final ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
 
             if (providerFactory == null) {

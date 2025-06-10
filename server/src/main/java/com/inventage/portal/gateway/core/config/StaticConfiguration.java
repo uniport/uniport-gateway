@@ -30,6 +30,7 @@ public class StaticConfiguration {
     public static final String ENTRYPOINTS = "entrypoints";
     public static final String ENTRYPOINT_NAME = "name";
     public static final String ENTRYPOINT_PORT = "port";
+    public static final String ENTRYPOINT_MIDDLEWARES = DynamicConfiguration.ROUTER_MIDDLEWARES;
 
     // providers
     public static final String PROVIDERS = "providers";
@@ -50,6 +51,7 @@ public class StaticConfiguration {
     public static final String PROVIDER_DOCKER_EXPOSED_BY_DEFAULT = "exposedByDefault";
     public static final String PROVIDER_DOCKER_NETWORK = "network";
     public static final String PROVIDER_DOCKER_DEFAULT_RULE = "defaultRule";
+    public static final String PROVIDER_DOCKER_WATCH = "watch";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticConfiguration.class);
 
@@ -79,19 +81,38 @@ public class StaticConfiguration {
                     .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)),
                 Schemas.stringSchema()
                     .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
-            .optionalProperty(DynamicConfiguration.MIDDLEWARES,
+            .optionalProperty(StaticConfiguration.ENTRYPOINT_MIDDLEWARES,
                 Schemas.arraySchema()
-                    .items(Schemas.oneOf(DynamicConfiguration.getBuildMiddlewareSchema())))
+                    .items(Schemas.oneOf(getBuildMiddlewareSchema())))
             .allowAdditionalProperties(false);
 
-        final ObjectSchemaBuilder providerSchema = Schemas.objectSchema()
-            .requiredProperty(PROVIDER_NAME, Schemas.stringSchema()
-                .with(Keywords.minLength(1)))
+        final ObjectSchemaBuilder[] providerSchema = buildProviderSchema();
+
+        final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
+            .optionalProperty(ENTRYPOINTS, Schemas.arraySchema()
+                .items(entrypointSchema))
+            .optionalProperty(PROVIDERS, Schemas.arraySchema()
+                .items(Schemas.oneOf(providerSchema)));
+
+        return staticConfigBuilder;
+    }
+
+    public static ObjectSchemaBuilder[] getBuildMiddlewareSchema() {
+        return DynamicConfiguration.getBuildMiddlewareSchema();
+    }
+
+    public static ObjectSchemaBuilder[] buildProviderSchema() {
+        final ObjectSchemaBuilder fileSchema = Schemas.objectSchema()
+            .requiredProperty(PROVIDER_NAME, Schemas.constSchema(PROVIDER_FILE))
             .optionalProperty(PROVIDER_FILE_FILENAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_FILE_DIRECTORY, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_FILE_WATCH, Schemas.booleanSchema())
+            .allowAdditionalProperties(false);
+
+        final ObjectSchemaBuilder dockerSchema = Schemas.objectSchema()
+            .requiredProperty(PROVIDER_NAME, Schemas.constSchema(PROVIDER_DOCKER))
             .optionalProperty(PROVIDER_DOCKER_ENDPOINT, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_DOCKER_EXPOSED_BY_DEFAULT, Schemas.booleanSchema())
@@ -99,13 +120,10 @@ public class StaticConfiguration {
                 .with(Keywords.minLength(1)))
             .optionalProperty(PROVIDER_DOCKER_DEFAULT_RULE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
+            .optionalProperty(PROVIDER_DOCKER_WATCH, Schemas.booleanSchema())
             .allowAdditionalProperties(false);
 
-        final ObjectSchemaBuilder staticConfigBuilder = Schemas.objectSchema()
-            .optionalProperty(ENTRYPOINTS, Schemas.arraySchema().items(entrypointSchema))
-            .optionalProperty(PROVIDERS, Schemas.arraySchema().items(providerSchema));
-
-        return staticConfigBuilder;
+        return List.of(fileSchema, dockerSchema).toArray(ObjectSchemaBuilder[]::new);
     }
 
     public static Future<Void> validate(Vertx vertx, JsonObject json) {
@@ -146,7 +164,7 @@ public class StaticConfiguration {
         if (entrypoints != null) {
             for (int i = 0; i < entrypoints.size(); i++) {
                 final JsonObject entrypoint = entrypoints.getJsonObject(i);
-                final JsonArray middlewares = entrypoint.getJsonArray(DynamicConfiguration.MIDDLEWARES);
+                final JsonArray middlewares = entrypoint.getJsonArray(StaticConfiguration.ENTRYPOINT_MIDDLEWARES);
                 middlewareFutures.add(validateEntryMiddlewares(middlewares));
             }
         }

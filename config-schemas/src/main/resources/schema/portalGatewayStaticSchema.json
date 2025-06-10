@@ -1204,41 +1204,54 @@
     "providers" : {
       "type" : "array",
       "items" : {
-        "additionalProperties" : false,
-        "type" : "object",
-        "properties" : {
-          "endpoint" : {
-            "minLength" : 1,
-            "type" : "string"
+        "oneOf" : [ {
+          "additionalProperties" : false,
+          "type" : "object",
+          "properties" : {
+            "filename" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "watch" : {
+              "type" : "boolean"
+            },
+            "name" : {
+              "const" : "file"
+            },
+            "directory" : {
+              "minLength" : 1,
+              "type" : "string"
+            }
           },
-          "filename" : {
-            "minLength" : 1,
-            "type" : "string"
+          "required" : [ "name" ]
+        }, {
+          "additionalProperties" : false,
+          "type" : "object",
+          "properties" : {
+            "endpoint" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "watch" : {
+              "type" : "boolean"
+            },
+            "name" : {
+              "const" : "docker"
+            },
+            "defaultRule" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "exposedByDefault" : {
+              "type" : "boolean"
+            },
+            "network" : {
+              "minLength" : 1,
+              "type" : "string"
+            }
           },
-          "watch" : {
-            "type" : "boolean"
-          },
-          "name" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "directory" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "defaultRule" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "exposedByDefault" : {
-            "type" : "boolean"
-          },
-          "network" : {
-            "minLength" : 1,
-            "type" : "string"
-          }
-        },
-        "required" : [ "name" ]
+          "required" : [ "name" ]
+        } ]
       }
     }
   }

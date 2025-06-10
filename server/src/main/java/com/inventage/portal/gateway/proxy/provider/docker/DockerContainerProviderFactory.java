@@ -1,17 +1,21 @@
 package com.inventage.portal.gateway.proxy.provider.docker;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
+import com.inventage.portal.gateway.core.model.GatewayDockerProvider;
+import com.inventage.portal.gateway.core.model.GatewayProvider;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
 import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.DockerContainerServiceImporter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
-/**
- */
 public class DockerContainerProviderFactory implements ProviderFactory {
 
+    public static final String DEFAULT_ENDPOINT = "unix:///var/run/docker.sock";
+    public static final boolean DEFAULT_USE_TLS = false;
+    public static final boolean DEFAULT_EXPOSED_BY_DEFAULT = true;
     public static final String DEFAULT_RULE_TEMPLATE = "Host('${name}')";
+    public static final boolean DEFAULT_WATCH = true;
 
     @Override
     public String provides() {
@@ -19,22 +23,21 @@ public class DockerContainerProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public Provider create(Vertx vertx, String configurationAddress, JsonObject providerConfig, JsonObject env) {
-        final String endpoint = providerConfig.getString(StaticConfiguration.PROVIDER_DOCKER_ENDPOINT,
-            "unix:///var/run/docker.sock");
-        final boolean useTLS = false;
-        final JsonObject serviceImporterConfiguration = new JsonObject().put("docker-tls-verify", useTLS).put("docker-host",
-            endpoint);
+    public Provider create(Vertx vertx, String configurationAddress, GatewayProvider config, JsonObject env) {
+        final GatewayDockerProvider provider = castProvider(config, GatewayDockerProvider.class);
 
-        final Boolean exposedByDefault = providerConfig.getBoolean(StaticConfiguration.PROVIDER_DOCKER_EXPOSED_BY_DEFAULT,
-            true);
-        final String network = providerConfig.getString(StaticConfiguration.PROVIDER_DOCKER_NETWORK, "");
-        final String defaultRule = providerConfig.getString(StaticConfiguration.PROVIDER_DOCKER_DEFAULT_RULE,
-            DEFAULT_RULE_TEMPLATE);
-        final Boolean watch = providerConfig.getBoolean(StaticConfiguration.PROVIDER_FILE_WATCH, true);
+        final JsonObject serviceImporterConfiguration = new JsonObject()
+            .put("docker-tls-verify", DEFAULT_USE_TLS) // not configurable at the moment
+            .put("docker-host", provider.getEndpoint());
 
-        return new DockerContainerProvider(vertx, configurationAddress, new DockerContainerServiceImporter(),
-            serviceImporterConfiguration, exposedByDefault, network, defaultRule, watch);
+        return new DockerContainerProvider(vertx,
+            configurationAddress,
+            new DockerContainerServiceImporter(),
+            serviceImporterConfiguration,
+            provider.isExposedByDefault(),
+            provider.getNetwork(),
+            provider.getDefaultRule(),
+            provider.isWatch());
     }
 
 }
