@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.matomo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.inventage.portal.gateway.core.model.GatewayStyle;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.slf4j.Logger;

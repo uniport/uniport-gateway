@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.core.model;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

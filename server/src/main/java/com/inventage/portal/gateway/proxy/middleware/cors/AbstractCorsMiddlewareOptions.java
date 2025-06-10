@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.cors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.inventage.portal.gateway.core.model.GatewayStyle;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import io.vertx.core.http.HttpMethod;
 import java.util.List;
 import java.util.Set;

@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthoriz
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.inventage.portal.gateway.core.model.GatewayStyle;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase;
-import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import org.immutables.value.Value.Immutable;
 
 @Immutable

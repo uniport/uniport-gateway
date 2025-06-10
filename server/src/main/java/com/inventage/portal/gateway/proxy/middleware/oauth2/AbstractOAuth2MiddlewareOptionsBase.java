@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.inventage.portal.gateway.core.model.GatewayStyle;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;

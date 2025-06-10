@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.inventage.portal.gateway.core.model.GatewayStyle;
 import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayStyle;
 import io.vertx.core.http.CookieSameSite;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Default;
