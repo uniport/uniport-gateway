@@ -18,9 +18,6 @@ import net.minidev.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TODO fix the type conversion chaos in this class
- */
 public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl implements JWTAuthAdditionalClaimsHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthAdditionalClaimsHandlerImpl.class);
