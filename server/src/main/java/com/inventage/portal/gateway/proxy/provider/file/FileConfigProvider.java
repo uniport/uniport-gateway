@@ -2,7 +2,7 @@ package com.inventage.portal.gateway.proxy.provider.file;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.config.env.ConfigAdapter;
-import com.inventage.portal.gateway.core.config.file.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.config.file.GatewayConfigRetriever;
 import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.config.ConfigRetriever;
@@ -45,7 +45,7 @@ public class FileConfigProvider extends Provider {
         this.vertx = vertx;
         this.eb = vertx.eventBus();
         this.configurationAddress = configurationAddress;
-        PortalGatewayConfigRetriever.getStaticConfigPath().ifPresent(path -> this.staticConfigDir = path.getParent());
+        GatewayConfigRetriever.getStaticConfigPath().ifPresent(path -> this.staticConfigDir = path.getParent());
 
         if (filename != null && filename.length() != 0) {
             this.filename = Path.of(filename);

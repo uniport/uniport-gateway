@@ -6,7 +6,7 @@ import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.core.config.env.ConfigAdapter;
-import com.inventage.portal.gateway.core.config.file.PortalGatewayConfigRetriever;
+import com.inventage.portal.gateway.core.config.file.GatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.model.EntrypointModel;
 import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import com.inventage.portal.gateway.core.config.model.StaticModel;
@@ -51,7 +51,7 @@ public class GatewayVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) throws Exception {
         LOGGER.info("Portal-Gateway verticle is starting...");
 
-        PortalGatewayConfigRetriever.create(vertx).getConfig()
+        GatewayConfigRetriever.create(vertx).getConfig()
             .onSuccess(rawConfigWithEnv -> handleRawConfig(rawConfigWithEnv.copy(), startPromise))
             .onFailure(err -> {
                 final String errMsg = String.format("failed to retrieve static configuration '{}'",

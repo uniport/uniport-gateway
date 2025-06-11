@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class PortalGatewayConfigRetrieverTest {
+public class GatewayConfigRetrieverTest {
 
     @TempDir
     static Path tempDir;
@@ -25,7 +25,7 @@ public class PortalGatewayConfigRetrieverTest {
 
     @Test
     public void noConfigFileExists() {
-        Optional<Path> staticConfigPath = PortalGatewayConfigRetriever.getStaticConfigPath();
+        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
         assertTrue(staticConfigPath.isEmpty());
     }
 
@@ -36,34 +36,34 @@ public class PortalGatewayConfigRetrieverTest {
 
     @Test
     public void configFileAsProperty() {
-        System.setProperty(PortalGatewayConfigRetriever.PROPERTY, tempFile.toAbsolutePath().toString());
+        System.setProperty(GatewayConfigRetriever.PROPERTY, tempFile.toAbsolutePath().toString());
 
-        Optional<Path> staticConfigPath = PortalGatewayConfigRetriever.getStaticConfigPath();
+        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
 
         assertTrue(staticConfigPath.isPresent());
         assertEquals(staticConfigPath.get(), tempFile);
 
-        System.clearProperty(PortalGatewayConfigRetriever.PROPERTY);
+        System.clearProperty(GatewayConfigRetriever.PROPERTY);
     }
 
     @Test
     public void directoryAsProperty() {
-        System.setProperty(PortalGatewayConfigRetriever.PROPERTY, "path/to/a/dir");
+        System.setProperty(GatewayConfigRetriever.PROPERTY, "path/to/a/dir");
 
-        Optional<Path> staticConfigPath = PortalGatewayConfigRetriever.getStaticConfigPath();
+        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
         assertTrue(staticConfigPath.isEmpty());
 
-        System.clearProperty(PortalGatewayConfigRetriever.PROPERTY);
+        System.clearProperty(GatewayConfigRetriever.PROPERTY);
     }
 
     @Test
     public void nonExistingFileAsProperty() {
-        System.setProperty(PortalGatewayConfigRetriever.PROPERTY, "non/existing/file.json");
+        System.setProperty(GatewayConfigRetriever.PROPERTY, "non/existing/file.json");
 
-        Optional<Path> staticConfigPath = PortalGatewayConfigRetriever.getStaticConfigPath();
+        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
         assertTrue(staticConfigPath.isEmpty());
 
-        System.clearProperty(PortalGatewayConfigRetriever.PROPERTY);
+        System.clearProperty(GatewayConfigRetriever.PROPERTY);
     }
 
     @Test

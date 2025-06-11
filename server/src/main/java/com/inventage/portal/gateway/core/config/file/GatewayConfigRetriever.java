@@ -18,17 +18,17 @@ import org.slf4j.LoggerFactory;
  * 3. File 'portal-gateway.json' in '/etc/portal-gateway/default/'
  * 4. File 'portal-gateway.json' in the current working directory
  */
-public class PortalGatewayConfigRetriever {
+public class GatewayConfigRetriever {
 
     public static final String DEFAULT_CONFIG_FILE_NAME = "portal-gateway.json";
     public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
     public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/portal-gateway/default";
     public static final String LOCAL_CONFIG_FILE_PATH = ".";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayConfigRetriever.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayConfigRetriever.class);
     private static ConfigRetrieverOptions options;
 
-    private PortalGatewayConfigRetriever() {
+    private GatewayConfigRetriever() {
     }
 
     /**
@@ -81,7 +81,7 @@ public class PortalGatewayConfigRetriever {
         if (options == null) {
             options = new ConfigRetrieverOptions();
 
-            getPortalGatewayJson().ifPresent(json -> options.addStore(json));
+            getConfigStoreOptions().ifPresent(json -> options.addStore(json));
             options.addStore(new ConfigStoreOptions().setType("env").setConfig(new JsonObject().put("raw-data", true)));
         }
         return options;
@@ -92,7 +92,7 @@ public class PortalGatewayConfigRetriever {
      *
      * @return
      */
-    private static Optional<ConfigStoreOptions> getPortalGatewayJson() {
+    private static Optional<ConfigStoreOptions> getConfigStoreOptions() {
         final Optional<Path> staticConfigPath = getStaticConfigPath();
         if (staticConfigPath.isEmpty()) {
             return Optional.empty();

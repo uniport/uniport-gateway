@@ -12,13 +12,13 @@
     <suppress checks="HideUtilityClassConstructor" files=".*/DynamicConfiguration.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*/MiddlewareFactory.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*/Parser.java"/>
-    <suppress checks="HideUtilityClassConstructor" files=".*/PortalGatewayConfigRetriever.java"/>
+    <suppress checks="HideUtilityClassConstructor" files=".*/GatewayConfigRetriever.java"/>
     <suppress checks="HideUtilityClassConstructor" files="com/inventage/portal/gateway/proxy/middleware/log/SessionAdapter.java"/>
     <suppress checks="HideUtilityClassConstructor" files="com/inventage/portal/gateway/proxy/middleware/HttpResponder.java"/>
 
     <suppress checks="NestedIfDepth" files="com/inventage/portal/gateway/proxy/middleware/oauth2/relyingParty/RelyingPartyHandler.java"/>
 
-    <suppress checks="FinalClass" files=".*/PortalGatewayConfigRetriever.java"/>
+    <suppress checks="FinalClass" files=".*/GatewayConfigRetriever.java"/>
     <suppress checks="FinalClass" files=".*/GatewayLauncher.java"/>
     <suppress checks="FinalClass" files=".*/Runtime.java"/>
     <suppress checks="FinalClass" files=".*/StaticConfiguration.java"/>
