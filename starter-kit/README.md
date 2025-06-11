@@ -12,7 +12,7 @@
 
 ### Step 3
 
-* OAuth2
+* OIDC/OAuth2
 
 ### Step 4
 
@@ -26,11 +26,14 @@
 
 * Organize your dynamic configurations
 
+### Step 7
+
+* [Backchannel-logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)
+
 ### Future Step Ideas
 
 * env vars in config
 * ha proxy tls termination
-* backchannel logout
 * cluster mode
 
 ## Background

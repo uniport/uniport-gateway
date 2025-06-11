@@ -46,7 +46,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
     private static final String SUB_KEY = "sub";
     private static final String SID_KEY = "sid";
     private static final String EVENTS_KEY = "events";
-    private static final String EVENTS_BACKCHANNEL_LOGOUT_KEY = "http://schemas.openid.net/event/backchannel-logout";
+    private static final String EVENTS_BACK_CHANNEL_LOGOUT_KEY = "http://schemas.openid.net/event/backchannel-logout";
     private static final String NONCE_KEY = "nonce";
 
     private final String name;
@@ -64,7 +64,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
      *            of this middleware as set in the configuration
      * @param backChannelLogoutPath
      *            the URI path, which should be used as the
-     *            backchannel logout request
+     *            back-channel logout request
      */
     public BackChannelLogoutMiddleware(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler) {
         Objects.requireNonNull(vertx, "vertx must not be null");
@@ -181,12 +181,12 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
             return Future.failedFuture(new IllegalArgumentException(
                 String.format("'%s' claim not found in logout token: '%s'", EVENTS_KEY, logoutToken)));
         }
-        if (!events.containsKey(EVENTS_BACKCHANNEL_LOGOUT_KEY)) {
+        if (!events.containsKey(EVENTS_BACK_CHANNEL_LOGOUT_KEY)) {
             return Future
                 .failedFuture(new IllegalArgumentException(String.format("'%s' key not found in '%s' claim: '%s'",
-                    EVENTS_BACKCHANNEL_LOGOUT_KEY, EVENTS_KEY, logoutToken)));
+                    EVENTS_BACK_CHANNEL_LOGOUT_KEY, EVENTS_KEY, logoutToken)));
         }
-        LOGGER.debug("Checked correctess of logout token events claim");
+        LOGGER.debug("Checked correctness of logout token events claim");
 
         // 7. Verify that the Logout Token does not contain a nonce Claim.
         if (logoutToken.containsKey(NONCE_KEY)) {
@@ -236,7 +236,7 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
                         String.format("no mapping found for the ssoID '%s'", ssoSID)));
                 }
 
-                LOGGER.debug("resolved SSO sesion ID '{}' to internal session ID '{}'", ssoSID,
+                LOGGER.debug("resolved SSO session ID '{}' to internal session ID '{}'", ssoSID,
                     SessionAdapter.displaySessionId(internalSID));
                 return Future.succeededFuture(new SimpleEntry<String, String>(ssoSID, internalSID));
             });
@@ -251,10 +251,22 @@ public class BackChannelLogoutMiddleware extends TraceMiddleware {
                 "no session store passed on the routing context (session handler has to run before this middleware)"));
         }
         LOGGER.debug("Loaded session store");
-        return sessionStore.delete(internalSID).compose(session -> {
-            LOGGER.debug("Removed session '{}' from session store", SessionAdapter.displaySessionId(internalSID));
-            return sessionIDMap.remove(ssoSID).mapEmpty();
-        });
+
+        return sessionStore.get(internalSID)
+            .compose(session -> {
+                session.destroy();
+                LOGGER.debug("Destroyed session '{}'", SessionAdapter.displaySessionId(internalSID));
+                return Future.succeededFuture(session.id());
+            })
+            .compose(id -> {
+                LOGGER.debug("Removed session '{}' from session store", SessionAdapter.displaySessionId(internalSID));
+                return sessionStore.delete(id);
+            })
+            .compose(v -> {
+                LOGGER.debug("Removed SSO session id '{}' from map", SessionAdapter.displaySessionId(ssoSID));
+                return sessionIDMap.remove(ssoSID);
+            })
+            .mapEmpty();
     }
 
     private JWT initJWT(final List<JsonObject> jwks) {

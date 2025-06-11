@@ -1,0 +1,138 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "auth",
+                "rule": "PathPrefix('/auth')",
+                "service": "iam"
+            },
+            {
+                "name": "root",
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
+                "rule": "Path('/')",
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami1",
+                "rule": "PathPrefix('/whoami1')",
+                "middlewares": [
+                    "whoami1AuthBearer"
+                ],
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami2",
+                "rule": "PathPrefix('/whoami2')",
+                "priority": 50,
+                "middlewares": [
+                    "whoami2Oauth",
+                    "whoami2AuthBearer"
+                ],
+                "service": "whoami2"
+            },
+            {
+                "name": "backChannelLogout",
+                "middlewares": [
+                    "logoutRedirectRegex",
+                    "backChannelLogout"
+                ],
+                "rule": "PathPrefix('/backchannellogout')",
+                "service": "whoami1"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootRedirectregex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/whoami1"
+                }
+            },
+            {
+                "name": "whoami2Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami1AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami2AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "backChannelLogout",
+                "type": "backChannelLogout",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "http://keycloak:8080/auth/realms/testrealm"
+                        }
+                    ],
+                    "audience": [
+                        "testclient"
+                    ],
+                    "issuer": "http://localhost:20000/auth/realms/testrealm",
+                    "publicKeysReconciliation": {
+                        "enabled": true,
+                        "intervalMs": 3600000
+                    }
+                }
+            },
+            {
+                "name": "logoutRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/logout(.*)$",
+                    "replacement": "/whoami1"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami1",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "whoami2",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami2",
+                        "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "iam",
+                "servers": [
+                    {
+                        "host": "keycloak",
+                        "port": "8080"
+                    }
+                ]
+            }
+        ]
+    }
+}
