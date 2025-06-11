@@ -22,9 +22,7 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
     // schema
     public static final String TYPE = "_session_";
 
-    // defaults
     private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
-    private static final String DEFAULT_INSTANCE_NAME = "unknown";
 
     @Override
     public String provides() {
@@ -49,7 +47,7 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
-        final String instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME); // TODO move into Runtime
+        final String instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, AbstractShowSessionContentMiddlewareOptions.DEFAULT_INSTANCE_NAME); // TODO move into Runtime
         LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new ShowSessionContentMiddleware(name, instanceName));

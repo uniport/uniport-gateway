@@ -29,9 +29,6 @@ public class CSPViolationReportingServerMiddlewareFactory implements MiddlewareF
         Level.WARN.toString(),
         Level.ERROR.toString());
 
-    // defaults
-    public static final String DEFAULT_LOG_LEVEL = "WARN";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPViolationReportingServerMiddlewareFactory.class);
 
     @Override

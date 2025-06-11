@@ -6,15 +6,15 @@ import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_DETECTION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_MAX_REDIRECT_RETRIES;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.DetectionCookieValue.SPLITTER;
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES;
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
+import com.inventage.portal.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions;
 import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -101,7 +101,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         gateway.incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
             // then
             final long lastAccessed = sessionLastAccessedHolder.get();
-            final long sessionLifetimeMs = SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE * 60 * 1000;
+            final long sessionLifetimeMs = AbstractSessionMiddlewareOptions.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE * 60 * 1000;
             final DetectionCookieValue detectionCookieValue = new DetectionCookieValue(lastAccessed, sessionLifetimeMs);
 
             assertThat(testCtx, outgoingResponse)

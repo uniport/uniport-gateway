@@ -14,6 +14,10 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = ControlApiMiddlewareOptions.Builder.class)
 public abstract class AbstractControlApiMiddlewareOptions implements MiddlewareOptionsModel {
+
+    // defaults
+    public static final String DEFAULT_RESET_URL = null;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddlewareOptions.class);
 
     @JsonProperty(ControlApiMiddlewareFactory.ACTION)
@@ -23,7 +27,7 @@ public abstract class AbstractControlApiMiddlewareOptions implements MiddlewareO
     @Nullable
     @JsonProperty(ControlApiMiddlewareFactory.SESSION_RESET_URL)
     public String getSessionResetURL() {
-        logDefault(LOGGER, ControlApiMiddlewareFactory.SESSION_RESET_URL, ControlApiMiddlewareFactory.DEFAULT_RESET_URL);
-        return ControlApiMiddlewareFactory.DEFAULT_RESET_URL;
+        logDefault(LOGGER, ControlApiMiddlewareFactory.SESSION_RESET_URL, DEFAULT_RESET_URL);
+        return DEFAULT_RESET_URL;
     }
 }

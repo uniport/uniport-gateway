@@ -22,8 +22,6 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     public static final String TYPE = "bearerOnly";
     public static final String OPTIONAL = "optional";
 
-    public static final String DEFAULT_OPTIONAL = "false"; // TODO fix this and make it a real boolean
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
 
     @Override
@@ -36,7 +34,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
         return super.optionsSchema()
             .optionalProperty(OPTIONAL, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_OPTIONAL));
+                .defaultValue(AbstractBearerOnlyMiddlewareOptions.DEFAULT_OPTIONAL));
     }
 
     @Override

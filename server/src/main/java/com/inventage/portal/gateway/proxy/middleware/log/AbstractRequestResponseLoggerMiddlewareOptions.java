@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
+import io.vertx.core.json.JsonArray;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Default;
@@ -15,6 +16,10 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = RequestResponseLoggerMiddlewareOptions.Builder.class)
 public abstract class AbstractRequestResponseLoggerMiddlewareOptions implements MiddlewareOptionsModel {
+
+    public static final JsonArray DEFAULT_CONTENT_TYPES_TO_LOG = JsonArray.of();
+    public static final boolean DEFAULT_LOGGING_REQUEST_ENABLED = true;
+    public static final boolean DEFAULT_LOGGING_RESPONSE_ENABLED = true;
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggerMiddlewareOptions.class);
 
     @Nullable
@@ -27,14 +32,14 @@ public abstract class AbstractRequestResponseLoggerMiddlewareOptions implements 
     @Default
     @JsonProperty(RequestResponseLoggerMiddlewareFactory.LOGGING_REQUEST_ENABLED)
     public boolean isRequestEnabled() {
-        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.LOGGING_REQUEST_ENABLED, RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_REQUEST_ENABLED);
-        return RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_REQUEST_ENABLED;
+        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.LOGGING_REQUEST_ENABLED, DEFAULT_LOGGING_REQUEST_ENABLED);
+        return DEFAULT_LOGGING_REQUEST_ENABLED;
     }
 
     @Default
     @JsonProperty(RequestResponseLoggerMiddlewareFactory.LOGGING_RESPONSE_ENABLED)
     public boolean isResponseEnabled() {
-        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.LOGGING_RESPONSE_ENABLED, RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_RESPONSE_ENABLED);
-        return RequestResponseLoggerMiddlewareFactory.DEFAULT_LOGGING_RESPONSE_ENABLED;
+        logDefault(LOGGER, RequestResponseLoggerMiddlewareFactory.LOGGING_RESPONSE_ENABLED, DEFAULT_LOGGING_RESPONSE_ENABLED);
+        return DEFAULT_LOGGING_RESPONSE_ENABLED;
     }
 }

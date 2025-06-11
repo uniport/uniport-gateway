@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = CSPMiddlewareOptions.Builder.class)
 public abstract class AbstractCSPMiddlewareOptions implements MiddlewareOptionsModel {
+
+    public static final boolean DEFAULT_REPORT_ONLY = false;
+    public static final CSPMergeStrategy DEFAULT_MERGE_STRATEGY = CSPMergeStrategy.UNION;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddlewareOptions.class);
 
     @Check
@@ -30,15 +34,15 @@ public abstract class AbstractCSPMiddlewareOptions implements MiddlewareOptionsM
     @Default
     @JsonProperty(CSPMiddlewareFactory.REPORT_ONLY)
     public boolean isReportOnly() {
-        logDefault(LOGGER, CSPMiddlewareFactory.REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
-        return CSPMiddlewareFactory.DEFAULT_REPORT_ONLY;
+        logDefault(LOGGER, CSPMiddlewareFactory.REPORT_ONLY, DEFAULT_REPORT_ONLY);
+        return DEFAULT_REPORT_ONLY;
     }
 
     @Default
     @JsonProperty(CSPMiddlewareFactory.MERGE_STRATEGY)
     public CSPMergeStrategy getMergeStrategy() {
-        logDefault(LOGGER, CSPMiddlewareFactory.MERGE_STRATEGY, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY);
-        return CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY;
+        logDefault(LOGGER, CSPMiddlewareFactory.MERGE_STRATEGY, DEFAULT_MERGE_STRATEGY);
+        return DEFAULT_MERGE_STRATEGY;
     }
 
     @Immutable

@@ -10,4 +10,6 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = ShowSessionContentMiddlewareOptions.Builder.class)
 public abstract class AbstractShowSessionContentMiddlewareOptions implements MiddlewareOptionsModel {
 
+    public static final String DEFAULT_INSTANCE_NAME = "unknown";
+
 }

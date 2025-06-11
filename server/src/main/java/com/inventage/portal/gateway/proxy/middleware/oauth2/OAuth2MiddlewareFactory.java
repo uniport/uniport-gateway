@@ -53,7 +53,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     public static final String OIDC_RESPONSE_MODE = "response_mode";
     public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
-    public static final String DEFAULT_OIDC_RESPONSE_MODE = OIDC_RESPONSE_MODE_FORM_POST;
 
     private static final String[] OIDC_RESPONSE_MODES = new String[] {
         "query",
@@ -63,9 +62,6 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
-
-    // defaults
-    public static final boolean DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW = true;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
@@ -86,9 +82,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             .requiredProperty(SESSION_SCOPE, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(RESPONSE_MODE, Schemas.enumSchema((Object[]) OIDC_RESPONSE_MODES)
-                .defaultValue(DEFAULT_OIDC_RESPONSE_MODE))
+                .defaultValue(AbstractOAuth2MiddlewareOptionsBase.DEFAULT_OIDC_RESPONSE_MODE))
             .optionalProperty(PROXY_AUTHENTICATION_FLOW, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW))
+                .defaultValue(AbstractOAuth2MiddlewareOptionsBase.DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW))
             .optionalProperty(PUBLIC_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(ADDITIONAL_SCOPES, Schemas.arraySchema()

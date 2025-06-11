@@ -1,15 +1,15 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_DETECTION_COOKIE_NAME;
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_MAX_REDIRECT_RETRIES;
-import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_DETECTION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_MAX_REDIRECT_RETRIES;
+import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_WAIT_BEFORE_RETRY_MS;
+import static com.inventage.portal.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
 
 import com.inventage.portal.gateway.proxy.config.model.AbstractServiceModel;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.authorization.MockOAuth2Auth;
 import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
-import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase;
 import com.inventage.portal.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
@@ -22,18 +22,18 @@ import com.inventage.portal.gateway.proxy.middleware.claimToHeader.ClaimToHeader
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiAction;
 import com.inventage.portal.gateway.proxy.middleware.controlapi.ControlApiMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.cors.CorsMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.csp.AbstractCSPMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.middleware.csp.AbstractCSPViolationReportingServerMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.csp.CSPMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.csp.CSPViolationReportingServerMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.csp.DirectiveOptions;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
+import com.inventage.portal.gateway.proxy.middleware.csrf.AbstractCSRFMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.customResponse.CustomResponseMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.languageCookie.AbstractLanguageCookieMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.languageCookie.LanguageCookieMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.matomo.MatomoMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
@@ -41,10 +41,10 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFact
 import com.inventage.portal.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
+import com.inventage.portal.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.session.LifetimeCookieOptions;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionCookieOptions;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddleware;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.WhitelistedCookieOptions;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
@@ -117,16 +117,16 @@ public final class MiddlewareServerBuilder {
             new SessionMiddleware(
                 vertx,
                 "session",
-                SessionMiddlewareFactory.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
-                SessionMiddlewareFactory.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
+                AbstractSessionMiddlewareOptions.DEFAULT_SESSION_ID_MINIMUM_LENGTH,
+                AbstractSessionMiddlewareOptions.DEFAULT_SESSION_IDLE_TIMEOUT_IN_MINUTE,
                 uriWithoutSessionTimeoutReset,
-                SessionMiddlewareFactory.DEFAULT_NAG_HTTPS,
+                AbstractSessionMiddlewareOptions.DEFAULT_NAG_HTTPS,
                 SessionCookieOptions.builder().build(),
                 withLifetimeHeader,
-                SessionMiddlewareFactory.DEFAULT_SESSION_LIFETIME_HEADER_NAME,
+                AbstractSessionMiddlewareOptions.DEFAULT_SESSION_LIFETIME_HEADER_NAME,
                 withLifetimeCookie,
                 LifetimeCookieOptions.builder().build(),
-                SessionMiddlewareFactory.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS));
+                AbstractSessionMiddlewareOptions.DEFAULT_CLUSTERED_SESSION_STORE_RETRY_TIMEOUT_MILLISECONDS));
     }
 
     public MiddlewareServerBuilder withCorsMiddleware(String allowedOrigin) {
@@ -196,7 +196,7 @@ public final class MiddlewareServerBuilder {
         KeycloakServer mockKeycloakServer,
         String issuer, List<String> audience, List<PublicKeyOptions> publicKeys
     ) {
-        return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS));
+        return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareOptionsBase.DEFAULT_RECONCILIATION_INTERVAL_MS));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(MiddlewareOptionsModel bearerOnlyConfig) {
@@ -219,7 +219,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCspMiddleware(List<DirectiveOptions> directives, boolean reportOnly) {
-        return withMiddleware(new CSPMiddleware("csp", directives, reportOnly, CSPMiddlewareFactory.DEFAULT_MERGE_STRATEGY));
+        return withMiddleware(new CSPMiddleware("csp", directives, reportOnly, AbstractCSPMiddlewareOptions.DEFAULT_MERGE_STRATEGY));
     }
 
     public MiddlewareServerBuilder withCspMiddleware(List<DirectiveOptions> directives, boolean reportOnly, CSPMergeStrategy mergeStrategy) {
@@ -227,7 +227,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withCspViolationReportingServerMiddleware() {
-        return withCspViolationReportingServerMiddleware(CSPViolationReportingServerMiddlewareFactory.DEFAULT_LOG_LEVEL);
+        return withCspViolationReportingServerMiddleware(AbstractCSPViolationReportingServerMiddlewareOptions.DEFAULT_LOG_LEVEL.toString());
     }
 
     public MiddlewareServerBuilder withCspViolationReportingServerMiddleware(String logLevel) {
@@ -236,7 +236,17 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withCsrfMiddleware(String secret, String cookieName, String headerName) {
         return withMiddleware(
-            new CSRFMiddleware(this.vertx, "csrf", secret, cookieName, "/", CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE, headerName, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES, null, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS));
+            new CSRFMiddleware(
+                this.vertx,
+                "csrf",
+                secret,
+                cookieName,
+                "/",
+                AbstractCSRFMiddlewareOptions.DEFAULT_COOKIE_SECURE,
+                headerName,
+                AbstractCSRFMiddlewareOptions.DEFAULT_TIMEOUT_IN_MINUTES,
+                null,
+                AbstractCSRFMiddlewareOptions.DEFAULT_NAG_HTTPS));
     }
 
     public MiddlewareServerBuilder withHeaderMiddleware(MultiMap requestHeaders, MultiMap responseHeaders) {
@@ -264,7 +274,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withLanguageCookieMiddleware() {
-        return withMiddleware(new LanguageCookieMiddleware("languageCookie", LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME));
+        return withMiddleware(new LanguageCookieMiddleware("languageCookie", AbstractLanguageCookieMiddlewareOptions.DEFAULT_LANGUAGE_COOKIE_NAME));
     }
 
     public MiddlewareServerBuilder withControlApiMiddleware(ControlApiAction action, WebClient client) {

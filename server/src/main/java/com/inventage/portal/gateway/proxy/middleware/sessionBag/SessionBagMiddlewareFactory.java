@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -26,9 +25,6 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
     public static final String WHITELISTED_COOKIE_NAME = "name";
     public static final String WHITELISTED_COOKIE_PATH = "path";
 
-    // defaults
-    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareFactory.class);
 
     @Override
@@ -41,7 +37,7 @@ public class SessionBagMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
+                .defaultValue(AbstractSessionBagMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME))
             .requiredProperty(WHITELISTED_COOKIES, Schemas.arraySchema()
                 .items(Schemas.objectSchema()
                     .requiredProperty(WHITELISTED_COOKIE_NAME, Schemas.stringSchema()

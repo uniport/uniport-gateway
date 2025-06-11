@@ -5,7 +5,7 @@ import static com.inventage.portal.gateway.TestUtils.withMiddleware;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewareOpts;
 import static com.inventage.portal.gateway.TestUtils.withMiddlewares;
 import static com.inventage.portal.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
-import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+import static com.inventage.portal.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,7 +89,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
-            .withCsrfMiddleware(secret, CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME, CSRFMiddlewareFactory.DEFAULT_HEADER_NAME)
+            .withCsrfMiddleware(secret, AbstractCSRFMiddlewareOptions.DEFAULT_COOKIE_NAME, AbstractCSRFMiddlewareOptions.DEFAULT_HEADER_NAME)
             .build().start();
 
         //when

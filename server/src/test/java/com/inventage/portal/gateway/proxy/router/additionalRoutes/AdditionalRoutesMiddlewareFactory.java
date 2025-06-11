@@ -20,8 +20,6 @@ public class AdditionalRoutesMiddlewareFactory implements MiddlewareFactory {
     public static final String TYPE = "additionalRoutes";
     public static final String PATH = "path";
 
-    public static final String DEFAULT_ADDITIONAL_ROUTES_PATH = "/some-path";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalRoutesMiddlewareFactory.class);
 
     @Override

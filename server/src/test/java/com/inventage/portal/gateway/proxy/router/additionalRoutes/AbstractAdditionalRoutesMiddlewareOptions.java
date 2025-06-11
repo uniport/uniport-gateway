@@ -15,11 +15,13 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractAdditionalRoutesMiddlewareOptions implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalRoutesMiddlewareOptions.class);
 
+    public static final String DEFAULT_ADDITIONAL_ROUTES_PATH = "/some-path";
+
     @Default
     @JsonProperty(AdditionalRoutesMiddlewareFactory.PATH)
     public String getPath() {
-        logDefault(LOGGER, AdditionalRoutesMiddlewareFactory.PATH, AdditionalRoutesMiddlewareFactory.DEFAULT_ADDITIONAL_ROUTES_PATH);
-        return AdditionalRoutesMiddlewareFactory.DEFAULT_ADDITIONAL_ROUTES_PATH;
+        logDefault(LOGGER, AdditionalRoutesMiddlewareFactory.PATH, DEFAULT_ADDITIONAL_ROUTES_PATH);
+        return DEFAULT_ADDITIONAL_ROUTES_PATH;
     }
 
 }

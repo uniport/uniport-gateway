@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
+import com.inventage.portal.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
@@ -16,6 +17,9 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = SessionBagMiddlewareOptions.Builder.class)
 public abstract class AbstractSessionBagMiddlewareOptions implements MiddlewareOptionsModel {
+
+    public static final String DEFAULT_SESSION_COOKIE_NAME = AbstractSessionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareOptions.class);
 
     @Check
@@ -26,8 +30,8 @@ public abstract class AbstractSessionBagMiddlewareOptions implements MiddlewareO
     @Default
     @JsonProperty(SessionBagMiddlewareFactory.SESSION_COOKIE_NAME)
     public String getSessionCookieName() {
-        logDefault(LOGGER, SessionBagMiddlewareFactory.SESSION_COOKIE_NAME, SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME);
-        return SessionBagMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
+        logDefault(LOGGER, SessionBagMiddlewareFactory.SESSION_COOKIE_NAME, DEFAULT_SESSION_COOKIE_NAME);
+        return DEFAULT_SESSION_COOKIE_NAME;
     }
 
     @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIES)

@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.responseSessionCookie;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -23,8 +22,6 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
     public static final String TYPE = "responseSessionCookieRemoval";
     public static final String SESSION_COOKIE_NAME = "name";
 
-    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSessionCookieRemovalMiddlewareFactory.class);
 
     @Override
@@ -37,7 +34,7 @@ public class ResponseSessionCookieRemovalMiddlewareFactory implements Middleware
         return Schemas.objectSchema()
             .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
+                .defaultValue(AbstractResponseSessionCookieRemovalMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME))
             .allowAdditionalProperties(false);
     }
 

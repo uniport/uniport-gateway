@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import io.micrometer.common.lang.Nullable;
+import io.vertx.ext.web.handler.CSRFHandler;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.slf4j.Logger;
@@ -16,6 +17,14 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCSRFMiddlewareOptions implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareOptions.class);
 
+    public static final String DEFAULT_COOKIE_NAME = CSRFHandler.DEFAULT_COOKIE_NAME;
+    public static final String DEFAULT_COOKIE_PATH = CSRFHandler.DEFAULT_COOKIE_PATH;
+    public static final boolean DEFAULT_COOKIE_SECURE = true;
+    public static final String DEFAULT_HEADER_NAME = CSRFHandler.DEFAULT_HEADER_NAME;
+    public static final boolean DEFAULT_NAG_HTTPS = true;
+    public static final String DEFAULT_ORIGIN = null;
+    public static final long DEFAULT_TIMEOUT_IN_MINUTES = 15;
+
     @Default
     @JsonProperty(CSRFMiddlewareFactory.COOKIE)
     public CookieOptions getCookie() {
@@ -26,30 +35,30 @@ public abstract class AbstractCSRFMiddlewareOptions implements MiddlewareOptions
     @Default
     @JsonProperty(CSRFMiddlewareFactory.HEADER_NAME)
     public String getHeaderName() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.HEADER_NAME, CSRFMiddlewareFactory.DEFAULT_HEADER_NAME);
-        return CSRFMiddlewareFactory.DEFAULT_HEADER_NAME;
+        logDefault(LOGGER, CSRFMiddlewareFactory.HEADER_NAME, DEFAULT_HEADER_NAME);
+        return DEFAULT_HEADER_NAME;
     }
 
     @Default
     @JsonProperty(CSRFMiddlewareFactory.NAG_HTTPS)
     public boolean nagHTTPs() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.NAG_HTTPS, CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS);
-        return CSRFMiddlewareFactory.DEFAULT_NAG_HTTPS;
+        logDefault(LOGGER, CSRFMiddlewareFactory.NAG_HTTPS, DEFAULT_NAG_HTTPS);
+        return DEFAULT_NAG_HTTPS;
     }
 
     @Nullable
     @Default
     @JsonProperty(CSRFMiddlewareFactory.ORIGIN)
     public String getOrigin() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.ORIGIN, CSRFMiddlewareFactory.DEFAULT_ORIGIN);
-        return CSRFMiddlewareFactory.DEFAULT_ORIGIN;
+        logDefault(LOGGER, CSRFMiddlewareFactory.ORIGIN, DEFAULT_ORIGIN);
+        return DEFAULT_ORIGIN;
     }
 
     @Default
     @JsonProperty(CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES)
     public long getTimeoutMinutes() {
-        logDefault(LOGGER, CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES, CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES);
-        return CSRFMiddlewareFactory.DEFAULT_TIMEOUT_IN_MINUTES;
+        logDefault(LOGGER, CSRFMiddlewareFactory.TIMEOUT_IN_MINUTES, DEFAULT_TIMEOUT_IN_MINUTES);
+        return DEFAULT_TIMEOUT_IN_MINUTES;
     }
 
     @Immutable
@@ -60,22 +69,22 @@ public abstract class AbstractCSRFMiddlewareOptions implements MiddlewareOptions
         @Default
         @JsonProperty(CSRFMiddlewareFactory.COOKIE_NAME)
         public String getName() {
-            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_NAME, CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME);
-            return CSRFMiddlewareFactory.DEFAULT_COOKIE_NAME;
+            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_NAME, DEFAULT_COOKIE_NAME);
+            return DEFAULT_COOKIE_NAME;
         }
 
         @Default
         @JsonProperty(CSRFMiddlewareFactory.COOKIE_PATH)
         public String getPath() {
-            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_PATH, CSRFMiddlewareFactory.DEFAULT_COOKIE_PATH);
-            return CSRFMiddlewareFactory.DEFAULT_COOKIE_PATH;
+            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_PATH, DEFAULT_COOKIE_PATH);
+            return DEFAULT_COOKIE_PATH;
         }
 
         @Default
         @JsonProperty(CSRFMiddlewareFactory.COOKIE_SECURE)
         public boolean isSecure() {
-            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_SECURE, CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE);
-            return CSRFMiddlewareFactory.DEFAULT_COOKIE_SECURE;
+            logDefault(LOGGER, CSRFMiddlewareFactory.COOKIE_SECURE, DEFAULT_COOKIE_SECURE);
+            return DEFAULT_COOKIE_SECURE;
         }
     }
 }

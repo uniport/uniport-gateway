@@ -13,13 +13,16 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = PreventForeignInitiatedAuthMiddlewareOptions.Builder.class)
 public abstract class AbstractPreventForeignInitiatedAuthMiddlewareOptions implements MiddlewareOptionsModel {
+
+    public static final String DEFAULT_REDIRECT_URI = "/";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PreventForeignInitiatedAuthMiddlewareOptions.class);
 
     @Default
     @JsonProperty(PreventForeignInitiatedAuthMiddlewareFactory.REDIRECT_URI)
     public String getRedirectURI() {
-        logDefault(LOGGER, PreventForeignInitiatedAuthMiddlewareFactory.REDIRECT_URI, PreventForeignInitiatedAuthMiddlewareFactory.DEFAULT_REDIRECT_URI);
-        return PreventForeignInitiatedAuthMiddlewareFactory.DEFAULT_REDIRECT_URI;
+        logDefault(LOGGER, PreventForeignInitiatedAuthMiddlewareFactory.REDIRECT_URI, DEFAULT_REDIRECT_URI);
+        return DEFAULT_REDIRECT_URI;
     }
 
 }

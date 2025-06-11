@@ -23,9 +23,6 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
     public static final String TYPE = "languageCookie";
     public static final String LANGUAGE_COOKIE_NAME = "name";
 
-    // defaults
-    public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddlewareFactory.class);
 
     @Override
@@ -38,7 +35,7 @@ public class LanguageCookieMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             .optionalProperty(LANGUAGE_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_LANGUAGE_COOKIE_NAME))
+                .defaultValue(AbstractLanguageCookieMiddlewareOptions.DEFAULT_LANGUAGE_COOKIE_NAME))
             .allowAdditionalProperties(false);
     }
 

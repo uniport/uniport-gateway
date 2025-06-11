@@ -8,7 +8,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.CSRFHandler;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
@@ -32,15 +31,6 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
     public static final String ORIGIN = "origin";
     public static final String TIMEOUT_IN_MINUTES = "timeoutInMinute";
 
-    // defaults
-    public static final String DEFAULT_COOKIE_NAME = CSRFHandler.DEFAULT_COOKIE_NAME;
-    public static final String DEFAULT_COOKIE_PATH = CSRFHandler.DEFAULT_COOKIE_PATH;
-    public static final boolean DEFAULT_COOKIE_SECURE = true;
-    public static final String DEFAULT_HEADER_NAME = CSRFHandler.DEFAULT_HEADER_NAME;
-    public static final boolean DEFAULT_NAG_HTTPS = true;
-    public static final String DEFAULT_ORIGIN = null;
-    public static final long DEFAULT_TIMEOUT_IN_MINUTES = 15;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareFactory.class);
 
     @Override
@@ -54,23 +44,23 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
             .optionalProperty(COOKIE, Schemas.objectSchema()
                 .optionalProperty(COOKIE_NAME, Schemas.stringSchema()
                     .with(Keywords.minLength(1))
-                    .defaultValue(DEFAULT_COOKIE_NAME))
+                    .defaultValue(AbstractCSRFMiddlewareOptions.DEFAULT_COOKIE_NAME))
                 .optionalProperty(COOKIE_PATH, Schemas.stringSchema()
                     .with(Keywords.minLength(1))
-                    .defaultValue(DEFAULT_COOKIE_PATH))
+                    .defaultValue(AbstractCSRFMiddlewareOptions.DEFAULT_COOKIE_PATH))
                 .optionalProperty(COOKIE_SECURE, Schemas.booleanSchema()
-                    .defaultValue(DEFAULT_COOKIE_SECURE))
+                    .defaultValue(AbstractCSRFMiddlewareOptions.DEFAULT_COOKIE_SECURE))
                 .allowAdditionalProperties(false))
             .optionalProperty(HEADER_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_HEADER_NAME))
+                .defaultValue(AbstractCSRFMiddlewareOptions.DEFAULT_HEADER_NAME))
             .optionalProperty(NAG_HTTPS, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_NAG_HTTPS))
+                .defaultValue(AbstractCSRFMiddlewareOptions.DEFAULT_NAG_HTTPS))
             .optionalProperty(ORIGIN, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
             .optionalProperty(TIMEOUT_IN_MINUTES, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
-                .defaultValue(DEFAULT_TIMEOUT_IN_MINUTES))
+                .defaultValue(AbstractCSRFMiddlewareOptions.DEFAULT_TIMEOUT_IN_MINUTES))
             .allowAdditionalProperties(false);
     }
 

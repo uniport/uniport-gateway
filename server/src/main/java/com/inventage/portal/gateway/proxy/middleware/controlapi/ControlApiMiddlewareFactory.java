@@ -31,9 +31,6 @@ public class ControlApiMiddlewareFactory implements MiddlewareFactory {
         ACTION_SESSION_TERMINATE,
         ACTION_SESSION_RESET);
 
-    // defaults
-    public static final String DEFAULT_RESET_URL = null;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ControlApiMiddlewareFactory.class);
 
     // reusable instance

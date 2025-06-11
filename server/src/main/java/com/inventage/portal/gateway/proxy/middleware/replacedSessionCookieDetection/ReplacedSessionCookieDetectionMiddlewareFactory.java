@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -27,12 +26,6 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     public static final String WAIT_BEFORE_RETRY_MS = "waitTimeInMillisecond";
     public static final String MAX_REDIRECT_RETRIES = "maxRedirectRetries";
 
-    // defaults
-    public static final String DEFAULT_DETECTION_COOKIE_NAME = "uniport.state";
-    public static final String DEFAULT_SESSION_COOKIE_NAME = SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
-    public static final int DEFAULT_WAIT_BEFORE_RETRY_MS = 50;
-    public static final int DEFAULT_MAX_REDIRECT_RETRIES = 5;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddlewareFactory.class);
 
     @Override
@@ -45,16 +38,16 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
         return Schemas.objectSchema()
             .optionalProperty(DETECTION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_DETECTION_COOKIE_NAME))
+                .defaultValue(AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_DETECTION_COOKIE_NAME))
             .optionalProperty(SESSION_COOKIE_NAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_SESSION_COOKIE_NAME))
+                .defaultValue(AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME))
             .optionalProperty(WAIT_BEFORE_RETRY_MS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
-                .defaultValue(DEFAULT_WAIT_BEFORE_RETRY_MS))
+                .defaultValue(AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_WAIT_BEFORE_RETRY_MS))
             .optionalProperty(MAX_REDIRECT_RETRIES, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
-                .defaultValue(DEFAULT_MAX_REDIRECT_RETRIES))
+                .defaultValue(AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_MAX_REDIRECT_RETRIES))
             .allowAdditionalProperties(false);
     }
 

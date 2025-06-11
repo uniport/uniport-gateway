@@ -16,6 +16,11 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = CorsMiddlewareOptions.Builder.class)
 public abstract class AbstractCorsMiddlewareOptions implements MiddlewareOptionsModel {
+
+    public static final int DEFAULT_MAX_AGE_SECONDS = -1;
+    public static final boolean DEFAULT_ALLOW_CREDENTIALS = false;
+    public static final boolean DEFAULT_ALLOW_PRIVATE_NETWORK = false;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CorsMiddlewareOptions.class);
 
     @JsonProperty(CorsMiddlewareFactory.ALLOWED_ORIGINS)
@@ -36,21 +41,21 @@ public abstract class AbstractCorsMiddlewareOptions implements MiddlewareOptions
     @Default
     @JsonProperty(CorsMiddlewareFactory.MAX_AGE_SECONDS)
     public int getMaxAgeSeconds() {
-        logDefault(LOGGER, CorsMiddlewareFactory.MAX_AGE_SECONDS, CorsMiddlewareFactory.DEFAULT_MAX_AGE_SECONDS);
-        return CorsMiddlewareFactory.DEFAULT_MAX_AGE_SECONDS;
+        logDefault(LOGGER, CorsMiddlewareFactory.MAX_AGE_SECONDS, DEFAULT_MAX_AGE_SECONDS);
+        return DEFAULT_MAX_AGE_SECONDS;
     };
 
     @Default
     @JsonProperty(CorsMiddlewareFactory.ALLOW_CREDENTIALS)
     public boolean allowCredentials() {
-        logDefault(LOGGER, CorsMiddlewareFactory.ALLOW_CREDENTIALS, CorsMiddlewareFactory.DEFAULT_ALLOW_CREDENTIALS);
-        return CorsMiddlewareFactory.DEFAULT_ALLOW_CREDENTIALS;
+        logDefault(LOGGER, CorsMiddlewareFactory.ALLOW_CREDENTIALS, DEFAULT_ALLOW_CREDENTIALS);
+        return DEFAULT_ALLOW_CREDENTIALS;
     }
 
     @Default
     @JsonProperty(CorsMiddlewareFactory.ALLOW_PRIVATE_NETWORK)
     public boolean allowPrivateNetworks() {
-        logDefault(LOGGER, CorsMiddlewareFactory.ALLOW_PRIVATE_NETWORK, CorsMiddlewareFactory.DEFAULT_ALLOW_PRIVATE_NETWORK);
-        return CorsMiddlewareFactory.DEFAULT_ALLOW_PRIVATE_NETWORK;
+        logDefault(LOGGER, CorsMiddlewareFactory.ALLOW_PRIVATE_NETWORK, DEFAULT_ALLOW_PRIVATE_NETWORK);
+        return DEFAULT_ALLOW_PRIVATE_NETWORK;
     }
 }

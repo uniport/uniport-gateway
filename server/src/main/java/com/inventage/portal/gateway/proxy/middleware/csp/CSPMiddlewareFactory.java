@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.proxy.middleware.csp;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -38,10 +37,6 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
         MERGE_STRATEGY_EXTERNAL,
         MERGE_STRATEGY_INTERNAL);
 
-    // defaults
-    public static final boolean DEFAULT_REPORT_ONLY = false;
-    public static final CSPMergeStrategy DEFAULT_MERGE_STRATEGY = CSPMergeStrategy.UNION;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddlewareFactory.class);
 
     @Override
@@ -61,9 +56,9 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
                             .with(Keywords.minLength(1))))
                     .allowAdditionalProperties(false)))
             .optionalProperty(REPORT_ONLY, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_REPORT_ONLY))
+                .defaultValue(AbstractCSPMiddlewareOptions.DEFAULT_REPORT_ONLY))
             .optionalProperty(MERGE_STRATEGY, Schemas.enumSchema(MERGE_STRATEGIES.toArray())
-                .defaultValue(DEFAULT_MERGE_STRATEGY))
+                .defaultValue(AbstractCSPMiddlewareOptions.DEFAULT_MERGE_STRATEGY))
             .allowAdditionalProperties(false);
     }
 
@@ -90,7 +85,7 @@ public class CSPMiddlewareFactory implements MiddlewareFactory {
             }
         }
 
-        final Boolean reportOnly = options.getBoolean(REPORT_ONLY, CSPMiddlewareFactory.DEFAULT_REPORT_ONLY);
+        final Boolean reportOnly = options.getBoolean(REPORT_ONLY, AbstractCSPMiddlewareOptions.DEFAULT_REPORT_ONLY);
         if (reportOnly && !hasReportToOrUriDirective) {
             return Future.failedFuture("Reporting enabled, but no report-uri or report-to is configured");
         }

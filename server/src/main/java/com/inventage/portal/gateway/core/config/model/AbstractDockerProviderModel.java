@@ -3,7 +3,6 @@ package com.inventage.portal.gateway.core.config.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.proxy.provider.docker.DockerContainerProviderFactory;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
@@ -12,6 +11,12 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize(builder = DockerProviderModel.Builder.class)
 public abstract class AbstractDockerProviderModel implements ProviderModel {
 
+    public static final String DEFAULT_ENDPOINT = "unix:///var/run/docker.sock";
+    public static final boolean DEFAULT_EXPOSED_BY_DEFAULT = true;
+    public static final String DEFAULT_RULE_TEMPLATE = "Host('${name}')";
+    public static final boolean DEFAULT_WATCH = true;
+    public static final boolean DEFAULT_USE_TLS = false;
+
     @Override
     @JsonProperty(StaticConfiguration.PROVIDER_NAME)
     public abstract String getName();
@@ -19,13 +24,13 @@ public abstract class AbstractDockerProviderModel implements ProviderModel {
     @Default
     @JsonProperty(StaticConfiguration.PROVIDER_DOCKER_ENDPOINT)
     public String getEndpoint() {
-        return DockerContainerProviderFactory.DEFAULT_ENDPOINT;
+        return DEFAULT_ENDPOINT;
     }
 
     @Default
     @JsonProperty(StaticConfiguration.PROVIDER_DOCKER_EXPOSED_BY_DEFAULT)
     public boolean isExposedByDefault() {
-        return DockerContainerProviderFactory.DEFAULT_EXPOSED_BY_DEFAULT;
+        return DEFAULT_EXPOSED_BY_DEFAULT;
     }
 
     @JsonProperty(StaticConfiguration.PROVIDER_DOCKER_NETWORK)
@@ -34,13 +39,13 @@ public abstract class AbstractDockerProviderModel implements ProviderModel {
     @Default
     @JsonProperty(StaticConfiguration.PROVIDER_DOCKER_DEFAULT_RULE)
     public String getDefaultRule() {
-        return DockerContainerProviderFactory.DEFAULT_RULE_TEMPLATE;
+        return DEFAULT_RULE_TEMPLATE;
     }
 
     @Default
     @JsonProperty(StaticConfiguration.PROVIDER_DOCKER_WATCH)
     public boolean isWatch() {
-        return DockerContainerProviderFactory.DEFAULT_WATCH;
+        return DEFAULT_WATCH;
     }
 
 }

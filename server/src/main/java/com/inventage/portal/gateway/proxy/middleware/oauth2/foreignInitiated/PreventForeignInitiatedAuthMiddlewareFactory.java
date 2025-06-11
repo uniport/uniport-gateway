@@ -20,9 +20,6 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
     public static final String TYPE = "checkInitiatedAuth";
     public static final String REDIRECT_URI = "redirectUri";
 
-    // defaults
-    public static final String DEFAULT_REDIRECT_URI = "/";
-
     @Override
     public String provides() {
         return TYPE;
@@ -33,7 +30,7 @@ public class PreventForeignInitiatedAuthMiddlewareFactory implements MiddlewareF
         return Schemas.objectSchema()
             .optionalProperty(REDIRECT_URI, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_REDIRECT_URI))
+                .defaultValue(AbstractPreventForeignInitiatedAuthMiddlewareOptions.DEFAULT_REDIRECT_URI))
             .allowAdditionalProperties(false);
     }
 

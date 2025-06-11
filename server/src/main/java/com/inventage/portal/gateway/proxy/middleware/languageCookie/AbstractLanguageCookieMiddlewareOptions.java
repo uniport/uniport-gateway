@@ -13,13 +13,16 @@ import org.slf4j.LoggerFactory;
 @ModelStyle
 @JsonDeserialize(builder = LanguageCookieMiddlewareOptions.Builder.class)
 public abstract class AbstractLanguageCookieMiddlewareOptions implements MiddlewareOptionsModel {
+
+    public static final String DEFAULT_LANGUAGE_COOKIE_NAME = "uniport.language";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageCookieMiddlewareOptions.class);
 
     @Default
     @JsonProperty(LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE_NAME)
     public String getCookieName() {
-        logDefault(LOGGER, LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE_NAME, LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME);
-        return LanguageCookieMiddlewareFactory.DEFAULT_LANGUAGE_COOKIE_NAME;
+        logDefault(LOGGER, LanguageCookieMiddlewareFactory.LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE_COOKIE_NAME);
+        return DEFAULT_LANGUAGE_COOKIE_NAME;
     }
 
 }

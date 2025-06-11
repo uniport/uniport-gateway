@@ -61,11 +61,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         CLAIM_OPERATOR_EQUALS,
         CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
 
-    // defaults
-    public static final boolean DEFAULT_RECONCILIATION_ENABLED_VALUE = true;
-    public static final long DEFAULT_RECONCILIATION_INTERVAL_MS = 60_000;
-    public static final String DEFAULT_PUBLIC_KEY_ALGORITHM = "RS256";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
 
     @Override
@@ -77,7 +72,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                     .with(Keywords.minLength(1)))
                 .optionalProperty(PUBLIC_KEY_ALGORITHM, Schemas.stringSchema()
                     .with(Keywords.minLength(1))
-                    .defaultValue(DEFAULT_PUBLIC_KEY_ALGORITHM))
+                    .defaultValue(WithAuthHandlerMiddlewareOptionsBase.DEFAULT_PUBLIC_KEY_ALGORITHM))
                 .allowAdditionalProperties(false));
 
         final ArraySchemaBuilder claimsSchema = Schemas.arraySchema()
@@ -90,10 +85,10 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
         final ObjectSchemaBuilder reconciliationSchema = Schemas.objectSchema()
             .optionalProperty(RECONCILIATION_ENABLED, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_RECONCILIATION_ENABLED_VALUE))
+                .defaultValue(WithAuthHandlerMiddlewareOptionsBase.DEFAULT_RECONCILIATION_ENABLED_VALUE))
             .optionalProperty(RECONCILIATION_INTERVAL_MS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0))
-                .defaultValue(DEFAULT_RECONCILIATION_INTERVAL_MS))
+                .defaultValue(WithAuthHandlerMiddlewareOptionsBase.DEFAULT_RECONCILIATION_INTERVAL_MS))
             .allowAdditionalProperties(false);
 
         return Schemas.objectSchema()

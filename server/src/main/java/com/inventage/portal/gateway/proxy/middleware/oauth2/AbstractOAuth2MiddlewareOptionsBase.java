@@ -12,6 +12,10 @@ import org.slf4j.LoggerFactory;
 
 @ModelStyle
 public abstract class AbstractOAuth2MiddlewareOptionsBase implements MiddlewareOptionsModel {
+
+    public static final String DEFAULT_OIDC_RESPONSE_MODE = OAuth2MiddlewareFactory.OIDC_RESPONSE_MODE_FORM_POST;
+    public static final boolean DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW = true;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareOptions.class);
 
     @JsonProperty(OAuth2MiddlewareFactory.CLIENT_ID)
@@ -29,15 +33,15 @@ public abstract class AbstractOAuth2MiddlewareOptionsBase implements MiddlewareO
     @Default
     @JsonProperty(OAuth2MiddlewareFactory.RESPONSE_MODE)
     public String getResponseMode() {
-        logDefault(LOGGER, OAuth2MiddlewareFactory.RESPONSE_MODE, OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE);
-        return OAuth2MiddlewareFactory.DEFAULT_OIDC_RESPONSE_MODE;
+        logDefault(LOGGER, OAuth2MiddlewareFactory.RESPONSE_MODE, DEFAULT_OIDC_RESPONSE_MODE);
+        return DEFAULT_OIDC_RESPONSE_MODE;
     }
 
     @Default
     @JsonProperty(OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW)
     public boolean proxyAuthenticationFlow() {
-        logDefault(LOGGER, OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, OAuth2MiddlewareFactory.DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
-        return OAuth2MiddlewareFactory.DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW;
+        logDefault(LOGGER, OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW);
+        return DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW;
     }
 
     @Nullable

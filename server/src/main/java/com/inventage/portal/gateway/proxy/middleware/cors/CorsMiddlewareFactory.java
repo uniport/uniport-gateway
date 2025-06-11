@@ -32,10 +32,6 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
     public static final String ALLOW_CREDENTIALS = "allowCredentials";
     public static final String ALLOW_PRIVATE_NETWORK = "allowPrivateNetwork";
 
-    public static final int DEFAULT_MAX_AGE_SECONDS = -1;
-    public static final boolean DEFAULT_ALLOW_CREDENTIALS = false;
-    public static final boolean DEFAULT_ALLOW_PRIVATE_NETWORK = false;
-
     private static final String ORIGIN_LOCALHOST = "http://localhost";
     private static final String[] HTTP_METHODS = new String[] {
         HttpMethod.GET.toString(),
@@ -76,9 +72,9 @@ public class CorsMiddlewareFactory implements MiddlewareFactory {
             .optionalProperty(MAX_AGE_SECONDS, Schemas.intSchema()
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .optionalProperty(ALLOW_CREDENTIALS, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_ALLOW_CREDENTIALS))
+                .defaultValue(AbstractCorsMiddlewareOptions.DEFAULT_ALLOW_CREDENTIALS))
             .optionalProperty(ALLOW_PRIVATE_NETWORK, Schemas.booleanSchema()
-                .defaultValue(DEFAULT_ALLOW_PRIVATE_NETWORK))
+                .defaultValue(AbstractCorsMiddlewareOptions.DEFAULT_ALLOW_PRIVATE_NETWORK))
             .allowAdditionalProperties(false);
     }
 

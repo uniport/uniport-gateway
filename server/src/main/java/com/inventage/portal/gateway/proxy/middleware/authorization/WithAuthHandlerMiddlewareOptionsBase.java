@@ -15,6 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class WithAuthHandlerMiddlewareOptionsBase implements MiddlewareOptionsModel {
+
+    public static final boolean DEFAULT_RECONCILIATION_ENABLED_VALUE = true;
+    public static final long DEFAULT_RECONCILIATION_INTERVAL_MS = 60_000;
+    public static final String DEFAULT_PUBLIC_KEY_ALGORITHM = "RS256";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareOptions.class);
 
     @Check
@@ -56,8 +61,8 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements Middleware
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM)
         public String getAlgorithm() {
-            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_PUBLIC_KEY_ALGORITHM);
-            return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_PUBLIC_KEY_ALGORITHM;
+            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, DEFAULT_PUBLIC_KEY_ALGORITHM);
+            return DEFAULT_PUBLIC_KEY_ALGORITHM;
         }
     }
 
@@ -84,15 +89,15 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements Middleware
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED)
         public boolean isEnabled() {
-            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_ENABLED_VALUE);
-            return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_ENABLED_VALUE;
+            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, DEFAULT_RECONCILIATION_ENABLED_VALUE);
+            return DEFAULT_RECONCILIATION_ENABLED_VALUE;
         }
 
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS)
         public long getIntervalMs() {
-            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS);
-            return WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS;
+            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, DEFAULT_RECONCILIATION_INTERVAL_MS);
+            return DEFAULT_RECONCILIATION_INTERVAL_MS;
         }
     }
 }

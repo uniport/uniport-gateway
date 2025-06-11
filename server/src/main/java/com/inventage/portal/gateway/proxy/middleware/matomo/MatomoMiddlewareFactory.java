@@ -25,12 +25,6 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
     public static final String JWT_PATH_ROLES = "pathRoles";
     public static final String JWT_PATH_GROUP = "pathGroup";
 
-    // defaults
-    public static final String DEFAULT_JWT_PATH_USERNAME = "$.preferred_username";
-    public static final String DEFAULT_JWT_PATH_EMAIL = "$.email";
-    public static final String DEFAULT_JWT_PATH_ROLES = "$.resource_access.Analytics.roles";
-    public static final String DEFAULT_JWT_PATH_GROUP = "$.tenant";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MatomoMiddlewareFactory.class);
 
     @Override
@@ -43,16 +37,16 @@ public class MatomoMiddlewareFactory implements MiddlewareFactory {
         return Schemas.objectSchema()
             .optionalProperty(JWT_PATH_USERNAME, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_JWT_PATH_USERNAME))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_USERNAME))
             .optionalProperty(JWT_PATH_EMAIL, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_JWT_PATH_EMAIL))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_EMAIL))
             .optionalProperty(JWT_PATH_ROLES, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_JWT_PATH_ROLES))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_ROLES))
             .optionalProperty(JWT_PATH_GROUP, Schemas.stringSchema()
                 .with(Keywords.minLength(1))
-                .defaultValue(DEFAULT_JWT_PATH_GROUP))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_GROUP))
             .allowAdditionalProperties(false);
     }
 
