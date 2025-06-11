@@ -9,11 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 // https://vertx.io/docs/vertx-junit5/java/#_integration_with_junit_5
 @ExtendWith(VertxExtension.class)
-public class PortalGatewayVerticleTest {
+public class GatewayVerticleTest {
 
     @BeforeEach
     void deployVerticle(Vertx vertx, VertxTestContext testContext) {
-        vertx.deployVerticle(new PortalGatewayVerticle(), testContext.succeeding(id -> testContext.completeNow()));
+        vertx.deployVerticle(new GatewayVerticle(), testContext.succeeding(id -> testContext.completeNow()));
     }
 
     @Test

@@ -5,7 +5,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.hazelcast.config.Config;
 import com.hazelcast.kubernetes.KubernetesProperties;
-import com.inventage.portal.gateway.core.PortalGatewayVerticle;
+import com.inventage.portal.gateway.core.GatewayVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
@@ -84,7 +84,7 @@ public class GatewayLauncher extends Launcher {
         // TODO might be required to rework this part with the vertx builder
         final List<String> arguments = new LinkedList<String>();
         arguments.add("run");
-        arguments.add(PortalGatewayVerticle.class.getName());
+        arguments.add(GatewayVerticle.class.getName());
         if (Runtime.isClustered()) {
             arguments.add("--cluster");
         }

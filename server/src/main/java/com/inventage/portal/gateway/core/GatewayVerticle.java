@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
  * The main verticle of the portal gateway. It reads the configuration for the
  * entrypoints and creates an HTTP listener for each of them.
  */
-public class PortalGatewayVerticle extends AbstractVerticle {
+public class GatewayVerticle extends AbstractVerticle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PortalGatewayVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayVerticle.class);
 
     private static final String CONFIGURATION_ADDRESS = "configuration-announce-address";
 
