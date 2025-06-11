@@ -1,8 +1,9 @@
-package com.inventage.portal.gateway.proxy.config;
+package com.inventage.portal.gateway.proxy.config.watcher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.Runtime;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import com.inventage.portal.gateway.proxy.listener.Listener;
 import com.inventage.portal.gateway.proxy.provider.Provider;

@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.config;
+package com.inventage.portal.gateway.proxy.config.watcher;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withRouter;
@@ -13,6 +13,7 @@ import static com.inventage.portal.gateway.TestUtils.withServices;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.inventage.portal.gateway.proxy.config.MockProvider;
 import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import com.inventage.portal.gateway.proxy.config.model.RouterModel;
 import com.inventage.portal.gateway.proxy.config.model.ServerOptions;
