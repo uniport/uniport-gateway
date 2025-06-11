@@ -67,8 +67,10 @@ public class DynamicConfiguration {
     public static final String SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD = "trustStorePassword";
     public static final String SERVICE_VERBOSE = "verbose";
 
-    // schema
-    private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
+    // A word consisting solely of underscores, digits, and alphabetics from the portable character set. 
+    // The first character of a name is not a digit. 
+    // https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_235
+    public static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{[a-zA-Z_]+[a-zA-Z0-9_]*\\}$");
 
     private static Validator validator;
 

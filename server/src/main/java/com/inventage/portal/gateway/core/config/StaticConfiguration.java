@@ -17,7 +17,6 @@ import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +54,6 @@ public class StaticConfiguration {
 
     private static Validator validator;
 
-    // schema
-    private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
-
     private StaticConfiguration() {
     }
 
@@ -78,7 +74,7 @@ public class StaticConfiguration {
                 Schemas.intSchema()
                     .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(1)),
                 Schemas.stringSchema()
-                    .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
+                    .with(Keywords.pattern(DynamicConfiguration.ENV_VARIABLE_PATTERN))))
             .optionalProperty(StaticConfiguration.ENTRYPOINT_MIDDLEWARES,
                 Schemas.arraySchema()
                     .items(Schemas.oneOf(getBuildMiddlewareSchema())))

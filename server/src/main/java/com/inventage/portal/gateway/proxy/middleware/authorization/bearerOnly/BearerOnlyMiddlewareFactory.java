@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly;
 
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
@@ -10,7 +11,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +25,6 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
 
-    private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
-
     @Override
     public String provides() {
         return TYPE;
@@ -39,7 +37,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
                 Schemas.booleanSchema()
                     .defaultValue(AbstractBearerOnlyMiddlewareOptions.DEFAULT_OPTIONAL),
                 Schemas.stringSchema()
-                    .with(Keywords.pattern(ENV_VARIABLE_PATTERN))));
+                    .with(Keywords.pattern(DynamicConfiguration.ENV_VARIABLE_PATTERN))));
 
     }
 
