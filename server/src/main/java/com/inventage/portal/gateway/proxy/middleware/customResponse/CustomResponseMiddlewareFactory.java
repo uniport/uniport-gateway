@@ -44,7 +44,7 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
                 .with(io.vertx.json.schema.draft7.dsl.Keywords.maximum(HTTP_STATUS_CODE_MAX)))
             .requiredProperty(CONTENT, Schemas.stringSchema())
             .optionalProperty(HEADERS, Schemas.objectSchema()
-                .additionalProperties(Schemas.stringSchema() // TODO technically this should be an array to allow multi header values
+                .additionalProperties(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
             .allowAdditionalProperties(false);
     }
