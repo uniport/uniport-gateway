@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.config;
+package com.inventage.portal.gateway.core.config.env;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.text.StringSubstitutor;

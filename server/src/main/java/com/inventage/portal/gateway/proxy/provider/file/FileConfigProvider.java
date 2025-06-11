@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.provider.file;
 
-import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
+import com.inventage.portal.gateway.core.config.env.ConfigAdapter;
 import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.config.ConfigRetriever;
