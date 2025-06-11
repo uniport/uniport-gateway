@@ -14,7 +14,8 @@
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <Class name="~.*?(middleware\..*?Options|model\..*?)" />
+        <!-- https://github.com/spotbugs/spotbugs/issues/633 -->
+        <Class name="~.*?(middleware\..*?Options|Abstract.*?Model|)" />
         <Bug pattern="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION" />
     </Match>
     <Match>

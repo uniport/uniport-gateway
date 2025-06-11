@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.core.config.model.AbstractDockerProviderModel;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;

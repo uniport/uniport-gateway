@@ -1,7 +1,6 @@
 package com.inventage.portal.gateway.proxy.provider.file;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.core.config.model.FileProviderModel;
 import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;

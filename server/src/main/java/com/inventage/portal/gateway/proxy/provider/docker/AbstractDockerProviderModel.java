@@ -1,8 +1,10 @@
-package com.inventage.portal.gateway.core.config.model;
+package com.inventage.portal.gateway.proxy.provider.docker;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 

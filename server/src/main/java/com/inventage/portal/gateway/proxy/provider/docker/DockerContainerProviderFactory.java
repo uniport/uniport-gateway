@@ -1,8 +1,6 @@
 package com.inventage.portal.gateway.proxy.provider.docker;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.core.config.model.AbstractDockerProviderModel;
-import com.inventage.portal.gateway.core.config.model.DockerProviderModel;
 import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
