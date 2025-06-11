@@ -38,7 +38,6 @@ public class RouterSwitchListener implements Listener {
     }
 
     private void setSubRouter(Router subRouter) {
-        // TODO might this create a connection gap?
         router.clear();
         router.mountSubRouter("/", subRouter);
     }
