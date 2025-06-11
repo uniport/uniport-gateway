@@ -1,10 +1,10 @@
 package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -72,7 +72,7 @@ public class ReplacedSessionCookieDetectionMiddlewareFactory implements Middlewa
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
         final ReplacedSessionCookieDetectionMiddlewareOptions options = castOptions(config, modelType());
         LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(

@@ -3,9 +3,9 @@ package com.inventage.portal.gateway.proxy.middleware.csp;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Immutable
-@GatewayStyle
+@ModelStyle
 @JsonDeserialize(builder = CSPMiddlewareOptions.Builder.class)
-public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareOptions {
+public abstract class AbstractCSPMiddlewareOptions implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSPMiddlewareOptions.class);
 
     @Check
@@ -42,9 +42,9 @@ public abstract class AbstractCSPMiddlewareOptions implements GatewayMiddlewareO
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = DirectiveOptions.Builder.class)
-    public abstract static class AbstractDirectiveOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractDirectiveOptions implements MiddlewareOptionsModel {
 
         @Check
         protected void validate() {

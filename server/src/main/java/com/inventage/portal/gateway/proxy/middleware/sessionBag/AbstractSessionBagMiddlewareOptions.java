@@ -3,8 +3,8 @@ package com.inventage.portal.gateway.proxy.middleware.sessionBag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Immutable
-@GatewayStyle
+@ModelStyle
 @JsonDeserialize(builder = SessionBagMiddlewareOptions.Builder.class)
-public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMiddlewareOptions {
+public abstract class AbstractSessionBagMiddlewareOptions implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionBagMiddlewareOptions.class);
 
     @Check
@@ -34,9 +34,9 @@ public abstract class AbstractSessionBagMiddlewareOptions implements GatewayMidd
     public abstract List<WhitelistedCookieOptions> getWhitelistedCookieOptions();
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = WhitelistedCookieOptions.Builder.class)
-    public abstract static class AbstractWhitelistedCookieOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractWhitelistedCookieOptions implements MiddlewareOptionsModel {
 
         @JsonProperty(SessionBagMiddlewareFactory.WHITELISTED_COOKIE_NAME)
         public abstract String getName();

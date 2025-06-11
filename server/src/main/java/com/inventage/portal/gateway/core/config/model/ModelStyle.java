@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.model;
+package com.inventage.portal.gateway.core.config.model;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,6 +15,6 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
     typeImmutable = "*", // No prefix or suffix for generated immutable type
     visibility = ImplementationVisibility.PUBLIC // Generated class will be always public
 )
-public @interface GatewayStyle {
+public @interface ModelStyle {
 
 }

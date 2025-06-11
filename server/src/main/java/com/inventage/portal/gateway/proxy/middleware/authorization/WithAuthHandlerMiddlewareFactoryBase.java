@@ -1,11 +1,11 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.jayway.jsonpath.internal.path.PathCompiler;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -214,16 +214,16 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
      *            The config for the middleware
      * @return Your {@link Middleware}
      */
-    protected abstract Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config);
+    protected abstract Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, MiddlewareOptionsModel config);
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
         final Promise<Middleware> promise = Promise.promise();
         this.create(vertx, name, router, config, promise);
         return promise.future();
     }
 
-    public void create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config, Handler<AsyncResult<Middleware>> handler) {
+    public void create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config, Handler<AsyncResult<Middleware>> handler) {
         LOGGER.debug("Creating '{}' middleware", provides());
         final WithAuthHandlerMiddlewareOptionsBase options = castOptions(config, WithAuthHandlerMiddlewareOptionsBase.class);
 

@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -10,8 +10,8 @@ import org.immutables.value.Value.Default;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@GatewayStyle
-public abstract class AbstractOAuth2MiddlewareOptionsBase implements GatewayMiddlewareOptions {
+@ModelStyle
+public abstract class AbstractOAuth2MiddlewareOptionsBase implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareOptions.class);
 
     @JsonProperty(OAuth2MiddlewareFactory.CLIENT_ID)

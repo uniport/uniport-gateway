@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.proxy.config.model;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;
@@ -28,7 +28,7 @@ import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 
-public class GatewayTest {
+public class DynamicModelTest {
 
     @Test
     public void parseJsonTest() {
@@ -72,13 +72,14 @@ public class GatewayTest {
 
         // when
         final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
-        final ThrowingSupplier<Gateway> parse = () -> new ObjectMapper().readValue(httpJson.encode(), Gateway.class);
+        final ThrowingSupplier<DynamicModel> parse = () -> new ObjectMapper().readValue(httpJson.encode(),
+            DynamicModel.class);
 
         // then
-        final Gateway gateway = assertDoesNotThrow(parse);
+        final DynamicModel gateway = assertDoesNotThrow(parse);
 
         assertNotNull(gateway.getRouters());
-        final GatewayRouter router = gateway.getRouters().get(0);
+        final RouterModel router = gateway.getRouters().get(0);
         assertNotNull(router);
         assertEquals(aRouterName, router.getName());
 
@@ -91,12 +92,12 @@ public class GatewayTest {
         assertEquals(aServiceName, router.getService());
 
         assertNotNull(gateway.getMiddlewares());
-        final GatewayMiddleware middleware = gateway.getMiddlewares().get(0);
+        final MiddlewareModel middleware = gateway.getMiddlewares().get(0);
         assertNotNull(middleware);
         assertEquals(aMiddlewareName, middleware.getName());
         assertEquals(aMiddlewareType, middleware.getType());
 
-        final GatewayMiddlewareOptions options = middleware.getOptions();
+        final MiddlewareOptionsModel options = middleware.getOptions();
         assertNotNull(options);
         assertTrue(options instanceof HeaderMiddlewareOptions);
         final HeaderMiddlewareOptions headerOptions = (HeaderMiddlewareOptions) options;
@@ -107,7 +108,7 @@ public class GatewayTest {
         assertTrue(headerOptions.getResponseHeaders().isEmpty());
 
         assertNotNull(gateway.getServices());
-        final GatewayService service = gateway.getServices().get(0);
+        final ServiceModel service = gateway.getServices().get(0);
         assertNotNull(service);
         assertEquals(aServiceName, service.getName());
 
@@ -127,7 +128,7 @@ public class GatewayTest {
 
     @Test
     public void allowNullOptions() {
-        // given 
+        // given
         final String aMiddlewareName = "mA";
         final String aMiddlewareType = "responseSessionCookieRemoval"; // allows no options in configuration
 
@@ -138,18 +139,19 @@ public class GatewayTest {
 
         // when
         final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
-        final ThrowingSupplier<Gateway> parse = () -> new ObjectMapper().readValue(httpJson.encode(), Gateway.class);
+        final ThrowingSupplier<DynamicModel> parse = () -> new ObjectMapper().readValue(httpJson.encode(),
+            DynamicModel.class);
 
         // then
-        final Gateway gateway = assertDoesNotThrow(parse);
+        final DynamicModel gateway = assertDoesNotThrow(parse);
 
         assertNotNull(gateway.getMiddlewares());
-        final GatewayMiddleware middleware = gateway.getMiddlewares().get(0);
+        final MiddlewareModel middleware = gateway.getMiddlewares().get(0);
         assertNotNull(middleware);
         assertEquals(aMiddlewareName, middleware.getName());
         assertEquals(aMiddlewareType, middleware.getType());
 
-        final GatewayMiddlewareOptions options = middleware.getOptions();
+        final MiddlewareOptionsModel options = middleware.getOptions();
         assertNotNull(options);
     }
 }

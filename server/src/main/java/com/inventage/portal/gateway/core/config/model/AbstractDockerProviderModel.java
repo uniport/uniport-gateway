@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.model;
+package com.inventage.portal.gateway.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -8,9 +8,9 @@ import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayStyle
-@JsonDeserialize(builder = GatewayDockerProvider.Builder.class)
-public abstract class AbstractGatewayDockerProvider implements GatewayProvider {
+@ModelStyle
+@JsonDeserialize(builder = DockerProviderModel.Builder.class)
+public abstract class AbstractDockerProviderModel implements ProviderModel {
 
     @Override
     @JsonProperty(StaticConfiguration.PROVIDER_NAME)

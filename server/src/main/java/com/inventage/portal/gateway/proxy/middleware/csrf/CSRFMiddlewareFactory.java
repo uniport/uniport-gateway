@@ -1,9 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.csrf;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.CookieUtil;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -90,7 +90,7 @@ public class CSRFMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
         final CSRFMiddlewareOptions options = castOptions(config, modelType());
         final String secret = UUID.randomUUID().toString();
 

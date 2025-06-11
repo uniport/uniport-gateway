@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
+import com.inventage.portal.gateway.proxy.config.model.RouterModel;
+import com.inventage.portal.gateway.proxy.config.model.ServerOptions;
+import com.inventage.portal.gateway.proxy.config.model.ServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
-import com.inventage.portal.gateway.proxy.model.Gateway;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
-import com.inventage.portal.gateway.proxy.model.GatewayRouter;
-import com.inventage.portal.gateway.proxy.model.GatewayService;
-import com.inventage.portal.gateway.proxy.model.ServerOptions;
 import com.inventage.portal.gateway.proxy.router.additionalRoutes.AdditionalRoutesMiddlewareFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
@@ -239,7 +239,10 @@ public class RouterFactoryTest {
 
     @ParameterizedTest
     @MethodSource("provideRulesForRouting")
-    public void testRoutingRules(String rule, String virtualHost, String path, int expectedStatusCode, Vertx vertx, VertxTestContext testCtx) {
+    public void testRoutingRules(
+        String rule, String virtualHost, String path, int expectedStatusCode, Vertx vertx,
+        VertxTestContext testCtx
+    ) {
         // given
         final String svcName = "bar";
         final JsonObject config = TestUtils.buildConfiguration(
@@ -332,9 +335,9 @@ public class RouterFactoryTest {
 
     @Test
     public void failingMiddlewareCreation(Vertx vertx, VertxTestContext testCtx) {
-        final Gateway model = Gateway.builder()
+        final DynamicModel model = DynamicModel.builder()
             .withRouters(List.of(
-                GatewayRouter.builder()
+                RouterModel.builder()
                     .withName("foo")
                     .withService("bar")
                     .withRule("Path('/path')")
@@ -342,12 +345,12 @@ public class RouterFactoryTest {
                     .withMiddlewares(List.of("unknownMiddleware"))
                     .build()))
             .withMiddlewares(List.of(
-                GatewayMiddleware.builder()
+                MiddlewareModel.builder()
                     .withName("unknownMiddleware")
                     .withType("unknownMiddleware")
                     .build()))
             .withServices(List.of(
-                GatewayService.builder()
+                ServiceModel.builder()
                     .withName("bar")
                     .withServers(List.of(
                         ServerOptions.builder()

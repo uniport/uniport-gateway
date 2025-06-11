@@ -1,9 +1,9 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.proxy.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -14,10 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Immutable
-@GatewayStyle
-@JsonDeserialize(builder = GatewayService.Builder.class)
-public abstract class AbstractGatewayService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayService.class);
+@ModelStyle
+@JsonDeserialize(builder = ServiceModel.Builder.class)
+public abstract class AbstractServiceModel {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceModel.class);
 
     // defaults
     public static final String DEFAULT_SERVICE_SERVER_PROTOCOL = "http";
@@ -46,9 +46,9 @@ public abstract class AbstractGatewayService {
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = ServerOptions.Builder.class)
-    public abstract static class AbstractServerOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractServerOptions implements MiddlewareOptionsModel {
 
         @Default
         @JsonProperty(DynamicConfiguration.SERVICE_SERVER_PROTOCOL)
@@ -71,21 +71,23 @@ public abstract class AbstractGatewayService {
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = HTTPsOptions.Builder.class)
-    public abstract static class AbstractHTTPsOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractHTTPsOptions implements MiddlewareOptionsModel {
 
         @Default
         @JsonProperty(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME)
         public boolean verifyHostname() {
-            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME);
+            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
+                DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME);
             return DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME;
         }
 
         @Default
         @JsonProperty(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL)
         public boolean trustAll() {
-            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL);
+            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
+                DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL);
             return DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL;
         }
 
@@ -93,7 +95,8 @@ public abstract class AbstractGatewayService {
         @Nullable
         @JsonProperty(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH)
         public String getTrustStorePath() {
-            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH, DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH);
+            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
+                DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH);
             return DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH;
         }
 
@@ -101,7 +104,8 @@ public abstract class AbstractGatewayService {
         @Nullable
         @JsonProperty(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD)
         public String getTrustStorePassword() {
-            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD, DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD);
+            logDefault(LOGGER, DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
+                DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD);
             return DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD;
         }
     }

@@ -3,10 +3,10 @@ package com.inventage.portal.gateway.proxy.middleware.authorization;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import com.inventage.portal.gateway.proxy.middleware.csrf.CSRFMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import java.util.List;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
@@ -14,7 +14,7 @@ import org.immutables.value.Value.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMiddlewareOptions {
+public abstract class WithAuthHandlerMiddlewareOptionsBase implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(CSRFMiddlewareOptions.class);
 
     @Check
@@ -46,9 +46,9 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = PublicKeyOptions.Builder.class)
-    public abstract static class AbstractPublicKeyOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractPublicKeyOptions implements MiddlewareOptionsModel {
 
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY)
         public abstract String getKey();
@@ -62,9 +62,9 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = ClaimOptions.Builder.class)
-    public abstract static class AbstractClaimOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractClaimOptions implements MiddlewareOptionsModel {
 
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR)
         public abstract JWTClaimOperator getOperator();
@@ -77,9 +77,9 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements GatewayMid
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = ReconciliationOptions.Builder.class)
-    public abstract static class AbstractReconciliationOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractReconciliationOptions implements MiddlewareOptionsModel {
 
         @Default
         @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED)

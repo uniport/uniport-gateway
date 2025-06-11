@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.model.GatewayService;
+import com.inventage.portal.gateway.proxy.config.model.ServiceModel;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +43,10 @@ public class ReverseProxyOptionsTest {
             DynamicConfiguration.SERVICE_VERBOSE, verbose);
 
         // when
-        final ThrowingSupplier<GatewayService> parse = () -> new ObjectMapper().readValue(json.encode(), GatewayService.class);
+        final ThrowingSupplier<ServiceModel> parse = () -> new ObjectMapper().readValue(json.encode(), ServiceModel.class);
 
         // then
-        final GatewayService options = assertDoesNotThrow(parse);
+        final ServiceModel options = assertDoesNotThrow(parse);
         assertNotNull(options);
 
         assertNotNull(options.getServers());

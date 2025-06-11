@@ -2,8 +2,8 @@ package com.inventage.portal.gateway.proxy.middleware.session;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import io.vertx.core.http.CookieSameSite;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Default;
@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Immutable
-@GatewayStyle
+@ModelStyle
 @JsonDeserialize(builder = SessionMiddlewareOptions.Builder.class)
-public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlewareOptions {
+public abstract class AbstractSessionMiddlewareOptions implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionMiddlewareOptions.class);
 
     @Default
@@ -85,9 +85,9 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = SessionCookieOptions.Builder.class)
-    public abstract static class AbstractSessionCookieOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractSessionCookieOptions implements MiddlewareOptionsModel {
 
         @Default
         @JsonProperty(SessionMiddlewareFactory.SESSION_COOKIE_NAME)
@@ -119,9 +119,9 @@ public abstract class AbstractSessionMiddlewareOptions implements GatewayMiddlew
     }
 
     @Immutable
-    @GatewayStyle
+    @ModelStyle
     @JsonDeserialize(builder = LifetimeCookieOptions.Builder.class)
-    public abstract static class AbstractLifetimeCookieOptions implements GatewayMiddlewareOptions {
+    public abstract static class AbstractLifetimeCookieOptions implements MiddlewareOptionsModel {
 
         @Default
         public String getName() {

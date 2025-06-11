@@ -1,17 +1,17 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.proxy.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import java.util.List;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayStyle
-@JsonDeserialize(builder = GatewayRouter.Builder.class)
-public abstract class AbstractGatewayRouter implements Comparable<AbstractGatewayRouter> {
+@ModelStyle
+@JsonDeserialize(builder = RouterModel.Builder.class)
+public abstract class AbstractRouterModel implements Comparable<AbstractRouterModel> {
 
     @JsonProperty(DynamicConfiguration.ROUTER_NAME)
     public abstract String getName();
@@ -35,14 +35,14 @@ public abstract class AbstractGatewayRouter implements Comparable<AbstractGatewa
     public abstract String getService();
 
     /**
-     * To avoid path overlap, routes are sorted, by default, in descending order using rules length.
-     * The priority is directly equal to the length of the rule, and so the longest length has the
-     * highest priority.
-     * Additionally, a priority for each router can be defined. This overwrites priority calculates
-     * by the length of the rule.
+     * To avoid path overlap, routes are sorted, by default, in descending order
+     * using rules length. The priority is directly equal to the length of the
+     * rule, and so the longest length has the highest priority.
+     * Additionally, a priority for each router can be defined. This overwrites
+     * priority calculates by the length of the rule.
      */
     @Override
-    public int compareTo(AbstractGatewayRouter other) {
+    public int compareTo(AbstractRouterModel other) {
         final String ruleA = this.getRule();
         final String ruleB = other.getRule();
 

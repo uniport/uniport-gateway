@@ -7,13 +7,13 @@ import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.core.config.ConfigAdapter;
 import com.inventage.portal.gateway.core.config.PortalGatewayConfigRetriever;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
+import com.inventage.portal.gateway.core.config.model.EntrypointModel;
+import com.inventage.portal.gateway.core.config.model.ProviderModel;
+import com.inventage.portal.gateway.core.config.model.StaticModel;
 import com.inventage.portal.gateway.core.entrypoint.Entrypoint;
-import com.inventage.portal.gateway.core.model.Gateway;
-import com.inventage.portal.gateway.core.model.GatewayEntrypoint;
-import com.inventage.portal.gateway.core.model.GatewayProvider;
 import com.inventage.portal.gateway.proxy.config.ConfigurationWatcher;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
 import com.inventage.portal.gateway.proxy.listener.RouterSwitchListener;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
 import com.inventage.portal.gateway.proxy.provider.aggregator.ProviderAggregator;
 import com.inventage.portal.gateway.proxy.router.PublicProtoHostPort;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
@@ -32,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The main verticle of the portal gateway. It reads the configuration for the entrypoints and
- * creates an HTTP listener for each of them.
+ * The main verticle of the portal gateway. It reads the configuration for the
+ * entrypoints and creates an HTTP listener for each of them.
  */
 public class PortalGatewayVerticle extends AbstractVerticle {
 
@@ -42,7 +42,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
     private static final String CONFIGURATION_ADDRESS = "configuration-announce-address";
 
     /**
-     * Default maximum length of all headers for HTTP/1.x in bytes = {@code 10240}, i.e. 10 kilobytes
+     * Default maximum length of all headers for HTTP/1.x in bytes = {@code 10240},
+     * i.e. 10 kilobytes
      */
     private static final int DEFAULT_HEADER_LIMIT = 10 * 1024;
 
@@ -53,7 +54,8 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         PortalGatewayConfigRetriever.create(vertx).getConfig()
             .onSuccess(rawConfigWithEnv -> handleRawConfig(rawConfigWithEnv.copy(), startPromise))
             .onFailure(err -> {
-                final String errMsg = String.format("failed to retrieve static configuration '{}'", err.getMessage());
+                final String errMsg = String.format("failed to retrieve static configuration '{}'",
+                    err.getMessage());
                 shutdownOnStartupFailure(new RuntimeException(errMsg));
             });
     }
@@ -111,18 +113,18 @@ public class PortalGatewayVerticle extends AbstractVerticle {
         return new JsonObject(ConfigAdapter.replaceEnvVariables(config.encode(), env));
     }
 
-    private Future<Gateway> mapToModel(JsonObject config) {
+    private Future<StaticModel> mapToModel(JsonObject config) {
         final ObjectMapper codec = new ObjectMapper();
-        Gateway gateway = null;
+        StaticModel gateway = null;
         try {
-            gateway = codec.readValue(config.encode(), Gateway.class);
+            gateway = codec.readValue(config.encode(), StaticModel.class);
         } catch (JsonProcessingException e) {
             return Future.failedFuture(e);
         }
         return Future.succeededFuture(gateway);
     }
 
-    private Future<List<HttpServer>> runServer(Gateway config, JsonObject env) {
+    private Future<List<HttpServer>> runServer(StaticModel config, JsonObject env) {
         final Function<ConfigurationWatcher, List<Future<HttpServer>>> deployEntrypoints = w -> config.getEntrypoints().stream()
             .map(ep -> createEntrypoint(ep, env, w)
                 .compose(entrypoint -> entryPointListen(entrypoint)))
@@ -133,22 +135,29 @@ public class PortalGatewayVerticle extends AbstractVerticle {
             .mapEmpty();
     }
 
-    private Future<ConfigurationWatcher> deployConfigurationWatcher(List<GatewayEntrypoint> entrypoints, List<GatewayProvider> providers, JsonObject env) {
+    private Future<ConfigurationWatcher> deployConfigurationWatcher(
+        List<EntrypointModel> entrypoints,
+        List<ProviderModel> providers, JsonObject env
+    ) {
         final ProviderAggregator aggregator = new ProviderAggregator(vertx, CONFIGURATION_ADDRESS, providers, env);
 
         final int pvdThrottleDuration = env.getInteger(StaticConfiguration.PROVIDERS_THROTTLE_INTERVAL_MS, 2000);
         final List<String> epNames = entrypoints.stream()
             .map(config -> config.getName())
             .toList();
-        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, CONFIGURATION_ADDRESS, pvdThrottleDuration, epNames);
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, aggregator, CONFIGURATION_ADDRESS,
+            pvdThrottleDuration, epNames);
 
         return Future.succeededFuture(watcher);
     }
 
-    private Future<Entrypoint> createEntrypoint(GatewayEntrypoint entrypoint, JsonObject env, ConfigurationWatcher watcher) {
+    private Future<Entrypoint> createEntrypoint(
+        EntrypointModel entrypoint, JsonObject env,
+        ConfigurationWatcher watcher
+    ) {
         final String epName = entrypoint.getName();
         final int epPort = entrypoint.getPort();
-        final List<GatewayMiddleware> epMiddlewares = entrypoint.getMiddlewares();
+        final List<MiddlewareModel> epMiddlewares = entrypoint.getMiddlewares();
 
         final PublicProtoHostPort publicProtoHostPort = PublicProtoHostPort.of(env, epPort);
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtoHostPort, epName);

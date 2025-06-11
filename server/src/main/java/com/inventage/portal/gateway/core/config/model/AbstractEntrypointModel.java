@@ -1,16 +1,16 @@
-package com.inventage.portal.gateway.core.model;
+package com.inventage.portal.gateway.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
 import java.util.List;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayStyle
-@JsonDeserialize(builder = GatewayEntrypoint.Builder.class)
-public abstract class AbstractGatewayEntrypoint {
+@ModelStyle
+@JsonDeserialize(builder = EntrypointModel.Builder.class)
+public abstract class AbstractEntrypointModel {
 
     @JsonProperty(StaticConfiguration.ENTRYPOINT_NAME)
     public abstract String getName();
@@ -19,6 +19,6 @@ public abstract class AbstractGatewayEntrypoint {
     public abstract int getPort();
 
     @JsonProperty(StaticConfiguration.ENTRYPOINT_MIDDLEWARES)
-    public abstract List<GatewayMiddleware> getMiddlewares();
+    public abstract List<MiddlewareModel> getMiddlewares();
 
 }

@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.service;
 
-import com.inventage.portal.gateway.proxy.model.GatewayService;
-import com.inventage.portal.gateway.proxy.model.HTTPsOptions;
-import com.inventage.portal.gateway.proxy.model.ServerOptions;
+import com.inventage.portal.gateway.proxy.config.model.HTTPsOptions;
+import com.inventage.portal.gateway.proxy.config.model.ServerOptions;
+import com.inventage.portal.gateway.proxy.config.model.ServiceModel;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -17,11 +17,11 @@ public class ReverseProxyFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReverseProxyFactory.class);
 
-    public static Future<Handler<RoutingContext>> of(Vertx vertx, String name, GatewayService options) {
+    public static Future<Handler<RoutingContext>> of(Vertx vertx, String name, ServiceModel options) {
         return new ReverseProxyFactory().create(vertx, name, options);
     }
 
-    public Future<Handler<RoutingContext>> create(Vertx vertx, String name, GatewayService options) {
+    public Future<Handler<RoutingContext>> create(Vertx vertx, String name, ServiceModel options) {
         final ServerOptions serverConfig = options.getServers().get(0); // TODO support multiple servers
         final HTTPsOptions httpsOptions = serverConfig.getHTTPs();
         if (httpsOptions == null) {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.model.Gateway;
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -28,8 +28,10 @@ public final class TestUtils {
     /**
      * Returns a free port number on localhost.
      * <p>
-     * Heavily inspired from org.eclipse.jdt.launching.SocketUtil (to avoid a dependency to JDT just because of this).
-     * Slightly improved with close() missing in JDT. And throws exception instead of returning -1.
+     * Heavily inspired from org.eclipse.jdt.launching.SocketUtil (to avoid a
+     * dependency to JDT just because of this).
+     * Slightly improved with close() missing in JDT. And throws exception instead
+     * of returning -1.
      *
      * @return a free port number on localhost
      * @throws IllegalStateException
@@ -58,12 +60,12 @@ public final class TestUtils {
         throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
     }
 
-    public static Gateway toModel(JsonObject config) {
+    public static DynamicModel toModel(JsonObject config) {
         final JsonObject httpJson = config.getJsonObject(DynamicConfiguration.HTTP);
         final ObjectMapper codec = new ObjectMapper();
-        Gateway gateway = null;
+        DynamicModel gateway = null;
         try {
-            gateway = codec.readValue(httpJson.encode(), Gateway.class);
+            gateway = codec.readValue(httpJson.encode(), DynamicModel.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -213,7 +215,10 @@ public final class TestUtils {
         };
     }
 
-    public static Handler<JsonObject> withServerHttpOptions(boolean verifyHostname, boolean trustAll, String trustStorePath, String trustStorePassword) {
+    public static Handler<JsonObject> withServerHttpOptions(
+        boolean verifyHostname, boolean trustAll,
+        String trustStorePath, String trustStorePassword
+    ) {
         return httpOptions -> {
             httpOptions.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME, verifyHostname);
             httpOptions.put(DynamicConfiguration.SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL, trustAll);

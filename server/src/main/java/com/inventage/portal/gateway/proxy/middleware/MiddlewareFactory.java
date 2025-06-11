@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware;
 
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -27,12 +27,12 @@ public interface MiddlewareFactory {
 
     Future<Void> validate(JsonObject options);
 
-    Class<? extends GatewayMiddlewareOptions> modelType();
+    Class<? extends MiddlewareOptionsModel> modelType();
 
-    Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config);
+    Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config);
 
     @SuppressWarnings("unchecked")
-    default <T extends GatewayMiddlewareOptions> T castOptions(GatewayMiddlewareOptions options, Class<T> clazz) {
+    default <T extends MiddlewareOptionsModel> T castOptions(MiddlewareOptionsModel options, Class<T> clazz) {
         if (options == null) {
             return null;
         }

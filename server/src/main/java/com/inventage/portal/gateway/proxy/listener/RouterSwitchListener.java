@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.listener;
 
 import com.inventage.portal.gateway.GatewayRouterInternal;
-import com.inventage.portal.gateway.proxy.model.Gateway;
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.ext.web.Router;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class RouterSwitchListener implements Listener {
     }
 
     @Override
-    public void listen(Gateway model) {
+    public void listen(DynamicModel model) {
         routerFactory.createRouter(model)
             .onSuccess(this::setSubRouter)
             .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", model, err.getMessage()));

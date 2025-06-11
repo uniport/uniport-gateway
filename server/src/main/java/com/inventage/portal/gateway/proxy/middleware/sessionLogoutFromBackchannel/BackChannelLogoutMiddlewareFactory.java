@@ -1,9 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -42,7 +42,7 @@ public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewar
     }
 
     @Override
-    protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config) {
+    protected Middleware create(final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler, MiddlewareOptionsModel config) {
         LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return new BackChannelLogoutMiddleware(vertx, name, authHandler);
     }

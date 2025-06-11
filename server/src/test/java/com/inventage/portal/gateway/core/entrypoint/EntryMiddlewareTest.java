@@ -1,14 +1,14 @@
 package com.inventage.portal.gateway.core.entrypoint;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
+import com.inventage.portal.gateway.proxy.config.model.RouterModel;
+import com.inventage.portal.gateway.proxy.config.model.ServerOptions;
+import com.inventage.portal.gateway.proxy.config.model.ServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.Gateway;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
-import com.inventage.portal.gateway.proxy.model.GatewayRouter;
-import com.inventage.portal.gateway.proxy.model.GatewayService;
-import com.inventage.portal.gateway.proxy.model.ServerOptions;
 import com.inventage.portal.gateway.proxy.router.PublicProtoHostPort;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -73,7 +73,8 @@ public class EntryMiddlewareTest {
 
         latch.await();
 
-        routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", HOST, String.format("%d", proxyPort)), ENTRYPOINT_PREFIX + proxyPort);
+        routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", HOST, String.format("%d", proxyPort)),
+            ENTRYPOINT_PREFIX + proxyPort);
     }
 
     @AfterEach
@@ -83,17 +84,19 @@ public class EntryMiddlewareTest {
     }
 
     /**
-     * Testing entryMiddleware: is the entryMiddleware traversed for each request at a entrypoint?
-     * We send two request on two different routes, we expect that the entry redirect middleware is traversed.
+     * Testing entryMiddleware: is the entryMiddleware traversed for each request at
+     * a entrypoint?
+     * We send two request on two different routes, we expect that the entry
+     * redirect middleware is traversed.
      * The redirect middleware sets a key-value pair in the response header.
      */
     @Test
     void entryRedirectMiddlewareRunsOnAllRoutes(Vertx vertx, VertxTestContext testCtx) {
-        //given
+        // given
         final String entryPointIdentifier = ENTRYPOINT_PREFIX + proxyPort;
         final String expectedRedirect = "/to/some/page";
 
-        final GatewayMiddleware entryMiddlewareConfig = GatewayMiddleware.builder()
+        final MiddlewareModel entryMiddlewareConfig = MiddlewareModel.builder()
             .withName("redirect")
             .withType(RedirectRegexMiddlewareFactory.TYPE)
             .withOptions(RedirectRegexMiddlewareOptions.builder()
@@ -102,22 +105,22 @@ public class EntryMiddlewareTest {
                 .build())
             .build();
 
-        final Gateway dynamicConfig = Gateway.builder()
+        final DynamicModel dynamicConfig = DynamicModel.builder()
             .withRouters(List.of(
-                GatewayRouter.builder()
+                RouterModel.builder()
                     .withName("foo")
                     .withService("bar")
                     .withRule("Path('/pathA')")
                     .withEntrypoints(List.of(entryPointIdentifier))
                     .build(),
-                GatewayRouter.builder()
+                RouterModel.builder()
                     .withName("foo2")
                     .withService("bar")
                     .withRule("Path('/pathB')")
                     .withEntrypoints(List.of(entryPointIdentifier))
                     .build()))
             .withServices(List.of(
-                GatewayService.builder()
+                ServiceModel.builder()
                     .withName("bar")
                     .withServers(List.of(
                         ServerOptions.builder()
@@ -138,7 +141,7 @@ public class EntryMiddlewareTest {
                 .forEach(path -> {
                     final RequestOptions opt = new RequestOptions().setURI(path);
                     doRequest(vertx, testCtx, opt, resp -> {
-                        //then
+                        // then
                         VertxAssertions.assertEquals(testCtx, HttpResponseStatus.FOUND.code(), resp.statusCode(), "unexpected status code");
                         VertxAssertions.assertEquals(testCtx, expectedRedirect, resp.headers().get("location"));
 

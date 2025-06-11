@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.customResponse;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -60,7 +60,7 @@ public class CustomResponseMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
         final CustomResponseMiddlewareOptions options = castOptions(config, modelType());
         final MultiMap headers = HeadersMultiMap.httpHeaders().addAll(options.getHeaders());
         LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);

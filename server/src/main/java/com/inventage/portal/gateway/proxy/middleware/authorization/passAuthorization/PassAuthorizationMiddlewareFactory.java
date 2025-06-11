@@ -1,9 +1,9 @@
 package com.inventage.portal.gateway.proxy.middleware.authorization.passAuthorization;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -50,7 +50,7 @@ public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewar
     }
 
     @Override
-    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, GatewayMiddlewareOptions config) {
+    protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, MiddlewareOptionsModel config) {
         final PassAuthorizationMiddlewareOptions options = castOptions(config, modelType());
         final String sessionScope = options.getSessionScope();
 

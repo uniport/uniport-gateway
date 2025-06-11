@@ -1,17 +1,17 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.proxy.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
-import com.inventage.portal.gateway.proxy.model.deserialize.GatewayMiddlewareJsonDeserializer;
+import com.inventage.portal.gateway.proxy.config.model.deserialize.MiddlewareModelJsonDeserializer;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayStyle
-@JsonDeserialize(using = GatewayMiddlewareJsonDeserializer.class, builder = GatewayMiddleware.Builder.class)
-public abstract class AbstractGatewayMiddleware {
+@ModelStyle
+@JsonDeserialize(using = MiddlewareModelJsonDeserializer.class, builder = MiddlewareModel.Builder.class)
+public abstract class AbstractMiddlewareModel {
 
     @JsonProperty(DynamicConfiguration.MIDDLEWARE_NAME)
     public abstract String getName();
@@ -21,5 +21,5 @@ public abstract class AbstractGatewayMiddleware {
 
     @Nullable
     @JsonProperty(DynamicConfiguration.MIDDLEWARE_OPTIONS)
-    public abstract GatewayMiddlewareOptions getOptions();
+    public abstract MiddlewareOptionsModel getOptions();
 }

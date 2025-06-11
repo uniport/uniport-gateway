@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.provider.docker;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.core.model.GatewayDockerProvider;
-import com.inventage.portal.gateway.core.model.GatewayProvider;
+import com.inventage.portal.gateway.core.config.model.DockerProviderModel;
+import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
 import com.inventage.portal.gateway.proxy.provider.docker.servicediscovery.DockerContainerServiceImporter;
@@ -23,8 +23,8 @@ public class DockerContainerProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public Provider create(Vertx vertx, String configurationAddress, GatewayProvider config, JsonObject env) {
-        final GatewayDockerProvider provider = castProvider(config, GatewayDockerProvider.class);
+    public Provider create(Vertx vertx, String configurationAddress, ProviderModel config, JsonObject env) {
+        final DockerProviderModel provider = castProvider(config, DockerProviderModel.class);
 
         final JsonObject serviceImporterConfiguration = new JsonObject()
             .put("docker-tls-verify", DEFAULT_USE_TLS) // not configurable at the moment

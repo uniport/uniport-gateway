@@ -1,8 +1,8 @@
 package com.inventage.portal.gateway.proxy.middleware.headers;
 
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -71,7 +71,7 @@ public class HeaderMiddlewareFactory implements MiddlewareFactory {
     }
 
     @Override
-    public Future<Middleware> create(Vertx vertx, String name, Router router, GatewayMiddlewareOptions config) {
+    public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
         final HeaderMiddlewareOptions options = castOptions(config, modelType());
         final MultiMap requestHeaders = HeadersMultiMap.httpHeaders();
         final MultiMap responseHeaders = HeadersMultiMap.httpHeaders();

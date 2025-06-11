@@ -2,10 +2,10 @@ package com.inventage.portal.gateway.core.entrypoint;
 
 import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -30,12 +30,12 @@ public class Entrypoint {
 
     private final String name;
     private final int port;
-    private final List<GatewayMiddleware> middlewares;
+    private final List<MiddlewareModel> middlewares;
 
     private GatewayRouterInternal router;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, List<GatewayMiddleware> entryMiddlewares) {
+    public Entrypoint(Vertx vertx, String name, int port, List<MiddlewareModel> entryMiddlewares) {
         this.vertx = vertx;
         this.name = name;
         this.port = port;
@@ -64,7 +64,7 @@ public class Entrypoint {
         return router;
     }
 
-    private Future<Void> createAndMountMiddlewares(List<GatewayMiddleware> entryMiddlewares, Router router) {
+    private Future<Void> createAndMountMiddlewares(List<MiddlewareModel> entryMiddlewares, Router router) {
         final List<Future<Middleware>> entryMiddlewaresFutures = entryMiddlewares.stream()
             .map(entryMiddleware -> createEntryMiddleware(entryMiddleware, router))
             .toList();
@@ -87,15 +87,18 @@ public class Entrypoint {
         return Future.succeededFuture();
     }
 
-    private Future<Middleware> createEntryMiddleware(GatewayMiddleware middlewareConfig, Router router) {
+    private Future<Middleware> createEntryMiddleware(MiddlewareModel middlewareConfig, Router router) {
         final Promise<Middleware> promise = Promise.promise();
         createEntryMiddleware(middlewareConfig, router, promise);
         return promise.future();
     }
 
-    private void createEntryMiddleware(GatewayMiddleware middlewareConfig, Router router, Handler<AsyncResult<Middleware>> handler) {
+    private void createEntryMiddleware(
+        MiddlewareModel middlewareConfig, Router router,
+        Handler<AsyncResult<Middleware>> handler
+    ) {
         final String middlewareType = middlewareConfig.getType();
-        final GatewayMiddlewareOptions middlewareOptions = middlewareConfig.getOptions();
+        final MiddlewareOptionsModel middlewareOptions = middlewareConfig.getOptions();
 
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {

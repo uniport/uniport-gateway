@@ -10,7 +10,6 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.ClaimOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.ReconciliationOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareOptions.Builder;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -40,7 +39,7 @@ public class BearerOnlyMiddlewareOptionsTest {
                 .withAlgorithm(given.publicKeyAlgorithm)
                 .build());
 
-        final Builder builder = BearerOnlyMiddlewareOptions.builder()
+        final BearerOnlyMiddlewareOptions.Builder builder = BearerOnlyMiddlewareOptions.builder()
             .withAudience(given.audience)
             .withIssuer(given.issuer)
             .withPublicKeys(publicKeys)
@@ -212,7 +211,7 @@ public class BearerOnlyMiddlewareOptionsTest {
 
     @ParameterizedTest
     @MethodSource("invalidOptionsValues")
-    public void shouldFailIfRequiredPropertiesAreMissing(Builder builder) {
+    public void shouldFailIfRequiredPropertiesAreMissing(BearerOnlyMiddlewareOptions.Builder builder) {
         assertThrows(IllegalStateException.class, () -> builder.build());
     }
 }

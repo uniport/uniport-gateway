@@ -12,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.inventage.portal.gateway.TestUtils;
+import com.inventage.portal.gateway.proxy.config.model.AbstractServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareServer;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareTestBase;
 import com.inventage.portal.gateway.proxy.middleware.VertxAssertions;
-import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
 import com.inventage.portal.gateway.proxy.service.ReverseProxy;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
@@ -354,12 +354,12 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             final SessionBagMiddleware sessionBag = new SessionBagMiddleware("sessionBag", whitelistedCookies, "uniport.session");
             final ReverseProxy proxy = new ReverseProxy(vertx, "proxy",
                 HOST, servicePort,
-                AbstractGatewayService.DEFAULT_SERVICE_SERVER_PROTOCOL,
-                AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
-                AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
-                AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
-                AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
-                AbstractGatewayService.DEFAULT_SERVICE_VERBOSE);
+                AbstractServiceModel.DEFAULT_SERVICE_SERVER_PROTOCOL,
+                AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
+                AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
+                AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
+                AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
+                AbstractServiceModel.DEFAULT_SERVICE_VERBOSE);
 
             final Router proxyRouter = Router.router(vertx);
             proxyRouter.route().handler(sessionHandler).handler(sessionBag).handler(proxy);

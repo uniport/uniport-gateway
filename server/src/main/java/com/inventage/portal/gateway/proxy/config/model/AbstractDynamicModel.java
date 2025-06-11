@@ -1,23 +1,23 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.proxy.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
 import java.util.List;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@GatewayStyle
-@JsonDeserialize(builder = Gateway.Builder.class)
-public abstract class AbstractGateway {
+@ModelStyle
+@JsonDeserialize(builder = DynamicModel.Builder.class)
+public abstract class AbstractDynamicModel {
 
     @JsonProperty(DynamicConfiguration.ROUTERS)
-    public abstract List<GatewayRouter> getRouters();
+    public abstract List<RouterModel> getRouters();
 
     @JsonProperty(DynamicConfiguration.MIDDLEWARES)
-    public abstract List<GatewayMiddleware> getMiddlewares();
+    public abstract List<MiddlewareModel> getMiddlewares();
 
     @JsonProperty(DynamicConfiguration.SERVICES)
-    public abstract List<GatewayService> getServices();
+    public abstract List<ServiceModel> getServices();
 }

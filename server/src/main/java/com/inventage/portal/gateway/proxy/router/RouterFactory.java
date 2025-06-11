@@ -4,17 +4,17 @@ import com.google.common.collect.ImmutableList;
 import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
+import com.inventage.portal.gateway.proxy.config.model.RouterModel;
+import com.inventage.portal.gateway.proxy.config.model.ServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOptions;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.Gateway;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
-import com.inventage.portal.gateway.proxy.model.GatewayRouter;
-import com.inventage.portal.gateway.proxy.model.GatewayService;
 import com.inventage.portal.gateway.proxy.service.ReverseProxyFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -69,15 +69,19 @@ public class RouterFactory {
     private static final String PATH_PREFIX_REGEX_RULE_NAME = "PathPrefixRegex";
     private static final String HOST_RULE_NAME = "Host";
     private static final String HOST_REGEX_RULE_NAME = "HostRegex";
-    private static final Pattern RULE_PATTERN = Pattern.compile(String.format("^(?<ruleName>(%s))\\('(?<ruleValue>.*)'\\)$",
-        String.join("|", PATH_RULE_NAME, PATH_REGEX_RULE_NAME, PATH_PREFIX_RULE_NAME, PATH_PREFIX_REGEX_RULE_NAME, HOST_RULE_NAME, HOST_REGEX_RULE_NAME)));
+    private static final Pattern RULE_PATTERN = Pattern
+        .compile(String.format("^(?<ruleName>(%s))\\('(?<ruleValue>.*)'\\)$",
+            String.join("|", PATH_RULE_NAME, PATH_REGEX_RULE_NAME, PATH_PREFIX_RULE_NAME,
+                PATH_PREFIX_REGEX_RULE_NAME, HOST_RULE_NAME, HOST_REGEX_RULE_NAME)));
     /**
-     * Allowed rule values according to RFC 3986 - Uniform Resource Identifier (URI): Generic Syntax
+     * Allowed rule values according to RFC 3986 - Uniform Resource Identifier
+     * (URI): Generic Syntax
      * See https://www.rfc-editor.org/rfc/rfc3986.html#appendix-A
      * 
      * URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
      * 
-     * hier-part = "//" authority (path-abempty | path-absolute | path-rootless | path-empty)
+     * hier-part = "//" authority (path-abempty | path-absolute | path-rootless |
+     * path-empty)
      * 
      * authority = [ userinfo "@" ] host [ ":" port ]
      * host = IP-literal | IPv4address | reg-name
@@ -118,8 +122,9 @@ public class RouterFactory {
     private static final String PCHAR = UNRESERVED + PCT_ENCODED + SUB_DELIMS + ":" + "@";
 
     /*
-     * We dont enforce the complete structure, but at least only allow possible characters. 
-     * Invalid combinations of those are still possible. Could still be extended though.
+     * We dont enforce the complete structure, but at least only allow possible
+     * characters. Invalid combinations of those are still possible. Could still
+     * be extended though.
      */
     private static final Pattern HOST_PATTERN = Pattern.compile("^[" + IP_LITERAL + IPV4 + REG_NAME + "]+$");
     private static final Pattern PATH_PATTERN = Pattern.compile("^\\/[" + PCHAR + "\\/]*$");
@@ -191,26 +196,27 @@ public class RouterFactory {
         this.entrypointName = other.entrypointName;
     }
 
-    public Future<Router> createRouter(Gateway model) {
+    public Future<Router> createRouter(DynamicModel model) {
         final Promise<Router> promise = Promise.promise();
         createRouter(model, promise);
         return promise.future();
     }
 
-    private void createRouter(Gateway model, Handler<AsyncResult<Router>> handler) {
-        final List<GatewayRouter> routers = new LinkedList<GatewayRouter>(model.getRouters());
+    private void createRouter(DynamicModel model, Handler<AsyncResult<Router>> handler) {
+        final List<RouterModel> routers = new LinkedList<RouterModel>(model.getRouters());
         Collections.sort(routers);
         LOGGER.debug("Routing requests in the following order:");
-        for (GatewayRouter r : routers) {
-            LOGGER.debug("Router '{}': rule '{}', priority '{}'", r.getName(), r.getRule(), r.getPriority() > 0 ? r.getPriority() : r.getRule().length());
+        for (RouterModel r : routers) {
+            LOGGER.debug("Router '{}': rule '{}', priority '{}'", r.getName(), r.getRule(),
+                r.getPriority() > 0 ? r.getPriority() : r.getRule().length());
         }
 
-        final ImmutableList<GatewayMiddleware> middlewares = model.getMiddlewares();
-        final ImmutableList<GatewayService> services = model.getServices();
+        final ImmutableList<MiddlewareModel> middlewares = model.getMiddlewares();
+        final ImmutableList<ServiceModel> services = model.getServices();
 
         LOGGER.debug("Creating router from config");
         final List<Future<Router>> subRouterFutures = new ArrayList<>();
-        for (GatewayRouter r : routers) {
+        for (RouterModel r : routers) {
 
             final ImmutableList<String> entrypoints = r.getEntrypoints();
             if (entrypoints.isEmpty()) {
@@ -255,13 +261,19 @@ public class RouterFactory {
         });
     }
 
-    private Future<Router> createSubRouter(GatewayRouter routerConfig, ImmutableList<GatewayMiddleware> middlewares, ImmutableList<GatewayService> services) {
+    private Future<Router> createSubRouter(
+        RouterModel routerConfig, ImmutableList<MiddlewareModel> middlewares,
+        ImmutableList<ServiceModel> services
+    ) {
         final Promise<Router> promise = Promise.promise();
         createSubRouter(routerConfig, middlewares, services, promise);
         return promise.future();
     }
 
-    private void createSubRouter(GatewayRouter routerConfig, ImmutableList<GatewayMiddleware> middlewares, ImmutableList<GatewayService> services, Handler<AsyncResult<Router>> handler) {
+    private void createSubRouter(
+        RouterModel routerConfig, ImmutableList<MiddlewareModel> middlewares,
+        ImmutableList<ServiceModel> services, Handler<AsyncResult<Router>> handler
+    ) {
         final String routerName = routerConfig.getName();
         final Router router = GatewayRouterInternal.router(this.vertx, String.format("rule matcher %s", routerName));
 
@@ -279,7 +291,7 @@ public class RouterFactory {
 
         final ImmutableList<String> middlewareNames = routerConfig.getMiddlewares();
         for (String middlewareName : middlewareNames) {
-            final Optional<GatewayMiddleware> middlewareConfig = middlewares.stream()
+            final Optional<MiddlewareModel> middlewareConfig = middlewares.stream()
                 .filter(m -> m.getName().equals(middlewareName))
                 .findFirst();
 
@@ -294,7 +306,7 @@ public class RouterFactory {
         }
 
         final String serviceName = routerConfig.getService();
-        final Optional<GatewayService> serviceConfig = services.stream()
+        final Optional<ServiceModel> serviceConfig = services.stream()
             .filter(s -> s.getName().equals(serviceName))
             .findFirst();
 
@@ -329,15 +341,18 @@ public class RouterFactory {
         middlewares.forEach(mf -> route.handler((Handler<RoutingContext>) mf.result()));
     }
 
-    private Future<Middleware> createMiddleware(GatewayMiddleware middlewareConfig, Router router) {
+    private Future<Middleware> createMiddleware(MiddlewareModel middlewareConfig, Router router) {
         final Promise<Middleware> promise = Promise.promise();
         createMiddleware(middlewareConfig, router, promise);
         return promise.future();
     }
 
-    private void createMiddleware(GatewayMiddleware middlewareConfig, Router router, Handler<AsyncResult<Middleware>> handler) {
+    private void createMiddleware(
+        MiddlewareModel middlewareConfig, Router router,
+        Handler<AsyncResult<Middleware>> handler
+    ) {
         final String middlewareType = middlewareConfig.getType();
-        final GatewayMiddlewareOptions middlewareOptions = injectPublicProtocolHostPort(middlewareType, middlewareConfig.getOptions());
+        final MiddlewareOptionsModel middlewareOptions = injectPublicProtocolHostPort(middlewareType, middlewareConfig.getOptions());
 
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
@@ -353,7 +368,7 @@ public class RouterFactory {
             .onComplete(handler);
     }
 
-    private GatewayMiddlewareOptions injectPublicProtocolHostPort(String type, GatewayMiddlewareOptions options) {
+    private MiddlewareOptionsModel injectPublicProtocolHostPort(String type, MiddlewareOptionsModel options) {
         if (!(type.equals(OAuth2MiddlewareFactory.TYPE) || type.equals(OAuth2RegistrationMiddlewareFactory.TYPE))) {
             return options;
         }
@@ -391,8 +406,13 @@ public class RouterFactory {
     }
 
     /**
-     * Rules like Path("/foo"), PathPrefix('/bar'), PathRegex('/language/(de|en)/.*'), Host('*.example.com') and HostRegex('(de|en)\.example\.com') and are
-     * supported.
+     * Rules like:
+     * Path("/foo"),
+     * PathPrefix('/bar'),
+     * PathRegex('/language/(de|en)/.*'),
+     * Host('*.example.com') and
+     * HostRegex('(de|en)\.example\.com')
+     * are supported.
      */
     private RoutingRule parseRule(String rule) {
         if (rule == null) {
@@ -481,7 +501,8 @@ public class RouterFactory {
     }
 
     private RoutingRule pathPrefixRegex(String pathRegex) {
-        // append non-capturing atomic group that matches anything to do regex-based path prefix routing
+        // append non-capturing atomic group that matches anything to do regex-based
+        // path prefix routing
         final String pathPrefixRegex = pathRegex + "(?>.*)";
         final String name = String.format("path regex matcher: %s", pathRegex);
         return router -> {

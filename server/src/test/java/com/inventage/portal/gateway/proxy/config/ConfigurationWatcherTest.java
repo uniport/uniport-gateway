@@ -13,11 +13,11 @@ import static com.inventage.portal.gateway.TestUtils.withServices;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
+import com.inventage.portal.gateway.proxy.config.model.RouterModel;
+import com.inventage.portal.gateway.proxy.config.model.ServerOptions;
+import com.inventage.portal.gateway.proxy.config.model.ServiceModel;
 import com.inventage.portal.gateway.proxy.listener.Listener;
-import com.inventage.portal.gateway.proxy.model.Gateway;
-import com.inventage.portal.gateway.proxy.model.GatewayRouter;
-import com.inventage.portal.gateway.proxy.model.GatewayService;
-import com.inventage.portal.gateway.proxy.model.ServerOptions;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
@@ -56,16 +56,16 @@ public class ConfigurationWatcherTest {
                     withService("svc",
                         withServers(withServer("host", 1234)))))));
 
-        final Gateway expected = Gateway.builder()
+        final DynamicModel expected = DynamicModel.builder()
             .withRouters(List.of(
-                GatewayRouter.builder()
+                RouterModel.builder()
                     .withName("test@mock")
                     .withEntrypoints(List.of("ep"))
                     .withRule("Path('/')")
                     .withService("svc@mock")
                     .build()))
             .withServices(List.of(
-                GatewayService.builder()
+                ServiceModel.builder()
                     .withName("svc@mock")
                     .withServers(List.of(
                         ServerOptions.builder()
@@ -77,12 +77,13 @@ public class ConfigurationWatcherTest {
 
         int providersThrottleIntervalMs = 1000;
         Provider pvd = new MockProvider(vertx, configurationAddress, messages);
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress, providersThrottleIntervalMs, List.of());
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+            providersThrottleIntervalMs, List.of());
 
         // when
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 // then
                 testCtx.verify(() -> assertEquals(expected, actual, errMsg));
                 testCtx.completeNow();
@@ -116,12 +117,13 @@ public class ConfigurationWatcherTest {
 
         int providersThrottleIntervalMs = 1000;
         Provider pvd = new MockProvider(vertx, configurationAddress, messages);
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress, providersThrottleIntervalMs, List.of());
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+            providersThrottleIntervalMs, List.of());
 
         // when
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 testCtx.failNow(String.format("%s: %s", errMsg, "no message expected"));
             }
         });
@@ -160,13 +162,14 @@ public class ConfigurationWatcherTest {
 
         int providersThrottleIntervalMs = 100;
         Provider pvd = new MockProvider(vertx, configurationAddress, messages, 150);
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress, providersThrottleIntervalMs, List.of());
+        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+            providersThrottleIntervalMs, List.of());
 
         // when
         final AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 publishedConfigCount.incrementAndGet();
             }
         });
@@ -216,7 +219,7 @@ public class ConfigurationWatcherTest {
         AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 publishedConfigCount.incrementAndGet();
             }
         });
@@ -258,7 +261,7 @@ public class ConfigurationWatcherTest {
 
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 testCtx.failNow("An empty configuration was published but it should not");
             }
         });
@@ -305,7 +308,7 @@ public class ConfigurationWatcherTest {
         AtomicBoolean isFirst = new AtomicBoolean(true);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 if (isFirst.get()) {
                     testCtx.verify(() -> assertNotNull(actual, errMsg));
                 } else {
@@ -356,10 +359,10 @@ public class ConfigurationWatcherTest {
         ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
-        AtomicReference<Gateway> publishedProviderConfig = new AtomicReference<Gateway>();
+        AtomicReference<DynamicModel> publishedProviderConfig = new AtomicReference<DynamicModel>();
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 publishedProviderConfig.set(actual);
             }
         });
@@ -375,17 +378,17 @@ public class ConfigurationWatcherTest {
         });
 
         vertx.setTimer(2000, timerID -> {
-            final GatewayRouter.Builder routerBuilder = GatewayRouter.builder()
+            final RouterModel.Builder routerBuilder = RouterModel.builder()
                 .withRule("Path('/')");
 
-            final GatewayService.Builder serviceBuilder = GatewayService.builder()
+            final ServiceModel.Builder serviceBuilder = ServiceModel.builder()
                 .withServers(List.of(
                     ServerOptions.builder()
                         .withHost("host")
                         .withPort(1234)
                         .build()));
 
-            final Gateway expected = Gateway.builder()
+            final DynamicModel expected = DynamicModel.builder()
                 .withRouters(List.of(
                     routerBuilder
                         .withName("foo@mock")
@@ -424,7 +427,8 @@ public class ConfigurationWatcherTest {
             withServices(
                 withService("bar", withServers(withServer("host", 1234)))));
 
-        // Update the provider configuration published in next dynamic Message which should trigger a new publish.
+        // Update the provider configuration published in next dynamic Message which
+        // should trigger a new publish.
         JsonObject pvdConfigUpdate = buildConfiguration(
             withRouters(
                 withRouter("blub",
@@ -433,7 +437,8 @@ public class ConfigurationWatcherTest {
             withServices(
                 withService("bar", withServers(withServer("host", 1234)))));
 
-        List<JsonObject> messages = List.of(assembleMessage("mock", pvdConfig), assembleMessage("mock", pvdConfigUpdate));
+        List<JsonObject> messages = List.of(assembleMessage("mock", pvdConfig),
+            assembleMessage("mock", pvdConfigUpdate));
         long waitMs = 100;
 
         Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
@@ -445,7 +450,7 @@ public class ConfigurationWatcherTest {
         AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
-            public void listen(Gateway actual) {
+            public void listen(DynamicModel actual) {
                 publishedConfigCount.getAndIncrement();
             }
         });

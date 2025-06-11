@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.provider.aggregator;
 
-import com.inventage.portal.gateway.core.model.GatewayProvider;
+import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import com.inventage.portal.gateway.proxy.provider.ProviderFactory;
 import io.vertx.core.Future;
@@ -24,10 +24,10 @@ public class ProviderAggregator extends Provider {
     private final Vertx vertx;
 
     private final String configurationAddress;
-    private final List<GatewayProvider> providerConfigs;
+    private final List<ProviderModel> providerConfigs;
     private final JsonObject env;
 
-    public ProviderAggregator(Vertx vertx, String configurationAddress, List<GatewayProvider> providerConfigs, JsonObject env) {
+    public ProviderAggregator(Vertx vertx, String configurationAddress, List<ProviderModel> providerConfigs, JsonObject env) {
         this.vertx = vertx;
         this.configurationAddress = configurationAddress;
         this.providerConfigs = providerConfigs;
@@ -42,7 +42,7 @@ public class ProviderAggregator extends Provider {
     @Override
     public void provide(Promise<Void> startPromise) {
         final List<Future<String>> futures = new ArrayList<>();
-        for (GatewayProvider providerConfig : providerConfigs) {
+        for (ProviderModel providerConfig : providerConfigs) {
             final String providerName = providerConfig.getName();
             final ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
 

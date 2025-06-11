@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.config.dynamic;
 
+import com.inventage.portal.gateway.proxy.config.model.AbstractServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -143,7 +143,7 @@ public class DynamicConfiguration {
                             .with(Keywords.pattern(ENV_VARIABLE_PATTERN))))
                     .allowAdditionalProperties(false)))
             .optionalProperty(SERVICE_VERBOSE, Schemas.booleanSchema()
-                .defaultValue(AbstractGatewayService.DEFAULT_SERVICE_VERBOSE))
+                .defaultValue(AbstractServiceModel.DEFAULT_SERVICE_VERBOSE))
             .allowAdditionalProperties(false);
         return serviceSchema;
     }

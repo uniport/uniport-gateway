@@ -5,6 +5,8 @@ import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCooki
 import static com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory.DEFAULT_WAIT_BEFORE_RETRY_MS;
 import static com.inventage.portal.gateway.proxy.middleware.session.SessionMiddlewareFactory.DEFAULT_SESSION_COOKIE_NAME;
 
+import com.inventage.portal.gateway.proxy.config.model.AbstractServiceModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.authorization.MockOAuth2Auth;
 import com.inventage.portal.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
@@ -47,8 +49,6 @@ import com.inventage.portal.gateway.proxy.middleware.sessionBag.SessionBagMiddle
 import com.inventage.portal.gateway.proxy.middleware.sessionBag.WhitelistedCookieOptions;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.BackChannelLogoutMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.sessionLogoutFromBackchannel.MockJWKAuthHandler;
-import com.inventage.portal.gateway.proxy.model.AbstractGatewayService;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.service.ReverseProxy;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -199,7 +199,7 @@ public final class MiddlewareServerBuilder {
         return withBearerOnlyMiddleware(mockKeycloakServer.getBearerOnlyConfig(issuer, audience, publicKeys, false, WithAuthHandlerMiddlewareFactoryBase.DEFAULT_RECONCILIATION_INTERVAL_MS));
     }
 
-    public MiddlewareServerBuilder withBearerOnlyMiddleware(GatewayMiddlewareOptions bearerOnlyConfig) {
+    public MiddlewareServerBuilder withBearerOnlyMiddleware(MiddlewareOptionsModel bearerOnlyConfig) {
         final BearerOnlyMiddlewareFactory factory = new BearerOnlyMiddlewareFactory();
         final Future<Middleware> middlewareFuture = factory.create(vertx, "bearerOnly", router, bearerOnlyConfig);
         final int atMost = 50;
@@ -320,11 +320,11 @@ public final class MiddlewareServerBuilder {
         return this;
     }
 
-    public MiddlewareServerBuilder withOAuth2AuthMiddleware(GatewayMiddlewareOptions oAuth2AuthConfig) throws Throwable {
+    public MiddlewareServerBuilder withOAuth2AuthMiddleware(MiddlewareOptionsModel oAuth2AuthConfig) throws Throwable {
         return withOAuth2AuthMiddleware(oAuth2AuthConfig, null);
     }
 
-    private MiddlewareServerBuilder withOAuth2AuthMiddleware(GatewayMiddlewareOptions oAuth2AuthConfig, String scope) throws Throwable {
+    private MiddlewareServerBuilder withOAuth2AuthMiddleware(MiddlewareOptionsModel oAuth2AuthConfig, String scope) throws Throwable {
         final OAuth2MiddlewareFactory factory = new OAuth2MiddlewareFactory();
         final Future<Middleware> middlewareFuture = factory.create(vertx, "oauth", router, oAuth2AuthConfig);
 
@@ -366,11 +366,11 @@ public final class MiddlewareServerBuilder {
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port, boolean verbose) {
         return withMiddleware(new ReverseProxy(vertx, "proxy",
             host, port,
-            AbstractGatewayService.DEFAULT_SERVICE_SERVER_PROTOCOL,
-            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
-            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
-            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
-            AbstractGatewayService.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
+            AbstractServiceModel.DEFAULT_SERVICE_SERVER_PROTOCOL,
+            AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_ALL,
+            AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_VERIFY_HOSTNAME,
+            AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PATH,
+            AbstractServiceModel.DEFAULT_SERVICE_SERVER_HTTPS_OPTIONS_TRUST_STORE_PASSWORD,
             verbose));
     }
 

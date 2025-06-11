@@ -1,8 +1,8 @@
-package com.inventage.portal.gateway.proxy.model;
+package com.inventage.portal.gateway.proxy.config.model;
 
 import org.slf4j.Logger;
 
-public interface GatewayMiddlewareOptions {
+public interface MiddlewareOptionsModel {
 
     /**
      * A middleware option POJO commonly needs to validate a its configuration and is responsible for setting default values.

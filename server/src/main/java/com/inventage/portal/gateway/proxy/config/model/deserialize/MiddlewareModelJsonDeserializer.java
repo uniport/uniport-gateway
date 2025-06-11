@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.model.deserialize;
+package com.inventage.portal.gateway.proxy.config.model.deserialize;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -8,17 +8,17 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddleware;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
 import java.io.IOException;
 import java.util.Optional;
 
-public class GatewayMiddlewareJsonDeserializer extends JsonDeserializer<GatewayMiddleware> {
+public class MiddlewareModelJsonDeserializer extends JsonDeserializer<MiddlewareModel> {
 
     @Override
-    public GatewayMiddleware deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        final GatewayMiddleware.Builder builder = GatewayMiddleware.builder();
+    public MiddlewareModel deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+        final MiddlewareModel.Builder builder = MiddlewareModel.builder();
 
         final ObjectCodec codec = p.getCodec();
         final JsonNode node = codec.readTree(p);
@@ -44,7 +44,7 @@ public class GatewayMiddlewareJsonDeserializer extends JsonDeserializer<GatewayM
         } else {
             optionsNode = node.get(DynamicConfiguration.MIDDLEWARE_OPTIONS);
         }
-        final GatewayMiddlewareOptions options = codec.treeToValue(optionsNode, middlewareFactory.get().modelType());
+        final MiddlewareOptionsModel options = codec.treeToValue(optionsNode, middlewareFactory.get().modelType());
         builder.withOptions(options);
 
         return builder.build();

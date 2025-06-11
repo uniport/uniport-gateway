@@ -1,6 +1,6 @@
 package com.inventage.portal.gateway.proxy.provider;
 
-import com.inventage.portal.gateway.core.model.GatewayProvider;
+import com.inventage.portal.gateway.core.config.model.ProviderModel;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import java.util.Optional;
@@ -19,10 +19,10 @@ public interface ProviderFactory {
 
     String provides();
 
-    Provider create(Vertx vertx, String configurationAddress, GatewayProvider providerConfig, JsonObject env);
+    Provider create(Vertx vertx, String configurationAddress, ProviderModel providerConfig, JsonObject env);
 
     @SuppressWarnings("unchecked")
-    default <T extends GatewayProvider> T castProvider(GatewayProvider provider, Class<T> clazz) {
+    default <T extends ProviderModel> T castProvider(ProviderModel provider, Class<T> clazz) {
         if (provider == null) {
             return null;
         }

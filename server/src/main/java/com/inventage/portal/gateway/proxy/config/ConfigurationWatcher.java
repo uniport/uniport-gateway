@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import com.inventage.portal.gateway.proxy.listener.Listener;
-import com.inventage.portal.gateway.proxy.model.Gateway;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -71,7 +71,8 @@ public class ConfigurationWatcher extends AbstractVerticle {
     }
 
     /**
-     * Each provider supplies one configuration. Here, all configurations are merged into one aggregated configuration.
+     * Each provider supplies one configuration. Here, all configurations are merged
+     * into one aggregated configuration.
      * 
      * @param configurations
      *            contains the configuration supplied by each provider
@@ -400,12 +401,12 @@ public class ConfigurationWatcher extends AbstractVerticle {
         return config;
     }
 
-    private Future<Gateway> mapToModel(JsonObject config) {
+    private Future<DynamicModel> mapToModel(JsonObject config) {
         final JsonObject httpJson = config.getJsonObject(DynamicConfiguration.HTTP);
         final ObjectMapper codec = new ObjectMapper();
-        Gateway gateway = null;
+        DynamicModel gateway = null;
         try {
-            gateway = codec.readValue(httpJson.encode(), Gateway.class);
+            gateway = codec.readValue(httpJson.encode(), DynamicModel.class);
         } catch (JsonProcessingException e) {
             return Future.failedFuture(e);
         }

@@ -2,17 +2,17 @@ package com.inventage.portal.gateway.proxy.middleware.replacedSessionCookieDetec
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.inventage.portal.gateway.core.model.GatewayStyle;
-import com.inventage.portal.gateway.proxy.model.GatewayMiddlewareOptions;
+import com.inventage.portal.gateway.core.config.model.ModelStyle;
+import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Immutable
-@GatewayStyle
+@ModelStyle
 @JsonDeserialize(builder = ReplacedSessionCookieDetectionMiddlewareOptions.Builder.class)
-public abstract class AbstractReplacedSessionCookieDetectionMiddlewareOptions implements GatewayMiddlewareOptions {
+public abstract class AbstractReplacedSessionCookieDetectionMiddlewareOptions implements MiddlewareOptionsModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacedSessionCookieDetectionMiddlewareOptions.class);
 
     @Default
