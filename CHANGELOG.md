@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING** Changed the configuration JSON schema key in the `session` middleware from `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds` ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
 - **BREAKING** Changed the configuration JSON schema key in the `session` middleware from `idleTimeoutInMinute` to `idleTimeoutInMinutes` ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
 - **BREAKING** Use screaming snake-case for env vars ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
+- **BREAKING** Changed the type of the `bearerOnly` middleware option `optional` from String to Boolean, if it not an environment variable ([PORTAL-2414](https://inventage-all.atlassian.net/browse/PORTAL-2414)).
 - Change the internal representation of the static configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
 
 ### Removed

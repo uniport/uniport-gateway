@@ -13,6 +13,10 @@ The following environment variables are converted to screaming snake-case.
 
 The configuration key `applications` in the static configuration was removed without replacement. It is no longer required. Please remove this entry in your configuration.
 
+### Bearer Only Middleware
+
+Please change the type of the `bearerOnly` middleware option `optional` from String to Boolean. Environment variables as Strings are still accepted.
+
 ### Language Cookie Middleware
 
 The detection of the deprecated language cookie name `ips.language` was removed. Please use its replacement `uniport.language` or configure the language cookie middleware accordingly.

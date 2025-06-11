@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,8 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareFactory.class);
 
+    private static final Pattern ENV_VARIABLE_PATTERN = Pattern.compile("^\\$\\{.*\\}$");
+
     @Override
     public String provides() {
         return TYPE;
@@ -32,9 +35,12 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     @Override
     public ObjectSchemaBuilder optionsSchema() {
         return super.optionsSchema()
-            .optionalProperty(OPTIONAL, Schemas.stringSchema()
-                .with(Keywords.minLength(1))
-                .defaultValue(AbstractBearerOnlyMiddlewareOptions.DEFAULT_OPTIONAL));
+            .optionalProperty(OPTIONAL, Schemas.anyOf(
+                Schemas.booleanSchema()
+                    .defaultValue(AbstractBearerOnlyMiddlewareOptions.DEFAULT_OPTIONAL),
+                Schemas.stringSchema()
+                    .with(Keywords.pattern(ENV_VARIABLE_PATTERN))));
+
     }
 
     @Override
@@ -51,9 +57,7 @@ public class BearerOnlyMiddlewareFactory extends WithAuthHandlerMiddlewareFactor
     protected Middleware create(Vertx vertx, String name, JWKAccessibleAuthHandler authHandler, MiddlewareOptionsModel config) {
         final BearerOnlyMiddlewareOptions options = castOptions(config, modelType());
 
-        final boolean optional = Boolean.parseBoolean(options.isOptional());
-
-        final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, optional);
+        final Middleware bearerOnlyMiddleware = new BearerOnlyMiddleware(name, authHandler, options.isOptional());
         LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return bearerOnlyMiddleware;
     }

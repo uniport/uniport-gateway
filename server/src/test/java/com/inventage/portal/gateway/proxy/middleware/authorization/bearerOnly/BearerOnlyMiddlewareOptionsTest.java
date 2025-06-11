@@ -24,8 +24,8 @@ public class BearerOnlyMiddlewareOptionsTest {
 
     static Stream<Arguments> validOptionsValues() {
         return Stream.of(
-            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of("anotherIssuer"), JWTClaimOperator.CONTAINS, "aPath", "aValue", true, 1234, "true")),
-            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of(), null, null, null, null, null, "true"))
+            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of("anotherIssuer"), JWTClaimOperator.CONTAINS, "aPath", "aValue", true, 1234, true)),
+            Arguments.of(new Options(List.of("anAudience"), "anIssuer", "aPublicKey", "aPublicKeyAlgorithm", List.of(), null, null, null, null, null, true))
 
         );
     }
@@ -151,7 +151,7 @@ public class BearerOnlyMiddlewareOptionsTest {
         String claimValue;
         Boolean reconciliationEnabled;
         Integer reconciliationIntervalMs;
-        String optional;
+        boolean optional;
 
         Options(
             List<String> audience,
@@ -164,7 +164,7 @@ public class BearerOnlyMiddlewareOptionsTest {
             String claimValue,
             Boolean reconciliationEnabled,
             Integer reconciliationIntervalMs,
-            String optional
+            boolean optional
         ) {
             this.audience = audience;
             this.issuer = issuer;

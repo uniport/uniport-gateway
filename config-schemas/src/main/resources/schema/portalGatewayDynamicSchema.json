@@ -111,9 +111,13 @@
                       }
                     },
                     "optional" : {
-                      "default" : "false",
-                      "minLength" : 1,
-                      "type" : "string"
+                      "anyOf" : [ {
+                        "default" : false,
+                        "type" : "boolean"
+                      }, {
+                        "pattern" : "^\\$\\{.*\\}$",
+                        "type" : "string"
+                      } ]
                     },
                     "issuer" : {
                       "minLength" : 1,

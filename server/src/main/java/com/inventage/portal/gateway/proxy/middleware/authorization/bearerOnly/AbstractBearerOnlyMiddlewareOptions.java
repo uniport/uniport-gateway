@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractBearerOnlyMiddlewareOptions extends WithAuthHandlerMiddlewareOptionsBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerOnlyMiddlewareOptions.class);
 
-    public static final String DEFAULT_OPTIONAL = "false"; // TODO fix this and make it a real boolean
+    public static final boolean DEFAULT_OPTIONAL = false;
 
     @Default
     @JsonProperty(BearerOnlyMiddlewareFactory.OPTIONAL)
-    public String isOptional() {
+    public boolean isOptional() {
         logDefault(LOGGER, BearerOnlyMiddlewareFactory.OPTIONAL, DEFAULT_OPTIONAL);
         return DEFAULT_OPTIONAL;
     }
