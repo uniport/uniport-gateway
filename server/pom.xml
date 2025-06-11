@@ -225,7 +225,7 @@
                         <configuration>
                             <archive>
                                 <manifestEntries>
-                                    <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                    <Main-Class>com.inventage.portal.gateway.GatewayLauncher</Main-Class>
                                 </manifestEntries>
                             </archive>
                         </configuration>
@@ -243,7 +243,7 @@
                                     <classpathPrefix>dependency-jars/</classpathPrefix>
                                 </manifest>
                                 <manifestEntries>
-                                    <Main-Class>com.inventage.portal.gateway.PortalGatewayLauncher</Main-Class>
+                                    <Main-Class>com.inventage.portal.gateway.GatewayLauncher</Main-Class>
                                 </manifestEntries>
                             </archive>
                             <classifier>slim</classifier>

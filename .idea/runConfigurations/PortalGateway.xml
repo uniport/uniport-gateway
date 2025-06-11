@@ -4,7 +4,7 @@
       <env name="development" value="true" />
       <env name="PORTAL_GATEWAY_JSON" value="$PROJECT_DIR$/helm/src/main/resources/proxy-config.examples/portal-gateway.json" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.PortalGatewayLauncher" />
+    <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.GatewayLauncher" />
     <module name="server" />
     <extension name="coverage">
       <pattern>

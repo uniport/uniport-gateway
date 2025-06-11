@@ -19,7 +19,7 @@
     <suppress checks="NestedIfDepth" files="com/inventage/portal/gateway/proxy/middleware/oauth2/relyingParty/RelyingPartyHandler.java"/>
 
     <suppress checks="FinalClass" files=".*/PortalGatewayConfigRetriever.java"/>
-    <suppress checks="FinalClass" files=".*/PortalGatewayLauncher.java"/>
+    <suppress checks="FinalClass" files=".*/GatewayLauncher.java"/>
     <suppress checks="FinalClass" files=".*/Runtime.java"/>
     <suppress checks="FinalClass" files=".*/StaticConfiguration.java"/>
 

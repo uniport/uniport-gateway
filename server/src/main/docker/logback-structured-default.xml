@@ -1,5 +1,5 @@
 <!-- Default structured logback configuration included in the container image
-     (PortalGatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME) as a fallback -->
+     (GatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME) as a fallback -->
 <!-- The content of this file should be a copy of helm/src/main/resources/app-config/logback-structured.xml -->
 <configuration scan="true">
     <conversionRule conversionWord="vcl" converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Custom Vert.x Launcher for the portal gateway.
  */
-public class PortalGatewayLauncher extends Launcher {
+public class GatewayLauncher extends Launcher {
 
     private static final String METRICS_PORT_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PORT";
     private static final int DEFAULT_METRICS_PORT = 9090;
@@ -44,7 +44,7 @@ public class PortalGatewayLauncher extends Launcher {
 
     private static Logger logger;
 
-    private PortalGatewayLauncher() {
+    private GatewayLauncher() {
     }
 
     /**
@@ -69,7 +69,7 @@ public class PortalGatewayLauncher extends Launcher {
             }
         });
 
-        logger = LoggerFactory.getILoggerFactory().getLogger(PortalGatewayLauncher.class.getName());
+        logger = LoggerFactory.getILoggerFactory().getLogger(GatewayLauncher.class.getName());
         logger.info("Portal Gateway is starting....");
 
         if (loggingConfigPath.isPresent()) {
@@ -89,9 +89,9 @@ public class PortalGatewayLauncher extends Launcher {
             arguments.add("--cluster");
         }
         logger.debug("Launching with args: {}", arguments);
-        new PortalGatewayLauncher().dispatch(arguments.toArray(String[]::new));
+        new GatewayLauncher().dispatch(arguments.toArray(String[]::new));
 
-        logger.info("PortalGatewayLauncher started.");
+        logger.info("GatewayLauncher started.");
     }
 
     @Override
