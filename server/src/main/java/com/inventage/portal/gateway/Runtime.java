@@ -14,6 +14,9 @@ public class Runtime {
 
     public static final String CLUSTERED_KEY = "PORTAL_GATEWAY_CLUSTERED";
 
+    private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
+    public static final String DEFAULT_INSTANCE_NAME = "unknown";
+
     public static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
     public static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
 
@@ -80,6 +83,10 @@ public class Runtime {
             return true;
         }
         return false;
+    }
+
+    public static String getInstanceName() {
+        return System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);
     }
 
     /**

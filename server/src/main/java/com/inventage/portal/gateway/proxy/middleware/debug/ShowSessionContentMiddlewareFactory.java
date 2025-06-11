@@ -1,5 +1,6 @@
 package com.inventage.portal.gateway.proxy.middleware.debug;
 
+import com.inventage.portal.gateway.Runtime;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
@@ -21,8 +22,6 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
     // schema
     public static final String TYPE = "_session_";
-
-    private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
 
     @Override
     public String provides() {
@@ -47,7 +46,7 @@ public class ShowSessionContentMiddlewareFactory implements MiddlewareFactory {
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
-        final String instanceName = System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, AbstractShowSessionContentMiddlewareOptions.DEFAULT_INSTANCE_NAME); // TODO move into Runtime
+        final String instanceName = Runtime.getInstanceName();
         LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
         return Future.succeededFuture(
             new ShowSessionContentMiddleware(name, instanceName));
