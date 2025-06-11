@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.headers.HeaderMiddlewareOptions;
 import io.vertx.core.json.JsonObject;

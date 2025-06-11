@@ -3,7 +3,7 @@ package com.inventage.portal.gateway;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;

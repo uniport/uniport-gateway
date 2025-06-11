@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.proxy.config.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.inventage.portal.gateway.core.config.model.ModelStyle;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.model.deserialize.MiddlewareModelJsonDeserializer;
 import javax.annotation.Nullable;
 import org.immutables.value.Value.Immutable;

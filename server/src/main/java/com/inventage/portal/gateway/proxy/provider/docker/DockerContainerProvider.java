@@ -1,7 +1,7 @@
 package com.inventage.portal.gateway.proxy.provider.docker;
 
 import com.inventage.portal.gateway.core.config.StaticConfiguration;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.label.Parser;
 import com.inventage.portal.gateway.proxy.provider.Provider;
 import io.vertx.core.Promise;

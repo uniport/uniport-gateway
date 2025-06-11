@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.config.dynamic;
+package com.inventage.portal.gateway.proxy.config;
 
 import com.inventage.portal.gateway.proxy.config.model.AbstractServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;

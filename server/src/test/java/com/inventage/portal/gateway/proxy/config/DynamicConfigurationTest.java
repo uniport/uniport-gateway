@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.proxy.config.dynamic;
+package com.inventage.portal.gateway.proxy.config;
 
 import static com.inventage.portal.gateway.TestUtils.buildConfiguration;
 import static com.inventage.portal.gateway.TestUtils.withMiddleware;

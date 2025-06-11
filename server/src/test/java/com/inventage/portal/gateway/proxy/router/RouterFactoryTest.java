@@ -4,7 +4,7 @@ import static com.inventage.portal.gateway.TestUtils.toModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.inventage.portal.gateway.TestUtils;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
 import com.inventage.portal.gateway.proxy.config.model.RouterModel;

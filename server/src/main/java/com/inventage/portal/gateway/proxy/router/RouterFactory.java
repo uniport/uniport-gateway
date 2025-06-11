@@ -3,7 +3,7 @@ package com.inventage.portal.gateway.proxy.router;
 import com.google.common.collect.ImmutableList;
 import com.inventage.portal.gateway.GatewayRouterInternal;
 import com.inventage.portal.gateway.Runtime;
-import com.inventage.portal.gateway.proxy.config.dynamic.DynamicConfiguration;
+import com.inventage.portal.gateway.proxy.config.DynamicConfiguration;
 import com.inventage.portal.gateway.proxy.config.model.DynamicModel;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
