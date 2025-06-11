@@ -81,7 +81,6 @@ public class GatewayLauncher extends Launcher {
         // https://vertx.io/docs/vertx-core/java/#_logging
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
 
-        // TODO might be required to rework this part with the vertx builder
         final List<String> arguments = new LinkedList<String>();
         arguments.add("run");
         arguments.add(GatewayVerticle.class.getName());
