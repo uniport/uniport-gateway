@@ -22,7 +22,7 @@ public class ReverseProxyFactory {
     }
 
     public Future<Handler<RoutingContext>> create(Vertx vertx, String name, ServiceModel options) {
-        final ServerOptions serverConfig = options.getServers().get(0); // TODO support multiple servers
+        final ServerOptions serverConfig = options.getServers().get(0);
         final HTTPsOptions httpsOptions = serverConfig.getHTTPs();
         if (httpsOptions == null) {
             return Future.failedFuture(
