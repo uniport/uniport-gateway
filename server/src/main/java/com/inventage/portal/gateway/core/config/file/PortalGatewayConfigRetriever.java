@@ -1,4 +1,4 @@
-package com.inventage.portal.gateway.core.config;
+package com.inventage.portal.gateway.core.config.file;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
