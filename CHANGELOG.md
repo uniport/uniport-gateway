@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Unauthenticated `application/json`requests should be handled with a `401` directly instead of returning a redirect ([PORTAL-2332](https://inventage-all.atlassian.net/browse/PORTAL-2332)).
+- Incoming cookies are propagated to service if whitelisted ((PORTAL-2431)[https://inventage-all.atlassian.net/browse/PORTAL-2431]).
 
 ### Changed
 
