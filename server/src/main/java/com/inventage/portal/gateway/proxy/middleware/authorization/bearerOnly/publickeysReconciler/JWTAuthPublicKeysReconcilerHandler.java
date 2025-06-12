@@ -18,6 +18,7 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -70,57 +71,42 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
      */
     List<JsonObject> getJwks();
 
-    static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, List<PublicKeyOptions> publicKeySources) {
-        final Promise<JWTAuthOptions> promise = Promise.promise();
-        fetchPublicKeys(vertx, publicKeySources, promise);
-        return promise.future();
-    }
-
-    private static void fetchPublicKeys(Vertx vertx, List<PublicKeyOptions> publicKeys, Handler<AsyncResult<JWTAuthOptions>> handler) {
-
+    static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, List<PublicKeyOptions> publicKeys) {
         final JWTAuthOptions authOpts = new JWTAuthOptions();
         final List<Future<List<JsonObject>>> futures = new LinkedList<>();
 
         publicKeys.forEach(pk -> {
             final String publicKey = pk.getKey();
-            boolean isURL = false;
-            try {
-                new URL(publicKey).toURI();
-                isURL = true;
-            } catch (MalformedURLException | URISyntaxException e) {
-                // intended case
-                LOGGER.debug("URI is malformed, hence it is has to be a raw public key: '{}'", e.getMessage());
-            }
 
-            if (isURL) {
+            if (isURL(publicKey)) {
                 LOGGER.info("Public key provided by URL. Fetching JWKs...");
-
                 futures.add(
                     fetchJWKsFromDiscoveryURL(vertx, publicKey)
-                        .onSuccess(jwks -> {
-                            jwks.forEach(jwk -> authOpts.addJwk(jwk));
-                        })
-                        .onFailure(err -> handler.handle(Future.failedFuture(err))));
-
+                        .onSuccess(jwks -> jwks.forEach(jwk -> authOpts.addJwk(jwk))));
             } else {
                 LOGGER.info("Public key provided directly");
-
-                final String publicKeyAlgorithm = pk.getAlgorithm();
                 authOpts.addPubSecKey(
                     new PubSecKeyOptions()
-                        .setAlgorithm(publicKeyAlgorithm)
+                        .setAlgorithm(pk.getAlgorithm())
                         .setBuffer(publickeyToPEM(publicKey)));
             }
         });
 
-        Future.join(futures)
-            .onSuccess(psk -> {
+        return Future.join(futures)
+            .map(cf -> {
                 LOGGER.info("Successfully fetched JWKs");
-                handler.handle(Future.succeededFuture(authOpts));
-            }).onFailure(err -> {
-                LOGGER.error(err.getMessage());
-                handler.handle(Future.failedFuture(err));
+                return authOpts;
             });
+    }
+
+    private static boolean isURL(String publicKey) {
+        try {
+            new URI(publicKey);
+        } catch (URISyntaxException e) {
+            LOGGER.debug("URI is malformed, hence it is has to be a raw public key: '{}'", e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     private static Future<List<JsonObject>> fetchJWKsFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL) {
