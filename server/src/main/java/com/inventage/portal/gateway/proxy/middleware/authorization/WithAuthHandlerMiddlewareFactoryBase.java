@@ -7,10 +7,7 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.cu
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
 import com.jayway.jsonpath.internal.path.PathCompiler;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -213,12 +210,6 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
 
     @Override
     public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
-        final Promise<Middleware> promise = Promise.promise();
-        this.create(vertx, name, router, config, promise);
-        return promise.future();
-    }
-
-    public void create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config, Handler<AsyncResult<Middleware>> handler) {
         LOGGER.debug("Creating '{}' middleware", provides());
         final WithAuthHandlerMiddlewareOptionsBase options = castOptions(config, WithAuthHandlerMiddlewareOptionsBase.class);
 
@@ -253,16 +244,15 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         final ReconciliationOptions publicKeysReconciliation = options.getReconciliation();
         final boolean publicKeysReconciliationEnabled = publicKeysReconciliation.isEnabled();
         final long publicKeysReconciliationIntervalMs = publicKeysReconciliation.getIntervalMs();
-        JWTAuthPublicKeysReconcilerHandler.fetchPublicKeys(vertx, publicKeySources)
-            .onSuccess(authOpts -> {
+        return JWTAuthPublicKeysReconcilerHandler.fetchPublicKeys(vertx, publicKeySources)
+            .map(authOpts -> {
                 final JWTAuthOptions jwtAuthOptions = new JWTAuthOptions(authOpts).setJWTOptions(jwtOptions);
 
                 final JWTAuthPublicKeysReconcilerHandler reconciler = JWTAuthPublicKeysReconcilerHandler.create(
                     vertx, jwtAuthOptions, additionalIssuersOptions, additionalClaimsOptions, publicKeySources, publicKeysReconciliationEnabled, publicKeysReconciliationIntervalMs);
 
-                handler.handle(Future.succeededFuture(create(vertx, name, reconciler, config)));
-            })
-            .onFailure(err -> handler.handle(Future.failedFuture(err.getMessage())));
+                return create(vertx, name, reconciler, config);
+            });
 
     }
 }
