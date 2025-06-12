@@ -16,7 +16,6 @@ import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOpti
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareOptions;
 import com.inventage.portal.gateway.proxy.service.ReverseProxyFactory;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -249,15 +248,6 @@ public class RouterFactory {
         RouterModel routerConfig, ImmutableList<MiddlewareModel> middlewares,
         ImmutableList<ServiceModel> services
     ) {
-        final Promise<Router> promise = Promise.promise();
-        createSubRouter(routerConfig, middlewares, services, promise);
-        return promise.future();
-    }
-
-    private void createSubRouter(
-        RouterModel routerConfig, ImmutableList<MiddlewareModel> middlewares,
-        ImmutableList<ServiceModel> services, Handler<AsyncResult<Router>> handler
-    ) {
         final String routerName = routerConfig.getName();
         final Router router = GatewayRouterInternal.router(this.vertx, String.format("rule matcher %s", routerName));
 
@@ -266,8 +256,7 @@ public class RouterFactory {
         if (routingRule == null) {
             final String errMsg = String.format("Failed to parse rule of router '%s'", routerName);
             LOGGER.warn("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-            return;
+            return Future.failedFuture(errMsg);
         }
         final Route route = routingRule.apply(router).last();
 
@@ -282,8 +271,7 @@ public class RouterFactory {
             if (middlewareConfig.isEmpty()) {
                 final String errMsg = String.format("Failed to find middleware '%s' in router '%s'", middlewareName, routerName);
                 LOGGER.warn("{}", errMsg);
-                handler.handle(Future.failedFuture(errMsg));
-                return;
+                return Future.failedFuture(errMsg);
             }
 
             middlewareFutures.add(createMiddleware(middlewareConfig.get(), router));
@@ -297,26 +285,26 @@ public class RouterFactory {
         if (serviceConfig.isEmpty()) {
             final String errMsg = String.format("Failed to find service '%s' in router '%s'", serviceConfig, routerName);
             LOGGER.warn("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-            return;
+            return Future.failedFuture(errMsg);
         }
 
-        // required to be the last element in th middleware chain
+        // required to be the last element in the middleware chain
         final Future<Handler<RoutingContext>> proxyFuture = ReverseProxyFactory.of(vertx, serviceName, serviceConfig.get());
         middlewareFutures.add(proxyFuture);
 
         // Handlers will get called if and only if
         // - all futures are succeeded and completed
         // - any future is failed.
-        Future.all(middlewareFutures)
-            .onSuccess(cf -> {
-                mountMiddlewareChain(route, middlewareFutures);
-                LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
-                handler.handle(Future.succeededFuture(router));
-            }).onFailure(cfErr -> {
+        return Future.all(middlewareFutures)
+            .recover(cfErr -> {
                 final String errMsg = String.format("Failed to create middlewares of router '%s': %s", routerName, cfErr);
                 LOGGER.warn("{}", errMsg);
-                handler.handle(Future.failedFuture(errMsg));
+                return Future.failedFuture(errMsg);
+            })
+            .map(cf -> {
+                mountMiddlewareChain(route, middlewareFutures);
+                LOGGER.debug("Middlewares of router '{}' created successfully", routerName);
+                return router;
             });
     }
 
