@@ -4,7 +4,6 @@ import com.inventage.portal.gateway.proxy.config.model.AbstractServiceModel;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
 import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -586,13 +585,7 @@ public class DynamicConfiguration {
                 .onFailure(err -> LOGGER.warn("ignoring invalid middleware '{}': {}", name, err.getMessage())));
         }
 
-        final Promise<JsonArray> p = Promise.promise();
-        Future.join(futs)
-            .onComplete(cf -> {
-                p.complete(validMiddlewares);
-            });
-
-        return p.future();
+        return Future.join(futs).map(f -> validMiddlewares);
     }
 
     private static Future<Void> validateMiddlewareOptions(String mwType, JsonObject mwOptions) {
