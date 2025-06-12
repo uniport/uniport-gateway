@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="PortalGateway" type="Application" factoryName="Application">
     <envs>
-      <env name="development" value="true" />
+      <env name="DEVELOPMENT" value="true" />
       <env name="PORTAL_GATEWAY_JSON" value="$PROJECT_DIR$/helm/src/main/resources/proxy-config.examples/portal-gateway.json" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.GatewayLauncher" />

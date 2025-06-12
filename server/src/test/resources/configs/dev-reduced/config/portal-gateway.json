@@ -73,10 +73,6 @@
                             {
                                 "name": "uniport.amr",
                                 "path": "/"
-                            },
-                            {
-                                "name": "ips.language",
-                                "path": "/"
                             }
                         ]
                     }
