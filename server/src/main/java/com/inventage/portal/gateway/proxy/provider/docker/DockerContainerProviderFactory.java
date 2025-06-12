@@ -40,4 +40,8 @@ public class DockerContainerProviderFactory implements ProviderFactory {
             provider.isWatch());
     }
 
+    @Override
+    public Class<DockerProviderModel> modelType() {
+        return DockerProviderModel.class;
+    }
 }

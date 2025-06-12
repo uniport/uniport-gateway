@@ -9,6 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +45,14 @@ public class ProviderAggregator extends Provider {
         final List<Future<String>> futures = new ArrayList<>();
         for (ProviderModel providerConfig : providerConfigs) {
             final String providerName = providerConfig.getName();
-            final ProviderFactory providerFactory = ProviderFactory.Loader.getFactory(providerName);
+            final Optional<ProviderFactory> providerFactory = ProviderFactory.Loader.getFactory(providerName);
 
-            if (providerFactory == null) {
+            if (providerFactory.isEmpty()) {
                 LOGGER.warn("Ignoring unknown provider '{}'", providerName);
                 continue;
             }
 
-            final Provider provider = providerFactory.create(this.vertx, this.configurationAddress, providerConfig, this.env);
+            final Provider provider = providerFactory.get().create(this.vertx, this.configurationAddress, providerConfig, this.env);
 
             futures.add(launchProvider(provider));
         }

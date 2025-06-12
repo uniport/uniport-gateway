@@ -21,4 +21,9 @@ public class FileConfigProviderFactory implements ProviderFactory {
         return new FileConfigProvider(vertx, configurationAddress, provider.getFilename(), provider.getDirectory(), provider.isWatch(), env);
     }
 
+    @Override
+    public Class<? extends ProviderModel> modelType() {
+        return FileProviderModel.class;
+    }
+
 }

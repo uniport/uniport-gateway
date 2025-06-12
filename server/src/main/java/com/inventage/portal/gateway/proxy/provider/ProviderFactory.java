@@ -21,6 +21,8 @@ public interface ProviderFactory {
 
     Provider create(Vertx vertx, String configurationAddress, ProviderModel providerConfig, JsonObject env);
 
+    Class<? extends ProviderModel> modelType();
+
     @SuppressWarnings("unchecked")
     default <T extends ProviderModel> T castProvider(ProviderModel provider, Class<T> clazz) {
         if (provider == null) {
@@ -37,12 +39,12 @@ public interface ProviderFactory {
         private Loader() {
         }
 
-        public static ProviderFactory getFactory(String providerName) {
+        public static Optional<ProviderFactory> getFactory(String providerName) {
             LOGGER.debug("Get provider factory '{}'", providerName);
-            final Optional<ProviderFactory> provider = ServiceLoader.load(ProviderFactory.class).stream()
-                .map(ServiceLoader.Provider::get).filter(instance -> instance.provides().equals(providerName))
+            return ServiceLoader.load(ProviderFactory.class).stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(instance -> instance.provides().equals(providerName))
                 .findFirst();
-            return provider.orElse(null);
         }
     }
 }
