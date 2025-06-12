@@ -6,7 +6,6 @@ import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.cu
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import com.inventage.portal.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
@@ -112,25 +111,18 @@ public class JWTAuthPublicKeysReconcilerHandlerImpl implements JWTAuthPublicKeys
     public Future<AuthenticationHandler> getOrRefreshPublicKeys() {
         LOGGER.debug("Refreshing public keys");
 
-        final Promise<AuthenticationHandler> promise = Promise.promise();
-        JWTAuthPublicKeysReconcilerHandler.fetchPublicKeys(this.vertx, this.publicKeySources)
-            .onSuccess(authOptions -> {
-                this.jwtAuthOptions = authOptions;
-                this.authHandler = createAuthHandlerWithFreshPublicKeys(authOptions);
-                LOGGER.debug("Refreshed public keys");
-                promise.complete(this);
-            })
-            .onFailure(err -> {
-                final String errMsg = String.format("Failed to refresh public keys '%s'", err.getMessage());
-                LOGGER.warn(errMsg);
-                promise.fail(errMsg);
-            });
-
         if (this.reconciliationEnabled) {
             startReconciler();
         }
 
-        return promise.future();
+        return JWTAuthPublicKeysReconcilerHandler.fetchPublicKeys(this.vertx, this.publicKeySources)
+            .onFailure(err -> LOGGER.warn(String.format("Failed to refresh public keys '%s'", err.getMessage())))
+            .map(authOptions -> {
+                this.jwtAuthOptions = authOptions;
+                this.authHandler = createAuthHandlerWithFreshPublicKeys(authOptions);
+                LOGGER.debug("Refreshed public keys");
+                return this;
+            });
     }
 
     @Override
