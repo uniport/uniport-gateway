@@ -405,10 +405,10 @@ public class DynamicConfiguration {
                 },
                 err -> {
                     if (validMiddlewares.failed()) {
-                        LOGGER.warn("invalid middleware configuration: {}", validMiddlewares.cause().getMessage());
+                        LOGGER.error("invalid middleware configuration: {}", validMiddlewares.cause().getMessage());
                     }
                     if (validServices.failed()) {
-                        LOGGER.warn("invalid service configuration: {}", validServices.cause().getMessage());
+                        LOGGER.error("invalid service configuration: {}", validServices.cause().getMessage());
                     }
                     return Future.failedFuture("invalid configuration");
                 });
@@ -592,7 +592,7 @@ public class DynamicConfiguration {
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(mwType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", mwType);
-            LOGGER.warn("{}", errMsg);
+            LOGGER.error(errMsg);
             return Future.failedFuture(errMsg);
         }
 

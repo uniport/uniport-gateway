@@ -51,7 +51,7 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
 
         if (authContext == null) {
             final String errMsg = "No user found";
-            LOGGER.debug("{}", errMsg);
+            LOGGER.debug(errMsg);
             return Future.failedFuture(errMsg);
         }
 

@@ -92,7 +92,7 @@ public class Entrypoint {
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
-            LOGGER.warn("{}", errMsg);
+            LOGGER.error(errMsg);
             return Future.failedFuture(errMsg);
         }
 

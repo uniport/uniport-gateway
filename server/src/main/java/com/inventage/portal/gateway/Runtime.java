@@ -59,13 +59,13 @@ public class Runtime {
         }
         try {
             final int propvalue = toInt(System.getProperty(VERTICLE_INSTANCES_KEY));
-            LOGGER.warn("Number of verticles from system property is '{}'", propvalue);
+            LOGGER.info("Number of verticles from system property is '{}'", propvalue);
             return propvalue;
         } catch (Exception e) {
             // Noop…
         }
         final int defaultNumber = 1;
-        LOGGER.warn("Number of verticles from default is '{}'", defaultNumber);
+        LOGGER.info("Number of verticles from default is '{}'", defaultNumber);
         return defaultNumber;
     }
 
@@ -79,7 +79,7 @@ public class Runtime {
         final boolean envValue = toBoolean(System.getenv(CLUSTERED_KEY));
         final boolean propValue = toBoolean(System.getProperty(CLUSTERED_KEY));
         if (envValue || propValue) {
-            LOGGER.warn("Running in cluster mode");
+            LOGGER.info("Running in cluster mode");
             return true;
         }
         return false;

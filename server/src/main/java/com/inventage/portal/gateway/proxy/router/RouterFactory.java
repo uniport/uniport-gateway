@@ -255,7 +255,7 @@ public class RouterFactory {
         final RoutingRule routingRule = parseRule(rule);
         if (routingRule == null) {
             final String errMsg = String.format("Failed to parse rule of router '%s'", routerName);
-            LOGGER.warn("{}", errMsg);
+            LOGGER.error(errMsg);
             return Future.failedFuture(errMsg);
         }
         final Route route = routingRule.apply(router).last();
@@ -270,7 +270,7 @@ public class RouterFactory {
 
             if (middlewareConfig.isEmpty()) {
                 final String errMsg = String.format("Failed to find middleware '%s' in router '%s'", middlewareName, routerName);
-                LOGGER.warn("{}", errMsg);
+                LOGGER.error(errMsg);
                 return Future.failedFuture(errMsg);
             }
 
@@ -284,7 +284,7 @@ public class RouterFactory {
 
         if (serviceConfig.isEmpty()) {
             final String errMsg = String.format("Failed to find service '%s' in router '%s'", serviceConfig, routerName);
-            LOGGER.warn("{}", errMsg);
+            LOGGER.error(errMsg);
             return Future.failedFuture(errMsg);
         }
 
@@ -298,7 +298,7 @@ public class RouterFactory {
         return Future.all(middlewareFutures)
             .recover(cfErr -> {
                 final String errMsg = String.format("Failed to create middlewares of router '%s': %s", routerName, cfErr);
-                LOGGER.warn("{}", errMsg);
+                LOGGER.error(errMsg);
                 return Future.failedFuture(errMsg);
             })
             .map(cf -> {
@@ -320,7 +320,7 @@ public class RouterFactory {
         final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
-            LOGGER.warn("{}", errMsg);
+            LOGGER.error(errMsg);
             return Future.failedFuture(errMsg);
         }
 

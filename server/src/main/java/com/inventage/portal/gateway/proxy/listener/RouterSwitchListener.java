@@ -29,7 +29,7 @@ public class RouterSwitchListener implements Listener {
     public void listen(DynamicModel model) {
         routerFactory.createRouter(model)
             .onSuccess(this::setSubRouter)
-            .onFailure(err -> LOGGER.warn("Failed to create new router from config '{}': '{}'", model, err.getMessage()));
+            .onFailure(err -> LOGGER.error("Failed to create new router from config '{}': '{}'", model, err.getMessage()));
     }
 
     @Override
