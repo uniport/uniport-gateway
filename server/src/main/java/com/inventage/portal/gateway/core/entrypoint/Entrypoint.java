@@ -6,10 +6,8 @@ import com.inventage.portal.gateway.proxy.config.model.MiddlewareModel;
 import com.inventage.portal.gateway.proxy.config.model.MiddlewareOptionsModel;
 import com.inventage.portal.gateway.proxy.middleware.Middleware;
 import com.inventage.portal.gateway.proxy.middleware.MiddlewareFactory;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
@@ -88,15 +86,6 @@ public class Entrypoint {
     }
 
     private Future<Middleware> createEntryMiddleware(MiddlewareModel middlewareConfig, Router router) {
-        final Promise<Middleware> promise = Promise.promise();
-        createEntryMiddleware(middlewareConfig, router, promise);
-        return promise.future();
-    }
-
-    private void createEntryMiddleware(
-        MiddlewareModel middlewareConfig, Router router,
-        Handler<AsyncResult<Middleware>> handler
-    ) {
         final String middlewareType = middlewareConfig.getType();
         final MiddlewareOptionsModel middlewareOptions = middlewareConfig.getOptions();
 
@@ -104,14 +93,12 @@ public class Entrypoint {
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.warn("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-            return;
+            return Future.failedFuture(errMsg);
         }
 
         final String middlewareName = middlewareConfig.getName();
-        middlewareFactory.get()
-            .create(vertx, middlewareName, router, middlewareOptions)
-            .onComplete(handler);
+        return middlewareFactory.get()
+            .create(vertx, middlewareName, router, middlewareOptions);
     }
 
     public boolean isTls() {
