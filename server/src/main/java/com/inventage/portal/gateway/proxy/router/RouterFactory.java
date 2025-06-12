@@ -197,12 +197,6 @@ public class RouterFactory {
     }
 
     public Future<Router> createRouter(DynamicModel model) {
-        final Promise<Router> promise = Promise.promise();
-        createRouter(model, promise);
-        return promise.future();
-    }
-
-    private void createRouter(DynamicModel model, Handler<AsyncResult<Router>> handler) {
         final List<RouterModel> routers = new LinkedList<RouterModel>(model.getRouters());
         Collections.sort(routers);
         LOGGER.debug("Routing requests in the following order:");
@@ -215,17 +209,16 @@ public class RouterFactory {
         final ImmutableList<ServiceModel> services = model.getServices();
 
         LOGGER.debug("Creating router from config");
-        final List<Future<Router>> subRouterFutures = new ArrayList<>();
+        final List<Future<Router>> subRouters = new ArrayList<>();
         for (RouterModel r : routers) {
 
             final ImmutableList<String> entrypoints = r.getEntrypoints();
             if (entrypoints.isEmpty()) {
                 final String errMsg = "Router has no entrypoints";
-                handler.handle(Future.failedFuture(errMsg));
 
                 // Fast-failing
                 Runtime.fatal(vertx, errMsg);
-                return;
+                return Future.failedFuture(errMsg); // technically does not matter
             }
 
             // ignore routers that are not mounted on this entrypoint
@@ -233,7 +226,7 @@ public class RouterFactory {
                 continue;
             }
 
-            subRouterFutures.add(createSubRouter(r, middlewares, services));
+            subRouters.add(createSubRouter(r, middlewares, services));
         }
 
         final GatewayRouterInternal router = GatewayRouterInternal.router(this.vertx, "root");
@@ -241,24 +234,15 @@ public class RouterFactory {
         // has to be first route, so no other paths are shadowing it
         addHealthRoute(router);
 
-        // Handlers will get called if and only if
-        // - all futures are completed
-        Future.join(subRouterFutures).onComplete(ar -> {
-            subRouterFutures.forEach(srf -> {
-                if (srf.succeeded()) {
-                    final Router subRouter = srf.result();
-                    router.mountSubRouter("/", subRouter);
-                } else {
-                    handler.handle(Future.failedFuture(String.format("Route failed '{}'", srf.cause().getMessage())));
-                    LOGGER.warn("Ignoring route '{}'", srf.cause().getMessage());
-
-                    // Fast-failing
-                    Runtime.fatal(vertx, srf.cause().getMessage());
+        return Future.join(subRouters)
+            .onFailure(err -> LOGGER.error("Route creation failed: {}", err))
+            .onSuccess(ar -> {
+                for (Future<Router> subRouter : subRouters) {
+                    router.mountSubRouter("/", subRouter.result());
                 }
-            });
-            LOGGER.debug("Router '{}' created successfully", router.getName());
-            handler.handle(Future.succeededFuture(router));
-        });
+                LOGGER.debug("Router '{}' created successfully", router.getName());
+            })
+            .map(router);
     }
 
     private Future<Router> createSubRouter(
