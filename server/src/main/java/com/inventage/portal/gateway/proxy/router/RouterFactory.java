@@ -342,15 +342,6 @@ public class RouterFactory {
     }
 
     private Future<Middleware> createMiddleware(MiddlewareModel middlewareConfig, Router router) {
-        final Promise<Middleware> promise = Promise.promise();
-        createMiddleware(middlewareConfig, router, promise);
-        return promise.future();
-    }
-
-    private void createMiddleware(
-        MiddlewareModel middlewareConfig, Router router,
-        Handler<AsyncResult<Middleware>> handler
-    ) {
         final String middlewareType = middlewareConfig.getType();
         final MiddlewareOptionsModel middlewareOptions = injectPublicProtocolHostPort(middlewareType, middlewareConfig.getOptions());
 
@@ -358,14 +349,12 @@ public class RouterFactory {
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.warn("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-            return;
+            return Future.failedFuture(errMsg);
         }
 
         final String middlewareName = middlewareConfig.getName();
-        middlewareFactory.get()
-            .create(this.vertx, middlewareName, router, middlewareOptions)
-            .onComplete(handler);
+        return middlewareFactory.get()
+            .create(this.vertx, middlewareName, router, middlewareOptions);
     }
 
     private MiddlewareOptionsModel injectPublicProtocolHostPort(String type, MiddlewareOptionsModel options) {
