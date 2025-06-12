@@ -3,10 +3,7 @@ package com.inventage.portal.gateway.proxy.middleware.authorization;
 import com.inventage.portal.gateway.proxy.middleware.TraceMiddleware;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import com.inventage.portal.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -39,70 +36,40 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
     }
 
     protected Future<String> getAuthToken(Session session) {
-        try {
-            final Promise<String> promise = Promise.promise();
-            this.getAuthToken(session, promise);
-            return promise.future();
-        } catch (Throwable t) {
-            LOGGER.error("error in getAuthToken", t);
-            return Future.failedFuture(t);
-        }
-    }
-
-    private void getAuthToken(Session session, Handler<AsyncResult<String>> handler) {
         AuthenticationUserContext authContext = null;
-        boolean idTokenDemanded = false;
+        final boolean idTokenDemanded = sessionScope.equals(OAuth2MiddlewareFactory.SESSION_SCOPE_ID);
 
-        if (this.sessionScope == null) {
-            final String errMsg = "No session scope found";
-            LOGGER.debug("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-            return;
-        }
-
-        if (this.sessionScope.equals(OAuth2MiddlewareFactory.SESSION_SCOPE_ID)) {
-            idTokenDemanded = true;
+        if (idTokenDemanded) {
             // all ID tokens are the same hence take anyone
             authContext = AuthenticationUserContext.fromSessionAtAnyScope(session).orElse(null);
-        } else if (this.sessionScope.length() != 0) {
-            authContext = AuthenticationUserContext.fromSessionAtScope(session, this.sessionScope).orElse(null);
+        } else if (sessionScope.length() != 0) {
+            authContext = AuthenticationUserContext.fromSessionAtScope(session, sessionScope).orElse(null);
         } else {
             LOGGER.debug("No token demanded");
-            handler.handle(Future.succeededFuture());
-            return;
+            return Future.succeededFuture();
         }
 
         if (authContext == null) {
             final String errMsg = "No user found";
             LOGGER.debug("{}", errMsg);
-            handler.handle(Future.failedFuture(errMsg));
-            return;
+            return Future.failedFuture(errMsg);
         }
 
-        final Promise<AuthenticationUserContext> preparedUser = Promise.promise();
-        final OAuth2Auth authProvider = authContext.getAuthenticationProvider(vertx);
+        return refreshUser(authContext, session)
+            .map(ac -> buildAuthToken(ac, idTokenDemanded));
+    }
+
+    private Future<AuthenticationUserContext> refreshUser(AuthenticationUserContext authContext, Session session) {
         final User user = authContext.getUser();
-        if (user.expired(EXPIRATION_LEEWAY_SECONDS)) {
-            LOGGER.info("Refreshing access token");
-            authProvider.refresh(user).onSuccess(u -> {
-                preparedUser.complete(AuthenticationUserContext.of(authProvider, u).toSessionAtScope(session, sessionScope));
-            }).onFailure(err -> {
-                handler.handle(Future.failedFuture(err));
-            });
-        } else {
+        if (!user.expired(EXPIRATION_LEEWAY_SECONDS)) {
             LOGGER.debug("Use existing access token");
-            preparedUser.complete(authContext);
+            return Future.succeededFuture(authContext);
         }
 
-        // fix: Local variable defined in an enclosing scope must be final or
-        // effectively final
-        final boolean finalIdTokenDemanded = idTokenDemanded;
-        preparedUser.future().onSuccess(ap -> {
-            final String token = this.buildAuthToken(ap, finalIdTokenDemanded);
-            handler.handle(Future.succeededFuture(token));
-        }).onFailure(err -> {
-            handler.handle(Future.failedFuture(err));
-        });
+        LOGGER.info("Refreshing access token");
+        final OAuth2Auth authProvider = authContext.getAuthenticationProvider(vertx);
+        return authProvider.refresh(user)
+            .map(u -> AuthenticationUserContext.of(authProvider, u).toSessionAtScope(session, sessionScope));
     }
 
     private String buildAuthToken(AuthenticationUserContext authContext, boolean idTokenDemanded) {
@@ -111,7 +78,7 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
             LOGGER.debug("Providing id token");
             rawToken = authContext.getIdToken();
         } else {
-            LOGGER.debug("Providing access token for session scope: '{}'", this.sessionScope);
+            LOGGER.debug("Providing access token for session scope: '{}'", sessionScope);
             rawToken = authContext.getAccessToken();
         }
 
