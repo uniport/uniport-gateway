@@ -1,6 +1,7 @@
 package com.inventage.portal.gateway.core.config.env;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 /**
@@ -18,6 +19,10 @@ public class ConfigAdapter {
      */
     public static String replaceEnvVariables(String input, JsonObject env) {
         return StringSubstitutor.replace(input, env.getMap());
+    }
+
+    public static String replaceBooleans(String input) {
+        return RegExUtils.replacePattern(input, "\"(true|false)\"", "$1");
     }
 
 }

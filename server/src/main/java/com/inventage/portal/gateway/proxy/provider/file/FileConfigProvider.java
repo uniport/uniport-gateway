@@ -162,7 +162,9 @@ public class FileConfigProvider extends Provider {
     }
 
     private JsonObject substituteConfigurationVariables(JsonObject config, JsonObject env) {
-        return new JsonObject(ConfigAdapter.replaceEnvVariables(config.toString(), env));
+        return new JsonObject(
+            ConfigAdapter.replaceBooleans( // replace booleans added by an env var
+                ConfigAdapter.replaceEnvVariables(config.toString(), env))); // replace env var by its value
     }
 
     // To allow variable substitution by environment variables in the file config
