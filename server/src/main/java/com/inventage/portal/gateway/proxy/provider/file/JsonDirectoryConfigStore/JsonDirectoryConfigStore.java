@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mostly copied from DirectoryConfigStore with a custom Json merge function
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
  * https://github.com/vert-x3/vertx-config/blob/4.5.14/vertx-config/src/main/java/io/vertx/config/impl/spi/DirectoryConfigStore.java#L95
  */
 public final class JsonDirectoryConfigStore implements ConfigStore {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDirectoryConfigStore.class);
 
     private final VertxInternal vertx;
 
@@ -58,6 +62,7 @@ public final class JsonDirectoryConfigStore implements ConfigStore {
                 .sorted()
                 .collect(Collectors.toList()))
             .flatMap(files -> {
+                LOGGER.debug("merging config files '{}'", files);
                 final List<Future<JsonObject>> futures = new ArrayList<>();
                 for (FileSet set : filesets) {
                     final Promise<JsonObject> promise = vertx.promise();
