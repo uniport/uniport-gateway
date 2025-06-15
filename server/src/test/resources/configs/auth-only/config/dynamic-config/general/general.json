@@ -28,16 +28,6 @@
         ],
         "middlewares": [
             {
-                "name": "oauth2",
-                "type": "oauth2",
-                "options": {
-                    "clientId": "Portal-Gateway",
-                    "clientSecret": "Portal-Gateway!",
-                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
-                    "sessionScope": "Organisation"
-                }
-            },
-            {
                 "name": "backChannelLogout",
                 "type": "backChannelLogout",
                 "options": {
