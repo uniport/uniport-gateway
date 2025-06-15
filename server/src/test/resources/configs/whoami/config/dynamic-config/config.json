@@ -16,7 +16,7 @@
             },
             {
                 "name": "whoami2",
-                "rule": "Host('whoami2')",
+                "rule": "Host('whoami2.local.uniport.ch')",
                 "priority": 50,
                 "service": "whoami2"
             }

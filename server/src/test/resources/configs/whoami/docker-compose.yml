@@ -1,3 +1,4 @@
+# necessary services for 'whoami' example
 services:
   whoami1:
     image: traefik/whoami
