@@ -1,0 +1,72 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "organisation-proxy",
+                "middlewares": [
+                    "organisationRedirectRegex",
+                    "organisationOauth2",
+                    "organisationAuthBearer",
+                    "organisationReplacePath",
+                    "organisationCheckRoute"
+                ],
+                "rule": "PathPrefix('/organisation')",
+                "service": "organisation-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "organisationRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/organisation)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "organisationOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "${PORTAL_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${PORTAL_GATEWAY_CLIENT_SECRET}",
+                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Organisation"
+                }
+            },
+            {
+                "name": "organisationAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "Organisation"
+                }
+            },
+            {
+                "name": "organisationReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/organisation/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "organisationCheckRoute",
+                "type": "checkRoute"
+            },
+            {
+                "name": "organisationCsrf",
+                "type": "csrf"
+            }
+        ],
+        "services": [
+            {
+                "name": "organisation-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_ORGANISATION_HOST}",
+                        "port": "${PORTAL_GATEWAY_ORGANISATION_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}

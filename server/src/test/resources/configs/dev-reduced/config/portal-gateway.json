@@ -150,6 +150,10 @@
                             }
                         ]
                     }
+                },
+                {
+                    "name": "ShowSessionContentMiddleware",
+                    "type": "_session_"
                 }
             ]
         }
