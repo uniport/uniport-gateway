@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PortalGateway 'whoami'" type="Application" factoryName="Application">
+  <configuration default="false" name="PortalGateway 'router-rules'" type="Application" factoryName="Application">
     <envs>
       <env name="development" value="true" />
     </envs>
@@ -19,7 +19,7 @@
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/test/resources/configs/whoami/portal-gateway.env" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/test/resources/configs/router-rules/portal-gateway.env" />
       </ENTRIES>
     </extension>
     <method v="2">

@@ -18,6 +18,5 @@ Examples (marked with ✅ if they confirm the directory structure):
 - auth-only ✅
 - dev-reduced ✅
 - entrypoints
-- standalone-auth
-- whoami ✅
-- whoami-file1
+- standalone-auth ✅
+- router-rules ✅

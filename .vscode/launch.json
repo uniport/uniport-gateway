@@ -26,11 +26,19 @@
             "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
         },
         {
-            "name": "Launch (simple)",
+            "name": "Launch (router-rules)",
             "type": "java",
             "projectName": "server",
             "request": "launch",
-            "envFile": "${workspaceFolder}/server/src/test/resources/configs/simple/portal-gateway.env",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/router-rules/portal-gateway.env",
+            "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
+        },
+        {
+            "name": "Launch (dev reduced)",
+            "type": "java",
+            "projectName": "server",
+            "request": "launch",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/dev-reduced/portal-gateway.env",
             "mainClass": "com.inventage.portal.gateway.PortalGatewayLauncher"
         }
     ]
