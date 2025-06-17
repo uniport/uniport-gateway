@@ -13,6 +13,9 @@
     <properties>
         <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
         <maven.deploy.skip>true</maven.deploy.skip>
+
+        <main.verticle>com.inventage.portal.gateway.core.GatewayVerticle</main.verticle>
+        <launcher.class>com.inventage.portal.gateway.GatewayLauncher</launcher.class>
     </properties>
 
     <dependencies>
@@ -225,7 +228,8 @@
                         <configuration>
                             <archive>
                                 <manifestEntries>
-                                    <Main-Class>com.inventage.portal.gateway.GatewayLauncher</Main-Class>
+                                    <Main-Class>${launcher.class}</Main-Class>
+                                    <Main-Verticle>${main.verticle}</Main-Verticle>
                                 </manifestEntries>
                             </archive>
                         </configuration>
@@ -243,7 +247,8 @@
                                     <classpathPrefix>dependency-jars/</classpathPrefix>
                                 </manifest>
                                 <manifestEntries>
-                                    <Main-Class>com.inventage.portal.gateway.GatewayLauncher</Main-Class>
+                                    <Main-Class>${launcher.class}</Main-Class>
+                                    <Main-Verticle>${main.verticle}</Main-Verticle>
                                 </manifestEntries>
                             </archive>
                             <classifier>slim</classifier>
