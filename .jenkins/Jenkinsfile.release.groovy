@@ -7,11 +7,11 @@ releasePipeline(
     releaseHelmCharts: true,
     releaseNpmPackages: false,
     releaseContainerImages: true,
-    createGitTag: true,
-    bumpVersion: true,
-    updateChangelog: true,
-    createJiraRelease: true,
+    createGitTag: false,
+    bumpVersion: false,
+    updateChangelog: false,
+    createJiraRelease: false,
     jiraReleasePrefix: "Portal-Gateway",
-    registerVersionWithArchetype: true,
+    registerVersionWithArchetype: false,
     registerVersionWithArchetypeComponentName: "portal-gateway"
 )
