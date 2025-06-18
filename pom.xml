@@ -50,15 +50,9 @@
         <nexus3.helm.registry.push.url>https://nexus3.inventage.com/repository</nexus3.helm.registry.push.url>
         <nexus3.helm.repository.push.id>inventage-portal-helm-staging</nexus3.helm.repository.push.id>
 
-        <portal-helm-dependencies.repository>https://nexus3.inventage.com/repository/inventage-portal-helm/</portal-helm-dependencies.repository>
-        <!--<portal-helm-dependencies.repository>https://nexus3.inventage.com/repository/inventage-portal-helm-staging/</portal-helm-dependencies.repository>-->
+        <portal-helm-dependencies.repository>oci://uniportcr.artifacts.inventage.com/charts</portal-helm-dependencies.repository>
 
-        <!--
-            Note: If you switch between staged & releases versions, you will need to change the property `portal-helm-dependencies.repository`
-            to point to the staging version or the released version.
-            For convenience, both variants are configured here, one in a comment.
-        -->
-        <portal-helm-chart-library.version>4.8.0-202408121024-348-6564893</portal-helm-chart-library.version>
+        <portal-helm-chart-library.version>6.0.0-202504090952-418-d491e48</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.6.0-202408121127-104-1154cd4</portal-code-style-settings.version>
     </properties>
 
