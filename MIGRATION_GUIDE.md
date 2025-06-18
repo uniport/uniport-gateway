@@ -2,6 +2,10 @@
 
 ## `9.*.*` -> `10.*.*`
 
+### OCI registry
+
+Change the OCI registry for pulling images from `docker-registry.inventage.com:10094` to `uniportcr.artifacts.inventage.com`.
+
 ### Environment variable
 
 The following environment variables are converted to screaming snake-case.

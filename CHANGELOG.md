@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+Starting with this release, please use the following OCI registry `uniportcr.artifacts.inventage.com` i.e. `uniportcr.artifacts.inventage.com/com.inventage.portal.gateway.portal-gateway:<version>`.
+
 ### Changed
 
 - **BREAKING** Changed the configuration JSON schema key in the `session` middleware from `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds` ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
@@ -34,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Unauthenticated `application/json`requests should be handled with a `401` directly instead of returning a redirect ([PORTAL-2332](https://inventage-all.atlassian.net/browse/PORTAL-2332)).
-- Incoming cookies are propagated to service if whitelisted ((PORTAL-2431)[https://inventage-all.atlassian.net/browse/PORTAL-2431]).
+- Incoming cookies are propagated to service if whitelisted ([PORTAL-2431](https://inventage-all.atlassian.net/browse/PORTAL-2431)).
 
 ### Changed
 
