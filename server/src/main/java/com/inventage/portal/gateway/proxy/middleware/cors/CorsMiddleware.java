@@ -50,7 +50,7 @@ public class CorsMiddleware extends TraceMiddleware {
             corsHandler.addOrigins(allowedOrigin);
         }
         if (!allowedOriginPattern.isEmpty()) {
-            corsHandler.addRelativeOrigins(allowedOriginPattern);
+            corsHandler.addOriginsWithRegex(allowedOriginPattern);
         }
         if (!allowedMethods.isEmpty()) {
             corsHandler.allowedMethods(allowedMethods);
