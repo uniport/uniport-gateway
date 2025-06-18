@@ -12,7 +12,6 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.net.HostAndPort;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
@@ -84,7 +83,6 @@ public class ReverseProxy extends TraceMiddleware {
                 vertx))
             .origin(serverPort, serverHost);
 
-        setHostHeader(httpProxy);
         setXForwardedHeaders(httpProxy);
         applyModifiers(httpProxy);
         if (verbose) {
@@ -130,28 +128,6 @@ public class ReverseProxy extends TraceMiddleware {
             LOGGER.error("Error while proxying request", e);
             ctx.fail(e);
         }
-    }
-
-    /**
-     * 
-     * Technically, vertx-http-proxy should set the host header to the target server.
-     * However, due to a bug, it is set to a wrong value.
-     * 
-     * Once this issue has been fixed, this interceptor can be removed.
-     * See: https://github.com/eclipse-vertx/vertx-http-proxy/issues/85
-     * 
-     * @param proxy
-     */
-    protected void setHostHeader(HttpProxy proxy) {
-        proxy.addInterceptor(new ProxyInterceptor() {
-            @Override
-            public Future<ProxyResponse> handleProxyRequest(ProxyContext proxyContext) {
-                final ProxyRequest incomingRequest = proxyContext.request();
-                LOGGER.debug("setting the host header to '{}:{}'", serverHost, serverPort);
-                incomingRequest.setAuthority(HostAndPort.create(serverHost, serverPort));
-                return proxyContext.sendRequest();
-            }
-        });
     }
 
     /**
