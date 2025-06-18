@@ -1,0 +1,114 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "base-proxy",
+                "middlewares": [
+                    "baseRedirectRegex",
+                    "baseAuthBearer",
+                    "baseReplacePath",
+                    "sessionTerminate",
+                    "sessionReset"
+                ],
+                "rule": "PathPrefix('/base')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "base-favicon",
+                "entrypoints": [
+                    "http20000"
+                ],
+                "middlewares": [
+                    "baseFaviconIcoReplacePath"
+                ],
+                "rule": "Path('/favicon.ico')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "apple-app-site-association",
+                "middlewares": [
+                    "applicationJsonNoCacheHeaders"
+                ],
+                "rule": "Path('/.well-known/apple-app-site-association')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "android-assetlinks",
+                "middlewares": [
+                    "applicationJsonNoCacheHeaders"
+                ],
+                "rule": "Path('/.well-known/assetlinks.json')",
+                "service": "base-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "baseRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^(/base)$",
+                    "replacement": "$1/"
+                }
+            },
+            {
+                "name": "baseAuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "id"
+                }
+            },
+            {
+                "name": "baseReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/base/(.*)",
+                    "replacement": "/$1"
+                }
+            },
+            {
+                "name": "baseFaviconIcoReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "^/(.*)",
+                    "replacement": "/assets/$1"
+                }
+            },
+            {
+                "name": "sessionTerminate",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_TERMINATE"
+                }
+            },
+            {
+                "name": "sessionReset",
+                "type": "controlApi",
+                "options": {
+                    "action": "SESSION_RESET",
+                    "iamSessionResetUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal/session_reset"
+                }
+            },
+            {
+                "name": "applicationJsonNoCacheHeaders",
+                "type": "headers",
+                "options": {
+                    "customResponseHeaders": {
+                        "Content-Type": "application/json",
+                        "Cache-Control": "no-cache"
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "base-proxy",
+                "servers": [
+                    {
+                        "host": "${PORTAL_GATEWAY_BASE_HOST}",
+                        "port": "${PORTAL_GATEWAY_BASE_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}
