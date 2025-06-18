@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URLEncodedUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.assertj.core.api.AbstractAssert;
 
 /**
@@ -136,7 +136,7 @@ public class AuthenticationRedirectRequestAssert
 
         List<NameValuePair> responseParamsList = null;
         try {
-            responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
+            responseParamsList = new URIBuilder(new URI(header), StandardCharsets.UTF_8).getQueryParams();
         } catch (URISyntaxException e) {
             testCtx.failNow(e);
             return null;

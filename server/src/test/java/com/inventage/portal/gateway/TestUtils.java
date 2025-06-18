@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URLEncodedUtils;
+import org.apache.hc.core5.net.URIBuilder;
 
 public final class TestUtils {
 
@@ -278,7 +278,7 @@ public final class TestUtils {
     public static Map<String, String> extractParametersFromHeader(String header) {
         List<NameValuePair> responseParamsList = null;
         try {
-            responseParamsList = URLEncodedUtils.parse(new URI(header), StandardCharsets.UTF_8);
+            responseParamsList = new URIBuilder(new URI(header), StandardCharsets.UTF_8).getQueryParams();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
