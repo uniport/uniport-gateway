@@ -12,6 +12,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.net.HostAndPort;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
@@ -34,6 +35,7 @@ public class ReverseProxy extends TraceMiddleware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReverseProxy.class);
 
     private static final CharSequence X_FORWARDED_PROTO = HttpHeaders.createOptimized("x-forwarded-proto");
+    private static final CharSequence X_FORWARDED_HOST = HttpHeaders.createOptimized("x-forwarded-host");
     private static final CharSequence X_FORWARDED_PORT = HttpHeaders.createOptimized("x-forwarded-port");
 
     private static final String HTTPS = "https";
@@ -133,8 +135,10 @@ public class ReverseProxy extends TraceMiddleware {
     /**
      * Since version 4.3.5, the vertx-http-proxy sets the 'x-forwarded-host', in case it detects that
      * the outgoing request has a different host header value than the incoming request.
-     * We previously set that header ourself, alongside with 'x-forwarded-proto' and 'x-forwarded-port',
-     * so we still need to set them here.
+     * However, since version 4.5.15, it only checks if the authority was modified in an interceptor, so
+     * again we need to set it ourself.
+     * 
+     * We also set 'x-forwarded-proto' and 'x-forwarded-port'.
      * 
      * @param proxy
      */
@@ -148,8 +152,11 @@ public class ReverseProxy extends TraceMiddleware {
                 final String proto = request.scheme();
                 useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PROTO, proto);
 
+                final HostAndPort authority = request.authority();
+                useOrSetHeader(incomingRequest.headers(), X_FORWARDED_HOST, authority.toString());
+
                 if (request.authority() != null) {
-                    final int port = request.authority().port();
+                    final int port = authority.port();
                     if (port > 0) {
                         useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PORT, String.valueOf(port));
                     }
