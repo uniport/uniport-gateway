@@ -20,8 +20,8 @@ import io.vertx.json.schema.common.dsl.Keywords;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import io.vertx.json.schema.common.dsl.Schemas;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -124,26 +124,9 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 return Future.failedFuture(new IllegalStateException("Empty public key defined"));
             }
 
-            // the public key has to be either a valid URL to fetch it from or base64
-            // encoded
-            boolean isBase64;
-            try {
-                Base64.getDecoder().decode(publicKey);
-                isBase64 = true;
-            } catch (IllegalArgumentException e) {
-                isBase64 = false;
-            }
-
-            boolean isURL = false;
-            if (!isBase64) {
-                try {
-                    new URL(publicKey).toURI();
-                    isURL = true;
-                } catch (MalformedURLException | URISyntaxException e) {
-                    isURL = false;
-                }
-            }
-
+            // the public key has to be either a valid URL to fetch it from or base64 encoded
+            final boolean isBase64 = isBase64(publicKey);
+            final boolean isURL = isURL(publicKey);
             if (!isBase64 && !isURL) {
                 return Future.failedFuture("Public key is required to either be base64 encoded or a valid URL");
             }
@@ -254,5 +237,23 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
                 return create(vertx, name, reconciler, config);
             });
 
+    }
+
+    private boolean isBase64(String publicKey) {
+        try {
+            Base64.getDecoder().decode(publicKey);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isURL(String publicKey) {
+        try {
+            new URI(publicKey).toURL();
+        } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+            return false;
+        }
+        return true;
     }
 }

@@ -75,7 +75,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
         publicKeys.forEach(pk -> {
             final String publicKey = pk.getKey();
 
-            if (isURI(publicKey)) {
+            if (isURL(publicKey)) {
                 LOGGER.info("Public key provided by URL. Fetching JWKs...");
                 futures.add(
                     fetchJWKsFromDiscoveryURL(vertx, publicKey)
@@ -108,7 +108,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
      * @return
      */
     private static Future<List<JsonObject>> fetchJWKsFromDiscoveryURL(Vertx vertx, String rawRealmBaseURL) {
-        final URL parsedRealmBaseURL = parseURI(rawRealmBaseURL);
+        final URL parsedRealmBaseURL = parseURL(rawRealmBaseURL);
         if (parsedRealmBaseURL == null) {
             final String errMsg = String.format("Malformed discovery URL '%s'", rawRealmBaseURL);
             LOGGER.warn(errMsg);
@@ -173,7 +173,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
             return Future.failedFuture(errMsg);
         }
 
-        final URL parsedJWKsURL = parseURI(rawJWKsURI);
+        final URL parsedJWKsURL = parseURL(rawJWKsURI);
         if (parsedJWKsURL == null) {
             final String errMsg = String.format("Malformed JWKs URL '%s'", rawJWKsURI);
             LOGGER.warn(errMsg);
@@ -232,11 +232,11 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
             "-----END PUBLIC KEY-----");
     }
 
-    private static boolean isURI(String publicKey) {
-        return parseURI(publicKey) != null;
+    private static boolean isURL(String publicKey) {
+        return parseURL(publicKey) != null;
     }
 
-    private static URL parseURI(String publicKey) {
+    private static URL parseURL(String publicKey) {
         try {
             return new URI(publicKey).toURL();
         } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
