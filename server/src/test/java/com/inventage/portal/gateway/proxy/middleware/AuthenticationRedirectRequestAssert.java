@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.net.WWWFormCodec;
 import org.assertj.core.api.AbstractAssert;
 
 /**
@@ -134,16 +134,18 @@ public class AuthenticationRedirectRequestAssert
             return null;
         }
 
-        List<NameValuePair> responseParamsList = null;
+        URI uri = null;
         try {
-            responseParamsList = new URIBuilder(new URI(header), StandardCharsets.UTF_8).getQueryParams();
+            uri = new URI(header);
         } catch (URISyntaxException e) {
             testCtx.failNow(e);
             return null;
         }
+
+        final List<NameValuePair> responseParamsList = WWWFormCodec.parse(uri.getQuery(), StandardCharsets.UTF_8);
         VertxAssertions.assertNotNull(testCtx, responseParamsList);
-        final Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
-            entry -> entry.getName(), entry -> entry.getValue()));
+        final Map<String, String> responseParamsMap = responseParamsList.stream()
+            .collect(Collectors.toMap(entry -> entry.getName(), entry -> entry.getValue()));
 
         return responseParamsMap;
     }
