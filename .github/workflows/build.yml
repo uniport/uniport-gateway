@@ -54,6 +54,8 @@ jobs:
           settings-file: .github/settings.xml
 
       - name: Maven build
+        env:
+          HELM_REGISTRY_CONFIG: "~/.docker/config.json"
         run: |
           mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -P!local,ci -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
 
