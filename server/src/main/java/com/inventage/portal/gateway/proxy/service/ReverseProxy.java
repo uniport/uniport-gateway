@@ -230,7 +230,7 @@ public class ReverseProxy extends TraceMiddleware {
                 final String version = outgoingRequest.version().alpnName();
                 final String method = outgoingRequest.getMethod().name();
                 final String uri = outgoingRequest.getURI();
-                final String authority = outgoingRequest.getAuthority().toString();
+                final String authority = outgoingRequest.proxiedRequest().authority().toString();
                 final String headers = headersToString(outgoingRequest.headers());
 
                 log(String.format("%s %s %s - Host: %s - %s",
