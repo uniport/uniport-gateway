@@ -66,9 +66,3 @@ PORTAL_GATEWAY_BASE_PROXY_HOST=local-portal-base-proxy
 PORTAL_GATEWAY_DASHBOARD_PROXY_HOST=local-portal-dashboard-proxy
 PORTAL_GATEWAY_ORGANISATION_PROXY_HOST=local-portal-organisation-proxy
 ```
-
-## Visulisierungen
-
-### Konzept des Sessionbags
-
-![Session Bag](.docs/SessionBag.png)
