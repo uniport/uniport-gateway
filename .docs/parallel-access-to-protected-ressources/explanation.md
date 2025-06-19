@@ -86,7 +86,6 @@ Fälle
 - mit existierender Authentisierung, parallele Requests auf eine andere Applikation
 - mit existierender Authentisierung, parallele Requests auf zwei andere, unterschiedliche Applikationen
 
-
 Der `state` Parameter des Authentication Requests wird genutzt, damit die ursprünglich aufgerufene URL und die dafür verwendete HTTP Methode über den ganzen Authentication Flow erhalten bleiben. Es kommt dafür im `RelyingPartyHandler` die Klasse `StateWithUri` zum Einsatz. Der Wert des `state` Parameters entspricht dem String von "base64(Zufallszahl:HTTP-Methode@base64(URI))"
 
 ### FIX: PORTAL-1184
