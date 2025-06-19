@@ -69,10 +69,6 @@ PORTAL_GATEWAY_ORGANISATION_PROXY_HOST=local-portal-organisation-proxy
 
 ## Visulisierungen
 
-## Beispielflow
-
-![Example Flow](.docs/ExampleFlow.png)
-
 ### Konzept des Sessionbags
 
 ![Session Bag](.docs/SessionBag.png)
