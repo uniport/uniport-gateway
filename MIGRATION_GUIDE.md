@@ -2,6 +2,30 @@
 
 ## `9.*.*` -> `10.*.*`
 
+### Chart publishing
+The chart is now available at `oci://uniportcr.artifacts.inventage.com/charts`. If you have previously downloaded the chart
+from the helm repository you will have to update the chart repository source, e.g. in the Chart.yaml:
+
+```
+# Previous versions
+dependencies:
+  - name: portal-gateway
+    version: "9.x.y"
+    repository: "https://nexus3.inventage.com/repository/inventage-portal-helm/"
+...
+# New version
+dependencies:
+  - name: portal-gateway
+    version: "10.x.y"
+    repository: "oci://uniportcr.artifacts.inventage.com/charts"
+...
+# New version (using docker-registry hostname, port might change depending on your group settings)
+dependencies:
+  - name: portal-gateway
+    version: "10.x.y"
+    repository: "oci://docker-registry.inventage.com:10094/charts"
+```
+
 ### OCI registry
 
 Change the OCI registry for pulling images from `docker-registry.inventage.com:10094` to `uniportcr.artifacts.inventage.com`.

@@ -22,6 +22,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - **BREAKING** Use screaming snake-case for env vars ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
 - **BREAKING** Changed the type of the `bearerOnly` middleware option `optional` from String to Boolean, if it not an environment variable ([PORTAL-2414](https://inventage-all.atlassian.net/browse/PORTAL-2414)).
 - Change the internal representation of the static configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
+- **BREAKING** (chart only): Publish chart to OCI registry instead of chart repository ([PORTAL-2298](https://inventage-all.atlassian.net/browse/PORTAL-2298))
 
 ### Removed
 
