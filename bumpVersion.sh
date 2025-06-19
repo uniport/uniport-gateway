@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eEuCo pipefail
 
 function printUsage {
     cat <<EOF
@@ -13,8 +13,7 @@ function printUsage {
 EOF
 }
 
-if [[ "$#" -eq 0 ]]
- then
+if [[ "$#" -eq 0 ]]; then
     printUsage
     exit
 fi
@@ -23,4 +22,4 @@ readonly newVersion=$1
 
 mvn versions:set \
     -DgenerateBackupPoms=false \
-    -DnewVersion=${newVersion}
+    -DnewVersion="${newVersion}"
