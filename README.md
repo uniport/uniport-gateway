@@ -4,7 +4,7 @@
 
 Der Portal Gateway Server agiert als Reverse Proxy für alle Request des Portals.
 
-![Concept Overview](.docs/ConceptOverview.png)
+![Concept](.docs/Concept.png)
 
 Für die Konfiguration des Portal Gateway Servers wird eine JSON Datei verwendet. Diese wird in der angegebenen Reihenfolge gesucht:
 
