@@ -4,7 +4,7 @@ library identifier: 'portal-jenkinsfile-library@stable', retriever: modernSCM([
 
 releasePipeline(
     releaseMvnArtifacts: true,
-    releaseHelmCharts: true,
+    releaseHelmCharts: false,
     releaseNpmPackages: false,
     releaseContainerImages: true,
     createGitTag: true,

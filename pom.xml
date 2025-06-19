@@ -367,16 +367,26 @@
                         <useLocalHelmBinary>false</useLocalHelmBinary>
                         <debug>true</debug>
                         <uploadRepoSnapshot>
-                            <name>${nexus3.helm.repository.push.id}</name>
-                            <url>${nexus3.helm.registry.push.url}/${nexus3.helm.repository.push.id}/</url>
-                            <type>NEXUS</type>
+                            <name>inventage-portal-group</name>
+                            <url>uniportcr.artifacts.inventage.com/charts</url>
                         </uploadRepoSnapshot>
                         <uploadRepoStable>
-                            <name>${nexus3.helm.repository.push.id}</name>
-                            <url>${nexus3.helm.registry.push.url}/${nexus3.helm.repository.push.id}/</url>
-                            <type>NEXUS</type>
+                            <name>inventage-portal-group</name>
+                            <url>uniportcr.artifacts.inventage.com/charts</url>
                         </uploadRepoStable>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-upload</id>
+                            <goals>
+                                <goal>push</goal>
+                            </goals>
+                            <phase>deploy</phase>
+                            <configuration>
+                                <skipUpload>true</skipUpload>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <!-- Code Coverage report generation -->
                 <plugin>
