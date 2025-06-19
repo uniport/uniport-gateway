@@ -47,6 +47,13 @@ jobs:
           username: ${{ vars.NEXUS3_USER }}
           password: ${{ secrets.NEXUS3_PW }}
 
+      - name: Setup Helm Registries
+        env:
+          HELM_REGISTRY_CONFIG: "~/.docker/config.json"
+        run: |
+          helm env
+          helm registry login uniportcr.artifacts.inventage.com --username ${CI_AUTH_USR} --password ${CI_AUTH_PSW} 
+
       - name: Set version
         uses: uniport/workflows/.github/actions/set-maven-project-version@main
         with:
