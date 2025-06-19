@@ -6,12 +6,6 @@
     </envs>
     <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.GatewayLauncher" />
     <module name="server" />
-    <extension name="coverage">
-      <pattern>
-        <option name="PATTERN" value="com.inventage.portal.gateway.setup.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-    </extension>
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
       <option name="IS_SUBST" value="false" />
