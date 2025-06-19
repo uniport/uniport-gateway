@@ -14,6 +14,7 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.net.HostAndPort;
 import io.vertx.core.net.JksOptions;
+import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.httpproxy.HttpProxy;
 import io.vertx.httpproxy.ProxyContext;
@@ -37,6 +38,7 @@ public class ReverseProxy extends TraceMiddleware {
     private static final CharSequence X_FORWARDED_PROTO = HttpHeaders.createOptimized("x-forwarded-proto");
     private static final CharSequence X_FORWARDED_HOST = HttpHeaders.createOptimized("x-forwarded-host");
     private static final CharSequence X_FORWARDED_PORT = HttpHeaders.createOptimized("x-forwarded-port");
+    private static final CharSequence X_FORWARDED_FOR = HttpHeaders.createOptimized("x-forwarded-for");
 
     private static final String HTTPS = "https";
 
@@ -153,13 +155,19 @@ public class ReverseProxy extends TraceMiddleware {
                 useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PROTO, proto);
 
                 final HostAndPort authority = request.authority();
-                useOrSetHeader(incomingRequest.headers(), X_FORWARDED_HOST, authority.toString());
+                if (authority != null) {
+                    useOrSetHeader(incomingRequest.headers(), X_FORWARDED_HOST, authority.toString());
 
-                if (request.authority() != null) {
                     final int port = authority.port();
                     if (port > 0) {
                         useOrSetHeader(incomingRequest.headers(), X_FORWARDED_PORT, String.valueOf(port));
                     }
+
+                }
+
+                final SocketAddress remoteAddress = request.remoteAddress();
+                if (remoteAddress != null) {
+                    incomingRequest.headers().add(X_FORWARDED_FOR, remoteAddress.toString());
                 }
 
                 return proxyContext.sendRequest();
@@ -168,22 +176,25 @@ public class ReverseProxy extends TraceMiddleware {
     }
 
     /**
-     * Generally, x-forwarded header should be extended. But apparently, hosts like keycloak refuse to serve
-     * traffic that has 'http' in its 'x-forwarded-proto' header. As the portal-gateway is running behind and
-     * ingress, that terminates TLS, the public protocol is always 'https', but the ingress talks plain 'http'
-     * with the portal-gateway.
+     * Generally, x-forwarded headers should only be added, if they are not yet present on the request.
+     * One exception is x-forwarded-for, that should be extended by each intermediate proxy.
+     * 
+     * See
+     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Proto
+     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Host
+     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
      * 
      * @param headers
      * @param headerName
      * @param headerValue
      */
     private void useOrSetHeader(MultiMap headers, CharSequence headerName, String headerValue) {
-        if (headers.contains(headerName)) { // use
+        if (headers.contains(headerName)) {
             LOGGER.debug("using provided header '{}' with '{}'", headerName, headers.get(headerName));
-        } else { // set
-            LOGGER.debug("setting header '{}' to '{}'", headerName, headerValue);
-            headers.set(headerName, headerValue);
+            return;
         }
+        LOGGER.debug("setting header '{}' to '{}'", headerName, headerValue);
+        headers.set(headerName, headerValue);
     }
 
     /**

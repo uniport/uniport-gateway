@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.RequestOptions;
@@ -21,6 +22,7 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ public class ReverseProxyTest {
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
     private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
 
     @Test
     void correctHostHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
@@ -60,14 +63,18 @@ public class ReverseProxyTest {
     @Test
     void proxyTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final String host = "localhost";
+        final String host = "127.0.0.1";
         final int proxyPort = TestUtils.findFreePort();
         final int backendPort = TestUtils.findFreePort();
+        final AtomicReference<String> clientAddressHolder = new AtomicReference<>();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
             VertxAssertions.assertEquals(testCtx, "http", ctx.request().headers().get(X_FORWARDED_PROTO));
             VertxAssertions.assertEquals(testCtx, host + ":" + proxyPort, ctx.request().headers().get(X_FORWARDED_HOST));
             VertxAssertions.assertEquals(testCtx, String.valueOf(proxyPort), ctx.request().headers().get(X_FORWARDED_PORT));
+
+            VertxAssertions.assertEquals(testCtx, host + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
+            VertxAssertions.assertEquals(testCtx, clientAddressHolder.get(), ctx.request().headers().get(X_FORWARDED_FOR));
 
             ctx.response().end();
         };
@@ -77,14 +84,26 @@ public class ReverseProxyTest {
             .withBackend(vertx, backendPort, backendHandler)
             .build().start(proxyPort);
 
-        //when
-        gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            response.body().onComplete((body) -> {
-                //then
-                VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
-                testCtx.completeNow();
-            });
-        });
+        // in order to capture the local address of the client we need to assemble it http client ourself
+        final RequestOptions opt = new RequestOptions()
+            .setHost(host)
+            .setPort(proxyPort)
+            .setURI("/")
+            .setMethod(HttpMethod.GET);
+
+        // when
+        vertx.httpClientBuilder()
+            .withConnectHandler(connection -> clientAddressHolder.set(connection.localAddress().toString()))
+            .build()
+            .request(opt)
+            .compose(HttpClientRequest::send)
+            .onComplete(testCtx.succeeding(response -> {
+                response.body().onComplete((body) -> {
+                    // then
+                    VertxAssertions.assertEquals(testCtx, HttpResponseStatus.OK.code(), response.statusCode());
+                    testCtx.completeNow();
+                });
+            }));
     }
 
     @Test

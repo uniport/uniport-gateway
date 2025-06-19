@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Starting with this release, please use the following OCI registry `uniportcr.artifacts.inventage.com` i.e. `uniportcr.artifacts.inventage.com/com.inventage.portal.gateway.portal-gateway:<version>`.
 
+### Added
+
+- Added support for the `X-Forwarded-For` header [PORTAL-2460](https://inventage-all.atlassian.net/browse/PORTAL-2460).
+
 ### Changed
 
 - **BREAKING** Changed the configuration JSON schema key in the `session` middleware from `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds` ([PORTAL-2378](https://inventage-all.atlassian.net/browse/PORTAL-2378)).
