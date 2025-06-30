@@ -654,7 +654,7 @@
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
                         <!-- Keep same version as used by the IntelliJ plugin, see IntelliJ IDEA > Preferences > Tools > Checkstyle -->
-                        <version>10.25.0</version>
+                        <version>10.26.1</version>
                     </dependency>
                 </dependencies>
             </plugin>
