@@ -35,7 +35,7 @@ jobs:
 
   deploy:
     name: Trigger Deployment (dev)
-    if: ${{ inputs.deploy_to_dev || github.event_name == 'push' }}
+    if: ${{ inputs.deploy_to_dev || github.event_name == 'push' || github.event_name == 'schedule' }}
     needs: [build]
     uses: uniport/workflows/.github/workflows/deploy-dev.yml@main
     with:
@@ -47,7 +47,7 @@ jobs:
 
   archetype:
     name: Update Archetype
-    if: ${{ inputs.update_archetype || github.event_name == 'push' }}
+    if: ${{ inputs.update_archetype || github.event_name == 'push' || github.event_name == 'schedule' }}
     needs: [build]
     uses: uniport/workflows/.github/workflows/update-archetype.yml@main
     with:
