@@ -142,6 +142,8 @@ public class ReverseProxy extends TraceMiddleware {
      * 
      * We also set 'x-forwarded-proto' and 'x-forwarded-port'.
      * 
+     * See https://github.com/eclipse-vertx/vertx-http-proxy/issues/130
+     * 
      * @param proxy
      */
     protected void setXForwardedHeaders(HttpProxy proxy) {
