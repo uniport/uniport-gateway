@@ -30,6 +30,10 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - **BREAKING**: Removed entrypoint configuration `sessionIdleTimeout` ([PORTAL-2144](https://inventage-all.atlassian.net/browse/PORTAL-2144)).
 - **BREAKING**: Removed deprecated language middleware cookie name `ips.language` ([PORTAL-2144](https://inventage-all.atlassian.net/browse/PORTAL-2144)).
 
+### Fixed
+
+- Fix websocket upgrade error [PORTAL-2445](https://inventage-all.atlassian.net/browse/PORTAL-2445).
+
 ## [9.5.0]-202506100904-135-d216a4a - 2025-06-10
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%229.5.0-202506100904-135-d216a4a%22)
