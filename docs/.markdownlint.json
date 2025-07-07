@@ -1,0 +1,16 @@
+{
+    "line-length": {
+        "line_length": -1
+    },
+    "ul-indent": {
+        "indent": 4
+    },
+    "list-marker-space": false,
+    "code-block-style": false,
+    "no-bare-urls": false,
+    "no-inline-html": false,
+    "no-duplicate-heading": false,
+    "no-trailing-punctuation": {
+        "punctuation": ".,;:!。，；：！"
+    }
+}

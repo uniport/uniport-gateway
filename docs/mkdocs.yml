@@ -1,0 +1,83 @@
+# @see https://github.com/squidfunk/mkdocs-material/blob/master/mkdocs.yml
+site_name: Uniport-Gateway Documentation
+
+# Breaks docker usage of mkdocs :/
+# @see https://github.com/squidfunk/mkdocs-material/issues/1691
+# strict: true
+
+theme:
+  name: material
+  logo: assets/img/uniport-symbol-white.svg
+  favicon: assets/img/favicon-32x32.png
+  font:
+    text: DM Sans
+    code: DM Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.indexes
+#    - navigation.instant
+#    - navigation.expand
+#    - navigation.sections
+
+# Styles
+extra_css:
+  - assets/css/extra.css
+
+# Repository
+repo_name: portal-gateway
+repo_url: https://github.com/uniport/portal-gateway
+# edit_uri: browse
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - footnotes
+  - toc:
+      toc_depth: 5
+      permalink: true
+  # @see https://facelessuser.github.io/pymdown-extensions/
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format:
+            !!python/name:pymdownx.superfences.fence_code_format # Page tree
+
+
+nav:
+  - Home: README.md
+  - Einführung:
+      - introduction/README.md
+      - Portal-Gateway: introduction/portal-gateway.md
+  - Getting Started:
+      - getting-started/README.md
+  - Configuration & Deployment:
+      - configuration-deployment/README.md
+      - Portal-Gateway: configuration-deployment/portal-gateway.md
+  - Customization:
+      - customization/README.md
+      - Portal-Gateway: customization/portal-gateway.md
+  - Extending & Developing:
+      - extending-developing/README.md
+      - Portal-Gateway: extending-developing/portal-gateway.md
+      - Entwickler-Tools: extending-developing/entwickler-tools.md
+  - API:
+      - api/README.md
+      - Portal-Gateway: api/portal-gateway.md
+  - Cheat Sheets:
+      - cheat-sheets/README.md
+      - Logs: cheat-sheets/logs.md
+  - Troubleshooting:
+      - troubleshooting/README.md
+      - Portal-Gateway: troubleshooting/portal-gateway.md

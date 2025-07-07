@@ -11,6 +11,7 @@
 !/.idea/sqldialects.xml
 !/.idea/prettier.xml
 !/.idea/eclipseCodeFormatter.xml
+!/.idea/inspectionProfiles/
 *.iml
 
 # Ignore all VS Code stuff and include the important things
@@ -36,3 +37,10 @@ helm/src/main/resources/proxy-config.specific/
 
 # ASDF
 .tool-versions
+
+# documentation
+docs/node_modules/
+docs/build/
+
+# macos
+*.DS_Store

@@ -1,0 +1,44 @@
+:root {
+  --md-primary-fg-color: #1c8484;
+  --md-primary-fg-color--light: #4cb2b0;
+  --md-primary-fg-color--dark: #006b68;
+  --md-accent-fg-color: #4cb2b0;
+}
+
+.md-header,
+.md-tabs {
+  background-color: var(--md-primary-fg-color--dark);
+}
+
+.md-typeset td code {
+  word-break: normal;
+}
+
+.md-typeset h5 {
+  text-transform: none;
+}
+
+.md-grid {
+  max-width: 80rem;
+}
+
+.md-typeset p {
+  max-width: 75ch;
+}
+
+.md-typeset :is(.admonition) p {
+  max-width: none;
+}
+
+[dir="ltr"] .md-header__title {
+  margin-left: 0.25rem;
+}
+
+.md-typeset h1,
+.md-typeset h2 {
+  font-weight: 700;
+}
+
+.md-typeset h1 {
+  color: var(--md-primary-fg-color--dark);
+}

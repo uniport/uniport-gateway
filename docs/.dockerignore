@@ -1,0 +1,8 @@
+# Exclude everything except what we include
+# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+**
+
+# Explicitly include files needed
+!docs/
+!includes/
+!mkdocs.yml
