@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is copied from:
- * https://github.com/vert-x3/vertx-web/blob/4.5.15/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
+ * https://github.com/vert-x3/vertx-web/blob/4.5.16/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
  *
  * The following changes were made:
  * - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
