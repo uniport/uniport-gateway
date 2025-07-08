@@ -8,6 +8,8 @@ on:
     secrets:
       NEXUS3_PW:
         required: true
+      MACDUFF_KEYCHAIN_PASSWORD:
+        required: true
     outputs:
       VERSION:
         description: "Build version"
@@ -19,10 +21,11 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: macduff
     env:
       CI_AUTH_USR: ${{ vars.NEXUS3_USER }}
       CI_AUTH_PSW: ${{ secrets.NEXUS3_PW }}
+      HELM_REGISTRY_CONFIG: "~/.docker/config.json"
     outputs:
       VERSION: ${{ steps.vars.outputs.RC_VERSION }}
       GROUP_ID: ${{ steps.vars.outputs.GROUP_ID }}
@@ -40,19 +43,21 @@ jobs:
 
       - name: Setup Java
         uses: uniport/workflows/.github/actions/setup-java@main
+        with:
+          architecture: ${{ contains(runner.name, 'macduff') && 'aarch64' || 'x64' }}
 
       - name: Setup Helm
         uses: uniport/workflows/.github/actions/add-helm-repositories@main
         with:
-          username: ${{ vars.NEXUS3_USER }}
-          password: ${{ secrets.NEXUS3_PW }}
+          username: ${{ env.CI_AUTH_USR }}
+          password: ${{ env.CI_AUTH_PSW }}
 
-      - name: Setup Helm Registries
-        env:
-          HELM_REGISTRY_CONFIG: "~/.docker/config.json"
-        run: |
-          helm env
-          helm registry login uniportcr.artifacts.inventage.com --username ${CI_AUTH_USR} --password ${CI_AUTH_PSW} 
+      - name: Login to Nexus Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: uniportcr.artifacts.inventage.com
+          username: ${{ env.CI_AUTH_USR }}
+          password: ${{ env.CI_AUTH_PSW }}
 
       - name: Set version
         uses: uniport/workflows/.github/actions/set-maven-project-version@main
@@ -60,9 +65,12 @@ jobs:
           version: ${{ steps.vars.outputs.RC_VERSION }}
           settings-file: .github/settings.xml
 
+      - name: Unlock keychain
+        if: contains(runner.name, 'macduff')
+        run: |
+          security unlock-keychain -p "${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}"
+
       - name: Maven build
-        env:
-          HELM_REGISTRY_CONFIG: "~/.docker/config.json"
         run: |
           mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -P!local,ci -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
 
