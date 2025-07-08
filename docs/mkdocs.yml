@@ -73,5 +73,4 @@ nav:
   - Cheat Sheets:
       - Logs: 07-cheat-sheets/logs.md
   - Troubleshooting:
-      - 08-troubleshooting/README.md
-      - Portal-Gateway: 08-troubleshooting/portal-gateway.md
+      - 08-troubleshooting/index.md
