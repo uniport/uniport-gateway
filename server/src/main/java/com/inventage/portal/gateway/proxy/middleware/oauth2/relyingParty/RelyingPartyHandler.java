@@ -589,6 +589,7 @@ public final class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Au
 
             authProvider.authenticate(credentials, res -> {
                 if (res.failed()) {
+                    LOGGER.warn("authProvider authenticate failed '{}')", res.cause() == null ? "unknown" : res.cause().getMessage());
                     ctx.fail(res.cause());
                 } else {
                     ctx.setUser(res.result());
@@ -597,6 +598,7 @@ public final class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Au
                         // the user has upgraded from unauthenticated to authenticated
                         // session should be upgraded as recommended by owasp
                         session.regenerateId();
+                        LOGGER.trace("session id regenerated to new value '{}...'", session.id().substring(0, 5));
                     } else {
                         // there is no session object so we cannot keep state.
                         // if there is no session and the resource is relative

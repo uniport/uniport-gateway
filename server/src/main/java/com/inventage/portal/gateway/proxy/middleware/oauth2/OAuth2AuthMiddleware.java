@@ -189,7 +189,12 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
             }
         }
         if (asyncResult.failed()) {
-            LOGGER.warn("End handler failed '{}'", asyncResult.cause());
+            if (asyncResult.cause() != null) {
+                LOGGER.warn("End handler failed '{}'", asyncResult.cause().getMessage());
+                asyncResult.cause().printStackTrace();
+            } else {
+                LOGGER.warn("End handler failed with unknown failure.");
+            }
         }
         OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
     }
