@@ -3,6 +3,6 @@
 **
 
 # Explicitly include files needed
-!docs/
+!content/
 !includes/
 !mkdocs.yml

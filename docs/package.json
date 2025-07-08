@@ -13,7 +13,7 @@
         "build": "docker run --rm -v ${PWD}:/docs docker-registry.inventage.com:10094/squidfunk/mkdocs-material:$npm_package_config_version_mkdocs build --site-dir build",
         "check:links:base": "docker run --rm -v ${PWD}:/lychee docker-registry.inventage.com:10094/lycheeverse/lychee:$npm_package_config_version_lychee -c /lychee/lychee.toml",
         "check:links:build": "npm run check:links:base -- '/lychee/build/**/*.html'",
-        "check:links:source": "npm run check:links:base -- '/lychee/docs/**/*.md'",
+        "check:links:source": "npm run check:links:base -- '/lychee/content/**/*.md'",
         "format": "run-p format:*",
         "format:package-json": "prettier-package-json --write package.json",
         "format:prettier": "prettier '**/*.md' --write --ignore-path .gitignore",
