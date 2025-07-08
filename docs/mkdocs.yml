@@ -23,12 +23,12 @@ theme:
     text: DM Sans
     code: DM Mono
   features:
-    - navigation.tabs
-    - navigation.tabs.sticky
+    # - navigation.tabs
+    # - navigation.tabs.sticky
     - navigation.top
     - navigation.indexes
-    #    - navigation.sections
-    #    - navigation.expand
+    - navigation.sections
+    - navigation.expand
 
 # Styles
 extra_css:
@@ -63,12 +63,11 @@ markdown_extensions:
 
 
 nav:
-  - Home: README.md
-  - Einführung:
-      - 01-introduction/README.md
-      - Portal-Gateway: 01-introduction/portal-gateway.md
+  - Uniport: README.md
+  - Einführung: 01-introduction/portal-gateway.md
   - Getting Started:
       - 02-getting-started/README.md
+      - Portal-Gateway: 02-getting-started/portal-gateway.md
   - Configuration & Deployment:
       - 03-configuration-deployment/README.md
       - Portal-Gateway: 03-configuration-deployment/portal-gateway.md
