@@ -71,7 +71,6 @@ nav:
   - Extending & Developing: 05-extending-developing/index.md
   - API: 06-api/index.md
   - Cheat Sheets:
-      - 07-cheat-sheets/README.md
       - Logs: 07-cheat-sheets/logs.md
   - Troubleshooting:
       - 08-troubleshooting/README.md
