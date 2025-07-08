@@ -1,4 +1,28 @@
-# Entwickler-Tools
+# Extending & Developing
+
+## JSON Schemas for configuration files
+
+Starting with portal-gateway version `8.0.0`, we provide JSON schemas that can be used to validate your configuration files.
+
+### Usage
+
+There are two JSON schemas, `portalGatewayStaticSchema.json` for the static and `portalGatewayDynamicSchema.json` for the dynamic configuration file. Both files are included in the following artifact:
+
+```xml
+<dependency>
+    <groupId>com.inventage.portal.gateway</groupId>
+    <artifactId>config-schemas</artifactId>
+    <version>${portal-gateway.version}</version>
+</dependency>
+```
+
+You can either manually extract schemas, or use a maven plugin to automate their extraction (for example, `maven-depedency-plugin`).
+
+### Helpful links
+
+- [IntelliJ: Using custom JSON schemas](https://www.jetbrains.com/help/idea/json.html#ws_json_schema_add_custom)
+- [About JSON Schemas](https://json-schema.org/)
+- [JSON Schema Validator](https://www.jsonschemavalidator.net/)
 
 ## Code Quality
 

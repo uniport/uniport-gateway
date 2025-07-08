@@ -68,10 +68,7 @@ nav:
   - Getting Started: 02-getting-started/index.md
   - Configuration & Deployment: 03-configuration-deployment/index.md
   - Customization: 04-customization/index.md
-  - Extending & Developing:
-      - 05-extending-developing/README.md
-      - Portal-Gateway: 05-extending-developing/portal-gateway.md
-      - Entwickler-Tools: 05-extending-developing/entwickler-tools.md
+  - Extending & Developing: 05-extending-developing/index.md
   - API:
       - 06-api/README.md
       - Portal-Gateway: 06-api/portal-gateway.md

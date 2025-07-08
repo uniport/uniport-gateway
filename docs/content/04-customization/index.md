@@ -17,7 +17,7 @@ Die zweite Stufe ist abhängig von den `providers` aus der statischen Konfigurat
 
 Sowohl für die statische als auch für die dynamische Konfiguration gibt es JSON-Schemas, die die Struktur der Konfiguration festlegen. Moderne IDEs (z. B. IntelliJ) können das JSON-Schema verwenden, um den Entwickler beim Schreiben und Validieren der Konfiguration zu unterstützen.
 
-Weitere Informationen zur Benutzung der JSON-Schemas findest du unter dem folgenden [Link](../05-extending-developing/portal-gateway.md#json-schemas-for-configuration-files).
+Weitere Informationen zur Benutzung der JSON-Schemas findest du unter dem folgenden [Link](../05-extending-developing/index.md#json-schemas-for-configuration-files).
 
 ### Statische Konfiguration
 
