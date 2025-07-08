@@ -1,4 +1,4 @@
-# Portal-Gateway
+# Configuration & Deployment
 
 The Portal-Gateway has two different types of configuration, a `static` configuration and `dynamic` configurations:
 

@@ -63,14 +63,21 @@ markdown_extensions:
 
 
 nav:
-  - Uniport: README.md
-  - Introduction: 01-introduction/index.md
-  - Getting Started: 02-getting-started/index.md
-  - Configuration & Deployment: 03-configuration-deployment/index.md
-  - Customization: 04-customization/index.md
-  - Extending & Developing: 05-extending-developing/index.md
-  - API: 06-api/index.md
+  - Uniport:
+      - README.md
+  - Introduction:
+      - 01-introduction/index.md
+  - Getting Started:
+      - 02-getting-started/index.md
+  - Configuration & Deployment:
+      - 03-configuration-deployment/index.md
+  - Customization:
+      - 04-customization/index.md
+  - Extending & Developing:
+      - 05-extending-developing/index.md
+  - API:
+      - 06-api/index.md
   - Cheat Sheets:
-      - Logs: 07-cheat-sheets/logs.md
+      - 07-cheat-sheets/index.md
   - Troubleshooting:
       - 08-troubleshooting/index.md

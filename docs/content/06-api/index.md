@@ -1,4 +1,4 @@
-# Portal-Gateway
+# API
 
 ## Backend
 
@@ -10,10 +10,10 @@ Das Portal-Gateway bietet die Möglichkeit via folgenden `middlewares` Typen das
 
 Die `controlApi` Middleware analysiert die Header der Antworten der weitergeleiteten HTTP Anfragen um vordefinierte Aktionen auszuführen. Das Control API bietet folgenden Aktionen:
 
-| Aktion | Beschreibung |
-| --- | --- |
+| Aktion              | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SESSION_TERMINATE` | Diese Aktion ruft den `end_session_endpoint` des verwendeten Identity Providers auf um dort die Session zu beenden. Parallel dazu wird die Session auf dem Gateway selbst gelöscht. _Bemerkung_: Der `end_session_endpoint` wird vom Identity Provider zur Verfügung gestellt und via `OpenID Connect Discovery` abgefragt. Beispiel für einen Logout Request: `http://portal-iam:8080/auth/realms/portal/protocol/openid-connect/logout?id_token_hint=eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Y0p4dWNXRDF...` |
-| `SESSION_RESET` | Diese Aktion entfernt alle Session Scopes (JWTs) und entfernt alle Cookies vom Session Bag des eingeloggten Benutzers, die nicht mit `KEYCLOAK_` in Namen anfangen. Mit dieser Aktion kann der Benutzer zwischen mehreren Organisationen wechseln, bei denen er verschiedene Rollen besitzt, ohne sich ausloggen zu müssen. |
+| `SESSION_RESET`     | Diese Aktion entfernt alle Session Scopes (JWTs) und entfernt alle Cookies vom Session Bag des eingeloggten Benutzers, die nicht mit `KEYCLOAK_` in Namen anfangen. Mit dieser Aktion kann der Benutzer zwischen mehreren Organisationen wechseln, bei denen er verschiedene Rollen besitzt, ohne sich ausloggen zu müssen.                                                                                                                                                                                                |
 
 Eine Aktion wird wie folgt konfiguriert:
 

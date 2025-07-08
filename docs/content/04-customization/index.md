@@ -1,4 +1,4 @@
-# Portal-Gateway
+# Customization
 
 Sollen neue Microservices über den Portal-Gateway erreichbar sein, so muss eine eigene Konfiguration erstellt und eingebunden werden. Die nächsten Abschnitte beschrieben das Vorgehen dafür.
 

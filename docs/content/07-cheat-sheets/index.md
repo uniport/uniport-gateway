@@ -1,4 +1,4 @@
-# Logs
+# Cheat Sheets
 
 ## Kubernetes
 
