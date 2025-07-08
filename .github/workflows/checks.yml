@@ -2,9 +2,6 @@ name: Branch Checks
 
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - "master"
 
 # Prevent running checks for the same branch in parallel
 # New workflows will cancel existing workflows…
