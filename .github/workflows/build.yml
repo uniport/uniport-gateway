@@ -46,6 +46,11 @@ jobs:
         with:
           architecture: ${{ contains(runner.name, 'macduff') && 'aarch64' || 'x64' }}
 
+      - name: Unlock keychain
+        if: contains(runner.name, 'macduff')
+        run: |
+          security unlock-keychain -p "${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}"
+
       - name: Setup Helm
         uses: uniport/workflows/.github/actions/add-helm-repositories@main
         with:
@@ -64,11 +69,6 @@ jobs:
         with:
           version: ${{ steps.vars.outputs.RC_VERSION }}
           settings-file: .github/settings.xml
-
-      - name: Unlock keychain
-        if: contains(runner.name, 'macduff')
-        run: |
-          security unlock-keychain -p "${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}"
 
       - name: Maven build
         run: |
