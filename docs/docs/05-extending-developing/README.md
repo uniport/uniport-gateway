@@ -6,7 +6,7 @@ Die Inventage Portal Solution stellt für die Entwicklung eines neuen Microservi
 
 ## Maven Archetype `portal-hasura-quarkus-postgres`
 
-Damit der Uniport Archetype über den `mvn` Befehl genutzt werden kann, muss in den Maven Einstellungen unter `~/.m2/settings.xml` das `archetype` Repository konfiguriert werden. Die notwendigen Schritte dafür sind in der Anleitung [Getting Started](../getting-started/maven-archetype.md) aufgezeigt.
+Damit der Uniport Archetype über den `mvn` Befehl genutzt werden kann, muss in den Maven Einstellungen unter `~/.m2/settings.xml` das `archetype` Repository konfiguriert werden. Die notwendigen Schritte dafür sind in der Anleitung [Getting Started](../02-getting-started/maven-archetype.md) aufgezeigt.
 
 Anschliessend kann das Maven Archetype Plugin aufgerufen werden:
 
@@ -425,7 +425,7 @@ Als Vorgehen bei der Erweiterung des lesenden GraphQL APIs werden folgende Schri
 
 ### Modul: frontend
 
-Wir gehen für diese Anleitung davon aus, dass alle notwendigen Uniport Komponenten gemäss [Getting-Started](../getting-started/README.md) aufgesetzt sind und als Docker-Container laufen. Möchte man nun an einem Microservice am Frontend arbeiten, kann die Frontend-Konfiguration in einem Microservice entsprechend angepasst werden. Wir erläutern dies am Beispiel des Organisation-Microservice.
+Wir gehen für diese Anleitung davon aus, dass alle notwendigen Uniport Komponenten gemäss [Getting-Started](../02-getting-started/README.md) aufgesetzt sind und als Docker-Container laufen. Möchte man nun an einem Microservice am Frontend arbeiten, kann die Frontend-Konfiguration in einem Microservice entsprechend angepasst werden. Wir erläutern dies am Beispiel des Organisation-Microservice.
 
 Im `frontend`-Modul eines Uniport Microservice wird jeweils ein Entwicklungsserver verwendet, um während der Entwicklung die Ressourcen (HTML, CSS, JS, etc.) für den Browser bereitzustellen und auszuliefern. In unserem Fall verwenden wir dazu den [Web Dev Server]. Die Konfiguration des [Web Dev Server] ist in der Datei `web-dev-server.config.mjs` erfasst.
 

@@ -2,7 +2,7 @@
 
 Diese Anleitung zeigt, wie eine Uniport Instanz konfiguriert und gestartet werden kann.
 
-Als Ausgangsbasis wird ein Uniport Projekt verwendet, wie es vom Archetype `inventage-portal-solution` erstellt wird. Für Details zum Erstellen eine Uniport Projekts siehe [Getting Started](../getting-started/README.md).
+Als Ausgangsbasis wird ein Uniport Projekt verwendet, wie es vom Archetype `inventage-portal-solution` erstellt wird. Für Details zum Erstellen eine Uniport Projekts siehe [Getting Started](../02-getting-started/README.md).
 
 Die Konfiguration ist in allen Uniport Komponenten gleich aufgebaut und erfolgt über Environment Variablen.
 

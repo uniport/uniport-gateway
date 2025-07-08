@@ -58,26 +58,26 @@ markdown_extensions:
 nav:
   - Home: README.md
   - Einführung:
-      - introduction/README.md
-      - Portal-Gateway: introduction/portal-gateway.md
+      - 01-introduction/README.md
+      - Portal-Gateway: 01-introduction/portal-gateway.md
   - Getting Started:
-      - getting-started/README.md
+      - 02-getting-started/README.md
   - Configuration & Deployment:
-      - configuration-deployment/README.md
-      - Portal-Gateway: configuration-deployment/portal-gateway.md
+      - 03-configuration-deployment/README.md
+      - Portal-Gateway: 03-configuration-deployment/portal-gateway.md
   - Customization:
-      - customization/README.md
-      - Portal-Gateway: customization/portal-gateway.md
+      - 04-customization/README.md
+      - Portal-Gateway: 04-customization/portal-gateway.md
   - Extending & Developing:
-      - extending-developing/README.md
-      - Portal-Gateway: extending-developing/portal-gateway.md
-      - Entwickler-Tools: extending-developing/entwickler-tools.md
+      - 05-extending-developing/README.md
+      - Portal-Gateway: 05-extending-developing/portal-gateway.md
+      - Entwickler-Tools: 05-extending-developing/entwickler-tools.md
   - API:
-      - api/README.md
-      - Portal-Gateway: api/portal-gateway.md
+      - 06-api/README.md
+      - Portal-Gateway: 06-api/portal-gateway.md
   - Cheat Sheets:
-      - cheat-sheets/README.md
-      - Logs: cheat-sheets/logs.md
+      - 07-cheat-sheets/README.md
+      - Logs: 07-cheat-sheets/logs.md
   - Troubleshooting:
-      - troubleshooting/README.md
-      - Portal-Gateway: troubleshooting/portal-gateway.md
+      - 08-troubleshooting/README.md
+      - Portal-Gateway: 08-troubleshooting/portal-gateway.md

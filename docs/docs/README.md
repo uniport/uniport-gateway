@@ -8,9 +8,9 @@ hide:
 
 | Anleitung |  |
 | --- | --- |
-| [Einführung](./introduction/README.md) | Was ist Uniport, eine Übersicht |
-| [Getting Started](./getting-started/README.md) | Erste Schritte mit Uniport |
-| [Configuration & Deployment](./configuration-deployment/README.md) | Konfiguration durch Environment Variablen und Installation auf Docker oder Kubernetes |
+| [Einführung](./01-introduction/README.md) | Was ist Uniport, eine Übersicht |
+| [Getting Started](./02-getting-started/README.md) | Erste Schritte mit Uniport |
+| [Configuration & Deployment](./03-configuration-deployment/README.md) | Konfiguration durch Environment Variablen und Installation auf Docker oder Kubernetes |
 | [Customization](./customization/README.md) | Anpassung von Uniport, welche über die Konfiguration von Environment Variablen hinaus geht |
 | [Extending & Developing](./extending-developing/README.md) | Erweiterung von Uniport |
 | [API](./api/README.md) | Dokumentation der APIs |

@@ -14,4 +14,4 @@ Allfällige Anpassungen erfolgen durch Veränderungen beim Bau des Docker Images
 
 ![Docker Image Custom](./data/IPS_Custom_Project_Customization.png)
 
-Als Ausgangsbasis wird die Verwendung des `inventage-portal-solution` Archetypes, wie in [Getting Started](../getting-started/README.md) beschrieben, empfohlen.
+Als Ausgangsbasis wird die Verwendung des `inventage-portal-solution` Archetypes, wie in [Getting Started](../02-getting-started/README.md) beschrieben, empfohlen.
