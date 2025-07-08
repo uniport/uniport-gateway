@@ -64,13 +64,9 @@ markdown_extensions:
 
 nav:
   - Uniport: README.md
-  - Einführung: 01-introduction/portal-gateway.md
-  - Getting Started:
-      - 02-getting-started/README.md
-      - Portal-Gateway: 02-getting-started/portal-gateway.md
-  - Configuration & Deployment:
-      - 03-configuration-deployment/README.md
-      - Portal-Gateway: 03-configuration-deployment/portal-gateway.md
+  - Introduction: 01-introduction/index.md
+  - Getting Started: 02-getting-started/index.md
+  - Configuration & Deployment: 03-configuration-deployment/index.md
   - Customization:
       - 04-customization/README.md
       - Portal-Gateway: 04-customization/portal-gateway.md
