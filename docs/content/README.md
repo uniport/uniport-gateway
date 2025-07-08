@@ -68,7 +68,7 @@ Wir unterscheiden bei den Uniport Komponenten zwischen Infrastruktur Komponenten
 
 ### Infrastruktur Komponenten
 
-#### [Portal-Gateway](./01-introduction/portal-gateway.md)
+#### [Portal-Gateway](./01-introduction/index.md)
 
 Die Portal-Gateway Infrastruktur Komponente dient dem Routing eines Requests zu den jeweiligen Uniport Komponenten.
 
