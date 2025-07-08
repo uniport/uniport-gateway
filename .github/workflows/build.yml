@@ -72,7 +72,7 @@ jobs:
 
       - name: Maven build
         run: |
-          mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -P!local,ci -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
+          mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
 
       - name: Checkstyle
         run: |
