@@ -11,6 +11,7 @@ jobs:
     # Can be skipped with the `no changelog` label on a PR
     name: Check Changelog
     runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.head_ref, 'dependabot/') }}
     steps:
       - uses: tarides/changelog-check-action@v3
         with:
