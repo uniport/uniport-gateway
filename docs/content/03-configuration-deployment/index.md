@@ -16,21 +16,21 @@ The simplest `provider` is the `file` provider. It reads the configuration from 
 
 Im Container Image von Portal-Gateway befindet sich im Verzeichnis `/etc/portal-gateway/default/` bereits eine `portal-gateway.json` Datei. Es wird empfohlen die projektspezifische `portal-gateway.json` Datei in einem anderen Verzeichnis (z.B. `/etc/portal-gateway/<PROJEKTNAME>/`) abzulegen und die `PORTAL_GATEWAY_JSON` Environment Variable auf diesen Pfad zu setzen.
 
-| Variable                                    | Beschreibung                                                                                                                                                                | Default                                           |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `PORTAL_GATEWAY_JSON`                       | Absoluter Pfad der JSON Datei für die statische Konfiguration                                                                                                               | -                                                 |
-| `PORTAL_GATEWAY_PUBLIC_PROTOCOL`            | HTTP Protokoll für die URL, welche ein Browser verwenden soll                                                                                                               | http                                              |
-| `PORTAL_GATEWAY_PUBLIC_HOSTNAME`            | HTTP Host Name für die URL, welche ein Browser verwenden soll                                                                                                               | portal.minikube                                   |
-| `PORTAL_GATEWAY_PUBLIC_PORT`                | HTTP Port für die URL, welche ein Browser verwenden soll                                                                                                                    | http: 80, https: 443                              |
-| `PORTAL_GATEWAY_LOG_LEVEL`                  | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF                                                                                                                      | INFO                                              |
-| `PORTAL_GATEWAY_LOGGING_CONFIG`             | Absoluter Pfad der `logback.xml` Datei, für die Logback Konfiguration                                                                                                       | /etc/portal-gateway/logback.xml                   |
-| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log Output wird als strukturierte JSON ausgegeben.                                                                                                                          | false                                             |
-| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY`    | Pfad oder URL                                                                                                                                                               | http://portal-iam:8080/auth/realms/portal         |
-| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER`        | Beschreibt den erwarteten Issuer im Access Token. Siehe `issuer` in [bearerOnly](../customization/portal-gateway.md#beareronly)                                             | http://ips.inventage.com:20000/auth/realms/portal |
-| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL`      | Gibt an, ob der Proxy ein Access Token erwarten (und somit überprüfen) sollte. Siehe `optional` in [bearerOnly](../customization/portal-gateway.md#beareronly)              | false                                             |
-| `PORTAL_GATEWAY_METRICS_PORT`               | HTTP Port für den Metrics Endpoint                                                                                                                                          | 9090                                              |
-| `PORTAL_GATEWAY_METRICS_PATH`               | HTTP Path für den Metrics Endpoint                                                                                                                                          | /metrics                                          |
-| `PORTAL_GATEWAY_CLUSTERED`                  | Switch, um den Portal-Gateway im Cluster Modus laufen zu lassen. Dafür muss auch die Anzahl deployten Instanzen (z.B. `replicas` in den Helm Value Files) angepasst werden. | false                                             |
+| Variable | Beschreibung | Default |
+| --- | --- | --- |
+| `PORTAL_GATEWAY_JSON` | Absoluter Pfad der JSON Datei für die statische Konfiguration | - |
+| `PORTAL_GATEWAY_PUBLIC_PROTOCOL` | HTTP Protokoll für die URL, welche ein Browser verwenden soll | http |
+| `PORTAL_GATEWAY_PUBLIC_HOSTNAME` | HTTP Host Name für die URL, welche ein Browser verwenden soll | portal.minikube |
+| `PORTAL_GATEWAY_PUBLIC_PORT` | HTTP Port für die URL, welche ein Browser verwenden soll | http: 80, https: 443 |
+| `PORTAL_GATEWAY_LOG_LEVEL` | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF | INFO |
+| `PORTAL_GATEWAY_LOGGING_CONFIG` | Absoluter Pfad der `logback.xml` Datei, für die Logback Konfiguration | /etc/portal-gateway/logback.xml |
+| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log Output wird als strukturierte JSON ausgegeben. | false |
+| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Pfad oder URL | http://portal-iam:8080/auth/realms/portal |
+| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Beschreibt den erwarteten Issuer im Access Token. Siehe `issuer` in [bearerOnly](../customization/portal-gateway.md#beareronly) | http://ips.inventage.com:20000/auth/realms/portal |
+| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Gibt an, ob der Proxy ein Access Token erwarten (und somit überprüfen) sollte. Siehe `optional` in [bearerOnly](../customization/portal-gateway.md#beareronly) | false |
+| `PORTAL_GATEWAY_METRICS_PORT` | HTTP Port für den Metrics Endpoint | 9090 |
+| `PORTAL_GATEWAY_METRICS_PATH` | HTTP Path für den Metrics Endpoint | /metrics |
+| `PORTAL_GATEWAY_CLUSTERED` | Switch, um den Portal-Gateway im Cluster Modus laufen zu lassen. Dafür muss auch die Anzahl deployten Instanzen (z.B. `replicas` in den Helm Value Files) angepasst werden. | false |
 
 Die 3 Variablen `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME` und `PORTAL_GATEWAY_PUBLIC_PORT` ergeben zusammen die öffentliche URL, welche vom Portal-Gateway für Redirects verwendet wird. Dies betrifft sowohl Redirects von der OAuth2 Middleware zum Portal-IAM, a
 
