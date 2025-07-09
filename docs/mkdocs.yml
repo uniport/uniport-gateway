@@ -29,6 +29,7 @@ theme:
     - navigation.indexes
     - navigation.sections
     - navigation.expand
+    - content.code.copy
 
 # Styles
 extra_css:
@@ -54,6 +55,8 @@ markdown_extensions:
   - pymdownx.highlight
   - pymdownx.smartsymbols
   - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
