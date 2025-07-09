@@ -1,53 +1,53 @@
 {
-    "private": true,
-    "name": "documentation",
-    "version": "0.0.0",
-    "description": "Uniport-Gateway Documentation",
-    "license": "proprietary",
-    "author": "Uniport <info@inventage.com>",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/uniport/portal-gateway.git"
-    },
-    "scripts": {
-        "build": "docker run --rm -v ${PWD}:/docs docker-registry.inventage.com:10094/squidfunk/mkdocs-material:$npm_package_config_version_mkdocs build --site-dir build",
-        "check:links:base": "docker run --rm -v ${PWD}:/lychee docker-registry.inventage.com:10094/lycheeverse/lychee:$npm_package_config_version_lychee -c /lychee/lychee.toml",
-        "check:links:build": "npm run check:links:base -- '/lychee/build/**/*.html'",
-        "check:links:source": "npm run check:links:base -- '/lychee/content/**/*.md'",
-        "format": "run-p format:*",
-        "format:package-json": "prettier-package-json --write package.json",
-        "format:prettier": "prettier '**/*.md' --write --ignore-path .gitignore",
-        "lint": "run-p -l lint:*",
-        "lint:markdown": "git ls-files '*.md' | xargs markdownlint",
-        "lint:prettier": "prettier '**/*.md' --check --ignore-path .gitignore",
-        "serve:build": "docker run --rm -it -p 8043:8043 -v ${PWD}/build:/srv/http pierrezemb/gostatic:$npm_package_config_version_gostatic",
-        "start": "docker run --rm -it -v ${PWD}:/docs -p 8000:8000 docker-registry.inventage.com:10094/squidfunk/mkdocs-material:$npm_package_config_version_mkdocs",
-        "test": "npm run check:links:source && npm run build && npm run check:links:build"
-    },
-    "config": {
-        "version_gostatic": "latest",
-        "version_lychee": "sha-0a54079",
-        "version_mkdocs": "9.6.11"
-    },
-    "devDependencies": {
-        "markdownlint-cli": "^0.44.0",
-        "npm-run-all": "^4.1.5",
-        "prettier": "^3.5.3",
-        "prettier-package-json": "^2.8.0"
-    },
-    "engines": {
-        "npm": ">=7"
-    },
-    "prettier": {
-        "printWidth": 160,
-        "overrides": [
-            {
-                "files": "**/*.md",
-                "options": {
-                    "tabWidth": 4,
-                    "proseWrap": "never"
-                }
-            }
-        ]
-    }
+  "private": true,
+  "name": "documentation",
+  "version": "0.0.0",
+  "description": "Uniport-Gateway Documentation",
+  "license": "proprietary",
+  "author": "Uniport <info@inventage.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uniport/portal-gateway.git"
+  },
+  "scripts": {
+    "build": "docker run --rm -v ${PWD}:/docs docker-registry.inventage.com:10094/squidfunk/mkdocs-material:$npm_package_config_version_mkdocs build --site-dir build",
+    "check:links:base": "docker run --rm -v ${PWD}:/lychee docker-registry.inventage.com:10094/lycheeverse/lychee:$npm_package_config_version_lychee -c /lychee/lychee.toml",
+    "check:links:build": "npm run check:links:base -- '/lychee/build/**/*.html'",
+    "check:links:source": "npm run check:links:base -- '/lychee/content/**/*.md'",
+    "format": "run-p format:*",
+    "format:package-json": "prettier-package-json --write package.json",
+    "format:prettier": "prettier '**/*.md' --write --ignore-path .gitignore",
+    "lint": "run-p -l lint:*",
+    "lint:markdown": "git ls-files '*.md' | xargs markdownlint",
+    "lint:prettier": "prettier '**/*.md' --check --ignore-path .gitignore",
+    "serve:build": "docker run --rm -it -p 8043:8043 -v ${PWD}/build:/srv/http pierrezemb/gostatic:$npm_package_config_version_gostatic",
+    "start": "docker run --rm -it -v ${PWD}:/docs -p 8000:8000 docker-registry.inventage.com:10094/squidfunk/mkdocs-material:$npm_package_config_version_mkdocs",
+    "test": "npm run check:links:source && npm run build && npm run check:links:build"
+  },
+  "config": {
+    "version_gostatic": "latest",
+    "version_lychee": "sha-0a54079",
+    "version_mkdocs": "9.6.11"
+  },
+  "devDependencies": {
+    "markdownlint-cli": "^0.44.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.5.3",
+    "prettier-package-json": "^2.8.0"
+  },
+  "engines": {
+    "npm": ">=7"
+  },
+  "prettier": {
+    "printWidth": 160,
+    "overrides": [
+      {
+        "files": "**/*.md",
+        "options": {
+          "tabWidth": 4,
+          "proseWrap": "never"
+        }
+      }
+    ]
+  }
 }

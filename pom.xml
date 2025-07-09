@@ -613,6 +613,7 @@
                             <include>**/*.json</include>
                         </includes>
                         <excludes>
+                            <exclude>**/package.json</exclude>
                             <exclude>**/frontend/**/*</exclude>
                             <exclude>**/config-schemas/**/dynamic.json</exclude>
                             <exclude>**/config-schemas/**/static.json</exclude>
