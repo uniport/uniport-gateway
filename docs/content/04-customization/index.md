@@ -655,6 +655,51 @@ The **Matomo Middleware** should be used exclusively with the Analytics microser
 
 The following **Entry-Middlewares** are typically attached to Entrypoints instead of Routers. However, it's also possible to use Entry-Middlewares as regular [(Route-)Middlewares](#middlewares) and vice versa. Entry-Middlewares are defined in the [static configuration](#static-configuration).
 
+##### `csp`
+
+!!! bug
+
+    Directives without values (e.g., sandbox) are only supported from Portal-Gateway Version 8.2.0+. Microservices (e.g., Portal-Monitoring) that return such directives as CSP-Policies will not function, meaning the Gateway cannot load the resources on that path.
+
+With the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) Middleware, we can define which resources the browser is allowed to load. As of Portal Gateway Version 8.1.0+, it is now possible to define multiple consecutive CSP-Middlewares for a route: e.g., general CSP-Policies on the Entry-Middleware and specific/restrictive CSP-Policies on each specific route. The union of all CSP-Policies will then be enforced.
+
+| Variable | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `reportOnly` | No | Boolean | false | Activates [Content-Security-Policy-Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only). If active, `report-to` must also be present as a directive. |
+| `policyDirectives` | Yes | Array | - | An array of Policy Directives. Each element (Directive) in the array is an object with the fields `directive` and `values`, where `values` is an array of multiple or single values. |
+| `mergeStrategy` | No | `UNION`, `INTERNAL`, `EXTERNAL` | `UNION` | The `mergeStrategy` determines how external CSP-Policies (e.g., set by Portal IAM) are used. External CSP-Policies are read from the `Content-Security-Policy` and `Content-Security-Policy-Report-Only` headers and combined/union. <br>With `UNION`, the union of the Middleware CSP Policies and the external CSP Policies is enforced as the final CSP Policy. <br>With `EXTERNAL`, the external CSP-Policy is enforced, and <br>with `INTERNAL`, the Middleware-Policy. |
+
+!!! warning
+
+    In the case of multiple CSP-Middlewares for a route, the last middleware processed determines the `mergeStrategy` between external and internal CSP-Policies. In the schema below, that is the `CSP2` Middleware or `Resp2`.
+
+    ![Portal-Gateway Session Handling](data/CSPMiddlewareFlow.png)
+
+!!! example
+
+    ```json
+    {
+        "name": "csp",
+        "type": "csp",
+        "options": {
+            "policyDirectives": [
+                {
+                    "directive": "default-src",
+                    "values": ["self"]
+                },
+                {
+                    "directive": "style-src",
+                    "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self", "unsafe-inline"]
+                }
+            ]
+        }
+    }
+    ```
+
+!!! note
+
+    A keen eye might have observed that the CSP-Policies are already configured and combined on the Request (`CSP1/Req1` and `CSP2/Req2` in the schema above). This ensures that CSP-Policies are enforced even if a Request is terminated by any Middleware and does not reach the Backend.
+
 ##### `openTelemetry`
 
 This Middleware ensures that the keys `traceId` and `sessionId` are available in the logging context. These are then used in the configuration of the Log Pattern via `%vcl{traceId}` so that every log output contains these two values.
@@ -680,6 +725,20 @@ This Middleware is (as of today: October 19, 2022) only used in combination with
 | Variable | Required | Type   | Default           | Description                                                     |
 | -------- | -------- | ------ | ----------------- | --------------------------------------------------------------- |
 | `name`   | No       | String | `uniport.session` | Name of the session cookie. Must match [cookie.name](#session). |
+
+##### `requestResponseLogger`
+
+Logs each request and/or response and adds the `requestId` and `sessionId` to the contextual data. Depending on the configured Log-Level, more or fewer details of the Request/Response are logged.
+
+!!! tip
+
+    Only on the `TRACE` Log-Level will the Body be logged.
+
+| Variable | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `contentTypes` | No | String Array | [] | Logs the Body of the specified [Content-Types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type). |
+| `loggingRequestEnabled` | No | Boolean | True | An array of Policy Directives. Each element (Directive) in the array is an object with the fields `directive` and `values`, where `values` is an array of multiple or single values. |
+| `loggingResponseEnabled` | No | Boolean | True | An array of Policy Directives. Each element (Directive) in the array is an object with the fields `directive` and `values`, where `values` is an array of multiple or single values. |
 
 ##### `session`
 
@@ -734,65 +793,6 @@ Exceptions can be configured so that cookies are also returned to the User-Agent
 An exception to this rule is the Keycloak session cookie for the Master Realm. This is the only cookie, apart from the Vert.x session cookie, that is passed to the User-Agent. This is required for some Keycloak pages.
 
 ![Portal-Gateway Session Bag](data/portal-gateway-session-bag.png)
-
-##### `requestResponseLogger`
-
-Logs each request and/or response and adds the `requestId` and `sessionId` to the contextual data. Depending on the configured Log-Level, more or fewer details of the Request/Response are logged.
-
-!!! tip
-
-    Only on the `TRACE` Log-Level will the Body be logged.
-
-| Variable | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-| `contentTypes` | No | String Array | [] | Logs the Body of the specified [Content-Types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type). |
-| `loggingRequestEnabled` | No | Boolean | True | An array of Policy Directives. Each element (Directive) in the array is an object with the fields `directive` and `values`, where `values` is an array of multiple or single values. |
-| `loggingResponseEnabled` | No | Boolean | True | An array of Policy Directives. Each element (Directive) in the array is an object with the fields `directive` and `values`, where `values` is an array of multiple or single values. |
-
-##### `csp`
-
-!!! bug
-
-    Directives without values (e.g., sandbox) are only supported from Portal-Gateway Version 8.2.0+. Microservices (e.g., Portal-Monitoring) that return such directives as CSP-Policies will not function, meaning the Gateway cannot load the resources on that path.
-
-With the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) Middleware, we can define which resources the browser is allowed to load. As of Portal Gateway Version 8.1.0+, it is now possible to define multiple consecutive CSP-Middlewares for a route: e.g., general CSP-Policies on the Entry-Middleware and specific/restrictive CSP-Policies on each specific route. The union of all CSP-Policies will then be enforced.
-
-| Variable | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-| `reportOnly` | No | Boolean | false | Activates [Content-Security-Policy-Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only). If active, `report-to` must also be present as a directive. |
-| `policyDirectives` | Yes | Array | - | An array of Policy Directives. Each element (Directive) in the array is an object with the fields `directive` and `values`, where `values` is an array of multiple or single values. |
-| `mergeStrategy` | No | `UNION`, `INTERNAL`, `EXTERNAL` | `UNION` | The `mergeStrategy` determines how external CSP-Policies (e.g., set by Portal IAM) are used. External CSP-Policies are read from the `Content-Security-Policy` and `Content-Security-Policy-Report-Only` headers and combined/union. <br>With `UNION`, the union of the Middleware CSP Policies and the external CSP Policies is enforced as the final CSP Policy. <br>With `EXTERNAL`, the external CSP-Policy is enforced, and <br>with `INTERNAL`, the Middleware-Policy. |
-
-!!! warning
-
-    In the case of multiple CSP-Middlewares for a route, the last middleware processed determines the `mergeStrategy` between external and internal CSP-Policies. In the schema below, that is the `CSP2` Middleware or `Resp2`.
-
-    ![Portal-Gateway Session Handling](data/CSPMiddlewareFlow.png)
-
-!!! example
-
-    ```json
-    {
-        "name": "csp",
-        "type": "csp",
-        "options": {
-            "policyDirectives": [
-                {
-                    "directive": "default-src",
-                    "values": ["self"]
-                },
-                {
-                    "directive": "style-src",
-                    "values": ["https://fonts.googleapis.com", "https://fonts.gstatic.com", "self", "unsafe-inline"]
-                }
-            ]
-        }
-    }
-    ```
-
-!!! note
-
-    A keen eye might have observed that the CSP-Policies are already configured and combined on the Request (`CSP1/Req1` and `CSP2/Req2` in the schema above). This ensures that CSP-Policies are enforced even if a Request is terminated by any Middleware and does not reach the Backend.
 
 #### Services
 
