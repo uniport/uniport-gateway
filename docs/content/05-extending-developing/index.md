@@ -4,6 +4,8 @@
 
 Starting with portal-gateway version `8.0.0`, we provide JSON schemas that can be used to validate your configuration files.
 
+---
+
 ### Usage
 
 There are two JSON schemas, `portalGatewayStaticSchema.json` for the static and `portalGatewayDynamicSchema.json` for the dynamic configuration file. Both files are included in the following artifact:
@@ -24,191 +26,216 @@ You can either manually extract schemas, or use a maven plugin to automate their
 - [About JSON Schemas](https://json-schema.org/)
 - [JSON Schema Validator](https://www.jsonschemavalidator.net/)
 
+---
+
 ## Code Quality
 
-Das Uniport Projekt wendet verschiedene Code Quality Tools an, um immer ein saubere Codebase zu haben. Dabei wird ein konsistentes Format der ganzen Codebase, das Einhalten eines hohen Java Coding Standards, und das Erkennen von Bugs durch statische Analyse angestrebt. Dazu kommen verschiedenste Tools zum Einsatz, um einerseits eine einfache Integration der Code Quality Tools in den Workflow des Uniport-Teams zu ermöglichen und andererseits die Code Qualität automatisiert zu überprüfen.
+The Uniport project applies various code quality tools to maintain a clean codebase at all times. The aim is to achieve a consistent format across the entire codebase, adhere to high Java coding standards, and detect bugs through static analysis. To this end, various tools are employed to enable easy integration of code quality tools into the Uniport team's workflow and to automate code quality checks.
 
-Die Code Quality Tool Settings werden dabei in einem zentralen Repo (`code-style-settings`) verwaltet und von den einzelnen Projekten jeweils heruntergeladen.
+The code quality tool settings are managed in a central repository (`code-style-settings`) and pulled in by individual projects.
 
 !!! warning
 
-    Bei jeder Änderung an den globalen Settings im zentralen Repo, muss das Uniport-Team darüber informiert werden.
+    The Uniport team must be informed of any changes to the global settings in the central repository.
 
-### Formatierung
+---
 
-Für eine konsistente Formatierung des Source-Codes wird der Eclipse Code Formatter eingesetzt. Für die verschiedene IDE's gibt es jeweils ein Plugin, um das Format automatische anzuwenden:
+### Formatting
 
-- Intellij: [Adapter for Eclipse Code Formatter](https://plugins.jetbrains.com/plugin/6546-adapter-for-eclipse-code-formatter)
-- VScode: [Redhat Java](https://marketplace.visualstudio.com/items?itemName=redhat.java)
+The Eclipse Code Formatter is used for consistent source code formatting. There are plugins available for various IDEs to automatically apply the format:
 
-Damit die Source-Codes einerseits automatisch bei jedem `mvn install` formatiert wird und andererseits bei einem Commit überprüft werden kann, ob die zu committende Codebase die korrekte Formatierung hat, wird das [Spotless Maven Plugin](https://github.com/diffplug/spotless) von diffplug eingesetzt. Zudem kann dieses Plugin nicht nur Java Files mit dem Eclipse Code Formatter formatieren, sondern auch JSON und Pom Files. Weiter kann es auch analog zur bekannten `editorconfig` auch simple Formatierung (wie z.B. intendation, spaces vs tabs, trim trailing whitespaces etc.) auf textbasierte Files anwenden.
+- IntelliJ: [Adapter for Eclipse Code Formatter](https://plugins.jetbrains.com/plugin/6546-adapter-for-eclipse-code-formatter)
+- VSCode: [Redhat Java](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 
-Die Formatierung wird vor jedem Kompilieren des Source-Codes angewendet. Zudem kann die Formatierung auch manuell mit `mvn spotless:apply` angewendet werden. Weiter werden per Default nur dirty Files formattiert und überprüft. Das soll verhindern, dass die ganze Codebase bei einem kleine Featuren einen Diff aufweist.
+To ensure that source code is automatically formatted with every `mvn install` and can be checked for correct formatting before a commit, the [Spotless Maven Plugin](https://github.com/diffplug/spotless) by diffplug is used. Additionally, this plugin can not only format Java files with the Eclipse Code Formatter but also JSON and Pom files. Furthermore, similar to the well-known `editorconfig`, it can also apply simple formatting (such as indentation, spaces vs. tabs, trimming trailing whitespaces, etc.) to text-based files.
 
-Wie bereits angedeutet, wird die Formatierung bei jedem Commit überprüft. Dazu wird ein weiteres Maven Plugin angewendet, das ein Pre-Commit Hook installiert. Dazu mehr unter [Pre-Commit Hooks](#pre-commit-hooks).
+Formatting is applied before each compilation of the source code. By default, only dirty files are formatted and checked. This prevents the entire codebase from showing a diff for a small feature.
 
-Da jedes Projekt spezielle Files enthalten kann, die nicht formatiert werden sollten oder aber auch Files enthalten, die von der geteilten Konfiguration nicht automatisch formatiert werden, kann dies jeweils pro Projekt eingestellt werden. Die Konfiguration des Spotless Maven Plugins beinhaltet jeweils `<includes>` und `<excludes>` Tags, um genau diese individuelle Konfiguration zu erreichen.
+!!! tip
 
-Die verwendete Config des Spotless Maven Plugins:
+    Spotless formatting can be performed manually with `mvn spotless:apply`.
 
-```xml
-<plugin>
-    <groupId>com.diffplug.spotless</groupId>
-    <artifactId>spotless-maven-plugin</artifactId>
-    <version>2.35.0</version>
-    <!-- See https://github.com/diffplug/spotless/tree/maven/2.35.0/plugin-maven -->
-    <configuration>
-        <!-- limit format enforcement to just the files changed by this feature branch -->
-        <ratchetFrom>origin/master</ratchetFrom>
-        <formats>
-            <!-- you can define as many formats as you want, each is independent -->
-            <format>
+As already mentioned, formatting is checked with every commit. For this, another Maven plugin is used, which installs a Pre-Commit Hook. More on this can be found in the [Pre-Commit Hooks](#pre-commit-hooks) chapter.
+
+!!! tip
+
+    Since each project can contain special files that should not be formatted, or files that are not automatically formatted by the shared configuration, this can be set per project. The configuration of the Spotless Maven Plugin includes `<includes>` and `<excludes>` tags to achieve this exact individual configuration.
+
+??? abstract "Spotless Plugin Configuration"
+
+    The used configuration of the Spotless Maven Plugin:
+
+    ```xml
+    <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.35.0</version>
+        <configuration>
+            <ratchetFrom>origin/master</ratchetFrom>
+            <formats>
+                <format>
+                    <includes>
+                        <include>**/*.md</include>
+                        <include>.gitignore</include>
+                        <include>.jenkins/Jenkinsfile.build</include>
+                    </includes>
+
+                    <trimTrailingWhitespace/>
+                    <endWithNewline/>
+                    <indent>
+                        <spaces>true</spaces>
+                        <spacesPerTab>4</spacesPerTab>
+                    </indent>
+                </format>
+            </formats>
+            <java>
                 <includes>
-                    <include>**/*.md</include>
-                    <include>.gitignore</include>
-                    <include>.jenkins/Jenkinsfile.build</include>
+                    <include>**/src/main/java/**/*.java</include>
+                    <include>**/src/test/java/**/*.java</include>
                 </includes>
 
-                <trimTrailingWhitespace/>
-                <endWithNewline/>
-                <indent>
-                    <spaces>true</spaces>
-                    <spacesPerTab>4</spacesPerTab>
-                </indent>
-            </format>
-        </formats>
-        <java>
-            <includes>
-                <include>**/src/main/java/**/*.java</include>
-                <include>**/src/test/java/**/*.java</include>
-            </includes>
+                <importOrder/>
+                <removeUnusedImports/>
 
-            <importOrder/>
-            <removeUnusedImports/>
+                <eclipse>
+                    <file>${maven.multiModuleProjectDirectory}/.code-style-settings/portal-java-formatter.xml</file>
+                </eclipse>
+            </java>
+            <pom>
+                <includes>
+                    <include>**/pom.xml</include>
+                </includes>
+                <sortPom>
+                    <nrOfIndentSpace>4</nrOfIndentSpace>
+                    <expandEmptyElements>false</expandEmptyElements>
+                </sortPom>
+            </pom>
+            <json>
+                <includes>
+                    <include>**/*.json</include>
+                </includes>
 
-            <eclipse>
-                <file>${maven.multiModuleProjectDirectory}/.code-style-settings/portal-java-formatter.xml</file>
-            </eclipse>
-        </java>
-        <pom>
-            <includes>
-                <include>**/pom.xml</include>
-            </includes>
-            <sortPom>
-                <nrOfIndentSpace>4</nrOfIndentSpace>
-                <expandEmptyElements>false</expandEmptyElements>
-            </sortPom>
-        </pom>
-        <json>
-            <includes>
-                <include>**/*.json</include>
-            </includes>
+                <gson>
+                    <version>2.8.1</version>
+                    <indentSpaces>4</indentSpaces>
+                    <sortByKeys>false</sortByKeys>
+                </gson>
+            </json>
+        </configuration>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>apply</goal>
+                </goals>
+                <phase>process-sources</phase>
+            </execution>
+        </executions>
+    </plugin>
+    ```
 
-            <gson>
-                <version>2.8.1</version>
-                <indentSpaces>4</indentSpaces>
-                <sortByKeys>false</sortByKeys>
-            </gson>
-        </json>
-    </configuration>
-    <executions>
-        <execution>
-            <goals>
-                <goal>apply</goal>
-            </goals>
-            <phase>process-sources</phase>
-        </execution>
-    </executions>
-</plugin>
-```
+---
 
-### Coding Standart
+### Coding Standard
 
-Um einen hohen Java Coding Standard aufrechtzuerhalten, wird das [Checkstyle Tool](https://checkstyle.org/) angewendet. Auch hier gibt es für die verschiedenen IDE's jeweils ein Plugin, um die Vorschläge direkt im Source-Code anzuzeigen:
+To maintain a high Java Coding Standard, the [Checkstyle Tool](https://checkstyle.org/) is used. Here too, there are plugins available for various IDEs to display suggestions directly in the source code:
 
-- Intellij: [Checkstyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea)
-- VScode: [VSCode Checkstyle](https://marketplace.visualstudio.com/items?itemName=shengchen.vscode-checkstyle)
+- IntelliJ: [Checkstyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea)
+- VSCode: [VSCode Checkstyle](https://marketplace.visualstudio.com/items?itemName=shengchen.vscode-checkstyle)
 
-Die Checkstyle können manuell mit `mvn checkstyle:check` durchgeführt werden.
+!!! tip
 
-Auch hier wird durch ein Pre-Commit Hook jeweils überprüft, dass keine Coding Standards verletzt werden.
+    Checkstyle checks can be performed manually with `mvn checkstyle:check`.
 
-Falls auch hier der Wunsch vorhanden ist, einzelne Checkstyle zu ignorieren, kann dies entweder über das global `suppressions.xml` im zentralen Repo oder sogar pro Projekt über das `suppressions-specific.xm` eingestellt werden.
+Here too, a Pre-Commit Hook ensures that no coding standards are violated.
 
-Die verwendete Config des Checkstyle Maven Plugins:
+!!! tip
 
-```xml
-<plugin>
-    <artifactId>maven-checkstyle-plugin</artifactId>
-    <version>3.2.1</version>
-    <configuration>
-        <consoleOutput>true</consoleOutput>
-        <configLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/config.xml</configLocation>
-        <suppressionsLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/suppressions.xml</suppressionsLocation>
-    </configuration>
-    <dependencies>
-        <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <!-- Keep same version as used by the IntelliJ plugin, see IntelliJ IDEA > Preferences > Tools > Checkstyle -->
-            <version>10.7.0</version>
-        </dependency>
-    </dependencies>
-</plugin>
-```
+    If there's a desire to ignore individual Checkstyle rules, this can be configured either via the global `suppressions.xml` in the central repository or even per project via `suppressions-specific.xml`.
 
-### Statische Analyse zur Bug-Decetion
+??? abstract "Checkstyle Plugin Configuration"
 
-Die statische Analyse des Source-Codes findet in der Build Pipeline des Projektes statt und wird durch das [Spotbugs Maven Plugin](https://spotbugs.github.io/) durchgeführt. Ebenfalls werden die gefundenen Bugs auch in einem separaten Bericht, der in der Übersicht der Build Pipeline abrufbar ist, aufgelistet.
+    The used configuration of the Checkstyle Maven Plugin:
 
-Die verwendete Config des Spotbugs Maven Plugins:
+    ```xml
+    <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.2.1</version>
+        <configuration>
+            <consoleOutput>true</consoleOutput>
+            <configLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/config.xml</configLocation>
+            <suppressionsLocation>${maven.multiModuleProjectDirectory}/.code-style-settings/checkstyle/suppressions.xml</suppressionsLocation>
+        </configuration>
+        <dependencies>
+            <dependency>
+                <groupId>com.puppycrawl.tools</groupId>
+                <artifactId>checkstyle</artifactId>
+                <version>10.7.0</version>
+            </dependency>
+        </dependencies>
+    </plugin>
+    ```
 
-```xml
-<plugin>
-    <groupId>com.github.spotbugs</groupId>
-    <artifactId>spotbugs-maven-plugin</artifactId>
-    <version>4.7.3.2</version>
-    <configuration>
-        <failOnError>false</failOnError>
-        <xmlOutput>true</xmlOutput>
-        <excludeFilterFiles>
-            <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
-            <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude-specific.xml</excludeFilterFile>
-        </excludeFilterFiles>
-    </configuration>
-</plugin>
-```
+---
+
+### Static Analysis for Bug Detection
+
+Static analysis of the source code takes place in the project's build pipeline and is performed by the [Spotbugs Maven Plugin](https://spotbugs.github.io/). The detected bugs are also listed in a separate report, which is available in the build pipeline overview.
+
+??? abstract "Spotbugs Plugin Configuration"
+
+    The used configuration of the Spotbugs Maven Plugin:
+
+    ```xml
+    <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.7.3.2</version>
+        <configuration>
+            <failOnError>false</failOnError>
+            <xmlOutput>true</xmlOutput>
+            <excludeFilterFiles>
+                <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude.xml</excludeFilterFile>
+                <excludeFilterFile>${maven.multiModuleProjectDirectory}/.code-style-settings/spotbugs/exclude-specific.xml</excludeFilterFile>
+            </excludeFilterFiles>
+        </configuration>
+    </plugin>
+    ```
+
+---
 
 ### Pre-Commit Hooks
 
-Git Hooks sind eine lokal Einstellung und werden nicht Upstream gepusht. Daher bedarf es hier ein separates Plugins, das in diesem Fall den Pre-Commit Hooks installiert. Zur Anwendung kommt hier das [Git Build Hook Maven Plugin](https://github.com/rudikershaw/git-build-hook), welches nur ein Pfad zu einem File erwartet, das als Pre-Commit Hooks ausgeführt werden soll. Das File ist ein Bash-Script und enthält dabei nur die beiden Commands, die bereist in den beiden vorangehenden Abschnitten besprochen wurden:
+Git Hooks are a local setting and are not pushed upstream. Therefore, a separate plugin is needed here, which in this case installs the Pre-Commit Hooks. The [Git Build Hook Maven Plugin](https://github.com/rudikershaw/git-build-hook) is used, which only expects a path to a file that should be executed as a Pre-Commit Hook. The file is a Bash script and contains only the two commands already discussed in the preceding two sections:
 
 ```bash
 mvn spotless:check \
     checkstyle:check
 ```
 
-Zu beachten ist hier, dass bei der Anwendung des Pre-Commit Hooks das Committen einige Sekunden länger beanspruchen kann, damit die beiden Checks auch ausgeführt werden können. Es ist zudem nur mögliche etwas zu Committen, wenn die beiden Checks erfolgreich durchgeführt wurden.
+It should be noted here that when applying the Pre-Commit Hook, committing may take a few seconds longer for the two checks to be executed. Furthermore, it is only possible to commit something if both checks have been successfully completed.
 
-Die verwendete Config des Git Build Hook Maven Plugins:
+??? abstract "Git Build Hook Plugin Configuration"
 
-```xml
-<plugin>
-    <groupId>com.rudikershaw.gitbuildhook</groupId>
-    <artifactId>git-build-hook-maven-plugin</artifactId>
-    <version>3.4.1</version>
-    <configuration>
-        <installHooks>
-            <pre-commit>.code-style-settings/hooks/pre-commit</pre-commit>
-            <pre-push>.code-style-settings/hooks/pre-push</pre-push>
-        </installHooks>
-    </configuration>
-    <executions>
-        <execution>
-            <goals>
-                <goal>install</goal>
-            </goals>
-        </execution>
-    </executions>
-</plugin>
-```
+    The used configuration of the Git Build Hook Maven Plugin:
+
+    ```xml
+    <plugin>
+        <groupId>com.rudikershaw.gitbuildhook</groupId>
+        <artifactId>git-build-hook-maven-plugin</artifactId>
+        <version>3.4.1</version>
+        <configuration>
+            <installHooks>
+                <pre-commit>.code-style-settings/hooks/pre-commit</pre-commit>
+                <pre-push>.code-style-settings/hooks/pre-push</pre-push>
+            </installHooks>
+        </configuration>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>install</goal>
+                </goals>
+                <phase>install</phase>
+            </execution>
+        </executions>
+    </plugin>
+    ```

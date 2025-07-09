@@ -2,6 +2,8 @@
 
 The Portal-Gateway can be built & launched as follows.
 
+---
+
 ## Build
 
 ```bash
@@ -24,6 +26,8 @@ mvn clean install
 
     (It is also possible to use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens), instead of username/password)
 
+---
+
 ## Launch
 
 ### IDE
@@ -39,6 +43,8 @@ Then visit <http://localhost:20000>
 !!! note
 
     To use the run config in IntelliJ, the plugin `net.ashald.envfile` has to be installed.
+
+---
 
 ### Docker
 

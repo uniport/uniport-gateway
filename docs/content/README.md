@@ -1,80 +1,80 @@
-# Über Uniport
+# About Uniport
 
-## Hintergrund
+## Background
 
-### Digitalisierung von Unternehmen
+### Digitalization of Companies
 
-Die «Digitalisierung» ist in aller Munde. Doch was bedeutet Digitalisierung? In einer digitalen Welt müssen alle Menschen, die an demselben Prozess beteiligt sind, zusammenarbeiten können. Sie müssen dies so tun können, dass ihre Rolle gemäss ihrer Identität jederzeit klar ist. Akteure und Rollen ändern in der heutigen Zeit laufend. Um dem zu entgegnen, muss die Verwaltung der Akteure und deren Rollen in die Hände derjenigen gegeben werden, die dieses Wissen auch haben. Dadurch werden alle Prozesse deutlich effizienter und weniger fehleranfällig. Alle Tätigkeiten werden chronologisch nachvollziehbar. Mit digitalen Prozessen wollen Endkunden, Vermittler, Verwalter, Lieferanten, Kundenberater und Callcenter Mitarbeiter alle sicher miteinander interagieren können.
+"Digitalization" is on everyone's lips. But what does digitalization mean? In a digital world, all people involved in the same process must be able to collaborate. They must be able to do so in a way that their role, according to their identity, is clear at all times. Actors and roles are constantly changing in today's world. To counteract this, the management of actors and their roles must be placed in the hands of those who possess this knowledge. This makes all processes significantly more efficient and less prone to errors. All activities become chronologically traceable. With digital processes, end-customers, intermediaries, administrators, suppliers, customer advisors, and call center employees all want to be able to interact securely with each other.
 
-Nehmen wir als Beispiel eine Bank. Eine Firma ist ein Kunde, welche ein Firmenkonto bei der Bank hat. Mehrere Mitarbeiter der Firma haben eine Kollektivunterschriftsberechtigung und sind somit berechtigt, auf das Firmenkonto mit Kollektivunterschrift zuzugreifen. Anstatt dass die Firma jeden berechtigten Mitarbeiter der Bank meldet und die Bank diese Mitarbeiter für den digitalen Service hinzufügt und berechtigt, wird nur noch die Firma hinzugefügt und ein Administrator bei der Firma bestimmt. Dieser Administrator verwaltet zukünftig die Mitarbeiter und deren Rollen/Berechtigungen selber.
+Let's take a bank as an example. A company is a client that has a corporate account with the bank. Several employees of the company have collective signing authority and are thus authorized to access the corporate account with collective signature. Instead of the company notifying the bank of every authorized employee and the bank adding and authorizing these employees for the digital service, only the company is added, and an administrator within the company is designated. This administrator will manage the employees and their roles/permissions themselves in the future.
 
 ### Enterprise IT
 
-Die Entwicklung der IT und insbesondere von Unternehmens-IT (Enterprise IT) geht sehr schnell voran. Zwei zentrale Treiber der Enterprise-IT Entwicklung sind die Cloud und die stetig wachsende Anzahl an digitalen Services die den Kunden zur Verfügung gestellt werden.
+The development of IT, and particularly Enterprise IT, is progressing very rapidly. Two central drivers of Enterprise IT development are the cloud and the steadily growing number of digital services provided to customers.
 
-#### Hin zur Cloud
+#### Towards the Cloud
 
-Aktuell sind die Bestrebungen gross, möglichst alle IT Services in die Cloud zu verschieben. Dies verspricht viele Vorteile wie reduzierte Betriebskosten und viel höhere Skalierbarkeit. IT Services bezieht man in Zukunft wie Wasser oder Strom direkt ab der Steckdose.
+Currently, there are strong efforts to move as many IT services as possible to the cloud. This promises many advantages such as reduced operating costs and much higher scalability. In the future, IT services will be obtained directly from the socket, like water or electricity.
 
-Infrastruktur Komponenten wie Docker und Kubernetes oder OpenShift ermöglichen eine effiziente Nutzung solcher Cloud Anbieter. Die Software Entwicklung macht diese Innovationen mit und unterteilt die bisherigen monolithischen Systeme in kleinere, dedizierte Systeme. Dadurch werden eine Vielzahl von Vorteilen erzielt: Die kleineren Services können unabhängig und viel häufiger released werden. Das Ziel ist sogar eine zero-downtime, d.h. kein Unterbruch beim releasen.
+Infrastructure components like Docker and Kubernetes or OpenShift enable efficient use of such cloud providers. Software development keeps pace with these innovations and divides the previously monolithic systems into smaller, dedicated systems. This achieves a multitude of advantages: the smaller services can be released independently and much more frequently. The goal is even zero-downtime, meaning no interruption during releases.
 
-#### Viele digitale Angebote
+#### Many Digital Offerings
 
-Früher konnten Unternehmen ihren Kunden einen zentralen digitalen Service anbieten. Mittlerweile wächst die Anzahl an digitalen Angeboten aber schnell und stetig. So haben z.B. Banken früher ihren Kunden ein e-Banking mit Zahlungsverkehr und Börsenaufträgen angeboten. Heute stehen sie vor der Herausforderung, den Kunden auch digitales onboarding, digitale Marktplätze, e-Dossier, e-Safe Lösungen u.v.a. anzubieten. Diese können nicht mehr alle selber entwickelt werden, sondern es lohnt sich die Integration von bestehenden Lösungen.
+Previously, companies could offer their customers one central digital service. Meanwhile, the number of digital offerings is growing rapidly and steadily. For example, banks used to offer their customers e-banking with payment transactions and stock market orders. Today, they face the challenge of also offering customers digital onboarding, digital marketplaces, e-dossier, e-safe solutions, and much more. These can no longer all be developed in-house; instead, integrating existing solutions is worthwhile.
 
-Die Gesamtlösung soll aber ein einheitliches look&feel haben, die einzelnen Lösungen sollen sich nahtlos in ein übergeordnetes Portal integrieren lassen und bestehende Funktionen nutzen.
+However, the overall solution should have a uniform look & feel, and the individual solutions should seamlessly integrate into a overarching portal and utilize existing functions.
 
-Es ist offensichtlich, dass sich solche hohen Ziele nur mit einer Modularisierung der bestehenden Infrastruktur erzielen lassen. Nur so kann Wiederverwendbarkeit von existierender Funktionalität erreicht werden. Monolithische Systeme müssen aufgebrochen und modularisiert werden.
+It is obvious that such high goals can only be achieved through modularization of the existing infrastructure. Only in this way can reusability of existing functionality be achieved. Monolithic systems must be broken down and modularized.
 
-## Die Ziele für ein Kundenportal
+## The Goals for a Customer Portal
 
-Diese Entwicklungen und Veränderungen am Markt der Unternehmens-IT sowie unserem 20-jährigen Know-how im Bau von sicheren Kundenlösungen haben uns dazu bewogen, eine Plattform zu erstellen, welche folgende Ziele erreichen soll:
+These developments and changes in the enterprise IT market, as well as our 20 years of expertise in building secure customer solutions, have led us to create a platform that aims to achieve the following goals:
 
-**Modular** Die Plattform wird als Microservice Architektur aufgebaut. Dank der Microservice Architektur ist das gesamte System resp. sogar ganze Eco System sehr modular aufgebaut. Mit dieser Architektur können einzelne Microservices unabhängig von den anderen Microservices aktualisiert werden.
+**Modular** The platform is built as a Microservice Architecture. Thanks to the Microservice Architecture, the entire system, or even the entire ecosystem, is very modular. With this architecture, individual microservices can be updated independently of other microservices.
 
-**Offen** Das Wort "offen" resp. "open" wird in der IT sehr häufig missbraucht. Wir verstehen darunter folgendes:
+**Open** The word "open" is very frequently misused in IT. We understand it to mean the following:
 
-Es können beliebige weitere Microservices in die Lösung integriert werden.
+Any further microservices can be integrated into the solution.
 
-Die Microservices können von beliebigen Anbietern stammen und in einer beliebigen Computersprache implementiert sein. Für die Authentisierung müssen sie sich an den Open ID Connect 2.0 Standard halten. Die Kommunikation mit anderen Microservices erfolgt vorteilhaft über den Datenbus Kafka (lesen und schreiben). Jeder Microservice dokumentiert seine Kafka Datenschnittstelle.
+The microservices can come from any provider and be implemented in any programming language. For authentication, they must adhere to the Open ID Connect 2.0 standard. Communication with other microservices preferably takes place via the Kafka data bus (reading and writing). Each microservice documents its Kafka data interface.
 
-Microservices können Web Components zur Verfügung stellen, welche von anderen Microservices in ihrem UI integriert werden.
+Microservices can provide Web Components that are integrated by other microservices into their UI.
 
-Microservices können ausgetauscht werden. Jeder Microservice kann autonom released werden.
+Microservices can be exchanged. Each microservice can be released autonomously.
 
-**Sicher** Applikatorische Sicherheit ist in der DNA von Inventage. Wir kennen das Thema seit wir e-Banking schreiben, also schon sehr lange. Dieses Fundament wollen wir in Uniport umsetzen. WAF, IAM, feingranularer Datenzugriffsschutz, Datenverschlüsselung, Sonatype IQ: alles spielt zusammen.
+**Secure** Application security is in Inventage's DNA. We have known this topic since we started writing e-banking, which is a very long time ago. We want to implement this foundation in Uniport. WAF, IAM, fine-grained data access protection, data encryption, Sonatype IQ: everything works together.
 
-**Digitale Kommunikation** Uniport richtet sich nicht nur an Endanwender resp. Kunden der Lösung, sondern bietet auch Funktionalität für Call Center und Kundenberater. Mit der delegierten Benutzerverwaltung können auch ganze Unternehmen an den digitalen Prozessen teilhaben, indem sie die Rollen (und damit die Rechte) ihrer Mitarbeiter auf der Plattform selber verwalten. In einer modernen, digitalen Welt kommunizieren alle diese Akteure digital miteinander.
+**Digital Communication** Uniport is not only aimed at end-users or customers of the solution but also offers functionality for call centers and customer advisors. With delegated user management, entire companies can participate in digital processes by managing the roles (and thus the rights) of their employees on the platform themselves. In a modern, digital world, all these actors communicate digitally with each other.
 
-**Cloud Ready** Die Lösung wurde von Grund auf für die Cloud konzipiert. Sie basiert auf Software, welche den Betrieb und das automatisierte Deployment für die Cloud optimiert hat. Das Ziel ist, die komplette Portal Lösung innert Minuten in einer beliebigen Cloud deployen zu können (Vision).
+**Cloud Ready** The solution was designed from the ground up for the cloud. It is based on software that has optimized operation and automated deployment for the cloud. The goal is to be able to deploy the complete Portal solution in minutes in any cloud (vision).
 
-## Architektur Übersicht
+## Architecture Overview
 
-Um die vorgangs erwähnten Ziele mit der Kundenplattform zu erzielen, haben wir uns für eine moderne Microservice Architektur entschieden.
+To achieve the aforementioned goals with the customer platform, we have opted for a modern Microservice Architecture.
 
-Damit die hohen Erwartungen an die Sicherheit einer Portal Lösung effizient und schnell umgesetzt werden können, müssen die relevanten Sicherheitskomponenten teil der Portal Lösung sein. Nur so ist die Lösung flexibel genug, um sich an den ständig ändernden Business Anforderungen schnell anzupassen. Zu diesen Komponenten zählen wir die Web Application Firewall (WAF) und vor allem das Identity und Access Management System (IAM).
+To efficiently and quickly implement the high expectations for the security of a Portal solution, the relevant security components must be part of the Portal solution. Only in this way is the solution flexible enough to quickly adapt to constantly changing business requirements. These components include the Web Application Firewall (WAF) and, above all, the Identity and Access Management System (IAM).
 
 ![Uniport Overview](01-introduction/data/IPS_Overview.png)
 
 ### User Interface
 
-Die Benutzeroberfläche setzt sich aus mehreren [Micro-frontends](https://increment.com/frontend/micro-frontends-in-context/) zusammen.
+The user interface is composed of several [Micro-frontends](https://increment.com/frontend/micro-frontends-in-context/).
 
 ![Uniport Micro Frontends](01-introduction/data/IPS_Micro_Frontends.png)
 
-## Übersicht aller derzeit verfügbaren Uniport Komponenten
+## Overview of all currently available Uniport Components
 
-Wir unterscheiden bei den Uniport Komponenten zwischen Infrastruktur Komponenten, Microservices und Libraries. Nachfolgende werden nur für den Gateway relevante Komponenten gelistet.
+We distinguish between infrastructure components, microservices, and libraries within Uniport components. The following lists only components relevant to the Gateway.
 
-### Infrastruktur Komponenten
+### Infrastructure Components
 
 #### [Portal-Gateway](./01-introduction/index.md)
 
-Die Portal-Gateway Infrastruktur Komponente dient dem Routing eines Requests zu den jeweiligen Uniport Komponenten.
+The Portal-Gateway infrastructure component is responsible for routing requests to the respective Uniport components.
 
 ### Microservices
 
-Es existieren verschiedene Mircroservices, auf welche hier nicht weiter eigegangen wird, da der Fokus auf dem Portal-Gateway liegt. Die folgende Liste soll einen groben Überblich geben:
+Various microservices exist, which will not be discussed further here, as the focus is on the Portal-Gateway. The following list provides a general overview:
 
 - Base
 - Dashboard
@@ -88,8 +88,8 @@ Es existieren verschiedene Mircroservices, auf welche hier nicht weiter eigegang
 
 ### Libraries
 
-Da einige Infrastruktur Komponente und Microservice gemeinsamen Code haben, wurde dieser in eine Library ausgelagert.
+Since some infrastructure components and microservices share common code, it has been outsourced to a library.
 
 #### Portal Helm Chart Library
 
-Alle Infrastruktur Komponente und Microservices werden unter Anderem mit Helm in Kubernetes deployed. [Helm](https://helm.sh/) ist der Package Manage für Kubernetes. Mit Helm können Kubernetes Applikationen definiert, versioniert, installiert, upgradet und deinstalliert werden. Im Grunde ist Helm eine Templating Engine für Kubernetes Manifests, die auch gleich die generierten Manifeste in einem Kubernetes Cluster deployen kann. Die Portal Helm Chart Library bietet hier die Möglichkeit Komponente über Helm zu deployen, wobei jeweils nur das Notwendige für ein Deployment konfiguiert werden muss und die Library den Rest übernimmt.
+All infrastructure components and microservices are deployed to Kubernetes, among other methods, using Helm. [Helm](https://helm.sh/) is the package manager for Kubernetes. With Helm, Kubernetes applications can be defined, versioned, installed, upgraded, and uninstalled. Essentially, Helm is a templating engine for Kubernetes Manifests that can also directly deploy the generated manifests to a Kubernetes cluster. The Portal Helm Chart Library offers the possibility to deploy components via Helm, whereby only the necessary information for a deployment needs to be configured, and the library takes care of the rest.

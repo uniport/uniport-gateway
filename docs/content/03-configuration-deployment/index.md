@@ -12,97 +12,115 @@ The simplest `provider` is the `file` provider. It reads the configuration from 
 3. File `portal-gateway.json` in the `/etc/portal-gateway/default/` directory
 4. File `portal-gateway.json` in the current working directory
 
-## Konfiguration
+---
 
-Im Container Image von Portal-Gateway befindet sich im Verzeichnis `/etc/portal-gateway/default/` bereits eine `portal-gateway.json` Datei. Es wird empfohlen die projektspezifische `portal-gateway.json` Datei in einem anderen Verzeichnis (z.B. `/etc/portal-gateway/<PROJEKTNAME>/`) abzulegen und die `PORTAL_GATEWAY_JSON` Environment Variable auf diesen Pfad zu setzen.
+## Configuration
 
-| Variable | Beschreibung | Default |
-| --- | --- | --- |
-| `PORTAL_GATEWAY_JSON` | Absoluter Pfad der JSON Datei für die statische Konfiguration | - |
-| `PORTAL_GATEWAY_PUBLIC_PROTOCOL` | HTTP Protokoll für die URL, welche ein Browser verwenden soll | http |
-| `PORTAL_GATEWAY_PUBLIC_HOSTNAME` | HTTP Host Name für die URL, welche ein Browser verwenden soll | portal.minikube |
-| `PORTAL_GATEWAY_PUBLIC_PORT` | HTTP Port für die URL, welche ein Browser verwenden soll | http: 80, https: 443 |
+The Portal-Gateway container image already includes a `portal-gateway.json` file in the `/etc/portal-gateway/default/` directory. We recommend storing your project-specific `portal-gateway.json` file in a different directory (e.g., `/etc/portal-gateway/<PROJECTNAME>/`) and setting the `PORTAL_GATEWAY_JSON` environment variable to this path.
+
+| Variable | Description | Default |
+| :-- | :-- | :-- |
+| `PORTAL_GATEWAY_JSON` | Absolute path of the JSON file for static configuration | - |
+| `PORTAL_GATEWAY_PUBLIC_PROTOCOL` | HTTP protocol for the URL that a browser should use | http |
+| `PORTAL_GATEWAY_PUBLIC_HOSTNAME` | HTTP Host Name for the URL that a browser should use | portal.minikube |
+| `PORTAL_GATEWAY_PUBLIC_PORT` | HTTP Port for the URL that a browser should use | http: 80, https: 443 |
 | `PORTAL_GATEWAY_LOG_LEVEL` | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF | INFO |
-| `PORTAL_GATEWAY_LOGGING_CONFIG` | Absoluter Pfad der `logback.xml` Datei, für die Logback Konfiguration | /etc/portal-gateway/logback.xml |
-| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log Output wird als strukturierte JSON ausgegeben. | false |
-| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Pfad oder URL | http://portal-iam:8080/auth/realms/portal |
-| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Beschreibt den erwarteten Issuer im Access Token. Siehe `issuer` in [bearerOnly](../04-customization/index.md#beareronly) | http://ips.inventage.com:20000/auth/realms/portal |
-| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Gibt an, ob der Proxy ein Access Token erwarten (und somit überprüfen) sollte. Siehe `optional` in [bearerOnly](../04-customization/index.md#beareronly) | false |
-| `PORTAL_GATEWAY_METRICS_PORT` | HTTP Port für den Metrics Endpoint | 9090 |
-| `PORTAL_GATEWAY_METRICS_PATH` | HTTP Path für den Metrics Endpoint | /metrics |
-| `PORTAL_GATEWAY_CLUSTERED` | Switch, um den Portal-Gateway im Cluster Modus laufen zu lassen. Dafür muss auch die Anzahl deployten Instanzen (z.B. `replicas` in den Helm Value Files) angepasst werden. | false |
+| `PORTAL_GATEWAY_LOGGING_CONFIG` | Absolute path of the `logback.xml` file for Logback configuration | /etc/portal-gateway/logback.xml |
+| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log output is formatted as structured JSON. | false |
+| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Path or URL | http://portal-iam:8080/auth/realms/portal |
+| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Describes the expected issuer in the access token. See `issuer` in [bearerOnly](../04-customization/index.md#beareronly) | [http://ips.inventage.com:20000/auth/realms/portal](http://ips.inventage.com:20000/auth/realms/portal) |
+| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Indicates whether the proxy should expect (and thus validate) an access token. See `optional` in [bearerOnly](../04-customization/index.md#beareronly) | false |
+| `PORTAL_GATEWAY_METRICS_PORT` | HTTP Port for the Metrics Endpoint | 9090 |
+| `PORTAL_GATEWAY_METRICS_PATH` | HTTP Path for the Metrics Endpoint | /metrics |
+| `PORTAL_GATEWAY_CLUSTERED` | Switch to run the Portal-Gateway in cluster mode. This also requires adjusting the number of deployed instances (e.g., `replicas` in the Helm Value Files). | false |
 
-Die 3 Variablen `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME` und `PORTAL_GATEWAY_PUBLIC_PORT` ergeben zusammen die öffentliche URL, welche vom Portal-Gateway für Redirects verwendet wird. Dies betrifft sowohl Redirects von der OAuth2 Middleware zum Portal-IAM, a
+The three variables `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME`, and `PORTAL_GATEWAY_PUBLIC_PORT` collectively form the public URL that the Portal-Gateway uses for redirects. This applies to redirects from the OAuth2 Middleware to Portal-IAM.
+
+---
 
 ### Default portal-gateway.json
 
-Die `portal-gateway.json` Datei im `/etc/portal-gateway/default/` Verzeichnis dient als Beispiel für die Konfiguration des Portal-Gateways.
+The `portal-gateway.json` file in the `/etc/portal-gateway/default/` directory serves as an example for the Portal-Gateway's configuration.
+
+---
 
 ### Upstreams
 
-| Variable                              | Beschreibung                                       | Default                   |
-| ------------------------------------- | -------------------------------------------------- | ------------------------- |
-| `PORTAL_GATEWAY_PORTAL_IAM_HOST`      | Hostname, um via HTTP auf Portal-IAM zuzugreifen   | portal-iam                |
-| `PORTAL_GATEWAY_PORTAL_IAM_PORT`      | Port, um via HTTP auf Portal-IAM zuzugreifen       | 8080                      |
-| `PORTAL_GATEWAY_BASE_HOST`            | Hostname, um via HTTP auf Base zuzugreifen         | base-proxy                |
-| `PORTAL_GATEWAY_BASE_PORT`            | Port, um via HTTP auf Base zuzugreifen             | 20010                     |
-| `PORTAL_GATEWAY_DASHBOARD_HOST`       | Hostname, um via HTTP auf Dashboard zuzugreifen    | dashboard-proxy           |
-| `PORTAL_GATEWAY_DASHBOARD_PORT`       | Port, um via HTTP auf Dashboard zuzugreifen        | 20020                     |
-| `PORTAL_GATEWAY_ORGANISATION_HOST`    | Hostname, um via HTTP auf Organisation zuzugreifen | organisation-proxy        |
-| `PORTAL_GATEWAY_ORGANISATION_PORT`    | Port, um via HTTP auf Organisation zuzugreifen     | 20030                     |
-| `PORTAL_GATEWAY_FILESTORAGE_HOST`     | Hostname, um via HTTP auf Filestorage zuzugreifen  | filestorage-proxy         |
-| `PORTAL_GATEWAY_FILESTORAGE_PORT`     | Port, um via HTTP auf Filestorage zuzugreifen      | 20090                     |
-| `PORTAL_GATEWAY_CONTENT_HOST`         | Hostname, um via HTTP auf Content zuzugreifen      | content-proxy             |
-| `PORTAL_GATEWAY_CONTENT_PORT`         | Port, um via HTTP auf Content zuzugreifen          | 20110                     |
-| `PORTAL_GATEWAY_PORTAL_KAFKA_UI_HOST` | Hostname, um via HTTP auf Kafka-UI zuzugreifen     | portal-kafka-ui           |
-| `PORTAL_GATEWAY_PORTAL_KAFKA_UI_PORT` | Port, um via HTTP auf Kafka-UI zuzugreifen         | 80                        |
-| `PORTAL_GATEWAY_PORTAL_PGADMIN_HOST`  | Hostname, um via HTTP auf PgAdmin zuzugreifen      | portal-pgadmin            |
-| `PORTAL_GATEWAY_PORTAL_PGADMIN_PORT`  | Port, um via HTTP auf PgAdmin zuzugreifen          | 80                        |
-| `PORTAL_GATEWAY_PORTAL_GRAFANA_HOST`  | Port, um via HTTP auf Grafana zuzugreifen          | portal-monitoring-grafana |
-| `PORTAL_GATEWAY_PORTAL_GRAFANA_PORT`  | Port, um via HTTP auf Grafana zuzugreifen          | 3000                      |
+| Variable                              | Description                              | Default                   |
+| :------------------------------------ | :--------------------------------------- | :------------------------ |
+| `PORTAL_GATEWAY_PORTAL_IAM_HOST`      | Hostname to access Portal-IAM via HTTP   | portal-iam                |
+| `PORTAL_GATEWAY_PORTAL_IAM_PORT`      | Port to access Portal-IAM via HTTP       | 8080                      |
+| `PORTAL_GATEWAY_BASE_HOST`            | Hostname to access Base via HTTP         | base-proxy                |
+| `PORTAL_GATEWAY_BASE_PORT`            | Port to access Base via HTTP             | 20010                     |
+| `PORTAL_GATEWAY_DASHBOARD_HOST`       | Hostname to access Dashboard via HTTP    | dashboard-proxy           |
+| `PORTAL_GATEWAY_DASHBOARD_PORT`       | Port to access Dashboard via HTTP        | 20020                     |
+| `PORTAL_GATEWAY_ORGANISATION_HOST`    | Hostname to access Organization via HTTP | organisation-proxy        |
+| `PORTAL_GATEWAY_ORGANISATION_PORT`    | Port to access Organization via HTTP     | 20030                     |
+| `PORTAL_GATEWAY_FILESTORAGE_HOST`     | Hostname to access Filestorage via HTTP  | filestorage-proxy         |
+| `PORTAL_GATEWAY_FILESTORAGE_PORT`     | Port to access Filestorage via HTTP      | 20090                     |
+| `PORTAL_GATEWAY_CONTENT_HOST`         | Hostname to access Content via HTTP      | content-proxy             |
+| `PORTAL_GATEWAY_CONTENT_PORT`         | Port to access Content via HTTP          | 20110                     |
+| `PORTAL_GATEWAY_PORTAL_KAFKA_UI_HOST` | Hostname to access Kafka-UI via HTTP     | portal-kafka-ui           |
+| `PORTAL_GATEWAY_PORTAL_KAFKA_UI_PORT` | Port to access Kafka-UI via HTTP         | 80                        |
+| `PORTAL_GATEWAY_PORTAL_PGADMIN_HOST`  | Hostname to access PgAdmin via HTTP      | portal-pgadmin            |
+| `PORTAL_GATEWAY_PORTAL_PGADMIN_PORT`  | Port to access PgAdmin via HTTP          | 80                        |
+| `PORTAL_GATEWAY_PORTAL_GRAFANA_HOST`  | Hostname to access Grafana via HTTP      | portal-monitoring-grafana |
+| `PORTAL_GATEWAY_PORTAL_GRAFANA_PORT`  | Port to access Grafana via HTTP          | 3000                      |
+
+---
 
 ### Logging
 
-Das Log-Level kann auch auf Package Ebene einzeln konfiguriert werden, falls das global Log Level nicht ausreicht. Der Portal-Gateway verwendet [logback](https://github.com/qos-ch/logback) als Logging Backend und somit kann das Logging-Verhalten mittels der `logback.xml` Datei konfiguriert werden. Um das Log-Level auf Package Ebene anzupassen, muss die `logback.xml` Datei mit [logger erweitert](https://logback.qos.ch/manual/configuration.html#loggerElement) werden.
+The log level can also be configured individually at the package level if the global log level is insufficient. The Portal-Gateway uses [logback](https://github.com/qos-ch/logback) as its logging backend, allowing logging behavior to be configured via the `logback.xml` file. To adjust the log level at the package level, the `logback.xml` file must be [extended with a logger](https://logback.qos.ch/manual/configuration.html#loggerElement).
 
-!!! example "Setzen des Log Levels für `com.inventage`"
+!!! example "Setting the Log Level for `com.inventage`"
 
     `<logger name="com.inventage" level="DEBUG"/>`
 
-Analog zur Portal-Gateway Konfiguration gibt es eine Default Logback Konfiguration unter `/etc/portal-gateway/logback.xml`. Um die ergänzte `logback.xml` Datei zu verwenden, wird empfohlen die Default Konfiguration zu überschreiben. Alternativ kann auch eine zusätzliche Datei angelegt werden und die `PORTAL_GATEWAY_LOGGING_CONFIG` Environment Variable auf diesen Pfad zu setzen.
+Analogous to the Portal-Gateway configuration, there is a default Logback configuration under `/etc/portal-gateway/logback.xml`. To use an extended `logback.xml` file, it is recommended to overwrite the default configuration. Alternatively, an additional file can be created, and the `PORTAL_GATEWAY_LOGGING_CONFIG` environment variable can be set to its path.
+
+---
 
 ### OpenTelemetry
 
-Wir setzen auf [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure). Unten aufgeführt sind Properties, deren Default Wert von [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure) abweichen können.
+We rely on [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure). Listed below are properties whose default values may differ from [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-| Variable                | Beschreibung                                                          | Default                                             |
-| ----------------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
-| `OTEL_SERVICE_NAME`     | Service Name, der eventuell in den exportierten Daten mitgegeben wird | Hängt von der Komponente ab (z.B. `portal-gateway`) |
-| `OTEL_TRACES_EXPORTER`  | Liste von Exporters für Tracing, mit Kommas separiert                 | `none`                                              |
-| `OTEL_METRICS_EXPORTER` | Exporter für Metric                                                   | `none`                                              |
+| Variable                | Description                                            | Default                                           |
+| :---------------------- | :----------------------------------------------------- | :------------------------------------------------ |
+| `OTEL_SERVICE_NAME`     | Service name that may be included in the exported data | Depends on the component (e.g., `portal-gateway`) |
+| `OTEL_TRACES_EXPORTER`  | Comma-separated list of exporters for tracing          | `none`                                            |
+| `OTEL_METRICS_EXPORTER` | Exporter for metrics                                   | `none`                                            |
+
+---
 
 ## Deployment
 
-Der Portal-Gateway kann in seinen Konfigurationsfiles auch Environmentvariablen verwenden. Falls dies der Fall ist müssen diese bei einem Deployment definiert werden. Das geschieht mittels des `portal-gateway.common.env` Files in einer Docker Umgebung und mittels des `values.yaml` Files in einer Kubernetes Umgebung.
+The Portal-Gateway can also use environment variables in its configuration files. If this is the case, these must be defined during deployment. This is done using the `portal-gateway.common.env` file in a Docker environment and the `values.yaml` file in a Kubernetes environment.
+
+---
 
 ### Observability
 
 #### Traces
 
-Die Tracing Daten werden zum OpenTelemetry Collector exportiert. Es werden folgende Spans erstellt:
+Tracing data is exported to the OpenTelemetry Collector. The following spans are created:
 
-- Span Kind = `server` für eingehende Request/Response
-- Span Kind = `client` für ausgehende Request/Response
+- Span Kind = `server` for incoming Request/Response
+- Span Kind = `client` for outgoing Request/Response
 
-Falls die `openTelemetry` Middleware Komponente als Entrypoint Middleware konfiguriert ist, so wird in jeder zum Client zurückgegebenen HTTP Antwort der HTTP Header `X-Uniport-Trace-Id` gesetzt. Als Wert ist die OpenTelemetry Trace-Id enthalten.
+If the `openTelemetry` middleware component is configured as an entrypoint middleware, the HTTP header `X-Uniport-Trace-Id` will be set in every HTTP response returned to the client. The value will contain the OpenTelemetry Trace-Id.
+
+---
 
 #### Metrics
 
-Für die Bereitstellung der Metriken wird die [Vert.x Micrometer Implementation](https://vertx.io/docs/vertx-micrometer-metrics/java/) verwendet. Sie basiert auf [Micrometer](http://micrometer.io/) und stellt 2 Arten von Metriken zur Verfügung:
+The [Vert.x Micrometer Implementation](https://vertx.io/docs/vertx-micrometer-metrics/java/) is used for providing metrics. It is based on [Micrometer](http://micrometer.io/) and provides two types of metrics:
 
 - [Vert.x Core](https://vertx.io/docs/vertx-micrometer-metrics/java/#_vert_x_core_tools_metrics)
 - [Vert.x Pool](https://vertx.io/docs/vertx-micrometer-metrics/java/#_vert_x_pool_metrics)
 
+---
+
 #### Logs
 
-Die Log Einträge werden via Promtail zum OpenTelemetry Collector exportiert.
+Log entries are exported via Promtail to the OpenTelemetry Collector.

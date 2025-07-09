@@ -4,6 +4,8 @@ The Portal-Gateway acts as an reverse proxy for all requests in Uniport.
 
 ![Concept Overview](data/Concept.png)
 
+---
+
 ## Overview
 
 The Portal-Gateway build on top of the concepts of `entrypoints`, `routers`, `middlewares`, `services` and `providers`:

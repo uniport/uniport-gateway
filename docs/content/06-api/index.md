@@ -4,40 +4,43 @@
 
 ### Middlewares
 
-Das Portal-Gateway bietet die Möglichkeit via folgenden `middlewares` Typen das Verhalten des Gateway zu konfigurieren.
+The Portal-Gateway offers the possibility to configure the behavior of the gateway via the following `middlewares` types.
 
 #### Control API - controlApi
 
-Die `controlApi` Middleware analysiert die Header der Antworten der weitergeleiteten HTTP Anfragen um vordefinierte Aktionen auszuführen. Das Control API bietet folgenden Aktionen:
+The `controlApi` middleware analyzes the headers of the responses from forwarded HTTP requests to execute predefined actions. The Control API offers the following actions:
 
-| Aktion | Beschreibung |
+| Action | Description |
 | --- | --- |
-| `SESSION_TERMINATE` | Diese Aktion ruft den `end_session_endpoint` des verwendeten Identity Providers auf um dort die Session zu beenden. Parallel dazu wird die Session auf dem Gateway selbst gelöscht. _Bemerkung_: Der `end_session_endpoint` wird vom Identity Provider zur Verfügung gestellt und via `OpenID Connect Discovery` abgefragt. Beispiel für einen Logout Request: `http://portal-iam:8080/auth/realms/portal/protocol/openid-connect/logout?id_token_hint=eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Y0p4dWNXRDF...` |
-| `SESSION_RESET` | Diese Aktion entfernt alle Session Scopes (JWTs) und entfernt alle Cookies vom Session Bag des eingeloggten Benutzers, die nicht mit `KEYCLOAK_` in Namen anfangen. Mit dieser Aktion kann der Benutzer zwischen mehreren Organisationen wechseln, bei denen er verschiedene Rollen besitzt, ohne sich ausloggen zu müssen. |
+| `SESSION_TERMINATE` | This action calls the `end_session_endpoint` of the used Identity Provider to terminate the session there. In parallel, the session on the Gateway itself is deleted. |
+| `SESSION_RESET` | This action removes all session scopes (JWTs) and all cookies from the session bag of the logged-in user that do not start with `KEYCLOAK_` in their name. With this action, the user can switch between multiple organizations where they have different roles, without having to log out. |
 
-Eine Aktion wird wie folgt konfiguriert:
+!!! note
+
+    The `end_session_endpoint` is provided by the Identity Provider and queried via `OpenID Connect Discovery`. Example for a logout request: `http://portal-iam:8080/auth/realms/portal/protocol/openid-connect/logout?id_token_hint=eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Y0p4dWNXRDF...` |
+
+An action is configured as follows:
 
 ```json
-
 ...
 "middlewares": [
         ...
- {
+  {
     "name": "sessionTerminate",
     "type": "controlApi",
     "options": {
-        "action": "SESSION_TERMINATE"
+      "action": "SESSION_TERMINATE"
     }
 }
         ...
 ]
 ```
 
-Konfiguration des Headers:
+Header Specification:
 
-Um eine Aktion zu triggern, muss auf der Antwort ein Cookie mit dem Key `IPS_GW_CONTROL` und der Aktion als Value z.B. `SESSION_TERMINATE` gesetzt sein. Es können auch mehrere Control API Cookies gesetzt werden. Nach der Verarbeitung werden diese Cookie aus der Session gelöscht.
+To trigger an action, a cookie with the key `IPS_GW_CONTROL` and the action as its value, e.g., `SESSION_TERMINATE`, must be set in the response. Multiple Control API cookies can also be set. After processing, these cookies are deleted from the session.
 
-!!! example "Beispiel"
+!!! example
 
     ```shell
     < HTTP/1.1 303 See Other
@@ -46,9 +49,11 @@ Um eine Aktion zu triggern, muss auf der Antwort ein Cookie mit dem Key `IPS_GW_
     < Location: https://portal.com/cms/logged_out
     ```
 
+---
+
 ## Monitoring
 
-Über den Port 9090 unter `/metrics` werden verschiedenste Metriken bereitgestellt:
+Various metrics are provided via port 9090 under `/metrics`:
 
 ```text
 # HELP vertx_http_client_responses_total Response count with codes

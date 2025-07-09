@@ -2,24 +2,24 @@
 
 ## Cluster mode
 
-Wenn der Portal-Gateway im Cluster Mode betrieben wird, werden die Key-Value Pairs im Session Store über die Instanzen synchronisiert. Der Session Store wird hauptsächlich für user-spezifische Daten bzgl. Authentisierung wie ID und Access Tokens sowie für Cookies benutzt. Mit der Beispiel-Konfiguration wird üblicherweise der Inhalt des Session Store unter `/organisation/_session_` ersichtlich gemacht. Wenn der Portal-Gateway im Cluster Mode betrieben wird, ist allerdings nicht klar auf welcher Instanz man landet. Als Hilfsmittel ist die aktuelle Instanz, auf welche man zugreift, auf der Seite ersichtlich, allerdings möchte man manchmal die Session Store Inhalte aller Instanzen sehen. Dazu braucht es ein wenig manuelle Arbeit:
+When the Portal-Gateway is operated in cluster mode, the key-value pairs in the Session Store are synchronized across instances. The Session Store is primarily used for user-specific data related to authentication, such as ID and Access Tokens, as well as for cookies. With the example configuration, the content of the Session Store is usually made visible under `/organisation/_session_`. However, when the Portal-Gateway is operated in cluster mode, it is not clear which instance you land on. As a tool, the current instance being accessed is visible on the page, but sometimes you want to see the Session Store contents of all instances. This requires a little manual work:
 
-Wir gehen im Folgenden von 2 Portal-Gateway Instanzen aus.
+We assume 2 Portal-Gateway instances below.
 
-- Die beiden Instanzen werden mittels port-forward auf die lokalen Ports `:8000` und `:8001` erreichbar gemacht.
+1. The two instances are made accessible via port-forward to the local ports `:8000` and `:8001`.
 
     ```bash
     kubectl port-forward portal-gateway-0 8000:20000
     kubectl port-forward portal-gateway-1 8001:20000
     ```
 
-- Der aktuelle Wert des Session Cookies `uniport.session` muss aus dem Browser kopiert werden.
+2. The current value of the session cookie `uniport.session` must be copied from the browser.
 
     ```plain
     uniport.session:"1af17763441b19582a2a26764050322dbd743a98260e8c83bda74c3b60dd16c1"
     ```
 
-- Mittel `curl` können nun die beiden Session Store Inhalte eingesehen werden.
+3. The contents of both Session Stores can now be viewed using `curl`.
 
     ```bash
     curl -v --cookie "uniport.session=1af17763441b19582a2a26764050322dbd743a98260e8c83bda74c3b60dd16c1" http://127.0.0.1:8000/organisation/_session_
