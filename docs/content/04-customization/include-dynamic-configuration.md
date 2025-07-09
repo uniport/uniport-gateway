@@ -49,70 +49,43 @@ A Middleware's configuration always consists of a **`name`**, a **`type`**, and 
     }
     ```
 
-##### `bodyHandler`
-
-The **Bodyhandler Middleware** is currently only used/needed in the context of CSRF and should only be set if necessary.
-
-##### `headers`
-
-The **Headers Middleware** manages the headers of incoming requests and outgoing responses.
-
-| Variable                | Required | Type                           | Description |
-| ----------------------- | -------- | ------------------------------ | ----------- |
-| `customRequestHeaders`  | No       | Pairs of header name and value | -           |
-| `customResponseHeaders` | No       | Pairs of header name and value | -           |
-
-##### `customResponse`
-
-This Middleware allows hardcoded responses to be returned to the client. The following options are supported:
-
-| Variable     | Required | Type                           | Description |
-| ------------ | -------- | ------------------------------ | ----------- |
-| `content`    | Yes      | String                         | -           |
-| `statusCode` | Yes      | Integer                        | -           |
-| `headers`    | No       | Pairs of header name and value | -           |
-
-##### `oauth2`
-
-This Middleware enables user authentication through a **Keycloak server instance**. It intercepts all requests and redirects them for authentication if necessary. After successful authentication, it stores the ID token and access token under the given session scope.
-
-Specifications:
-
-- [OAuth2](https://www.rfc-editor.org/rfc/rfc6749.html)
-- [OIDC](https://openid.net/specs/openid-connect-core-1_0.html)
-
-| Variable | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-| `clientId` | Yes | String |  | Provider client ID. |
-| `clientSecret` | Yes | String |  | Provider client secret. |
-| `discoveryUrl` | Yes | URL |  | Provider discovery URL. For Keycloak, usually `https://keycloak.ch/auth/realms/<your-realm>`. |
-| `sessionScope` | Yes | String |  | - |
-| `additionalScopes` | No | Array | empty | Additional OAuth2 scopes. |
-| `responseMode` | No | query, fragment, form_post | form_post | Default is `form_post`. |
-| `proxyAuthenticationFlow` | No | boolean | true | If set, the `authorization_path` and `issuer` are patched with the Portal-Gateway's public URL (see `publicUrl`). This ensures that the authentication process is always handled via the Portal-Gateway. |
-| `publicUrl` | No | URL | empty | To correctly set the `redirect_uri` for the OAuth2 callback, the middleware needs to know the URL under which the Portal-Gateway is accessible. Generally, the environment variables `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME`, and `PORTAL_GATEWAY_PUBLIC_PORT` are used for this. However, these can be overridden per middleware with this property. This is necessary if `oauth2` middlewares are used under different hosts. |
-| `additionalParameters` | No | Map | empty | Additional OAuth2 authentication request parameters. |
-| `passthroughParameters` | No | Array | empty | This list is a whitelist for parameter keys that are added to the OAuth2 Auth Request Parameters if they are present in the initial request that triggered the Auth Request. If a parameter key appears multiple times in the initial request, only the first parameter value is added. The `passthroughParameters` overwrite parameters added by `additionalParameters`. This option is useful if dynamic information needs to be passed to the Authorization Provider, such as `kc_idp_hint`. |
-
-!!! warning
-
-    It's recommended to use `responseMode=form_post` only when it's guaranteed that the first loaded resource has the MIME type `text/html`.
-
-!!! note
-
-    The `oauth2` Middleware generates an internal callback URL in the format `/callback/<sessionScope>` to obtain the Authorization Code from Keycloak.
-
-##### `oauth2registration`
-
-This Middleware enables the direct invocation of user self-registration at a Keycloak server instance. It intercepts all requests and redirects them for registration if necessary. After successful registration, it stores the ID token and access token under the given session scope.
-
-The `oauth2registration` accepts the same configuration parameters as the `oauth2` Middleware.
-
 ##### `authorizationBearer`
 
 The Authorization Bearer sets a token in the HTTP header `Authorization: Bearer <token>` depending on the Session Scope. It's tightly coupled with the OAuth2 Middleware as it uses tokens acquired through the authentication process.
 
 --8<-- "content/04-customization/include-auth-bearer-options.md"
+
+##### `backchannellogout`
+
+This middleware implements the [OIDC back-channel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html). The IAm may send a request to the router this middleware is configured for to logout a specific user i.e. destroy its session. This covers the use-case of an admin clearing a session in the IAM that also clears the corresponding session in the Portal-Gateway.
+
+The middleware answers invalid back-channel logout requests with a `400 Bad Request`.
+
+--8<-- "content/04-customization/include-base-auth-handler-options.md"
+
+??? example
+
+    ```json
+    {
+        "name": "backChannelLogout",
+        "type": "backChannelLogout",
+        "options": {
+            "publicKeys": [
+                {
+                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                }
+            ],
+            "audience": [
+                "Portal-Gateway"
+            ],
+            "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+            "publicKeysReconcilation": {
+                "enabled": true,
+                "intervalMs": 3600000
+            }
+        }
+    }
+    ```
 
 ##### `bearerOnly`
 
@@ -170,95 +143,9 @@ Additionally:
     }
     ```
 
-##### `passAuthorization`
+##### `bodyHandler`
 
-This Middleware is a combination of `authorization` and `bearerOnly` Middlewares and accepts a **superset** of both Middleware configurations. It checks whether the incoming request has an Access Token in its session under the configured `sessionScope` (`authorization`) that fulfills the configured JWT claims (`bearerOnly`).
-
-The name already indicates that the value in the `Authorization` header of the incoming request is not modified but passed through as is. This is necessary if a frontend already sends JWTs that need to reach the backend, but the Portal-Gateway still wants to enforce authN/authZ.
-
---8<-- "content/04-customization/include-base-auth-handler-options.md"
-
---8<-- "content/04-customization/include-auth-bearer-options.md"
-
-##### `backchannellogout`
-
-This middleware implements the [OIDC back-channel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html). The IAm may send a request to the router this middleware is configured for to logout a specific user i.e. destroy its session. This covers the use-case of an admin clearing a session in the IAM that also clears the corresponding session in the Portal-Gateway.
-
-The middleware answers invalid back-channel logout requests with a `400 Bad Request`.
-
---8<-- "content/04-customization/include-base-auth-handler-options.md"
-
-??? example
-
-    ```json
-    {
-        "name": "backChannelLogout",
-        "type": "backChannelLogout",
-        "options": {
-            "publicKeys": [
-                {
-                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
-                }
-            ],
-            "audience": [
-                "Portal-Gateway"
-            ],
-            "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-            "publicKeysReconcilation": {
-                "enabled": true,
-                "intervalMs": 3600000
-            }
-        }
-    }
-    ```
-
-##### `redirectRegex`
-
-Redirect Regex redirects a request using regex matching and replacement.
-
-| Variable      | Required | Type   | Description                                                                                         |
-| ------------- | -------- | ------ | --------------------------------------------------------------------------------------------------- |
-| `regex`       | Yes      | String | The regex option is the regular expression used to match and capture elements from the request URL. |
-| `replacement` | Yes      | String | The Replacement option defines how the URL should be changed to obtain the new target URL.          |
-
-##### `replacePathRegex`
-
-Replace Path Regex replaces the path of a URL using regex matching and replacement.
-
-| Variable      | Required | Type   | Description                                                                                              |
-| ------------- | -------- | ------ | -------------------------------------------------------------------------------------------------------- |
-| `regex`       | Yes      | String | The regex option is the regular expression used to match and capture the path from the request URL.      |
-| `replacement` | Yes      | String | The replacement option defines the format of the replacement path, which can contain captured variables. |
-
-##### `languageCookie`
-
-The Language Cookie Middleware adds the value (ISO code) of the (by default: `uniport.language`) cookie to the `Accept-Language` header. This overwrites the previous Accept-Language header. If no Language Cookie is present in the request, nothing is changed.
-
-| Variable | Required | Type   | Default            | Description                  |
-| -------- | -------- | ------ | ------------------ | ---------------------------- |
-| `name`   | No       | String | `uniport.language` | Name of the Language Cookie. |
-
-!!! example
-
-    ```json
-    {
-        "name": "languageCookie",
-        "type": "languageCookie"
-    }
-    ```
-
-##### `_session_`
-
-This Middleware is intended for **development** only. It displays the current session content, including the Session ID, every cookie, and, if logged in, the ID token (encoded and decoded), and every Access token (encoded and decoded).
-
-!!! example
-
-    ```json
-    {
-        "name": "ShowSessionContentMiddleware",
-        "type": "_session_"
-    }
-    ```
+The **Bodyhandler Middleware** is currently only used/needed in the context of CSRF and should only be set if necessary.
 
 ##### `checkRoute`
 
@@ -275,39 +162,24 @@ The `checkRoute` Middleware of type `checkRoute` returns a `202` status code dir
 
 If this Middleware is placed in a route that requires authentication, it can be used on the client side to check if a valid session exists. This is because if the client receives a `200` status code, this could also be the result of the forwarded login page. Typically, this route is called when the client receives an error status code (e.g., `405`) for a POST request. After checking the session with `checkRoute`, it can be decided whether the POST request should be called again.
 
-##### `csrf`
+##### `claimToHeader`
 
-The CSRF Middleware implements the [Double Submit Cookie](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie) strategy to counteract Cross-Site Request Forgery attacks. The Middleware generates a CSRF cookie with every `GET` request, whose value must then be set in `POST`, `PUT`, `PATCH`, `DELETE` requests, either in the header or in the body.
+The ClaimToHeader Middleware can set the value of a JWT Claim as an HTTP Header, allowing other components to read the value directly from the header.
 
-!!! bug
-
-    When using the CSRF middleware, it's assumed that the Session middleware and Bodyhandler middleware are processed before the CSRF middleware. However, the Bodyhandler middleware currently doesn't work and shouldn't be used; this results in a 500 HTTP error being returned instead of a 403 when a CSRF token is missing.
-
-| Variable | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-| `timeoutInMinute` | No | Int | `15` | CSRF cookie timeout in minutes. |
-| `nagHttps` | No | Boolean | `true` | If the request comes over HTTP (instead of HTTPS), it should be logged. |
-| `headerName` | No | String | `X-XSRF-TOKEN` | Name of the header where the value of the CSRF cookie is expected. |
-| `origin` | No | String |  | Sets the origin for this server. If this value is set, an additional check takes place. The request must match the origin server, port, and protocol. |
-| `cookie` | No | Object |  | CSRF cookie configuration. |
-| `cookie.name` | No | String | `XSRF-TOKEN` | Name of the CSRF cookie. |
-| `cookie.path` | No | String | `/` | Path of the CSRF cookie. |
-| `cookie.secure` | No | Boolean | `true` | If this flag is set, browsers are instructed to send the cookie only over HTTPS. Note that this will likely cause sessions to stop working if used without HTTPS (e.g., in development). |
+| Variable     | Required | Type                                              | Default | Description         |
+| ------------ | -------- | ------------------------------------------------- | ------- | ------------------- |
+| `claimPath`  | Yes      | [JsonPath](https://github.com/json-path/JsonPath) | -       | Path to the claim.  |
+| `headerName` | Yes      | String                                            | -       | Name of the header. |
 
 !!! example
 
     ```json
     {
-        "name": "csrf",
-        "type": "csrf",
+        "name": "tenantFromJwtToHeader",
+        "type": "claimToHeader",
         "options": {
-            "timeoutInMinute": 15,
-            "nagHttps": true,
-            "headerName": "X-Uniport-XSRF-TOKEN",
-            "cookie": {
-                "name": "uniport.xsrf-token",
-                "secure": false
-            }
+            "claimPath": "tenant",
+            "headerName": "X-Uniport-Tenant"
         }
     }
     ```
@@ -363,28 +235,6 @@ If neither `allowedOrigins` nor `allowedOriginPatterns` is configured, this impl
             "maxAgeSeconds": 42,
             "allowCredentials": true,
             "allowPrivateNetwork": true
-        }
-    }
-    ```
-
-##### `claimToHeader`
-
-The ClaimToHeader Middleware can set the value of a JWT Claim as an HTTP Header, allowing other components to read the value directly from the header.
-
-| Variable     | Required | Type                                              | Default | Description         |
-| ------------ | -------- | ------------------------------------------------- | ------- | ------------------- |
-| `claimPath`  | Yes      | [JsonPath](https://github.com/json-path/JsonPath) | -       | Path to the claim.  |
-| `headerName` | Yes      | String                                            | -       | Name of the header. |
-
-!!! example
-
-    ```json
-    {
-        "name": "tenantFromJwtToHeader",
-        "type": "claimToHeader",
-        "options": {
-            "claimPath": "tenant",
-            "headerName": "X-Uniport-Tenant"
         }
     }
     ```
@@ -458,6 +308,79 @@ The [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/
 
     There are `report-uri` and `report-to` as [Reporting Directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#reporting_directives) available for reporting CSP Violations. `report-uri` is deprecated and should no longer be used. However, not all browsers (especially Firefox) support the `report-to` Reporting Directive yet, and therefore both Reporting Directives can/must/should be set to cover all browsers. Browsers that already support `report-to` ignore `report-uri`, and browsers that do not yet support `report-to` use `report-uri` and may log a warning that an unknown Directive `report-to` is being used.
 
+##### `csrf`
+
+The CSRF Middleware implements the [Double Submit Cookie](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie) strategy to counteract Cross-Site Request Forgery attacks. The Middleware generates a CSRF cookie with every `GET` request, whose value must then be set in `POST`, `PUT`, `PATCH`, `DELETE` requests, either in the header or in the body.
+
+!!! bug
+
+    When using the CSRF middleware, it's assumed that the Session middleware and Bodyhandler middleware are processed before the CSRF middleware. However, the Bodyhandler middleware currently doesn't work and shouldn't be used; this results in a 500 HTTP error being returned instead of a 403 when a CSRF token is missing.
+
+| Variable | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `timeoutInMinute` | No | Int | `15` | CSRF cookie timeout in minutes. |
+| `nagHttps` | No | Boolean | `true` | If the request comes over HTTP (instead of HTTPS), it should be logged. |
+| `headerName` | No | String | `X-XSRF-TOKEN` | Name of the header where the value of the CSRF cookie is expected. |
+| `origin` | No | String |  | Sets the origin for this server. If this value is set, an additional check takes place. The request must match the origin server, port, and protocol. |
+| `cookie` | No | Object |  | CSRF cookie configuration. |
+| `cookie.name` | No | String | `XSRF-TOKEN` | Name of the CSRF cookie. |
+| `cookie.path` | No | String | `/` | Path of the CSRF cookie. |
+| `cookie.secure` | No | Boolean | `true` | If this flag is set, browsers are instructed to send the cookie only over HTTPS. Note that this will likely cause sessions to stop working if used without HTTPS (e.g., in development). |
+
+!!! example
+
+    ```json
+    {
+        "name": "csrf",
+        "type": "csrf",
+        "options": {
+            "timeoutInMinute": 15,
+            "nagHttps": true,
+            "headerName": "X-Uniport-XSRF-TOKEN",
+            "cookie": {
+                "name": "uniport.xsrf-token",
+                "secure": false
+            }
+        }
+    }
+    ```
+
+##### `customResponse`
+
+This Middleware allows hardcoded responses to be returned to the client. The following options are supported:
+
+| Variable     | Required | Type                           | Description |
+| ------------ | -------- | ------------------------------ | ----------- |
+| `content`    | Yes      | String                         | -           |
+| `statusCode` | Yes      | Integer                        | -           |
+| `headers`    | No       | Pairs of header name and value | -           |
+
+##### `headers`
+
+The **Headers Middleware** manages the headers of incoming requests and outgoing responses.
+
+| Variable                | Required | Type                           | Description |
+| ----------------------- | -------- | ------------------------------ | ----------- |
+| `customRequestHeaders`  | No       | Pairs of header name and value | -           |
+| `customResponseHeaders` | No       | Pairs of header name and value | -           |
+
+##### `languageCookie`
+
+The Language Cookie Middleware adds the value (ISO code) of the (by default: `uniport.language`) cookie to the `Accept-Language` header. This overwrites the previous Accept-Language header. If no Language Cookie is present in the request, nothing is changed.
+
+| Variable | Required | Type   | Default            | Description                  |
+| -------- | -------- | ------ | ------------------ | ---------------------------- |
+| `name`   | No       | String | `uniport.language` | Name of the Language Cookie. |
+
+!!! example
+
+    ```json
+    {
+        "name": "languageCookie",
+        "type": "languageCookie"
+    }
+    ```
+
 ##### `matomo`
 
 The **Matomo Middleware** should be used exclusively with the Analytics microservie. In combination with our AutoLogin Feature for Matomo, it enables automatic login based on request header values. The Middleware reads the Access Token from the Authorization Header and then sets the required values in the Request Header. The path to the values must be specified as a JsonPath.
@@ -468,6 +391,83 @@ The **Matomo Middleware** should be used exclusively with the Analytics microser
 | `pathGroup`    | No       | [JsonPath](https://github.com/json-path/JsonPath) | `$.tenant`                          | Path to the group name.    |
 | `pathUsername` | No       | [JsonPath](https://github.com/json-path/JsonPath) | `$.preferred_username`              | Path to the username.      |
 | `pathEmail`    | No       | [JsonPath](https://github.com/json-path/JsonPath) | `$.email`                           | Path to the email address. |
+
+##### `oauth2`
+
+This Middleware enables user authentication through a **Keycloak server instance**. It intercepts all requests and redirects them for authentication if necessary. After successful authentication, it stores the ID token and access token under the given session scope.
+
+Specifications:
+
+- [OAuth2](https://www.rfc-editor.org/rfc/rfc6749.html)
+- [OIDC](https://openid.net/specs/openid-connect-core-1_0.html)
+
+| Variable | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `clientId` | Yes | String |  | Provider client ID. |
+| `clientSecret` | Yes | String |  | Provider client secret. |
+| `discoveryUrl` | Yes | URL |  | Provider discovery URL. For Keycloak, usually `https://keycloak.ch/auth/realms/<your-realm>`. |
+| `sessionScope` | Yes | String |  | - |
+| `additionalScopes` | No | Array | empty | Additional OAuth2 scopes. |
+| `responseMode` | No | query, fragment, form_post | form_post | Default is `form_post`. |
+| `proxyAuthenticationFlow` | No | boolean | true | If set, the `authorization_path` and `issuer` are patched with the Portal-Gateway's public URL (see `publicUrl`). This ensures that the authentication process is always handled via the Portal-Gateway. |
+| `publicUrl` | No | URL | empty | To correctly set the `redirect_uri` for the OAuth2 callback, the middleware needs to know the URL under which the Portal-Gateway is accessible. Generally, the environment variables `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME`, and `PORTAL_GATEWAY_PUBLIC_PORT` are used for this. However, these can be overridden per middleware with this property. This is necessary if `oauth2` middlewares are used under different hosts. |
+| `additionalParameters` | No | Map | empty | Additional OAuth2 authentication request parameters. |
+| `passthroughParameters` | No | Array | empty | This list is a whitelist for parameter keys that are added to the OAuth2 Auth Request Parameters if they are present in the initial request that triggered the Auth Request. If a parameter key appears multiple times in the initial request, only the first parameter value is added. The `passthroughParameters` overwrite parameters added by `additionalParameters`. This option is useful if dynamic information needs to be passed to the Authorization Provider, such as `kc_idp_hint`. |
+
+!!! warning
+
+    It's recommended to use `responseMode=form_post` only when it's guaranteed that the first loaded resource has the MIME type `text/html`.
+
+!!! note
+
+    The `oauth2` Middleware generates an internal callback URL in the format `/callback/<sessionScope>` to obtain the Authorization Code from Keycloak.
+
+##### `oauth2registration`
+
+This Middleware enables the direct invocation of user self-registration at a Keycloak server instance. It intercepts all requests and redirects them for registration if necessary. After successful registration, it stores the ID token and access token under the given session scope.
+
+The `oauth2registration` accepts the same configuration parameters as the `oauth2` Middleware.
+
+##### `passAuthorization`
+
+This Middleware is a combination of `authorization` and `bearerOnly` Middlewares and accepts a **superset** of both Middleware configurations. It checks whether the incoming request has an Access Token in its session under the configured `sessionScope` (`authorization`) that fulfills the configured JWT claims (`bearerOnly`).
+
+The name already indicates that the value in the `Authorization` header of the incoming request is not modified but passed through as is. This is necessary if a frontend already sends JWTs that need to reach the backend, but the Portal-Gateway still wants to enforce authN/authZ.
+
+--8<-- "content/04-customization/include-base-auth-handler-options.md"
+
+--8<-- "content/04-customization/include-auth-bearer-options.md"
+
+##### `redirectRegex`
+
+Redirect Regex redirects a request using regex matching and replacement.
+
+| Variable      | Required | Type   | Description                                                                                         |
+| ------------- | -------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `regex`       | Yes      | String | The regex option is the regular expression used to match and capture elements from the request URL. |
+| `replacement` | Yes      | String | The Replacement option defines how the URL should be changed to obtain the new target URL.          |
+
+##### `replacePathRegex`
+
+Replace Path Regex replaces the path of a URL using regex matching and replacement.
+
+| Variable      | Required | Type   | Description                                                                                              |
+| ------------- | -------- | ------ | -------------------------------------------------------------------------------------------------------- |
+| `regex`       | Yes      | String | The regex option is the regular expression used to match and capture the path from the request URL.      |
+| `replacement` | Yes      | String | The replacement option defines the format of the replacement path, which can contain captured variables. |
+
+##### `_session_`
+
+This Middleware is intended for **development** only. It displays the current session content, including the Session ID, every cookie, and, if logged in, the ID token (encoded and decoded), and every Access token (encoded and decoded).
+
+!!! example
+
+    ```json
+    {
+        "name": "ShowSessionContentMiddleware",
+        "type": "_session_"
+    }
+    ```
 
 #### Entry-Middlewares
 
