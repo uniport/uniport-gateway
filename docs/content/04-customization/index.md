@@ -232,10 +232,6 @@ A Middleware's configuration always consists of a **`name`**, a **`type`**, and 
     }
     ```
 
-##### `proxy`
-
-Der Proxy ist als eine Middleware implementiert, kann aber **nicht** dynamisch gesetzt werden. Der Proxy ist immer der letzte Middleware in der Kette und leitet die eingehenden Request weiter an die Services.
-
 ##### `bodyHandler`
 
 The **Bodyhandler Middleware** is currently only used/needed in the context of CSRF and should only be set if necessary.
