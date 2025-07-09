@@ -8,19 +8,21 @@ The Portal-Gateway can be built & launched as follows.
 mvn clean install
 ```
 
-**Note**: Your configuration at [~/.m2/settings.xml](http://maven.apache.org/settings.html#Servers) needs to exist with the following content:
+!!! note "Authentication for dependencies"
 
-```xml
-<servers>
-    <server>
-        <id>inventage-portal-group</id>
-        <username>username</username>
-        <password>password</password>
-    </server>
-</servers>
-```
+    Your configuration at [~/.m2/settings.xml](http://maven.apache.org/settings.html#Servers) needs to exist with the following content:
 
-(It is also possible to use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens), instead of username/password)
+    ```xml
+    <servers>
+        <server>
+            <id>inventage-portal-group</id>
+            <username>username</username>
+            <password>password</password>
+        </server>
+    </servers>
+    ```
+
+    (It is also possible to use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens), instead of username/password)
 
 ## Launch
 
@@ -34,7 +36,9 @@ docker compose -f server/src/test/resources/configs/router-rules/docker-compose.
 
 Then visit <http://localhost:20000>
 
-> **Note**: To use the run config in IntelliJ, the plugin `net.ashald.envfile` has to be installed.
+!!! note
+
+    To use the run config in IntelliJ, the plugin `net.ashald.envfile` has to be installed.
 
 ### Docker
 
@@ -46,4 +50,7 @@ docker compose -f .docs/starter-kit/docker-compose.yml up
 
 Then visit <http://localhost:20000>
 
-> **Important**: For the service discovery of the `docker` provider to work, the `/var/run/docker.sock` has to be available and have permissions set to `666`. There are [some security aspects](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) involved.
+!!! warning "Docker provider permissions"
+
+    For the service discovery of the `docker` provider to work, the `/var/run/docker.sock` has to be available and have permissions set to `666`.
+    There are [some security aspects](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) involved.

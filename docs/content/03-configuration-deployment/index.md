@@ -2,8 +2,8 @@
 
 The Portal-Gateway has two different types of configuration, a `static` configuration and `dynamic` configurations:
 
-* The `static` configuration is the minimal configuration needed to start the Portal-Gateway and cannot be changed at runtime. It consists of `entrypoints` and `providers`.
-* The `dynamic` configuration configures `routers`, `middlewares` and `services`. It can be dynamically updated and applied at runtime.
+- The `static` configuration is the minimal configuration needed to start the Portal-Gateway and cannot be changed at runtime. It consists of `entrypoints` and `providers`.
+- The `dynamic` configuration configures `routers`, `middlewares` and `services`. It can be dynamically updated and applied at runtime.
 
 The simplest `provider` is the `file` provider. It reads the configuration from a JSON file and searches at the following locations:
 
@@ -91,8 +91,8 @@ Der Portal-Gateway kann in seinen Konfigurationsfiles auch Environmentvariablen 
 
 Die Tracing Daten werden zum OpenTelemetry Collector exportiert. Es werden folgende Spans erstellt:
 
-* Span Kind = `server` für eingehende Request/Response
-* Span Kind = `client` für ausgehende Request/Response
+- Span Kind = `server` für eingehende Request/Response
+- Span Kind = `client` für ausgehende Request/Response
 
 Falls die `openTelemetry` Middleware Komponente als Entrypoint Middleware konfiguriert ist, so wird in jeder zum Client zurückgegebenen HTTP Antwort der HTTP Header `X-Uniport-Trace-Id` gesetzt. Als Wert ist die OpenTelemetry Trace-Id enthalten.
 
@@ -100,8 +100,8 @@ Falls die `openTelemetry` Middleware Komponente als Entrypoint Middleware konfig
 
 Für die Bereitstellung der Metriken wird die [Vert.x Micrometer Implementation](https://vertx.io/docs/vertx-micrometer-metrics/java/) verwendet. Sie basiert auf [Micrometer](http://micrometer.io/) und stellt 2 Arten von Metriken zur Verfügung:
 
-* [Vert.x Core](https://vertx.io/docs/vertx-micrometer-metrics/java/#_vert_x_core_tools_metrics)
-* [Vert.x Pool](https://vertx.io/docs/vertx-micrometer-metrics/java/#_vert_x_pool_metrics)
+- [Vert.x Core](https://vertx.io/docs/vertx-micrometer-metrics/java/#_vert_x_core_tools_metrics)
+- [Vert.x Pool](https://vertx.io/docs/vertx-micrometer-metrics/java/#_vert_x_pool_metrics)
 
 #### Logs
 

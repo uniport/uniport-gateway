@@ -30,7 +30,9 @@ Das Uniport Projekt wendet verschiedene Code Quality Tools an, um immer ein saub
 
 Die Code Quality Tool Settings werden dabei in einem zentralen Repo (`code-style-settings`) verwaltet und von den einzelnen Projekten jeweils heruntergeladen.
 
-**Wichtig**: Bei jeder Änderung an den globalen Settings im zentralen Repo, muss das Uniport-Team darüber informiert werden.
+!!! warning
+
+    Bei jeder Änderung an den globalen Settings im zentralen Repo, muss das Uniport-Team darüber informiert werden.
 
 ### Formatierung
 

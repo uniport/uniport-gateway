@@ -14,7 +14,7 @@ Gerade bei Deployments, wo der Pod Name mit jedem Restart wechselt, ist es mühs
 
 Zu Monitoring-Zwecken loggen einige Microservices structured Log Statement. Dies vereinfacht, das Parsen von Log Statements in einer Monitoring Instanz, macht das Lesen der Logs in seiner rohen Form für einen Entwickler eher müde Augen. Um structured Logs besser lesen zu können, empfiehlt sich die Verwendung von [jq](https://github.com/jqlang/jq) für das Parsen der Logs Statements. Das selbe Tool kann auch für das Filtern von Log Statement verwendet werden.
 
-!!! hint "Kombination stern und jq"
+!!! tip "Kombination stern und jq"
 
     Die beiden Tools lassen sich hervorragend kombinieren.
 

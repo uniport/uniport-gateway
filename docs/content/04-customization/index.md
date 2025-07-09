@@ -157,7 +157,9 @@ Der Port wird wie folgt gewählt:
     ```
     [Source: Docker Daemon Attack Surface documentation](https://docs.docker.com/engine/security/#docker-daemon-attack-surface)
 
-    **Lösung**: Der Docker Socket kann auch über SSH exponiert werden. SSH ist mit [Docker > 18.09](https://docs.docker.com/engine/security/protect-access/) unterstützt.
+    !!! success "Solution"
+
+        Der Docker Socket kann auch über SSH exponiert werden. SSH ist mit [Docker > 18.09](https://docs.docker.com/engine/security/protect-access/) unterstützt.
 
 ##### Konfigurationsintervall
 
@@ -188,14 +190,12 @@ Die dynamische Konfiguration enthält alles, was definiert, wie die Requests vom
 Ein Router ist für das Weiterleiten der einkommenden Requests zu den Services verantwortlich, welche diese weiters bearbeiten können. Während diesem Vorgang können Routers Middlewares benutzen, um Requests zu updaten oder zu verändern, bevor sie weiter an den Service weiter geleitet wird.
 
 | Variable      | Benötigt | Typ                                                                                                                                     | Beschreibung                                                                                                                                                                                                                                                                                               |
-| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --- | --------- | --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`        | Ja       | String                                                                                                                                  | Name von dem Router                                                                                                                                                                                                                                                                                        |
 | `entrypoints` | Nein     | List of Strings                                                                                                                         | Wenn nicht angegeben, so wird der Router Request von allen definierten Entrypoints annehmen. Wenn der Router Scope auf eine Menge von Entrypoints limitiert sein soll, dann setze die Entrypoint Option.                                                                                                   |
 | `rule`        | Nein     | `Path('/example')`<br>`PathPrefix('/example')`<br>`PathRegex('/(de\|en)/example')`<br>`Host('example.com')`<br>`HostRegex('foo(bar)?')` | Eine Regel ist ein Matcher, welche mit Werten konfiguriert ist. Diese Werte bestimmten, ob ein bestimmter Request mit einem spezifischen Kriterium zusammenpasst. Sobald die Regel verifiziert wurde, wird der Router aktive. Er benachrichtigt Middlewares und leitet den Request weiter zu den Services. |
 | `priority`    | Nein     | Integer                                                                                                                                 | Routers sind sortiert per default, um Pfadüberlappungen zu vermeiden. Sie werden in absteigender Reihenfolge nach der Länge der Rules sortiert. Die Priorität ist also gleich der Länge von den Regeln, sodass die längste Regel höchste Priorität hat.                                                    |
-| `middlewares` | Nein     | List of Strings                                                                                                                         | Ein Router kann eine Liste von Middleware haben. Die Middlewares werden nur dann aktiv, wenn die Regel übereinstimmt (match) und bevor der Request an die Services weitergeleitet wird.<br><br>\*\*                                                                                                        |
-
-IMPORTANT**: Das Zeichen `@` ist nicht erlaubt im Name vom Middleware.<br><br>** IMPORTANT\*\*: Middlewares werden in der gleichen Reihenfolge betätigt, wie sie in der Router-Konfiguration eingetragen sind (Forced Ranking). | | `service` | Ja | String | Jeder Request muss schliesslich von einem Service bearbeitet werden. Darum sollte jeder Router Definition ein Service Target beinhalten, welches im Prinzip beschreibt, wohin the Request überliefert wird. Im Generellen, ein Service, der einem Router zugewiesen ist, sollte definiert sein. Doch es gibt Ausnahmen bei Label-basierten Providern. Siehe die spezifische Docker Dokumentation. |
+| `middlewares` | Nein     | List of Strings                                                                                                                         | Ein Router kann eine Liste von Middleware haben. Die Middlewares werden nur dann aktiv, wenn die Regel übereinstimmt (match) und bevor der Request an die Services weitergeleitet wird.                                                                                                                    | Middlewares werden in der gleichen Reihenfolge betätigt, wie sie in der Router-Konfiguration eingetragen sind (Forced Ranking). |     | `service` | Ja  | String | Jeder Request muss schliesslich von einem Service bearbeitet werden. Darum sollte jeder Router Definition ein Service Target beinhalten, welches im Prinzip beschreibt, wohin the Request überliefert wird. Im Generellen, ein Service, der einem Router zugewiesen ist, sollte definiert sein. Doch es gibt Ausnahmen bei Label-basierten Providern. Siehe die spezifische Docker Dokumentation. |
 
 !!! example "Beispiel"
 
@@ -208,6 +208,10 @@ IMPORTANT**: Das Zeichen `@` ist nicht erlaubt im Name vom Middleware.<br><br>**
         "service": "testService"
     }
     ```
+
+!!! warning
+
+    Das Zeichen `@` ist nicht erlaubt im Name einer Middleware.
 
 #### Middlewares
 
@@ -278,7 +282,9 @@ Spezifikationen:
 
 Es wird empfohlen `responseMode=form_post` nur zu verwenden, wenn garantiert ist, dass die erste geladene Ressource vom Mime-Type `text/html` ist.
 
-**Beachte**, dass die `oauth2` Middleware einen internen Callback-URL im Format `/callback/<sessionScope>` generiert, um den Authorization Code von Keycloak zu erhalten.
+!!! note
+
+    Die `oauth2` Middleware generiert einen internen Callback-URL im Format `/callback/<sessionScope>`, um den Authorization Code von Keycloak zu erhalten.
 
 ##### `oauth2registration`
 
@@ -425,7 +431,11 @@ Wenn diese Middleware in einer Route, welche eine Authentifizierung voraussetzt,
 
 ##### `csrf`
 
-Die CSRF Middleware implementiert die [Double Submit Cookie](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie) Strategie, um Cross-Site Request Forgery Attacken entgegenzuwirken. Die Middleware generiert bei jedem `GET`-Request ein CSRF Cookie, dessen Wert dann in `POST`, `PUT`, `PATCH`, `DELETE`-Requests entweder im Header oder im Body gesetzt werden muss. _WICHTIG_: Bei der Verwendung der CSRF-Middleware wird davon ausgegangen, dass die Session-Middleware und die Bodyhandler-Middleware vor der CSRF-Middleware durchlaufen werden. Momentan funktioniert aber die Bodyhandler Middleware nicht und sollte nicht eingesetzt werden, dies hat zur Folge, dass bei fehlendem CSRF Token ein 500 HTTP-Fehler zurückgegeben wird anstatt 403.
+Die CSRF Middleware implementiert die [Double Submit Cookie](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie) Strategie, um Cross-Site Request Forgery Attacken entgegenzuwirken. Die Middleware generiert bei jedem `GET`-Request ein CSRF Cookie, dessen Wert dann in `POST`, `PUT`, `PATCH`, `DELETE`-Requests entweder im Header oder im Body gesetzt werden muss.
+
+!!! bug
+
+    Bei der Verwendung der CSRF-Middleware wird davon ausgegangen, dass die Session-Middleware und die Bodyhandler-Middleware vor der CSRF-Middleware durchlaufen werden. Momentan funktioniert aber die Bodyhandler Middleware nicht und sollte nicht eingesetzt werden, dies hat zur Folge, dass bei fehlendem CSRF Token ein 500 HTTP-Fehler zurückgegeben wird anstatt 403.
 
 | Variable          | Benötigt | Typ     | Default        | Beschreibung                                                                                                                                                                                                                                                  |
 | ----------------- | -------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -703,7 +713,9 @@ Eine Ausnahme von dieser Regel ist das Keycloak-Session-Cookie für den Master-R
 
 Loggt jede Request und/oder Response und fügt die requestId und die sessionId zu den kontextuellen Daten hinzu. Je nach eingestelltem Log-Level im portal-gateway/proxy werden mehr oder weniger Details von der Request/Response geloggt.
 
-Wichtig: Nur auf dem `TRACE` Log-Level wird der Body geloggt.
+!!! tip
+
+    Nur auf dem `TRACE` Log-Level wird der Body geloggt.
 
 | Variable                 | Benötigt | Typ          | Default | Beschreibung                                                                                                                                                                                 |
 | ------------------------ | -------- | ------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -717,13 +729,17 @@ _DISCLAIMER_: Directives ohne values (bspw: sandbox) werden erst ab Portal-Gatew
 
 Mit der [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) Middleware können wir festlegen, welche Ressourcen der Browser laden darf. Ab Portal Gateway Version 8.1.0+ ist es nun möglich, mehrere aufeinanderfolgende CSP-Middlewares für eine Route zu definieren: z.B. allgemeine CSP-Policies auf der Entry-Middleware und spezifische/restriktive CSP-Policies auf jeder spezifischen Route. Die Vereinigung/Union aller CSP-Policies wird dann durchgesetzt.
 
-| Variable           | Benötigt | Typ                             | Default | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------ | -------- | ------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `reportOnly`       | Nein     | Boolean                         | false   | [Content-Security-Policy-Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only) aktivieren. Wenn aktiv, muss auch `report-to` als directive vorhanden sein.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `policyDirectives` | Ja       | Array                           | -       | Ein Array von Policy Directives. Jedes Element(Directive) im Array ist ein Objekt mit den Feldern `directive` und `values`, wobei `values` ein Array von mehreren oder einzelnen Werten ist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `mergeStrategy`    | Nein     | `UNION`, `INTERNAL`, `EXTERNAL` | `UNION` | Die `mergeStrategy` bestimmt, wie externe CSP-Policies (die z.B. vom Portal IAM gesetzt werden) verwendet werden. Die externen CSP-Policies werden aus den Headern `Content-Security-Policy` und `Content-Security-Policy-Report-Only` ausgelesen und vereint/union. Mit `UNION` wird die Vereinigung/Union der Middleware CSP Policies und der externen CSP Policies als finale CSP Policy durchgesetzt. Mit `EXTERNAL` wird die externe CSP-Policy durchgesetzt und mit `INTERNAL` die Middleware-Policy. **WICHTIG**: Im Falle mehrerer CSP-Middlewares für eine Route bestimmt die zuletzt durchlaufene Middleware die `mergeStrategy` zwischen externen und internen CSP-Policies (Im unteren Schema ist das die `CSP2` Middleware respektive die `Resp2``). |
+| Variable           | Benötigt | Typ                             | Default | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | -------- | ------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reportOnly`       | Nein     | Boolean                         | false   | [Content-Security-Policy-Report-Only](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only) aktivieren. Wenn aktiv, muss auch `report-to` als directive vorhanden sein.                                                                                                                                                                                                                                                                                            |
+| `policyDirectives` | Ja       | Array                           | -       | Ein Array von Policy Directives. Jedes Element(Directive) im Array ist ein Objekt mit den Feldern `directive` und `values`, wobei `values` ein Array von mehreren oder einzelnen Werten ist.                                                                                                                                                                                                                                                                                                                |
+| `mergeStrategy`    | Nein     | `UNION`, `INTERNAL`, `EXTERNAL` | `UNION` | Die `mergeStrategy` bestimmt, wie externe CSP-Policies (die z.B. vom Portal IAM gesetzt werden) verwendet werden. Die externen CSP-Policies werden aus den Headern `Content-Security-Policy` und `Content-Security-Policy-Report-Only` ausgelesen und vereint/union. Mit `UNION` wird die Vereinigung/Union der Middleware CSP Policies und der externen CSP Policies als finale CSP Policy durchgesetzt. Mit `EXTERNAL` wird die externe CSP-Policy durchgesetzt und mit `INTERNAL` die Middleware-Policy. |
 
-![Portal-Gateway Session Handling](data/CSPMiddlewareFlow.png)
+!!! warning
+
+    Im Falle mehrerer CSP-Middlewares für eine Route bestimmt die zuletzt durchlaufene Middleware die `mergeStrategy` zwischen externen und internen CSP-Policies. Im unteren Schema ist das die `CSP2` Middleware respektive die `Resp2``.
+
+    ![Portal-Gateway Session Handling](data/CSPMiddlewareFlow.png)
 
 !!! example "Beispiel"
 
@@ -765,7 +781,7 @@ Services sind für Konfiguration verantwortlich, wie die aktuellen Services erre
 | `httpsOptions.trustStorePath`     | Nein     | String                                                                                                                    | -       | Pfad zum Truststore. (Falls doch nicht allen Serverzertifikaten vertraut werden soll)                                                                 |
 | `httpsOptions.trustStorePassword` | Nein     | String                                                                                                                    | -       | Password für den Truststore.                                                                                                                          |
 
-!!! caution "Service Name"
+!!! warning "Service Name"
 
     Der Character `@` ist nicht im Service Namen erlaubt
 
@@ -902,7 +918,7 @@ Der Portal-Gateway kreiert für jeden Container einen dazugehörigen Router und 
 
 Dem Service wird automatische eine Server-Instanz angehängt und dem Router wird die Default Rule zugewiesen, falls keine Routing Rule in den Labels definiert wurde.
 
-!!! important "Docker Service Discovery"
+!!! warning "Docker Service Discovery"
 
     Damit die Service Discovery von Docker Containern funktioniert, wird `/var/run/docker.sock` in der Portal-Gateway gemounted. Wichtig dabei ist, dass der `docker.sock` die Berechtigung 666 (`sudo chmod 666 /var/run/docker.sock`) hat. Dabei gibt es [einige Sicherheitsaspekte](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) zu beachten.
 
@@ -965,5 +981,4 @@ labels:
 
 ## Hinzufügen von Microservices
 
-Es wird empfohlen die eigenen Konfigurationsdateien unter einem anderen Pfad im Docker Image abzulegen als `/etc/portal-gateway/default/`.
-Mit dem anschliessenden Setzen der Environment Variable auf den verwendeten Wert, z.B. `PORTAL_GATEWAY_JSON=/etc/portal-gateway/example/portal-gateway.json`, in der Datei `portal-gateway.common.env` unter `./portal-gateway/docker-compose/src/main/resources/portal-gateway.common.env` für Docker und in der Datei `values.dev.yaml` unter `portal-gateway/helm/src/main/resources/values.dev.yaml` für Kubernetes.
+Es wird empfohlen die eigenen Konfigurationsdateien unter einem anderen Pfad im Docker Image abzulegen als `/etc/portal-gateway/default/`. Mit dem anschliessenden Setzen der Environment Variable auf den verwendeten Wert, z.B. `PORTAL_GATEWAY_JSON=/etc/portal-gateway/example/portal-gateway.json`, in der Datei `portal-gateway.common.env` unter `./portal-gateway/docker-compose/src/main/resources/portal-gateway.common.env` für Docker und in der Datei `values.dev.yaml` unter `portal-gateway/helm/src/main/resources/values.dev.yaml` für Kubernetes.

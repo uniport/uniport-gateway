@@ -26,4 +26,6 @@ Wir gehen im Folgenden von 2 Portal-Gateway Instanzen aus.
     curl -v --cookie "uniport.session=1af17763441b19582a2a26764050322dbd743a98260e8c83bda74c3b60dd16c1" http://127.0.0.1:8001/organisation/_session_
     ```
 
-**Note**: We cannot simply forward the respective instances and access them via the browser, because we then access them with the `localhost` domain, instead of the true domain. Hence, the wrong session cookie will be sent along the request by the browser.
+!!! note
+
+    We cannot simply forward the respective instances and access them via the browser, because we then access them with the `localhost` domain, instead of the true domain. Hence, the wrong session cookie will be sent along the request by the browser.
