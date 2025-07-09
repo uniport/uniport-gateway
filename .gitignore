@@ -1,6 +1,7 @@
 # Ignore all IntelliJ stuff and include the important things
 # @see https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 /.idea/*
+!/.idea/http-client/
 !/.idea/codeStyles/
 !/.idea/jsLinters/
 !/.idea/runConfigurations/
