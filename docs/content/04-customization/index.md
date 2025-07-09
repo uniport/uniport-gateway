@@ -295,23 +295,19 @@ The `oauth2registration` accepts the same configuration parameters as the `oauth
 
 The Authorization Bearer sets a token in the HTTP header `Authorization: Bearer <token>` depending on the Session Scope. It's tightly coupled with the OAuth2 Middleware as it uses tokens acquired through the authentication process.
 
-| Variable | Required | Type | Description |
-| --- | --- | --- | --- |
-| `sessionScope` | Yes | id (referencing a session scope defined by an OAuth2 middleware) | The Session Scope determines which token should be set in the Auth Bearer Header. This can be either an ID token or an Access token. Per user, there is one ID token and zero or more Access tokens. |
+--8<-- "content/04-customization/include-auth-bearer-options.md"
 
 ##### `bearerOnly`
 
 This Middleware checks every incoming request for an HTTP `Authorization` header containing a valid JWT. For validity, the signature and the claims for Issuer and Audience are checked. The values used for this are defined via `options`:
 
-| Variable | Required | Type | Description |
-| --- | --- | --- | --- |
-| `publicKeys` | Yes | Array | An array of Public Keys. Each element (Public Key) in the array is an object with the fields `publicKey` and optionally `publicKeyAlgorithm`. The `publicKey` value is a public key in PEM format (without header/footer) or a URL for retrieving the public key from Portal-IAM (e.g., http://portal-iam:8080/auth/realms/portal). The OIDC Discovery mechanism is used for this, and all public keys found under the `jwks_uri` URL that are used to create a signature are loaded. If the `publicKey` contains a public key in PEM format, the `publicKeyAlgorithm` value can also be set; otherwise, the default `RS256` is used. |
-| `issuer` | No | String | Value that the `sub` claim in the JWT must possess. |
-| `additionalIssuers` | No | Array | An array of additional Issuers. If other Issuers besides the main `issuer` are relevant, they can be declared in this array. |
-| `audience` | No | String | Value that the `aud` claim in the JWT must possess. |
-| `optional` | No | Boolean | Switch whether the Authorization header in the request is mandatory. |
-| `claims` | No | Array | An array of requirements that each JWT must fulfill. Each element (requirement) in the array is an object with the fields `claimPath`, `operator`, and `value`. The `value` at the path `claimPath`, specified as JSONPath ([https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/](https://datatracker.ietf.org/doc/draft-ietf-jsonpath-base/)) in bracket-notation, is compared with the claim in the JWT at that path according to the `operator`. The following operators are currently supported:<br/><br/>`EQUALS`: The value in the JWT claim must match `value`.<br/>`CONTAINS`: The value in the JWT claim must be contained in `value`. `value` must necessarily be specified as a list\!<br/>`EQUALS_SUBSTRING_WHITESPACE` and `CONTAINS_SUBSTRING_WHITESPACE`: Instead of specifying `value` as a list, elements can be separated by whitespace. |
-| `publicKeysReconciliation` | No | Object | An object with the two fields `enabled` and `intervalMs`. By default, `enabled` is `true` and `intervalMs` is `600000` (1h). Basically, the `bearerOnly` middleware loads the current Public Keys used by Portal-IAM to sign JWTs from Portal-IAM when the Portal-Gateway starts. The Public Key Reconciler can automatically update the Public Keys at a defined interval. This ensures that in the event of a key rollover, the Portal-Gateway does not need to be restarted, but automatically knows and accepts the new Public Keys. Additionally, in the case of an `Unauthorized` Request (401), the Public Keys are automatically updated and the Request is repeated _once_. This ensures that JWTs signed with a new Public Key, but where the reconciliation interval has not yet expired, can still be verified. |
+--8<-- "content/04-customization/include-base-auth-handler-options.md"
+
+Additionally:
+
+| Variable   | Required | Type    | Description                                                          |
+| ---------- | -------- | ------- | -------------------------------------------------------------------- |
+| `optional` | No       | Boolean | Switch whether the Authorization header in the request is mandatory. |
 
 !!! tip
 
@@ -363,9 +359,41 @@ This Middleware is a combination of `authorization` and `bearerOnly` Middlewares
 
 The name already indicates that the value in the `Authorization` header of the incoming request is not modified but passed through as is. This is necessary if a frontend already sends JWTs that need to reach the backend, but the Portal-Gateway still wants to enforce authN/authZ.
 
+--8<-- "content/04-customization/include-base-auth-handler-options.md"
+
+--8<-- "content/04-customization/include-auth-bearer-options.md"
+
 ##### `backchannellogout`
 
-<!-- TODO -->
+This middleware implements the [OIDC back-channel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html). The IAm may send a request to the router this middleware is configured for to logout a specific user i.e. destroy its session. This covers the use-case of an admin clearing a session in the IAM that also clears the corresponding session in the Portal-Gateway.
+
+The middleware answers invalid back-channel logout requests with a `400 Bad Request`.
+
+--8<-- "content/04-customization/include-base-auth-handler-options.md"
+
+??? example
+
+    ```json
+    {
+        "name": "backChannelLogout",
+        "type": "backChannelLogout",
+        "options": {
+            "publicKeys": [
+                {
+                    "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                }
+            ],
+            "audience": [
+                "Portal-Gateway"
+            ],
+            "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
+            "publicKeysReconcilation": {
+                "enabled": true,
+                "intervalMs": 3600000
+            }
+        }
+    }
+    ```
 
 ##### `redirectRegex`
 
