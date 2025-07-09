@@ -2,6 +2,11 @@
     "http": {
         "routers": [
             {
+                "name": "auth",
+                "rule": "PathPrefix('/auth')",
+                "service": "iam"
+            },
+            {
                 "name": "root",
                 "middlewares": [
                     "rootRedirectregex"
@@ -12,12 +17,19 @@
             {
                 "name": "whoami1",
                 "rule": "PathPrefix('/whoami1')",
+                "middlewares": [
+                    "whoami1AuthBearer"
+                ],
                 "service": "whoami1"
             },
             {
                 "name": "whoami2",
                 "rule": "PathPrefix('/whoami2')",
                 "priority": 50,
+                "middlewares": [
+                    "whoami2Oauth",
+                    "whoami2AuthBearer"
+                ],
                 "service": "whoami2"
             }
         ],
@@ -28,6 +40,30 @@
                 "options": {
                     "regex": "^/$",
                     "replacement": "/whoami1"
+                }
+            },
+            {
+                "name": "whoami2Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami1AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
+                }
+            },
+            {
+                "name": "whoami2AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
                 }
             }
         ],
@@ -49,6 +85,15 @@
                     {
                         "host": "whoami2",
                         "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "iam",
+                "servers": [
+                    {
+                        "host": "keycloak",
+                        "port": "8080"
                     }
                 ]
             }

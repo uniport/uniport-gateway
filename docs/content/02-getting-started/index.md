@@ -53,7 +53,7 @@ Alternatively, a similar configuration can be launched by running `docker compos
 === "Command"
 
     ```bash
-    docker compose -f .docs/starter-kit/docker-compose.yml up
+    docker compose -f starter-kit/docker-compose.yml up
     ```
 
 === "docker-compose.yml"
