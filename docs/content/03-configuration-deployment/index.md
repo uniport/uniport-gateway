@@ -26,8 +26,8 @@ Im Container Image von Portal-Gateway befindet sich im Verzeichnis `/etc/portal-
 | `PORTAL_GATEWAY_LOGGING_CONFIG` | Absoluter Pfad der `logback.xml` Datei, für die Logback Konfiguration | /etc/portal-gateway/logback.xml |
 | `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log Output wird als strukturierte JSON ausgegeben. | false |
 | `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Pfad oder URL | http://portal-iam:8080/auth/realms/portal |
-| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Beschreibt den erwarteten Issuer im Access Token. Siehe `issuer` in [bearerOnly](../customization/portal-gateway.md#beareronly) | http://ips.inventage.com:20000/auth/realms/portal |
-| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Gibt an, ob der Proxy ein Access Token erwarten (und somit überprüfen) sollte. Siehe `optional` in [bearerOnly](../customization/portal-gateway.md#beareronly) | false |
+| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Beschreibt den erwarteten Issuer im Access Token. Siehe `issuer` in [bearerOnly](../04-customization/index.md#beareronly) | http://ips.inventage.com:20000/auth/realms/portal |
+| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Gibt an, ob der Proxy ein Access Token erwarten (und somit überprüfen) sollte. Siehe `optional` in [bearerOnly](../04-customization/index.md#beareronly) | false |
 | `PORTAL_GATEWAY_METRICS_PORT` | HTTP Port für den Metrics Endpoint | 9090 |
 | `PORTAL_GATEWAY_METRICS_PATH` | HTTP Path für den Metrics Endpoint | /metrics |
 | `PORTAL_GATEWAY_CLUSTERED` | Switch, um den Portal-Gateway im Cluster Modus laufen zu lassen. Dafür muss auch die Anzahl deployten Instanzen (z.B. `replicas` in den Helm Value Files) angepasst werden. | false |

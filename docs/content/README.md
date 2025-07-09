@@ -64,7 +64,7 @@ Die Benutzeroberfläche setzt sich aus mehreren [Micro-frontends](https://increm
 
 ## Übersicht aller derzeit verfügbaren Uniport Komponenten
 
-Wir unterscheiden bei den Uniport Komponenten zwischen Infrastruktur Komponenten und Microservices.
+Wir unterscheiden bei den Uniport Komponenten zwischen Infrastruktur Komponenten, Microservices und Libraries. Nachfolgende werden nur für den Gateway relevante Komponenten gelistet.
 
 ### Infrastruktur Komponenten
 
@@ -90,6 +90,6 @@ Es existieren verschiedene Mircroservices, auf welche hier nicht weiter eigegang
 
 Da einige Infrastruktur Komponente und Microservice gemeinsamen Code haben, wurde dieser in eine Library ausgelagert.
 
-#### [Portal Helm Chart Library](./01-introduction/portal-helm-chart-lib.md)
+#### Portal Helm Chart Library
 
 Alle Infrastruktur Komponente und Microservices werden unter Anderem mit Helm in Kubernetes deployed. [Helm](https://helm.sh/) ist der Package Manage für Kubernetes. Mit Helm können Kubernetes Applikationen definiert, versioniert, installiert, upgradet und deinstalliert werden. Im Grunde ist Helm eine Templating Engine für Kubernetes Manifests, die auch gleich die generierten Manifeste in einem Kubernetes Cluster deployen kann. Die Portal Helm Chart Library bietet hier die Möglichkeit Komponente über Helm zu deployen, wobei jeweils nur das Notwendige für ein Deployment konfiguiert werden muss und die Library den Rest übernimmt.

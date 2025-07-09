@@ -42,7 +42,7 @@ Then visit <http://localhost:20000>
 
 ### Docker
 
-Alternatively, a similar configuration can be launched by running [docker compose](.docs/starter-kit/docker-compose.yml).
+Alternatively, a similar configuration can be launched by running `docker compose`.
 
 ```bash
 docker compose -f .docs/starter-kit/docker-compose.yml up

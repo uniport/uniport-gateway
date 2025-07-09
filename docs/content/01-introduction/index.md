@@ -13,5 +13,3 @@ The Portal-Gateway build on top of the concepts of `entrypoints`, `routers`, `mi
 - A `router` may have `middlewares` to manipulate a request
 - A `router` passes the request to a `service` that forward the request to the destination server
 - A `provider` reads configuration, e.g. from a file, and provisions the `router`, `middlewares` and `services` accordingly.
-
-![Concept](./docs/content/01-introduction/data/Concept.png)

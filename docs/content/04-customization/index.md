@@ -957,7 +957,7 @@ Um die Konfiguration des automatisch an den Container angehängten Routers zu ak
 
 ##### Middlewares
 
-Es können Middlewares deklariert werden, indem Label verwendet werden, die mit `portal.http.middlewares.<name-of-your-middleware>.` beginnen, gefolgt von dem Middleware Typ/Optionen. Beispiele und ausführliche Erklärungen sind unter "[Customization > Middlewares](../customization/portal-gateway.md#middlewares)" vorhanden.
+Es können Middlewares deklariert werden, indem Label verwendet werden, die mit `portal.http.middlewares.<name-of-your-middleware>.` beginnen, gefolgt von dem Middleware Typ/Optionen. Beispiele und ausführliche Erklärungen sind unter "[Customization > Middlewares](./index.md#middlewares)" vorhanden.
 
 ##### Services
 
