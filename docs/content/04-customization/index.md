@@ -87,7 +87,6 @@ Entrypoints are the network entry points of Portal-Gateway. They define the port
 | `name` | Yes | String | Name of the entrypoint |
 | `port` | Yes | Integer | Port number |
 | `sessionDisabled` | No | Boolean | Disables session handling (Default: `false`). As of version `8.0.0`, this variable **MUST NOT** be set anymore. Session is not active by default, it can only be activated if the Session Middleware is explicitly declared. |
-| `sessionIdleTimeout` | No | Integer | Defines after how many minutes a session is considered "idle" and removed (Default: `30`) |
 | `middlewares` | No | List of [middlewares](#entry-middlewares) | Middlewares can be attached to each entrypoint, which are first processed before a request is forwarded to the route-specific middlewares. |
 
 #### Applications
@@ -654,7 +653,7 @@ The **Matomo Middleware** should be used exclusively with the Analytics microser
 
 #### Entry-Middlewares
 
-Die folgenden Entry-Middlewares werden normalerweise an Entrypoints anstelle von Routern angehängt. Es ist jedoch auch möglich, die Entry-Middlewares als normale [(Route-)Middlewares](#middlewares) zu verwenden und auch umgekehrt (Route)-Middlewares als Entry-Middlewares zu verwenden. Entry-Middlewares werden in der [statischen Konfiguration](#statische-konfiguration) definiert.
+The following **Entry-Middlewares** are typically attached to Entrypoints instead of Routers. However, it's also possible to use Entry-Middlewares as regular [(Route-)Middlewares](#middlewares) and vice versa. Entry-Middlewares are defined in the [static configuration](#static-configuration).
 
 ##### `openTelemetry`
 
@@ -688,7 +687,7 @@ The Session Middleware manages browser sessions. Each request can be associated 
 
 | Variable | Required | Type | Default | Description |
 | --- | --- | --- | --- | --- |
-| `idleTimeoutInMinute` | No | Int | `15` | Session timeout in minutes. |
+| `idleTimeoutInMinutes` | No | Int | `15` | Session timeout in minutes. |
 | `idMinimumLength` | No | Int | `32` | Minimum length of the session ID. |
 | `nagHttps` | No | Boolean | `true` | If the request comes over HTTP (instead of HTTPS), it should be logged. |
 | `lifetimeHeader` | No | Boolean | `false` | If this flag is set, the `x-uniport-session-lifetime` header with the session expiration will be returned in the response. |
@@ -708,7 +707,7 @@ The Session Middleware manages browser sessions. Each request can be associated 
         "name": "session",
         "type": "session",
         "options": {
-            "idleTimeoutInMinute": 15,
+            "idleTimeoutInMinutes": 15,
             "idMinimumLength": 32,
             "nagHttps": true,
             "cookie": {
@@ -717,7 +716,7 @@ The Session Middleware manages browser sessions. Each request can be associated 
                 "secure": false,
                 "sameSite": "STRICT"
             },
-            "clusteredSessionStoreRetryTimeoutInMiliseconds": 5000
+            "clusteredSessionStoreRetryTimeoutInMilliseconds": 5000
         }
     }
     ```
