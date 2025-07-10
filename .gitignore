@@ -40,8 +40,10 @@ helm/src/main/resources/proxy-config.specific/
 .tool-versions
 
 # documentation
-docs/node_modules/
-docs/build/
+node_modules/
+docs/**/build/
+docs/**/node/
+*.tgz
 
 # macos
 *.DS_Store

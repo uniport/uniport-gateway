@@ -1,6 +1,6 @@
 # Uniport-Gateway Documentation
 
-[Start here](./content)
+[Start here](../../../content)
 
 ## Requirements
 
