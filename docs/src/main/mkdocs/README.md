@@ -13,7 +13,7 @@
 
 ```shell
 npm login https://nexus3.inventage.com/repository/inventage-portal-npm-group/
-docker login docker-registry.inventage.com:10094
+docker login uniportcr.artifacts.inventage.com
 ```
 
 ### Useful commands
