@@ -28,6 +28,9 @@ on:
       run_id:
         description: "The run-id of the job that uploaded the build artifact"
         value: ${{ github.run_id }}
+      branch_name_slug:
+        description: "The slug of the current branch"
+        value: ${{ jobs.build.outputs.branch_name_slug }}
 
 jobs:
   build:
@@ -43,6 +46,7 @@ jobs:
       docs_artifact_name: ${{ steps.docs-vars.outputs.ARTIFACT_NAME }}
       docs_artifact_path: ${{ steps.docs-vars.outputs.ARTIFACT_PATH }}
       run_id: ${{ steps.docs-vars.outputs.RUN_ID }}
+      branch_name_slug: ${{ steps.slug.outputs.branch-name-slug }}
 
     steps:
       - name: Checkout Repository
@@ -55,13 +59,18 @@ jobs:
         id: vars
         uses: uniport/workflows/.github/actions/setup-maven-build-variables@main
 
+      - uses: gacts/github-slug@v1
+        id: slug
+
       - name: Setup Docs Variable
         id: docs-vars
         shell: bash
         run: |
-          echo "ARTIFACT_NAME=uniport-gateway-docs-${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "ARTIFACT_PATH=build.zip" >> $GITHUB_OUTPUT
-          echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT <<EOF
+          ARTIFACT_NAME=uniport-gateway-docs-${{ github.sha }}
+          ARTIFACT_PATH=build.zip
+          RUN_ID=${{ github.run_id }}
+          EOF
 
       - name: Setup Java
         uses: uniport/workflows/.github/actions/setup-java@main
@@ -138,4 +147,5 @@ jobs:
           - **GROUP_ID**: \`${{ steps.vars.outputs.GROUP_ID }}\`
           - **docs_artifact_name**: \`${{ steps.docs-vars.outputs.ARTIFACT_NAME }}\`
           - **docs_artifact_path**: \`${{ steps.docs-vars.outputs.ARTIFACT_PATH }}\`
+          - **branch_name_slug**: \`${{ steps.slug.outputs.branch-name-slug }}\`
           EOF

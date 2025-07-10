@@ -11,19 +11,19 @@ on:
       alias:
         description: "The netlify deployment alias"
         type: string
-        default: "test"
+        default: ""
       artifact_name:
         description: "The name of the actions/upload-artifact artifact to deploy"
-        required: true
-        type: string
-      run_id:
-        description: "The run-id of the workflow that uploaded the artifact"
         required: true
         type: string
       artifact_path:
         description: "The path of the artifact in the actions/upload-artifact to deploy"
         type: string
         default: "build.zip"
+      run_id:
+        description: "The run-id of the workflow that uploaded the artifact"
+        required: true
+        type: string
       pr_number:
         description: "The PR number if a comment should be added"
         required: false
@@ -48,19 +48,19 @@ on:
       alias:
         description: "The netlify deployment alias"
         type: string
-        default: "test"
+        default: ""
       artifact_name:
         description: "The name of the actions/upload-artifact artifact to deploy"
-        required: true
-        type: string
-      run_id:
-        description: "The run-id of the workflow that uploaded the artifact"
         required: true
         type: string
       artifact_path:
         description: "The path of the artifact in the actions/upload-artifact to deploy"
         type: string
         default: "build.zip"
+      run_id:
+        description: "The run-id of the workflow that uploaded the artifact"
+        required: true
+        type: string
       pr_number:
         description: "The PR number if a comment should be added"
         required: false
@@ -83,6 +83,12 @@ jobs:
         id: variables
         run: |
           echo "DEPLOYMENT_URL=https://${{ inputs.alias }}--${{ vars.NETLIFY_DEPLOYMENT_URL }}" >> $GITHUB_OUTPUT
+
+          if [ "${{ inputs.alias }}" = "master" ]; then
+            echo "DEPLOYMENT_URL=https://${{ vars.NETLIFY_DEPLOYMENT_URL }}" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOYMENT_URL=https://${{ inputs.alias }}--${{ vars.NETLIFY_DEPLOYMENT_URL }}" >> $GITHUB_OUTPUT
+          fi
       - name: Summary
         if: always()
         run: |
@@ -97,6 +103,8 @@ jobs:
     environment:
       name: ${{ inputs.environment }}
       url: ${{ needs.setup.outputs.DEPLOYMENT_URL }}
+    env:
+      NETLIFY_CLI_VERSION: "21.5.0"
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -109,16 +117,30 @@ jobs:
         run: unzip ${{ inputs.artifact_path }}
 
       # @see https://cli.netlify.com/commands/deploy/
-      - name: Deploy
+      - name: Deploy Preview
+        if: ${{ inputs.alias != 'master' }}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_CLI_VERSION: "21.5.0"
         run: |
           npx netlify-cli@${{ env.NETLIFY_CLI_VERSION }} deploy \
             --alias ${{ inputs.alias }} \
             --dir build \
             --message 'Preview deployment for ${{ inputs.alias }}' \
+            --no-build \
+            --debug \
+            --json
+
+      - name: Deploy Production
+        if: ${{ inputs.alias == 'master' }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          npx netlify-cli@${{ env.NETLIFY_CLI_VERSION }} deploy \
+            --prod \
+            --dir build \
+            --message 'Production deployment' \
             --no-build \
             --debug \
             --json

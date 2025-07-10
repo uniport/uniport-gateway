@@ -12,10 +12,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Setup Docs
-    uses: ./.github/workflows/setup-docs.yml
-
   build:
     name: Build (preview)
     uses: ./.github/workflows/build.yml
@@ -24,10 +20,10 @@ jobs:
       NEXUS_NPM_TOKEN_READ_ONLY: ${{ secrets.NEXUS_NPM_TOKEN_READ_ONLY }}
       MACDUFF_KEYCHAIN_PASSWORD: ${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}
 
-  deploy:
-    name: Deploy Docs Preview
-    needs: [setup, build]
-    uses: ./.github/workflows/deploy-docs-preview.yml
+  docs:
+    name: Deploy Docs (preview)
+    needs: [build]
+    uses: ./.github/workflows/deploy-docs.yml
     # Do not deploy on forks
     if: ${{ !github.repository.fork }}
     permissions:
@@ -37,7 +33,7 @@ jobs:
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
     with:
-      alias: ${{ needs.setup.outputs.BRANCH_NAME_SLUG }}
+      alias: ${{ needs.build.outputs.branch_name_slug }}
       artifact_name: ${{ needs.build.outputs.docs_artifact_name }}
       artifact_path: ${{ needs.build.outputs.docs_artifact_path }}
       run_id: ${{ needs.build.outputs.run_id }}
