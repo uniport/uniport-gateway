@@ -60,6 +60,15 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>npm-lint</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run lint</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>npm-build-and-test</id>
                         <goals>
                             <goal>npm</goal>

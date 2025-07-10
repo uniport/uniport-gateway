@@ -471,7 +471,7 @@ This Middleware is intended for **development** only. It displays the current se
 
 #### Entry-Middlewares
 
-The following **Entry-Middlewares** are typically attached to Entrypoints instead of Routers. However, it's also possible to use Entry-Middlewares as regular [(Route-)Middlewares](#middlewares) and vice versa. Entry-Middlewares are defined in the [static configuration](#static-configuration).
+The following **Entry-Middlewares** are typically attached to Entrypoints instead of Routers. However, it's also possible to use Entry-Middlewares as regular [(Route-)Middlewares](#middlewares) and vice versa. Entry-Middlewares are defined in the [static configuration](../04-customization/index.md#static-configuration).
 
 ##### `csp`
 
