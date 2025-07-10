@@ -8,6 +8,8 @@ on:
     secrets:
       NEXUS3_PW:
         required: true
+      NEXUS_NPM_TOKEN_READ_ONLY:
+        required: true
       MACDUFF_KEYCHAIN_PASSWORD:
         required: true
     outputs:
@@ -63,6 +65,13 @@ jobs:
           registry: uniportcr.artifacts.inventage.com
           username: ${{ env.CI_AUTH_USR }}
           password: ${{ env.CI_AUTH_PSW }}
+
+      - name: Setup NPM Access
+        uses: uniport/workflows/.github/actions/setup-npm-nexus-access@main
+        with:
+          token: ${{ secrets.NEXUS_NPM_TOKEN_READ_ONLY }}
+          repository: inventage-portal-npm-group
+          auth-file: docs/src/main/mkdocs/.npmrc
 
       - name: Set version
         uses: uniport/workflows/.github/actions/set-maven-project-version@main

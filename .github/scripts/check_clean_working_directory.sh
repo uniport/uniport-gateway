@@ -25,6 +25,7 @@ set -EeuCo pipefail
 # Default patterns to exclude (if not set via environment variable)
 DEFAULT_EXCLUDED_PATTERNS=(
   ".*pom\.xml$"
+  ".*\.npmrc$"
   # ".*\.properties$"
   # ".*\.lock$"
   # ".*package-lock\.json$"
