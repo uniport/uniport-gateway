@@ -19,6 +19,15 @@ on:
       GROUP_ID:
         description: "The maven groupId attribute"
         value: ${{ jobs.build.outputs.GROUP_ID }}
+      docs_artifact_name:
+        description: "The name of the docs artifact uploaded with actions/upload-artifact"
+        value: ${{ jobs.build.outputs.docs_artifact_name }}
+      docs_artifact_path:
+        description: "The path of the docs artifact uploaded with actions/upload-artifact"
+        value: ${{ jobs.build.outputs.docs_artifact_path }}
+      run_id:
+        description: "The run-id of the job that uploaded the build artifact"
+        value: ${{ github.run_id }}
 
 jobs:
   build:
@@ -31,6 +40,9 @@ jobs:
     outputs:
       VERSION: ${{ steps.vars.outputs.RC_VERSION }}
       GROUP_ID: ${{ steps.vars.outputs.GROUP_ID }}
+      docs_artifact_name: ${{ steps.docs-vars.outputs.ARTIFACT_NAME }}
+      docs_artifact_path: ${{ steps.docs-vars.outputs.ARTIFACT_PATH }}
+      run_id: ${{ steps.docs-vars.outputs.RUN_ID }}
 
     steps:
       - name: Checkout Repository
@@ -39,9 +51,17 @@ jobs:
           # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/master branch in the configuration
           fetch-depth: 0
 
-      - name: Setup Variables
+      - name: Setup Maven Variables
         id: vars
         uses: uniport/workflows/.github/actions/setup-maven-build-variables@main
+
+      - name: Setup Docs Variable
+        id: docs-vars
+        shell: bash
+        run: |
+          echo "ARTIFACT_NAME=uniport-gateway-docs-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "ARTIFACT_PATH=build.zip" >> $GITHUB_OUTPUT
+          echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_OUTPUT
 
       - name: Setup Java
         uses: uniport/workflows/.github/actions/setup-java@main
@@ -94,6 +114,20 @@ jobs:
       - name: Check uncommited code
         run: ./.github/scripts/check_clean_working_directory.sh
 
+      - name: Zip dist directory for artifacts
+        working-directory: docs/src/main/mkdocs
+        run: |
+          zip -r ${{ github.workspace }}/${{ steps.docs-vars.outputs.ARTIFACT_PATH }} ./build
+
+      - name: Upload artifact for other jobs
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.docs-vars.outputs.ARTIFACT_NAME }}
+          path: ${{ steps.docs-vars.outputs.ARTIFACT_PATH }}
+          compression-level: 0
+          retention-days: 7
+
       - name: Summary
         run: |
           cat >> $GITHUB_STEP_SUMMARY <<EOF  
@@ -102,4 +136,6 @@ jobs:
           ### Outputs
           - **VERSION**: \`${{ steps.vars.outputs.RC_VERSION }}\`
           - **GROUP_ID**: \`${{ steps.vars.outputs.GROUP_ID }}\`
+          - **docs_artifact_name**: \`${{ steps.docs-vars.outputs.ARTIFACT_NAME }}\`
+          - **docs_artifact_path**: \`${{ steps.docs-vars.outputs.ARTIFACT_PATH }}\`
           EOF

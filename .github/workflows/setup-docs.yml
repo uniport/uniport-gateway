@@ -1,0 +1,47 @@
+name: Setup
+run-name: "Setup workflow #${{ github.run_number }} triggered by ${{ github.actor }}"
+
+on:
+  workflow_call:
+    outputs:
+      DEPLOYMENT_URL:
+        value: ${{ jobs.setup.outputs.DEPLOYMENT_URL }}
+      BRANCH_NAME_SLUG:
+        value: ${{ jobs.setup.outputs.BRANCH_NAME_SLUG }}
+      GITHUB_SHA_SHORT:
+        value: ${{ jobs.setup.outputs.GITHUB_SHA_SHORT }}
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+
+    outputs:
+      DEPLOYMENT_URL: ${{ steps.vars.outputs.DEPLOYMENT_URL }}
+      BRANCH_NAME_SLUG: ${{ steps.vars.outputs.BRANCH_NAME_SLUG }}
+      GITHUB_SHA_SHORT: ${{ steps.vars.outputs.GITHUB_SHA_SHORT }}
+
+    steps:
+      - uses: gacts/github-slug@v1
+        id: slug
+
+      - name: Setup build variables
+        id: vars
+        run: |
+          cat >> $GITHUB_OUTPUT <<EOF
+          DEPLOYMENT_URL=https://${{ steps.slug.outputs.branch-name-slug }}--${{ vars.NETLIFY_DEPLOYMENT_URL }}
+          BRANCH_NAME_SLUG=${{ steps.slug.outputs.branch-name-slug }}
+          GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c 1-7)
+          EOF
+
+      - name: Summary
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Setup Details
+          This workflow ran on **$(date)**.
+          ### Outputs
+          - **DEPLOYMENT_URL**: \`${{ steps.vars.outputs.DEPLOYMENT_URL }}\`
+          - **BRANCH_NAME_SLUG**: \`${{ steps.vars.outputs.BRANCH_NAME_SLUG }}\`
+          - **GITHUB_SHA_SHORT**: \`${{ steps.vars.outputs.GITHUB_SHA_SHORT }}\`
+          EOF
