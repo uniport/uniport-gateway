@@ -14,6 +14,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 ### Added
 
 - Added support for the `X-Forwarded-For` header [PORTAL-2460](https://inventage-all.atlassian.net/browse/PORTAL-2460).
+- Added `docs` module [PORTAL-2141](https://inventage-all.atlassian.net/browse/PORTAL-2141).
 
 ### Changed
 
