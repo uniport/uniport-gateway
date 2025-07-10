@@ -60,12 +60,12 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>npm-build</id>
+                        <id>npm-build-and-test</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <arguments>run build</arguments>
+                            <arguments>run test</arguments>
                         </configuration>
                     </execution>
                 </executions>

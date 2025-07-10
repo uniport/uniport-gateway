@@ -99,8 +99,8 @@ exclude = [
     'branding.inventage.com',
     'developer.mozilla.org/en-US/docs/Web/CSS/--',
     'portal-iam:8080',
-    'portal.localdev.me',
     'github.com/uniport',
+    'local.uniport.ch:20000',
     'https://open-telemetry.github.io/opentelemetry-helm-charts',
     'https://charts.bitnami.com/bitnami',
 ]
