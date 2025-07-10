@@ -37,4 +37,4 @@ jobs:
       artifact_name: ${{ needs.build.outputs.docs_artifact_name }}
       artifact_path: ${{ needs.build.outputs.docs_artifact_path }}
       run_id: ${{ needs.build.outputs.run_id }}
-      environment: main
+      environment: docs
