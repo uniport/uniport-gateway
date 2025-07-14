@@ -216,6 +216,10 @@ public class KeycloakServer {
     }
 
     public OAuth2MiddlewareOptions getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl) {
+        return getOAuth2AuthConfig(scope, proxyAuthenticationFlow, publicUrl, null);
+    }
+
+    public OAuth2MiddlewareOptions getOAuth2AuthConfig(String scope, boolean proxyAuthenticationFlow, String publicUrl, String callbackOrigin) {
         final OAuth2MiddlewareOptions.Builder builder = OAuth2MiddlewareOptions.builder()
             .withSessionScope(scope)
             .withClientId(EMPTY_STRING)
@@ -229,6 +233,10 @@ public class KeycloakServer {
 
         if (publicUrl != null) {
             builder.withPublicURL(publicUrl);
+        }
+
+        if (callbackOrigin != null) {
+            builder.withCallbackOrigin(callbackOrigin);
         }
 
         return builder.build();

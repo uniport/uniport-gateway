@@ -16,6 +16,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - Added support for the `X-Forwarded-For` header [PORTAL-2460](https://inventage-all.atlassian.net/browse/PORTAL-2460).
 - Added `docs` module [PORTAL-2141](https://inventage-all.atlassian.net/browse/PORTAL-2141).
 - Added MIT license [PORTAL-2140](https://inventage-all.atlassian.net/browse/PORTAL-2140).
+- Added option `callbackOrigin` to the `oauth2` middleware to configure the callback URL [PORTAL-2470](https://inventage-all.atlassian.net/browse/PORTAL-2470).
 
 ### Changed
 

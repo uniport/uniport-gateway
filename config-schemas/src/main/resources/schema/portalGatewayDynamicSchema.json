@@ -715,6 +715,11 @@
                       "minLength" : 1,
                       "type" : "string"
                     },
+                    "callbackOrigin" : {
+                      "minLength" : 1,
+                      "pattern" : "https?:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}",
+                      "type" : "string"
+                    },
                     "additionalScopes" : {
                       "type" : "array",
                       "items" : {
@@ -778,6 +783,11 @@
                     },
                     "clientId" : {
                       "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "callbackOrigin" : {
+                      "minLength" : 1,
+                      "pattern" : "https?:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}",
                       "type" : "string"
                     },
                     "additionalScopes" : {

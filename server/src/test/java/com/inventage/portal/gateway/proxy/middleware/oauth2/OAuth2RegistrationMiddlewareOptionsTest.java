@@ -22,23 +22,24 @@ public class OAuth2RegistrationMiddlewareOptionsTest {
         final String responseMode = "aResponseMode";
         final Boolean proxyAuthenticationFlow = true;
         final String publicURL = "aPublicURL";
+        final String callbackOrigin = "aCallbackOrigin";
         final String additionalScope = "aAdditionalScope";
         final String additionalParameterName = "aAdditionalParameterName";
         final String additionalParameterValue = "aAdditionalParameterValue";
         final String passthroughParameter = "aPassthroughParameter";
 
-        final JsonObject json = JsonObject.of(
-            OAuth2MiddlewareFactory.CLIENT_ID, clientID,
-            OAuth2MiddlewareFactory.CLIENT_SECRET, clientSecret,
-            OAuth2MiddlewareFactory.DISCOVERY_URL, discoveryURL,
-            OAuth2MiddlewareFactory.SESSION_SCOPE, sessionScope,
-            OAuth2MiddlewareFactory.RESPONSE_MODE, responseMode,
-            OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow,
-            OAuth2MiddlewareFactory.PUBLIC_URL, publicURL,
-            OAuth2MiddlewareFactory.ADDITIONAL_SCOPES, List.of(additionalScope),
-            OAuth2MiddlewareFactory.ADDITIONAL_PARAMETERS, Map.of(
-                additionalParameterName, additionalParameterValue),
-            OAuth2MiddlewareFactory.PASSTHROUGH_PARAMETERS, List.of(passthroughParameter));
+        final JsonObject json = new JsonObject()
+            .put(OAuth2MiddlewareFactory.CLIENT_ID, clientID)
+            .put(OAuth2MiddlewareFactory.CLIENT_SECRET, clientSecret)
+            .put(OAuth2MiddlewareFactory.DISCOVERY_URL, discoveryURL)
+            .put(OAuth2MiddlewareFactory.SESSION_SCOPE, sessionScope)
+            .put(OAuth2MiddlewareFactory.RESPONSE_MODE, responseMode)
+            .put(OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, proxyAuthenticationFlow)
+            .put(OAuth2MiddlewareFactory.PUBLIC_URL, publicURL)
+            .put(OAuth2MiddlewareFactory.CALLBACK_ORIGIN, callbackOrigin)
+            .put(OAuth2MiddlewareFactory.ADDITIONAL_SCOPES, List.of(additionalScope))
+            .put(OAuth2MiddlewareFactory.ADDITIONAL_PARAMETERS, Map.of(additionalParameterName, additionalParameterValue))
+            .put(OAuth2MiddlewareFactory.PASSTHROUGH_PARAMETERS, List.of(passthroughParameter));
 
         // when
         final ThrowingSupplier<OAuth2RegistrationMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), OAuth2RegistrationMiddlewareOptions.class);

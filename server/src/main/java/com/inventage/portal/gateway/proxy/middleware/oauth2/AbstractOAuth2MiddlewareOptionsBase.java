@@ -48,6 +48,10 @@ public abstract class AbstractOAuth2MiddlewareOptionsBase implements MiddlewareO
     @JsonProperty(OAuth2MiddlewareFactory.PUBLIC_URL)
     public abstract String getPublicURL();
 
+    @Nullable
+    @JsonProperty(OAuth2MiddlewareFactory.CALLBACK_ORIGIN)
+    public abstract String getCallbackOrigin();
+
     @JsonProperty(OAuth2MiddlewareFactory.ADDITIONAL_SCOPES)
     public abstract List<String> getAdditionalScopes();
 
