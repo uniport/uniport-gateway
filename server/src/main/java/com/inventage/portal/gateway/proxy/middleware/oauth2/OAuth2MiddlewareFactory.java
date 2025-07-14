@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public static final String SESSION_SCOPE_ID = "id";
     public static final String PROXY_AUTHENTICATION_FLOW = "proxyAuthenticationFlow";
     public static final String PUBLIC_URL = "publicUrl";
+    public static final String CALLBACK_ORIGIN = "callbackOrigin";
     public static final String ADDITIONAL_SCOPES = "additionalScopes";
     public static final String ADDITIONAL_PARAMETERS = "additionalParameters";
     public static final String PASSTHROUGH_PARAMETERS = "passthroughParameters";
@@ -63,6 +65,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
+    private static final Pattern ORIGIN_PATTERN = Pattern.compile("https?:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}");
 
     // defaults
     public static final boolean DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW = true;
@@ -91,6 +94,9 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 .defaultValue(DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW))
             .optionalProperty(PUBLIC_URL, Schemas.stringSchema()
                 .with(Keywords.minLength(1)))
+            .optionalProperty(CALLBACK_ORIGIN, Schemas.stringSchema()
+                .with(Keywords.minLength(1))
+                .with(Keywords.pattern(ORIGIN_PATTERN)))
             .optionalProperty(ADDITIONAL_SCOPES, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
@@ -131,6 +137,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
                 getPublicURL(options),
                 options.proxyAuthenticationFlow(),
                 callbacks,
+                options.getCallbackOrigin(),
                 callbackPath,
                 sessionScope,
                 options.getAdditionalScopes(),
@@ -223,6 +230,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
         String publicUrl,
         boolean proxyAuthenticationFlow,
         List<Route> callbacks,
+        String callbackOrigin,
         String callbackPath,
         String sessionScope,
         List<String> additionalScopes,
@@ -245,7 +253,21 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             for (Route callback : callbacks) {
                 OAuth2AuthMiddleware.registerCallbackHandlers(vertx, callback, sessionScope, authProvider);
             }
-            final String callbackURL = String.format("%s%s", publicUrl, callbackPath);
+
+            final String callbackURL;
+            if (callbackOrigin != null) {
+                final URI callbackOriginURI;
+                try {
+                    callbackOriginURI = new URI(callbackOrigin);
+                } catch (URISyntaxException err) {
+                    final String errMsg = String.format("Failed to parse callback origin '%s': %s", callbackOrigin, err.getMessage());
+                    LOGGER.warn(errMsg);
+                    return Future.failedFuture(errMsg);
+                }
+                callbackURL = String.format("%s://%s%s", callbackOriginURI.getScheme(), callbackOriginURI.getAuthority(), callbackPath);
+            } else {
+                callbackURL = String.format("%s%s", publicUrl, callbackPath);
+            }
 
             // PORTAL-1184 we are using a patched OAuth2AuthHandlerImpl class as OAuth2AuthHandler implementation.
             final OAuth2AuthHandler authHandler = new RelyingPartyHandler(vertx, authProvider, callbackURL)

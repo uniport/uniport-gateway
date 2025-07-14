@@ -60,7 +60,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
                     withMiddlewareOpts(JsonObject.of(
                         OAuth2MiddlewareFactory.CLIENT_ID, "foo",
                         OAuth2MiddlewareFactory.CLIENT_SECRET, "bar",
-                        OAuth2MiddlewareFactory.DISCOVERY_URL, "localhost:1234",
+                        OAuth2MiddlewareFactory.DISCOVERY_URL, "http://localhost:1234",
                         OAuth2MiddlewareFactory.SESSION_SCOPE, "blub",
                         OAuth2MiddlewareFactory.PROXY_AUTHENTICATION_FLOW, false)))));
 
@@ -282,7 +282,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final String[] sessionCookie = new String[1];
         final RequestOptions reqOpts = new RequestOptions()
             .addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
-        String initialUri1 = "http://localhost:8080/protected/one";
+        final String initialUri1 = "http://localhost:8080/protected/one";
         gateway.incomingRequest(GET, initialUri1, reqOpts, (outgoingResponse1) -> {
             // then
             assertThat(testCtx, outgoingResponse1)
@@ -292,7 +292,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
                 .hasPKCE();
 
             sessionCookie[0] = cookieFrom(outgoingResponse1);
-            String initialUri2 = "http://localhost:8080/protected/two";
+            final String initialUri2 = "http://localhost:8080/protected/two";
             gateway.incomingRequest(GET, initialUri2, withCookie(reqOpts, sessionCookie[0]), (outgoingResponse2) -> {
                 // then
                 assertThat(testCtx, outgoingResponse2)
@@ -302,7 +302,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
                     .hasPKCE();
             });
 
-            String initialUri3 = "http://localhost:8080/protected/three";
+            final String initialUri3 = "http://localhost:8080/protected/three";
             gateway.incomingRequest(GET, initialUri3, withCookie(reqOpts, sessionCookie[0]), (outgoingResponse3) -> {
                 // then
                 assertThat(testCtx, outgoingResponse3)
@@ -593,7 +593,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     void callbackRequestWithNonExistingStateWithURI(Vertx vertx, VertxTestContext testCtx)
         throws InterruptedException {
         // given
-        String state = new StateWithUri("aNonExistingState", "/test/resource").toStateParameter();
+        final String state = new StateWithUri("aNonExistingState", "/test/resource").toStateParameter();
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
         final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
@@ -723,9 +723,38 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         });
     }
 
+    @Test
+    void callbackOriginShouldBeConfigurable(Vertx vertx, VertxTestContext testCtx) throws Throwable {
+        // given
+        final String publicUrl = "http://some.domain/some/path";
+        final String callbackOrigin = "http://another.domain";
+        final String scope = "test";
+        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
+            .startWithDefaultDiscoveryHandler();
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+            .withSessionMiddleware()
+            .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, false, publicUrl, callbackOrigin))
+            .build()
+            .start();
+        final RequestOptions reqOpts = new RequestOptions().addHeader(HttpHeaders.ACCEPT, HttpHeaderValues.TEXT_HTML.toString());
+        // when
+        gateway.incomingRequest(GET, "http://localhost:8080", reqOpts, (outgoingResponse) -> {
+            // then
+            assertThat(testCtx, outgoingResponse)
+                .isRedirectToWithoutParameters("http://" + keycloakServer.host() + ":" + keycloakServer.port() + "/auth/realms/test") // redirect should point directly to Keycloak
+                .isValidAuthenticationRequest(Map.of(
+                    "redirect_uri", callbackOrigin + "/callback/" + scope, // callback should point to the configured origin
+                    "scope", "openid test"))
+                .isUsingFormPost()
+                .hasPKCE();
+            testCtx.completeNow();
+            keycloakServer.closeServer();
+        });
+    }
+
     // Dieser Test stellt den kompletten Flow für PORTAL-1184 nach.
     @Test
-    void fixed_PORTAL_1184(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void fixedPORTAL1184(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String protectedResource1 = "http://localhost:8080/protected1/one";
         final String protectedResource2 = "http://localhost:8080/protected2/two";
@@ -795,10 +824,10 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
 
     // --------------------------------- helper functions ---------------------------------
 
-    private JsonObject oidcSessionState(String state, String redirect_uri, String pkce) {
+    private JsonObject oidcSessionState(String state, String redirectURI, String pkce) {
         return JsonObject.of(
-            OIDC_PARAM_STATE, stateWithUri(state, redirect_uri),
-            OIDC_PARAM_REDIRECT_URI, redirect_uri,
+            OIDC_PARAM_STATE, stateWithUri(state, redirectURI),
+            OIDC_PARAM_REDIRECT_URI, redirectURI,
             OIDC_PARAM_PKCE, pkce);
     }
 
@@ -807,9 +836,9 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
     }
 
     private String cookieFrom(HttpClientResponse response) {
-        String set_cookie = response.getHeader(HttpHeaderNames.SET_COOKIE);
+        final String setCookie = response.getHeader(HttpHeaderNames.SET_COOKIE);
         return Arrays.stream(
-            set_cookie.split(";"))
+            setCookie.split(";"))
             .filter(element -> element.startsWith(DEFAULT_SESSION_COOKIE_NAME))
             .findFirst()
             .orElse(null);
