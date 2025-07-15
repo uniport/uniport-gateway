@@ -1,0 +1,102 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "auth",
+                "rule": "Host('auth.local.uniport.ch')",
+                "service": "iam"
+            },
+            {
+                "name": "whoami1",
+                "rule": "Host('whoami1.local.uniport.ch')",
+                "middlewares": [
+                    "whoami1Oauth",
+                    "whoami1AuthBearer"
+                ],
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami2",
+                "rule": "Host('whoami2.local.uniport.ch')",
+                "middlewares": [
+                    "whoami2Oauth",
+                    "whoami2AuthBearer"
+                ],
+                "service": "whoami2"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "whoami1Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "publicUrl": "http://auth.local.uniport.ch:20000",
+                    "callbackOrigin": "http://whoami1.local.uniport.ch:20000",
+                    "sessionScope": "whoami1",
+                    "responseMode": "query"
+                }
+            },
+            {
+                "name": "whoami2Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "publicUrl": "http://auth.local.uniport.ch:20000",
+                    "callbackOrigin": "http://whoami2.local.uniport.ch:20000",
+                    "sessionScope": "whoami2",
+                    "responseMode": "query"
+                }
+            },
+            {
+                "name": "whoami1AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami1"
+                }
+            },
+            {
+                "name": "whoami2AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "whoami2"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami1",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "whoami2",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami2",
+                        "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "iam",
+                "servers": [
+                    {
+                        "host": "keycloak",
+                        "port": "8080"
+                    }
+                ]
+            }
+        ]
+    }
+}

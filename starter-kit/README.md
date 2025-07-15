@@ -18,6 +18,10 @@
 
 * Multiple entrypoints
 
+### Step 5
+
+* Multiple hosts with a shared Keycloak Session i.e. SSO session
+
 ### Future Step Ideas
 
 * env vars in config

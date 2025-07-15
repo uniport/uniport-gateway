@@ -9,7 +9,7 @@ docker compose up
 
 ## Background
 
-Entry Middleware Documentation: <https://docs.uniport.ch/customization/portal-gateway/#entry-middlewares>
+Entry Middleware Documentation: <https://uniport-gateway.netlify.app/04-customization/#entry-middlewares>
 
 Entrypoint with `openTelemetry` and `requestResponseLogger` middlewares:
 

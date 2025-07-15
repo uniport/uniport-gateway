@@ -8,20 +8,13 @@ docker compose -f auth/docker-compose-auth.yml up -d
 docker compose up
 ```
 
-**NOTE**: This may take a couple of minutes and may even timeout, because `keycloak` is setting up all its database tables and importing the `testrealm`. Further,
-*the `portal-gateway` service may also fail on creating its `oauth2` middleware, due to `keycloak` not being configured completely yet.
+Verify everything is [set up correctly](../auth/README.md).
 
-Once everything is running, visit <http://localhost:8080> and login to `keycloak` with `admin`/`admin`. Verify that there is:
-
-* a realm called `testrealm`
-* a user called `user1@mail.com` in `testrealm` (initial password `user1...`)
-* client called `testclient`, `whoami<N>` in `testrealm`
-
-Then visit <http://localhost:20000> (unprotected) or <http://localhost:20000/whoami1> (protected) and use the test user to login.
+Then visit <http://localhost:20000> (unprotected) or <http://localhost:20000/whoami1> (protected) and use the test user to login `user1@mail.com`/`user1...`.
 
 ## Background
 
-Middleware Documentation: <https://docs.uniport.ch/customization/portal-gateway/#middlewares>
+Middleware Documentation: <https://uniport-gateway.netlify.app/04-customization/#middlewares>
 
 Entrypoint with `session` and `_session_` middlewares:
 

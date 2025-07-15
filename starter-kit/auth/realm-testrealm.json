@@ -401,10 +401,14 @@
             "clientAuthenticatorType": "client-secret",
             "secret": "**********",
             "redirectUris": [
-                "http://localhost:20000/*"
+                "http://localhost:20000/*",
+                "http://whoami1.local.uniport.ch:20000/*",
+                "http://whoami2.local.uniport.ch:20000/*"
             ],
             "webOrigins": [
-                "http://localhost:20000"
+                "http://localhost:20000",
+                "http://whoami1.local.uniport.ch:20000/*",
+                "http://whoami2.local.uniport.ch:20000/*"
             ],
             "notBefore": 0,
             "bearerOnly": false,
