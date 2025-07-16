@@ -4,8 +4,8 @@ The JSON file for the static configuration is searched for at startup in the spe
 
 1.  File specified via the Environment Variable `PORTAL_GATEWAY_JSON`
 2.  File specified via the System Property `PORTAL_GATEWAY_JSON`
-3.  File `portal-gateway.json` in the `/etc/portal-gateway/default/` directory
-4.  File `portal-gateway.json` in the current directory (Run Configuration "PortalGateway" := ./server/portal-gateway)
+3.  File `uniport-gateway.json` in the `/etc/uniport-gateway/default/` directory
+4.  File `uniport-gateway.json` in the current directory (Run Configuration "PortalGateway" := ./server/uniport-gateway)
 
 ??? abstract "Example of a static configuration"
 
@@ -45,8 +45,8 @@ The JSON file for the static configuration is searched for at startup in the spe
     In this case, the referenced directory `./dynamic-config/` must contain at least one subdirectory (with any name). This subdirectory contains the other JSON files for configuring `routers`, `middlewares`, and `services`, e.g.:
 
     ```text
-    portal-gateway/server/src/main/resources/
-    |-- portal-gateway
+    uniport-gateway/server/src/main/resources/
+    |-- uniport-gateway
     |   |-- dynamic-config
     |   |   |-- auth
     |   |   |   `-- config.json
@@ -61,12 +61,12 @@ The JSON file for the static configuration is searched for at startup in the spe
 
 Entrypoints are the network entry points of Portal-Gateway. They define the port where packets are received. Entrypoints are part of the Static Configuration.
 
-| Variable | Required | Type | Description |
-| --- | --- | --- | --- |
-| `name` | Yes | String | Name of the entrypoint |
-| `port` | Yes | Integer | Port number |
-| `sessionDisabled` | No | Boolean | Disables session handling (Default: `false`). As of version `8.0.0`, this variable **MUST NOT** be set anymore. Session is not active by default, it can only be activated if the Session Middleware is explicitly declared. |
-| `middlewares` | No | List of [middlewares](../04-customization/index.md#entry-middlewares) | Middlewares can be attached to each entrypoint, which are first processed before a request is forwarded to the route-specific middlewares. |
+| Variable          | Required | Type                                                                  | Description                                                                                                                                                                                                                  |
+| ----------------- | -------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`            | Yes      | String                                                                | Name of the entrypoint                                                                                                                                                                                                       |
+| `port`            | Yes      | Integer                                                               | Port number                                                                                                                                                                                                                  |
+| `sessionDisabled` | No       | Boolean                                                               | Disables session handling (Default: `false`). As of version `8.0.0`, this variable **MUST NOT** be set anymore. Session is not active by default, it can only be activated if the Session Middleware is explicitly declared. |
+| `middlewares`     | No       | List of [middlewares](../04-customization/index.md#entry-middlewares) | Middlewares can be attached to each entrypoint, which are first processed before a request is forwarded to the route-specific middlewares.                                                                                   |
 
 #### Applications
 
@@ -96,23 +96,23 @@ The Portal-Gateway can be configured using a JSON file via the File Provider. Co
 
     The File Provider can be used for the reuse of configurations.
 
-| Variable | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-| `name` | Yes | String | - | Type of the Provider, here `file` |
-| `filename` | Yes or `directory` | String | - | Defines the path to a configuration file |
-| `directory` | Yes or `filename` | String | - | Defines the path to the directory which contains the configuration files. It is important to understand how multiple configuration files are merged: In general, with a deep-merge (recursive) JSON objects are matched within the existing structure and all matching entries are replaced. JsonArrays are treated like any other entry, i.e., completely replaced. This pattern is applied to all files that are in the same directory. For more complex configurations, we offer a merge mechanism over subdirectories. Subdirectories are largely merged in the same way as described above, with the exception of JsonArrays. JsonArrays are concatenated without duplicates. The names of the subdirectories do not matter and can be used for organizational purposes. |
-| `watch` | Yes | Boolean | - | Set watch option to `true` to automatically react to file changes. |
+| Variable    | Required           | Type    | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------- | ------------------ | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`      | Yes                | String  | -       | Type of the Provider, here `file`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `filename`  | Yes or `directory` | String  | -       | Defines the path to a configuration file                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `directory` | Yes or `filename`  | String  | -       | Defines the path to the directory which contains the configuration files. It is important to understand how multiple configuration files are merged: In general, with a deep-merge (recursive) JSON objects are matched within the existing structure and all matching entries are replaced. JsonArrays are treated like any other entry, i.e., completely replaced. This pattern is applied to all files that are in the same directory. For more complex configurations, we offer a merge mechanism over subdirectories. Subdirectories are largely merged in the same way as described above, with the exception of JsonArrays. JsonArrays are concatenated without duplicates. The names of the subdirectories do not matter and can be used for organizational purposes. |
+| `watch`     | Yes                | Boolean | -       | Set watch option to `true` to automatically react to file changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ##### Docker Provider
 
 With Docker, Container Labels can be used to configure routing in the Portal-Gateway.
 
-| Variable | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-| `endpoint` | No | String | `unix:///var/run/docker.sock` | The Portal-Gateway needs access to the Docker Socket to read the dynamic configuration. The Docker API endpoint can be defined via this variable. |
-| `exposedByDefault` | No | Boolean | `true` | Exposes the container by default via the Portal-Gateway. If set to `false`, containers without the `portal.enable=true` label are ignored. |
-| `network` | No | String | `""` | Defines the Default Network that is used for connecting with the containers. |
-| `defaultRule` | No | String | `Host('${name}')` | Defines which routing rule is applied to the container if the container does not define one. The rule must be a valid [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html). The Container Service Name can be retrieved via the `${name}` variable and the StringSubstitutor has access to any Labels that are defined for this container. |
+| Variable           | Required | Type    | Default                       | Description                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------ | -------- | ------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `endpoint`         | No       | String  | `unix:///var/run/docker.sock` | The Portal-Gateway needs access to the Docker Socket to read the dynamic configuration. The Docker API endpoint can be defined via this variable.                                                                                                                                                                                                                                                                |
+| `exposedByDefault` | No       | Boolean | `true`                        | Exposes the container by default via the Portal-Gateway. If set to `false`, containers without the `portal.enable=true` label are ignored.                                                                                                                                                                                                                                                                       |
+| `network`          | No       | String  | `""`                          | Defines the Default Network that is used for connecting with the containers.                                                                                                                                                                                                                                                                                                                                     |
+| `defaultRule`      | No       | String  | `Host('${name}')`             | Defines which routing rule is applied to the container if the container does not define one. The rule must be a valid [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html). The Container Service Name can be retrieved via the `${name}` variable and the StringSubstitutor has access to any Labels that are defined for this container. |
 
 ###### IP/Port Detection
 

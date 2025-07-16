@@ -27,6 +27,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - **BREAKING** Changed the type of the `bearerOnly` middleware option `optional` from String to Boolean, if it not an environment variable ([PORTAL-2414](https://inventage-all.atlassian.net/browse/PORTAL-2414)).
 - Change the internal representation of the static configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
 - **BREAKING** (chart only): Publish chart to OCI registry instead of chart repository ([PORTAL-2298](https://inventage-all.atlassian.net/browse/PORTAL-2298))
+- **BREAKING** Changed the name of the default config directory from `/etc/portal-gateway` to `/etc/uniport-gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 
 ### Removed
 
@@ -64,7 +65,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 ### Added
 
-- Added option to configure if the authentication request, triggered by a `oauth2` middleware, should be executed via the portal-gateway ([PORTAL-2301](https://inventage-all.atlassian.net/browse/PORTAL-2301)).
+- Added option to configure if the authentication request, triggered by a `oauth2` middleware, should be executed via the uniport-gateway ([PORTAL-2301](https://inventage-all.atlassian.net/browse/PORTAL-2301)).
 - Added support for `HostRegex`, `PathRegex` and `PathPrefixRegex` Routing ([PORTAL-2307](https://inventage-all.atlassian.net/browse/PORTAL-2307))
 - Added support to configure `additionalScopes` and `additionalParameters` in the `oauth2` middleware ([PORTAL-2312](https://inventage-all.atlassian.net/browse/PORTAL-2312))
 - Added `customResponse` middleware for delivering static responses with ease (#5).
@@ -614,7 +615,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 ### Changed
 
-- Path of default gateway configuration to `/etc/portal-gateway/default`
+- Path of default gateway configuration to `/etc/uniport-gateway/default`
 - Docker-compose artifacts contains only the base `docker-compose.yml` and `*.common.env` files.
 
 ### Removed

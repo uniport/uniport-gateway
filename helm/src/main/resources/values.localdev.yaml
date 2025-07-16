@@ -14,7 +14,7 @@ containers:
       proxy-config:
         type: configMap
         configMapName: portal-gateway-proxy-config
-        mountPath: /etc/portal-gateway/default
+        mountPath: /etc/uniport-gateway/default
         items:
           - key: portal-gateway.json
             path: portal-gateway.json

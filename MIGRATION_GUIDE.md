@@ -38,6 +38,11 @@ The following environment variables are converted to screaming snake-case.
 * `development` to `DEVELOPMENT`
 * `verticle.instances` to `VERTICLE_INSTANCES`
 
+### Default configuration
+
+* Change the path for the default configuration from `/etc/portal-gateway` to `/etc/uniport-gateway`, if used.
+* Change the default configuration file name from `portal-gateway.json` to `uniport-gateway.json`, if used.
+
 ### Static Configuration
 
 The configuration key `applications` in the static configuration was removed without replacement. It is no longer required. Please remove this entry in your configuration.

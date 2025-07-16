@@ -33,4 +33,4 @@ Further information on using JSON schemas can be found in the following [chapter
 
 ## Adding Microservices
 
-It is recommended to store your own configuration files under a different path in the Docker Image than `/etc/portal-gateway/default/`. Then, set the Environment Variable to the used value, e.g., `PORTAL_GATEWAY_JSON=/etc/portal-gateway/example/portal-gateway.json`, in the `portal-gateway.common.env` file under `./portal-gateway/docker-compose/src/main/resources/portal-gateway.common.env` for Docker, and in the `values.dev.yaml` file under `portal-gateway/helm/src/main/resources/values.dev.yaml` for Kubernetes.
+It is recommended to store your own configuration files under a different path in the Docker Image than `/etc/uniport-gateway/default/`. Then, set the Environment Variable to the used value, e.g., `PORTAL_GATEWAY_JSON=/etc/uniport-gateway/example/uniport-gateway.json`, in the `uniport-gateway.common.env` file under `./uniport-gateway/docker-compose/src/main/resources/uniport-gateway.common.env` for Docker, and in the `values.dev.yaml` file under `uniport-gateway/helm/src/main/resources/values.dev.yaml` for Kubernetes.

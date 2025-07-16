@@ -20,7 +20,7 @@ public class Runtime {
     public static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
     public static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
 
-    private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/portal-gateway";
+    private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/uniport-gateway";
     private static final String DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME = "logback.xml";
     private static final String DEFAULT_UNSTRUCTURED_LOGGING_CONFIG_FILE_NAME = "logback-unstructured.xml";
 
@@ -104,8 +104,8 @@ public class Runtime {
      * The logback.xml for the logback configuration is taken from one of these places:
      * 1. File pointed to by the env variable 'PORTAL_GATEWAY_LOGGING_CONFIG'
      * 2. File pointed to by the system property 'PORTAL_GATEWAY_LOGGING_CONFIG'
-     * 3. File 'logback.xml' in '/etc/portal-gateway', if PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED=true
-     * 4. File 'logback-unstructured.xml' in '/etc/portal-gateway', if PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED=false
+     * 3. File 'logback.xml' in '/etc/uniport-gateway', if PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED=true
+     * 4. File 'logback-unstructured.xml' in '/etc/uniport-gateway', if PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED=false
      * 5. Normal configuration discovery process as configured by logback
      */
     public static Optional<Path> getLoggingConfigPath() {

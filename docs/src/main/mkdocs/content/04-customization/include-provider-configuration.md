@@ -131,7 +131,7 @@ A server instance is automatically attached to the Service, and the Default Rule
     ```dockerfile
     FROM ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:${portal-gateway.version}-native
 
-    COPY target/docker-context/organisation-proxy-config/ /etc/portal-gateway/organisation/
+    COPY target/docker-context/organisation-proxy-config/ /etc/uniport-gateway/organisation/
 
     # labels used for the service discovery by the portal-gateway
     LABEL portal.enable="true"

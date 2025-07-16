@@ -109,7 +109,7 @@ containers:
         value: "INFO"
       # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
       PORTAL_GATEWAY_LOGGING_CONFIG:
-        value: "/etc/portal-gateway/logging-config/logback-structured.xml"
+        value: "/etc/uniport-gateway/logging-config/logback-structured.xml"
       # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
       PORTAL_GATEWAY_CLUSTERED:
         value: "true"
@@ -267,8 +267,8 @@ containers:
         type: configMap
         configMapName: portal-gateway-logging-config
         # As mounting a configMap creates a dir and mounts the config map's data as files in it
-        # and there are existing files in /etc/portal-gateway, an additional path `logging-config` is used
-        mountPath: /etc/portal-gateway/logging-config
+        # and there are existing files in /etc/uniport-gateway, an additional path `logging-config` is used
+        mountPath: /etc/uniport-gateway/logging-config
         readOnly: true
 
 serviceAccount:
