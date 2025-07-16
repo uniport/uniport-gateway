@@ -16,13 +16,13 @@ dependencies:
 ...
 # New version
 dependencies:
-  - name: portal-gateway
+  - name: uniport-gateway
     version: "10.x.y"
     repository: "oci://uniportcr.artifacts.inventage.com/charts"
 ...
 # New version (using docker-registry hostname, port might change depending on your group settings)
 dependencies:
-  - name: portal-gateway
+  - name: uniport-gateway
     version: "10.x.y"
     repository: "oci://docker-registry.inventage.com:10094/charts"
 ```

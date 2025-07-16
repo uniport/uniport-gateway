@@ -1,6 +1,6 @@
 apiVersion: v2
-name: portal-gateway
-description: A Helm chart for configuring portal-gateway on Kubernetes
+name: uniport-gateway
+description: A Helm chart for configuring uniport-gateway on Kubernetes
 
 type: application
 
