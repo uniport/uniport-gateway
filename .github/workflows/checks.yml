@@ -28,7 +28,9 @@ jobs:
     if: ${{ !github.repository.fork }}
     permissions:
       actions: read
+      statuses: write
       pull-requests: write
+      deployments: write
     secrets:
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
