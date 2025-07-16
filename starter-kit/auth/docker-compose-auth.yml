@@ -43,7 +43,7 @@ services:
       interval: 15s
       retries: 20 # importing realm may take quite some time
     networks:
-      - portal-gateway
+      - uniport-gateway
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,11 +70,11 @@ services:
       interval: 10s
       retries: 5
     networks:
-      - portal-gateway
+      - uniport-gateway
 
 networks:
-  portal-gateway:
-    name: portal-gateway-starter-kit
+  uniport-gateway:
+    name: uniport-gateway-starter-kit
 
 volumes:
   postgres-data:

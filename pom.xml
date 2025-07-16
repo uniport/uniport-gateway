@@ -364,7 +364,7 @@
                     <extensions>true</extensions>
                     <configuration>
                         <chartVersion>${project.version}</chartVersion>
-                        <chartDirectory>${project.basedir}/helm/target/portal-gateway</chartDirectory>
+                        <chartDirectory>${project.basedir}/helm/target/uniport-gateway</chartDirectory>
                         <useLocalHelmBinary>false</useLocalHelmBinary>
                         <debug>true</debug>
                         <uploadRepoSnapshot>

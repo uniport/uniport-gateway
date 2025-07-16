@@ -216,7 +216,7 @@
     "clients": [
         {
             "clientId": "testclient",
-            "name": "Uniport Gateway Test Client",
+            "name": "Uniport-Gateway Test Client",
             "description": "",
             "rootUrl": "",
             "adminUrl": "",

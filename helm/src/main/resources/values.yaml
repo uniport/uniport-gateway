@@ -265,7 +265,7 @@ containers:
         mountPath: /app/file-uploads
       logging-config:
         type: configMap
-        configMapName: portal-gateway-logging-config
+        configMapName: uniport-gateway-logging-config
         # As mounting a configMap creates a dir and mounts the config map's data as files in it
         # and there are existing files in /etc/uniport-gateway, an additional path `logging-config` is used
         mountPath: /etc/uniport-gateway/logging-config
@@ -286,7 +286,7 @@ serviceMonitor:
       interval: 15s
 
 configMaps:
-  portal-gateway-logging-config:
+  uniport-gateway-logging-config:
     enabled: true
     data:
       logback-structured.xml:

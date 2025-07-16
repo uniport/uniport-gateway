@@ -13,7 +13,7 @@ containers:
     storages:
       proxy-config:
         type: configMap
-        configMapName: portal-gateway-proxy-config
+        configMapName: uniport-gateway-proxy-config
         mountPath: /etc/uniport-gateway/default
         items:
           - key: uniport-gateway.json
@@ -82,7 +82,7 @@ pod:
     rollme: true
 
 configMaps:
-  portal-gateway-proxy-config:
+  uniport-gateway-proxy-config:
     enabled: true
     # The '..' character in the following key names DO NOT have a special meaning.
     # Its a limitation of k8s that configmap key have to consist of alphanumeric characters, -, _ or .

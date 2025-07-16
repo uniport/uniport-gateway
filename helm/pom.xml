@@ -12,7 +12,7 @@
     <packaging>helm</packaging>
 
     <properties>
-        <chart.directory>${project.build.directory}/portal-gateway</chart.directory>
+        <chart.directory>${project.build.directory}/uniport-gateway</chart.directory>
     </properties>
 
     <build>
