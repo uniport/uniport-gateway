@@ -80,7 +80,7 @@ public class DynamicConfiguration {
         final JsonSchemaOptions options = new JsonSchemaOptions()
             .setDraft(Draft.DRAFT202012)
             .setOutputFormat(OutputFormat.Basic)
-            .setBaseUri("https://inventage.com/portal-gateway/dynamic-configuration");
+            .setBaseUri("https://inventage.com/uniport-gateway/dynamic-configuration");
         return Validator.create(schema, options);
     }
 

@@ -62,7 +62,7 @@ public class StaticConfiguration {
         final JsonSchemaOptions options = new JsonSchemaOptions()
             .setDraft(Draft.DRAFT202012)
             .setOutputFormat(OutputFormat.Basic)
-            .setBaseUri("https://inventage.com/portal-gateway/static-configuration");
+            .setBaseUri("https://inventage.com/uniport-gateway/static-configuration");
         return Validator.create(schema, options);
     }
 
