@@ -129,7 +129,7 @@ A server instance is automatically attached to the Service, and the Default Rule
 ??? example "Example of a Dockerfile for the Organization Microservice"
 
     ```dockerfile
-    FROM ${docker.pull.registry}/com.inventage.portal.gateway.portal-gateway:${uniport-gateway.version}
+    FROM ${docker.pull.registry}/com.inventage.portal.gateway.uniport-gateway:${uniport-gateway.version}
 
     COPY target/docker-context/organisation-proxy-config/ /etc/uniport-gateway/organisation/
 

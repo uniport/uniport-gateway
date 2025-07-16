@@ -31,6 +31,8 @@ dependencies:
 
 Change the OCI registry for pulling images from `docker-registry.inventage.com:10094` to `uniportcr.artifacts.inventage.com`.
 
+Further, change the docker image name from `com.inventage.portal.gateway.portal-gateway` to `ch.uniport.uniport.uniport-gateway` and the helm chart name from `portal-gateway` to `uniport-gateway`.
+
 ### Environment variable
 
 The following environment variables are converted to screaming snake-case.

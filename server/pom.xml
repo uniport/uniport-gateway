@@ -11,7 +11,7 @@
     <artifactId>server</artifactId>
 
     <properties>
-        <docker.image.name>${project.groupId}.portal-gateway</docker.image.name>
+        <docker.image.name>${project.groupId}.uniport-gateway</docker.image.name>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <main.verticle>com.inventage.portal.gateway.core.GatewayVerticle</main.verticle>

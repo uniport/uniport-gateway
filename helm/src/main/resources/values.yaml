@@ -57,7 +57,7 @@ containers:
   uniport-gateway:
     image:
       baseName: ${project.groupId}
-      name: portal-gateway
+      name: uniport-gateway
       tag: ${project.version}
       pullPolicy: IfNotPresent
     securityContext:
