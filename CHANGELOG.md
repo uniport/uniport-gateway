@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
-Starting with this release, please use the following OCI registry `uniportcr.artifacts.inventage.com` i.e. `uniportcr.artifacts.inventage.com/com.inventage.portal.gateway.uniport-gateway:<version>`.
+Starting with this release, please use the following OCI registry `uniportcr.artifacts.inventage.com` i.e. `uniportcr.artifacts.inventage.com/ch.uniport.gateway.uniport-gateway:<version>`.
 
 ### Added
 
@@ -30,7 +30,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - **BREAKING** Changed the name of the default config directory from `/etc/portal-gateway` to `/etc/uniport-gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 - **BREAKING** Changed the name of the default config file `portal-gateway.json` to `uniport-gateway.json` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 - **BREAKING** Changed the environment variable prefix from `PORTAL_GATEWAY_` to `UNIPORT_GATEWAY_` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
-- **BREAKING** Changed the docker image name from `com.inventage.portal.gateway.portal-gateway` to `ch.uniport.uniport.uniport-gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
+- **BREAKING** Changed the docker image name from `ch.uniport.gateway.portal-gateway` to `ch.uniport.gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 - **BREAKING** Changed to helm chart name from `portal-gateway` to `uniport-gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 
 ### Removed

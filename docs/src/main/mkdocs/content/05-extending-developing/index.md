@@ -12,7 +12,7 @@ There are two JSON schemas, `portalGatewayStaticSchema.json` for the static and 
 
 ```xml
 <dependency>
-    <groupId>com.inventage.portal.gateway</groupId>
+    <groupId>ch.uniport.gateway</groupId>
     <artifactId>config-schemas</artifactId>
     <version>${uniport-gateway.version}</version>
 </dependency>

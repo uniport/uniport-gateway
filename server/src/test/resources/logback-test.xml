@@ -21,7 +21,7 @@
     <logger name="io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl" level="TRACE" />
     <logger name="io.netty" level="INFO" />
     <logger name="com.hazelcast" level="INFO" />
-    <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware"
+    <logger name="ch.uniport.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware"
         level="TRACE" />
 
     <logger name="com.inventage" level="DEBUG" />

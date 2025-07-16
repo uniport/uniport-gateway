@@ -1,0 +1,52 @@
+package ch.uniport.gateway.proxy.middleware.sessionLogoutFromBackchannel;
+
+import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
+import ch.uniport.gateway.proxy.middleware.Middleware;
+import ch.uniport.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
+import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Factory for {@link BackChannelLogoutMiddleware}.
+ */
+public class BackChannelLogoutMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
+
+    // schema
+    public static final String TYPE = "backChannelLogout";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BackChannelLogoutMiddlewareFactory.class);
+
+    @Override
+    public String provides() {
+        return TYPE;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return super.optionsSchema();
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return super.validate(options);
+    }
+
+    @Override
+    public Class<BackChannelLogoutMiddlewareOptions> modelType() {
+        return BackChannelLogoutMiddlewareOptions.class;
+    }
+
+    @Override
+    protected Middleware create(
+        final Vertx vertx, final String name, final JWKAccessibleAuthHandler authHandler,
+        MiddlewareOptionsModel config
+    ) {
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
+        return new BackChannelLogoutMiddleware(vertx, name, authHandler);
+    }
+}

@@ -33,7 +33,7 @@
     <logger name="io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl" level="TRACE"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="com.hazelcast" level="INFO"/>
-    <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="DEBUG"/>
+    <logger name="ch.uniport.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="DEBUG"/>
 
     <root level="${UNIPORT_GATEWAY_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />

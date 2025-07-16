@@ -1,1 +1,1 @@
-com.inventage.portal.gateway.proxy.provider.file.JsonDirectoryConfigStore.JsonDirectoryConfigStoreFactory
+ch.uniport.gateway.proxy.provider.file.JsonDirectoryConfigStore.JsonDirectoryConfigStoreFactory

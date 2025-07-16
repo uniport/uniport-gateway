@@ -15,7 +15,7 @@
             "projectName": "server",
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/test/resources/configs/auth-only/uniport-gateway.env",
-            "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
+            "mainClass": "ch.uniport.gateway.GatewayLauncher"
         },
         {
             "name": "Launch (standalone auth)",
@@ -23,7 +23,7 @@
             "projectName": "server",
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/test/resources/configs/standalone-auth/uniport-gateway.env",
-            "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
+            "mainClass": "ch.uniport.gateway.GatewayLauncher"
         },
         {
             "name": "Launch (router-rules)",
@@ -31,7 +31,7 @@
             "projectName": "server",
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/test/resources/configs/router-rules/uniport-gateway.env",
-            "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
+            "mainClass": "ch.uniport.gateway.GatewayLauncher"
         },
         {
             "name": "Launch (dev reduced)",
@@ -39,7 +39,7 @@
             "projectName": "server",
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/test/resources/configs/dev-reduced/uniport-gateway.env",
-            "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
+            "mainClass": "ch.uniport.gateway.GatewayLauncher"
         }
     ]
 }

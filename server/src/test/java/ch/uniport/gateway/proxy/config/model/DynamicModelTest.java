@@ -1,0 +1,157 @@
+package ch.uniport.gateway.proxy.config.model;
+
+import static ch.uniport.gateway.TestUtils.buildConfiguration;
+import static ch.uniport.gateway.TestUtils.withMiddleware;
+import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
+import static ch.uniport.gateway.TestUtils.withMiddlewares;
+import static ch.uniport.gateway.TestUtils.withRouter;
+import static ch.uniport.gateway.TestUtils.withRouterEntrypoints;
+import static ch.uniport.gateway.TestUtils.withRouterMiddlewares;
+import static ch.uniport.gateway.TestUtils.withRouterRule;
+import static ch.uniport.gateway.TestUtils.withRouterService;
+import static ch.uniport.gateway.TestUtils.withRouters;
+import static ch.uniport.gateway.TestUtils.withServer;
+import static ch.uniport.gateway.TestUtils.withServerHttpOptions;
+import static ch.uniport.gateway.TestUtils.withServers;
+import static ch.uniport.gateway.TestUtils.withService;
+import static ch.uniport.gateway.TestUtils.withServices;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import ch.uniport.gateway.proxy.config.DynamicConfiguration;
+import ch.uniport.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.headers.HeaderMiddlewareOptions;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.json.JsonObject;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
+
+public class DynamicModelTest {
+
+    @Test
+    public void parseJsonTest() {
+        // given
+        final String aRouterName = "rA";
+        final String aRouterRule = "rA";
+        final String aRouterEp = "rA";
+
+        final String aMiddlewareName = "mA";
+        final String aMiddlewareType = "headers";
+        final String aHeaderName = "X-Foo";
+        final String aHeaderValue = "bar";
+        final JsonObject aMiddlewareOpts = JsonObject.of(
+            HeaderMiddlewareFactory.HEADERS_REQUEST, JsonObject.of(
+                aHeaderName, aHeaderValue));
+
+        final String aServiceName = "sA";
+        final String aHost = "example.com";
+        final int aPort = 1234;
+        final boolean aVerify = true;
+        final boolean aTrust = false;
+        final String aPath = "/path";
+        final String aPassword = "password";
+
+        @SuppressWarnings("unchecked")
+        final JsonObject json = buildConfiguration(
+            withRouters(
+                withRouter(aRouterName,
+                    withRouterRule(aRouterRule),
+                    withRouterEntrypoints(aRouterEp),
+                    withRouterMiddlewares(aMiddlewareName),
+                    withRouterService(aServiceName))),
+            withMiddlewares(
+                withMiddleware(aMiddlewareName, aMiddlewareType,
+                    withMiddlewareOpts(aMiddlewareOpts))),
+            withServices(
+                withService(aServiceName,
+                    withServers(
+                        withServer(aHost, aPort,
+                            withServerHttpOptions(aVerify, aTrust, aPath, aPassword))))));
+
+        // when
+        final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
+        final ThrowingSupplier<DynamicModel> parse = () -> new ObjectMapper().readValue(httpJson.encode(),
+            DynamicModel.class);
+
+        // then
+        final DynamicModel gateway = assertDoesNotThrow(parse);
+
+        assertNotNull(gateway.getRouters());
+        final RouterModel router = gateway.getRouters().get(0);
+        assertNotNull(router);
+        assertEquals(aRouterName, router.getName());
+
+        assertNotNull(router.getEntrypoints());
+        assertEquals(aRouterEp, router.getEntrypoints().get(0));
+        assertEquals(aRouterRule, router.getRule());
+
+        assertNotNull(router.getMiddlewares());
+        assertEquals(aMiddlewareName, router.getMiddlewares().get(0));
+        assertEquals(aServiceName, router.getService());
+
+        assertNotNull(gateway.getMiddlewares());
+        final MiddlewareModel middleware = gateway.getMiddlewares().get(0);
+        assertNotNull(middleware);
+        assertEquals(aMiddlewareName, middleware.getName());
+        assertEquals(aMiddlewareType, middleware.getType());
+
+        final MiddlewareOptionsModel options = middleware.getOptions();
+        assertNotNull(options);
+        assertTrue(options instanceof HeaderMiddlewareOptions);
+        final HeaderMiddlewareOptions headerOptions = (HeaderMiddlewareOptions) options;
+        assertNotNull(headerOptions.getRequestHeaders());
+        assertTrue(headerOptions.getRequestHeaders().containsKey(aHeaderName));
+        assertEquals(aHeaderValue, headerOptions.getRequestHeaders().get(aHeaderName));
+        assertNotNull(headerOptions.getResponseHeaders());
+        assertTrue(headerOptions.getResponseHeaders().isEmpty());
+
+        assertNotNull(gateway.getServices());
+        final ServiceModel service = gateway.getServices().get(0);
+        assertNotNull(service);
+        assertEquals(aServiceName, service.getName());
+
+        assertNotNull(service.getServers());
+        final ServerOptions server = service.getServers().get(0);
+        assertNotNull(server);
+        assertEquals(aHost, server.getHost());
+        assertEquals(aPort, server.getPort());
+
+        final HTTPsOptions httpsOptions = server.getHTTPs();
+        assertNotNull(httpsOptions);
+        assertEquals(aVerify, httpsOptions.verifyHostname());
+        assertEquals(aTrust, httpsOptions.trustAll());
+        assertEquals(aPath, httpsOptions.getTrustStorePath());
+        assertEquals(aPassword, httpsOptions.getTrustStorePassword());
+    }
+
+    @Test
+    public void allowNullOptions() {
+        // given
+        final String aMiddlewareName = "mA";
+        final String aMiddlewareType = "responseSessionCookieRemoval"; // allows no options in configuration
+
+        @SuppressWarnings("unchecked")
+        final JsonObject json = buildConfiguration(
+            withMiddlewares(
+                withMiddleware(aMiddlewareName, aMiddlewareType)));
+
+        // when
+        final JsonObject httpJson = json.getJsonObject(DynamicConfiguration.HTTP);
+        final ThrowingSupplier<DynamicModel> parse = () -> new ObjectMapper().readValue(httpJson.encode(),
+            DynamicModel.class);
+
+        // then
+        final DynamicModel gateway = assertDoesNotThrow(parse);
+
+        assertNotNull(gateway.getMiddlewares());
+        final MiddlewareModel middleware = gateway.getMiddlewares().get(0);
+        assertNotNull(middleware);
+        assertEquals(aMiddlewareName, middleware.getName());
+        assertEquals(aMiddlewareType, middleware.getType());
+
+        final MiddlewareOptionsModel options = middleware.getOptions();
+        assertNotNull(options);
+    }
+}

@@ -4,7 +4,7 @@
       <env name="DEVELOPMENT" value="true" />
       <env name="UNIPORT_GATEWAY_JSON" value="$PROJECT_DIR$/helm/src/main/resources/proxy-config.examples/uniport-gateway.json" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="com.inventage.portal.gateway.GatewayLauncher" />
+    <option name="MAIN_CLASS_NAME" value="ch.uniport.gateway.GatewayLauncher" />
     <module name="server" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />

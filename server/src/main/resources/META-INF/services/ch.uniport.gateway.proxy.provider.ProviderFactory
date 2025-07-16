@@ -1,0 +1,2 @@
+ch.uniport.gateway.proxy.provider.file.FileConfigProviderFactory
+ch.uniport.gateway.proxy.provider.docker.DockerContainerProviderFactory

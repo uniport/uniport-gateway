@@ -1,2 +1,0 @@
-com.inventage.portal.gateway.proxy.provider.file.FileConfigProviderFactory
-com.inventage.portal.gateway.proxy.provider.docker.DockerContainerProviderFactory

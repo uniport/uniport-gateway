@@ -1,0 +1,71 @@
+package ch.uniport.gateway.proxy.middleware.matomo;
+
+import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
+import ch.uniport.gateway.proxy.middleware.Middleware;
+import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
+import io.vertx.json.schema.common.dsl.Keywords;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Factory for {@link MatomoMiddleware}.
+ */
+public class MatomoMiddlewareFactory implements MiddlewareFactory {
+
+    // schema
+    public static final String TYPE = "matomo";
+    public static final String JWT_PATH_USERNAME = "pathUsername";
+    public static final String JWT_PATH_EMAIL = "pathEmail";
+    public static final String JWT_PATH_ROLES = "pathRoles";
+    public static final String JWT_PATH_GROUP = "pathGroup";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatomoMiddlewareFactory.class);
+
+    @Override
+    public String provides() {
+        return TYPE;
+    }
+
+    @Override
+    public ObjectSchemaBuilder optionsSchema() {
+        return Schemas.objectSchema()
+            .optionalProperty(JWT_PATH_USERNAME, Schemas.stringSchema()
+                .with(Keywords.minLength(1))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_USERNAME))
+            .optionalProperty(JWT_PATH_EMAIL, Schemas.stringSchema()
+                .with(Keywords.minLength(1))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_EMAIL))
+            .optionalProperty(JWT_PATH_ROLES, Schemas.stringSchema()
+                .with(Keywords.minLength(1))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_ROLES))
+            .optionalProperty(JWT_PATH_GROUP, Schemas.stringSchema()
+                .with(Keywords.minLength(1))
+                .defaultValue(AbstractMatomoMiddlewareOptions.DEFAULT_JWT_PATH_GROUP))
+            .allowAdditionalProperties(false);
+    }
+
+    @Override
+    public Future<Void> validate(JsonObject options) {
+        return Future.succeededFuture();
+    }
+
+    @Override
+    public Class<MatomoMiddlewareOptions> modelType() {
+        return MatomoMiddlewareOptions.class;
+    }
+
+    @Override
+    public Future<Middleware> create(Vertx vertx, String name, Router router, MiddlewareOptionsModel config) {
+        final MatomoMiddlewareOptions options = castOptions(config, modelType());
+        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
+        return Future.succeededFuture(
+            new MatomoMiddleware(name, options.getJWTPathRoles(), options.getJWTPathGroup(),
+                options.getJWTPathUsername(), options.getJWTPathEMail()));
+    }
+}

@@ -1,0 +1,46 @@
+package ch.uniport.gateway.proxy.listener;
+
+import ch.uniport.gateway.GatewayRouterInternal;
+import ch.uniport.gateway.proxy.config.model.DynamicModel;
+import ch.uniport.gateway.proxy.router.RouterFactory;
+import io.vertx.ext.web.Router;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Builds and deploys the router structure after receiving a new/changed dynamic
+ * configuration.
+ */
+public class RouterSwitchListener implements Listener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterSwitchListener.class);
+
+    private static final String NAME = "RouterSwitchListener";
+
+    private final GatewayRouterInternal router;
+    private final RouterFactory routerFactory;
+
+    public RouterSwitchListener(GatewayRouterInternal router, RouterFactory routerFactory) {
+        this.router = router;
+        this.routerFactory = new RouterFactory(routerFactory);
+    }
+
+    @Override
+    public void listen(DynamicModel model) {
+        routerFactory.createRouter(model)
+            .onSuccess(this::setSubRouter)
+            .onFailure(err -> LOGGER.error("Failed to create new router from config '{}': '{}'", model,
+                err.getMessage()));
+    }
+
+    @Override
+    public String toString() {
+        return NAME;
+    }
+
+    private void setSubRouter(Router subRouter) {
+        router.clear();
+        router.mountSubRouter("/", subRouter);
+    }
+
+}
