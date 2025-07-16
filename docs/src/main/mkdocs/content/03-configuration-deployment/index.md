@@ -85,11 +85,11 @@ Analogous to the Uniport-Gateway configuration, there is a default Logback confi
 
 We rely on [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure). Listed below are properties whose default values may differ from [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-| Variable                | Description                                            | Default                                           |
-| :---------------------- | :----------------------------------------------------- | :------------------------------------------------ |
-| `OTEL_SERVICE_NAME`     | Service name that may be included in the exported data | Depends on the component (e.g., `portal-gateway`) |
-| `OTEL_TRACES_EXPORTER`  | Comma-separated list of exporters for tracing          | `none`                                            |
-| `OTEL_METRICS_EXPORTER` | Exporter for metrics                                   | `none`                                            |
+| Variable                | Description                                            | Default                                            |
+| :---------------------- | :----------------------------------------------------- | :------------------------------------------------- |
+| `OTEL_SERVICE_NAME`     | Service name that may be included in the exported data | Depends on the component (e.g., `uniport-gateway`) |
+| `OTEL_TRACES_EXPORTER`  | Comma-separated list of exporters for tracing          | `none`                                             |
+| `OTEL_METRICS_EXPORTER` | Exporter for metrics                                   | `none`                                             |
 
 ---
 

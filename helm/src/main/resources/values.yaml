@@ -202,7 +202,7 @@ containers:
         value: "/metrics"
       # OTEL_SERVICE_NAME is the name of the service
       OTEL_SERVICE_NAME:
-        value: "portal-gateway"
+        value: "uniport-gateway"
       # OTEL_TRACES_EXPORTER is the list of exporters used for tracing, separated by commas
       OTEL_TRACES_EXPORTER:
         value: "none"
