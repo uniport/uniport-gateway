@@ -79,7 +79,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
-        final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
+        final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         portalGateway(vertx, host, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
@@ -104,7 +104,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
-        final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
+        final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         portalGateway(vertx, host, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
@@ -135,7 +135,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String invalidStringToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
-        final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
+        final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         portalGateway(vertx, host, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
@@ -164,7 +164,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
-        final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
+        final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         portalGateway(vertx, host, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
@@ -199,7 +199,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
-        final List<String> expectedAudience = List.of("Organisation", "Portal-Gateway");
+        final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         portalGateway(vertx, host, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(

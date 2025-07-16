@@ -53,7 +53,7 @@ import org.junit.jupiter.params.provider.Arguments;
 public class SessionBagMiddlewareTest extends MiddlewareTestBase {
 
     static final String HOST = "localhost";
-    static final String SESSION_COOKIE_NAME = "portal-gateway-test.session";
+    static final String SESSION_COOKIE_NAME = "uniport-gateway-test.session";
 
     @SuppressWarnings("unchecked")
     @Override
