@@ -12,13 +12,13 @@ public class Runtime {
     public static final String DEVELOPMENT_MODE_KEY = "DEVELOPMENT";
     public static final String VERTICLE_INSTANCES_KEY = "VERTICLE_INSTANCES";
 
-    public static final String CLUSTERED_KEY = "PORTAL_GATEWAY_CLUSTERED";
+    public static final String CLUSTERED_KEY = "UNIPORT_GATEWAY_CLUSTERED";
 
-    private static final String INSTANCE_NAME_PROPERTY = "PORTAL_GATEWAY_INSTANCE_NAME";
+    private static final String INSTANCE_NAME_PROPERTY = "UNIPORT_GATEWAY_INSTANCE_NAME";
     public static final String DEFAULT_INSTANCE_NAME = "unknown";
 
-    public static final String LOGGING_CONFIG_PROPERTY = "PORTAL_GATEWAY_LOGGING_CONFIG";
-    public static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
+    public static final String LOGGING_CONFIG_PROPERTY = "UNIPORT_GATEWAY_LOGGING_CONFIG";
+    public static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "UNIPORT_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
 
     private static final String DEFAULT_LOGGING_CONFIG_FILE_PATH = "/etc/uniport-gateway";
     private static final String DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME = "logback.xml";
@@ -102,10 +102,10 @@ public class Runtime {
 
     /**
      * The logback.xml for the logback configuration is taken from one of these places:
-     * 1. File pointed to by the env variable 'PORTAL_GATEWAY_LOGGING_CONFIG'
-     * 2. File pointed to by the system property 'PORTAL_GATEWAY_LOGGING_CONFIG'
-     * 3. File 'logback.xml' in '/etc/uniport-gateway', if PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED=true
-     * 4. File 'logback-unstructured.xml' in '/etc/uniport-gateway', if PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED=false
+     * 1. File pointed to by the env variable 'UNIPORT_GATEWAY_LOGGING_CONFIG'
+     * 2. File pointed to by the system property 'UNIPORT_GATEWAY_LOGGING_CONFIG'
+     * 3. File 'logback.xml' in '/etc/uniport-gateway', if UNIPORT_GATEWAY_STRUCTURAL_LOGGING_ENABLED=true
+     * 4. File 'logback-unstructured.xml' in '/etc/uniport-gateway', if UNIPORT_GATEWAY_STRUCTURAL_LOGGING_ENABLED=false
      * 5. Normal configuration discovery process as configured by logback
      */
     public static Optional<Path> getLoggingConfigPath() {

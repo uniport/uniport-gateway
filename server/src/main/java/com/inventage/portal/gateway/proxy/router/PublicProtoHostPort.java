@@ -4,13 +4,13 @@ import io.vertx.core.json.JsonObject;
 
 public class PublicProtoHostPort {
 
-    public static final String PORTAL_GATEWAY_PUBLIC_PROTOCOL = "PORTAL_GATEWAY_PUBLIC_PROTOCOL";
-    public static final String PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT = "http";
+    public static final String UNIPORT_GATEWAY_PUBLIC_PROTOCOL = "UNIPORT_GATEWAY_PUBLIC_PROTOCOL";
+    public static final String UNIPORT_GATEWAY_PUBLIC_PROTOCOL_DEFAULT = "http";
 
-    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME = "PORTAL_GATEWAY_PUBLIC_HOSTNAME";
-    public static final String PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
+    public static final String UNIPORT_GATEWAY_PUBLIC_HOSTNAME = "UNIPORT_GATEWAY_PUBLIC_HOSTNAME";
+    public static final String UNIPORT_GATEWAY_PUBLIC_HOSTNAME_DEFAULT = "localhost";
 
-    public static final String PORTAL_GATEWAY_PUBLIC_PORT = "PORTAL_GATEWAY_PUBLIC_PORT";
+    public static final String UNIPORT_GATEWAY_PUBLIC_PORT = "UNIPORT_GATEWAY_PUBLIC_PORT";
 
     private final String proto;
     private final String host;
@@ -29,9 +29,9 @@ public class PublicProtoHostPort {
     }
 
     public PublicProtoHostPort(JsonObject env, int defaultPort) {
-        proto = env.getString(PORTAL_GATEWAY_PUBLIC_PROTOCOL, PORTAL_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
-        host = env.getString(PORTAL_GATEWAY_PUBLIC_HOSTNAME, PORTAL_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
-        port = env.getString(PORTAL_GATEWAY_PUBLIC_PORT, "%d".formatted(defaultPort));
+        proto = env.getString(UNIPORT_GATEWAY_PUBLIC_PROTOCOL, UNIPORT_GATEWAY_PUBLIC_PROTOCOL_DEFAULT);
+        host = env.getString(UNIPORT_GATEWAY_PUBLIC_HOSTNAME, UNIPORT_GATEWAY_PUBLIC_HOSTNAME_DEFAULT);
+        port = env.getString(UNIPORT_GATEWAY_PUBLIC_PORT, "%d".formatted(defaultPort));
     }
 
     PublicProtoHostPort(String proto, String host, String port) {

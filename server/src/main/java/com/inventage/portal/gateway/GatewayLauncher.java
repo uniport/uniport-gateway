@@ -34,13 +34,13 @@ import org.slf4j.LoggerFactory;
  */
 public class GatewayLauncher extends Launcher {
 
-    private static final String METRICS_PORT_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PORT";
+    private static final String METRICS_PORT_CONFIG_PROPERTY = "UNIPORT_GATEWAY_METRICS_PORT";
     private static final int DEFAULT_METRICS_PORT = 9090;
-    private static final String METRICS_PATH_CONFIG_PROPERTY = "PORTAL_GATEWAY_METRICS_PATH";
+    private static final String METRICS_PATH_CONFIG_PROPERTY = "UNIPORT_GATEWAY_METRICS_PATH";
     private static final String DEFAULT_METRICS_PATH = "/metrics";
 
-    private static final String HEADLESS_SERVICE_NAME_PROPERTY = "PORTAL_GATEWAY_HEADLESS_SERVICE_NAME";
-    private static final String DEFAULT_HEADLESS_SERVICE_NAME = "portal-gateway-headless.ips.svc.cluster.local";
+    private static final String HEADLESS_SERVICE_NAME_PROPERTY = "UNIPORT_GATEWAY_HEADLESS_SERVICE_NAME";
+    private static final String DEFAULT_HEADLESS_SERVICE_NAME = "uniport-gateway-headless.ips.svc.cluster.local";
 
     private static Logger logger;
 

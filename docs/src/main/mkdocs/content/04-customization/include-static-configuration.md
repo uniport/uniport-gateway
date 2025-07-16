@@ -2,8 +2,8 @@
 
 The JSON file for the static configuration is searched for at startup in the specified order:
 
-1.  File specified via the Environment Variable `PORTAL_GATEWAY_JSON`
-2.  File specified via the System Property `PORTAL_GATEWAY_JSON`
+1.  File specified via the Environment Variable `UNIPORT_GATEWAY_JSON`
+2.  File specified via the System Property `UNIPORT_GATEWAY_JSON`
 3.  File `uniport-gateway.json` in the `/etc/uniport-gateway/default/` directory
 4.  File `uniport-gateway.json` in the current directory (Run Configuration "PortalGateway" := ./server/uniport-gateway)
 

@@ -13,15 +13,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Json file for the portal gateway configuration is taken from one of these places:
- * 1. File pointed to by the system env variable 'PORTAL_GATEWAY_JSON'
- * 2. File pointed to by the system property 'PORTAL_GATEWAY_JSON'
+ * 1. File pointed to by the system env variable 'UNIPORT_GATEWAY_JSON'
+ * 2. File pointed to by the system property 'UNIPORT_GATEWAY_JSON'
  * 3. File 'uniport-gateway.json' in '/etc/uniport-gateway/default/'
  * 4. File 'uniport-gateway.json' in the current working directory
  */
 public class GatewayConfigRetriever {
 
     public static final String DEFAULT_CONFIG_FILE_NAME = "uniport-gateway.json";
-    public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
+    public static final String PROPERTY = "UNIPORT_GATEWAY_JSON";
     public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/uniport-gateway/default";
     public static final String LOCAL_CONFIG_FILE_PATH = ".";
 

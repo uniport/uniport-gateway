@@ -29,6 +29,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - **BREAKING** (chart only): Publish chart to OCI registry instead of chart repository ([PORTAL-2298](https://inventage-all.atlassian.net/browse/PORTAL-2298)).
 - **BREAKING** Changed the name of the default config directory from `/etc/portal-gateway` to `/etc/uniport-gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 - **BREAKING** Changed the name of the default config file `portal-gateway.json` to `uniport-gateway.json` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
+- **BREAKING** Changed the environment variable prefix from `PORTAL_GATEWAY_` to `UNIPORT_GATEWAY_` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 
 ### Removed
 

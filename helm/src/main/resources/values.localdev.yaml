@@ -54,24 +54,24 @@ containers:
       limits:
         memory: "512Mi"
     env:
-      PORTAL_GATEWAY_CLUSTERED:
+      UNIPORT_GATEWAY_CLUSTERED:
         value: "false"
-      # PORTAL_GATEWAY_PUBLIC_HOSTNAME is the HTTP host name for external access
-      PORTAL_GATEWAY_PUBLIC_HOSTNAME:
+      # UNIPORT_GATEWAY_PUBLIC_HOSTNAME is the HTTP host name for external access
+      UNIPORT_GATEWAY_PUBLIC_HOSTNAME:
         value: "portal1.local.uniport.ch."
-      # PORTAL_GATEWAY_PUBLIC_PORT is the HTTP port for external access
-      PORTAL_GATEWAY_PUBLIC_PORT:
+      # UNIPORT_GATEWAY_PUBLIC_PORT is the HTTP port for external access
+      UNIPORT_GATEWAY_PUBLIC_PORT:
         value: "29000"
-      # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
-      PORTAL_GATEWAY_PUBLIC_PROTOCOL:
+      # UNIPORT_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
+      UNIPORT_GATEWAY_PUBLIC_PROTOCOL:
         value: "http"
-      # PORTAL_GATEWAY_BEARER_TOKEN_ISSUER is the expected value for the "iss" claim
-      PORTAL_GATEWAY_BEARER_TOKEN_ISSUER:
+      # UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER is the expected value for the "iss" claim
+      UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER:
         value: "http://portal1.local.uniport.ch.:29000/auth/realms/portal"
-      PORTAL_GATEWAY_LOG_LEVEL:
+      UNIPORT_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
-      PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
-        value: "portal-gateway-headless.portal1.svc.cluster.local"
+      UNIPORT_GATEWAY_HEADLESS_SERVICE_NAME:
+        value: "uniport-gateway-headless.portal1.svc.cluster.local"
       OTEL_TRACES_EXPORTER:
         value: "otlp"
       OTEL_EXPORTER_OTLP_ENDPOINT:

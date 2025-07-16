@@ -42,8 +42,8 @@
                 "name": "filestorage-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_FILESTORAGE_HOST}",
-                        "port": "${PORTAL_GATEWAY_FILESTORAGE_PORT}"
+                        "host": "${UNIPORT_GATEWAY_FILESTORAGE_HOST}",
+                        "port": "${UNIPORT_GATEWAY_FILESTORAGE_PORT}"
                     }
                 ]
             }

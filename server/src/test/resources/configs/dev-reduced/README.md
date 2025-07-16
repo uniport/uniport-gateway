@@ -7,7 +7,7 @@ After a successful start of the Portal-Gateway the session can be inspected by [
 
 The configuration is done within 3 files: [auth.json](./config/dynamic-config/auth/auth.json), [organisation.json](./config/dynamic-config/organisation/organisation.json) and [portal-iam](./config/dynamic-config/portal-iam/portal-iam.json).
 
-The values for the host name and the port are taken from the environment variables `PORTAL_GATEWAY_PORTAL_IAM_HOST` and `PORTAL_GATEWAY_PORTAL_IAM_PORT` for the `portal-iam` service and `PORTAL_GATEWAY_ORGANISATION_HOST` and `PORTAL_GATEWAY_ORGANISATION_PORT` for the `organisation-proxy` service. These variables are defined in [uniport-gateway.env](./uniport-gateway.env).
+The values for the host name and the port are taken from the environment variables `UNIPORT_GATEWAY_PORTAL_IAM_HOST` and `UNIPORT_GATEWAY_PORTAL_IAM_PORT` for the `portal-iam` service and `UNIPORT_GATEWAY_ORGANISATION_HOST` and `UNIPORT_GATEWAY_ORGANISATION_PORT` for the `organisation-proxy` service. These variables are defined in [uniport-gateway.env](./uniport-gateway.env).
 
 auth.json
 ---

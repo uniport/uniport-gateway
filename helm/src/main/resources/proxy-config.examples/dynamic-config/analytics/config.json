@@ -61,9 +61,9 @@
                 "name": "analyticsOauth2",
                 "type": "oauth2",
                 "options": {
-                    "clientId": "${PORTAL_GATEWAY_CLIENT_ID}",
-                    "clientSecret": "${PORTAL_GATEWAY_CLIENT_SECRET}",
-                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "clientId": "${UNIPORT_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${UNIPORT_GATEWAY_CLIENT_SECRET}",
+                    "discoveryUrl": "http://${UNIPORT_GATEWAY_PORTAL_IAM_HOST}:${UNIPORT_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Analytics"
                 }
             },
@@ -80,15 +80,15 @@
                 "options": {
                     "publicKeys": [
                         {
-                            "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
+                            "publicKey": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
                             "publicKeyAlgorithm": "RS256"
                         }
                     ],
                     "audience": [
                         "Analytics"
                     ],
-                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
+                    "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Analytics']['roles']",
@@ -142,8 +142,8 @@
                 "name": "analytics-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_ANALYTICS_HOST}",
-                        "port": "${PORTAL_GATEWAY_ANALYTICS_PORT}"
+                        "host": "${UNIPORT_GATEWAY_ANALYTICS_HOST}",
+                        "port": "${UNIPORT_GATEWAY_ANALYTICS_PORT}"
                     }
                 ]
             }

@@ -140,9 +140,9 @@
                 "name": "portalGrafanaOauth2",
                 "type": "oauth2",
                 "options": {
-                    "clientId": "${PORTAL_GATEWAY_CLIENT_ID}",
-                    "clientSecret": "${PORTAL_GATEWAY_CLIENT_SECRET}",
-                    "discoveryUrl": "http://${PORTAL_GATEWAY_PORTAL_IAM_HOST}:${PORTAL_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "clientId": "${UNIPORT_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${UNIPORT_GATEWAY_CLIENT_SECRET}",
+                    "discoveryUrl": "http://${UNIPORT_GATEWAY_PORTAL_IAM_HOST}:${UNIPORT_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
                     "sessionScope": "Portal-Monitoring"
                 }
             },
@@ -159,14 +159,14 @@
                 "options": {
                     "publicKeys": [
                         {
-                            "publicKey": "${PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                            "publicKey": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
                         }
                     ],
                     "audience": [
                         "Portal-Monitoring"
                     ],
-                    "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL}",
+                    "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL}",
                     "claims": [
                         {
                             "claimPath": "$['resource_access']['Portal-Monitoring']['roles']",
@@ -188,8 +188,8 @@
                 "name": "portal-grafana-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_PORTAL_GRAFANA_HOST}",
-                        "port": "${PORTAL_GATEWAY_PORTAL_GRAFANA_PORT}"
+                        "host": "${UNIPORT_GATEWAY_PORTAL_GRAFANA_HOST}",
+                        "port": "${UNIPORT_GATEWAY_PORTAL_GRAFANA_PORT}"
                     }
                 ]
             },

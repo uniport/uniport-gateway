@@ -18,7 +18,7 @@
     <logger name="com.hazelcast" level="INFO"/>
     <logger name="com.inventage.portal.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="TRACE"/>
 
-    <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
+    <root level="${UNIPORT_GATEWAY_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

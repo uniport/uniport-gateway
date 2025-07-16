@@ -63,8 +63,8 @@ Alternatively, a similar configuration can be launched by running `docker compos
         gateway:
             image: uniportcr.artifacts.inventage.com/com.inventage.portal.gateway.portal-gateway:10.0.0-202507090956-185-a370e5a
             environment:
-            - "PORTAL_GATEWAY_JSON=/config/uniport-gateway.json"
-            - "PORTAL_GATEWAY_LOG_LEVEL=INFO"
+            - "UNIPORT_GATEWAY_JSON=/config/uniport-gateway.json"
+            - "UNIPORT_GATEWAY_LOG_LEVEL=INFO"
             - "OTEL_TRACES_EXPORTER=none"
             - "OTEL_METRICS_EXPORTER=none"
             volumes:

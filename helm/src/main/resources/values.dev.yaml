@@ -27,29 +27,29 @@ containers:
   portal-gateway:
     env:
       # HTTP protocol for external access
-      PORTAL_GATEWAY_PUBLIC_PROTOCOL:
+      UNIPORT_GATEWAY_PUBLIC_PROTOCOL:
         value: "https"
         # HTTP host name for external access
-      PORTAL_GATEWAY_PUBLIC_HOSTNAME:
+      UNIPORT_GATEWAY_PUBLIC_HOSTNAME:
         value: "ips.inventage.dev"
         # HTTP port for external access, must be the same as the exposed port
-      PORTAL_GATEWAY_PUBLIC_PORT:
+      UNIPORT_GATEWAY_PUBLIC_PORT:
         value: "443"
-      PORTAL_GATEWAY_BEARER_TOKEN_ISSUER:
+      UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER:
         value: "https://ips.inventage.dev/auth/realms/portal"
       OTEL_TRACES_EXPORTER:
         value: "otlp"
       OTEL_EXPORTER_OTLP_ENDPOINT:
         value: "http://portal-monitoring-open-telemetry-collector.monitoring:4317"
-      PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED:
+      UNIPORT_GATEWAY_STRUCTURAL_LOGGING_ENABLED:
         value: "true"
-      PORTAL_GATEWAY_LOG_LEVEL:
+      UNIPORT_GATEWAY_LOG_LEVEL:
         value: "DEBUG"
-      PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
-        value: "portal-gateway-headless.ips.svc.cluster.local"
-      PORTAL_GATEWAY_ANALYTICS_HOST:
+      UNIPORT_GATEWAY_HEADLESS_SERVICE_NAME:
+        value: "uniport-gateway-headless.ips.svc.cluster.local"
+      UNIPORT_GATEWAY_ANALYTICS_HOST:
         value: analytics.analytics
-      PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
+      UNIPORT_GATEWAY_PORTAL_GRAFANA_HOST:
         value: "grafana-grafana-service.monitoring.svc.cluster.local"
     storages:
       proxy-config:

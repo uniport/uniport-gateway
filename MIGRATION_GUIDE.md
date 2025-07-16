@@ -38,6 +38,8 @@ The following environment variables are converted to screaming snake-case.
 * `development` to `DEVELOPMENT`
 * `verticle.instances` to `VERTICLE_INSTANCES`
 
+Further, change all environment variable prefixed with `PORTAL_GATEWAY` to start with `UNIPORT_GATEWAY_`.
+
 ### Default configuration
 
 * Change the path for the default configuration from `/etc/portal-gateway` to `/etc/uniport-gateway`, if used.

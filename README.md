@@ -33,9 +33,9 @@ The Portal-Gateway has two different types of configuration, a `static` configur
 
 The simplest `provider` is the `file` provider. It reads the configuration from a JSON file and searches at the following locations:
 
-1. File pointed at by the environment variable `PORTAL_GATEWAY_JSON`
-2. File pointed at by the system property `PORTAL_GATEWAY_JSON`
-3. File `uniport-gateway.json` in the `/etc/portal-gateway/default/` directory
+1. File pointed at by the environment variable `UNIPORT_GATEWAY_JSON`
+2. File pointed at by the system property `UNIPORT_GATEWAY_JSON`
+3. File `uniport-gateway.json` in the `/etc/uniport-gateway/default/` directory
 4. File `uniport-gateway.json` in the current working directory
 
 ## Build

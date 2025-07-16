@@ -26,7 +26,7 @@
 
     <logger name="com.inventage" level="DEBUG" />
 
-    <root level="${PORTAL_GATEWAY_LOG_LEVEL:-INFO}">
+    <root level="${UNIPORT_GATEWAY_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

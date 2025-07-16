@@ -39,8 +39,8 @@
                 "name": "content-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_CONTENT_HOST}",
-                        "port": "${PORTAL_GATEWAY_CONTENT_PORT}"
+                        "host": "${UNIPORT_GATEWAY_CONTENT_HOST}",
+                        "port": "${UNIPORT_GATEWAY_CONTENT_PORT}"
                     }
                 ]
             }

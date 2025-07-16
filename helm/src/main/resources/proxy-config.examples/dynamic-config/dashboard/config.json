@@ -47,8 +47,8 @@
                 "name": "dashboard-proxy",
                 "servers": [
                     {
-                        "host": "${PORTAL_GATEWAY_DASHBOARD_HOST}",
-                        "port": "${PORTAL_GATEWAY_DASHBOARD_PORT}"
+                        "host": "${UNIPORT_GATEWAY_DASHBOARD_HOST}",
+                        "port": "${UNIPORT_GATEWAY_DASHBOARD_PORT}"
                     }
                 ]
             }

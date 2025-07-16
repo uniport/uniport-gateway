@@ -95,110 +95,110 @@ containers:
       # Hostname for proxying prometheus
       PROMETHEUS_PORT:
         value: "9090"
-      # PORTAL_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
-      PORTAL_GATEWAY_PUBLIC_PROTOCOL:
+      # UNIPORT_GATEWAY_PUBLIC_PROTOCOL HTTP protocol for external access
+      UNIPORT_GATEWAY_PUBLIC_PROTOCOL:
         value: "http"
-      # PORTAL_GATEWAY_PUBLIC_HOSTNAME HTTP host name for external access
-      PORTAL_GATEWAY_PUBLIC_HOSTNAME:
+      # UNIPORT_GATEWAY_PUBLIC_HOSTNAME HTTP host name for external access
+      UNIPORT_GATEWAY_PUBLIC_HOSTNAME:
         value: "portal.minikube"
-      # PORTAL_GATEWAY_PUBLIC_PORT HTTP port for external access, must be the same as the exposed port
-      PORTAL_GATEWAY_PUBLIC_PORT:
+      # UNIPORT_GATEWAY_PUBLIC_PORT HTTP port for external access, must be the same as the exposed port
+      UNIPORT_GATEWAY_PUBLIC_PORT:
         value: "80"
-      # PORTAL_GATEWAY_LOG_LEVEL is the overall log level and can be one of TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF
-      PORTAL_GATEWAY_LOG_LEVEL:
+      # UNIPORT_GATEWAY_LOG_LEVEL is the overall log level and can be one of TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF
+      UNIPORT_GATEWAY_LOG_LEVEL:
         value: "INFO"
-      # PORTAL_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
-      PORTAL_GATEWAY_LOGGING_CONFIG:
+      # UNIPORT_GATEWAY_LOGGING_CONFIG is the location of the custom logback configuration file
+      UNIPORT_GATEWAY_LOGGING_CONFIG:
         value: "/etc/uniport-gateway/logging-config/logback-structured.xml"
-      # PORTAL_GATEWAY_CLUSTERED is the switch to run the portal-gateway in standalone or cluster mode
-      PORTAL_GATEWAY_CLUSTERED:
+      # UNIPORT_GATEWAY_CLUSTERED is the switch to run the uniport-gateway in standalone or cluster mode
+      UNIPORT_GATEWAY_CLUSTERED:
         value: "true"
-      PORTAL_GATEWAY_HEADLESS_SERVICE_NAME:
-        value: "portal-gateway-headless.minikube.svc.cluster.local"
-      PORTAL_GATEWAY_INSTANCE_NAME:
+      UNIPORT_GATEWAY_HEADLESS_SERVICE_NAME:
+        value: "uniport-gateway-headless.minikube.svc.cluster.local"
+      UNIPORT_GATEWAY_INSTANCE_NAME:
         valueFrom:
           fieldRef:
             fieldPath: metadata.name
-      # PORTAL_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
-      PORTAL_GATEWAY_PORTAL_IAM_HOST:
+      # UNIPORT_GATEWAY_PORTAL_IAM_HOST is the hostname of the portal-iam
+      UNIPORT_GATEWAY_PORTAL_IAM_HOST:
         value: "portal-iam"
-      # PORTAL_GATEWAY_PORTAL_IAM_PORT is the port of the portal-iam host
-      PORTAL_GATEWAY_PORTAL_IAM_PORT:
+      # UNIPORT_GATEWAY_PORTAL_IAM_PORT is the port of the portal-iam host
+      UNIPORT_GATEWAY_PORTAL_IAM_PORT:
         value: "8080"
-      # PORTAL_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
-      PORTAL_GATEWAY_BASE_HOST:
+      # UNIPORT_GATEWAY_BASE_HOST is the hostname for accessing Base microservice via HTTP
+      UNIPORT_GATEWAY_BASE_HOST:
         value: "base"
-      # PORTAL_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
-      PORTAL_GATEWAY_BASE_PORT:
+      # UNIPORT_GATEWAY_BASE_PORT is the port for accessing the Base microservice via HTTP
+      UNIPORT_GATEWAY_BASE_PORT:
         value: "20010"
-      # PORTAL_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
-      PORTAL_GATEWAY_DASHBOARD_HOST:
+      # UNIPORT_GATEWAY_DASHBOARD_HOST is the hostname for accessing Dashboard microservice via HTTP
+      UNIPORT_GATEWAY_DASHBOARD_HOST:
         value: "dashboard"
-      # PORTAL_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
-      PORTAL_GATEWAY_DASHBOARD_PORT:
+      # UNIPORT_GATEWAY_DASHBOARD_PORT is the port for accessing Dashboard microservice via HTTP
+      UNIPORT_GATEWAY_DASHBOARD_PORT:
         value: "20020"
-      # PORTAL_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
-      PORTAL_GATEWAY_ORGANISATION_HOST:
+      # UNIPORT_GATEWAY_ORGANISATION_HOST is the hostname for accessing Organisation microservice via HTTP
+      UNIPORT_GATEWAY_ORGANISATION_HOST:
         value: "organisation"
-      # PORTAL_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
-      PORTAL_GATEWAY_ORGANISATION_PORT:
+      # UNIPORT_GATEWAY_ORGANISATION_PORT is the port for accessing Organisation microservice via HTTP
+      UNIPORT_GATEWAY_ORGANISATION_PORT:
         value: "20030"
-      # PORTAL_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
-      PORTAL_GATEWAY_FILESTORAGE_HOST:
+      # UNIPORT_GATEWAY_FILESTORAGE_HOST is the hostname for accessing FileStorage microservice via HTTP
+      UNIPORT_GATEWAY_FILESTORAGE_HOST:
         value: "filestorage"
-      # PORTAL_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
-      PORTAL_GATEWAY_FILESTORAGE_PORT:
+      # UNIPORT_GATEWAY_FILESTORAGE_PORT is the port for accessing FileStorage microservice via HTTP
+      UNIPORT_GATEWAY_FILESTORAGE_PORT:
         value: "20090"
-      # PORTAL_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
-      PORTAL_GATEWAY_CONTENT_HOST:
+      # UNIPORT_GATEWAY_CONTENT_HOST is the hostname for accessing Content microservice via HTTP
+      UNIPORT_GATEWAY_CONTENT_HOST:
         value: "content"
-      # PORTAL_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
-      PORTAL_GATEWAY_CONTENT_PORT:
+      # UNIPORT_GATEWAY_CONTENT_PORT is the port for accessing Content microservice via HTTP
+      UNIPORT_GATEWAY_CONTENT_PORT:
         value: "20110"
-      # PORTAL_GATEWAY_CONVERSATION_HOST is the hostname for accessing Conversation microservice via HTTP
-      PORTAL_GATEWAY_CONVERSATION_HOST:
+      # UNIPORT_GATEWAY_CONVERSATION_HOST is the hostname for accessing Conversation microservice via HTTP
+      UNIPORT_GATEWAY_CONVERSATION_HOST:
         value: "conversation"
-      # PORTAL_GATEWAY_CONVERSATION_PORT is the port for accessing Conversation microservice via HTTP
-      PORTAL_GATEWAY_CONVERSATION_PORT:
+      # UNIPORT_GATEWAY_CONVERSATION_PORT is the port for accessing Conversation microservice via HTTP
+      UNIPORT_GATEWAY_CONVERSATION_PORT:
         value: "20120"
-      # PORTAL_GATEWAY_NOTIFICATION_HOST is the hostname for accessing Notification microservice via HTTP
-      PORTAL_GATEWAY_NOTIFICATION_HOST:
+      # UNIPORT_GATEWAY_NOTIFICATION_HOST is the hostname for accessing Notification microservice via HTTP
+      UNIPORT_GATEWAY_NOTIFICATION_HOST:
         value: "notification"
-      # PORTAL_GATEWAY_NOTIFICATION_PORT is the port for accessing Notification microservice via HTTP
-      PORTAL_GATEWAY_NOTIFICATION_PORT:
+      # UNIPORT_GATEWAY_NOTIFICATION_PORT is the port for accessing Notification microservice via HTTP
+      UNIPORT_GATEWAY_NOTIFICATION_PORT:
         value: "20060"
-      # PORTAL_GATEWAY_PORTAL_KAFKA_UI_HOST is the hostname for accessing Portal-Kafka-UI via HTTP
-      PORTAL_GATEWAY_PORTAL_KAFKA_UI_HOST:
+      # UNIPORT_GATEWAY_PORTAL_KAFKA_UI_HOST is the hostname for accessing Portal-Kafka-UI via HTTP
+      UNIPORT_GATEWAY_PORTAL_KAFKA_UI_HOST:
         value: "portal-kafka-ui"
-      # PORTAL_GATEWAY_PORTAL_KAFKA_UI_PORT is the port for accessing Portal-Kafka-UI via HTTP
-      PORTAL_GATEWAY_PORTAL_KAFKA_UI_PORT:
+      # UNIPORT_GATEWAY_PORTAL_KAFKA_UI_PORT is the port for accessing Portal-Kafka-UI via HTTP
+      UNIPORT_GATEWAY_PORTAL_KAFKA_UI_PORT:
         value: "80"
-      # PORTAL_GATEWAY_PORTAL_PGWEB_HOST is the hostname for accessing the pgweb web gui via HTTP
-      PORTAL_GATEWAY_PORTAL_PGWEB_HOST:
+      # UNIPORT_GATEWAY_PORTAL_PGWEB_HOST is the hostname for accessing the pgweb web gui via HTTP
+      UNIPORT_GATEWAY_PORTAL_PGWEB_HOST:
         value: pgweb
-      # PORTAL_GATEWAY_PORTAL_PGWEB_PORT is the port for accessing the pgweb web gui via HTTP
-      PORTAL_GATEWAY_PORTAL_PGWEB_PORT:
+      # UNIPORT_GATEWAY_PORTAL_PGWEB_PORT is the port for accessing the pgweb web gui via HTTP
+      UNIPORT_GATEWAY_PORTAL_PGWEB_PORT:
         value: "80"
-      # PORTAL_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
-      PORTAL_GATEWAY_PORTAL_GRAFANA_HOST:
+      # UNIPORT_GATEWAY_PORTAL_GRAFANA_HOST is the hostname for accessing Grafana via HTTP
+      UNIPORT_GATEWAY_PORTAL_GRAFANA_HOST:
         value: "grafana-grafana-operator-grafana-service.monitoring.svc.cluster.local"
-      # PORTAL_GATEWAY_PORTAL_GRAFANA_PORT is the port for accessing Grafana via HTTP
-      PORTAL_GATEWAY_PORTAL_GRAFANA_PORT:
+      # UNIPORT_GATEWAY_PORTAL_GRAFANA_PORT is the port for accessing Grafana via HTTP
+      UNIPORT_GATEWAY_PORTAL_GRAFANA_PORT:
         value: "3000"
-      # PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY describes the path or url to the public key. this is required to verify the signature of incoming jwts.
-      PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY:
+      # UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY describes the path or url to the public key. this is required to verify the signature of incoming jwts.
+      UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY:
         value: "http://portal-iam:8080/auth/realms/portal"
-      # PORTAL_GATEWAY_BEARER_TOKEN_ISSUER the issuer expected in the access token
-      PORTAL_GATEWAY_BEARER_TOKEN_ISSUER:
+      # UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER the issuer expected in the access token
+      UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER:
         value: "http://portal.minikube/auth/realms/portal"
-      # PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL dictates if the proxy should expect (and therefore verify) an access token
-      PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL:
+      # UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL dictates if the proxy should expect (and therefore verify) an access token
+      UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL:
         value: "false"
-      # PORTAL_GATEWAY_METRICS_PORT is the port of the metrics endpoint
-      PORTAL_GATEWAY_METRICS_PORT:
+      # UNIPORT_GATEWAY_METRICS_PORT is the port of the metrics endpoint
+      UNIPORT_GATEWAY_METRICS_PORT:
         value: "9090"
-      # PORTAL_GATEWAY_METRICS_PATH is the path of the metrics endpoint
-      PORTAL_GATEWAY_METRICS_PATH:
+      # UNIPORT_GATEWAY_METRICS_PATH is the path of the metrics endpoint
+      UNIPORT_GATEWAY_METRICS_PATH:
         value: "/metrics"
       # OTEL_SERVICE_NAME is the name of the service
       OTEL_SERVICE_NAME:
@@ -209,18 +209,18 @@ containers:
       # OTEL_METRICS_EXPORTER is the list of exporters user for metrics, separated by commas
       OTEL_METRICS_EXPORTER:
         value: "none"
-      PORTAL_GATEWAY_ANALYTICS_HOST:
+      UNIPORT_GATEWAY_ANALYTICS_HOST:
         value: analytics
-      PORTAL_GATEWAY_ANALYTICS_PORT:
+      UNIPORT_GATEWAY_ANALYTICS_PORT:
         value: "80"
       # ID of the oauth/oidc client to be used in this gateway instance.
-      PORTAL_GATEWAY_CLIENT_ID:
+      UNIPORT_GATEWAY_CLIENT_ID:
         valueFrom:
           secretKeyRef:
             name: gateway-oauth-config
             key: client-id
       # Client secret of the oauth/oidc client to be used in this gateway instance.
-      PORTAL_GATEWAY_CLIENT_SECRET:
+      UNIPORT_GATEWAY_CLIENT_SECRET:
         valueFrom:
           secretKeyRef:
             name: gateway-oauth-config

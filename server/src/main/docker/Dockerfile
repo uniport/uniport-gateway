@@ -11,7 +11,7 @@ RUN chown -R appuser /app
 USER appuser
 
 # Default location by defined in GatewayLauncher.DEFAULT_LOGGING_CONFIG_FILE_PATH/DEFAULT_STRUCTURED_LOGGING_CONFIG_FILE_NAME
-# To choose between the two configurations the PORTAL_GATEWAY_LOGGING_CONFIG env var can be used.
+# To choose between the two configurations the UNIPORT_GATEWAY_LOGGING_CONFIG env var can be used.
 COPY logback-structured-default.xml /etc/uniport-gateway/logback.xml
 COPY logback-unstructured-default.xml /etc/uniport-gateway/logback-unstructured.xml
 

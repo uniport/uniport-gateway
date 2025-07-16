@@ -7,8 +7,8 @@ The Portal-Gateway has two different types of configuration, a `static` configur
 
 The simplest `provider` is the `file` provider. It reads the configuration from a JSON file and searches at the following locations:
 
-1. File pointed at by the environment variable `PORTAL_GATEWAY_JSON`
-2. File pointed at by the system property `PORTAL_GATEWAY_JSON`
+1. File pointed at by the environment variable `UNIPORT_GATEWAY_JSON`
+2. File pointed at by the system property `UNIPORT_GATEWAY_JSON`
 3. File `uniport-gateway.json` in the `/etc/uniport-gateway/default/` directory
 4. File `uniport-gateway.json` in the current working directory
 
@@ -16,25 +16,25 @@ The simplest `provider` is the `file` provider. It reads the configuration from 
 
 ## Configuration
 
-The Uniport-Gateway container image already includes a `uniport-gateway.json` file in the `/etc/uniport-gateway/default/` directory. We recommend storing your project-specific `uniport-gateway.json` file in a different directory (e.g., `/etc/uniport-gateway/<PROJECTNAME>/`) and setting the `PORTAL_GATEWAY_JSON` environment variable to this path.
+The Uniport-Gateway container image already includes a `uniport-gateway.json` file in the `/etc/uniport-gateway/default/` directory. We recommend storing your project-specific `uniport-gateway.json` file in a different directory (e.g., `/etc/uniport-gateway/<PROJECTNAME>/`) and setting the `UNIPORT_GATEWAY_JSON` environment variable to this path.
 
 | Variable | Description | Default |
 | :-- | :-- | :-- |
-| `PORTAL_GATEWAY_JSON` | Absolute path of the JSON file for static configuration | - |
-| `PORTAL_GATEWAY_PUBLIC_PROTOCOL` | HTTP protocol for the URL that a browser should use | http |
-| `PORTAL_GATEWAY_PUBLIC_HOSTNAME` | HTTP Host Name for the URL that a browser should use | portal.minikube |
-| `PORTAL_GATEWAY_PUBLIC_PORT` | HTTP Port for the URL that a browser should use | http: 80, https: 443 |
-| `PORTAL_GATEWAY_LOG_LEVEL` | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF | INFO |
-| `PORTAL_GATEWAY_LOGGING_CONFIG` | Absolute path of the `logback.xml` file for Logback configuration | /etc/uniport-gateway/logback.xml |
-| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log output is formatted as structured JSON. | false |
-| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Path or URL | http://portal-iam:8080/auth/realms/portal |
-| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Describes the expected issuer in the access token. See `issuer` in [bearerOnly](../04-customization/index.md#beareronly) | [http://ips.inventage.com:20000/auth/realms/portal](http://ips.inventage.com:20000/auth/realms/portal) |
-| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Indicates whether the proxy should expect (and thus validate) an access token. See `optional` in [bearerOnly](../04-customization/index.md#beareronly) | false |
-| `PORTAL_GATEWAY_METRICS_PORT` | HTTP Port for the Metrics Endpoint | 9090 |
-| `PORTAL_GATEWAY_METRICS_PATH` | HTTP Path for the Metrics Endpoint | /metrics |
-| `PORTAL_GATEWAY_CLUSTERED` | Switch to run the Uniport-Gateway in cluster mode. This also requires adjusting the number of deployed instances (e.g., `replicas` in the Helm Value Files). | false |
+| `UNIPORT_GATEWAY_JSON` | Absolute path of the JSON file for static configuration | - |
+| `UNIPORT_GATEWAY_PUBLIC_PROTOCOL` | HTTP protocol for the URL that a browser should use | http |
+| `UNIPORT_GATEWAY_PUBLIC_HOSTNAME` | HTTP Host Name for the URL that a browser should use | portal.minikube |
+| `UNIPORT_GATEWAY_PUBLIC_PORT` | HTTP Port for the URL that a browser should use | http: 80, https: 443 |
+| `UNIPORT_GATEWAY_LOG_LEVEL` | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF | INFO |
+| `UNIPORT_GATEWAY_LOGGING_CONFIG` | Absolute path of the `logback.xml` file for Logback configuration | /etc/uniport-gateway/logback.xml |
+| `UNIPORT_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log output is formatted as structured JSON. | false |
+| `UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Path or URL | http://portal-iam:8080/auth/realms/portal |
+| `UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER` | Describes the expected issuer in the access token. See `issuer` in [bearerOnly](../04-customization/index.md#beareronly) | [http://ips.inventage.com:20000/auth/realms/portal](http://ips.inventage.com:20000/auth/realms/portal) |
+| `UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL` | Indicates whether the proxy should expect (and thus validate) an access token. See `optional` in [bearerOnly](../04-customization/index.md#beareronly) | false |
+| `UNIPORT_GATEWAY_METRICS_PORT` | HTTP Port for the Metrics Endpoint | 9090 |
+| `UNIPORT_GATEWAY_METRICS_PATH` | HTTP Path for the Metrics Endpoint | /metrics |
+| `UNIPORT_GATEWAY_CLUSTERED` | Switch to run the Uniport-Gateway in cluster mode. This also requires adjusting the number of deployed instances (e.g., `replicas` in the Helm Value Files). | false |
 
-The three variables `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME`, and `PORTAL_GATEWAY_PUBLIC_PORT` collectively form the public URL that the Portal-Gateway uses for redirects. This applies to redirects from the OAuth2 Middleware to Portal-IAM.
+The three variables `UNIPORT_GATEWAY_PUBLIC_PROTOCOL`, `UNIPORT_GATEWAY_PUBLIC_HOSTNAME`, and `UNIPORT_GATEWAY_PUBLIC_PORT` collectively form the public URL that the Uniport-Gateway uses for redirects. This applies to redirects from the OAuth2 Middleware to Portal-IAM.
 
 ---
 
@@ -46,26 +46,26 @@ The `uniport-gateway.json` file in the `/etc/uniport-gateway/default/` directory
 
 ### Upstreams
 
-| Variable                              | Description                              | Default                   |
-| :------------------------------------ | :--------------------------------------- | :------------------------ |
-| `PORTAL_GATEWAY_PORTAL_IAM_HOST`      | Hostname to access Portal-IAM via HTTP   | portal-iam                |
-| `PORTAL_GATEWAY_PORTAL_IAM_PORT`      | Port to access Portal-IAM via HTTP       | 8080                      |
-| `PORTAL_GATEWAY_BASE_HOST`            | Hostname to access Base via HTTP         | base-proxy                |
-| `PORTAL_GATEWAY_BASE_PORT`            | Port to access Base via HTTP             | 20010                     |
-| `PORTAL_GATEWAY_DASHBOARD_HOST`       | Hostname to access Dashboard via HTTP    | dashboard-proxy           |
-| `PORTAL_GATEWAY_DASHBOARD_PORT`       | Port to access Dashboard via HTTP        | 20020                     |
-| `PORTAL_GATEWAY_ORGANISATION_HOST`    | Hostname to access Organization via HTTP | organisation-proxy        |
-| `PORTAL_GATEWAY_ORGANISATION_PORT`    | Port to access Organization via HTTP     | 20030                     |
-| `PORTAL_GATEWAY_FILESTORAGE_HOST`     | Hostname to access Filestorage via HTTP  | filestorage-proxy         |
-| `PORTAL_GATEWAY_FILESTORAGE_PORT`     | Port to access Filestorage via HTTP      | 20090                     |
-| `PORTAL_GATEWAY_CONTENT_HOST`         | Hostname to access Content via HTTP      | content-proxy             |
-| `PORTAL_GATEWAY_CONTENT_PORT`         | Port to access Content via HTTP          | 20110                     |
-| `PORTAL_GATEWAY_PORTAL_KAFKA_UI_HOST` | Hostname to access Kafka-UI via HTTP     | portal-kafka-ui           |
-| `PORTAL_GATEWAY_PORTAL_KAFKA_UI_PORT` | Port to access Kafka-UI via HTTP         | 80                        |
-| `PORTAL_GATEWAY_PORTAL_PGADMIN_HOST`  | Hostname to access PgAdmin via HTTP      | portal-pgadmin            |
-| `PORTAL_GATEWAY_PORTAL_PGADMIN_PORT`  | Port to access PgAdmin via HTTP          | 80                        |
-| `PORTAL_GATEWAY_PORTAL_GRAFANA_HOST`  | Hostname to access Grafana via HTTP      | portal-monitoring-grafana |
-| `PORTAL_GATEWAY_PORTAL_GRAFANA_PORT`  | Port to access Grafana via HTTP          | 3000                      |
+| Variable                               | Description                              | Default                   |
+| :------------------------------------- | :--------------------------------------- | :------------------------ |
+| `UNIPORT_GATEWAY_PORTAL_IAM_HOST`      | Hostname to access Portal-IAM via HTTP   | portal-iam                |
+| `UNIPORT_GATEWAY_PORTAL_IAM_PORT`      | Port to access Portal-IAM via HTTP       | 8080                      |
+| `UNIPORT_GATEWAY_BASE_HOST`            | Hostname to access Base via HTTP         | base-proxy                |
+| `UNIPORT_GATEWAY_BASE_PORT`            | Port to access Base via HTTP             | 20010                     |
+| `UNIPORT_GATEWAY_DASHBOARD_HOST`       | Hostname to access Dashboard via HTTP    | dashboard-proxy           |
+| `UNIPORT_GATEWAY_DASHBOARD_PORT`       | Port to access Dashboard via HTTP        | 20020                     |
+| `UNIPORT_GATEWAY_ORGANISATION_HOST`    | Hostname to access Organization via HTTP | organisation-proxy        |
+| `UNIPORT_GATEWAY_ORGANISATION_PORT`    | Port to access Organization via HTTP     | 20030                     |
+| `UNIPORT_GATEWAY_FILESTORAGE_HOST`     | Hostname to access Filestorage via HTTP  | filestorage-proxy         |
+| `UNIPORT_GATEWAY_FILESTORAGE_PORT`     | Port to access Filestorage via HTTP      | 20090                     |
+| `UNIPORT_GATEWAY_CONTENT_HOST`         | Hostname to access Content via HTTP      | content-proxy             |
+| `UNIPORT_GATEWAY_CONTENT_PORT`         | Port to access Content via HTTP          | 20110                     |
+| `UNIPORT_GATEWAY_PORTAL_KAFKA_UI_HOST` | Hostname to access Kafka-UI via HTTP     | portal-kafka-ui           |
+| `UNIPORT_GATEWAY_PORTAL_KAFKA_UI_PORT` | Port to access Kafka-UI via HTTP         | 80                        |
+| `UNIPORT_GATEWAY_PORTAL_PGADMIN_HOST`  | Hostname to access PgAdmin via HTTP      | portal-pgadmin            |
+| `UNIPORT_GATEWAY_PORTAL_PGADMIN_PORT`  | Port to access PgAdmin via HTTP          | 80                        |
+| `UNIPORT_GATEWAY_PORTAL_GRAFANA_HOST`  | Hostname to access Grafana via HTTP      | portal-monitoring-grafana |
+| `UNIPORT_GATEWAY_PORTAL_GRAFANA_PORT`  | Port to access Grafana via HTTP          | 3000                      |
 
 ---
 
@@ -77,7 +77,7 @@ The log level can also be configured individually at the package level if the gl
 
     `<logger name="com.inventage" level="DEBUG"/>`
 
-Analogous to the Uniport-Gateway configuration, there is a default Logback configuration under `/etc/uniport-gateway/logback.xml`. To use an extended `logback.xml` file, it is recommended to overwrite the default configuration. Alternatively, an additional file can be created, and the `PORTAL_GATEWAY_LOGGING_CONFIG` environment variable can be set to its path.
+Analogous to the Uniport-Gateway configuration, there is a default Logback configuration under `/etc/uniport-gateway/logback.xml`. To use an extended `logback.xml` file, it is recommended to overwrite the default configuration. Alternatively, an additional file can be created, and the `UNIPORT_GATEWAY_LOGGING_CONFIG` environment variable can be set to its path.
 
 ---
 
