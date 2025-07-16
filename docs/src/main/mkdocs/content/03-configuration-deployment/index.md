@@ -95,7 +95,7 @@ We rely on [OpenTelemetry SDK Autoconfiguration](https://github.com/open-telemet
 
 ## Deployment
 
-The Portal-Gateway can also use environment variables in its configuration files. If this is the case, these must be defined during deployment. This is done using the `portal-gateway.common.env` file in a Docker environment and the `values.yaml` file in a Kubernetes environment.
+The Uniport-Gateway can also use environment variables in its configuration files. If this is the case, these must be defined during deployment. This is done using the `uniport-gateway.common.env` file in a Docker environment and the `values.yaml` file in a Kubernetes environment.
 
 ---
 

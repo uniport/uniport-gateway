@@ -32,7 +32,7 @@ pom.xml.versionsBackup
 release.properties
 
 # env file for a specific environment
-server/src/main/config/portal-gateway.specific.env
+server/src/main/config/uniport-gateway.specific.env
 helm/src/main/resources/values.specific.yaml
 helm/src/main/resources/proxy-config.specific/
 

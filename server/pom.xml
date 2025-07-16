@@ -288,7 +288,7 @@
                         <phase>initialize</phase>
                         <configuration>
                             <target>
-                                <touch file="src/main/config/portal-gateway.specific.env"/>
+                                <touch file="src/main/config/uniport-gateway.specific.env"/>
                             </target>
                         </configuration>
                     </execution>

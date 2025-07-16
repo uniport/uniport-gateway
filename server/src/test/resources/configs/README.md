@@ -9,7 +9,7 @@ All examples should (by do not yet) contain the same directory structure:
 │   |    ├── service1/service1.json
 │   |    └── service2/service2.json
 │   └── uniport-gateway.json
-├── portal-gateway.env
+├── uniport-gateway.env
 └── README.md
 ```
 

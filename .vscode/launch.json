@@ -14,7 +14,7 @@
             "type": "java",
             "projectName": "server",
             "request": "launch",
-            "envFile": "${workspaceFolder}/server/src/test/resources/configs/auth-only/portal-gateway.env",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/auth-only/uniport-gateway.env",
             "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
         },
         {
@@ -22,7 +22,7 @@
             "type": "java",
             "projectName": "server",
             "request": "launch",
-            "envFile": "${workspaceFolder}/server/src/test/resources/configs/standalone-auth/portal-gateway.env",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/standalone-auth/uniport-gateway.env",
             "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
         },
         {
@@ -30,7 +30,7 @@
             "type": "java",
             "projectName": "server",
             "request": "launch",
-            "envFile": "${workspaceFolder}/server/src/test/resources/configs/router-rules/portal-gateway.env",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/router-rules/uniport-gateway.env",
             "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
         },
         {
@@ -38,7 +38,7 @@
             "type": "java",
             "projectName": "server",
             "request": "launch",
-            "envFile": "${workspaceFolder}/server/src/test/resources/configs/dev-reduced/portal-gateway.env",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/dev-reduced/uniport-gateway.env",
             "mainClass": "com.inventage.portal.gateway.GatewayLauncher"
         }
     ]
