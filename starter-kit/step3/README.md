@@ -140,7 +140,7 @@ Everything is routed through the Gateway
 }
 ```
 
-`keycloak` is required to be configured to work with the example configuration of the `portal-gateway`. The imported realm
+`keycloak` is required to be configured to work with the example configuration of the `uniport-gateway`. The imported realm
 configuration should take care of everything. For the sake of completeness, the following list shows the custom configuration that is applied by the import:
 
 * Create realm `testrealm` (the following configuration has to be applied in this realm)
@@ -151,7 +151,7 @@ configuration should take care of everything. For the sake of completeness, the 
   * Select `Standard flow`
   * Set `http://localhost:20000` as `home url`
   * Set `http://localhost:20000/*` as `redirect url`
-* Copy client secret into the `portal-gateway` config of the `oauth2` middleware (> `Clients` > `testclient` > `Credentials`)
+* Copy client secret into the `uniport-gateway` config of the `oauth2` middleware (> `Clients` > `testclient` > `Credentials`)
 * Create client with client ID `whoami{1..2}`
   * ?
 * Create client scope `whoami{1..2}` (> `Client scopes`)

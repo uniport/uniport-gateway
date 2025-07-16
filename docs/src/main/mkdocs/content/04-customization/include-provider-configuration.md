@@ -4,7 +4,7 @@
 
 ##### General
 
-The good old configuration file. This is the least magical way to configure the Portal-Gateway. Nothing is done automatically here, and everything must be defined manually.
+The good old configuration file. This is the least magical way to configure the Uniport-Gateway. Nothing is done automatically here, and everything must be defined manually.
 
 The basic structure of the configuration file is:
 
@@ -118,13 +118,13 @@ Environment variables can also be used in all parts of the configuration file.
 
 ##### General
 
-The Portal-Gateway creates a corresponding Router and Service for each container.
+The Uniport-Gateway creates a corresponding Router and Service for each container.
 
 A server instance is automatically attached to the Service, and the Default Rule is assigned to the Router if no Routing Rule has been defined in the Labels.
 
 !!! warning "Docker Service Discovery"
 
-    For Docker Container Service Discovery to work, `/var/run/docker.sock` must be mounted in the Portal-Gateway. It is important that `docker.sock` has permission 666 (`sudo chmod 666 /var/run/docker.sock`). In this regard, there are [some security aspects](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) to consider.
+    For Docker Container Service Discovery to work, `/var/run/docker.sock` must be mounted in the Uniport-Gateway. It is important that `docker.sock` has permission 666 (`sudo chmod 666 /var/run/docker.sock`). In this regard, there are [some security aspects](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) to consider.
 
 ??? example "Example of a Dockerfile for the Organization Microservice"
 
@@ -133,7 +133,7 @@ A server instance is automatically attached to the Service, and the Default Rule
 
     COPY target/docker-context/organisation-proxy-config/ /etc/uniport-gateway/organisation/
 
-    # labels used for the service discovery by the portal-gateway
+    # labels used for the service discovery by the uniport-gateway
     LABEL portal.enable="true"
     LABEL portal.http.routers.organisation-proxy.rule="PathPrefix('/organisation')"
     LABEL portal.http.routers.organisation-proxy.middlewares="organisationRedirectRegex, organisationOauth2@file, organisationAuthBearer@file, organisationReplacePath"
@@ -169,7 +169,7 @@ To update the configuration of the Service automatically attached to the contain
 
 ##### Specific Provider Options
 
-You can instruct Portal-Gateway to consider (or not consider) the container by setting `portal.enable` to true or false. This option overrides the value of `exposedByDefault`.
+You can instruct Uniport-Gateway to consider (or not consider) the container by setting `portal.enable` to true or false. This option overrides the value of `exposedByDefault`.
 
 ```yaml
 labels:

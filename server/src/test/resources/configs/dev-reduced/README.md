@@ -1,9 +1,9 @@
-Portal-Gateway `dev-reduced`
+Uniport-Gateway `dev-reduced`
 ===
 
-This folder contains a simple, minimal Portal-Gateway example configuration with two services: `portal-iam` and `organisation-proxy`.
+This folder contains a simple, minimal Uniport-Gateway example configuration with two services: `portal-iam` and `organisation-proxy`.
 
-After a successful start of the Portal-Gateway the session can be inspected by [the `_session_` middleware](http://localhost:20000/_session_).
+After a successful start of the Uniport-Gateway the session can be inspected by [the `_session_` middleware](http://localhost:20000/_session_).
 
 The configuration is done within 3 files: [auth.json](./config/dynamic-config/auth/auth.json), [organisation.json](./config/dynamic-config/organisation/organisation.json) and [portal-iam](./config/dynamic-config/portal-iam/portal-iam.json).
 

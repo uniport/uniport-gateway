@@ -1,8 +1,8 @@
-# Portal Gateway
+# Uniport-Gateway
 
 [![Main build](https://github.com/uniport/portal-gateway/actions/workflows/main.yaml/badge.svg)](https://github.com/uniport/portal-gateway/actions/workflows/main.yaml)
 
-The Portal-Gateway acts as an reverse proxy for all requests in Uniport.
+The Uniport-Gateway acts as an reverse proxy for all requests in Uniport.
 
 ## Why yet another reverse proxy?
 
@@ -14,7 +14,7 @@ The Portal-Gateway acts as an reverse proxy for all requests in Uniport.
 
 ## Overview
 
-The Portal-Gateway build on top of the concepts of `entrypoints`, `routers`, `middlewares`, `services` and `providers`:
+The Uniport-Gateway build on top of the concepts of `entrypoints`, `routers`, `middlewares`, `services` and `providers`:
 
 * An `entrypoint` configures the port it is listening on
 * A `router` configures a `rule` to route requests, e.g. based on the request's host or path
@@ -26,9 +26,9 @@ The Portal-Gateway build on top of the concepts of `entrypoints`, `routers`, `mi
 
 ## Configuration
 
-The Portal-Gateway has two different types of configuration, a `static` configuration and `dynamic` configurations:
+The Uniport-Gateway has two different types of configuration, a `static` configuration and `dynamic` configurations:
 
-* The `static` configuration is the minimal configuration needed to start the Portal-Gateway and cannot be changed at runtime. It consists of `entrypoints` and `providers`.
+* The `static` configuration is the minimal configuration needed to start the Uniport-Gateway and cannot be changed at runtime. It consists of `entrypoints` and `providers`.
 * The `dynamic` configuration configures `routers`, `middlewares` and `services`. It can be dynamically updated and applied at runtime.
 
 The simplest `provider` is the `file` provider. It reads the configuration from a JSON file and searches at the following locations:
@@ -62,7 +62,7 @@ mvn clean install
 
 ### IDE
 
-A simple setup can be launched by first starting some background services with [docker compose](server/src/test/resources/configs/router-rules/docker-compose.yml), and then run the Portal-Gateway with the launch config `Launch (router-rules)` (VSCode) or the run config `PortalGateway` (IntelliJ).
+A simple setup can be launched by first starting some background services with [docker compose](server/src/test/resources/configs/router-rules/docker-compose.yml), and then run the Uniport-Gateway with the launch config `Launch (router-rules)` (VSCode) or the run config `PortalGateway` (IntelliJ).
 
 ```bash
 docker compose -f server/src/test/resources/configs/router-rules/docker-compose.yml up

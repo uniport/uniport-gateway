@@ -2,7 +2,7 @@
 
 ## JSON Schemas for configuration files
 
-Starting with portal-gateway version `8.0.0`, we provide JSON schemas that can be used to validate your configuration files.
+Starting with uniport-gateway version `8.0.0`, we provide JSON schemas that can be used to validate your configuration files.
 
 ---
 
@@ -14,7 +14,7 @@ There are two JSON schemas, `portalGatewayStaticSchema.json` for the static and 
 <dependency>
     <groupId>com.inventage.portal.gateway</groupId>
     <artifactId>config-schemas</artifactId>
-    <version>${portal-gateway.version}</version>
+    <version>${uniport-gateway.version}</version>
 </dependency>
 ```
 

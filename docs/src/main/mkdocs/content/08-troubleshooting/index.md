@@ -2,9 +2,9 @@
 
 ## Cluster mode
 
-When the Portal-Gateway is operated in cluster mode, the key-value pairs in the Session Store are synchronized across instances. The Session Store is primarily used for user-specific data related to authentication, such as ID and Access Tokens, as well as for cookies. With the example configuration, the content of the Session Store is usually made visible under `/organisation/_session_`. However, when the Portal-Gateway is operated in cluster mode, it is not clear which instance you land on. As a tool, the current instance being accessed is visible on the page, but sometimes you want to see the Session Store contents of all instances. This requires a little manual work:
+When the Uniport-Gateway is operated in cluster mode, the key-value pairs in the Session Store are synchronized across instances. The Session Store is primarily used for user-specific data related to authentication, such as ID and Access Tokens, as well as for cookies. With the example configuration, the content of the Session Store is usually made visible under `/organisation/_session_`. However, when the Uniport-Gateway is operated in cluster mode, it is not clear which instance you land on. As a tool, the current instance being accessed is visible on the page, but sometimes you want to see the Session Store contents of all instances. This requires a little manual work:
 
-We assume 2 Portal-Gateway instances below.
+We assume 2 Uniport-Gateway instances below.
 
 1. The two instances are made accessible via port-forward to the local ports `:8000` and `:8001`.
 

@@ -188,7 +188,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 ### Added
 
-- Add support to run the Portal-Gateway in cluster mode ([PORTAL-1572](https://inventage-all.atlassian.net/browse/PORTAL-1572)).
+- Add support to run the Uniport-Gateway in cluster mode ([PORTAL-1572](https://inventage-all.atlassian.net/browse/PORTAL-1572)).
 - Add matomo middleware for autologin feature ([PORTAL-1718](https://inventage-all.atlassian.net/browse/PORTAL-1718)).
 
 ### Changed
@@ -253,7 +253,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 ### Fixed
 
-- Bug when authentication request is not initiated by Portal-Gateway ([PORTAL-1417](https://inventage-all.atlassian.net/browse/PORTAL-1417)).
+- Bug when authentication request is not initiated by Uniport-Gateway ([PORTAL-1417](https://inventage-all.atlassian.net/browse/PORTAL-1417)).
 
 ### Added
 
@@ -439,7 +439,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - Added structural logging ([PORTAL-741](https://inventage-all.atlassian.net/browse/PORTAL-741)).
 - Update to Eclipse-Temurin JRE v17 for Docker-Desktop cgroup v2 support & MaxRAMPercentage=50.0 ([PORTAL-453](https://inventage-all.atlassian.net/browse/PORTAL-453)).
 
-  **IMPORTANT**: The `portal-gateway` process needs 256 MB memory when running in a container (`docker-comose` = `mem_limit: '256m'`, `kubernetes` = `rescources: / limits: / memory: "256Mi"`). This also applies when `portal-gateway` is used as a proxy in a microservice. The JVM inside the container image is configured in a way that the maximum amount of memory allocated for the heap is 50%.
+  **IMPORTANT**: The `uniport-gateway` process needs 256 MB memory when running in a container (`docker-comose` = `mem_limit: '256m'`, `kubernetes` = `rescources: / limits: / memory: "256Mi"`). This also applies when `uniport-gateway` is used as a proxy in a microservice. The JVM inside the container image is configured in a way that the maximum amount of memory allocated for the heap is 50%.
 
 ## [4.0.0]-202205231117-426-efc4093 - 2022-05-23
 
@@ -650,7 +650,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 ### Added
 
-- Portal-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://inventage-all.atlassian.net/browse/PORTAL-89)).
+- Uniport-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://inventage-all.atlassian.net/browse/PORTAL-89)).
 
 [unreleased]: https://github.com/uniport/portal-gateway/compare/9.5.0...master
 [9.5.0]: https://github.com/uniport/portal-gateway/compare/9.4.0...9.5.0

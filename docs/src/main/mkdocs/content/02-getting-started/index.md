@@ -1,6 +1,6 @@
 # Getting Started
 
-The Portal-Gateway can be built & launched as follows.
+The Uniport-Gateway can be built & launched as follows.
 
 ---
 
@@ -32,7 +32,7 @@ mvn clean install
 
 ### IDE
 
-A simple setup can be launched by first starting some background services with `docker compose` and then run the Portal-Gateway with the launch config `Launch (router-rules)` (VSCode) or the run config `PortalGateway` (IntelliJ).
+A simple setup can be launched by first starting some background services with `docker compose` and then run the Uniport-Gateway with the launch config `Launch (router-rules)` (VSCode) or the run config `PortalGateway` (IntelliJ).
 
 ```bash
 docker compose -f server/src/test/resources/configs/router-rules/docker-compose.yml up

@@ -1,6 +1,6 @@
 <!-- markdownlint-disable first-line-h1 -->
 
-Dynamic configuration contains all the definitions for how the Portal-Gateway processes requests. This configuration can be changed during runtime.
+Dynamic configuration contains all the definitions for how the Uniport-Gateway processes requests. This configuration can be changed during runtime.
 
 #### Routers
 
@@ -57,7 +57,7 @@ The Authorization Bearer sets a token in the HTTP header `Authorization: Bearer 
 
 ##### `backchannellogout`
 
-This middleware implements the [OIDC back-channel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html). The IAm may send a request to the router this middleware is configured for to logout a specific user i.e. destroy its session. This covers the use-case of an admin clearing a session in the IAM that also clears the corresponding session in the Portal-Gateway.
+This middleware implements the [OIDC back-channel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html). The IAm may send a request to the router this middleware is configured for to logout a specific user i.e. destroy its session. This covers the use-case of an admin clearing a session in the IAM that also clears the corresponding session in the Uniport-Gateway.
 
 The middleware answers invalid back-channel logout requests with a `400 Bad Request`.
 
@@ -76,7 +76,7 @@ The middleware answers invalid back-channel logout requests with a `400 Bad Requ
                 }
             ],
             "audience": [
-                "Portal-Gateway"
+                "Uniport-Gateway"
             ],
             "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
             "publicKeysReconciliation": {
@@ -113,7 +113,7 @@ Additionally:
             "publicKey": "https://portal-iam:8080/auth/realms/portal",
             "publicKeyAlgorithm": "RS256",
             "issuer": "${PROXY_BEARER_TOKEN_ISSUER}",
-            "audience": ["Portal-Gateway", "Navigation"],
+            "audience": ["Uniport-Gateway", "Navigation"],
             "optional": false,
             "claims": [
                 {
@@ -433,7 +433,7 @@ The `oauth2registration` accepts the same configuration parameters as the `oauth
 
 This Middleware is a combination of `authorization` and `bearerOnly` Middlewares and accepts a **superset** of both Middleware configurations. It checks whether the incoming request has an Access Token in its session under the configured `sessionScope` (`authorization`) that fulfills the configured JWT claims (`bearerOnly`).
 
-The name already indicates that the value in the `Authorization` header of the incoming request is not modified but passed through as is. This is necessary if a frontend already sends JWTs that need to reach the backend, but the Portal-Gateway still wants to enforce authN/authZ.
+The name already indicates that the value in the `Authorization` header of the incoming request is not modified but passed through as is. This is necessary if a frontend already sends JWTs that need to reach the backend, but the Uniport-Gateway still wants to enforce authN/authZ.
 
 --8<-- "content/04-customization/include-base-auth-handler-options.md"
 
@@ -478,9 +478,9 @@ The following **Entry-Middlewares** are typically attached to Entrypoints instea
 
 !!! bug
 
-    Directives without values (e.g., sandbox) are only supported from Portal-Gateway Version 8.2.0+. Microservices (e.g., Portal-Monitoring) that return such directives as CSP-Policies will not function, meaning the Gateway cannot load the resources on that path.
+    Directives without values (e.g., sandbox) are only supported from Uniport-Gateway Version 8.2.0+. Microservices (e.g., Portal-Monitoring) that return such directives as CSP-Policies will not function, meaning the Gateway cannot load the resources on that path.
 
-With the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) Middleware, we can define which resources the browser is allowed to load. As of Portal Gateway Version 8.1.0+, it is now possible to define multiple consecutive CSP-Middlewares for a route: e.g., general CSP-Policies on the Entry-Middleware and specific/restrictive CSP-Policies on each specific route. The union of all CSP-Policies will then be enforced.
+With the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) Middleware, we can define which resources the browser is allowed to load. As of Uniport-Gateway Version 8.1.0+, it is now possible to define multiple consecutive CSP-Middlewares for a route: e.g., general CSP-Policies on the Entry-Middleware and specific/restrictive CSP-Policies on each specific route. The union of all CSP-Policies will then be enforced.
 
 | Variable | Required | Type | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -492,7 +492,7 @@ With the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/
 
     In the case of multiple CSP-Middlewares for a route, the last middleware processed determines the `mergeStrategy` between external and internal CSP-Policies. In the schema below, that is the `CSP2` Middleware or `Resp2`.
 
-    ![Portal-Gateway Session Handling](data/CSPMiddlewareFlow.png)
+    ![Uniport-Gateway Session Handling](data/CSPMiddlewareFlow.png)
 
 !!! example
 
@@ -529,7 +529,7 @@ Additionally, the Middleware sets the HTTP Header `X-Uniport-Trace-Id` in the HT
 
 This Middleware processes all requests from the browser that are sent during the session ID regeneration (see figure). These requests are recognized by the Middleware using a "detection" cookie, whose name is configurable ("name"), and then sent back as a Redirect (=retry) Response to the same URL (no new session ID is included). However, the Redirect Response is only sent back after a configurable timeout ('waitTimeInMillisecond'), in the hope that the new session ID has arrived at the browser in the meantime.
 
-![Portal-Gateway Session Handling](data/Gateway_Session_Handling.png)
+![Uniport-Gateway Session Handling](data/Gateway_Session_Handling.png)
 
 | Variable                | Required | Type   | Default         | Description                                                          |
 | ----------------------- | -------- | ------ | --------------- | -------------------------------------------------------------------- |
@@ -611,7 +611,7 @@ Exceptions can be configured so that cookies are also returned to the User-Agent
 
 An exception to this rule is the Keycloak session cookie for the Master Realm. This is the only cookie, apart from the Vert.x session cookie, that is passed to the User-Agent. This is required for some Keycloak pages.
 
-![Portal-Gateway Session Bag](data/portal-gateway-session-bag.png)
+![Uniport-Gateway Session Bag](data/session-bag.png)
 
 #### Services
 

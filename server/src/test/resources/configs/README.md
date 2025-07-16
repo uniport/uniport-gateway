@@ -1,4 +1,4 @@
-Examples for Portal-Gateway
+Examples for Uniport-Gateway
 ===
 
 All examples should (by do not yet) contain the same directory structure:

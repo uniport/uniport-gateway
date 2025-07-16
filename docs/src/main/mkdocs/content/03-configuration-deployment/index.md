@@ -1,8 +1,8 @@
 # Configuration & Deployment
 
-The Portal-Gateway has two different types of configuration, a `static` configuration and `dynamic` configurations:
+The Uniport-Gateway has two different types of configuration, a `static` configuration and `dynamic` configurations:
 
-- The `static` configuration is the minimal configuration needed to start the Portal-Gateway and cannot be changed at runtime. It consists of `entrypoints` and `providers`.
+- The `static` configuration is the minimal configuration needed to start the Uniport-Gateway and cannot be changed at runtime. It consists of `entrypoints` and `providers`.
 - The `dynamic` configuration configures `routers`, `middlewares` and `services`. It can be dynamically updated and applied at runtime.
 
 The simplest `provider` is the `file` provider. It reads the configuration from a JSON file and searches at the following locations:
@@ -71,7 +71,7 @@ The `uniport-gateway.json` file in the `/etc/uniport-gateway/default/` directory
 
 ### Logging
 
-The log level can also be configured individually at the package level if the global log level is insufficient. The Portal-Gateway uses [logback](https://github.com/qos-ch/logback) as its logging backend, allowing logging behavior to be configured via the `logback.xml` file. To adjust the log level at the package level, the `logback.xml` file must be [extended with a logger](https://logback.qos.ch/manual/configuration.html#loggerElement).
+The log level can also be configured individually at the package level if the global log level is insufficient. The Uniport-Gateway uses [logback](https://github.com/qos-ch/logback) as its logging backend, allowing logging behavior to be configured via the `logback.xml` file. To adjust the log level at the package level, the `logback.xml` file must be [extended with a logger](https://logback.qos.ch/manual/configuration.html#loggerElement).
 
 !!! example "Setting the Log Level for `com.inventage`"
 

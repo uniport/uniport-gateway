@@ -1,4 +1,4 @@
-Portal-Gateway `whoami`
+Uniport-Gateway `whoami`
 ===
 
-This folder contains a simple, minimal Portal-Gateway example configuration with two services: `whoami` and `whoami2`.
+This folder contains a simple, minimal Uniport-Gateway example configuration with two services: `whoami` and `whoami2`.

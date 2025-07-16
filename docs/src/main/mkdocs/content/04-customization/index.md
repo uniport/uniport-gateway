@@ -1,17 +1,17 @@
 # Customization
 
-To make new microservices accessible via the Portal-Gateway, a dedicated configuration must be created and integrated. The following sections describe the procedure for this.
+To make new microservices accessible via the Uniport-Gateway, a dedicated configuration must be created and integrated. The following sections describe the procedure for this.
 
 ## Creating a Custom Configuration
 
-The configuration of the Portal-Gateway is twofold:
+The configuration of the Uniport-Gateway is twofold:
 
 - **Static**
 - **Dynamic**
 
 The static configuration is provided in the form of a JSON file. It defines the objects for `entrypoints` and `providers`.
 
-The second level depends on the `providers` from the static configuration. The dynamic configuration defines how the Portal-Gateway processes incoming requests.
+The second level depends on the `providers` from the static configuration. The dynamic configuration defines how the Uniport-Gateway processes incoming requests.
 
 ### Static Configuration
 

@@ -71,9 +71,9 @@ The detection of the deprecated language cookie name `ips.language` was removed.
 
 ## `9.*.*` -> `9.3.*`
 
-### Clustered Portal-Gateway
+### Clustered Uniport-Gateway
 
-With the upgrade to vertx 4.5.8, the hazelcast version was updated from 4.2 to 5.3. In general, the updated Portal-Gateway instance can be deployed in a rolling
+With the upgrade to vertx 4.5.8, the hazelcast version was updated from 4.2 to 5.3. In general, the updated Uniport-Gateway instance can be deployed in a rolling
 update. However, if the following error message appears, stop all instance and start them again. **Caution**: This clears the session store.
 
 ```json

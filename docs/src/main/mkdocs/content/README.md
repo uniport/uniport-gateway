@@ -68,13 +68,13 @@ We distinguish between infrastructure components, microservices, and libraries w
 
 ### Infrastructure Components
 
-#### [Portal-Gateway](./01-introduction/index.md)
+#### [Uniport-Gateway](./01-introduction/index.md)
 
-The Portal-Gateway infrastructure component is responsible for routing requests to the respective Uniport components.
+The Uniport-Gateway infrastructure component is responsible for routing requests to the respective Uniport components.
 
 ### Microservices
 
-Various microservices exist, which will not be discussed further here, as the focus is on the Portal-Gateway. The following list provides a general overview:
+Various microservices exist, which will not be discussed further here, as the focus is on the Uniport-Gateway. The following list provides a general overview:
 
 - Base
 - Dashboard

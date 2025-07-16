@@ -59,7 +59,7 @@ The JSON file for the static configuration is searched for at startup in the spe
 
 #### Entrypoints
 
-Entrypoints are the network entry points of Portal-Gateway. They define the port where packets are received. Entrypoints are part of the Static Configuration.
+Entrypoints are the network entry points of Uniport-Gateway. They define the port where packets are received. Entrypoints are part of the Static Configuration.
 
 | Variable | Required | Type | Description |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ Entrypoints are the network entry points of Portal-Gateway. They define the port
 
 #### Applications
 
-Applications define the core logic of Portal-Gateway. They define which applications listen on which ports and paths.
+Applications define the core logic of Uniport-Gateway. They define which applications listen on which ports and paths.
 
 | Variable                    | Required | Type   | Description                                                                         |
 | --------------------------- | -------- | ------ | ----------------------------------------------------------------------------------- |
@@ -81,7 +81,7 @@ Applications define the core logic of Portal-Gateway. They define which applicat
 
 #### Providers
 
-The Portal-Gateway can be configured via Providers.
+The Uniport-Gateway can be configured via Providers.
 
 The following Provider types are supported:
 
@@ -90,7 +90,7 @@ The following Provider types are supported:
 
 ##### File Provider
 
-The Portal-Gateway can be configured using a JSON file via the File Provider. Configuration via a single file or multiple files is supported.
+The Uniport-Gateway can be configured using a JSON file via the File Provider. Configuration via a single file or multiple files is supported.
 
 !!! hint "Keep it DRY"
 
@@ -105,7 +105,7 @@ The Portal-Gateway can be configured using a JSON file via the File Provider. Co
 
 ##### Docker Provider
 
-With Docker, Container Labels can be used to configure routing in the Portal-Gateway.
+With Docker, Container Labels can be used to configure routing in the Uniport-Gateway.
 
 | Variable | Required | Type | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -128,7 +128,7 @@ The port is chosen as follows:
 
 !!! warning "Security Notice"
 
-    Access to the Docker API without restrictions is [not recommended](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) according to OWASP. If the Portal-Gateway is attacked, the attacker can gain access to the underlying host:
+    Access to the Docker API without restrictions is [not recommended](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers) according to OWASP. If the Uniport-Gateway is attacked, the attacker can gain access to the underlying host:
 
     ```text
     [...] only trusted users shouls be allowed to control your Docker dameon [...]
@@ -147,7 +147,7 @@ Status: Functionality is available, but cannot yet be configured (the Default is
 | --------------------------- | -------- | ------- | ------- | ----------------------------------------------------------------------------------------- |
 | `providersThrottleDuration` | No       | Integer | `2000`  | Interval in milliseconds in which the configuration should be re-read from the Providers. |
 
-In some cases, some Providers can publish many configuration changes at once. This would generate more change events in the Portal-Gateway than necessary. To circumvent this problem, this option can be set. It defines how long the Portal-Gateway waits after a re-configuration before it makes new changes. If multiple change events are registered during this time, only the most current one is considered and the rest ist ignored. This option can only be set globally for all Providers, but is applied individually for each Provider.
+In some cases, some Providers can publish many configuration changes at once. This would generate more change events in the Uniport-Gateway than necessary. To circumvent this problem, this option can be set. It defines how long the Uniport-Gateway waits after a re-configuration before it makes new changes. If multiple change events are registered during this time, only the most current one is considered and the rest ist ignored. This option can only be set globally for all Providers, but is applied individually for each Provider.
 
 ##### Provider Namespace
 

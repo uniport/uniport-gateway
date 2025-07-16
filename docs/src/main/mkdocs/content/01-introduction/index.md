@@ -1,6 +1,6 @@
 # Introduction
 
-The Portal-Gateway acts as an reverse proxy for all requests in Uniport.
+The Uniport-Gateway acts as an reverse proxy for all requests in Uniport.
 
 ![Concept Overview](data/Concept.png)
 
@@ -8,7 +8,7 @@ The Portal-Gateway acts as an reverse proxy for all requests in Uniport.
 
 ## Overview
 
-The Portal-Gateway build on top of the concepts of `entrypoints`, `routers`, `middlewares`, `services` and `providers`:
+The Uniport-Gateway build on top of the concepts of `entrypoints`, `routers`, `middlewares`, `services` and `providers`:
 
 - An `entrypoint` configures the port it is listening on
 - A `router` configures a `rule` to route requests, e.g. based on the request's host or path

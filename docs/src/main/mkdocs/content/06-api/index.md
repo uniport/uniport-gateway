@@ -4,7 +4,7 @@
 
 ### Middlewares
 
-The Portal-Gateway offers the possibility to configure the behavior of the gateway via the following `middlewares` types.
+The Uniport-Gateway offers the possibility to configure the behavior of the gateway via the following `middlewares` types.
 
 #### Control API - controlApi
 
