@@ -8,7 +8,7 @@ All examples should (by do not yet) contain the same directory structure:
 │   ├── dynamic-config/
 │   |    ├── service1/service1.json
 │   |    └── service2/service2.json
-│   └── portal-gateway.json
+│   └── uniport-gateway.json
 ├── portal-gateway.env
 └── README.md
 ```

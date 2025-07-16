@@ -16,7 +16,7 @@ public class GatewayConfigRetrieverTest {
     @TempDir
     static Path tempDir;
     static Path tempFile;
-    static String tempFilename = "portal-gateway.json";
+    static String tempFilename = "uniport-gateway.json";
 
     @BeforeAll
     public static void init() throws IOException {

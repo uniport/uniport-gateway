@@ -9,8 +9,8 @@ containers:
         configMapName: portal-gateway-proxy-config
         mountPath: /etc/uniport-gateway/default
         items:
-          - key: portal-gateway.json
-            path: portal-gateway.json
+          - key: uniport-gateway.json
+            path: uniport-gateway.json
           - key: dynamic-config..analytics..config.json
             path: dynamic-config/analytics/config.json
           - key: dynamic-config..auth..config.json
@@ -49,8 +49,8 @@ configMaps:
     # Its a limitation of k8s that configmap key have to consist of alphanumeric characters, -, _ or .
     # With the '..' characters we want to symbolize the path the config file will live under.
     data:
-      portal-gateway.json:
-        valueFromFile: proxy-config.examples/portal-gateway.json
+      uniport-gateway.json:
+        valueFromFile: proxy-config.examples/uniport-gateway.json
       dynamic-config..analytics..config.json:
         valueFromFile: proxy-config.examples/dynamic-config/analytics/config.json
       dynamic-config..auth..config.json:

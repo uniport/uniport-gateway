@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GatewayConfigRetriever {
 
-    public static final String DEFAULT_CONFIG_FILE_NAME = "portal-gateway.json";
+    public static final String DEFAULT_CONFIG_FILE_NAME = "uniport-gateway.json";
     public static final String PROPERTY = "PORTAL_GATEWAY_JSON";
     public static final String DEFAULT_CONFIG_FILE_PATH = "/etc/uniport-gateway/default";
     public static final String LOCAL_CONFIG_FILE_PATH = ".";
@@ -53,7 +53,7 @@ public class GatewayConfigRetriever {
             .or(() -> getPathFor(String.format("%s/%s", DEFAULT_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME), "reading from default file '{}'"))
             .or(() -> getPathFor(String.format("%s/%s", LOCAL_CONFIG_FILE_PATH, DEFAULT_CONFIG_FILE_NAME), "reading from default file within working directory '{}'"))
             .or(() -> {
-                LOGGER.warn("No portal-gateway.json file found, working directory is '{}'", new File(LOCAL_CONFIG_FILE_PATH).getAbsolutePath());
+                LOGGER.warn("No uniport-gateway.json file found, working directory is '{}'", new File(LOCAL_CONFIG_FILE_PATH).getAbsolutePath());
                 return Optional.empty();
             });
     }

@@ -18,27 +18,27 @@ The simplest `provider` is the `file` provider. It reads the configuration from 
 
 The Uniport-Gateway container image already includes a `uniport-gateway.json` file in the `/etc/uniport-gateway/default/` directory. We recommend storing your project-specific `uniport-gateway.json` file in a different directory (e.g., `/etc/uniport-gateway/<PROJECTNAME>/`) and setting the `PORTAL_GATEWAY_JSON` environment variable to this path.
 
-| Variable                                    | Description                                                                                                                                                  | Default                                                                                                |
-| :------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
-| `PORTAL_GATEWAY_JSON`                       | Absolute path of the JSON file for static configuration                                                                                                      | -                                                                                                      |
-| `PORTAL_GATEWAY_PUBLIC_PROTOCOL`            | HTTP protocol for the URL that a browser should use                                                                                                          | http                                                                                                   |
-| `PORTAL_GATEWAY_PUBLIC_HOSTNAME`            | HTTP Host Name for the URL that a browser should use                                                                                                         | portal.minikube                                                                                        |
-| `PORTAL_GATEWAY_PUBLIC_PORT`                | HTTP Port for the URL that a browser should use                                                                                                              | http: 80, https: 443                                                                                   |
-| `PORTAL_GATEWAY_LOG_LEVEL`                  | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF                                                                                                       | INFO                                                                                                   |
-| `PORTAL_GATEWAY_LOGGING_CONFIG`             | Absolute path of the `logback.xml` file for Logback configuration                                                                                            | /etc/uniport-gateway/logback.xml                                                                       |
-| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log output is formatted as structured JSON.                                                                                                                  | false                                                                                                  |
-| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY`    | Path or URL                                                                                                                                                  | http://portal-iam:8080/auth/realms/portal                                                              |
-| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER`        | Describes the expected issuer in the access token. See `issuer` in [bearerOnly](../04-customization/index.md#beareronly)                                     | [http://ips.inventage.com:20000/auth/realms/portal](http://ips.inventage.com:20000/auth/realms/portal) |
-| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL`      | Indicates whether the proxy should expect (and thus validate) an access token. See `optional` in [bearerOnly](../04-customization/index.md#beareronly)       | false                                                                                                  |
-| `PORTAL_GATEWAY_METRICS_PORT`               | HTTP Port for the Metrics Endpoint                                                                                                                           | 9090                                                                                                   |
-| `PORTAL_GATEWAY_METRICS_PATH`               | HTTP Path for the Metrics Endpoint                                                                                                                           | /metrics                                                                                               |
-| `PORTAL_GATEWAY_CLUSTERED`                  | Switch to run the Uniport-Gateway in cluster mode. This also requires adjusting the number of deployed instances (e.g., `replicas` in the Helm Value Files). | false                                                                                                  |
+| Variable | Description | Default |
+| :-- | :-- | :-- |
+| `PORTAL_GATEWAY_JSON` | Absolute path of the JSON file for static configuration | - |
+| `PORTAL_GATEWAY_PUBLIC_PROTOCOL` | HTTP protocol for the URL that a browser should use | http |
+| `PORTAL_GATEWAY_PUBLIC_HOSTNAME` | HTTP Host Name for the URL that a browser should use | portal.minikube |
+| `PORTAL_GATEWAY_PUBLIC_PORT` | HTTP Port for the URL that a browser should use | http: 80, https: 443 |
+| `PORTAL_GATEWAY_LOG_LEVEL` | Log Level: TRACE, DEBUG, INFO, WARN, ERROR, ALL or OFF | INFO |
+| `PORTAL_GATEWAY_LOGGING_CONFIG` | Absolute path of the `logback.xml` file for Logback configuration | /etc/uniport-gateway/logback.xml |
+| `PORTAL_GATEWAY_STRUCTURAL_LOGGING_ENABLED` | Log output is formatted as structured JSON. | false |
+| `PORTAL_GATEWAY_BEARER_TOKEN_PUBLIC_KEY` | Path or URL | http://portal-iam:8080/auth/realms/portal |
+| `PORTAL_GATEWAY_BEARER_TOKEN_ISSUER` | Describes the expected issuer in the access token. See `issuer` in [bearerOnly](../04-customization/index.md#beareronly) | [http://ips.inventage.com:20000/auth/realms/portal](http://ips.inventage.com:20000/auth/realms/portal) |
+| `PORTAL_GATEWAY_BEARER_TOKEN_OPTIONAL` | Indicates whether the proxy should expect (and thus validate) an access token. See `optional` in [bearerOnly](../04-customization/index.md#beareronly) | false |
+| `PORTAL_GATEWAY_METRICS_PORT` | HTTP Port for the Metrics Endpoint | 9090 |
+| `PORTAL_GATEWAY_METRICS_PATH` | HTTP Path for the Metrics Endpoint | /metrics |
+| `PORTAL_GATEWAY_CLUSTERED` | Switch to run the Uniport-Gateway in cluster mode. This also requires adjusting the number of deployed instances (e.g., `replicas` in the Helm Value Files). | false |
 
 The three variables `PORTAL_GATEWAY_PUBLIC_PROTOCOL`, `PORTAL_GATEWAY_PUBLIC_HOSTNAME`, and `PORTAL_GATEWAY_PUBLIC_PORT` collectively form the public URL that the Portal-Gateway uses for redirects. This applies to redirects from the OAuth2 Middleware to Portal-IAM.
 
 ---
 
-### Default portal-gateway.json
+### Default uniport-gateway.json
 
 The `uniport-gateway.json` file in the `/etc/uniport-gateway/default/` directory serves as an example for the Uniport-Gateway's configuration.
 

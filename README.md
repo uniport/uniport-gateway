@@ -35,8 +35,8 @@ The simplest `provider` is the `file` provider. It reads the configuration from 
 
 1. File pointed at by the environment variable `PORTAL_GATEWAY_JSON`
 2. File pointed at by the system property `PORTAL_GATEWAY_JSON`
-3. File `portal-gateway.json` in the `/etc/portal-gateway/default/` directory
-4. File `portal-gateway.json` in the current working directory
+3. File `uniport-gateway.json` in the `/etc/portal-gateway/default/` directory
+4. File `uniport-gateway.json` in the current working directory
 
 ## Build
 

@@ -31,7 +31,7 @@
                 <list>
                   <Item>
                     <option name="pattern" value="true" />
-                    <option name="path" value="*/**/portal-gateway.json" />
+                    <option name="path" value="*/**/uniport-gateway.json" />
                     <option name="mappingKind" value="Pattern" />
                   </Item>
                   <Item>
