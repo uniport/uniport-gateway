@@ -133,7 +133,7 @@ public class GatewayLauncher extends Launcher {
         // See https://vertx.io/docs/vertx-hazelcast/java/#_configuring_for_kubernetes
         // See https://docs.hazelcast.com/hazelcast/latest/kubernetes/kubernetes-auto-discovery#using-kubernetes-in-dns-lookup-mode
         final Config config = new Config();
-        config.setClusterName("portal-gateway-ha");
+        config.setClusterName("uniport-gateway-ha");
         config.setProperty("hazelcast.logging.type", "slf4j");
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true)

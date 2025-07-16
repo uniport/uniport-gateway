@@ -81,7 +81,7 @@ update. However, if the following error message appears, stop all instance and s
   "logger": "com.hazelcast.security",
   "line": "69",
   "method": "log",
-  "message": "[10.244.4.210]:5701 [portal-gateway-ha] [5.3.5] Reason of failure for node join: Joining node's version 5.3.5 is not compatible with cluster version 4.2 [...]",
+  "message": "[10.244.4.210]:5701 [uniport-gateway-ha] [5.3.5] Reason of failure for node join: Joining node's version 5.3.5 is not compatible with cluster version 4.2 [...]",
 }
 ```
 

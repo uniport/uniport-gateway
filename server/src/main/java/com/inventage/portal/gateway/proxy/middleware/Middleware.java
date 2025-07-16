@@ -16,7 +16,7 @@ public interface Middleware extends Handler<RoutingContext> {
 
     Logger LOGGER = LoggerFactory.getLogger(Middleware.class);
 
-    String MODIFIERS_PREFIX = "portal-gateway-middleware";
+    String MODIFIERS_PREFIX = "uniport-gateway-middleware";
 
     String REQUEST_URI_MODIFIERS = String.format("%s-request-uri-modifiers", MODIFIERS_PREFIX);
     String REQUEST_HEADERS_MODIFIERS = String.format("%s-request-headers-modifiers", MODIFIERS_PREFIX);

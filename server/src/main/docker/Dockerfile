@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY dependency-jars dependency-jars
 
-COPY ${project.artifactId}-${project.version}-slim.jar /app/portal-gateway.jar
+COPY ${project.artifactId}-${project.version}-slim.jar /app/uniport-gateway.jar
 
 RUN groupadd --system appuser && useradd --system --gid appuser appuser
 RUN chown -R appuser /app
@@ -44,4 +44,4 @@ ENV JAVA_OPTS="$JAVA_OPTS \
     -Dcom.sun.management.jmxremote.ssl=false \
     -Djava.rmi.server.hostname=0.0.0.0"
 
-ENTRYPOINT java $JAVA_OPTS -jar /app/portal-gateway.jar 
+ENTRYPOINT java $JAVA_OPTS -jar /app/uniport-gateway.jar 
