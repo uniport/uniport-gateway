@@ -13,5 +13,5 @@ releasePipeline(
     createJiraRelease: true,
     jiraReleasePrefix: "Portal-Gateway",
     registerVersionWithArchetype: true,
-    registerVersionWithArchetypeComponentName: "portal-gateway"
+    registerVersionWithArchetypeComponentName: "uniport-gateway"
 )
