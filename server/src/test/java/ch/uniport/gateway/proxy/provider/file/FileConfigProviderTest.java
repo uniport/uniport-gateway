@@ -39,19 +39,19 @@ public class FileConfigProviderTest {
     @Test
     @DisplayName("no config published when empty/invalid")
     void errorWhenEmptyConfigTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        Checkpoint fileProviderStarted = testCtx.checkpoint();
-        Checkpoint nothingReceived = testCtx.checkpoint();
+        final Checkpoint fileProviderStarted = testCtx.checkpoint();
+        final Checkpoint nothingReceived = testCtx.checkpoint();
 
-        String path = "fileConfigProvider/invalid_config_file_01.json";
-        String configurationAddress = "file-config-provider-test";
-        boolean watch = false;
-        JsonObject env = null;
-        FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
+        final String path = "fileConfigProvider/invalid_config_file_01.json";
+        final String configurationAddress = "file-config-provider-test";
+        final boolean watch = false;
+        final JsonObject env = null;
+        final FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
         if (fileProvider == null) {
             testCtx.failNow("Failed to created file provder. File/Directory does not exist.");
         }
 
-        MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
+        final MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
         consumer.handler(message -> {
             testCtx.failNow("Received configuration but should not.");
         });
@@ -69,59 +69,59 @@ public class FileConfigProviderTest {
     @Test
     @DisplayName("simple file with variable substitution")
     void variableSubstitutionTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
-        Checkpoint fileProviderStarted = testCtx.checkpoint();
-        Checkpoint configReceived = testCtx.checkpoint();
-        Checkpoint configValidated = testCtx.checkpoint();
+        final Checkpoint fileProviderStarted = testCtx.checkpoint();
+        final Checkpoint configReceived = testCtx.checkpoint();
+        final Checkpoint configValidated = testCtx.checkpoint();
 
-        int expectedNumRouter = 1;
-        int expectedNumService = 2;
-        int expectedNumServersEach = 1;
-        String expectedHost = "http://testhost.org";
-        int expectedPort = 1234;
+        final int expectedNumRouter = 1;
+        final int expectedNumService = 2;
+        final int expectedNumServersEach = 1;
+        final String expectedHost = "http://testhost.org";
+        final int expectedPort = 1234;
 
-        String path = "fileConfigProvider/variable_substitution_file_01.json";
-        String configurationAddress = "file-config-provider-test";
-        boolean watch = false;
-        JsonObject env = new JsonObject()
+        final String path = "fileConfigProvider/variable_substitution_file_01.json";
+        final String configurationAddress = "file-config-provider-test";
+        final boolean watch = false;
+        final JsonObject env = new JsonObject()
             .put("test.host", expectedHost)
             .put("test.port.string", String.format("%s", expectedPort))
             .put("test.port.number", expectedPort);
-        FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
+        final FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
         if (fileProvider == null) {
             testCtx.failNow("Failed to created file provder. File/Directory does not exist.");
         }
 
-        MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
+        final MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
         consumer.handler(message -> {
             configReceived.flag();
-            JsonObject config = message.body();
+            final JsonObject config = message.body();
             testCtx.verify(() -> {
-                String pvdName = config.getString(Provider.PROVIDER_NAME);
+                final String pvdName = config.getString(Provider.PROVIDER_NAME);
                 assertEquals(StaticConfiguration.PROVIDER_FILE, pvdName, errMsg);
-                JsonObject pvdConfig = config.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+                final JsonObject pvdConfig = config.getJsonObject(Provider.PROVIDER_CONFIGURATION);
                 assertNotNull(pvdConfig, errMsg);
-                JsonObject http = pvdConfig.getJsonObject(DynamicConfiguration.HTTP);
+                final JsonObject http = pvdConfig.getJsonObject(DynamicConfiguration.HTTP);
                 assertNotNull(http, errMsg);
-                JsonArray routers = http.getJsonArray(DynamicConfiguration.ROUTERS);
+                final JsonArray routers = http.getJsonArray(DynamicConfiguration.ROUTERS);
                 assertNotNull(routers, errMsg);
                 assertEquals(expectedNumRouter, routers.size(), errMsg);
-                JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
+                final JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
                 assertNotNull(services, errMsg);
                 assertEquals(expectedNumService, services.size(), errMsg);
                 for (int i = 0; i < services.size(); i++) {
-                    JsonObject service = services.getJsonObject(i);
+                    final JsonObject service = services.getJsonObject(i);
                     assertNotNull(service, errMsg);
-                    JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
+                    final JsonArray servers = service.getJsonArray(DynamicConfiguration.SERVICE_SERVERS);
                     assertNotNull(servers, errMsg);
                     assertEquals(expectedNumServersEach, servers.size(), errMsg);
                     for (int j = 0; j < servers.size(); j++) {
-                        JsonObject server = servers.getJsonObject(j);
+                        final JsonObject server = servers.getJsonObject(j);
                         assertNotNull(server, errMsg);
-                        String host = server.getString(DynamicConfiguration.SERVICE_SERVER_HOST);
+                        final String host = server.getString(DynamicConfiguration.SERVICE_SERVER_HOST);
                         assertEquals(expectedHost, host, errMsg);
-                        int port = server.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT);
+                        final int port = server.getInteger(DynamicConfiguration.SERVICE_SERVER_PORT);
                         assertEquals(expectedPort, port, errMsg);
                     }
                 }
@@ -140,35 +140,35 @@ public class FileConfigProviderTest {
         String name, String path, int expectedNumRouter, int expectedNumService, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        String errMsg = String.format("'%s' failed", name);
+        final String errMsg = String.format("'%s' failed", name);
 
-        Checkpoint fileProviderStarted = testCtx.checkpoint();
-        Checkpoint configReceived = testCtx.checkpoint();
-        Checkpoint configValidated = testCtx.checkpoint();
+        final Checkpoint fileProviderStarted = testCtx.checkpoint();
+        final Checkpoint configReceived = testCtx.checkpoint();
+        final Checkpoint configValidated = testCtx.checkpoint();
 
-        String configurationAddress = "file-config-provider-test";
-        boolean watch = false;
-        JsonObject env = null;
-        FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
+        final String configurationAddress = "file-config-provider-test";
+        final boolean watch = false;
+        final JsonObject env = null;
+        final FileConfigProvider fileProvider = createProvider(vertx, path, configurationAddress, watch, env);
         if (fileProvider == null) {
             testCtx.failNow("Failed to created file provder. File/Directory does not exist.");
         }
 
-        MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
+        final MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
         consumer.handler(message -> {
             configReceived.flag();
-            JsonObject config = message.body();
+            final JsonObject config = message.body();
             testCtx.verify(() -> {
-                String pvdName = config.getString(Provider.PROVIDER_NAME);
+                final String pvdName = config.getString(Provider.PROVIDER_NAME);
                 assertEquals(StaticConfiguration.PROVIDER_FILE, pvdName, errMsg);
-                JsonObject pvdConfig = config.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+                final JsonObject pvdConfig = config.getJsonObject(Provider.PROVIDER_CONFIGURATION);
                 assertNotNull(pvdConfig, errMsg);
-                JsonObject http = pvdConfig.getJsonObject(DynamicConfiguration.HTTP);
+                final JsonObject http = pvdConfig.getJsonObject(DynamicConfiguration.HTTP);
                 assertNotNull(http, errMsg);
-                JsonArray routers = http.getJsonArray(DynamicConfiguration.ROUTERS);
+                final JsonArray routers = http.getJsonArray(DynamicConfiguration.ROUTERS);
                 assertNotNull(routers, errMsg);
                 assertEquals(expectedNumRouter, routers.size(), errMsg);
-                JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
+                final JsonArray services = http.getJsonArray(DynamicConfiguration.SERVICES);
                 assertNotNull(services, errMsg);
                 assertEquals(expectedNumService, services.size(), errMsg);
             });
@@ -184,8 +184,8 @@ public class FileConfigProviderTest {
         Vertx vertx, String path, String configurationAddress, boolean watch,
         JsonObject env
     ) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(path).getFile());
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final File file = new File(classLoader.getResource(path).getFile());
 
         if (!file.exists()) {
             return null;

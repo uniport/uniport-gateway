@@ -59,13 +59,13 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
     })
     public void isHandledByCheckRoute(String uri, Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withAuthenticationTriggerMiddleware()
             .withMiddleware(ctx -> {
                 ctx.response().setStatusCode(200).end();
             })
             .build().start();
-        BrowserConnected browser = gateway.connectBrowser();
+        final BrowserConnected browser = gateway.connectBrowser();
         // when
         browser.request(GET, uri).whenComplete((response, error) -> {
             // then
@@ -78,13 +78,13 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void otherPathIsIgnored(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withAuthenticationTriggerMiddleware()
             .withMiddleware(ctx -> {
                 ctx.response().setStatusCode(200).end();
             })
             .build().start();
-        BrowserConnected browser = gateway.connectBrowser();
+        final BrowserConnected browser = gateway.connectBrowser();
         // when
         browser.request(GET, "/not-a-check-route-path").whenComplete((response, error) -> {
             // then

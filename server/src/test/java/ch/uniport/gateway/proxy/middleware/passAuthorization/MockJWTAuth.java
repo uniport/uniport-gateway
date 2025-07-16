@@ -51,9 +51,9 @@ public class MockJWTAuth implements JWTAuth {
 
     @Override
     public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-        String token = getTokenFromCredentials(credentials);
+        final String token = getTokenFromCredentials(credentials);
         if (token != null && token.equals(correctToken)) {
-            User user = createUser(this.principal);
+            final User user = createUser(this.principal);
             resultHandler.handle(Future.succeededFuture(user));
         } else {
             resultHandler.handle(Future.failedFuture("not authorized"));

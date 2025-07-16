@@ -4,7 +4,10 @@ import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 
-public class VertxAssertions {
+public final class VertxAssertions {
+
+    private VertxAssertions() {
+    }
 
     public static void assertTrue(VertxTestContext testCtx, boolean condition) {
         testCtx.verify(() -> {

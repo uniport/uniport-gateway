@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 @ExtendWith(VertxExtension.class)
 public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
 
-    private static final String host = "localhost";
+    private static final String HOST = "localhost";
 
     @SuppressWarnings("unchecked")
     @Override
@@ -63,7 +63,7 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.COOKIE, DEFAULT_LANGUAGE_COOKIE_NAME + "=de");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContext)
             .withLanguageCookieMiddleware()
             .build().start()
@@ -85,7 +85,7 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContext)
             .withLanguageCookieMiddleware()
             .build().start()

@@ -42,11 +42,11 @@ public class ConfigurationWatcherTest {
     @DisplayName("simple run test")
     @SuppressWarnings("unchecked")
     void simpleRunTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
         // given
-        String configurationAddress = "test-simple-configuration-watcher";
-        List<JsonObject> messages = List.of(
+        final String configurationAddress = "test-simple-configuration-watcher";
+        final List<JsonObject> messages = List.of(
             assembleMessage("mock", buildConfiguration(
                 withRouters(
                     withRouter("test",
@@ -76,9 +76,9 @@ public class ConfigurationWatcherTest {
                     .build()))
             .build();
 
-        int providersThrottleIntervalMs = 1000;
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages);
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 1000;
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages);
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
         // when
@@ -106,19 +106,19 @@ public class ConfigurationWatcherTest {
     @DisplayName("should fail fast when the first configuration is invalid")
     @SuppressWarnings("unchecked")
     void shouldFailFastWhenFirstConfigurationIsInvalid(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
         // given
-        String configurationAddress = "test-simple-configuration-watcher";
-        List<JsonObject> messages = List.of(
+        final String configurationAddress = "test-simple-configuration-watcher";
+        final List<JsonObject> messages = List.of(
             assembleMessage("mock", buildConfiguration(
                 withRouters(
                     withRouter("test",
                         withRouterService("non-existent-svc"))))));
 
-        int providersThrottleIntervalMs = 1000;
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages);
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 1000;
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages);
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
         // when
@@ -142,11 +142,11 @@ public class ConfigurationWatcherTest {
     @DisplayName("should should ignore invalid configurations after the first valid one")
     @SuppressWarnings("unchecked")
     void shouldIgnoreInvalidConfigsAfterTheFirstOne(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
         // given
-        String configurationAddress = "test-simple-configuration-watcher";
-        List<JsonObject> messages = List.of(
+        final String configurationAddress = "test-simple-configuration-watcher";
+        final List<JsonObject> messages = List.of(
             assembleMessage("mock", buildConfiguration(
                 withRouters(
                     withRouter("test",
@@ -161,9 +161,9 @@ public class ConfigurationWatcherTest {
                     withRouter("test",
                         withRouterService("non-existent-svc"))))));
 
-        int providersThrottleIntervalMs = 100;
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages, 150);
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 100;
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages, 150);
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
         // when
@@ -196,10 +196,10 @@ public class ConfigurationWatcherTest {
     @DisplayName("throttle provider config reload test")
     @SuppressWarnings("unchecked")
     void throttleProviderConfigReloadTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
-        String configurationAddress = "test-throttle-configuration-watcher";
-        List<JsonObject> messages = new ArrayList<JsonObject>();
+        final String configurationAddress = "test-throttle-configuration-watcher";
+        final List<JsonObject> messages = new ArrayList<JsonObject>();
         for (int i = 0; i < 5; i++) {
             messages.add(assembleMessage("mock", buildConfiguration(
                 withRouters(
@@ -210,14 +210,14 @@ public class ConfigurationWatcherTest {
                     withService("bar",
                         withServers(withServer("host", 1234)))))));
         }
-        long waitMs = 1000;
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
+        final long waitMs = 1000;
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
 
-        int providersThrottleIntervalMs = 3000;
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 3000;
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
-        AtomicInteger publishedConfigCount = new AtomicInteger(0);
+        final AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
             public void listen(DynamicModel actual) {
@@ -248,16 +248,16 @@ public class ConfigurationWatcherTest {
     @Test
     @DisplayName("skip empty configs test")
     void skipEmptyConfigsTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
-        String configurationAddress = "test-throttle-configuration-watcher";
-        List<JsonObject> messages = List.of(assembleMessage("mock", null));
-        long waitMs = 10;
+        final String configurationAddress = "test-throttle-configuration-watcher";
+        final List<JsonObject> messages = List.of(assembleMessage("mock", null));
+        final long waitMs = 10;
 
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
 
-        int providersThrottleIntervalMs = 1000;
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 1000;
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
         watcher.addListener(new Listener() {
@@ -286,10 +286,10 @@ public class ConfigurationWatcherTest {
     @DisplayName("skip same config for provider test")
     @SuppressWarnings("unchecked")
     void skipSameConfigForProviderTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
-        String configurationAddress = "test-throttle-configuration-watcher";
-        JsonObject message = assembleMessage("mock", buildConfiguration(
+        final String configurationAddress = "test-throttle-configuration-watcher";
+        final JsonObject message = assembleMessage("mock", buildConfiguration(
             withRouters(
                 withRouter("foo",
                     withRouterRule("Path('/')"),
@@ -297,16 +297,16 @@ public class ConfigurationWatcherTest {
             withServices(
                 withService("bar",
                     withServers(withServer("host", 1234))))));
-        List<JsonObject> messages = List.of(message, message);
-        long waitMs = 100;
+        final List<JsonObject> messages = List.of(message, message);
+        final long waitMs = 100;
 
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
 
-        int providersThrottleIntervalMs = 1000;
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 1000;
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
-        AtomicBoolean isFirst = new AtomicBoolean(true);
+        final AtomicBoolean isFirst = new AtomicBoolean(true);
         watcher.addListener(new Listener() {
             @Override
             public void listen(DynamicModel actual) {
@@ -338,10 +338,10 @@ public class ConfigurationWatcherTest {
     @DisplayName("publishes config for each provider test")
     @SuppressWarnings("unchecked")
     void publishesConfigForEachProviderTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
-        String configurationAddress = "test-throttle-configuration-watcher";
-        JsonObject pvdConfig = buildConfiguration(
+        final String configurationAddress = "test-throttle-configuration-watcher";
+        final JsonObject pvdConfig = buildConfiguration(
             withRouters(
                 withRouter("foo",
                     withRouterRule("Path('/')"),
@@ -349,18 +349,18 @@ public class ConfigurationWatcherTest {
             withServices(
                 withService("bar",
                     withServers(withServer("host", 1234)))));
-        List<JsonObject> messages = List.of(
+        final List<JsonObject> messages = List.of(
             assembleMessage("mock", pvdConfig),
             assembleMessage("mock2", pvdConfig));
-        long waitMs = 10;
+        final long waitMs = 10;
 
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
 
-        int providersThrottleIntervalMs = 1000;
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 1000;
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
-        AtomicReference<DynamicModel> publishedProviderConfig = new AtomicReference<DynamicModel>();
+        final AtomicReference<DynamicModel> publishedProviderConfig = new AtomicReference<DynamicModel>();
         watcher.addListener(new Listener() {
             @Override
             public void listen(DynamicModel actual) {
@@ -417,10 +417,10 @@ public class ConfigurationWatcherTest {
     @DisplayName("publish config by provider test")
     @SuppressWarnings("unchecked")
     void publishConfigByProviderTest(TestInfo testInfo, Vertx vertx, VertxTestContext testCtx) {
-        String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
+        final String errMsg = String.format("'%s' failed", testInfo.getDisplayName());
 
-        String configurationAddress = "test-throttle-configuration-watcher";
-        JsonObject pvdConfig = buildConfiguration(
+        final String configurationAddress = "test-throttle-configuration-watcher";
+        final JsonObject pvdConfig = buildConfiguration(
             withRouters(
                 withRouter("foo",
                     withRouterRule("Path('/')"),
@@ -430,7 +430,7 @@ public class ConfigurationWatcherTest {
 
         // Update the provider configuration published in next dynamic Message which
         // should trigger a new publish.
-        JsonObject pvdConfigUpdate = buildConfiguration(
+        final JsonObject pvdConfigUpdate = buildConfiguration(
             withRouters(
                 withRouter("blub",
                     withRouterRule("Path('/')"),
@@ -438,17 +438,17 @@ public class ConfigurationWatcherTest {
             withServices(
                 withService("bar", withServers(withServer("host", 1234)))));
 
-        List<JsonObject> messages = List.of(assembleMessage("mock", pvdConfig),
+        final List<JsonObject> messages = List.of(assembleMessage("mock", pvdConfig),
             assembleMessage("mock", pvdConfigUpdate));
-        long waitMs = 100;
+        final long waitMs = 100;
 
-        Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
+        final Provider pvd = new MockProvider(vertx, configurationAddress, messages, waitMs);
 
-        int providersThrottleIntervalMs = 1000;
-        ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
+        final int providersThrottleIntervalMs = 1000;
+        final ConfigurationWatcher watcher = new ConfigurationWatcher(vertx, pvd, configurationAddress,
             providersThrottleIntervalMs, List.of());
 
-        AtomicInteger publishedConfigCount = new AtomicInteger(0);
+        final AtomicInteger publishedConfigCount = new AtomicInteger(0);
         watcher.addListener(new Listener() {
             @Override
             public void listen(DynamicModel actual) {

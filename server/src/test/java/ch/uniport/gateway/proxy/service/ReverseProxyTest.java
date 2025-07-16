@@ -92,7 +92,7 @@ public class ReverseProxyTest {
             ctx.response().end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        portalGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build().start(proxyPort);
@@ -338,7 +338,7 @@ public class ReverseProxyTest {
             }));
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        portalGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build()
@@ -371,7 +371,7 @@ public class ReverseProxyTest {
             ctx.response().setStatusCode(400).end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        portalGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build()
@@ -405,7 +405,7 @@ public class ReverseProxyTest {
         };
         startNetBackend(vertx, backendPort, backendHandler);
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        portalGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .build()
             .start(proxyPort);
@@ -453,7 +453,7 @@ public class ReverseProxyTest {
             }));
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        portalGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build()

@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.Arguments;
 @ExtendWith(VertxExtension.class)
 public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
 
-    private static final String host = "localhost";
+    private static final String HOST = "localhost";
 
     @SuppressWarnings("unchecked")
     @Override
@@ -58,7 +58,7 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testNoBearer(Vertx vertx, VertxTestContext testCtx) {
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withSessionMiddleware()
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "someToken"))
             .build()
@@ -74,7 +74,7 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testWithBearerNotAuthorized(Vertx vertx, VertxTestContext testCtx) {
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withSessionMiddleware()
             .withMockOAuth2Middleware("unauthorizedAuthHeader")
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "authorizedAuthHeader"))
@@ -99,7 +99,7 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.AUTHORIZATION, externalAuthHeader);
 
         // when
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withSessionMiddleware()
             .withMockOAuth2Middleware(internalAuthHeader)
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), internalAuthHeader))

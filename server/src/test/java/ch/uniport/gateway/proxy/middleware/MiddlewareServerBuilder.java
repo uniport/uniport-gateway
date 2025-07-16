@@ -439,7 +439,7 @@ public final class MiddlewareServerBuilder {
         final JsonObject principal = new JsonObject().put("access_token", rawAccessToken);
         final OAuth2Auth authProvider = new MockOAuth2Auth(host, port, principal, 0);
         final User user = MockOAuth2Auth.createUser(principal);
-        AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
+        final AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
 
         // mock OAuth2 authentication
         final Handler<RoutingContext> injectTokenHandler = ctx -> {

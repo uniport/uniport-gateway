@@ -94,8 +94,8 @@ class CSPViolationReportingServerMiddlewareTest extends MiddlewareTestBase {
             "status-code", 200,
             "violated-directive", "style-src-elem");
 
-        Predicate<ILoggingEvent> isCorrectLogLevel = e -> e.getLevel().toString().matches(logLevel);
-        Predicate<ILoggingEvent> hasViolationReport = e -> e.getFormattedMessage().matches(".*\"blocked-uri\":\"http://example.com/css/style.css\".*");
+        final Predicate<ILoggingEvent> isCorrectLogLevel = e -> e.getLevel().toString().matches(logLevel);
+        final Predicate<ILoggingEvent> hasViolationReport = e -> e.getFormattedMessage().matches(".*\"blocked-uri\":\"http://example.com/css/style.css\".*");
 
         //when
         gateway.incomingRequest(HttpMethod.POST, "/", new RequestOptions(), violationReport.toString(), (httpClientResponse -> {

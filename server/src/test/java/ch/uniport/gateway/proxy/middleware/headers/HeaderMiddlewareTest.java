@@ -59,7 +59,7 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void test_redirect_has_custom_response_headers(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    public void shouldHaveCustomHeadersinRedirect(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final MiddlewareServer portalGateway = portalGateway(vertx, testCtx)
             .withHeaderMiddleware(

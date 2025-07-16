@@ -92,20 +92,20 @@ public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
     @ParameterizedTest
     @MethodSource("redirectTestData")
     void redirectTest(
-        String name, String regex, String replacement, String URL, int expectedStatusCode,
+        String name, String regex, String replacement, String url, int expectedStatusCode,
         String expectedURL, Vertx vertx, VertxTestContext testCtx
     ) {
 
-        String failureMsg = String.format("Failure of '%s' test case", name);
+        final String failureMsg = String.format("Failure of '%s' test case", name);
 
-        Checkpoint serverStarted = testCtx.checkpoint();
-        Checkpoint requestsServed = testCtx.checkpoint();
-        Checkpoint responsesReceived = testCtx.checkpoint();
+        final Checkpoint serverStarted = testCtx.checkpoint();
+        final Checkpoint requestsServed = testCtx.checkpoint();
+        final Checkpoint responsesReceived = testCtx.checkpoint();
 
-        RedirectRegexMiddleware redirect = new RedirectRegexMiddleware("redirectRegex", regex, replacement);
+        final RedirectRegexMiddleware redirect = new RedirectRegexMiddleware("redirectRegex", regex, replacement);
 
-        int port = TestUtils.findFreePort();
-        Router router = Router.router(vertx);
+        final int port = TestUtils.findFreePort();
+        final Router router = Router.router(vertx);
         router.route().handler(redirect).handler(ctx -> ctx.response().end("ok"));
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
@@ -113,7 +113,7 @@ public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
         }).listen(port).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
 
-            vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", URL).compose(req -> req.send())
+            vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", url).compose(req -> req.send())
                 .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
                     VertxAssertions.assertEquals(testCtx, expectedStatusCode, resp.statusCode(), failureMsg);
                     VertxAssertions.assertEquals(testCtx, expectedURL, resp.headers().get(HttpHeaders.LOCATION),

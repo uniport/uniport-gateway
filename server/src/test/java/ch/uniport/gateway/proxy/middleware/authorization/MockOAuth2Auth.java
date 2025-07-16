@@ -59,7 +59,7 @@ public class MockOAuth2Auth implements OAuth2Auth {
 
     @Override
     public void authenticate(JsonObject credentials, Handler<AsyncResult<User>> resultHandler) {
-        User user = createUser(this.principal);
+        final User user = createUser(this.principal);
         resultHandler.handle(Future.succeededFuture(user));
     }
 
@@ -86,7 +86,7 @@ public class MockOAuth2Auth implements OAuth2Auth {
     @Override
     public Future<User> refresh(User user) {
         this.principal.put("expires_in", refreshedExpiresIn);
-        User newUser = createUser(this.principal);
+        final User newUser = createUser(this.principal);
         return Future.succeededFuture(newUser);
     }
 
@@ -97,7 +97,7 @@ public class MockOAuth2Auth implements OAuth2Auth {
 
     @Override
     public Future<JsonObject> userInfo(User user) {
-        JsonObject userInfo = new JsonObject();
+        final JsonObject userInfo = new JsonObject();
         return Future.succeededFuture(userInfo);
     }
 

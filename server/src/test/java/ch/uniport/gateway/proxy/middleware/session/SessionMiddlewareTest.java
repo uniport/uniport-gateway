@@ -117,7 +117,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void sessionLifetimeCookie(Vertx vertx, VertxTestContext testCtx) {
         // given
-        BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = portalGateway(vertx, testCtx)
             .withSessionMiddleware(false, true)
             .build().start().connectBrowser();
         // when
@@ -132,7 +132,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void sessionLifetimeHeader(Vertx vertx, VertxTestContext testCtx) {
         // given
-        BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = portalGateway(vertx, testCtx)
             .withSessionMiddleware(true, false)
             .build().start().connectBrowser();
         // when
@@ -148,10 +148,10 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void newSessionIsCreated(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .build().start();
-        BrowserConnected browser = gateway.connectBrowser();
+        final BrowserConnected browser = gateway.connectBrowser();
         // when
         browser.request(GET, "/").whenComplete((response, error) -> {
             // then
@@ -165,9 +165,9 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void newSessionIsCreated2(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware().build().start();
-        BrowserConnected browser = gateway.connectBrowser();
+        final BrowserConnected browser = gateway.connectBrowser();
         // when
         browser.request(GET, "/request1")
             .thenCompose(response -> {
@@ -187,10 +187,10 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void sessionTimeoutNoReset(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware("^/(request2|request3).*").build().start();
-        BrowserConnected browser = gateway.connectBrowser();
-        HeadersMultiMap headersMultiMap = new HeadersMultiMap();
+        final BrowserConnected browser = gateway.connectBrowser();
+        final HeadersMultiMap headersMultiMap = new HeadersMultiMap();
 
         final List<String> sessionId = new ArrayList<>();
         final List<Long> lastAccessed = new ArrayList<>();
@@ -199,7 +199,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             .whenComplete((response, error) -> {
                 assertThat(testCtx, response).hasStatusCode(200);
                 vertx.getOrCreateContext();
-                SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
+                final SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 sessionId.add(sharedDataSession.id());
                 lastAccessed.add(sharedDataSession.lastAccessed());
             })
@@ -211,7 +211,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
                 // then
                 assertThat(testCtx, response).hasStatusCode(200);
                 vertx.getOrCreateContext();
-                SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
+                final SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 VertxAssertions.assertEquals(testCtx, sharedDataSession.id(), sessionId.get(0));
                 VertxAssertions.assertEquals(testCtx, sharedDataSession.lastAccessed(), lastAccessed.get(0));
                 testCtx.completeNow();
@@ -223,7 +223,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         // given
         final AtomicReference<String> originalCookie = new AtomicReference<>();
 
-        BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = portalGateway(vertx, testCtx)
             .withSessionMiddleware("^/(ignored).*", true, true)
             .build().start().connectBrowser();
 
@@ -250,12 +250,12 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         // given 
         final AtomicReference<Boolean> hasSessionIdleTimeout = new AtomicReference<>(false);
 
-        Handler<RoutingContext> checkSessionIdleTimeoutIsOnRoutingContext = ctx -> {
+        final Handler<RoutingContext> checkSessionIdleTimeoutIsOnRoutingContext = ctx -> {
             hasSessionIdleTimeout.set(ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_IDLE_TIMEOUT_IN_MS_KEY) != null);
             ctx.next();
         };
 
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(checkSessionIdleTimeoutIsOnRoutingContext)
             .build().start();
@@ -273,12 +273,12 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         // given 
         final AtomicReference<Boolean> hasSessionStore = new AtomicReference<>(false);
 
-        Handler<RoutingContext> checkSessionStoreIsOnRoutingContext = ctx -> {
+        final Handler<RoutingContext> checkSessionStoreIsOnRoutingContext = ctx -> {
             hasSessionStore.set(ctx.get(SessionMiddleware.SESSION_MIDDLEWARE_SESSION_STORE_KEY) != null);
             ctx.next();
         };
 
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(checkSessionStoreIsOnRoutingContext)
             .build().start();

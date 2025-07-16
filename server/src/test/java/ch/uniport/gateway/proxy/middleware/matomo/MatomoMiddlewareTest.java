@@ -95,7 +95,7 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
         final jakarta.json.JsonObject payload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .build();
         final String accessToken = TestBearerOnlyJWTProvider.signToken(payload);
-        RequestOptions requestOptions = new RequestOptions();
+        final RequestOptions requestOptions = new RequestOptions();
         requestOptions.addHeader("Authorization", "Bearer " + accessToken);
 
         vertx.createHttpServer().requestHandler((proxyRequestHandler) -> {
@@ -142,7 +142,7 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
             .build();
         final String accessToken = TestBearerOnlyJWTProvider.signToken(payload);
         final String selfSetRole = "Superuser";
-        RequestOptions requestOptions = new RequestOptions();
+        final RequestOptions requestOptions = new RequestOptions();
         requestOptions.addHeader("Authorization", "Bearer " + accessToken);
         requestOptions.addHeader(HEADER_MATOMO_ROLE, selfSetRole);
 
@@ -176,7 +176,7 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
             .withProxyMiddleware(port)
             .build().start();
 
-        RequestOptions requestOptions = new RequestOptions();
+        final RequestOptions requestOptions = new RequestOptions();
 
         vertx.createHttpServer().requestHandler((proxyRequestHandler) -> {
             final HttpServerResponse response = proxyRequestHandler.response();

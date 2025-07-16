@@ -23,12 +23,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class ParserTest {
 
     static Stream<Arguments> filterKeysTestData() {
-        Map<String, Object> labels = new HashMap<String, Object>(Map.ofEntries(//
+        final Map<String, Object> labels = new HashMap<String, Object>(Map.ofEntries(//
             new AbstractMap.SimpleEntry<String, Object>("testA", "value"), //
             new AbstractMap.SimpleEntry<String, Object>("someB", "value"), //
             new AbstractMap.SimpleEntry<String, Object>("otherC", "value")));
 
-        Map<String, Object> invalidLabelValues = new HashMap<String, Object>(Map.ofEntries(//
+        final Map<String, Object> invalidLabelValues = new HashMap<String, Object>(Map.ofEntries(//
             new AbstractMap.SimpleEntry<String, Object>("a", true), //
             new AbstractMap.SimpleEntry<String, Object>("b", 1), //
             new AbstractMap.SimpleEntry<String, Object>("c", List.of())));
@@ -43,19 +43,19 @@ public class ParserTest {
 
     static Stream<Arguments> decodeTestData() {
         // the middleware type needs to be one of 'DynamicConfiguration.MIDDLEWARE_TYPES'
-        Map<String, Object> labels = new HashMap<String, Object>(Map.ofEntries(//
+        final Map<String, Object> labels = new HashMap<String, Object>(Map.ofEntries(//
             new AbstractMap.SimpleEntry<String, Object>("test.http.routers.blub.rule", "someRule"), //
             new AbstractMap.SimpleEntry<String, Object>("test.http.routers.blub.middlewares", "one, two,foo"), //
             new AbstractMap.SimpleEntry<String, Object>("test.http.middlewares.foo.headers.bar", "baz"), //
             new AbstractMap.SimpleEntry<String, Object>("test.http.services.moose.servers.port", "1234")));
 
-        Map<String, Object> labelsWithNoMatch = new HashMap<String, Object>(
+        final Map<String, Object> labelsWithNoMatch = new HashMap<String, Object>(
             Map.ofEntries(new AbstractMap.SimpleEntry<String, Object>("blub.foo.bar.baz", "moose")));
 
-        Map<String, Object> invalidLabels = new HashMap<String, Object>(
+        final Map<String, Object> invalidLabels = new HashMap<String, Object>(
             Map.ofEntries(new AbstractMap.SimpleEntry<String, Object>("blub...baz", "moose")));
 
-        JsonObject expectedDecoding = new JsonObject().//
+        final JsonObject expectedDecoding = new JsonObject().//
             put(DynamicConfiguration.HTTP, new JsonObject()//
                 .put(DynamicConfiguration.ROUTERS, new JsonArray()//
                     .add(new JsonObject()//
@@ -90,9 +90,9 @@ public class ParserTest {
         String name, Map<String, Object> labels, List<String> filters, List<String> expected,
         Vertx vertx, VertxTestContext testCtx
     ) {
-        String errMsg = String.format("'%s' failed. Labels: '%s', Filters: '%s'", name, labels, filters);
+        final String errMsg = String.format("'%s' failed. Labels: '%s', Filters: '%s'", name, labels, filters);
 
-        List<String> actual = Parser.filterKeys(labels, filters);
+        final List<String> actual = Parser.filterKeys(labels, filters);
         testCtx.verify(() -> assertEquals(expected, actual, errMsg));
         testCtx.completeNow();
     }
@@ -103,11 +103,11 @@ public class ParserTest {
         String name, Map<String, Object> labels, String rootName, JsonObject expected, Vertx vertx,
         VertxTestContext testCtx
     ) {
-        List<String> filters = null; // usage of filters is tested in 'filterKeysTest'
-        String errMsg = String.format("'%s' failed. Labels: '%s', RootName: '%s', Filters: '%s'", name, labels,
+        final List<String> filters = null; // usage of filters is tested in 'filterKeysTest'
+        final String errMsg = String.format("'%s' failed. Labels: '%s', RootName: '%s', Filters: '%s'", name, labels,
             rootName, filters);
 
-        JsonObject actual = Parser.decode(labels, rootName, filters);
+        final JsonObject actual = Parser.decode(labels, rootName, filters);
         testCtx.verify(() -> assertEquals(expected, actual, errMsg));
         testCtx.completeNow();
     }

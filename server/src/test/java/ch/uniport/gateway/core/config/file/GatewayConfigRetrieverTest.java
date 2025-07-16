@@ -25,7 +25,7 @@ public class GatewayConfigRetrieverTest {
 
     @Test
     public void noConfigFileExists() {
-        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
+        final Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
         assertTrue(staticConfigPath.isEmpty());
     }
 
@@ -38,7 +38,7 @@ public class GatewayConfigRetrieverTest {
     public void configFileAsProperty() {
         System.setProperty(GatewayConfigRetriever.PROPERTY, tempFile.toAbsolutePath().toString());
 
-        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
+        final Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
 
         assertTrue(staticConfigPath.isPresent());
         assertEquals(staticConfigPath.get(), tempFile);
@@ -50,7 +50,7 @@ public class GatewayConfigRetrieverTest {
     public void directoryAsProperty() {
         System.setProperty(GatewayConfigRetriever.PROPERTY, "path/to/a/dir");
 
-        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
+        final Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
         assertTrue(staticConfigPath.isEmpty());
 
         System.clearProperty(GatewayConfigRetriever.PROPERTY);
@@ -60,7 +60,7 @@ public class GatewayConfigRetrieverTest {
     public void nonExistingFileAsProperty() {
         System.setProperty(GatewayConfigRetriever.PROPERTY, "non/existing/file.json");
 
-        Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
+        final Optional<Path> staticConfigPath = GatewayConfigRetriever.getStaticConfigPath();
         assertTrue(staticConfigPath.isEmpty());
 
         System.clearProperty(GatewayConfigRetriever.PROPERTY);

@@ -19,7 +19,7 @@ public class AuthenticationUserContextTest {
     @Test
     void serializeAndDeserialize(Vertx vertx, VertxTestContext testCtx) {
         // given
-        OAuth2Options options = new OAuth2Options()
+        final OAuth2Options options = new OAuth2Options()
             // we set some config options the keycloak discovery also sets {@link OpenIDConnectAuth}
             .setClientId("testClient")
             .setAuthorizationPath("/test/authorization")
@@ -29,13 +29,13 @@ public class AuthenticationUserContextTest {
             .setUserInfoPath("/test/userinfo")
             .setJwkPath("/test/jwk")
             .setIntrospectionPath("/test/introspect");
-        OAuth2Auth oauth2 = OAuth2Auth.create(vertx, options);
+        final OAuth2Auth oauth2 = OAuth2Auth.create(vertx, options);
 
-        User user = User.fromName("test");
+        final User user = User.fromName("test");
 
-        AuthenticationUserContext authContext = AuthenticationUserContext.of(oauth2, user);
+        final AuthenticationUserContext authContext = AuthenticationUserContext.of(oauth2, user);
 
-        Buffer buffer = Buffer.buffer();
+        final Buffer buffer = Buffer.buffer();
 
         // when
         authContext.writeToBuffer(buffer);

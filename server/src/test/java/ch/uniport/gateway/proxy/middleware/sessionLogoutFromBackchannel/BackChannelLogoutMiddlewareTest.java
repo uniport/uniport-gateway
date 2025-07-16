@@ -79,9 +79,9 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
         );
     }
 
-    final String SSO_SID = "d452ed42-33ec-4a59-b110-0aa0280101bc";
+    final String sid = "d452ed42-33ec-4a59-b110-0aa0280101bc";
     // Token format see: https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
-    final jakarta.json.JsonObject VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
+    final jakarta.json.JsonObject validLogoutTokenPayloadTemplate = Json.createObjectBuilder()
         .add("typ", "Logout")
         .add("exp", 1893452400) // expires at (1.1.2023)
         .add("iat", 1627053747) // issued at (23.7.2021)
@@ -89,7 +89,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
         .add("aud", "test-audience") // audience
         .add("jti", "50b642a2-ecd9-4776-9ef5-b3fb7b1c3139") // Unique identifier for the token - JWT token ID
         .add("sub", "f:924084fe-5091-428a-8e3f-1fa5542c5b69:83") // subject
-        .add("sid", SSO_SID) // sso session id
+        .add("sid", sid) // sso session id
         .add("events", Json.createObjectBuilder()
             // Claim whose value is a JSON object containing the member name http://schemas.openid.net/event/backchannel-logout. 
             // This declares that the JWT is a Logout Token. 
@@ -104,9 +104,9 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void backChannelLogoutRequest(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final String signedValidLogoutToken = TestBearerOnlyJWTProvider.signToken(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE);
+        final String signedValidLogoutToken = TestBearerOnlyJWTProvider.signToken(validLogoutTokenPayloadTemplate);
 
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build()
@@ -115,7 +115,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
         // when
         final List<String> sessionId = new ArrayList<>();
         final List<String> cookie = new ArrayList<>();
-        BrowserConnected browser = gateway.connectBrowser();
+        final BrowserConnected browser = gateway.connectBrowser();
         browser.request(GET, "/some-path")
             .whenComplete((response, error) -> {
                 testCtx.verify(() -> {
@@ -128,12 +128,12 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
                 cookie.add(response.cookies().get(0));
 
                 // simulate a login by populating the SID map
-                SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
+                final SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
                 sessionId.add(sharedDataSession.id());
             })
             .thenCompose(response -> {
                 return ssoSIDToInternalSIDMap(vertx)
-                    .compose(map -> map.put(SSO_SID, sessionId.get(0)))
+                    .compose(map -> map.put(sid, sessionId.get(0)))
                     .toCompletionStage();
             })
             .thenCompose(response -> {
@@ -154,7 +154,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
 
                             // assert sid mapping has been removed
                             ssoSIDToInternalSIDMap(vertx)
-                                .compose(map -> map.get(SSO_SID))
+                                .compose(map -> map.get(sid))
                                 .onComplete(testCtx.succeeding(internalSID -> {
                                     VertxAssertions.assertNull(testCtx, internalSID);
                                     testCtx.completeNow();
@@ -194,9 +194,9 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_withoutLogoutToken(Vertx vertx, VertxTestContext testCtx) {
+    public void withoutLogoutToken(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -211,14 +211,14 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_logoutTokenWithoutSubClaim(Vertx vertx, VertxTestContext testCtx) {
+    public void logoutTokenWithoutSubClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final jakarta.json.JsonObject logoutTokenWithoutSubClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithoutSubClaim = Json.createObjectBuilder(validLogoutTokenPayloadTemplate)
             .remove("sub")
             .build();
         final String signedLogoutTokenWithoutSubClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithoutSubClaim);
@@ -233,14 +233,14 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_logoutTokenWithoutSidClaim(Vertx vertx, VertxTestContext testCtx) {
+    public void logoutTokenWithoutSidClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final jakarta.json.JsonObject logoutTokenWithoutSidClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithoutSidClaim = Json.createObjectBuilder(validLogoutTokenPayloadTemplate)
             .remove("sid")
             .build();
         final String signedLogoutTokenWithoutSidClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithoutSidClaim);
@@ -255,14 +255,14 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_logoutTokenWithoutEventsClaim(Vertx vertx, VertxTestContext testCtx) {
+    public void logoutTokenWithoutEventsClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final jakarta.json.JsonObject logoutTokenWithoutEventsClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithoutEventsClaim = Json.createObjectBuilder(validLogoutTokenPayloadTemplate)
             .remove("events")
             .build();
         final String signedLogoutTokenWithoutEventsClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithoutEventsClaim);
@@ -277,14 +277,14 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_logoutTokenWithIncorrectEventsClaimValue(Vertx vertx, VertxTestContext testCtx) {
+    public void logoutTokenWithIncorrectEventsClaimValue(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final jakarta.json.JsonObject logoutTokenWithIncorrectEventsClaimValue = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithIncorrectEventsClaimValue = Json.createObjectBuilder(validLogoutTokenPayloadTemplate)
             .remove("events")
             .add("events", "test")
             .build();
@@ -300,14 +300,14 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_logoutTokenWithIncorrectEventsClaim(Vertx vertx, VertxTestContext testCtx) {
+    public void logoutTokenWithIncorrectEventsClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final jakarta.json.JsonObject logoutTokenWithIncorrectEventsClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithIncorrectEventsClaim = Json.createObjectBuilder(validLogoutTokenPayloadTemplate)
             .remove("events")
             .add("events", Json.createObjectBuilder()
                 .add("test", JsonValue.EMPTY_JSON_OBJECT)
@@ -325,14 +325,14 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_logoutTokenWithNonceClaim(Vertx vertx, VertxTestContext testCtx) {
+    public void logoutTokenWithNonceClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
 
-        final jakarta.json.JsonObject logoutTokenWithNonceClaim = Json.createObjectBuilder(VALID_LOGOUT_TOKEN_PAYLOAD_TEMPLATE)
+        final jakarta.json.JsonObject logoutTokenWithNonceClaim = Json.createObjectBuilder(validLogoutTokenPayloadTemplate)
             .add("nonce", "123456")
             .build();
         final String signedLogoutTokenWithNonceClaim = TestBearerOnlyJWTProvider.signToken(logoutTokenWithNonceClaim);
@@ -347,9 +347,9 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_invalidRequestMethod(Vertx vertx, VertxTestContext testCtx) {
+    public void invalidRequestMethod(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -364,9 +364,9 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void backChannelLogoutRequest_invalidRequestContentType(Vertx vertx, VertxTestContext testCtx) {
+    public void invalidRequestContentType(Vertx vertx, VertxTestContext testCtx) {
         // given
-        MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();

@@ -88,7 +88,7 @@ public class BearerOnlyMiddlewareOptionsTest {
             BearerOnlyMiddlewareFactory.OPTIONAL, given.optional).getMap());
 
         if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
-            JsonArray claims = JsonArray.of(
+            final JsonArray claims = JsonArray.of(
                 JsonObject.of(
                     WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR, given.claimOperator,
                     WithAuthHandlerMiddlewareFactoryBase.CLAIM_PATH, given.claimPath,
@@ -97,7 +97,7 @@ public class BearerOnlyMiddlewareOptionsTest {
         }
 
         if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
-            JsonObject reconciliation = JsonObject.of(
+            final JsonObject reconciliation = JsonObject.of(
                 WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, given.reconciliationEnabled,
                 WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs);
             json.put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, reconciliation);

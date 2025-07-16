@@ -53,7 +53,7 @@ public class ReplacePathRegexMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void test_starting_with() {
+    public void startingWith() {
         // given
         final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("replacePath", "^/organisation/(.*)",
             "/$1");
@@ -64,7 +64,7 @@ public class ReplacePathRegexMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void test_exact() {
+    public void exact() {
         // given
         final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("replacePath", "^/status*.*",
             "/status/200");
@@ -75,7 +75,7 @@ public class ReplacePathRegexMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    public void test_exact2() {
+    public void exact2() {
         // given
         final ReplacePathRegexMiddleware r = new ReplacePathRegexMiddleware("replacePath", "^/organisation/(.*)",
             "/$1");

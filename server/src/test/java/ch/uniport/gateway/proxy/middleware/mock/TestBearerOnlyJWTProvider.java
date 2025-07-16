@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Signing JWTs for Unit tests
  */
-public class TestBearerOnlyJWTProvider {
+public final class TestBearerOnlyJWTProvider {
 
     static {
         // JWT signing is normally done in Keycloak
@@ -17,8 +17,12 @@ public class TestBearerOnlyJWTProvider {
         System.setProperty("smallrye.jwt.new-token.lifespan", "" + (60 * 60 * 24 * 365));
     }
 
+    private TestBearerOnlyJWTProvider() {
+
+    }
+
     public static void main(String[] args) {
-        String token = signToken(new HashMap<>());
+        final String token = signToken(new HashMap<>());
         System.out.println(token);
     }
 

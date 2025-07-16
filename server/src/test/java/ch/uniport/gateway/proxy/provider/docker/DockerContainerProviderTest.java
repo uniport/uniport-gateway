@@ -69,7 +69,7 @@ public class DockerContainerProviderTest {
 
     @SuppressWarnings("unchecked")
     static Stream<Arguments> defaultRuleTestData() {
-        JsonObject record = buildRecord("simple-container",
+        final JsonObject record = buildRecord("simple-container",
             withMetadata(withId("abc123"), withName("simple-container"),
                 withLabels(Map.ofEntries(entry("portal.enable", "true"),
                     entry("portal.http.routers.simple-router.service", "simple-service"),
@@ -183,9 +183,9 @@ public class DockerContainerProviderTest {
     }
     */
     private static JsonObject buildRecord(String name, Handler<JsonObject> metadataHandler) {
-        JsonObject record = new JsonObject();
+        final JsonObject record = new JsonObject();
 
-        JsonObject metadata = new JsonObject();
+        final JsonObject metadata = new JsonObject();
         metadataHandler.handle(metadata);
 
         record.put("metadata", metadata);
@@ -219,7 +219,7 @@ public class DockerContainerProviderTest {
     private static Handler<JsonObject> withLabels(Map<String, String> labels) {
         return metadata -> {
             for (String name : labels.keySet()) {
-                String value = labels.get(name);
+                final String value = labels.get(name);
                 metadata.put(name, value);
             }
         };
@@ -233,9 +233,9 @@ public class DockerContainerProviderTest {
 
     private static Handler<JsonObject> withNetworks(Map<String, String> networks) {
         return metadata -> {
-            JsonObject hostPerNetwork = new JsonObject();
+            final JsonObject hostPerNetwork = new JsonObject();
             for (String name : networks.keySet()) {
-                String addr = networks.get(name);
+                final String addr = networks.get(name);
                 hostPerNetwork.put(name, addr);
             }
             metadata.put("docker.hostPerNetwork", hostPerNetwork);
@@ -248,28 +248,28 @@ public class DockerContainerProviderTest {
         String desc, String defaultRule, List<JsonObject> containers, JsonObject expectedConfig,
         Vertx vertx, VertxTestContext testCtx
     ) {
-        String errMsg = String.format("'%s' failed", desc);
+        final String errMsg = String.format("'%s' failed", desc);
 
-        Checkpoint dockerProviderStarted = testCtx.checkpoint();
-        Checkpoint configValidated = testCtx.checkpoint();
+        final Checkpoint dockerProviderStarted = testCtx.checkpoint();
+        final Checkpoint configValidated = testCtx.checkpoint();
 
-        long scanPeriodMs = 3000L;
-        ServiceImporter serviceImporter = new MockServiceImporter(containers, scanPeriodMs);
+        final long scanPeriodMs = 3000L;
+        final ServiceImporter serviceImporter = new MockServiceImporter(containers, scanPeriodMs);
 
-        String configurationAddress = "test-docker-container-provider";
-        boolean exposedByDefault = true;
-        boolean watch = false;
-        JsonObject serviceImporterConfiguration = new JsonObject();
-        DockerContainerProvider dockerProvider = new DockerContainerProvider(vertx, configurationAddress, serviceImporter,
+        final String configurationAddress = "test-docker-container-provider";
+        final boolean exposedByDefault = true;
+        final boolean watch = false;
+        final JsonObject serviceImporterConfiguration = new JsonObject();
+        final DockerContainerProvider dockerProvider = new DockerContainerProvider(vertx, configurationAddress, serviceImporter,
             serviceImporterConfiguration, exposedByDefault, TEST_NETWORK, defaultRule, watch);
 
-        MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
+        final MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(configurationAddress);
         consumer.handler(message -> {
-            JsonObject config = message.body();
+            final JsonObject config = message.body();
             testCtx.verify(() -> {
-                String pvdName = config.getString(Provider.PROVIDER_NAME);
+                final String pvdName = config.getString(Provider.PROVIDER_NAME);
                 assertEquals(StaticConfiguration.PROVIDER_DOCKER, pvdName, errMsg);
-                JsonObject pvdConfig = config.getJsonObject(Provider.PROVIDER_CONFIGURATION);
+                final JsonObject pvdConfig = config.getJsonObject(Provider.PROVIDER_CONFIGURATION);
                 assertEquals(expectedConfig, pvdConfig, errMsg);
             });
             configValidated.flag();

@@ -188,7 +188,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
             final RequestOptions requestOptions = new RequestOptions();
             final HeadersMultiMap headerEntries = new HeadersMultiMap();
             requestOptions.setHeaders(headerEntries);
-            Buffer buffer = Buffer.buffer();
+            final Buffer buffer = Buffer.buffer();
 
             headerEntries.add("Cookie", csrfCookie.get());
             buffer.appendString(addMultiFormDataToRequest(Map.of(csrfResponseName, csrfToken), headerEntries));
@@ -306,7 +306,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
             headerEntries.add(CSRFHandler.DEFAULT_HEADER_NAME, csrfToken);
             headerEntries.add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
 
-            String payload = "{\"operationName\":\"OrganisationList\",\"variables\":{},\"query\":\"query OrganisationList {\\n  organisations: OrganisationView(order_by: {name: asc}) {\\n    ...OrganisationList\\n    __typename\\n  }\\n}\\n\\nfragment OrganisationList on OrganisationView {\\n  id\\n  name\\n  active\\n  internalIdentifier\\n  createdAt\\n  createdBy\\n  __typename\\n}\"}";
+            final String payload = "{\"operationName\":\"OrganisationList\",\"variables\":{},\"query\":\"query OrganisationList {\\n  organisations: OrganisationView(order_by: {name: asc}) {\\n    ...OrganisationList\\n    __typename\\n  }\\n}\\n\\nfragment OrganisationList on OrganisationView {\\n  id\\n  name\\n  active\\n  internalIdentifier\\n  createdAt\\n  createdBy\\n  __typename\\n}\"}";
             // when
             gateway.incomingRequest(HttpMethod.POST, "/", requestOptions, payload, httpClientPostResponse -> {
                 // then
@@ -403,7 +403,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
             final RequestOptions requestOptions = new RequestOptions();
             final HeadersMultiMap headerEntries = new HeadersMultiMap();
             requestOptions.setHeaders(headerEntries);
-            Buffer buffer = Buffer.buffer();
+            final Buffer buffer = Buffer.buffer();
 
             headerEntries.add("Cookie", csrfCookie.get());
             buffer.appendString(addMultiFormDataToRequest(Map.of(csrfResponseName, invalidTokenValue), headerEntries));
@@ -420,7 +420,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
     // Util
 
     private String addMultiFormDataToRequest(Map<String, String> formData, HeadersMultiMap headerEntries) {
-        String boundary = "dLV9Wyq26L_-JQxk6ferf-RT153LhOO";
+        final String boundary = "dLV9Wyq26L_-JQxk6ferf-RT153LhOO";
         String bufferContent = "--" + boundary + "\r\n";
         for (Map.Entry<String, String> entry : formData.entrySet()) {
             bufferContent += "Content-Disposition: form-data; name=\"" + entry.getKey() + "\"\r\n\r\n"

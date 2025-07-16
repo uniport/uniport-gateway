@@ -41,7 +41,7 @@ public final class TestUtils {
         ServerSocket socket = null;
         try {
             socket = new ServerSocket(0);
-            int port = socket.getLocalPort();
+            final int port = socket.getLocalPort();
             try {
                 socket.close();
             } catch (IOException e) {
@@ -49,11 +49,13 @@ public final class TestUtils {
             }
             return port;
         } catch (IOException e) {
+            // do nothing
         } finally {
             if (socket != null) {
                 try {
                     socket.close();
                 } catch (IOException e) {
+                    // do nothing
                 }
             }
         }
@@ -74,8 +76,8 @@ public final class TestUtils {
 
     // buildConfiguration is a helper to create a configuration.
     public static JsonObject buildConfiguration(Handler<JsonObject>... dynamicConfigBuilders) {
-        JsonObject conf = new JsonObject();
-        JsonObject httpConf = new JsonObject();
+        final JsonObject conf = new JsonObject();
+        final JsonObject httpConf = new JsonObject();
         conf.put(DynamicConfiguration.HTTP, httpConf);
 
         for (Handler<JsonObject> build : dynamicConfigBuilders) {
@@ -86,10 +88,10 @@ public final class TestUtils {
 
     public static Handler<JsonObject> withRouters(Handler<JsonObject>... opts) {
         return conf -> {
-            JsonArray routers = new JsonArray();
+            final JsonArray routers = new JsonArray();
             conf.put(DynamicConfiguration.ROUTERS, routers);
             for (Handler<JsonObject> opt : opts) {
-                JsonObject r = new JsonObject();
+                final JsonObject r = new JsonObject();
                 opt.handle(r);
                 routers.add(r);
             }
@@ -137,10 +139,10 @@ public final class TestUtils {
 
     public static Handler<JsonObject> withMiddlewares(Handler<JsonObject>... opts) {
         return conf -> {
-            JsonArray middlewares = new JsonArray();
+            final JsonArray middlewares = new JsonArray();
             conf.put(DynamicConfiguration.MIDDLEWARES, middlewares);
             for (Handler<JsonObject> opt : opts) {
-                JsonObject m = new JsonObject();
+                final JsonObject m = new JsonObject();
                 opt.handle(m);
                 middlewares.add(m);
             }
@@ -168,10 +170,10 @@ public final class TestUtils {
 
     public static Handler<JsonObject> withServices(Handler<JsonObject>... opts) {
         return conf -> {
-            JsonArray services = new JsonArray();
+            final JsonArray services = new JsonArray();
             conf.put(DynamicConfiguration.SERVICES, services);
             for (Handler<JsonObject> opt : opts) {
-                JsonObject s = new JsonObject();
+                final JsonObject s = new JsonObject();
                 opt.handle(s);
                 services.add(s);
             }
@@ -189,10 +191,10 @@ public final class TestUtils {
 
     public static Handler<JsonObject> withServers(Handler<JsonObject>... opts) {
         return service -> {
-            JsonArray servers = new JsonArray();
+            final JsonArray servers = new JsonArray();
             service.put(DynamicConfiguration.SERVICE_SERVERS, servers);
             for (Handler<JsonObject> opt : opts) {
-                JsonObject server = new JsonObject();
+                final JsonObject server = new JsonObject();
                 opt.handle(server);
                 servers.add(server);
             }
@@ -204,7 +206,7 @@ public final class TestUtils {
             server.put(DynamicConfiguration.SERVICE_SERVER_HOST, host);
             server.put(DynamicConfiguration.SERVICE_SERVER_PORT, port);
 
-            JsonObject httpOptions = new JsonObject();
+            final JsonObject httpOptions = new JsonObject();
             for (Handler<JsonObject> opt : opts) {
                 opt.handle(httpOptions);
             }
@@ -229,7 +231,7 @@ public final class TestUtils {
 
     // For static configuration
     public static JsonObject buildStaticConfiguration(Handler<JsonObject>... staticConfiguration) {
-        JsonObject conf = new JsonObject();
+        final JsonObject conf = new JsonObject();
         for (Handler<JsonObject> build : staticConfiguration) {
             build.handle(conf);
         }
@@ -238,10 +240,10 @@ public final class TestUtils {
 
     public static Handler<JsonObject> withEntrypoints(Handler<JsonObject>... opts) {
         return conf -> {
-            JsonArray entrypoints = new JsonArray();
+            final JsonArray entrypoints = new JsonArray();
             conf.put(StaticConfiguration.ENTRYPOINTS, entrypoints);
             for (Handler<JsonObject> opt : opts) {
-                JsonObject entrypoint = new JsonObject();
+                final JsonObject entrypoint = new JsonObject();
                 opt.handle(entrypoint);
                 entrypoints.add(entrypoint);
             }
@@ -265,10 +267,10 @@ public final class TestUtils {
 
     public static Handler<JsonObject> withProviders(Handler<JsonObject>... opts) {
         return conf -> {
-            JsonArray providers = new JsonArray();
+            final JsonArray providers = new JsonArray();
             conf.put(StaticConfiguration.PROVIDERS, providers);
             for (Handler<JsonObject> opt : opts) {
-                JsonObject provider = new JsonObject();
+                final JsonObject provider = new JsonObject();
                 opt.handle(provider);
                 providers.add(provider);
             }
@@ -285,7 +287,7 @@ public final class TestUtils {
         if (responseParamsList == null) {
             throw new IllegalStateException("cannot be null");
         }
-        Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
+        final Map<String, String> responseParamsMap = responseParamsList.stream().collect(Collectors.toMap(
             entry -> entry.getName(), entry -> entry.getValue()));
 
         return responseParamsMap;

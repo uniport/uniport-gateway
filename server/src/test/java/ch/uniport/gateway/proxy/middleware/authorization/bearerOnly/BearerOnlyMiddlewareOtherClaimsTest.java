@@ -36,10 +36,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public class BearerOnlyMiddlewareOtherClaimsTest {
 
-    private static final String host = "localhost";
-    private static final String publicKeyPath = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
-    private static final String publicKeyAlgorithm = "RS256";
-    private static final JsonObject validPayloadTemplate = Json.createObjectBuilder()
+    private static final String HOST = "localhost";
+    private static final String PUBLIC_KEY_PATH = "FOR_DEVELOPMENT_PURPOSE_ONLY-publicKey.pem";
+    private static final String PUBLIC_KEY_ALGORITHM = "RS256";
+    private static final JsonObject VALID_PAYLOAD_TEMPLATE = Json.createObjectBuilder()
         .add("typ", "Bearer")
         .add("exp", 1893452400)
         .add("iat", 1627053747)
@@ -77,11 +77,11 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE, List.of("openid", "email", "profile", "Test"));
         final List<JWTClaim> expectedClaims = List.of(claimContainRole, claimEqualString, claimEqualObject, claimEqualBoolean, claimContainInteger, claimContainSubstringWhitespace);
 
-        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
+        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -102,11 +102,11 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final JWTClaim claimContainSubstringWhitespace = new JWTClaim("$['scope']", JWTClaimOperator.CONTAINS_SUBSTRING_WHITESPACE, List.of("openid", "email", "profile", "Test"));
         final List<JWTClaim> expectedClaims = List.of(claimContainSubstringWhitespace);
 
-        final String validToken = TestBearerOnlyJWTProvider.signToken(validPayloadTemplate);
+        final String validToken = TestBearerOnlyJWTProvider.signToken(VALID_PAYLOAD_TEMPLATE);
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -130,14 +130,14 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<JWTClaim> expectedClaims = List.of(claimContainRole);
 
         final io.vertx.core.json.JsonObject invalidPayload = new io.vertx.core.json.JsonObject(
-            validPayloadTemplate.toString());
+            VALID_PAYLOAD_TEMPLATE.toString());
         invalidPayload.remove("resource_access");
         final String invalidStringToken = TestBearerOnlyJWTProvider.signToken(invalidPayload.getMap());
 
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -158,7 +158,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
             Boolean.FALSE);
         final List<JWTClaim> expectedClaims = List.of(claimEqualBoolean);
 
-        JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate).add("email-verified",
+        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE).add("email-verified",
             true).build();
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
@@ -166,7 +166,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -189,7 +189,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
                 .build());
         final List<JWTClaim> expectedClaims = List.of(claimContainRole);
 
-        JsonObject invalidPayload = Json.createObjectBuilder(validPayloadTemplate)
+        final JsonObject invalidPayload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
             .add("resource_access", Json.createObjectBuilder()
                 .add("Organisation", Json.createObjectBuilder()
                     .add("roles", "Root")
@@ -201,7 +201,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, host, testCtx)
+        portalGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -218,13 +218,13 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
     private JWTAuth jwtAuth(Vertx vertx, String expectedIssuer, List<String> expectedAudience) {
         String publicKeyRS256 = null;
         try {
-            publicKeyRS256 = Resources.toString(Resources.getResource(publicKeyPath),
+            publicKeyRS256 = Resources.toString(Resources.getResource(PUBLIC_KEY_PATH),
                 StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return JWTAuthMultipleIssuersProvider.create(vertx, new JWTAuthOptions()
-            .addPubSecKey(new PubSecKeyOptions().setAlgorithm(publicKeyAlgorithm)
+            .addPubSecKey(new PubSecKeyOptions().setAlgorithm(PUBLIC_KEY_ALGORITHM)
                 .setBuffer(publicKeyRS256))
             .setJWTOptions(new JWTOptions()
                 .setIssuer(expectedIssuer)

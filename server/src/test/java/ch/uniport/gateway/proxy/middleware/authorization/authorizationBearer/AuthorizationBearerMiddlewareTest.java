@@ -92,15 +92,15 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
     @Test
     void setIdToken(Vertx vertx, VertxTestContext testCtx) {
         // given
-        String sessionScope = "testScope";
-        String rawIdToken = "thisIsWhoIAm";
-        JsonObject principal = new JsonObject().put("id_token", rawIdToken);
-        OAuth2Auth authProvider = new MockOAuth2Auth(principal, 0);
-        User user = MockOAuth2Auth.createUser(principal);
-        AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
+        final String sessionScope = "testScope";
+        final String rawIdToken = "thisIsWhoIAm";
+        final JsonObject principal = new JsonObject().put("id_token", rawIdToken);
+        final OAuth2Auth authProvider = new MockOAuth2Auth(principal, 0);
+        final User user = MockOAuth2Auth.createUser(principal);
+        final AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
 
         // mock OAuth2 authentication
-        Handler<RoutingContext> injectTokenHandler = ctx -> {
+        final Handler<RoutingContext> injectTokenHandler = ctx -> {
             authContext.toSessionAtScope(ctx.session(), sessionScope);
             ctx.next();
         };
@@ -127,15 +127,15 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
     @Test
     void setAccessToken(Vertx vertx, VertxTestContext testCtx) {
         // given
-        String sessionScope = "testScope";
-        String rawAccessToken = "mayIAccessThisRessource";
-        JsonObject principal = new JsonObject().put("access_token", rawAccessToken);
-        OAuth2Auth authProvider = new MockOAuth2Auth(principal, 0);
-        User user = MockOAuth2Auth.createUser(principal);
-        AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
+        final String sessionScope = "testScope";
+        final String rawAccessToken = "mayIAccessThisRessource";
+        final JsonObject principal = new JsonObject().put("access_token", rawAccessToken);
+        final OAuth2Auth authProvider = new MockOAuth2Auth(principal, 0);
+        final User user = MockOAuth2Auth.createUser(principal);
+        final AuthenticationUserContext authContext = AuthenticationUserContext.of(authProvider, user);
 
         // mock OAuth2 authentication
-        Handler<RoutingContext> injectTokenHandler = ctx -> {
+        final Handler<RoutingContext> injectTokenHandler = ctx -> {
             authContext.toSessionAtScope(ctx.session(), sessionScope);
             ctx.next();
         };
@@ -162,30 +162,30 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
     @Test
     void refreshAccessToken(Vertx vertx, VertxTestContext testCtx) {
         // given
-        String sessionScope = "testScope";
-        int refreshedExpiresIn = 42;
-        String rawRefreshToken = "iAmARefresher";
-        String rawAccessToken = "mayIAccessThisRessource";
-        int expiresIn = 1;
-        JsonObject principal = new JsonObject()
+        final String sessionScope = "testScope";
+        final int refreshedExpiresIn = 42;
+        final String rawRefreshToken = "iAmARefresher";
+        final String rawAccessToken = "mayIAccessThisRessource";
+        final int expiresIn = 1;
+        final JsonObject principal = new JsonObject()
             .put("access_token", rawAccessToken)
             .put("expires_in", expiresIn)
             .put("refresh_token", rawRefreshToken);
 
-        OAuth2Auth initialAuthProvider = new MockOAuth2Auth(principal, refreshedExpiresIn);
-        User initialUser = MockOAuth2Auth.createUser(principal);
-        AuthenticationUserContext initialAuthContext = AuthenticationUserContext.of(initialAuthProvider, initialUser);
+        final OAuth2Auth initialAuthProvider = new MockOAuth2Auth(principal, refreshedExpiresIn);
+        final User initialUser = MockOAuth2Auth.createUser(principal);
+        final AuthenticationUserContext initialAuthContext = AuthenticationUserContext.of(initialAuthProvider, initialUser);
 
         // wait for access token to expire
         try {
-            CountDownLatch waiter = new CountDownLatch(1);
+            final CountDownLatch waiter = new CountDownLatch(1);
             waiter.await(AuthorizationBearerMiddleware.EXPIRATION_LEEWAY_SECONDS + expiresIn + 1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         // mock OAuth2 authentication
-        Handler<RoutingContext> injectTokenHandler = ctx -> {
+        final Handler<RoutingContext> injectTokenHandler = ctx -> {
             initialAuthContext.toSessionAtScope(ctx.session(), sessionScope);
             ctx.next();
         };
@@ -196,9 +196,9 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
             .withAuthorizationBearerMiddleware(sessionScope)
             .build(ctx -> {
                 // then
-                Optional<AuthenticationUserContext> refreshedAuthContext = AuthenticationUserContext.fromSessionAtScope(ctx.session(), sessionScope);
+                final Optional<AuthenticationUserContext> refreshedAuthContext = AuthenticationUserContext.fromSessionAtScope(ctx.session(), sessionScope);
                 assertTrue(testCtx, refreshedAuthContext.isPresent(), "user should exist");
-                User refreshedUser = refreshedAuthContext.get().getUser();
+                final User refreshedUser = refreshedAuthContext.get().getUser();
                 assertEquals(testCtx, refreshedUser.principal().getInteger("expires_in", -1), refreshedExpiresIn, "should have been updated");
                 assertTrue(testCtx, refreshedUser.attributes().getInteger("exp", -1) > initialUser.attributes().getInteger("exp", -1), "'exp' should be updated");
 
@@ -217,13 +217,13 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
 
     @Test
     void setNoToken(Vertx vertx, VertxTestContext testCtx) {
-        String token = "mayIAccessThisRessource";
-        String sessionScope = "someScope";
-        String someOtherSessionScope = "anotherScope";
+        final String token = "mayIAccessThisRessource";
+        final String sessionScope = "someScope";
+        final String someOtherSessionScope = "anotherScope";
         assertNotEquals(testCtx, sessionScope, someOtherSessionScope);
 
         // mock OAuth2 authentication
-        Handler<RoutingContext> injectTokenHandler = ctx -> {
+        final Handler<RoutingContext> injectTokenHandler = ctx -> {
             ctx.session().put(someOtherSessionScope, token);
             ctx.next();
         };

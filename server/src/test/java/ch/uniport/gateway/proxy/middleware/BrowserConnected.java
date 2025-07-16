@@ -24,13 +24,13 @@ public class BrowserConnected {
     }
 
     public CompletionStage<HttpClientResponse> request(HttpMethod method, String uri, MultiMap headers) {
-        Promise<HttpClientResponse> result = Promise.promise();
+        final Promise<HttpClientResponse> result = Promise.promise();
         portalGateway.incomingRequest(method, uri, new RequestOptions().setHeaders(headers), result::complete);
         return result.future().toCompletionStage();
     }
 
     public CompletionStage<HttpClientResponse> request(HttpMethod method, String uri, MultiMap headers, String body) {
-        Promise<HttpClientResponse> result = Promise.promise();
+        final Promise<HttpClientResponse> result = Promise.promise();
         portalGateway.incomingRequest(method, uri, new RequestOptions().setHeaders(headers), body, result::complete);
         return result.future().toCompletionStage();
     }

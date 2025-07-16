@@ -34,16 +34,16 @@ public class CompletionStageTest {
     }
 
     private CompletionStage<String> asyncToUpperCase(String input, Vertx vertx) {
-        Promise<String> result = Promise.promise();
-        int i = new Random().nextInt(10 - 1 + 1);
+        final Promise<String> result = Promise.promise();
+        final int i = new Random().nextInt(10 - 1 + 1);
         LOGGER.info("waiting for = '{}' seconds", i);
         vertx.setTimer(i * 1000, timeout -> result.complete(input.toUpperCase()));
         return result.future().toCompletionStage();
     }
 
     private CompletionStage<String> asyncToLowerCase(String input, Vertx vertx) {
-        Promise<String> result = Promise.promise();
-        int i = new Random().nextInt(10 - 1 + 1);
+        final Promise<String> result = Promise.promise();
+        final int i = new Random().nextInt(10 - 1 + 1);
         LOGGER.info("waiting for = '{}' seconds", i);
         vertx.setTimer(i * 1000, timeout -> result.complete(input.toLowerCase()));
         return result.future().toCompletionStage();

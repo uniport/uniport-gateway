@@ -53,9 +53,9 @@ public class MockProvider extends Provider {
             return;
         }
 
-        AtomicInteger count = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
         this.timerId = this.vertx.setPeriodic(this.waitMs, tId -> {
-            JsonObject message = this.messages.get(count.get());
+            final JsonObject message = this.messages.get(count.get());
             this.eb.publish(this.configurationAddress, message);
 
             if (count.incrementAndGet() == this.messages.size()) {

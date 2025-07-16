@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class DetectionCookieValueTest {
 
     @Test
-    public void test_isWithInLimit_default() {
+    public void isWithInLimitDefault() {
         // given
         final int lifetime = 1 * 60 * 1000; // 1m
         final long now = System.currentTimeMillis();
@@ -21,7 +21,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_isWithInLimit_new() {
+    public void isWithInLimitNew() {
         // given
         final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
         final DetectionCookieValue cookieValue = new DetectionCookieValue(0 + SPLITTER + validTimestamp);
@@ -33,7 +33,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_isWithInLimit_max() {
+    public void isWithInLimitMax() {
         // given
         final int maxRetries = 5;
         final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
@@ -45,7 +45,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_isWithInLimit_false_counter() {
+    public void isWithInLimitFalseCounter() {
         // given
         final int maxRetries = 5;
         final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
@@ -57,7 +57,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_isWithInLimit_false_access() {
+    public void isWithInLimitFalseAccess() {
         // given
         final int maxRetries = 5;
         final long expiredTimestamp = 1000;
@@ -69,7 +69,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_toString() {
+    public void testToString() {
         // given
         final long timestamp = System.currentTimeMillis();
         final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + timestamp);
@@ -80,7 +80,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_contstructor_default() {
+    public void testConstructorDefault() {
         // given
         final int lifetime = 1 * 60 * 1000; // 1m
         final long now = System.currentTimeMillis();
@@ -92,7 +92,7 @@ public class DetectionCookieValueTest {
     }
 
     @Test
-    public void test_contstructor_with_one() {
+    public void testConstructorWithOne() {
         // given
         final long validTimestamp = System.currentTimeMillis() + 1 * 60 * 1000; // now+1m
         final DetectionCookieValue cookieValue = new DetectionCookieValue(1 + SPLITTER + validTimestamp);
