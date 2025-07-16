@@ -161,7 +161,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
 
     /**
      *
-     * the protocol, hostname or port can be different from what the portal-gateway knows, therefore
+     * the protocol, hostname or port can be different from what the uniport-gateway knows, therefore
      * in RouterFactory.createMiddleware the publicUrl configuration is added to this middleware
      * configuration
      */
@@ -279,7 +279,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     /**
-     * By patching the issuer and the authorization path, ensure that Keycloak is only visible from the outside as running behind the portal-gateway.
+     * By patching the issuer and the authorization path, ensure that Keycloak is only visible from the outside as running behind the uniport-gateway.
      */
     private void patchPublicKeycloakURIs(OAuth2Auth authProvider, String publicUrl) throws URISyntaxException {
         final OAuth2Options keycloakOAuth2Options = ((OAuth2AuthProviderImpl) authProvider).getConfig();

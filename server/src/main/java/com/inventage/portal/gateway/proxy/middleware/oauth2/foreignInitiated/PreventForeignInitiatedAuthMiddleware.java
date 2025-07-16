@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Prevents authentication requests not initiated by the Portal-Gateway by redirecting to a fallback URI.
+ * Prevents authentication requests not initiated by the Uniport-Gateway by redirecting to a fallback URI.
  * A common case is that the authentication URL
  * (= http://localhost:20000/auth/realms/portal/protocol/openid-connect/auth?state=xyz&redirect_uri=...)
  * was bookmarked by the user.

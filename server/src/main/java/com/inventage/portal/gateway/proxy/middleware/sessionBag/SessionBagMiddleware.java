@@ -132,7 +132,7 @@ public class SessionBagMiddleware extends TraceMiddleware implements PlatformHan
         // cookies `AUTH_SESSION` and `AUTH_SESSION_LEGACY` is required. Keycloak seems
         // to set the secure
         // flag on both cookies if the request is forwarded via HTTPS, even if the
-        // Portal-Gateway --> Keycloak
+        // Uniport-Gateway --> Keycloak
         // connection is HTTP.
         return true;
     }

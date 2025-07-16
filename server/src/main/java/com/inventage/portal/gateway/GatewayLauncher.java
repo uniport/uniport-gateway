@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Custom Vert.x Launcher for the portal gateway.
+ * Custom Vert.x Launcher for the uniport-gateway.
  */
 public class GatewayLauncher extends Launcher {
 
@@ -70,7 +70,7 @@ public class GatewayLauncher extends Launcher {
         });
 
         logger = LoggerFactory.getILoggerFactory().getLogger(GatewayLauncher.class.getName());
-        logger.info("Portal Gateway is starting....");
+        logger.info("Gateway is starting....");
 
         if (loggingConfigPath.isPresent()) {
             logger.info("Using logback configuration file from '{}'", loggingConfigPath.get());

@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Entry point for the portal gateway.
+ * Entry point for the uniport-gateway.
  */
 public class Entrypoint {
 

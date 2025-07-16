@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Json file for the portal gateway configuration is taken from one of these places:
+ * The Json file for the uniport-gateway configuration is taken from one of these places:
  * 1. File pointed to by the system env variable 'UNIPORT_GATEWAY_JSON'
  * 2. File pointed to by the system property 'UNIPORT_GATEWAY_JSON'
  * 3. File 'uniport-gateway.json' in '/etc/uniport-gateway/default/'

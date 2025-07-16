@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * These situations are detected by checking the session state and the value of an additional cookie. If such
  * a situation is detected, the request is sent back as a redirect (=retry) to the same URL but without returning a
  * new session id.
- * See also Portal-Gateway.drawio for a visual explanation.
+ * See also documentation for a visual explanation.
  */
 public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
 
@@ -102,7 +102,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
      * @return true, if an <strong>authenticated</strong> user's request is sent with the replaced session (but now invalid, due do session.regenerateId(),
      *         which has generated a new id for this session) <strong>session id</strong>. This special case is detected by checking (1) if the request contains
      *         our detection cookie (+ satisfies some conditions) ({@link #isDetectionCookieValueWithInLimit(RoutingContext)} and (2) if the user is not
-     *         authenticated from the portal gateway's point of view (because the <strong>session id</strong> has changed)
+     *         authenticated from the uniport-gateway's point of view (because the <strong>session id</strong> has changed)
      *         ({@link #noUserInSession(RoutingContext)}).
      *         <p>
      *         Detection-cookies are only handed to <strong>authenticated</strong> users on each new request (with
@@ -154,7 +154,7 @@ public class ReplacedSessionCookieDetectionMiddleware extends TraceMiddleware {
 
     /**
      * Sends a redirect (retry) response after a configurable delay. We expect/hope that the browser has received the new session id in the meantime.
-     * (Refer to Portal-Gateway.drawio for a visual explanation).
+     * (Refer to the documentation for a visual explanation).
      * We also use the detection cookie to track how many requests were made with the previously valid <strong>session id</strong>.
      */
     private void retryWithNewSessionIdFromBrowser(RoutingContext ctx) {

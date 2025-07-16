@@ -174,7 +174,7 @@ public class DockerContainerProviderTest {
         "docker.hostPerNetwork" : {
           "defaultNetworkMode" : "portal-database",
           "portal-database" : "192.168.240.10",
-          "portal-gateway" : "192.168.224.10",
+          "uniport-gateway" : "192.168.224.10",
           "portal-iam" : "172.18.0.2"
         }
       },

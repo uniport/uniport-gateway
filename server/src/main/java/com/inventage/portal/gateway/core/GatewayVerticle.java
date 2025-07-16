@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The main verticle of the portal gateway. It reads the configuration for the
+ * The main verticle of the uniport-gateway. It reads the configuration for the
  * entrypoints and creates an HTTP listener for each of them.
  */
 public class GatewayVerticle extends AbstractVerticle {
@@ -49,7 +49,7 @@ public class GatewayVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        LOGGER.info("Portal-Gateway verticle is starting...");
+        LOGGER.info("Verticle is starting...");
 
         GatewayConfigRetriever.create(vertx).getConfig()
             .onSuccess(rawConfigWithEnv -> handleRawConfig(rawConfigWithEnv.copy(), startPromise))
