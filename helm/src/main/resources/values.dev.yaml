@@ -5,17 +5,17 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/server-snippet: |
       location /.well-known/apple-app-site-association { 
-        allow all; proxy_pass http://portal-gateway.ips:20000;
+        allow all; proxy_pass http://uniport-gateway.ips:20000;
       }
 
       location /.well-known/assetlinks.json { 
-          allow all; proxy_pass http://portal-gateway.ips:20000;
+          allow all; proxy_pass http://uniport-gateway.ips:20000;
       }
   tls:
     enabled: true
 
 services:
-  portal-gateway:
+  uniport-gateway:
     ports:
       http-debug:
         port: 20009
@@ -24,7 +24,7 @@ serviceMonitor:
   enabled: true
 
 containers:
-  portal-gateway:
+  uniport-gateway:
     env:
       # HTTP protocol for external access
       UNIPORT_GATEWAY_PUBLIC_PROTOCOL:

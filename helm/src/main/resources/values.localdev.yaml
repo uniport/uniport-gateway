@@ -9,7 +9,7 @@ ingress:
   tls:
     enabled: false
 containers:
-  portal-gateway:
+  uniport-gateway:
     storages:
       proxy-config:
         type: configMap

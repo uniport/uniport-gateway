@@ -2,7 +2,7 @@ ingress:
   host: portal.minikube
 
 containers:
-  portal-gateway:
+  uniport-gateway:
     storages:
       proxy-config:
         type: configMap

@@ -9,8 +9,8 @@ We assume 2 Portal-Gateway instances below.
 1. The two instances are made accessible via port-forward to the local ports `:8000` and `:8001`.
 
     ```bash
-    kubectl port-forward portal-gateway-0 8000:20000
-    kubectl port-forward portal-gateway-1 8001:20000
+    kubectl port-forward uniport-gateway-0 8000:20000
+    kubectl port-forward uniport-gateway-1 8001:20000
     ```
 
 2. The current value of the session cookie `uniport.session` must be copied from the browser.

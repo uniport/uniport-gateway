@@ -17,12 +17,12 @@ ingress:
   defaultRule: enabled
 
 services:
-  portal-gateway-headless:
+  uniport-gateway-headless:
     headless: true
     ports:
       hazelcast:
         port: 5701
-  portal-gateway:
+  uniport-gateway:
     type: ClusterIP
     ports:
       http:
@@ -32,7 +32,7 @@ services:
 
 pod:
   type: StatefulSet
-  serviceName: portal-gateway-headless
+  serviceName: uniport-gateway-headless
   replicas: 2
   securityContext:
     enabled: true
@@ -54,7 +54,7 @@ initContainers:
       - "while ! wget --quiet --server-response --spider http://portal-iam:8080/auth/realms/portal; do sleep 1; done"
 
 containers:
-  portal-gateway:
+  uniport-gateway:
     image:
       baseName: ${project.groupId}
       name: portal-gateway
