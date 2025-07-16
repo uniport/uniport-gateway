@@ -37,7 +37,7 @@
                         }
                     ],
                     "audience": [
-                        "Portal-Gateway"
+                        "Uniport-Gateway"
                     ],
                     "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
                     "publicKeysReconciliation": {
