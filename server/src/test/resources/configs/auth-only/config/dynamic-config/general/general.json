@@ -40,7 +40,7 @@
                         "Portal-Gateway"
                     ],
                     "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-                    "publicKeysReconcilation": {
+                    "publicKeysReconciliation": {
                         "enabled": true,
                         "intervalMs": 3600000
                     }
@@ -86,7 +86,7 @@
                             ]
                         }
                     ],
-                    "publicKeysReconcilation": {
+                    "publicKeysReconciliation": {
                         "enabled": true,
                         "intervalMs": 3600000
                     }

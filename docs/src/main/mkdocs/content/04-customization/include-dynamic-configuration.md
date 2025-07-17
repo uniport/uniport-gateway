@@ -79,7 +79,7 @@ The middleware answers invalid back-channel logout requests with a `400 Bad Requ
                 "Portal-Gateway"
             ],
             "issuer": "${PORTAL_GATEWAY_BEARER_TOKEN_ISSUER}",
-            "publicKeysReconcilation": {
+            "publicKeysReconciliation": {
                 "enabled": true,
                 "intervalMs": 3600000
             }
@@ -135,7 +135,7 @@ Additionally:
                     }
                 }
             ],
-            "publicKeysReconcilation": {
+            "publicKeysReconciliation": {
                 "enabled": "true",
                 "intervalMs": "600000"
             }

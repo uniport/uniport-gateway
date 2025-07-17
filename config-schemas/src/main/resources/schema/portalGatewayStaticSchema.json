@@ -44,6 +44,21 @@
                     "additionalProperties" : false,
                     "type" : "object",
                     "properties" : {
+                      "publicKeysReconciliation" : {
+                        "additionalProperties" : false,
+                        "type" : "object",
+                        "properties" : {
+                          "intervalMs" : {
+                            "default" : 60000,
+                            "type" : "integer",
+                            "minimum" : 0.0
+                          },
+                          "enabled" : {
+                            "default" : true,
+                            "type" : "boolean"
+                          }
+                        }
+                      },
                       "audience" : {
                         "type" : "array",
                         "items" : {
@@ -69,21 +84,6 @@
                             }
                           },
                           "required" : [ "publicKey" ]
-                        }
-                      },
-                      "publicKeysReconcilation" : {
-                        "additionalProperties" : false,
-                        "type" : "object",
-                        "properties" : {
-                          "intervalMs" : {
-                            "default" : 60000,
-                            "type" : "integer",
-                            "minimum" : 0.0
-                          },
-                          "enabled" : {
-                            "default" : true,
-                            "type" : "boolean"
-                          }
                         }
                       },
                       "additionalIssuers" : {
@@ -143,6 +143,21 @@
                     "additionalProperties" : false,
                     "type" : "object",
                     "properties" : {
+                      "publicKeysReconciliation" : {
+                        "additionalProperties" : false,
+                        "type" : "object",
+                        "properties" : {
+                          "intervalMs" : {
+                            "default" : 60000,
+                            "type" : "integer",
+                            "minimum" : 0.0
+                          },
+                          "enabled" : {
+                            "default" : true,
+                            "type" : "boolean"
+                          }
+                        }
+                      },
                       "audience" : {
                         "type" : "array",
                         "items" : {
@@ -168,21 +183,6 @@
                             }
                           },
                           "required" : [ "publicKey" ]
-                        }
-                      },
-                      "publicKeysReconcilation" : {
-                        "additionalProperties" : false,
-                        "type" : "object",
-                        "properties" : {
-                          "intervalMs" : {
-                            "default" : 60000,
-                            "type" : "integer",
-                            "minimum" : 0.0
-                          },
-                          "enabled" : {
-                            "default" : true,
-                            "type" : "boolean"
-                          }
                         }
                       },
                       "additionalIssuers" : {
@@ -1116,6 +1116,21 @@
                     "additionalProperties" : false,
                     "type" : "object",
                     "properties" : {
+                      "publicKeysReconciliation" : {
+                        "additionalProperties" : false,
+                        "type" : "object",
+                        "properties" : {
+                          "intervalMs" : {
+                            "default" : 60000,
+                            "type" : "integer",
+                            "minimum" : 0.0
+                          },
+                          "enabled" : {
+                            "default" : true,
+                            "type" : "boolean"
+                          }
+                        }
+                      },
                       "audience" : {
                         "type" : "array",
                         "items" : {
@@ -1141,21 +1156,6 @@
                             }
                           },
                           "required" : [ "publicKey" ]
-                        }
-                      },
-                      "publicKeysReconcilation" : {
-                        "additionalProperties" : false,
-                        "type" : "object",
-                        "properties" : {
-                          "intervalMs" : {
-                            "default" : 60000,
-                            "type" : "integer",
-                            "minimum" : 0.0
-                          },
-                          "enabled" : {
-                            "default" : true,
-                            "type" : "boolean"
-                          }
                         }
                       },
                       "additionalIssuers" : {

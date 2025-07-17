@@ -48,7 +48,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
     public static final String PUBLIC_KEYS = "publicKeys";
     public static final String PUBLIC_KEY = "publicKey";
     public static final String PUBLIC_KEY_ALGORITHM = "publicKeyAlgorithm";
-    public static final String PUBLIC_KEYS_RECONCILIATION = "publicKeysReconcilation";
+    public static final String PUBLIC_KEYS_RECONCILIATION = "publicKeysReconciliation";
     public static final String RECONCILIATION_ENABLED = "enabled";
     public static final String RECONCILIATION_INTERVAL_MS = "intervalMs";
 

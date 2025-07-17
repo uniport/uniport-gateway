@@ -3,10 +3,11 @@
 ## `9.*.*` -> `10.*.*`
 
 ### Chart publishing
+
 The chart is now available at `oci://uniportcr.artifacts.inventage.com/charts`. If you have previously downloaded the chart
 from the helm repository you will have to update the chart repository source, e.g. in the Chart.yaml:
 
-```
+```yaml
 # Previous versions
 dependencies:
   - name: portal-gateway
@@ -43,7 +44,12 @@ The configuration key `applications` in the static configuration was removed wit
 
 ### Bearer Only Middleware
 
-Please change the type of the `bearerOnly` middleware option `optional` from String to Boolean. Environment variables as Strings are still accepted.
+* Please change the type of the `bearerOnly` middleware option `optional` from String to Boolean. Environment variables as Strings are still accepted.
+* Rename the configuration key `publicKeysReconcilation` to `publicKeysReconciliation`.
+
+### Back-channel Logout Middleware
+
+* Rename the configuration key `publicKeysReconcilation` to `publicKeysReconciliation`.
 
 ### Language Cookie Middleware
 
