@@ -1,12 +1,9 @@
-package ch.uniport.gateway.proxy.middleware.controlApi;
+package ch.uniport.gateway.proxy.middleware.controlapi;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import ch.uniport.gateway.proxy.middleware.controlapi.ControlApiAction;
-import ch.uniport.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory;
-import ch.uniport.gateway.proxy.middleware.controlapi.ControlApiMiddlewareOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;

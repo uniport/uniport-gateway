@@ -1,4 +1,4 @@
-package ch.uniport.gateway.proxy.middleware.controlApi;
+package ch.uniport.gateway.proxy.middleware.controlapi;
 
 import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
@@ -12,8 +12,6 @@ import static io.vertx.core.http.HttpMethod.GET;
 import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
-import ch.uniport.gateway.proxy.middleware.controlapi.ControlApiAction;
-import ch.uniport.gateway.proxy.middleware.controlapi.ControlApiMiddlewareFactory;
 import ch.uniport.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.vertx.core.Handler;
