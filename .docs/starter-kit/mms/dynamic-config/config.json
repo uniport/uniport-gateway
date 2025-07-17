@@ -1,0 +1,114 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "auth",
+                "rule": "Host('sso.local.uniport.ch')",
+                "service": "authenticate"
+            },
+            {
+                "name": "root",
+                "middlewares": [
+                    "rootRedirectregex"
+                ],
+                "rule": "Path('/')",
+                "service": "admHAPR"
+            },
+            {
+                "name": "monitoring",
+                "rule": "PathPrefix('/monitoring')",
+                "priority": 70,
+                "middlewares": [
+                    "shdHAPR2Oauth",
+                    "shdHAPR2AuthBearer"
+                ],
+                "service": "shdHAPR"
+            },
+            {
+                "name": "graylog",
+                "rule": "PathPrefix('/graylog')",
+                "priority": 80,
+                "middlewares": [
+                    "shdHAPR2Oauth",
+                    "shdHAPR2AuthBearer"
+                ],
+                "service": "admHAPR"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootRedirectregex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/graylog"
+                }
+            },
+            {
+                "name": "shdHAPR2Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "publicUrl": "http://sso.local.uniport.ch:20000",
+                    "callbackOrigin": "https://portal.lvh.me:2000",
+                    "responseMode": "form_post",
+                    "sessionScope": "shared"
+                }
+            },
+            {
+                "name": "octopus2Oauth",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "testclient",
+                    "clientSecret": "**********",
+                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "publicUrl": "http://sso.local.uniport.ch:20000",
+                    "callbackOrigin": "https://portal.local.uniport.me:2000",
+                    "responseMode": "form_post",
+                    "sessionScope": "shared"
+                }
+            },
+            {
+                "name": "shdHAPR2AuthBearer",
+                "type": "authorizationBearer",
+                "options": {
+                    "sessionScope": "shared"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "authenticate",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "keycloak",
+                        "port": 8080
+                    }
+                ]
+            },
+            {
+                "name": "admHAPR",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami2",
+                        "port": 80
+                    }
+                ]
+            },
+            {
+                "name": "shdHAPR",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": 80
+                    }
+                ]
+            }
+        ]
+    }
+}

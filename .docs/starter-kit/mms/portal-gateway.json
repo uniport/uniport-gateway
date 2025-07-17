@@ -1,0 +1,58 @@
+{
+    "entrypoints": [
+        {
+            "name": "mmsgateway",
+            "port": 20000,
+            "middlewares": [
+                {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
+                    "name": "session",
+                    "type": "session",
+                    "options": {
+                        "idleTimeoutInMinute": 30,
+                        "cookie": {
+                            "secure": true,
+                            "sameSite": "LAX"
+                        }
+                    }
+                },
+                {
+                    "name": "ShowSessionContentMiddleware",
+                    "type": "_session_"
+                },
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json",
+                            "application/x-www-form-urlencoded"
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "applications": [
+        {
+            "name": "proxy",
+            "entrypoint": "mmsgateway",
+            "requestSelector": {
+                "urlPrefix": "/"
+            },
+            "provider": "ProxyApplication"
+        }
+    ],
+    "providers": [
+        {
+            "name": "file",
+            "filename": "./dynamic-config/config.json",
+            "watch": true
+        }
+    ]
+}

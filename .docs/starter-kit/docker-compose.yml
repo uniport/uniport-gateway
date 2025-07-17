@@ -1,16 +1,18 @@
 services:
   gateway:
-    image: docker-registry.inventage.com:10094/com.inventage.portal.gateway.portal-gateway:9.4.0-202503211149-1294-26d95127
+    image: uniportcr.artifacts.inventage.com/com.inventage.portal.gateway.portal-gateway:9.5.1-202507150815-191-270e262
     environment:
       - "PORTAL_GATEWAY_JSON=/config/portal-gateway.json"
       - "PORTAL_GATEWAY_LOG_LEVEL=INFO"
       - "OTEL_TRACES_EXPORTER=none"
       - "OTEL_METRICS_EXPORTER=none"
     volumes:
-      - ./step1:/config/
+      - ./mms:/config/
     ports:
       # API port
       - "20000:20000"
+      - "20001:20001"
+      - "20009:20009"
     networks:
       - portal-gateway
 
