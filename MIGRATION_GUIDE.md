@@ -55,7 +55,7 @@ The configuration key `applications` in the static configuration was removed wit
 
 The detection of the deprecated language cookie name `ips.language` was removed. Please use its replacement `uniport.language` or configure the language cookie middleware accordingly.
 
-## Session Middleware
+### Session Middleware
 
 * Rename the configuration key `clusteredSessionStoreRetryTimeoutInMiliseconds` to `clusteredSessionStoreRetryTimeoutInMilliseconds`.
 * Rename the configuration key `idleTimeoutInMinute` to `idleTimeoutInMinutes`.
