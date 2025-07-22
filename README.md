@@ -4,6 +4,14 @@
 
 The Portal-Gateway acts as an reverse proxy for all requests in Uniport.
 
+## Why yet another reverse proxy?
+
+* Relying party as a reverse proxy with routing
+* Handling parallel authentication requests
+* Session bag - only the session cookie leaves the platform
+* HA deployment on Kubernetes
+* Maximum flexibility with minimal components
+
 ## Overview
 
 The Portal-Gateway build on top of the concepts of `entrypoints`, `routers`, `middlewares`, `services` and `providers`:
