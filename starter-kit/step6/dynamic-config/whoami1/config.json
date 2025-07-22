@@ -1,0 +1,53 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "middlewares": [
+                    "rootRedirectRegex"
+                ],
+                "rule": "Path('/')",
+                "service": "whoami1"
+            },
+            {
+                "name": "whoami1",
+                "rule": "Path('/whoami1')",
+                "middlewares": [
+                    "whoami1headers"
+                ],
+                "service": "whoami1"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/$",
+                    "replacement": "/whoami1"
+                }
+            },
+            {
+                "name": "whoami1headers",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "X-Uniport-Backend": "whoami1"
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami1",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami1",
+                        "port": 80
+                    }
+                ]
+            }
+        ]
+    }
+}

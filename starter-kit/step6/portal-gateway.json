@@ -1,0 +1,33 @@
+{
+    "entrypoints": [
+        {
+            "name": "http20000",
+            "port": 20000,
+            "middlewares": [
+                {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json",
+                            "application/x-www-form-urlencoded"
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "providers": [
+        {
+            "name": "file",
+            "directory": "./dynamic-config",
+            "watch": true
+        }
+    ]
+}

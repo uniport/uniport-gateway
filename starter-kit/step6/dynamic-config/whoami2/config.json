@@ -1,0 +1,37 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "whoami2",
+                "rule": "Path('/whoami2')",
+                "middlewares": [
+                    "whoami2headers"
+                ],
+                "service": "whoami2"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "whoami2headers",
+                "type": "headers",
+                "options": {
+                    "customRequestHeaders": {
+                        "X-Uniport-Backend": "whoami2"
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "whoami2",
+                "verbose": true,
+                "servers": [
+                    {
+                        "host": "whoami2",
+                        "port": 80
+                    }
+                ]
+            }
+        ]
+    }
+}

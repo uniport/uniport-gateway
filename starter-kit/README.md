@@ -22,6 +22,10 @@
 
 * Multiple hosts with a shared Keycloak Session i.e. SSO session
 
+### Step 6
+
+* Organize your dynamic configurations
+
 ### Future Step Ideas
 
 * env vars in config
