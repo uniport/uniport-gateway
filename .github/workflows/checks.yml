@@ -4,6 +4,7 @@ on:
   push:
     branches-ignore:
       - master
+      - dependabot/**
 
 # Prevent running checks for the same branch in parallel
 # New workflows will cancel existing workflows…
