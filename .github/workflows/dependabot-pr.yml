@@ -1,0 +1,21 @@
+# This workflow does have access to secrets and has a read-write token
+# https://github.com/dependabot/dependabot-core/issues/3253#issuecomment-852541544
+name: Dependabot PR Check
+on:
+  pull_request_target:
+
+# Prevent running checks for the same branch in parallel
+# New workflows will cancel existing workflows…
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (preview)
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    uses: ./.github/workflows/build.yml
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+      NEXUS_NPM_TOKEN_READ_ONLY: ${{ secrets.NEXUS_NPM_TOKEN_READ_ONLY }}
+      MACDUFF_KEYCHAIN_PASSWORD: ${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}
