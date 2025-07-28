@@ -330,7 +330,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
         gateway.incomingRequest(GET, "/",
             new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)),
             (outgoingResponse1) -> {
-                assertEquals(200, outgoingResponse1.statusCode(), "unexpected status code");
+                VertxAssertions.assertEquals(testCtx, 200, outgoingResponse1.statusCode(), "unexpected status code");
 
                 keycloakServer.serveInvalidPublicKeys();
 
@@ -338,7 +338,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                 vertx.setTimer(reconciliationIntervalMs, (timerID) -> {
                     gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)), (outgoingResponse2) -> {
                         // then
-                        assertEquals(401, outgoingResponse2.statusCode(), "unexpected status code");
+                        VertxAssertions.assertEquals(testCtx, 401, outgoingResponse2.statusCode(), "unexpected status code");
 
                         testCtx.completeNow();
                         keycloakServer.closeServer();
