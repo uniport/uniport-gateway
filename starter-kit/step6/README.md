@@ -23,5 +23,5 @@ In this example, config in the `whoami1` and `whoami` folders are appended. If t
 │   │   └── config.json
 │   └── whoami2
 │       └── config.json
-├── portal-gateway.json
+├── uniport-gateway.json
 ```
