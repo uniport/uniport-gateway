@@ -1,10 +1,11 @@
 # This workflow does have access to secrets and has a read-write token
 # https://github.com/dependabot/dependabot-core/issues/3253#issuecomment-852541544
 name: Dependabot PR Check
+
 on:
   pull_request_target:
 
-# Prevent running checks for the same branch in parallel
+# Prevent running builds for the same branch in parallel
 # New workflows will cancel existing workflows…
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

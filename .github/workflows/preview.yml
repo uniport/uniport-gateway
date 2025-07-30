@@ -1,4 +1,4 @@
-name: Branch Checks
+name: Preview Build
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
       - dependabot/**
 
-# Prevent running checks for the same branch in parallel
+# Prevent running builds for the same branch in parallel
 # New workflows will cancel existing workflows…
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
