@@ -32,6 +32,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - **BREAKING** Changed the environment variable prefix from `PORTAL_GATEWAY_` to `UNIPORT_GATEWAY_` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 - **BREAKING** Changed the docker image name from `ch.uniport.gateway.portal-gateway` to `ch.uniport.gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 - **BREAKING** Changed to helm chart name from `portal-gateway` to `uniport-gateway` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
+- Changed to default branch name from `master` to `main` ([PORTAL-2143](https://inventage-all.atlassian.net/browse/PORTAL-2143)).
 
 ### Removed
 
@@ -652,7 +653,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 - Uniport-Gateway providing reverse proxy functionality within the Inventage Portal Solution ([PORTAL-89](https://inventage-all.atlassian.net/browse/PORTAL-89)).
 
-[unreleased]: https://github.com/uniport/portal-gateway/compare/9.5.0...master
+[unreleased]: https://github.com/uniport/portal-gateway/compare/9.5.0...main
 [9.5.0]: https://github.com/uniport/portal-gateway/compare/9.4.0...9.5.0
 [9.4.0]: https://github.com/uniport/portal-gateway/compare/9.3.0...9.4.0
 [9.3.0]: https://github.com/uniport/portal-gateway/compare/9.2.0...9.3.0

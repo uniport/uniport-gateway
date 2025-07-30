@@ -71,7 +71,7 @@ As already mentioned, formatting is checked with every commit. For this, another
         <artifactId>spotless-maven-plugin</artifactId>
         <version>2.35.0</version>
         <configuration>
-            <ratchetFrom>origin/master</ratchetFrom>
+            <ratchetFrom>origin/main</ratchetFrom>
             <formats>
                 <format>
                     <includes>

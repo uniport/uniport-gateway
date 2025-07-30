@@ -3,7 +3,7 @@ name: Preview Build
 on:
   push:
     branches-ignore:
-      - master
+      - main
       - dependabot/**
 
 # Prevent running builds for the same branch in parallel

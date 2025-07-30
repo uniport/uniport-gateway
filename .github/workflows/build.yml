@@ -52,7 +52,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/master branch in the configuration
+          # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/main branch in the configuration
           fetch-depth: 0
 
       - name: Setup Maven Variables

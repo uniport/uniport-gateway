@@ -4,7 +4,7 @@ run-name: "Main build workflow #${{ github.run_number }} triggered by ${{ github
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
     inputs:
       deploy_to_dev:

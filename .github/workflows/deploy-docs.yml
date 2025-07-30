@@ -95,7 +95,7 @@ jobs:
           alias: ${{ inputs.alias }}
           publish-dir: "./build"
           deploy-message: "Deploy from GitHub Actions"
-          production-branch: master
+          production-branch: main
           fails-without-credentials: true
           # github
           github-token: ${{ secrets.GITHUB_TOKEN }}
