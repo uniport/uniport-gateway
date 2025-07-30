@@ -54,7 +54,7 @@ jobs:
     uses: uniport/workflows/.github/workflows/update-archetype.yml@main
     with:
       version: ${{ needs.build.outputs.VERSION }}
-      component_name: portal-gateway
+      component_name: uniport-gateway
     secrets:
       UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
 
