@@ -623,8 +623,8 @@
                             <exclude>**/frontend/**/*</exclude>
                             <exclude>**/config-schemas/**/dynamic.json</exclude>
                             <exclude>**/config-schemas/**/static.json</exclude>
-                            <exclude>**/config-schemas/**/portalGatewayDynamicSchema.json</exclude>
-                            <exclude>**/config-schemas/**/portalGatewayStaticSchema.json</exclude>
+                            <exclude>**/config-schemas/**/uniportGatewayDynamicSchema.json</exclude>
+                            <exclude>**/config-schemas/**/uniportGatewayStaticSchema.json</exclude>
                             <exclude>**/helm-maven-plugin/**/*</exclude>
                             <exclude>**/.docker/**/*</exclude>
                         </excludes>

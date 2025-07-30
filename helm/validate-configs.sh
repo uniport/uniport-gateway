@@ -16,7 +16,7 @@ function validateWithDynamicSchema() {
         -e NPM_CONFIG_YES=true \
         -v "${PWD}":/tmp \
         $NODE_IMAGE \
-        npx ajv-cli validate --allow-union-types -s /tmp/target/schema/portalGatewayDynamicSchema.json -d "/tmp/target/uniport-gateway/proxy-config.*/dynamic-config/**/*.json"
+        npx ajv-cli validate --allow-union-types -s /tmp/target/schema/uniportGatewayDynamicSchema.json -d "/tmp/target/uniport-gateway/proxy-config.*/dynamic-config/**/*.json"
 }
 
 function validateWithStaticSchema() {
@@ -25,7 +25,7 @@ function validateWithStaticSchema() {
         -e NPM_CONFIG_YES=true \
         -v "${PWD}":/tmp \
         $NODE_IMAGE \
-        npx ajv-cli validate --allow-union-types -s /tmp/target/schema/portalGatewayStaticSchema.json -d "/tmp/target/uniport-gateway/proxy-config.*/*.json"
+        npx ajv-cli validate --allow-union-types -s /tmp/target/schema/uniportGatewayStaticSchema.json -d "/tmp/target/uniport-gateway/proxy-config.*/*.json"
 }
 
 validateWithDynamicSchema

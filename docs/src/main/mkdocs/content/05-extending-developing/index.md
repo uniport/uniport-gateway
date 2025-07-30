@@ -8,7 +8,7 @@ Starting with uniport-gateway version `8.0.0`, we provide JSON schemas that can 
 
 ### Usage
 
-There are two JSON schemas, `portalGatewayStaticSchema.json` for the static and `portalGatewayDynamicSchema.json` for the dynamic configuration file. Both files are included in the following artifact:
+There are two JSON schemas, `uniportGatewayStaticSchema.json` for the static and `uniportGatewayDynamicSchema.json` for the dynamic configuration file. Both files are included in the following artifact:
 
 ```xml
 <dependency>

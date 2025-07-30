@@ -12,6 +12,9 @@ import java.nio.file.Paths;
 
 public final class JsonSchemaGenerator {
 
+    private static final String STATIC_CONFIG_JSON_SCHEMA_FILE_NAME = "uniportGatewayStaticSchema.json";
+    private static final String DYNAMIC_CONFIG_JSON_SCHEMA_FILE_NAME = "uniportGatewayDynamicSchema.json";
+
     private JsonSchemaGenerator() {
     }
 
@@ -28,14 +31,14 @@ public final class JsonSchemaGenerator {
         final ObjectSchemaBuilder schema = StaticConfiguration.buildSchema();
         final JsonObject schemaAsJson = schema.toJson();
         removeId(schemaAsJson);
-        Files.write(Paths.get(path + "portalGatewayStaticSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(path + STATIC_CONFIG_JSON_SCHEMA_FILE_NAME), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
     }
 
     private static void createDynamicJsonSchemaValidator(String path) throws IOException {
         final ObjectSchemaBuilder schema = DynamicConfiguration.buildSchema();
         final JsonObject schemaAsJson = schema.toJson();
         removeId(schemaAsJson);
-        Files.write(Paths.get(path + "portalGatewayDynamicSchema.json"), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(path + DYNAMIC_CONFIG_JSON_SCHEMA_FILE_NAME), schemaAsJson.encodePrettily().getBytes(StandardCharsets.UTF_8));
     }
 
     private static void removeId(JsonObject jsonObject) {
