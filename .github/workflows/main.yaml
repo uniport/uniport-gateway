@@ -66,7 +66,6 @@ jobs:
       version: ${{ needs.build.outputs.VERSION }}
       group_id: ${{ needs.build.outputs.GROUP_ID }}
       tag_docker: true
-      tag_helm: false
       tag_maven: true
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
