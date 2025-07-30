@@ -61,11 +61,6 @@
         <dependencies>
             <!-- Project dependencies -->
             <dependency>
-                <groupId>ch.uniport.gateway</groupId>
-                <artifactId>config-schemas</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.inventage.portal</groupId>
                 <artifactId>code-style-settings</artifactId>
                 <version>${portal-code-style-settings.version}</version>

@@ -15,6 +15,14 @@
         <chart.directory>${project.build.directory}/uniport-gateway</chart.directory>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>ch.uniport.gateway</groupId>
+            <artifactId>config-schemas</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -48,7 +56,7 @@
                         <goals>
                             <goal>unpack</goal>
                         </goals>
-                        <phase>verify</phase>
+                        <phase>generate-resources</phase>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
