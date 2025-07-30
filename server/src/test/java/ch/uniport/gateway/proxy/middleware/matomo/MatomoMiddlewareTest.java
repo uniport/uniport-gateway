@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 
 import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
@@ -87,7 +87,7 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
     void headersParsedCorrectlyForAutoLoginPlugin(Vertx vertx, VertxTestContext testCtx) {
         //given
         final int port = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withMatomoMiddleware(DEFAULT_JWT_PATH_ROLES, DEFAULT_JWT_PATH_GROUP, DEFAULT_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_EMAIL)
             .withProxyMiddleware(port)
             .build().start();
@@ -130,10 +130,10 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    void discardAutoLoginHeaderNotSetByPortalGateway(Vertx vertx, VertxTestContext testCtx) {
+    void discardAutoLoginHeaderNotSetByGateway(Vertx vertx, VertxTestContext testCtx) {
         //given
         final int port = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withMatomoMiddleware(DEFAULT_JWT_PATH_ROLES, DEFAULT_JWT_PATH_GROUP, DEFAULT_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_EMAIL)
             .withProxyMiddleware(port)
             .build().start();
@@ -171,7 +171,7 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
     void noAuthorizationHeader(Vertx vertx, VertxTestContext testCtx) {
         //given
         final int port = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withMatomoMiddleware(DEFAULT_JWT_PATH_ROLES, DEFAULT_JWT_PATH_GROUP, DEFAULT_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_EMAIL)
             .withProxyMiddleware(port)
             .build().start();

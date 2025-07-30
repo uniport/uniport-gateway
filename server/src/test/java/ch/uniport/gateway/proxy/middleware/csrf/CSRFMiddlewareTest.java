@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -87,7 +87,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String secret = UUID.randomUUID().toString();
         final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, AbstractCSRFMiddlewareOptions.DEFAULT_COOKIE_NAME,
                 AbstractCSRFMiddlewareOptions.DEFAULT_HEADER_NAME)
@@ -113,7 +113,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String cookieName = "Uniport-csrf-token";
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, cookieName, headerName)
             .build().start();
@@ -138,7 +138,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, cookieName, headerName)
             .build().start();
@@ -174,7 +174,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String csrfCookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String csrfResponseName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, csrfCookieName, csrfResponseName)
             .build().start();
@@ -210,7 +210,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String headerName = "X-XSRF-TOKEN";
         final String headerNameInLowercase = headerName.toLowerCase();
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, cookieName, headerName)
             .build().start();
@@ -246,7 +246,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String headerName = "X-XSRF-TOKEN";
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, cookieName, headerName)
@@ -287,7 +287,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String csrfCookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String csrfResponseName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, csrfCookieName, csrfResponseName)
             .build().start();
@@ -323,7 +323,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, cookieName, headerName)
             .build().start();
@@ -355,7 +355,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String cookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String headerName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, cookieName, headerName)
             .build().start();
@@ -389,7 +389,7 @@ class CSRFMiddlewareTest extends MiddlewareTestBase {
         final String csrfCookieName = CSRFHandler.DEFAULT_COOKIE_NAME;
         final String csrfResponseName = CSRFHandler.DEFAULT_HEADER_NAME;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBodyHandlerMiddleware()
             .withCsrfMiddleware(secret, csrfCookieName, csrfResponseName)
             .build().start();

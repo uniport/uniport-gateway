@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.qos.logback.classic.Level;
@@ -76,7 +76,7 @@ class CSPViolationReportingServerMiddlewareTest extends MiddlewareTestBase {
     @ValueSource(strings = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR" })
     void shouldAcceptAndLogConformantCspViolationReports(String logLevel, Vertx vertx, VertxTestContext testCtx) {
         //given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspViolationReportingServerMiddleware(logLevel)
             .build().start();
 
@@ -115,7 +115,7 @@ class CSPViolationReportingServerMiddlewareTest extends MiddlewareTestBase {
     @Test
     void shouldIgnoreNonConformantCspViolationReports(Vertx vertx, VertxTestContext testCtx) {
         //given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspViolationReportingServerMiddleware()
             .build().start();
 

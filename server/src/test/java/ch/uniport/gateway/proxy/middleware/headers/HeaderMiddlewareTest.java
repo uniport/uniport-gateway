@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertFalse;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertTrue;
 
@@ -61,14 +61,14 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void shouldHaveCustomHeadersinRedirect(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final MiddlewareServer portalGateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withHeaderMiddleware(
                 MultiMap.caseInsensitiveMultiMap(),
                 MultiMap.caseInsensitiveMultiMap().add("foo", "bar"))
             .withCustomResponseMiddleware(null, 302, MultiMap.caseInsensitiveMultiMap().add("Location", "/baz"))
             .build().start();
         // when
-        portalGateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
             // then
             assertThat(testCtx, resp)
                 .hasStatusCode(302)
@@ -119,7 +119,7 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
             assertHeaders(testCtx, expectedReqHeaders, ctx.request().headers(), errMsgFormat, name);
             ctx.response().setStatusCode(200).end("ok");
         };
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withHeaderMiddleware(reqHeaderModifiers, new HeadersMultiMap())
             .build(checkHeaders)
             .start();
@@ -145,7 +145,7 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
             ctx.response().headers().addAll(respHeaders);
             ctx.response().setStatusCode(200).end("ok");
         };
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withHeaderMiddleware(new HeadersMultiMap(), respHeaderModifiers)
             .build(setMockHeaders)
             .start();

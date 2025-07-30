@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.controlapi.ControlApiMiddleware.CONTROL_COOKIE_NAME;
 import static ch.uniport.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
 import static io.vertx.core.http.HttpMethod.GET;
@@ -108,7 +108,7 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
             .setDefaultPort(sessionTerminationPort)
             .setDefaultHost(HOST));
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContextHolder)
             .withSessionMiddleware()
             .withSessionBagMiddleware(List.of())
@@ -168,7 +168,7 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
             })
             .listen(sessionResetPort, testCtx.succeeding(v -> sessionResetServerStarted.flag()));
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContextHolder)
             .withSessionMiddleware()
             .withMockOAuth2Middleware()

@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.SSO_SID_TO_INTERNAL_SID_MAP_SESSION_DATA_KEY;
 import static ch.uniport.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
 import static io.vertx.core.http.HttpHeaders.APPLICATION_X_WWW_FORM_URLENCODED;
@@ -106,7 +106,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
         // given
         final String signedValidLogoutToken = TestBearerOnlyJWTProvider.signToken(validLogoutTokenPayloadTemplate);
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build()
@@ -196,7 +196,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void withoutLogoutToken(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -213,7 +213,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void logoutTokenWithoutSubClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -235,7 +235,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void logoutTokenWithoutSidClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -257,7 +257,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void logoutTokenWithoutEventsClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -279,7 +279,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void logoutTokenWithIncorrectEventsClaimValue(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -302,7 +302,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void logoutTokenWithIncorrectEventsClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -327,7 +327,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void logoutTokenWithNonceClaim(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -349,7 +349,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void invalidRequestMethod(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();
@@ -366,7 +366,7 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void invalidRequestContentType(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withBackChannelLogoutMiddleware("/backchannellogout", jwtAuthOptions())
             .build().start();

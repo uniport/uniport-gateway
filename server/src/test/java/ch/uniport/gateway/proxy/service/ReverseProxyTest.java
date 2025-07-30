@@ -1,6 +1,6 @@
 package ch.uniport.gateway.proxy.service;
 
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,7 +61,7 @@ public class ReverseProxyTest {
             ctx.response().end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware("local.uniport.ch", backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build().start();
@@ -92,7 +92,7 @@ public class ReverseProxyTest {
             ctx.response().end();
         };
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build().start(proxyPort);
@@ -136,7 +136,7 @@ public class ReverseProxyTest {
             ctx.response().end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build().start(proxyPort);
@@ -161,7 +161,7 @@ public class ReverseProxyTest {
         final ListAppender<ILoggingEvent> listAppender = new ListAppender<ILoggingEvent>();
         final Logger logger = setupLogger(listAppender);
         final int backendPort = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(backendPort, true)
             .withBackend(vertx, backendPort, ctx -> ctx.response().end("ok"))
             .build().start();
@@ -181,7 +181,7 @@ public class ReverseProxyTest {
         final ListAppender<ILoggingEvent> listAppender = new ListAppender<ILoggingEvent>();
         final Logger logger = setupLogger(listAppender);
         final int backendPort = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(backendPort, true)
             .withBackend(vertx, backendPort, ctx -> ctx.response().end("ok"))
             .build().start();
@@ -215,7 +215,7 @@ public class ReverseProxyTest {
                 .setPath(trustStoreFile.getPath())
                 .setPassword(trustStorePassword));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort, "https", false, false, trustStoreFile.getPath(), trustStorePassword)
             .withBackend(vertx, backendPort, serverOptions)
             .build().start();
@@ -243,7 +243,7 @@ public class ReverseProxyTest {
                 .setPath(file.getPath())
                 .setPassword("123456"));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
             .withBackend(vertx, backendPort, serverOptions)
             .build().start();
@@ -263,7 +263,7 @@ public class ReverseProxyTest {
         final int backendPort = TestUtils.findFreePort();
         final boolean trustAllCertificates = true;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
             .withBackend(vertx, backendPort, new HttpServerOptions().setSsl(true))
             .build().start();
@@ -282,7 +282,7 @@ public class ReverseProxyTest {
         final int backendPort = TestUtils.findFreePort();
         final boolean trustAllCertificates = true;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
             .withBackend(vertx, backendPort)
             .build().start();
@@ -338,7 +338,7 @@ public class ReverseProxyTest {
             }));
         };
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build()
@@ -371,7 +371,7 @@ public class ReverseProxyTest {
             ctx.response().setStatusCode(400).end();
         };
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build()
@@ -405,7 +405,7 @@ public class ReverseProxyTest {
         };
         startNetBackend(vertx, backendPort, backendHandler);
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .build()
             .start(proxyPort);
@@ -453,7 +453,7 @@ public class ReverseProxyTest {
             }));
         };
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .withBackend(vertx, backendPort, backendHandler)
             .build()

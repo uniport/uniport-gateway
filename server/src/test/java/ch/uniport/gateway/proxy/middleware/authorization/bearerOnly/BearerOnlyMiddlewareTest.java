@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -117,7 +117,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
             .build().start()
             // when
@@ -136,7 +136,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
 
         final String invalidSignatureToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJCZWFyZXIiLCJleHAiOjE4OTM0NTI0MDAsImlhdCI6MTYyNzA1Mzc0NywiaXNzIjoiaHR0cDovL3Rlc3QuaXNzdWVyOjEyMzQvYXV0aC9yZWFsbXMvdGVzdCIsImF6cCI6InRlc3QtYXV0aG9yaXplZC1wYXJ0aWVzIiwiYXVkIjoidGVzdC1hdWRpZW5jZSIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUgVGVzdCJ9.blub";
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
             .build().start()
             // when
@@ -161,7 +161,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
             .build().start()
             // when
@@ -189,7 +189,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
 
         final String validToken = TestBearerOnlyJWTProvider.signToken(validPayload);
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuthWithAdditionalIssuers(vertx, expectedIssuer, expectedAudience, additionalIssuers), false)
             .build().start()
             // when
@@ -216,7 +216,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
 
         final String invalidToken = TestBearerOnlyJWTProvider.signToken(invalidPayload);
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuthWithAdditionalIssuers(vertx, expectedIssuer, expectedAudience, additionalIssuers), false)
             .build().start()
             // when
@@ -240,7 +240,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
             .build().start()
             // when
@@ -261,7 +261,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("test-audience");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddleware(jwtAuth(vertx, expectedIssuer, expectedAudience), false)
             .build().start()
             // when
@@ -290,7 +290,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                 .withKey("http://localhost:" + keycloakServer.port() + "/auth/realms/test")
                 .build());
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
             .build().start()
             // when
@@ -322,7 +322,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
 
         final long reconciliationIntervalMs = 100;
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys, reconciliationIntervalMs)
             .build().start();
 
@@ -364,7 +364,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                 .withKey("http://localhost:" + keycloakServer.port() + "/auth/realms/test")
                 .build());
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(keycloakServer, expectedIssuer, expectedAudience, publicKeys)
             .build().start();
 
@@ -401,7 +401,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
             .withAudience(expectedAudience)
             .build();
 
-        portalGateway(vertx, testCtx)
+        uniportGateway(vertx, testCtx)
             .withBearerOnlyMiddleware(bearerOnlyConfig)
             .build().start()
             // when

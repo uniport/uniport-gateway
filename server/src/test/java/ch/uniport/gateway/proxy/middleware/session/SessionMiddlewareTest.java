@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
 import static ch.uniport.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_LIFETIME_COOKIE_NAME;
 import static ch.uniport.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_LIFETIME_HEADER_NAME;
@@ -117,7 +117,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void sessionLifetimeCookie(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = uniportGateway(vertx, testCtx)
             .withSessionMiddleware(false, true)
             .build().start().connectBrowser();
         // when
@@ -132,7 +132,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void sessionLifetimeHeader(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = uniportGateway(vertx, testCtx)
             .withSessionMiddleware(true, false)
             .build().start().connectBrowser();
         // when
@@ -148,7 +148,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void newSessionIsCreated(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .build().start();
         final BrowserConnected browser = gateway.connectBrowser();
@@ -165,7 +165,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void newSessionIsCreated2(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware().build().start();
         final BrowserConnected browser = gateway.connectBrowser();
         // when
@@ -187,7 +187,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void sessionTimeoutNoReset(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware("^/(request2|request3).*").build().start();
         final BrowserConnected browser = gateway.connectBrowser();
         final HeadersMultiMap headersMultiMap = new HeadersMultiMap();
@@ -223,7 +223,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         // given
         final AtomicReference<String> originalCookie = new AtomicReference<>();
 
-        final BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = uniportGateway(vertx, testCtx)
             .withSessionMiddleware("^/(ignored).*", true, true)
             .build().start().connectBrowser();
 
@@ -255,7 +255,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             ctx.next();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(checkSessionIdleTimeoutIsOnRoutingContext)
             .build().start();
@@ -278,7 +278,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             ctx.next();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(checkSessionStoreIsOnRoutingContext)
             .build().start();
@@ -369,7 +369,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             ctx.response().setStatusCode(200).end("ok");
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, backendHandler)
@@ -451,7 +451,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             ctx.response().setStatusCode(200).end("ok");
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, backendHandler)
@@ -483,7 +483,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         final String cookieName = "whatsNew:1.01";
         final MultiMap headers = HeadersMultiMap.httpHeaders()
             .set(HttpHeaders.COOKIE, cookieName + "=true"); // malformed cookie: contains illegal column
-        final BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, ctx -> {

@@ -1,6 +1,6 @@
 package ch.uniport.gateway.proxy.middleware.authorization.bearerOnly;
 
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
@@ -81,7 +81,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -106,7 +106,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -137,7 +137,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -166,7 +166,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
@@ -201,7 +201,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final String expectedIssuer = "http://test.issuer:1234/auth/realms/test";
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withBearerOnlyMiddlewareOtherClaims(
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)

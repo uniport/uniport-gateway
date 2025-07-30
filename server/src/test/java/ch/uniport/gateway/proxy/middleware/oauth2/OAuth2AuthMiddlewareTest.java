@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_PKCE;
 import static ch.uniport.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_REDIRECT_URI;
 import static ch.uniport.gateway.proxy.middleware.oauth2.OAuth2AuthMiddleware.OIDC_PARAM_STATE;
@@ -124,7 +124,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .build();
 
         try {
-            portalGateway(vertx, testCtx)
+            uniportGateway(vertx, testCtx)
                 .withSessionMiddleware()
                 .withOAuth2AuthMiddleware(config)
                 .build()
@@ -141,7 +141,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build()
@@ -164,7 +164,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build()
@@ -191,7 +191,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build()
@@ -215,7 +215,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build().start();
@@ -247,7 +247,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final BrowserConnected browser = portalGateway(vertx, testCtx)
+        final BrowserConnected browser = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build().start().connectBrowser();
@@ -274,7 +274,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build()
@@ -321,7 +321,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = MiddlewareServerBuilder.portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = MiddlewareServerBuilder.uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protectedScope")
             .build()
@@ -342,7 +342,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = MiddlewareServerBuilder.portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = MiddlewareServerBuilder.uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protectedScope")
             .build()
@@ -369,7 +369,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .withAdditionalAuthRequestParameters(Map.<String, String>of(
                 "extra", "parameter"));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
             .build()
@@ -396,7 +396,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final OAuth2MiddlewareOptions middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
             .withAdditionalScopes(scopes);
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
             .build()
@@ -421,7 +421,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build()
@@ -447,7 +447,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected")
             .build()
@@ -499,7 +499,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final OAuth2MiddlewareOptions middlewareConfig = keycloakServer.getOAuth2AuthConfig("test")
             .withPassthroughParameters(passthrough);
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(middlewareConfig)
             .build()
@@ -535,7 +535,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler((bodyHandler -> {
                 // ?
             }));
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withCustomSessionState(OAuth2AuthMiddleware.PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
@@ -558,7 +558,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
         // We need to mock the sessionstate to pass the OAuth2Middleware checks
         final JsonObject oidcSessionState = oidcSessionState("aState", "http://localhost:12345", "aPKCE");
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withCustomSessionState(OAuth2AuthMiddleware.PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
@@ -584,7 +584,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         throws InterruptedException {
         // given
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
@@ -609,7 +609,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         // given
         final String state = new StateWithUri("aNonExistingState", "/test/resource").toStateParameter();
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx).startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
             .build().start();
@@ -635,7 +635,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
             .setPKCE(createCodeChallenge(codeVerifier)) // is normally set on the authorization request, so we mimic
             // it here
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = MiddlewareServerBuilder.portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = MiddlewareServerBuilder.uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withCustomSessionState(OAuth2AuthMiddleware.PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
@@ -663,7 +663,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
             .setPKCE("anInvalidCodeChallenge") // is normally set on the authorization request, so we mimic it here
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = MiddlewareServerBuilder.portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = MiddlewareServerBuilder.uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withCustomSessionState(OAuth2AuthMiddleware.PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
@@ -693,7 +693,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final String scope = "test";
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, true, publicUrl))
             .build()
@@ -723,7 +723,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final String scope = "test";
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, false, publicUrl))
             .build()
@@ -760,7 +760,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final String scope = "test";
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx, "localhost")
             .startWithDefaultDiscoveryHandler();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withOAuth2AuthMiddleware(keycloakServer.getOAuth2AuthConfig(scope, false, publicUrl, callbackOrigin))
             .build()
@@ -801,7 +801,7 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
         final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
             .startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler((bodyHandler -> {
             }));
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withCustomSessionState(OAuth2AuthMiddleware.PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
             .withOAuth2AuthMiddlewareForScope(keycloakServer, "protected1")

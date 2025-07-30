@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertFalse;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertNotNull;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertNull;
@@ -84,7 +84,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String defaultSrc = "default-src";
         final String defaultSrcValue = "self";
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(defaultSrc, defaultSrcValue)), false)
             .build().start();
 
@@ -110,7 +110,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String reportTo = "report-to";
         final String reportToValue = "www.example.com";
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(
                 createDirective(defaultSrc, defaultSrcValue),
                 createDirective(reportTo, reportToValue)), true)
@@ -144,7 +144,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String mediaDirective = "media-src";
         final String mediaValue = "self";
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(mediaDirective, mediaValue)), false)
             .withCspMiddleware(List.of(createDirective(styleDirective, styleValue)), false)
             .build().start();
@@ -171,7 +171,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String styleValue = "self";
         final String differentStyleValue = "https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net";
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(styleDirective, differentStyleValue)), false)
             .withCspMiddleware(List.of(createDirective(styleDirective, styleValue)), false)
             .build().start();
@@ -208,7 +208,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withProxyMiddleware(backendPort)
@@ -245,7 +245,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
@@ -286,7 +286,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.INTERNAL)
             .withProxyMiddleware(backendPort)
@@ -327,7 +327,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendPort)
@@ -367,7 +367,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
@@ -404,7 +404,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
@@ -441,7 +441,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
                 .end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)
@@ -477,7 +477,7 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
             ctx.response().end();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort, cspInsertionHandler)

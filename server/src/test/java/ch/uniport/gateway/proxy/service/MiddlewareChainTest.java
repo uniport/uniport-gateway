@@ -1,6 +1,6 @@
 package ch.uniport.gateway.proxy.service;
 
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 
 import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
@@ -40,7 +40,7 @@ public class MiddlewareChainTest {
         };
 
         final int backendPort = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testContext)
+        final MiddlewareServer gateway = uniportGateway(vertx, testContext)
             .withReplacePathRegexMiddleware(requestReplacePathRegex1, requestReplacePathReplacement1)
             .withReplacePathRegexMiddleware(requestReplacePathRegex2, requestReplacePathReplacement2)
             .withProxyMiddleware(backendPort)
@@ -61,7 +61,7 @@ public class MiddlewareChainTest {
         final MultiMap responseHeaders = HeadersMultiMap.headers().add(headerName, expectedHeaderValue);
 
         final int backendPort = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testContext)
+        final MiddlewareServer gateway = uniportGateway(vertx, testContext)
             .withHeaderMiddleware(HeadersMultiMap.httpHeaders(), responseHeaders)
             .withProxyMiddleware(backendPort)
             .withBackend(vertx, backendPort)
@@ -88,7 +88,7 @@ public class MiddlewareChainTest {
         final MultiMap responseHeaders2 = HeadersMultiMap.headers().add(headerName, "blub"); // set header 
 
         final int backendPort = TestUtils.findFreePort();
-        final MiddlewareServer gateway = portalGateway(vertx, testContext)
+        final MiddlewareServer gateway = uniportGateway(vertx, testContext)
             .withHeaderMiddleware(HeadersMultiMap.httpHeaders(), responseHeaders1)
             .withHeaderMiddleware(HeadersMultiMap.httpHeaders(), responseHeaders2)
             .withProxyMiddleware(backendPort)

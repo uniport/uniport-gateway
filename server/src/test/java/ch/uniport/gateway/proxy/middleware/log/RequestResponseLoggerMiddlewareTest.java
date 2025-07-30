@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -84,7 +84,7 @@ public class RequestResponseLoggerMiddlewareTest extends MiddlewareTestBase {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, "localhost", testCtx)
+        uniportGateway(vertx, "localhost", testCtx)
             .withRoutingContextHolder(routingContext)
             .withRequestResponseLoggerMiddleware("/health.*|/ready.*")
             .build().start()
@@ -106,7 +106,7 @@ public class RequestResponseLoggerMiddlewareTest extends MiddlewareTestBase {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, "localhost", testCtx)
+        uniportGateway(vertx, "localhost", testCtx)
             .withRoutingContextHolder(routingContext)
             .withRequestResponseLoggerMiddleware("/health.*")
             .build().start()
@@ -128,7 +128,7 @@ public class RequestResponseLoggerMiddlewareTest extends MiddlewareTestBase {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, "localhost", testCtx)
+        uniportGateway(vertx, "localhost", testCtx)
             .withRoutingContextHolder(routingContext)
             .withRequestResponseLoggerMiddleware(null)
             .build().start()

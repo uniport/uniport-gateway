@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.languageCookie.AbstractLanguageCookieMiddlewareOptions.DEFAULT_LANGUAGE_COOKIE_NAME;
 import static io.vertx.core.http.HttpMethod.GET;
 
@@ -63,7 +63,7 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.COOKIE, DEFAULT_LANGUAGE_COOKIE_NAME + "=de");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContext)
             .withLanguageCookieMiddleware()
             .build().start()
@@ -85,7 +85,7 @@ public class LanguageCookieMiddlewareTest extends MiddlewareTestBase {
         // given
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContext)
             .withLanguageCookieMiddleware()
             .build().start()

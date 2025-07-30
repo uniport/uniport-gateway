@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -311,7 +311,7 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         final String cookieValue = "value1";
         headers.add(HttpHeaders.COOKIE, cookieName + "=" + cookieValue);
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withSessionMiddleware()
             .withSessionBagMiddleware(List.of(

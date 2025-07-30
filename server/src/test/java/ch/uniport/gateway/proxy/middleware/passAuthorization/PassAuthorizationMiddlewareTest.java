@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
@@ -58,7 +58,7 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testNoBearer(Vertx vertx, VertxTestContext testCtx) {
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withSessionMiddleware()
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "someToken"))
             .build()
@@ -74,7 +74,7 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testWithBearerNotAuthorized(Vertx vertx, VertxTestContext testCtx) {
 
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withSessionMiddleware()
             .withMockOAuth2Middleware("unauthorizedAuthHeader")
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), "authorizedAuthHeader"))
@@ -99,7 +99,7 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.AUTHORIZATION, externalAuthHeader);
 
         // when
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withSessionMiddleware()
             .withMockOAuth2Middleware(internalAuthHeader)
             .withPassAuthorizationMiddleware("testScope", new MockJWTAuth(new JsonObject(), internalAuthHeader))

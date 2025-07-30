@@ -92,11 +92,11 @@ public final class MiddlewareServerBuilder {
         router = Router.router(vertx);
     }
 
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx, VertxTestContext testCtx) {
-        return portalGateway(vertx, "localhost", testCtx);
+    public static MiddlewareServerBuilder uniportGateway(Vertx vertx, VertxTestContext testCtx) {
+        return uniportGateway(vertx, "localhost", testCtx);
     }
 
-    public static MiddlewareServerBuilder portalGateway(Vertx vertx, String host, VertxTestContext testCtx) {
+    public static MiddlewareServerBuilder uniportGateway(Vertx vertx, String host, VertxTestContext testCtx) {
         return new MiddlewareServerBuilder(vertx, host, testCtx);
     }
 

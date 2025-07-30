@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.BrowserConnected;
@@ -59,7 +59,7 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
     })
     public void isHandledByCheckRoute(String uri, Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withAuthenticationTriggerMiddleware()
             .withMiddleware(ctx -> {
                 ctx.response().setStatusCode(200).end();
@@ -78,7 +78,7 @@ public class CheckRouteMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void otherPathIsIgnored(Vertx vertx, VertxTestContext testCtx) {
         // given
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withAuthenticationTriggerMiddleware()
             .withMiddleware(ctx -> {
                 ctx.response().setStatusCode(200).end();

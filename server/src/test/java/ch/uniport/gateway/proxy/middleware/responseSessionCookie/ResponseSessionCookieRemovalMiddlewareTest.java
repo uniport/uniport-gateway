@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
@@ -59,7 +59,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest extends MiddlewareTestBa
 
     @Test
     public void shouldRemoveSessionCookieInResponse(Vertx vertx, VertxTestContext testCtx) {
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withMiddleware(addingSignal())
@@ -77,7 +77,7 @@ public class ResponseSessionCookieRemovalMiddlewareTest extends MiddlewareTestBa
 
     @Test
     public void shouldContainSessionCookieInResponse(Vertx vertx, VertxTestContext testCtx) {
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .build().start();

@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static ch.uniport.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_DETECTION_COOKIE_NAME;
 import static ch.uniport.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_MAX_REDIRECT_RETRIES;
 import static ch.uniport.gateway.proxy.middleware.replacedSessionCookieDetection.AbstractReplacedSessionCookieDetectionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
@@ -90,7 +90,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
             ctx.next();
         };
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
             .withMiddleware(extractSessionLastAccessed)
             .withUser()
@@ -121,7 +121,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         cookies.add(createSessionCookie("a-session-id-which-has-been-replaced"));
         cookies.add(createDetectionCookie(0, validTimestamp));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
@@ -152,7 +152,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
         cookies.add(createDetectionCookie(0, expiredTimestamp));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
@@ -180,7 +180,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         final Set<Cookie> cookies = new HashSet<Cookie>();
         cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
@@ -211,7 +211,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
         cookies.add(createDetectionCookie(DEFAULT_MAX_REDIRECT_RETRIES - 1, expiredTimestamp));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()
@@ -242,7 +242,7 @@ public class ReplacedSessionCookieDetectionMiddlewareTest extends MiddlewareTest
         cookies.add(createSessionCookie("=a-session-id-which-has-been-replaced"));
         cookies.add(createDetectionCookie(DEFAULT_MAX_REDIRECT_RETRIES, validTimestamp));
 
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withResponseSessionCookieRemovalMiddleware()
             .withSessionMiddleware()
             .withReplacedSessionCookieDetectionMiddleware()

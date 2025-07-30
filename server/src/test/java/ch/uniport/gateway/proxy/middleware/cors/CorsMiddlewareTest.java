@@ -5,7 +5,7 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.netty.handler.codec.http.HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS;
 import static io.vertx.core.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
 import static io.vertx.core.http.HttpHeaders.ORIGIN;
@@ -98,11 +98,11 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETNoOrigin(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final MiddlewareServer portalGateway = portalGateway(vertx, HOST, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start();
         // when
-        portalGateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
+        gateway.incomingRequest(HttpMethod.GET, "/", (resp) -> {
             // then
             assertThat(testCtx, resp)
                 .hasStatusCode(200);
@@ -113,7 +113,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETVaryOrigin(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(List.of("http://example.com", "http://example.org"))
             .build().start()
             // when
@@ -130,7 +130,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETOriginAllowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -148,7 +148,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETOriginAllowedPattern(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(List.of(), List.of("http://(a|b).example.com"))
             .build().start()
             // when
@@ -166,7 +166,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETAllAllowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("*")
             .build().start()
             // when
@@ -184,7 +184,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETAllAllowedPattern(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(List.of(), List.of(".*"))
             .build().start()
             // when
@@ -202,7 +202,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETOriginNotAllowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -219,7 +219,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETOriginNoAllowedPattern(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(List.of(), List.of("http://(a|b).example.com"))
             .build().start()
             // when
@@ -237,7 +237,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void testGETNoAllowedOriginsImpliesAllOrigins(Vertx vertx, VertxTestContext testCtx)
         throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(List.of(), List.of())
             .build().start()
             // when
@@ -254,7 +254,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testOPTIONSNoOrigin(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -269,7 +269,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testOPTIONSOriginAllowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -286,7 +286,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testOPTIONSOriginNotAllowed(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -304,7 +304,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void testOPTIONSOriginWithDifferentSchemeNotAllowed(Vertx vertx, VertxTestContext testCtx)
         throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -322,7 +322,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void testOPTIONSOriginWithDifferentPortNotAllowed(Vertx vertx, VertxTestContext testCtx)
         throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware("http://example.com")
             .build().start()
             // when
@@ -339,7 +339,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testOPTIONSAllowedMethods(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 Set.of(HttpMethod.GET, HttpMethod.POST),
@@ -362,7 +362,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testOPTIONSAllowedHeaders(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 Set.of(HttpMethod.GET),
@@ -388,7 +388,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testOPTIONSAllowedHeadersEcho(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 Set.of(HttpMethod.GET),
@@ -416,7 +416,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void testGETExposeHeaders(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 Set.of("Content-Encoding", "Uniport-Version"))
@@ -439,7 +439,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void testOPTIONSMaxAGE(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final int maxAge = 42;
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 maxAge)
@@ -463,7 +463,7 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
     public void testOPTIONSAllowCredentials(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final boolean allowCredentials = true;
-        portalGateway(vertx, HOST, testCtx)
+        uniportGateway(vertx, HOST, testCtx)
             .withCorsMiddleware(
                 List.of("http://example.com"),
                 allowCredentials)

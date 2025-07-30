@@ -4,7 +4,7 @@ import static ch.uniport.gateway.TestUtils.buildConfiguration;
 import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
-import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.portalGateway;
+import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
@@ -65,7 +65,7 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.AUTHORIZATION,
             "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Y0p4dWNXRDFWZnFSNU56QmtKZng2RnNZYmJHeEcxOHk5bVZrazFYYWJZIn0.eyJleHAiOjE2MTE5Nzg2MjAsImlhdCI6MTYxMTkzNTQyMCwianRpIjoiOWY0MGNiZTEtZDJhMC00N2Q0LWFlNjYtYTI5ZTQyNDg4ZTFmIiwiaXNzIjoiaHR0cDovL2RvY2tlci10ZXN0LmludmVudGFnZS5jb206ODA4MC9hdXRoL3JlYWxtcy9wb3J0YWwiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiYWIxNTk0MTMtODkyNC00ZjEwLThkYjEtMTc5NGY0MzFlNzJiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiT3JnYW5pc2F0aW9uIiwic2Vzc2lvbl9zdGF0ZSI6IjU3MWEzNTU3LWNiOWMtNDg4ZS05YzMwLWQyZTAwYjQ4MzRkMCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7Ik9yZ2FuaXNhdGlvbiI6eyJyb2xlcyI6WyJLRVlDTE9BSyJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtb3JnYW5pc2F0aW9uIn0.XkgBLTzgUHvmYFu96d55aZdSpkzKEGO6cyQxMfSZt3Ryfp5gLhLywtdXSyaHJ4qgDHDkB3rGcY6NH2tAT4wwDRSCz_4gzOZV5qkwirdvQ8OXwi-Oa16yPjFgj3I8Mn1UO7QkchiiIZ-2J9roVLPhet5McgBSkGB5YyzlWRyFIr2imM5JKuBjT2zVM6HiqzpvRoW11lQBR1h9kbf4sU-RTX4DCHjm8H4pfJx798X0oL6dezirq91QK3gizfR3wboLfEmtA4i-pnTpAOnfOoL9aqKoAweUp83uXJvbPDZjanoJsQhCTiaJprvUtF1CFBWDwtJBWR93Ki9TfBSk3CqTig");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withClaimToMiddleware("sub", "X-Uniport-Tenant")
             .build().start();
@@ -85,7 +85,7 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.AUTHORIZATION,
             "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Y0p4dWNXRDFWZnFSNU56QmtKZng2RnNZYmJHeEcxOHk5bVZrazFYYWJZIn0.eyJleHAiOjE2MTE5Nzg2MjAsImlhdCI6MTYxMTkzNTQyMCwianRpIjoiOWY0MGNiZTEtZDJhMC00N2Q0LWFlNjYtYTI5ZTQyNDg4ZTFmIiwiaXNzIjoiaHR0cDovL2RvY2tlci10ZXN0LmludmVudGFnZS5jb206ODA4MC9hdXRoL3JlYWxtcy9wb3J0YWwiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiYWIxNTk0MTMtODkyNC00ZjEwLThkYjEtMTc5NGY0MzFlNzJiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiT3JnYW5pc2F0aW9uIiwic2Vzc2lvbl9zdGF0ZSI6IjU3MWEzNTU3LWNiOWMtNDg4ZS05YzMwLWQyZTAwYjQ4MzRkMCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7Ik9yZ2FuaXNhdGlvbiI6eyJyb2xlcyI6WyJLRVlDTE9BSyJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtb3JnYW5pc2F0aW9uIn0.XkgBLTzgUHvmYFu96d55aZdSpkzKEGO6cyQxMfSZt3Ryfp5gLhLywtdXSyaHJ4qgDHDkB3rGcY6NH2tAT4wwDRSCz_4gzOZV5qkwirdvQ8OXwi-Oa16yPjFgj3I8Mn1UO7QkchiiIZ-2J9roVLPhet5McgBSkGB5YyzlWRyFIr2imM5JKuBjT2zVM6HiqzpvRoW11lQBR1h9kbf4sU-RTX4DCHjm8H4pfJx798X0oL6dezirq91QK3gizfR3wboLfEmtA4i-pnTpAOnfOoL9aqKoAweUp83uXJvbPDZjanoJsQhCTiaJprvUtF1CFBWDwtJBWR93Ki9TfBSk3CqTig");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withClaimToMiddleware("$.sub", "X-Uniport-Tenant")
             .build().start();
@@ -105,7 +105,7 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
         headers.add(HttpHeaders.AUTHORIZATION,
             "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Y0p4dWNXRDFWZnFSNU56QmtKZng2RnNZYmJHeEcxOHk5bVZrazFYYWJZIn0.eyJleHAiOjE2MTE5Nzg2MjAsImlhdCI6MTYxMTkzNTQyMCwianRpIjoiOWY0MGNiZTEtZDJhMC00N2Q0LWFlNjYtYTI5ZTQyNDg4ZTFmIiwiaXNzIjoiaHR0cDovL2RvY2tlci10ZXN0LmludmVudGFnZS5jb206ODA4MC9hdXRoL3JlYWxtcy9wb3J0YWwiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiYWIxNTk0MTMtODkyNC00ZjEwLThkYjEtMTc5NGY0MzFlNzJiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiT3JnYW5pc2F0aW9uIiwic2Vzc2lvbl9zdGF0ZSI6IjU3MWEzNTU3LWNiOWMtNDg4ZS05YzMwLWQyZTAwYjQ4MzRkMCIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7Ik9yZ2FuaXNhdGlvbiI6eyJyb2xlcyI6WyJLRVlDTE9BSyJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtb3JnYW5pc2F0aW9uIn0.XkgBLTzgUHvmYFu96d55aZdSpkzKEGO6cyQxMfSZt3Ryfp5gLhLywtdXSyaHJ4qgDHDkB3rGcY6NH2tAT4wwDRSCz_4gzOZV5qkwirdvQ8OXwi-Oa16yPjFgj3I8Mn1UO7QkchiiIZ-2J9roVLPhet5McgBSkGB5YyzlWRyFIr2imM5JKuBjT2zVM6HiqzpvRoW11lQBR1h9kbf4sU-RTX4DCHjm8H4pfJx798X0oL6dezirq91QK3gizfR3wboLfEmtA4i-pnTpAOnfOoL9aqKoAweUp83uXJvbPDZjanoJsQhCTiaJprvUtF1CFBWDwtJBWR93Ki9TfBSk3CqTig");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withClaimToMiddleware("$.resource_access.Organisation.roles", "roles")
             .build().start();
@@ -123,7 +123,7 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
         // given
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withClaimToMiddleware("sub", "X-Uniport-Tenant")
             .build().start();
@@ -142,7 +142,7 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer invalidValueForJWT");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withClaimToMiddleware("sub", "X-Uniport-Tenant")
             .build().start();
@@ -161,7 +161,7 @@ public class ClaimToHeaderMiddlewareTest extends MiddlewareTestBase {
         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
         headers.add(HttpHeaders.AUTHORIZATION, "Basic ldUIiwia2lkIiA6ICJ1Y0p4dW");
         final AtomicReference<RoutingContext> routingContext = new AtomicReference<>();
-        final MiddlewareServer gateway = portalGateway(vertx, testCtx)
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withRoutingContextHolder(routingContext)
             .withClaimToMiddleware("sub", "X-Uniport-Tenant")
             .build().start();

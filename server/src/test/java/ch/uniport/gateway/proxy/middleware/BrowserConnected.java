@@ -13,10 +13,10 @@ import java.util.concurrent.CompletionStage;
  */
 public class BrowserConnected {
 
-    private final MiddlewareServer portalGateway;
+    private final MiddlewareServer gateway;
 
-    public BrowserConnected(MiddlewareServer portalGateway) {
-        this.portalGateway = portalGateway;
+    public BrowserConnected(MiddlewareServer gateway) {
+        this.gateway = gateway;
     }
 
     public CompletionStage<HttpClientResponse> request(HttpMethod method, String uri) {
@@ -25,13 +25,13 @@ public class BrowserConnected {
 
     public CompletionStage<HttpClientResponse> request(HttpMethod method, String uri, MultiMap headers) {
         final Promise<HttpClientResponse> result = Promise.promise();
-        portalGateway.incomingRequest(method, uri, new RequestOptions().setHeaders(headers), result::complete);
+        gateway.incomingRequest(method, uri, new RequestOptions().setHeaders(headers), result::complete);
         return result.future().toCompletionStage();
     }
 
     public CompletionStage<HttpClientResponse> request(HttpMethod method, String uri, MultiMap headers, String body) {
         final Promise<HttpClientResponse> result = Promise.promise();
-        portalGateway.incomingRequest(method, uri, new RequestOptions().setHeaders(headers), body, result::complete);
+        gateway.incomingRequest(method, uri, new RequestOptions().setHeaders(headers), body, result::complete);
         return result.future().toCompletionStage();
     }
 }
