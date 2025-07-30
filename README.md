@@ -62,7 +62,7 @@ mvn clean install
 
 ### IDE
 
-A simple setup can be launched by first starting some background services with [docker compose](server/src/test/resources/configs/router-rules/docker-compose.yml), and then run the Uniport-Gateway with the launch config `Launch (router-rules)` (VSCode) or the run config `PortalGateway` (IntelliJ).
+A simple setup can be launched by first starting some background services with [docker compose](server/src/test/resources/configs/router-rules/docker-compose.yml), and then run the Uniport-Gateway with the launch config `Launch (router-rules)` (VSCode) or the run config `UniportGateway` (IntelliJ).
 
 ```bash
 docker compose -f server/src/test/resources/configs/router-rules/docker-compose.yml up
