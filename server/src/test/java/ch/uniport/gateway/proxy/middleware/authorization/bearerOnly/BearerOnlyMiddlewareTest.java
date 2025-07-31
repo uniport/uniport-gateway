@@ -335,7 +335,7 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
                 keycloakServer.serveInvalidPublicKeys();
 
                 // give the middleware time to refetch the public keys
-                vertx.setTimer(reconciliationIntervalMs, (timerID) -> {
+                vertx.setTimer(2 * reconciliationIntervalMs, (timerID) -> {
                     gateway.incomingRequest(GET, "/", new RequestOptions().addHeader(HttpHeaders.AUTHORIZATION, bearer(validTokenBeforePublicKeysRefresh)), (outgoingResponse2) -> {
                         // then
                         VertxAssertions.assertEquals(testCtx, 401, outgoingResponse2.statusCode(), "unexpected status code");
