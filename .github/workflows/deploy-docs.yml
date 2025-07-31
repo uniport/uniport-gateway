@@ -1,4 +1,4 @@
-name: Deploy Preview
+name: Preview Docs
 run-name: "Deployment #${{ github.run_number }}"
 
 on:
