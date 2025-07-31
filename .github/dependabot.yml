@@ -4,17 +4,54 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
+
+registries:
+  # @see https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#npm-registry
+  inventage-maven:
+    type: maven-repository
+    url: https://nexus3.inventage.com/repository/inventage-portal-maven-group
+    username: inventage-uniport-readonly
+    password: ${{ secrets.NEXUS_NPM_PASSWORD_READ_ONLY }}
+    replaces-base: true
+  inventage-npm:
+    type: npm-registry
+    url: https://nexus3.inventage.com/repository/inventage-portal-npm-group
+    username: inventage-uniport-readonly
+    password: ${{secrets.NEXUS_NPM_PASSWORD_READ_ONLY}}
+    replaces-base: true
+
 updates:
   - package-ecosystem: "maven"
     directory: "/"
-    open-pull-requests-limit: 10
+    registries:
+      - inventage-maven
     schedule:
       interval: "weekly"
     ignore:
       - dependency-name: "io.micrometer:micrometer-registry-prometheus" # required to be in sync with vertx-micrometer-metrics
+    open-pull-requests-limit: 10
+    labels:
+      - "java"
+      - "dependencies"
+      - "no changelog"
+
+  - package-ecosystem: "npm"
+    directory: "/docs/src/main/mkdocs"
+    registries:
+      - inventage-npm
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "javascript"
+      - "dependencies"
+      - "no changelog"
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    open-pull-requests-limit: 10
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "no changelog"
