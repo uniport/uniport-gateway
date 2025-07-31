@@ -118,11 +118,13 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "## Deploy Details" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow ran on **$(date)**." >> $GITHUB_STEP_SUMMARY
-          echo "### Inputs" >> $GITHUB_STEP_SUMMARY
-          echo "- **alias**: \`${{ inputs.alias }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **artifact_name**: \`${{ inputs.artifact_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **artifact_path**: \`${{ inputs.artifact_path }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **run_id**: \`${{ inputs.run_id }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **deploy-url**: ${{ steps.deployment.outputs.deploy-url }}" >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY <<EOF  
+          ## Deploy Details
+          This workflow ran on **$(date)**.
+          ### Inputs
+          - **alias**: \`${{ inputs.alias }}\`
+          - **artifact_name**: \`${{ inputs.artifact_name }}\`
+          - **artifact_path**: \`${{ inputs.artifact_path }}\`
+          - **run_id**: \`${{ inputs.run_id }}\`
+          - **deploy-url**: ${{ steps.deployment.outputs.deploy-url }}
+          EOF
