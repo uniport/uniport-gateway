@@ -131,3 +131,17 @@ jobs:
       command: release
     secrets:
       UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
+
+  announce:
+    name: Announce new release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify uniport team
+        uses: uniport/workflows/.github/actions/send-rocket-chat-message@main
+        with:
+          webhook_url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+          channel: uniport
+          message: |
+            A **new release** just happened! 🚀
+
+            ${{ github.repository }}: ${{ inputs.version }}
