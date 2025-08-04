@@ -33,13 +33,13 @@ jobs:
 
       - name: Check if target branch exists
         id: branch_check
-        uses: uniport/workflows/.github/actions/branch-exists@portal-1673
+        uses: uniport/workflows/.github/actions/ensure-branch@main
         with:
           branch: ${{ inputs.target_branch }}
 
       - name: Parse version string
         id: parse
-        uses: uniport/workflows/.github/actions/parse-version@portal-1673
+        uses: uniport/workflows/.github/actions/parse-version@main
         with:
           version: ${{ inputs.version }}
 
@@ -53,22 +53,22 @@ jobs:
 
           ## Parse Version
           ### Outputs
-          - **SEM_VER**: \`${{ steps.version.outputs.SEM_VER }}\`
-          - **BUILD_DATE**: \`${{ steps.version.outputs.BUILD_DATE }}\`
-          - **RUN_ID**: \`${{ steps.version.outputs.RUN_ID }}\`
-          - **COMMIT_SHA**: \`${{ steps.version.outputs.COMMIT_SHA }}\`
+          - **SEM_VER**: \`${{ steps.parse.outputs.SEM_VER }}\`
+          - **BUILD_DATE**: \`${{ steps.parse.outputs.BUILD_DATE }}\`
+          - **RUN_ID**: \`${{ steps.parse.outputs.RUN_ID }}\`
+          - **COMMIT_SHA**: \`${{ steps.parse.outputs.COMMIT_SHA }}\`
 
           ## Parse SemVer
           ### Outputs
-          - **MAJOR**: \`${{ steps.semver.outputs.MAJOR }}\`
-          - **MINOR**: \`${{ steps.semver.outputs.MINOR }}\`
-          - **PATCH**: \`${{ steps.semver.outputs.PATCH }}\`
+          - **MAJOR**: \`${{ steps.parse.outputs.MAJOR }}\`
+          - **MINOR**: \`${{ steps.parse.outputs.MINOR }}\`
+          - **PATCH**: \`${{ steps.parse.outputs.PATCH }}\`
           EOF
 
   move-artifacts:
     name: Move artifacts on Nexus3
     needs: [setup]
-    uses: uniport/workflows/.github/workflows/move-nexus-artifacts.yml@portal-1673
+    uses: uniport/workflows/.github/workflows/move-nexus-artifacts.yml@main
     with:
       version: ${{ inputs.version }}
       move_docker_helm: true
@@ -79,7 +79,7 @@ jobs:
   git-tag:
     name: Create git tag
     needs: [setup]
-    uses: uniport/workflows/.github/workflows/git-tag.yml@portal-1673
+    uses: uniport/workflows/.github/workflows/git-tag.yml@main
     with:
       tag_name: "${{ needs.setup.outputs.SEM_VER }}"
       tag_message: "${{ inputs.version }}"
@@ -88,7 +88,7 @@ jobs:
   changelog:
     name: Update changelog
     needs: [setup]
-    uses: uniport/workflows/.github/workflows/changelog-update.yml@portal-1673
+    uses: uniport/workflows/.github/workflows/changelog-update.yml@main
     with:
       version: ${{ inputs.version }}
       branch_name: ${{ inputs.target_branch }}
@@ -96,7 +96,7 @@ jobs:
   git-patch-branch:
     name: Create patch branch
     needs: [setup]
-    uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@portal-1673
+    uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@main
     with:
       major: ${{ needs.setup.outputs.MAJOR }}
       minor: ${{ needs.setup.outputs.MINOR }}
@@ -105,7 +105,7 @@ jobs:
   bump-version:
     name: Bump version
     needs: [setup]
-    uses: uniport/workflows/.github/workflows/version-bump.yml@portal-1673
+    uses: uniport/workflows/.github/workflows/version-bump.yml@main
     with:
       major: ${{ needs.setup.outputs.MAJOR }}
       minor: ${{ needs.setup.outputs.MINOR }}
@@ -115,7 +115,7 @@ jobs:
   jira-release:
     name: Do Jira release
     needs: [setup]
-    uses: uniport/workflows/.github/workflows/jira-release.yml@portal-1673
+    uses: uniport/workflows/.github/workflows/jira-release.yml@main
     with:
       version: ${{ inputs.version }}
       semver: ${{ needs.setup.outputs.SEM_VER }}
