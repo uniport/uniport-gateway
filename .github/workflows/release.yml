@@ -46,7 +46,7 @@ jobs:
       - name: Summary
         shell: bash
         run: |
-          cat >> $GITHUB_STEP_SUMMARY <<EOF  
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
           ### Inputs
           - **version**: \`${{ inputs.version }}\`
           - **target_branch**: \`${{ inputs.target_branch }}\`
@@ -119,7 +119,7 @@ jobs:
     with:
       version: ${{ inputs.version }}
       semver: ${{ needs.setup.outputs.SEM_VER }}
-      component_name: uniport-gateway
+      component_name: Uniport-Gateway
 
   archetype:
     name: Update Archetype
