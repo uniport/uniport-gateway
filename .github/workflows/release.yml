@@ -129,7 +129,7 @@ jobs:
       semver: ${{ needs.setup.outputs.SEM_VER }}
       component_name: Uniport-Gateway
     secrets:
-      ATLASSIAN_AUTH_PSW: ${{ secrets.ATLASSIAN_AUTH_PSW }}
+      ATLASSIAN_AUTH_TOKEN: ${{ secrets.ATLASSIAN_AUTH_TOKEN }}
 
   archetype:
     name: Update Archetype
