@@ -80,6 +80,8 @@ jobs:
     name: Create git tag
     needs: [setup]
     uses: uniport/workflows/.github/workflows/git-tag.yml@main
+    permissions:
+      contents: write # create tag
     with:
       tag_name: "${{ needs.setup.outputs.SEM_VER }}"
       tag_message: "${{ inputs.version }}"
@@ -89,6 +91,8 @@ jobs:
     name: Update changelog
     needs: [setup]
     uses: uniport/workflows/.github/workflows/changelog-update.yml@main
+    permissions:
+      contents: write # update changelog
     with:
       version: ${{ inputs.version }}
       branch_name: ${{ inputs.target_branch }}
@@ -98,7 +102,7 @@ jobs:
     needs: [setup]
     uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@main
     permissions:
-      contents: write
+      contents: write # create branch
     with:
       major: ${{ needs.setup.outputs.MAJOR }}
       minor: ${{ needs.setup.outputs.MINOR }}
@@ -108,6 +112,8 @@ jobs:
     name: Bump version
     needs: [setup]
     uses: uniport/workflows/.github/workflows/version-bump.yml@main
+    permissions:
+      contents: write # update version
     with:
       major: ${{ needs.setup.outputs.MAJOR }}
       minor: ${{ needs.setup.outputs.MINOR }}
