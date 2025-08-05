@@ -97,6 +97,8 @@ jobs:
     name: Create patch branch
     needs: [setup]
     uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@main
+    permissions:
+      contents: write
     with:
       major: ${{ needs.setup.outputs.MAJOR }}
       minor: ${{ needs.setup.outputs.MINOR }}
@@ -134,6 +136,15 @@ jobs:
 
   announce:
     name: Announce new release
+    needs:
+      - setup
+      - move-artifacts
+      - git-tag
+      - changelog
+      - git-patch-branch
+      - bump-version
+      - jira-release
+      - archetype
     runs-on: ubuntu-latest
     steps:
       - name: Notify uniport team
@@ -144,4 +155,4 @@ jobs:
           message: |
             A **new release** just happened! 🚀
 
-            ${{ github.repository }}: ${{ inputs.version }}
+            [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md): `${{ inputs.version }}`
