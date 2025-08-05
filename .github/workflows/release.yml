@@ -99,7 +99,7 @@ jobs:
 
   git-patch-branch:
     name: Create patch branch
-    needs: [setup]
+    needs: [setup, changelog]
     uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@main
     permissions:
       contents: write # create branch
@@ -110,7 +110,7 @@ jobs:
 
   bump-version:
     name: Bump version
-    needs: [setup]
+    needs: [setup, git-patch-branch, changelog]
     uses: uniport/workflows/.github/workflows/version-bump.yml@main
     permissions:
       contents: write # update version
