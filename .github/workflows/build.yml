@@ -122,7 +122,7 @@ jobs:
           mvn -B --settings .github/settings.xml initialize spotbugs:check
 
       - name: Check uncommited code
-        uses: uniport/workflows/.github/actions/check-uncommitted-code@main
+        uses: uniport/workflows/.github/actions/ensure-no-uncommitted-code@main
 
       - name: Zip dist directory for artifacts
         working-directory: docs/src/main/mkdocs
