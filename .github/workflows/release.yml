@@ -65,8 +65,8 @@ jobs:
           - **PATCH**: \`${{ steps.parse.outputs.PATCH }}\`
           EOF
 
-  move-artifacts:
-    name: Move artifacts on Nexus3
+  promote:
+    name: Promote Nexus Artifact
     needs: [setup]
     uses: uniport/workflows/.github/workflows/move-nexus-artifacts.yml@main
     with:
@@ -127,7 +127,7 @@ jobs:
     with:
       version: ${{ inputs.version }}
       semver: ${{ needs.setup.outputs.SEM_VER }}
-      component_name: Uniport-Gateway
+      component_name: ${{ vars.JIRA_RELEASE_NAME_PREFIX }}
     secrets:
       ATLASSIAN_AUTH_TOKEN: ${{ secrets.ATLASSIAN_AUTH_TOKEN }}
 
@@ -137,7 +137,7 @@ jobs:
     uses: uniport/workflows/.github/workflows/update-archetype.yml@main
     with:
       version: ${{ inputs.version }}
-      component_name: uniport-gateway
+      component_name: ${{ vars.ARCHETYPE_COMPONENT_NAME}}
       command: release
     secrets:
       UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
@@ -146,7 +146,7 @@ jobs:
     name: Announce new release
     needs:
       - setup
-      - move-artifacts
+      - promote
       - git-tag
       - changelog
       - git-patch-branch
