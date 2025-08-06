@@ -6,11 +6,15 @@ The Uniport-Gateway acts as an reverse proxy for all requests in Uniport.
 
 ## Why yet another reverse proxy?
 
+There are some unique requirements that could not be fulfilled by an existing implementation including, but not limited to:
+
 * Relying party as a reverse proxy with routing
 * Handling parallel authentication requests
 * Session bag - only the session cookie leaves the platform
 * HA deployment on Kubernetes
 * Maximum flexibility with minimal components
+
+Regarding the architecture it is heavily inspired by [traefik](https://github.com/traefik/traefik).
 
 ## Overview
 
@@ -22,7 +26,7 @@ The Uniport-Gateway build on top of the concepts of `entrypoints`, `routers`, `m
 * A `router` passes the request to a `service` that forward the request to the destination server
 * A `provider` reads configuration, e.g. from a file, and provisions the `router`, `middlewares` and `services` accordingly.
 
-![Concept](./docs/content/01-introduction/data/Concept.png)
+![Concept](./docs/src/main/mkdocs/content/01-introduction/data/Concept.png)
 
 ## Configuration
 
