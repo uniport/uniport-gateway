@@ -9,8 +9,8 @@ dev_addr: "127.0.0.1:8000"
 # strict: true
 
 # Repository
-repo_name: portal-gateway
-repo_url: https://github.com/uniport/portal-gateway
+repo_name: uniport-gateway
+repo_url: https://github.com/uniport/uniport-gateway
 
 docs_dir: "content"
 

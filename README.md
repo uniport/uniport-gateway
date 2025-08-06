@@ -1,6 +1,6 @@
 # Uniport-Gateway
 
-[![Main build](https://github.com/uniport/portal-gateway/actions/workflows/main.yaml/badge.svg)](https://github.com/uniport/portal-gateway/actions/workflows/main.yaml)
+[![Main build](https://github.com/uniport/uniport-gateway/actions/workflows/main.yaml/badge.svg)](https://github.com/uniport/uniport-gateway/actions/workflows/main.yaml)
 
 The Uniport-Gateway acts as an reverse proxy for all requests in Uniport.
 

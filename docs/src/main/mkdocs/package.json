@@ -7,7 +7,7 @@
   "author": "Uniport <info@inventage.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uniport/portal-gateway.git"
+    "url": "https://github.com/uniport/uniport-gateway.git"
   },
   "scripts": {
     "build": "docker run --rm -v ${PWD}:/docs uniportcr.artifacts.inventage.com/squidfunk/mkdocs-material:$npm_package_config_version_mkdocs build --site-dir build",

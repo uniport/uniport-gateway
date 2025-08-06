@@ -5,7 +5,7 @@
 ### Contents
 
 - [Contributing Guidelines](#contributing-guidelines)
-  - [Contents](#contents)
+    - [Contents](#contents)
   - [:book: Code of Conduct](#book-code-of-conduct)
   - [:bulb: Asking Questions](#bulb-asking-questions)
   - [:inbox\_tray: Opening an Issue](#inbox_tray-opening-an-issue)
@@ -25,11 +25,11 @@
 
 ## :book: Code of Conduct
 
-Please review our [Code of Conduct](https://github.com/uniport/portal-gateway/blob/main/CODE_OF_CONDUCT.md). It is in effect at all times. We expect it to be honored by everyone who contributes to this project. Acting like an asshole will not be tolerated.
+Please review our [Code of Conduct](https://github.com/uniport/uniport-gateway/blob/main/CODE_OF_CONDUCT.md). It is in effect at all times. We expect it to be honored by everyone who contributes to this project. Acting like an asshole will not be tolerated.
 
 ## :bulb: Asking Questions
 
-Please use [discussions](https://github.com/uniport/portal-gateway/discussions). Moreover, GitHub issues are not the appropriate place to debug your specific project, but should be reserved for filing bugs and feature requests.
+Please use [discussions](https://github.com/uniport/uniport-gateway/discussions). Moreover, GitHub issues are not the appropriate place to debug your specific project, but should be reserved for filing bugs and feature requests.
 
 ## :inbox_tray: Opening an Issue
 
@@ -37,7 +37,7 @@ Before [creating an issue](https://help.github.com/en/github/managing-your-work-
 
 ### :lock: Reporting Security Issues
 
-Review our [Security Policy](https://github.com/uniport/portal-gateway/blob/main/SECURITY.md). **Do not** file a public issue for security vulnerabilities.
+Review our [Security Policy](https://github.com/uniport/uniport-gateway/blob/main/SECURITY.md). **Do not** file a public issue for security vulnerabilities.
 
 ### :beetle: Bug Reports and Other Issues
 

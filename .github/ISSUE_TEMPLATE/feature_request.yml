@@ -10,7 +10,7 @@ body:
       value: |
         Read this first before creating an issue:
 
-        - do not use this issue tracker to ask questions, instead start a [discussion](https://github.com/uniport/portal-gateway/discussions). Questions will likely be closed without notice.
+        - do not use this issue tracker to ask questions, instead start a [discussion](https://github.com/uniport/uniport-gateway/discussions). Questions will likely be closed without notice.
         - you shall create a feature request only when it is general purpose enough.
         - make sure that the feature is not already implemented.
   - type: textarea
