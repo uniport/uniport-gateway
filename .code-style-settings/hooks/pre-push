@@ -2,6 +2,14 @@
 
 set -Eeuo pipefail
 
+ignore_errors() {
+    # Ignoring all errors as this is a convenience feature.
+    exit 0
+}
+
+trap "ignore_errors" EXIT
+
+
 # An hook script to print the link to the build. Called by "git
 # push" after it has checked the remote status, but before anything has been
 # pushed. If this script exits with a non-zero status nothing will be pushed.
@@ -20,27 +28,27 @@ set -Eeuo pipefail
 
 echo "[git pre-push hook] Running build job URL generation."
 
-CI_HOST="ci.inventage.com"
-CI_GROUP="Inventage Portal"
-CI_MULTIBRANCH_NAME="Build"
+JENKINS_HOST="ci.inventage.com"
+JENKINS_GROUP="Inventage Portal"
+JENKINS_MULTIBRANCH_NAME="Build"
+
+GITHUB_HOST="github.com"
+GITHUB_ORG="uniport"
 
 Z40=0000000000000000000000000000000000000000
 
+# https://inventage-all.atlassian.net/wiki/spaces/PORTAL/pages/472907779/GitHub+Actions+Migration
 declare -A REPO_TO_BUILD_NAME
 REPO_TO_BUILD_NAME["analytics"]="Analytics"
 REPO_TO_BUILD_NAME["antivirus"]="Antivirus"
 REPO_TO_BUILD_NAME["archetype-inventage-portal-solution"]="Archetype Inventage Portal Solution"
 REPO_TO_BUILD_NAME["archetype-portal-hasura-quarkus-postgres"]="Archetype Microservice"
-REPO_TO_BUILD_NAME["base"]="Base"
 REPO_TO_BUILD_NAME["code-style-settings"]="Code-Style-Settings"
 REPO_TO_BUILD_NAME["content"]="Content"
 REPO_TO_BUILD_NAME["conversation"]="Conversation"
-REPO_TO_BUILD_NAME["dashboard"]="Dashboard"
 REPO_TO_BUILD_NAME["filestorage"]="FileStorage"
 REPO_TO_BUILD_NAME["notification"]="Notification"
-REPO_TO_BUILD_NAME["organisation"]="Organisation"
 REPO_TO_BUILD_NAME["portal-database"]="Portal Database"
-REPO_TO_BUILD_NAME["portal-gateway"]="Portal Gateway"
 REPO_TO_BUILD_NAME["portal-helm-chart-library"]="Portal Helm Chart Library"
 REPO_TO_BUILD_NAME["portal-iam"]="Portal IAM"
 REPO_TO_BUILD_NAME["portal-messaging"]="Portal Messaging"
@@ -48,6 +56,14 @@ REPO_TO_BUILD_NAME["portal-monitoring"]="Portal Monitoring"
 REPO_TO_BUILD_NAME["portal-secrets"]="Portal Secrets"
 REPO_TO_BUILD_NAME["sms"]="SMS"
 REPO_TO_BUILD_NAME["template"]="Template"
+
+# repo on github actions
+declare -A REPOS=(
+    ["base"]=1
+    ["dashboard"]=1
+    ["organisation"]=1
+    ["uniport-gateway"]=1
+)
 
 # shellcheck disable=SC2034
 REMOTE="$1"
@@ -63,13 +79,7 @@ ORG=${ORG%%/*} # chop off everything after the first '/'
 
 # extract repo
 REPO=${URL#*/}   # chop off the beginning until the first '/'
-REPO=${REPO%%.*} # chop off the beginning until the first '.'
-
-BUILD_NAME="${REPO_TO_BUILD_NAME[$REPO]}"
-if [ -z "${BUILD_NAME}" ]; then
-    echo "[git pre-push hook] Unknown repository '$REPO'! Can't print build job URL."
-    exit 0 # still exit normally to proceed with the push
-fi
+REPO=${REPO%%.*} # chop off everything after the first '.'
 
 REMOTE_BRANCH=""
 # shellcheck disable=SC2034
@@ -90,8 +100,38 @@ if [ -z "${REMOTE_BRANCH}" ]; then
     exit 0 # still exit normally to proceed with the push
 fi
 
-echo "[git pre-push hook] Build job URL:"
-echo -n "    " # intend the following line
-echo "https://$CI_HOST/job/$CI_GROUP/job/$BUILD_NAME/job/$CI_MULTIBRANCH_NAME/job/$REMOTE_BRANCH/" | sed "s/\s/%20/g"
+function jenkins() {
+    if [[ ! -v "REPO_TO_BUILD_NAME[$REPO]" ]] ; then
+        echo "[git pre-push hook] Unknown repository '$REPO'! Can't print build job URL."
+        exit 0 # still exit normally to proceed with the push
+    fi
+
+    BUILD_NAME="${REPO_TO_BUILD_NAME[$REPO]}"
+    if [ -z "${BUILD_NAME}" ]; then
+        echo "[git pre-push hook] Unknown build name '$BUILD_NAME'! Can't print build job URL."
+        exit 0 # still exit normally to proceed with the push
+    fi
+
+    echo "[git pre-push hook] Build job URL:"
+    echo -n "    " # intend the following line
+    echo "https://$JENKINS_HOST/job/$JENKINS_GROUP/job/$BUILD_NAME/job/$JENKINS_MULTIBRANCH_NAME/job/$REMOTE_BRANCH/" | sed "s/\s/%20/g"
+}
+
+function github() {
+    if [[ ! -v "REPOS[$REPO]" ]] ; then
+        echo "[git pre-push hook] Unknown repository '$REPO'! Can't print build job URL."
+        exit 0 # still exit normally to proceed with the push
+    fi
+
+    echo "[git pre-push hook] Build job URL:"
+    echo -n "    " # intend the following line
+    echo "https://$GITHUB_HOST/$GITHUB_ORG/$REPO/actions"
+}
+
+if [[ -v "REPOS[$REPO]" ]] ; then
+    github
+else
+    jenkins
+fi
 
 exit 0
