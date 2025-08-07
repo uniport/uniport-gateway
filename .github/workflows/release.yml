@@ -40,6 +40,10 @@ on:
         description: "Update the archetype"
         default: true
         type: boolean
+      github_release:
+        description: "Create a GitHub release"
+        default: true
+        type: boolean
       send_announcement:
         description: "Announce the release on Rocket.Chat"
         default: true
@@ -47,7 +51,7 @@ on:
 
 jobs:
   release:
-    name: Setup
+    name: Release
     uses: uniport/workflows/.github/workflows/release.yml@main
     permissions:
       contents: write # create tag, create branch, update version, update changelog
@@ -61,6 +65,7 @@ jobs:
       bump_version: ${{ inputs.bump_version }}
       jira_release: ${{ inputs.jira_release }}
       update_archetype: ${{ inputs.update_archetype }}
+      github_release: ${{ inputs.github_release }}
       send_announcement: ${{ inputs.send_announcement }}
       jira_release_name_prefix: ${{ vars.JIRA_RELEASE_NAME_PREFIX }}
       archetype_component_name: ${{ vars.ARCHETYPE_COMPONENT_NAME }}
