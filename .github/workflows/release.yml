@@ -46,165 +46,26 @@ on:
         type: boolean
 
 jobs:
-  setup:
+  release:
     name: Setup
-    runs-on: ubuntu-latest
-    outputs:
-      SEM_VER: ${{ steps.parse.outputs.sem_ver }}
-      BUILD_DATE: ${{ steps.parse.outputs.build_date }}
-      RUN_ID: ${{ steps.parse.outputs.run_id }}
-      COMMIT_SHA: ${{ steps.parse.outputs.commit_sha }}
-      MAJOR: ${{ steps.parse.outputs.major }}
-      MINOR: ${{ steps.parse.outputs.minor }}
-      PATCH: ${{ steps.parse.outputs.patch }}
-    steps:
-      - name: Validate version format
-        uses: uniport/workflows/.github/actions/validate-version@main
-        with:
-          version: ${{ inputs.version }}
-
-      - name: Check if target branch exists
-        id: branch_check
-        uses: uniport/workflows/.github/actions/ensure-branch@main
-        with:
-          branch: ${{ inputs.target_branch }}
-
-      - name: Parse version string
-        id: parse
-        uses: uniport/workflows/.github/actions/parse-version@main
-        with:
-          version: ${{ inputs.version }}
-
-      - name: Summary
-        shell: bash
-        run: |
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ### Inputs
-          - **version**: \`${{ inputs.version }}\`
-          - **target_branch**: \`${{ inputs.target_branch }}\`
-
-          ## Parse Version
-          ### Outputs
-          - **SEM_VER**: \`${{ steps.parse.outputs.SEM_VER }}\`
-          - **BUILD_DATE**: \`${{ steps.parse.outputs.BUILD_DATE }}\`
-          - **RUN_ID**: \`${{ steps.parse.outputs.RUN_ID }}\`
-          - **COMMIT_SHA**: \`${{ steps.parse.outputs.COMMIT_SHA }}\`
-
-          ## Parse SemVer
-          ### Outputs
-          - **MAJOR**: \`${{ steps.parse.outputs.MAJOR }}\`
-          - **MINOR**: \`${{ steps.parse.outputs.MINOR }}\`
-          - **PATCH**: \`${{ steps.parse.outputs.PATCH }}\`
-          EOF
-
-  promote:
-    name: Promote Nexus Artifact
-    if: ${{ inputs.promote_artifacts }}
-    needs: [setup]
-    uses: uniport/workflows/.github/workflows/move-nexus-artifacts.yml@main
+    uses: uniport/workflows/.github/workflows/release.yml@main
+    permissions:
+      contents: write # create tag, create branch, update version, update changelog
     with:
       version: ${{ inputs.version }}
-      move_docker_helm: true
-      move_maven: true
+      target_branch: ${{ inputs.target_branch }}
+      promote_artifacts: ${{ inputs.promote_artifacts }}
+      create_tag: ${{ inputs.create_tag }}
+      update_changelog: ${{ inputs.update_changelog }}
+      create_patch_branch: ${{ inputs.create_patch_branch }}
+      bump_version: ${{ inputs.bump_version }}
+      jira_release: ${{ inputs.jira_release }}
+      update_archetype: ${{ inputs.update_archetype }}
+      send_announcement: ${{ inputs.send_announcement }}
+      jira_release_name_prefix: ${{ vars.JIRA_RELEASE_NAME_PREFIX }}
+      archetype_component_name: ${{ vars.ARCHETYPE_COMPONENT_NAME }}
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
-
-  git-tag:
-    name: Create git tag
-    if: ${{ inputs.create_tag }}
-    needs: [setup]
-    uses: uniport/workflows/.github/workflows/git-tag.yml@main
-    permissions:
-      contents: write # create tag
-    with:
-      tag_name: "${{ needs.setup.outputs.SEM_VER }}"
-      tag_message: "${{ inputs.version }}"
-      commit_sha: "${{ needs.setup.outputs.COMMIT_SHA }}"
-
-  changelog:
-    name: Update changelog
-    if: ${{ inputs.update_changelog }}
-    needs: [setup]
-    uses: uniport/workflows/.github/workflows/changelog-update.yml@main
-    permissions:
-      contents: write # update changelog
-    with:
-      version: ${{ inputs.version }}
-      branch_name: ${{ inputs.target_branch }}
-
-  git-patch-branch:
-    name: Create patch branch
-    # Ensure this job runs only if the previous job succeeded or was skipped
-    if: ${{ always() && inputs.create_patch_branch && (needs.changelog.result == 'success' || needs.changelog.result == 'skipped') }}
-    needs: [setup, changelog]
-    uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@main
-    permissions:
-      contents: write # create branch
-    with:
-      major: ${{ needs.setup.outputs.MAJOR }}
-      minor: ${{ needs.setup.outputs.MINOR }}
-      patch: ${{ needs.setup.outputs.PATCH }}
-      branch_name: ${{ inputs.target_branch }}
-
-  bump-version:
-    name: Bump version
-    # Ensure this job runs only if the previous jobs succeeded or was skipped (only skip if both previous jobs have failed)
-    if: ${{ always() && inputs.bump_version && (needs.changelog.result == 'success' || needs.changelog.result == 'skipped') && (needs.git-patch-branch.result == 'success' || needs.git-patch-branch.result == 'skipped') }}
-    needs: [setup, git-patch-branch, changelog]
-    uses: uniport/workflows/.github/workflows/version-bump.yml@main
-    permissions:
-      contents: write # update version
-    with:
-      major: ${{ needs.setup.outputs.MAJOR }}
-      minor: ${{ needs.setup.outputs.MINOR }}
-      patch: ${{ needs.setup.outputs.PATCH }}
-      branch_name: ${{ inputs.target_branch }}
-
-  jira-release:
-    name: Do Jira release
-    if: ${{ inputs.jira_release }}
-    needs: [setup]
-    uses: uniport/workflows/.github/workflows/jira-release.yml@main
-    with:
-      version: ${{ inputs.version }}
-      semver: ${{ needs.setup.outputs.SEM_VER }}
-      component_name: ${{ vars.JIRA_RELEASE_NAME_PREFIX }}
-    secrets:
       ATLASSIAN_AUTH_TOKEN: ${{ secrets.ATLASSIAN_AUTH_TOKEN }}
-
-  archetype:
-    name: Update Archetype
-    if: ${{ inputs.update_archetype }}
-    needs: [setup]
-    uses: uniport/workflows/.github/workflows/update-archetype.yml@main
-    with:
-      version: ${{ inputs.version }}
-      component_name: ${{ vars.ARCHETYPE_COMPONENT_NAME}}
-      command: release
-    secrets:
       UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
-
-  announce:
-    name: Announce new release
-    # this send an announcement iff no job was skipped
-    if: ${{ inputs.send_announcement }}
-    needs:
-      - setup
-      - promote
-      - git-tag
-      - changelog
-      - git-patch-branch
-      - bump-version
-      - jira-release
-      - archetype
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify uniport team
-        uses: uniport/workflows/.github/actions/send-rocket-chat-message@main
-        with:
-          webhook_url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          channel: uniport
-          message: |
-            A **new release** just happened! 🚀
-
-            [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md): `${{ inputs.version }}`
+      ROCKETCHAT_WEBHOOK_URL: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
