@@ -12,6 +12,38 @@ on:
         description: "The branch where the changelog will be updated and the version bumped"
         required: true
         type: string
+      promote_artifacts:
+        description: "Promote Nexus3 artifacts"
+        default: true
+        type: boolean
+      create_tag:
+        description: "Create the git tag"
+        default: true
+        type: boolean
+      update_changelog:
+        description: "Update the changelog"
+        default: true
+        type: boolean
+      create_patch_branch:
+        description: "Create the git patch branch"
+        default: true
+        type: boolean
+      bump_version:
+        description: "Set the next version"
+        default: true
+        type: boolean
+      jira_release:
+        description: "Do a Jira release"
+        default: true
+        type: boolean
+      update_archetype:
+        description: "Update the archetype"
+        default: true
+        type: boolean
+      send_announcement:
+        description: "Announce the release on Rocket.Chat"
+        default: true
+        type: boolean
 
 jobs:
   setup:
@@ -67,6 +99,7 @@ jobs:
 
   promote:
     name: Promote Nexus Artifact
+    if: ${{ inputs.promote_artifacts }}
     needs: [setup]
     uses: uniport/workflows/.github/workflows/move-nexus-artifacts.yml@main
     with:
@@ -78,6 +111,7 @@ jobs:
 
   git-tag:
     name: Create git tag
+    if: ${{ inputs.create_tag }}
     needs: [setup]
     uses: uniport/workflows/.github/workflows/git-tag.yml@main
     permissions:
@@ -89,6 +123,7 @@ jobs:
 
   changelog:
     name: Update changelog
+    if: ${{ inputs.update_changelog }}
     needs: [setup]
     uses: uniport/workflows/.github/workflows/changelog-update.yml@main
     permissions:
@@ -99,6 +134,8 @@ jobs:
 
   git-patch-branch:
     name: Create patch branch
+    # Ensure this job runs only if the previous job succeeded or was skipped
+    if: ${{ always() && inputs.create_patch_branch && (needs.changelog.result == 'success' || needs.changelog.result == 'skipped') }}
     needs: [setup, changelog]
     uses: uniport/workflows/.github/workflows/git-patch-branch-create.yml@main
     permissions:
@@ -107,9 +144,12 @@ jobs:
       major: ${{ needs.setup.outputs.MAJOR }}
       minor: ${{ needs.setup.outputs.MINOR }}
       patch: ${{ needs.setup.outputs.PATCH }}
+      branch_name: ${{ inputs.target_branch }}
 
   bump-version:
     name: Bump version
+    # Ensure this job runs only if the previous jobs succeeded or was skipped (only skip if both previous jobs have failed)
+    if: ${{ always() && inputs.bump_version && (needs.changelog.result == 'success' || needs.changelog.result == 'skipped') && (needs.git-patch-branch.result == 'success' || needs.git-patch-branch.result == 'skipped') }}
     needs: [setup, git-patch-branch, changelog]
     uses: uniport/workflows/.github/workflows/version-bump.yml@main
     permissions:
@@ -122,6 +162,7 @@ jobs:
 
   jira-release:
     name: Do Jira release
+    if: ${{ inputs.jira_release }}
     needs: [setup]
     uses: uniport/workflows/.github/workflows/jira-release.yml@main
     with:
@@ -133,6 +174,7 @@ jobs:
 
   archetype:
     name: Update Archetype
+    if: ${{ inputs.update_archetype }}
     needs: [setup]
     uses: uniport/workflows/.github/workflows/update-archetype.yml@main
     with:
@@ -144,6 +186,8 @@ jobs:
 
   announce:
     name: Announce new release
+    # this send an announcement iff no job was skipped
+    if: ${{ inputs.send_announcement }}
     needs:
       - setup
       - promote
