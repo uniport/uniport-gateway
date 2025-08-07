@@ -35,7 +35,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: macduff
+    runs-on: ubuntu-latest
     env:
       CI_AUTH_USR: ${{ vars.NEXUS3_USER }}
       CI_AUTH_PSW: ${{ secrets.NEXUS3_PW }}
