@@ -44,10 +44,6 @@ on:
         description: "Create a GitHub release"
         default: true
         type: boolean
-      send_announcement:
-        description: "Announce the release on Rocket.Chat"
-        default: true
-        type: boolean
 
 jobs:
   release:
@@ -66,7 +62,7 @@ jobs:
       jira_release: ${{ inputs.jira_release }}
       update_archetype: ${{ inputs.update_archetype }}
       github_release: ${{ inputs.github_release }}
-      send_announcement: ${{ inputs.send_announcement }}
+      send_announcement: true
       jira_release_name_prefix: ${{ vars.JIRA_RELEASE_NAME_PREFIX }}
       archetype_component_name: ${{ vars.ARCHETYPE_COMPONENT_NAME }}
     secrets:
