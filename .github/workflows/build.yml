@@ -75,7 +75,7 @@ jobs:
       - name: Setup Java
         uses: uniport/workflows/.github/actions/setup-java@main
         with:
-          architecture: ${{ contains(runner.name, 'macduff') && 'aarch64' || 'x64' }}
+          architecture: ${{ contains(runner.name, 'macduff') && 'aarch64' || '' }}
           cache-maven: ${{ !contains(runner.name, 'macduff') }}
 
       - name: Unlock keychain
