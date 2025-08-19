@@ -17,9 +17,7 @@
             {
                 "name": "whoami1",
                 "rule": "PathPrefix('/whoami1')",
-                "middlewares": [
-                    "whoami1AuthBearer"
-                ],
+                "middlewares": [],
                 "service": "whoami1"
             },
             {
@@ -27,19 +25,9 @@
                 "rule": "PathPrefix('/whoami2')",
                 "priority": 50,
                 "middlewares": [
-                    "whoami2Oauth",
-                    "whoami2AuthBearer"
+                    "whoami2BearerOnly"
                 ],
                 "service": "whoami2"
-            },
-            {
-                "name": "backChannelLogout",
-                "middlewares": [
-                    "logoutRedirectRegex",
-                    "backChannelLogout"
-                ],
-                "rule": "PathPrefix('/backchannellogout')",
-                "service": "whoami1"
             }
         ],
         "middlewares": [
@@ -52,32 +40,8 @@
                 }
             },
             {
-                "name": "whoami2Oauth",
-                "type": "oauth2",
-                "options": {
-                    "clientId": "testclient",
-                    "clientSecret": "**********",
-                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
-                    "sessionScope": "whoami2"
-                }
-            },
-            {
-                "name": "whoami1AuthBearer",
-                "type": "authorizationBearer",
-                "options": {
-                    "sessionScope": "whoami2"
-                }
-            },
-            {
-                "name": "whoami2AuthBearer",
-                "type": "authorizationBearer",
-                "options": {
-                    "sessionScope": "whoami2"
-                }
-            },
-            {
-                "name": "backChannelLogout",
-                "type": "backChannelLogout",
+                "name": "whoami2BearerOnly",
+                "type": "bearerOnly",
                 "options": {
                     "publicKeys": [
                         {
@@ -88,18 +52,20 @@
                         "testclient"
                     ],
                     "issuer": "http://localhost:20000/auth/realms/testrealm",
+                    "optional": "false",
+                    "claims": [
+                        {
+                            "claimPath": "$['resource_access']['whoami2']['roles']",
+                            "operator": "CONTAINS",
+                            "value": [
+                                "ADMIN"
+                            ]
+                        }
+                    ],
                     "publicKeysReconciliation": {
                         "enabled": true,
                         "intervalMs": 3600000
                     }
-                }
-            },
-            {
-                "name": "logoutRedirectRegex",
-                "type": "redirectRegex",
-                "options": {
-                    "regex": "^/logout(.*)$",
-                    "replacement": "/whoami1"
                 }
             }
         ],

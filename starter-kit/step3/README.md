@@ -10,7 +10,7 @@ docker compose up
 
 Verify everything is [set up correctly](../auth/README.md).
 
-Then visit <http://localhost:20000> (unprotected) or <http://localhost:20000/whoami1> (protected) and use the test user to login `user1@mail.com`/`user1...`.
+Then visit <http://localhost:20000/whoami1> (unprotected) or <http://localhost:20000/whoami2> (protected) and use the test user to login `user1@mail.com`/`user1...`.
 
 ## Background
 

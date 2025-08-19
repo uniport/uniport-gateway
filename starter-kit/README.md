@@ -30,6 +30,10 @@
 
 * [Backchannel-logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)
 
+### Step 8
+
+* JWT bearer token authorization
+
 ### Future Step Ideas
 
 * env vars in config

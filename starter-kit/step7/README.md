@@ -10,7 +10,7 @@ docker compose up
 
 Verify everything is [set up correctly](../auth/README.md).
 
-Then visit <http://localhost:20000> (unprotected) or <http://localhost:20000/whoami1> (protected) and use the test user to login `user1@mail.com`/`user1...`.
+Then visit <http://localhost:20000/whoami1> (unprotected) or <http://localhost:20000/whoami2> (protected) and use the test user to login `user1@mail.com`/`user1...`.
 
 Then visit to <http://localhost:20000/auth>, login with `admin/admin` and navigate to `testrealm` > `sessions`, where you should see an existing session for `user1`.
 On the three dots to the right, the user can be logged out. This also trigger a back-channel logout to the Uniport-Gateway and destroys the corresponding session.
