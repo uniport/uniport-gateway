@@ -8,6 +8,10 @@ on:
     secrets:
       NEXUS3_PW:
         required: true
+      NEXUS_NPM_TOKEN_READ_ONLY:
+        required: true
+      MACDUFF_KEYCHAIN_PASSWORD:
+        required: true
     outputs:
       VERSION:
         description: "Build version"
@@ -15,6 +19,12 @@ on:
       GROUP_ID:
         description: "The maven groupId attribute"
         value: ${{ jobs.build.outputs.GROUP_ID }}
+      run_id:
+        description: "The run-id of the job that uploaded the build artifact"
+        value: ${{ github.run_id }}
+      branch_name_slug:
+        description: "The slug of the current branch"
+        value: ${{ jobs.build.outputs.branch_name_slug }}
 
 jobs:
   build:
@@ -23,29 +33,49 @@ jobs:
     env:
       CI_AUTH_USR: ${{ vars.NEXUS3_USER }}
       CI_AUTH_PSW: ${{ secrets.NEXUS3_PW }}
+      HELM_REGISTRY_CONFIG: "~/.docker/config.json"
     outputs:
       VERSION: ${{ steps.vars.outputs.RC_VERSION }}
       GROUP_ID: ${{ steps.vars.outputs.GROUP_ID }}
+      branch_name_slug: ${{ steps.slug.outputs.branch-name-slug }}
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/master branch in the configuration
+          # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/main branch in the configuration
           fetch-depth: 0
 
-      - name: Setup Variables
+      - name: Setup Maven Variables
         id: vars
         uses: uniport/workflows/.github/actions/setup-maven-build-variables@main
 
+      - uses: gacts/github-slug@v1
+        id: slug
+
       - name: Setup Java
         uses: uniport/workflows/.github/actions/setup-java@main
+        with:
+          architecture: ${{ contains(runner.name, 'macduff') && 'aarch64' || '' }}
+          cache-maven: ${{ !contains(runner.name, 'macduff') }}
+
+      - name: Unlock keychain
+        if: contains(runner.name, 'macduff')
+        run: |
+          security unlock-keychain -p "${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}"
 
       - name: Setup Helm
         uses: uniport/workflows/.github/actions/add-helm-repositories@main
         with:
-          username: ${{ vars.NEXUS3_USER }}
-          password: ${{ secrets.NEXUS3_PW }}
+          username: ${{ env.CI_AUTH_USR }}
+          password: ${{ env.CI_AUTH_PSW }}
+
+      - name: Login to Nexus Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: uniportcr.artifacts.inventage.com
+          username: ${{ env.CI_AUTH_USR }}
+          password: ${{ env.CI_AUTH_PSW }}
 
       - name: Set version
         uses: uniport/workflows/.github/actions/set-maven-project-version@main
@@ -55,18 +85,18 @@ jobs:
 
       - name: Maven build
         run: |
-          mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -P!local,ci -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
+          mvn -B -V --no-transfer-progress --update-snapshots --settings .github/settings.xml -DmultiArchBuild=true -Djava.io.tmpdir=. deploy
 
       - name: Checkstyle
         run: |
-          mvn -B --settings .github/settings.xml -P '!local,ci' initialize checkstyle:check
+          mvn -B --settings .github/settings.xml initialize checkstyle:check
 
       - name: Spotbugs
         run: |
-          mvn -B --settings .github/settings.xml -P '!local,ci' initialize spotbugs:check
+          mvn -B --settings .github/settings.xml initialize spotbugs:check
 
-      - name: Check uncommited code
-        run: ./.github/scripts/check_clean_working_directory.sh
+      - name: Check uncommitted code
+        uses: uniport/workflows/.github/actions/ensure-no-uncommitted-code@main
 
       - name: Summary
         run: |
@@ -76,4 +106,5 @@ jobs:
           ### Outputs
           - **VERSION**: \`${{ steps.vars.outputs.RC_VERSION }}\`
           - **GROUP_ID**: \`${{ steps.vars.outputs.GROUP_ID }}\`
+          - **branch_name_slug**: \`${{ steps.slug.outputs.branch-name-slug }}\`
           EOF

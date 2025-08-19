@@ -1,0 +1,35 @@
+name: Preview Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+      - dependabot/**
+
+# Prevent running builds for the same branch in parallel
+# New workflows will cancel existing workflows…
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (preview)
+    uses: ./.github/workflows/build.yml
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+      NEXUS_NPM_TOKEN_READ_ONLY: ${{ secrets.NEXUS_NPM_TOKEN_READ_ONLY }}
+      MACDUFF_KEYCHAIN_PASSWORD: ${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}
+
+  tag:
+    name: Nexus Tagging
+    needs: [build]
+    uses: uniport/workflows/.github/workflows/tag-nexus-artifacts.yml@main
+    with:
+      version: ${{ needs.build.outputs.VERSION }}
+      group_id: ${{ needs.build.outputs.GROUP_ID }}
+      tag_docker: true
+      tag_maven: true
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
