@@ -1,4 +1,4 @@
-# Uniport-Gateway
+# Uniport-Gateway Starter Kit
 
 ## Steps
 
