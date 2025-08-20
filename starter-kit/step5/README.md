@@ -1,4 +1,4 @@
-# Step 5
+# Step 5 - Multiple sites with a shared SSO session
 
 ## Run
 

@@ -1,4 +1,4 @@
-# Step 8
+# Step 8 - JWT Authorization
 
 ## Run
 

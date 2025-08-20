@@ -1,4 +1,4 @@
-# Step &
+# Step 7 - Back-channel logout
 
 ## Run
 

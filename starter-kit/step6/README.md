@@ -1,4 +1,4 @@
-# Step 6
+# Step 6 - Organizing your dynamic configuration
 
 ## Run
 

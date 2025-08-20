@@ -8,7 +8,7 @@
 
 ### Step 2
 
-* Telemetry (Tracing & Logging)
+* Telemetry with Tracing & Logging
 
 ### Step 3
 
@@ -20,7 +20,7 @@
 
 ### Step 5
 
-* Multiple hosts with a shared Keycloak Session i.e. SSO session
+* Multiple sites with a shared Keycloak Session i.e. SSO session
 
 ### Step 6
 
@@ -28,7 +28,7 @@
 
 ### Step 7
 
-* [Backchannel-logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)
+* [Back-channel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)
 
 ### Step 8
 

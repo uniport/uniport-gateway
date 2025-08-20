@@ -1,4 +1,4 @@
-# Step 2
+# Step 2 - Telemetry with Tracing & Logging
 
 ## Run
 
