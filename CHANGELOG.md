@@ -43,6 +43,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 ### Fixed
 
 - Fix websocket upgrade error [PORTAL-2445](https://inventage-all.atlassian.net/browse/PORTAL-2445).
+- Fixed an issue where a session is not properly deleted/destroyed on a back-channel logout [PORTAL-2449](https://inventage-all.atlassian.net/browse/PORTAL-2449).
 
 ## [9.5.0]-202506100904-135-d216a4a - 2025-06-10
 
