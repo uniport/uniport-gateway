@@ -70,3 +70,19 @@ jobs:
       ATLASSIAN_AUTH_TOKEN: ${{ secrets.ATLASSIAN_AUTH_TOKEN }}
       UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
       ROCKETCHAT_WEBHOOK_URL: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+
+  mirror:
+    name: Mirror images
+    if: ${{ inputs.promote_artifacts }}
+    uses: uniport/workflows/.github/workflows/copy-docker-image.yml@main
+    permissions:
+      packages: write # push docker image
+    with:
+      version: ${{ inputs.version }}
+      source_registry: uniportcr.artifacts.inventage.com
+      source_image: ch.uniport.gateway.uniport-gateway
+      destination_registry: ghcr.io
+      destination_image: uniport/uniport-gateway
+    secrets:
+      source_credentials: "${{ vars.NEXUS3_USER }}:${{ secrets.NEXUS3_PW }}"
+      destination_credentials: "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
