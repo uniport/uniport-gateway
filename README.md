@@ -62,6 +62,8 @@ mvn clean install
 
 (It is also possible to use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens), instead of username/password)
 
+Alternatively, the **latest releases** are available on the GitHub Container Registry: <https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway>
+
 ## Launch
 
 ### IDE
