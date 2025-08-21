@@ -1,5 +1,11 @@
 FROM ${docker.registry}/eclipse-temurin:${maven.compiler.release}-jre
 
+LABEL org.opencontainers.image.title="Uniport-Gateway"
+LABEL org.opencontainers.image.description="The secure front door to all Uniport services"
+LABEL org.opencontainers.image.vendor="Uniport"
+LABEL org.opencontainers.image.source="https://github.com/uniport/uniport-gateway"
+LABEL org.opencontainers.image.licenses="MIT"
+
 WORKDIR /app
 
 COPY dependency-jars dependency-jars
