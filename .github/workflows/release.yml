@@ -13,7 +13,7 @@ on:
         required: true
         type: string
       promote_artifacts:
-        description: "Promote Nexus3 artifacts"
+        description: "Promote artifacts"
         default: true
         type: boolean
       create_tag:
@@ -54,7 +54,8 @@ jobs:
     with:
       version: ${{ inputs.version }}
       target_branch: ${{ inputs.target_branch }}
-      promote_artifacts: ${{ inputs.promote_artifacts }}
+      promote_docker_helm_artifacts: ${{ inputs.promote_artifacts }}
+      promote_maven_artifacts: ${{ inputs.promote_artifacts }}
       create_tag: ${{ inputs.create_tag }}
       update_changelog: ${{ inputs.update_changelog }}
       create_patch_branch: ${{ inputs.create_patch_branch }}
@@ -73,6 +74,7 @@ jobs:
 
   mirror:
     name: Mirror images
+    needs: [release]
     if: ${{ inputs.promote_artifacts }}
     uses: uniport/workflows/.github/workflows/copy-docker-image.yml@main
     permissions:
