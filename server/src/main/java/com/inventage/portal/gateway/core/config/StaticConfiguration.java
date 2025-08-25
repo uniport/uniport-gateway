@@ -145,7 +145,7 @@ public class StaticConfiguration {
                     final String message = error.getError();
 
                     if (keyword.endsWith("items/oneOf")) {
-                        LOGGER.warn("{} at '{}'", message, instance);
+                        LOGGER.warn("{} at '{}':\n{}", message, instance, DynamicConfiguration.resolveOneOfError(json, instance));
                     }
                 }
             }

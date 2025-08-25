@@ -6,8 +6,11 @@ import com.inventage.portal.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.pointer.JsonPointer;
 import io.vertx.json.schema.Draft;
 import io.vertx.json.schema.JsonSchema;
 import io.vertx.json.schema.JsonSchemaOptions;
@@ -384,7 +387,7 @@ public class DynamicConfiguration {
                     final String message = error.getError();
 
                     if (keyword.endsWith("items/oneOf")) {
-                        LOGGER.warn("{} at '{}'", message, instance);
+                        LOGGER.warn("{} at '{}':\n{}", message, instance, resolveOneOfError(json, instance));
                     }
                 }
             }
@@ -412,6 +415,29 @@ public class DynamicConfiguration {
                     }
                     return Future.failedFuture("invalid configuration");
                 });
+    }
+
+    public static String resolveOneOfError(JsonObject jsonObject, String location) {
+        try {
+            if (location.startsWith("#")) {
+                location = location.substring(1);
+            }
+
+            final JsonPointer pointer = JsonPointer.from(location);
+            final Object subJson = pointer.queryJson(jsonObject);
+            if (subJson == null) {
+                LOGGER.error("Failed to find any JSON node at the specified path: {}", location);
+                return "unknown";
+            }
+
+            return Json.encodePrettily(subJson);
+        } catch (DecodeException e) {
+            LOGGER.error("Failed to parse Json: {}", e.getMessage());
+            return "unknown";
+        } catch (Exception e) {
+            LOGGER.error("Failed to resolve oneOf error: {}", e.getMessage());
+            return "unknown";
+        }
     }
 
     private static Future<JsonArray> validateRouters(
