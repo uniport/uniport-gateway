@@ -54,7 +54,7 @@
         <portal-helm-dependencies.repository>oci://uniportcr.artifacts.inventage.com/charts</portal-helm-dependencies.repository>
 
         <portal-helm-chart-library.version>6.0.0-202504090952-418-d491e48</portal-helm-chart-library.version>
-        <portal-code-style-settings.version>1.8.0-202508061627-173-3706bdb</portal-code-style-settings.version>
+        <portal-code-style-settings.version>1.10.0-202508251248-185-e71941a</portal-code-style-settings.version>
     </properties>
 
     <dependencyManagement>
