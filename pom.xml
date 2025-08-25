@@ -785,5 +785,39 @@
                 <docker.platforms>linux/amd64,linux/arm64</docker.platforms>
             </properties>
         </profile>
+        <profile>
+            <id>public</id>
+            <activation>
+                <property>
+                    <name>public</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.registry>docker.io</docker.registry>
+            </properties>
+            <build>
+                <!-- disable download of private dependencies -->
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>remove-code-style-settings</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-zip</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

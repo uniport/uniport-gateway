@@ -62,6 +62,12 @@ mvn clean install
 
 (It is also possible to use [user tokens](https://help.sonatype.com/repomanager3/system-configuration/user-authentication/security-setup-with-user-tokens), instead of username/password)
 
+If you do not have a login, then it is also possible to build with the following command (by disabling the download of private dependencies; *this does not build the helm chart*):
+
+```bash
+mvn clean install -pl '!helm' -Dpublic=true
+```
+
 Alternatively, the **latest releases** are available on the GitHub Container Registry: <https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway>
 
 ## Launch
