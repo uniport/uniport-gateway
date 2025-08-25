@@ -6,15 +6,18 @@
 version: 2
 
 registries:
-  # @see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/configuring-access-to-private-registries-for-dependabot
-  # the credentials for the private registries are configured in the uniport organization: https://github.com/organizations/uniport/settings/secrets/private_registries
+  # @see https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#npm-registry
   inventage-maven:
     type: maven-repository
     url: https://nexus3.inventage.com/repository/inventage-portal-maven-group
+    username: inventage-uniport-readonly
+    password: ${{ secrets.NEXUS_NPM_PASSWORD_READ_ONLY }}
     replaces-base: true
   inventage-npm:
     type: npm-registry
     url: https://nexus3.inventage.com/repository/inventage-portal-npm-group
+    username: inventage-uniport-readonly
+    password: ${{secrets.NEXUS_NPM_PASSWORD_READ_ONLY}}
     replaces-base: true
 
 updates:
