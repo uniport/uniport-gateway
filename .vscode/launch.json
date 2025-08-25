@@ -40,6 +40,20 @@
             "request": "launch",
             "envFile": "${workspaceFolder}/server/src/test/resources/configs/dev-reduced/uniport-gateway.env",
             "mainClass": "ch.uniport.gateway.GatewayLauncher"
+        },
+        {
+            "name": "Launch (starter-kit)",
+            "type": "java",
+            "projectName": "server",
+            "request": "launch",
+            "env": {
+                "DEVELOPMENT": "true",
+                "UNIPORT_GATEWAY_JSON": "${workspaceFolder}/starter-kit/step1/uniport-gateway.json",
+                "UNIPORT_GATEWAY_LOG_LEVEL": "DEBUG",
+                "OTEL_TRACES_EXPORTER": "none",
+                "OTEL_METRICS_EXPORTER": "none"
+            },
+            "mainClass": "ch.uniport.gateway.GatewayLauncher"
         }
     ]
 }
