@@ -435,7 +435,7 @@ public class DynamicConfiguration {
                 });
     }
 
-    private static String resolveOneOfError(JsonObject jsonObject, String location) {
+    public static String resolveOneOfError(JsonObject jsonObject, String location) {
         try {
             if (location.startsWith("#")) {
                 location = location.substring(1);
