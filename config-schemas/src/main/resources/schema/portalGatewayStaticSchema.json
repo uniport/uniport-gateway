@@ -739,6 +739,10 @@
                         "minLength" : 1,
                         "type" : "string"
                       },
+                      "jwtExpirationLeeway" : {
+                        "type" : "integer",
+                        "minimum" : 0.0
+                      },
                       "sessionScope" : {
                         "minLength" : 1,
                         "type" : "string"
@@ -808,6 +812,10 @@
                       "publicUrl" : {
                         "minLength" : 1,
                         "type" : "string"
+                      },
+                      "jwtExpirationLeeway" : {
+                        "type" : "integer",
+                        "minimum" : 0.0
                       },
                       "sessionScope" : {
                         "minLength" : 1,
