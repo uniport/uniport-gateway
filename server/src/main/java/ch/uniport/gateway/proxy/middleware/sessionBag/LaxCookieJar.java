@@ -12,7 +12,7 @@ import java.util.Set;
  * The cookie jar from vertx only support parsing cookies from the request
  * cookie header in netty's strict mode
  * i.e. with validation of the name and value according to RFC6265.
- * https://github.com/fbuetler/vert.x/blob/4.5.10/src/main/java/io/vertx/core/http/impl/CookieJar.java#L40
+ * https://github.com/eclipse-vertx/vert.x/blob/4.5.18/src/main/java/io/vertx/core/http/impl/CookieJar.java#L40
  * 
  * However, the session bag also needs to support "invalid" cookies e.g.
  * containing whitespaces.

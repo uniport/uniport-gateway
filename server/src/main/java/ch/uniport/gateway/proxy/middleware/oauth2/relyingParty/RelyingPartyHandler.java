@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is copied from:
- * https://github.com/vert-x3/vertx-web/blob/4.5.16/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
+ * https://github.com/vert-x3/vertx-web/blob/4.5.18/vertx-web/src/main/java/io/vertx/ext/web/handler/impl/OAuth2AuthHandlerImpl.java
  *
  * The following changes were made:
  * - rename class from OAuth2AuthHandlerImpl to RelyingPartyHandler
@@ -222,8 +222,7 @@ public final class RelyingPartyHandler extends HTTPAuthorizationHandler<OAuth2Au
                         session.put("redirect_uri", context.request().uri());
 
                         // create a state value to mitigate replay attacks
-                        state = new StateWithUri(prng.nextString(6), context.request().uri(),
-                            context.request().method())
+                        state = new StateWithUri(prng.nextString(6), context.request().uri(), context.request().method())
                             .toStateParameter();
                         // store the state in the session
                         session.put("state", state);
