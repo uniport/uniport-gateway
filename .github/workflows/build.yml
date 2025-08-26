@@ -79,7 +79,7 @@ jobs:
           cache-maven: ${{ !contains(runner.name, 'macduff') }}
 
       - name: Unlock keychain
-        if: contains(runner.name, 'macduff')
+        if: ${{ contains(runner.name, 'macduff') }}
         run: |
           security unlock-keychain -p "${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}"
 
