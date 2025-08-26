@@ -40,7 +40,7 @@ The following environment variables are converted to screaming snake-case.
 * `development` to `DEVELOPMENT`
 * `verticle.instances` to `VERTICLE_INSTANCES`
 
-Further, change all environment variable prefixed with `PORTAL_GATEWAY` to start with `UNIPORT_GATEWAY_`.
+Further, change all environment variable prefixed with `PORTAL_GATEWAY_` to start with `UNIPORT_GATEWAY_`.
 
 ### Default configuration
 
