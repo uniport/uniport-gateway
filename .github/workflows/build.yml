@@ -95,6 +95,7 @@ jobs:
           registry: uniportcr.artifacts.inventage.com
           username: ${{ env.CI_AUTH_USR }}
           password: ${{ env.CI_AUTH_PSW }}
+          logout: ${{ !contains(runner.name, 'macduff') }}
 
       - name: Setup NPM Access
         uses: uniport/workflows/.github/actions/setup-npm-nexus-access@main
