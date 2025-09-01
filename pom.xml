@@ -5,7 +5,7 @@
 
     <groupId>com.inventage.portal.gateway</groupId>
     <artifactId>reactor</artifactId>
-    <version>9.5.1-SNAPSHOT</version>
+    <version>9.5.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
