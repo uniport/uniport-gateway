@@ -6,11 +6,6 @@
             <password>${env.CI_AUTH_PSW}</password>
         </server>
         <server>
-            <id>inventage-portal-helm-staging</id>
-            <username>${env.CI_AUTH_USR}</username>
-            <password>${env.CI_AUTH_PSW}</password>
-        </server>
-        <server>
             <id>inventage-portal-group</id>
             <username>${env.CI_AUTH_USR}</username>
             <password>${env.CI_AUTH_PSW}</password>

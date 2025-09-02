@@ -48,9 +48,6 @@
         <docker-java.version>3.6.0</docker-java.version>
         <junit-jupiter.version>5.13.4</junit-jupiter.version>
 
-        <nexus3.helm.registry.push.url>https://nexus3.inventage.com/repository</nexus3.helm.registry.push.url>
-        <nexus3.helm.repository.push.id>inventage-portal-helm-staging</nexus3.helm.repository.push.id>
-
         <portal-helm-dependencies.repository>oci://uniportcr.artifacts.inventage.com/charts</portal-helm-dependencies.repository>
 
         <portal-helm-chart-library.version>6.0.0-202504090952-418-d491e48</portal-helm-chart-library.version>
