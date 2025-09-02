@@ -49,6 +49,14 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - Fix websocket upgrade error [PORTAL-2445](https://inventage-all.atlassian.net/browse/PORTAL-2445).
 - Fixed an issue where a session is not properly deleted/destroyed on a back-channel logout [PORTAL-2449](https://inventage-all.atlassian.net/browse/PORTAL-2449).
 
+## [9.5.1]-202509010650-22-c3dc7ec - 2025-09-01
+
+[Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%229.5.1-202509010650-22-c3dc7ec%22)
+
+### Added
+
+- More log output for AKKP-1155 analysis during 'whenTokenForCodeReceived'
+
 ## [9.5.0]-202506100904-135-d216a4a - 2025-06-10
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%229.5.0-202506100904-135-d216a4a%22)
@@ -660,6 +668,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 
 [unreleased]: https://github.com/uniport/uniport-gateway/compare/10.0.0...main
 [10.0.0]: https://github.com/uniport/uniport-gateway/compare/9.5.0...10.0.0
+[9.5.1]: https://github.com/uniport/uniport-gateway/compare/9.5.0...9.5.1
 [9.5.0]: https://github.com/uniport/uniport-gateway/compare/9.4.0...9.5.0
 [9.4.0]: https://github.com/uniport/uniport-gateway/compare/9.3.0...9.4.0
 [9.3.0]: https://github.com/uniport/uniport-gateway/compare/9.2.0...9.3.0
