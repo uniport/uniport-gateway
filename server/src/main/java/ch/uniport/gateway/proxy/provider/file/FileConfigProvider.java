@@ -73,8 +73,7 @@ public class FileConfigProvider extends Provider {
             .onSuccess(config -> {
                 this.validateAndPublish(parseServerPorts(substituteConfigurationVariables(config, env)));
             }).onFailure(err -> {
-                final String errMsg = String.format("failed to retrieve dynamic configuration '{}'",
-                    err.getMessage());
+                final String errMsg = String.format("failed to retrieve dynamic configuration '%s'", err.getMessage());
                 LOGGER.warn(errMsg);
             });
 
