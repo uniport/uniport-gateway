@@ -1,0 +1,99 @@
+name: Release
+run-name: "Release ${{ inputs.version }} on ${{ inputs.target_branch }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version string"
+        required: true
+        type: string
+      target_branch:
+        description: "The branch where the changelog will be updated and the version bumped"
+        required: true
+        type: string
+      promote_artifacts:
+        description: "Promote artifacts"
+        default: true
+        type: boolean
+      create_tag:
+        description: "Create the git tag"
+        default: true
+        type: boolean
+      update_changelog:
+        description: "Update the changelog"
+        default: true
+        type: boolean
+      create_patch_branch:
+        description: "Create the git patch branch"
+        default: true
+        type: boolean
+      bump_version:
+        description: "Set the next version"
+        default: true
+        type: boolean
+      jira_release:
+        description: "Do a Jira release"
+        default: true
+        type: boolean
+      update_archetype:
+        description: "Update the archetype"
+        default: true
+        type: boolean
+      github_release:
+        description: "Create a GitHub release"
+        default: true
+        type: boolean
+
+jobs:
+  release:
+    name: Release
+    uses: uniport/workflows/.github/workflows/release.yml@main
+    permissions:
+      contents: write # create tag, create branch, update version, update changelog
+    with:
+      version: ${{ inputs.version }}
+      target_branch: ${{ inputs.target_branch }}
+      promote_docker_helm_artifacts: ${{ inputs.promote_artifacts }}
+      promote_maven_artifacts: ${{ inputs.promote_artifacts }}
+      create_tag: ${{ inputs.create_tag }}
+      update_changelog: ${{ inputs.update_changelog }}
+      create_patch_branch: ${{ inputs.create_patch_branch }}
+      bump_version: ${{ inputs.bump_version }}
+      jira_release: ${{ inputs.jira_release }}
+      update_archetype: ${{ inputs.update_archetype }}
+      send_announcement: true
+      jira_release_name_prefix: ${{ vars.JIRA_RELEASE_NAME_PREFIX }}
+      archetype_component_name: ${{ vars.ARCHETYPE_COMPONENT_NAME }}
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+      ATLASSIAN_AUTH_TOKEN: ${{ secrets.ATLASSIAN_AUTH_TOKEN }}
+      UNIPORT_APP_PRIVATE_KEY: ${{ secrets.UNIPORT_APP_PRIVATE_KEY }}
+      ROCKETCHAT_WEBHOOK_URL: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+
+  github-release:
+    name: Create a release on GitHub
+    if: ${{ inputs.github_release }}
+    needs: [release]
+    uses: uniport/workflows/.github/workflows/create-github-release.yml@main
+    permissions:
+      contents: write # create release
+    with:
+      version: ${{ inputs.version }}
+
+  mirror:
+    name: Mirror images
+    if: ${{ inputs.promote_artifacts }}
+    needs: [release]
+    uses: uniport/workflows/.github/workflows/copy-docker-image.yml@main
+    permissions:
+      packages: write # push docker image
+    with:
+      version: ${{ inputs.version }}
+      source_registry: uniportcr.artifacts.inventage.com
+      source_image: ch.uniport.gateway.uniport-gateway
+      destination_registry: ghcr.io
+      destination_image: uniport/uniport-gateway
+    secrets:
+      source_credentials: "${{ vars.NEXUS3_USER }}:${{ secrets.NEXUS3_PW }}"
+      destination_credentials: "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
