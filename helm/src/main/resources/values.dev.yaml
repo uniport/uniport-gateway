@@ -1,5 +1,4 @@
 ingress:
-  host: ips.inventage.dev
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -11,8 +10,11 @@ ingress:
       location /.well-known/assetlinks.json { 
           allow all; proxy_pass http://uniport-gateway.ips:20000;
       }
-  tls:
-    enabled: true
+  hosts:
+    default:
+      host: ips.inventage.dev
+      tls:
+        enabled: true
 
 services:
   uniport-gateway:

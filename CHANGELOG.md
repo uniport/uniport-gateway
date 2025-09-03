@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Changed
+
+- Stop using deprecated usage of `ingress.host` in helm charts, use `ingress.hosts` instead.
+
 ## [10.0.0]-202508211627-16-d140af6 - 2025-08-21
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%2210.0.0-202508211627-16-d140af6%22)

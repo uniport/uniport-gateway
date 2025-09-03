@@ -4,10 +4,13 @@ initContainers:
       registry: docker-registry.inventage.com:10116
 
 ingress:
-  host: portal1.local.uniport.ch.
   className: nginx
-  tls:
-    enabled: false
+  hosts:
+    default:
+      host: portal1.local.uniport.ch.
+      tls:
+        enabled: false
+
 containers:
   uniport-gateway:
     storages:
