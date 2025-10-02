@@ -2,8 +2,6 @@
 
 ## Run
 
-
-
 ```bash
 sed -i '' -e 's/step[0-9]/step2/g' ../docker-compose.yml
 docker compose up
