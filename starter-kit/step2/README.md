@@ -2,8 +2,10 @@
 
 ## Run
 
+
+
 ```bash
-sed -i -E 's/step[0-9]+/step2/g' docker-compose.yml
+sed -i '' -e 's/step[0-9]/step2/g' ../docker-compose.yml
 docker compose up
 ```
 
@@ -17,27 +19,27 @@ Entrypoint with `openTelemetry` and `requestResponseLogger` middlewares:
 {
     "entrypoints": [
         {
-        "name": "http20000",
-        "port": 20000,
-        "middlewares": [
-            {
-                "name": "openTelemetry",
-                "type": "openTelemetry"
-            }
-            {
-                "name": "requestResponseLogger",
-                "type": "requestResponseLogger",
-                "options": {
-                    "uriWithoutLoggingRegex": "/health.*|/ready.*",
-                    "contentTypes": [
-                    "text/plain",
-                    "application/json",
-                    "application/x-www-form-urlencoded"
-                    ]
+            "name": "http20000",
+            "port": 20000,
+            "middlewares": [
+                {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                        "text/plain",
+                        "application/json",
+                        "application/x-www-form-urlencoded"
+                        ]
+                    }
                 }
-            }
-        ]
-        },
+            ]
+        }
     ],
     "providers": [
         // [..]
@@ -61,4 +63,4 @@ Outgoing response HTTP header:
 
 ```text
 X-Uniport-Trace-Id: 3d689f8e6e63e518f8c21af6d8dd39af
-``
+```

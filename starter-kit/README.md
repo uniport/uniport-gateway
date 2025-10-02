@@ -1,10 +1,14 @@
 # Uniport-Gateway Starter Kit
 
+The following steps can help to get started with Uniport-Gateway. Every step contains a simple example showing a specific feature.
+
+All examples are based on the same docker compose file [docker-compose.yml](./docker-compose.yml). The use just a different folder containing the Uniport-Gateway configuration.
+
 ## Steps
 
 ### Step 1
 
-* Bare-bone
+[Uniport-Gateway as a bare-bone reverse proxy](./step1/README.md) with two services.
 
 ### Step 2
 
