@@ -1,16 +1,28 @@
 # Step 3 - OIDC/Oauth2
 
+In this example Uniport-Gateway serves as a reverse proxy and acts as the central relying party to Keycloak.
+
 ## Run
 
+As a prerequisite a Keycloak and its Postgres database must be up & running. The file [docker-compose-auth.yml](../auth/docker-compose-auth.yml) for docker compose can be used for that:
+
 ```bash
-sed -i -E 's/step[0-9]+/step3/g' docker-compose.yml
-docker compose -f auth/docker-compose-auth.yml up -d
+docker compose -f ../auth/docker-compose-auth.yml up
+```
+
+Verify Keycloak is [set up correctly](../auth/README.md).
+
+Then the Uniport-Gateway can be started:
+
+```bash
+sed -i '' -e 's/step[0-9]/step3/g' ../docker-compose.yml
 docker compose up
 ```
 
-Verify everything is [set up correctly](../auth/README.md).
+The following URLs can be used:
 
-Then visit <http://localhost:20000/whoami1> (unprotected) or <http://localhost:20000/whoami2> (protected) and use the test user to login `user1@mail.com`/`user1...`.
+- <http://localhost:20000/whoami1> (unprotected)
+- <http://localhost:20000/whoami2> (protected: use the test user to login `user1@mail.com`/`user1...`)
 
 ## Background
 

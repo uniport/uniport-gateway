@@ -16,7 +16,7 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 ### Step 3
 
-* OIDC/OAuth2
+[Uniport-Gateway as a OIDC relying party](./step3/README.md) using Keycloak as OpenID Provider.
 
 ### Step 4
 
