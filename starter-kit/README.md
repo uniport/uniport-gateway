@@ -12,7 +12,7 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 ### Step 2
 
-* Telemetry with Tracing & Logging
+[Uniport-Gateway with two entrypoint middlewares](./step2/README.md)for tracing & logging configured.
 
 ### Step 3
 
@@ -20,7 +20,7 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 ### Step 4
 
-* Multiple entrypoints
+[Uniport-Gateway listens on two ports](./step4/README.md).
 
 ### Step 5
 

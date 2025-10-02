@@ -1,5 +1,7 @@
 # Step 2 - Telemetry with Tracing & Logging
 
+In this example Uniport-Gateway [configures an entrypoint with two middlewares](./dynamic-config/config.json): `openTelementry` and `requestResponseLogger`.
+
 ## Run
 
 ```bash
