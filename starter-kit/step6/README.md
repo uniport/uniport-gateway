@@ -3,10 +3,16 @@
 ## Run
 
 ```bash
-sed -i -E 's/step[0-9]+/step6/g' docker-compose.yml
-docker compose -f auth/docker-compose-auth.yml up -d
+sed -i '' -e 's/step[0-9]/step6/g' ../docker-compose.yml
 docker compose up
 ```
+
+The following URLs can be used:
+
+- http://localhost:20000
+- http://localhost:20000/whoami1
+- http://localhost:20000/whoami2
+- http://local.uniport.ch:20000
 
 ## Background
 

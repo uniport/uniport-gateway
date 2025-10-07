@@ -5,6 +5,8 @@
     <file url="file://$PROJECT_DIR$/config-schemas/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/docker-compose/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/docker-compose/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/docs/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/docs/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/helm/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/helm/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/pom/src/main/java" charset="UTF-8" />

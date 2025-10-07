@@ -2,9 +2,14 @@
 
 ## Run
 
+As a prerequisite a Keycloak and its Postgres database must be up & running. The file [docker-compose-auth.yml](../auth/docker-compose-auth.yml) for docker compose can be used for that:
+
 ```bash
-sed -i -E 's/step[0-9]+/step8/g' docker-compose.yml
-docker compose -f auth/docker-compose-auth.yml up -d
+docker compose -f ../auth/docker-compose-auth.yml up
+```
+
+```bash
+sed -i '' -e 's/step[0-9]/step8/g' ../docker-compose.yml
 docker compose up
 ```
 
@@ -21,28 +26,21 @@ ACCESS_TOKEN="$(curl -sSf -X POST \
 echo "$ACCESS_TOKEN"
 ```
 
-Before we use the access token, lets check the protected routes first. <http://localhost:20000/whoami1> is unprotected and <http://localhost:20000/whoami2> is protected:
+Before we use the access token, lets check the routes first without the `Authorization: Bearer` header:
+
+<http://localhost:20000/whoami1> is unprotected:
 
 ```bash
-➜ curl -sSf localhost:20000/whoami1
-Hostname: 9fa5025212a7
-IP: 127.0.0.1
-IP: ::1
-IP: 172.27.0.2
-RemoteAddr: 172.27.0.6:43640
-GET /whoami1 HTTP/1.1
-Host: whoami1
-User-Agent: curl/8.15.0
-Accept: */*
-Traceparent: 00-376646c3aec3daab9d80ea91eea6c8fa-f8a310f922a584b6-01
-X-Forwarded-For: 192.168.65.1:52902
-X-Forwarded-Host: localhost:20000
-X-Forwarded-Port: 20000
-X-Forwarded-Proto: http
-
-➜ curl -sSf localhost:20000/whoami2
-curl: (22) The requested URL returned error: 401
+curl -sSf localhost:20000/whoami1
 ```
+
+<http://localhost:20000/whoami2> is protected:
+
+```bash
+curl -sSf localhost:20000/whoami2
+```
+
+And returns `curl: (22) The requested URL returned error: 401`
 
 Then issue an API call with the access token as the bearer token in the `Authorization` header:
 

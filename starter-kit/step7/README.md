@@ -2,9 +2,14 @@
 
 ## Run
 
+As a prerequisite a Keycloak and its Postgres database must be up & running. The file [docker-compose-auth.yml](../auth/docker-compose-auth.yml) for docker compose can be used for that:
+
 ```bash
-sed -i -E 's/step[0-9]+/step7/g' docker-compose.yml
-docker compose -f auth/docker-compose-auth.yml up -d
+docker compose -f ../auth/docker-compose-auth.yml up
+```
+
+```bash
+sed -i '' -e 's/step[0-9]/step7/g' ../docker-compose.yml
 docker compose up
 ```
 

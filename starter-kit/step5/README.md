@@ -2,13 +2,18 @@
 
 ## Run
 
+As a prerequisite a Keycloak and its Postgres database must be up & running. The file [docker-compose-auth.yml](../auth/docker-compose-auth.yml) for docker compose can be used for that:
+
 ```bash
-sed -i -E 's/step[0-9]+/step5/g' docker-compose.yml
-docker compose -f auth/docker-compose-auth.yml up -d
-docker compose up
+docker compose -f ../auth/docker-compose-auth.yml up
 ```
 
-Verify everything is [set up correctly](../auth/README.md).
+Verify Keycloak is [set up correctly](../auth/README.md).
+
+```bash
+sed -i '' -e 's/step[0-9]/step5/g' ../docker-compose.yml
+docker compose up
+```
 
 Then visit <http://whoami1.local.uniport.ch:20000> to login with `user1@mail.com`/`user1...` and then visit <http://whoami2.local.uniport.ch:20000/whoami1> to verify that there is a shared SSO session, as you are logged in.
 
