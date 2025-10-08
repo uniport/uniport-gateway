@@ -14,7 +14,7 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 ### Step 2
 
-[Uniport-Gateway with two entrypoint middlewares](./step2/README.md)for tracing & logging configured.
+[Uniport-Gateway with two entrypoint middlewares](./step2/README.md) for tracing & logging configured.
 
 ### Step 3
 

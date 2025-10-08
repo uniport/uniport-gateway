@@ -41,8 +41,8 @@
                 "name": "whoami1",
                 "servers": [
                     {
-                        "host": "whoami1",
-                        "port": 80
+                        "host": "${WHOAMI1_HOST}",
+                        "port": "${WHOAMI1_PORT}"
                     }
                 ]
             },
