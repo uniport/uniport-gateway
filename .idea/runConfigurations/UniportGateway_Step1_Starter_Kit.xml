@@ -1,0 +1,29 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="UniportGateway Step1 Starter-Kit" type="Application" factoryName="Application">
+    <envs>
+      <env name="DEVELOPMENT" value="true" />
+      <env name="OTEL_METRICS_EXPORTER" value="none" />
+      <env name="OTEL_TRACES_EXPORTER" value="none" />
+      <env name="UNIPORT_GATEWAY_JSON" value="$PROJECT_DIR$/starter-kit/step1/uniport-gateway.json" />
+      <env name="WHOAMI1_HOST" value="localhost" />
+      <env name="WHOAMI1_PORT" value="8001" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="ch.uniport.gateway.GatewayLauncher" />
+    <module name="server" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/main/config/uniport-gateway.common.env" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="server/src/main/config/uniport-gateway.specific.env" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
