@@ -4,6 +4,8 @@ The following steps can help to get started with Uniport-Gateway. Every step con
 
 All examples are based on the same docker compose file [docker-compose.yml](./docker-compose.yml). The use just a different folder containing the Uniport-Gateway configuration.
 
+**Note**: in all example scripts, BSD sed is assumed (see [this article](www.baeldung.com/linux/gnu-bsd-stream-editor) for the differences)
+
 ## Steps
 
 ### Step 1

@@ -3,7 +3,7 @@
 ## Run
 
 ```bash
-sed -i '' -e 's/step[0-9]/step6/g' ../docker-compose.yml
+sed -i '' -r -e 's/step[0-9]+/step6/g' ../docker-compose.yml
 docker compose up
 ```
 

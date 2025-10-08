@@ -5,7 +5,7 @@ In this example Uniport-Gateway listens on two ports: `20000` and also `20001`. 
 ## Run
 
 ```bash
-sed -i '' -e 's/step[0-9]/step4/g' ../docker-compose.yml
+sed -i '' -r -e 's/step[0-9]+/step4/g' ../docker-compose.yml
 docker compose up
 ```
 

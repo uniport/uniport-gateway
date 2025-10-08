@@ -15,7 +15,7 @@ Verify Keycloak is [set up correctly](../auth/README.md).
 Then the Uniport-Gateway can be started:
 
 ```bash
-sed -i '' -e 's/step[0-9]/step3/g' ../docker-compose.yml
+sed -i '' -e -r 's/step[0-9]+/step3/g' ../docker-compose.yml
 docker compose up
 ```
 
@@ -155,20 +155,20 @@ Everything is routed through the Gateway
 `keycloak` is required to be configured to work with the example configuration of the `uniport-gateway`. The imported realm
 configuration should take care of everything. For the sake of completeness, the following list shows the custom configuration that is applied by the import:
 
-* Create realm `testrealm` (the following configuration has to be applied in this realm)
-* Create user `testuser` (> `Users`)
-  * Set password (> `Users` > `testuser` > `Credentials`)
-* Create client with client ID `testclient` (> `Clients`)
-  * Toggle `Client authentication`
-  * Select `Standard flow`
-  * Set `http://localhost:20000` as `home url`
-  * Set `http://localhost:20000/*` as `redirect url`
-* Copy client secret into the `uniport-gateway` config of the `oauth2` middleware (> `Clients` > `testclient` > `Credentials`)
-* Create client with client ID `whoami{1..2}`
-  * ?
-* Create client scope `whoami{1..2}` (> `Client scopes`)
-  * Type `None`
-  * Toggle `include in token scope`
-  * Add mapper `Audience testclient` with `testclient` as `Included Client Audience` (> `Client scopes` > `whoamiX` > `Mappers`)
-  * Add mapper `Audience whoamiX` with `whoamiX` as `Included Client Audience` (> `Client scopes` > `whoamiX` > `Mappers`)
-* Add `whoami{1..2}` as optional client scopes to `testclient` (> `Clients` > `testclient` > `Client scopes`)
+- Create realm `testrealm` (the following configuration has to be applied in this realm)
+- Create user `testuser` (> `Users`)
+  - Set password (> `Users` > `testuser` > `Credentials`)
+- Create client with client ID `testclient` (> `Clients`)
+  - Toggle `Client authentication`
+  - Select `Standard flow`
+  - Set `http://localhost:20000` as `home url`
+  - Set `http://localhost:20000/*` as `redirect url`
+- Copy client secret into the `uniport-gateway` config of the `oauth2` middleware (> `Clients` > `testclient` > `Credentials`)
+- Create client with client ID `whoami{1..2}`
+  - ?
+- Create client scope `whoami{1..2}` (> `Client scopes`)
+  - Type `None`
+  - Toggle `include in token scope`
+  - Add mapper `Audience testclient` with `testclient` as `Included Client Audience` (> `Client scopes` > `whoamiX` > `Mappers`)
+  - Add mapper `Audience whoamiX` with `whoamiX` as `Included Client Audience` (> `Client scopes` > `whoamiX` > `Mappers`)
+- Add `whoami{1..2}` as optional client scopes to `testclient` (> `Clients` > `testclient` > `Client scopes`)

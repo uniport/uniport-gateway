@@ -9,7 +9,7 @@ docker compose -f ../auth/docker-compose-auth.yml up
 ```
 
 ```bash
-sed -i '' -e 's/step[0-9]/step8/g' ../docker-compose.yml
+sed -i '' -r -e 's/step[0-9]+/step8/g' ../docker-compose.yml
 docker compose up
 ```
 
