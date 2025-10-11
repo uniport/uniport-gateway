@@ -47,3 +47,6 @@ docs/**/node/
 
 # macos
 *.DS_Store
+
+# Postgres data
+starter-kit/auth/volume/
