@@ -1,0 +1,24 @@
+services:
+  # example resource server
+  whoami1:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8001:80"
+    networks:
+      - uniport-gateway
+
+  # example resource server
+  whoami2:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8002:80"
+    networks:
+      - uniport-gateway
+
+networks:
+  uniport-gateway:
+    name: uniport-gateway-starter-kit
