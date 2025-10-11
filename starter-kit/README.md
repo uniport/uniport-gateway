@@ -6,6 +6,39 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 **Note**: in all example scripts, the [sd] tool is used, to prevent differences of different sed (see [this article](www.baeldung.com/linux/gnu-bsd-stream-editor) distributions)
 
+## Overview
+
+
+| Middleware                     | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 |
+| ------------------------------ | :----: | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
+| authorizationBearer            |        |        | ✅      |        | ✅      |        | ✅      |        |        |
+| backchannellogout              |        |        |        |        |        |        | ✅      |        |        |
+| bearerOnly                     |        |        |        |        |        |        |        | ✅      |        |
+| bodyHandler                    |        |        |        |        |        |        |        |        |        |
+| checkRoute                     |        |        |        |        |        |        |        |        |        |
+| claimToHeader                  |        |        |        |        |        |        |        |        |        |
+| cors                           |        |        |        |        |        |        |        |        |        |
+| csp                            |        |        |        |        |        |        |        |        |        |
+| cspViolationReportingServer    |        |        |        |        |        |        |        |        |        |
+| csrf                           |        |        |        |        |        |        |        |        |        |
+| customResponse                 |        |        |        |        |        |        |        |        | ✅      |
+| headers                        |        |        |        | ✅      |        | ✅      |        |        |        |
+| languageCookie                 |        |        |        |        |        |        |        |        |        |
+| matomo                         |        |        |        |        |        |        |        |        |        |
+| oauth2                         |        |        | ✅      |        | ✅      |        | ✅      |        |        |
+| oauth2registration             |        |        |        |        |        |        |        |        |        |
+| openTelemetry                  |        | ✅      | ✅      |        | ✅      | ✅      | ✅      | ✅      |        |
+| passAuthorization              |        |        |        |        |        |        |        |        |        |
+| redirectRegex                  |   ✅    | ✅      | ✅      | ✅      |        | ✅      | ✅      | ✅      |        |
+| replacedSessionCookieDetection |        |        |        |        |        |        |        |        |        |
+| replacePathRegex               |        |        |        |        |        |        |        |        |        |
+| responseSessionCookieRemoval   |        |        |        |        |        |        |        |        |        |
+| requestResponseLogger          |        | ✅      | ✅      |        | ✅      | ✅      | ✅      | ✅      |        |
+| `_session_`                    |        |        | ✅      |        | ✅      |        | ✅      |        |        |
+| session                        |        |        | ✅      |        | ✅      |        | ✅      |        |        |
+| sessionBag                     |        |        |        |        |        |        |        |        |        |
+
+
 ## Steps
 
 ### Step 1
@@ -39,6 +72,10 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 ### Step 8
 
 * JWT bearer token authorization
+
+### Step 9
+
+[Uniport-Gateway serving a static page containing an iframe](./step9/README.md).
 
 ### Future Step Ideas
 

@@ -1,0 +1,15 @@
+{
+    "entrypoints": [
+        {
+            "name": "http20000",
+            "port": 20000
+        }
+    ],
+    "providers": [
+        {
+            "name": "file",
+            "filename": "./dynamic-config/config.json",
+            "watch": true
+        }
+    ]
+}

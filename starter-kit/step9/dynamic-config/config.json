@@ -1,0 +1,44 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "rule": "PathPrefix('/')",
+                "service": "openstreetmap"
+            },
+            {
+                "name": "app1",
+                "rule": "PathPrefix('/app1')",
+                "middlewares": [
+                    "app1"
+                ],
+                "service": "openstreetmap"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "app1",
+                "type": "customResponse",
+                "options": {
+                    "statusCode": 200,
+                    "headers": {
+                        "content-type": "text/html; charset=utf-8"
+                    },
+                    "content": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Step 9</title><style>body { margin: 0; } iframe { display: block; background: #000; border: none; height: 100vh; width: 100vw; }</style></head><body><portal-navigation current-application=\"step9\" internal-routing=\"\" anchor='body' logo-url='/' sticky show-language-switcher use-session-check></portal-navigation><h1>customReponse</h1><iframe src=\"/export/embed.html?bbox=8.515418%2C47.391726%2C8.520069%2C47.387945&amp;layer=mapnik\"></iframe><script type=\"module\" src=\"/base/portal-navigation.js\"></script></body></html>"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "openstreetmap",
+                "servers": [
+                    {
+                        "protocol": "https",
+                        "host": "www.openstreetmap.org",
+                        "port": "443"
+                    }
+                ]
+            }
+        ]
+    }
+}
