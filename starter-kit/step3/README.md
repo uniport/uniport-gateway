@@ -2,6 +2,12 @@
 
 In this example Uniport-Gateway serves as a reverse proxy and acts as the central relying party to Keycloak.
 
+The following middlewares are used:
+
+- redirectRegex
+- [oauth2](https://uniport-gateway.netlify.app/04-customization/#oauth2)
+- authorizationBearer
+
 ## Run
 
 As a prerequisite a Keycloak and its Postgres database must be up & running. The file [docker-compose-auth.yml](../auth/docker-compose-auth.yml) for docker compose can be used for that:

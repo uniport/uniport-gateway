@@ -8,6 +8,10 @@ services:
       - "OTEL_METRICS_EXPORTER=none"
       - "WHOAMI1_HOST=whoami1"
       - "WHOAMI1_PORT=80"
+      - "WHOAMI2_HOST=whoami2"
+      - "WHOAMI2_PORT=80"
+      - "KEYCLOAK_HOST=keycloak"
+      - "KEYCLOAK_PORT=8080"
     volumes:
       - ./step1:/config/
     ports:

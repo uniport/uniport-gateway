@@ -48,7 +48,7 @@
                 "options": {
                     "clientId": "testclient",
                     "clientSecret": "**********",
-                    "discoveryUrl": "http://keycloak:8080/auth/realms/testrealm",
+                    "discoveryUrl": "http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/auth/realms/testrealm",
                     "sessionScope": "whoami2"
                 }
             },
@@ -73,8 +73,8 @@
                 "verbose": true,
                 "servers": [
                     {
-                        "host": "whoami1",
-                        "port": 80
+                        "host": "${WHOAMI1_HOST}",
+                        "port": "${WHOAMI1_PORT}"
                     }
                 ]
             },
@@ -83,8 +83,8 @@
                 "verbose": true,
                 "servers": [
                     {
-                        "host": "whoami2",
-                        "port": 80
+                        "host": "${WHOAMI2_HOST}",
+                        "port": "${WHOAMI2_PORT}"
                     }
                 ]
             },
@@ -92,8 +92,8 @@
                 "name": "iam",
                 "servers": [
                     {
-                        "host": "keycloak",
-                        "port": "8080"
+                        "host": "${KEYCLOAK_HOST}",
+                        "port": "${KEYCLOAK_PORT}"
                     }
                 ]
             }
