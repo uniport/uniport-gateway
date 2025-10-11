@@ -15,7 +15,7 @@ Verify Keycloak is [set up correctly](../auth/README.md).
 Then the Uniport-Gateway can be started:
 
 ```bash
-sed -i '' -e -r 's/step[0-9]+/step3/g' ../docker-compose.yml
+sd 'step[0-9]+' 'step3' ../docker-compose.yml
 docker compose up
 ```
 

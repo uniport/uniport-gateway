@@ -2,9 +2,9 @@
 
 The following steps can help to get started with Uniport-Gateway. Every step contains a simple example showing a specific feature.
 
-All examples are based on the same docker compose file [docker-compose.yml](./docker-compose.yml). The use just a different folder containing the Uniport-Gateway configuration.
+All examples are based on the same docker compose file [docker-compose.yml](./docker-compose.yml). They use just a different folder containing the Uniport-Gateway configuration.
 
-**Note**: in all example scripts, BSD sed is assumed (see [this article](www.baeldung.com/linux/gnu-bsd-stream-editor) for the differences)
+**Note**: in all example scripts, the [sd] tool is used, to prevent differences of different sed (see [this article](www.baeldung.com/linux/gnu-bsd-stream-editor) distributions)
 
 ## Steps
 
@@ -52,3 +52,5 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 [whoami](https://github.com/traefik/whoami) is a tiny Go server that returns OS information and the received HTTP request as its HTTP response. It is a
 convenient way, to inspect the request a backend service would receive by the `uniport-gateway`.
+
+[sd]: https://github.com/chmln/sd
