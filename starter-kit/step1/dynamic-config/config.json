@@ -50,8 +50,8 @@
                 "name": "whoami2",
                 "servers": [
                     {
-                        "host": "whoami2",
-                        "port": 80
+                        "host": "${WHOAMI2_HOST}",
+                        "port": "${WHOAMI2_PORT}"
                     }
                 ]
             }
