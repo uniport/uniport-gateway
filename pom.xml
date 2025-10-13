@@ -107,7 +107,7 @@
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
-                <version>4.0.5</version>
+                <version>4.0.6</version>
             </dependency>
             <!-- for substituting variables in config via StringSubstitutor.replace -->
             <dependency>
