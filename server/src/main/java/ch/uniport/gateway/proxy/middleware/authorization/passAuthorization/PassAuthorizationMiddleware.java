@@ -1,6 +1,7 @@
 package ch.uniport.gateway.proxy.middleware.authorization.passAuthorization;
 
-import ch.uniport.gateway.proxy.middleware.authorization.AuthTokenMiddlewareBase;
+import ch.uniport.gateway.proxy.middleware.TraceMiddleware;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.tokenLoader.SessionScopeAuthTokenLoader;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -15,21 +16,29 @@ import org.slf4j.LoggerFactory;
  * backend.
  * It then adds the token that came with the original request to the backend.
  */
-public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
+public class PassAuthorizationMiddleware extends TraceMiddleware {
 
     public static final String BEARER = "Bearer ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PassAuthorizationMiddleware.class);
 
+    private final Vertx vertx;
+    private final String name;
+    private final String sessionScope;
     private final AuthenticationHandler authHandler;
 
     public PassAuthorizationMiddleware(
         Vertx vertx, String name, String sessionScope,
         AuthenticationHandler authHandler
     ) {
-        super(vertx, name, sessionScope);
-
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+        Objects.requireNonNull(sessionScope, "sessionScope must not be null");
         Objects.requireNonNull(authHandler, "authHandler must not be null");
+
+        this.vertx = vertx;
+        this.name = name;
+        this.sessionScope = sessionScope;
         this.authHandler = authHandler;
     }
 
@@ -37,24 +46,25 @@ public class PassAuthorizationMiddleware extends AuthTokenMiddlewareBase {
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        this.getAuthToken(ctx.session()).onSuccess(token -> {
-            LOGGER.debug("authToken: " + token);
+        SessionScopeAuthTokenLoader.load(vertx, ctx.session(), sessionScope)
+            .onSuccess(token -> {
+                LOGGER.debug("authToken: " + token);
 
-            final String incomingAuthHeader = getAndReplaceAuthHeader(ctx, BEARER + token);
+                final String incomingAuthHeader = getAndReplaceAuthHeader(ctx, BEARER + token);
 
-            LOGGER.debug("incomingAuthHeader: " + incomingAuthHeader);
+                LOGGER.debug("incomingAuthHeader: " + incomingAuthHeader);
 
-            LOGGER.debug("Handling jwt auth request");
-            authHandler.handle(ctx);
-            LOGGER.debug("Handled jwt auth request");
+                LOGGER.debug("Handling jwt auth request");
+                authHandler.handle(ctx);
+                LOGGER.debug("Handled jwt auth request");
 
-            getAndReplaceAuthHeader(ctx, incomingAuthHeader);
+                getAndReplaceAuthHeader(ctx, incomingAuthHeader);
 
-            ctx.next();
-        }).onFailure(err -> {
-            LOGGER.debug("Failed to get token '{}'", err.getMessage());
-            ctx.fail(401, err);
-        });
+                ctx.next();
+            }).onFailure(err -> {
+                LOGGER.debug("Failed to get token '{}'", err.getMessage());
+                ctx.fail(401, err);
+            });
     }
 
     private String getAndReplaceAuthHeader(RoutingContext ctx, String newHeader) {
