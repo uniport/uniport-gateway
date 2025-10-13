@@ -4,10 +4,10 @@ import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.unipor
 import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaim;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker.JWTAuthMultipleIssuersProvider;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTClaim;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTClaimOperator;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import ch.uniport.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import com.google.common.io.Resources;
 import io.vertx.core.Vertx;

@@ -1,4 +1,4 @@
-package ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customIssuerChecker;
+package ch.uniport.gateway.proxy.middleware.authorization.shared.customIssuerChecker;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;

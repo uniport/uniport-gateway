@@ -9,7 +9,7 @@ import ch.uniport.gateway.proxy.middleware.authorization.ClaimOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.ReconciliationOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTClaimOperator;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTClaimOperator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

@@ -1,6 +1,6 @@
-package ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
+package ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker;
 
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;

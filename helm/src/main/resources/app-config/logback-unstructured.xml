@@ -16,8 +16,8 @@
     <logger name="ch.uniport.gateway.proxy.middleware.log.RequestResponseLoggerMiddleware" level="TRACE"/>
 
     <!-- Set to warn, we are only interested if this fails -->
-    <logger name="ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandlerImpl" level="WARN" />
-    <logger name="ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler" level="WARN" />
+    <logger name="ch.uniport.gateway.proxy.middleware.authorization.shared.publickeysReconciler.JWTAuthPublicKeysReconcilerHandlerImpl" level="WARN" />
+    <logger name="ch.uniport.gateway.proxy.middleware.authorization.shared.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler" level="WARN" />
 
     <root level="${UNIPORT_GATEWAY_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
