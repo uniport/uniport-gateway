@@ -2,7 +2,7 @@
 <FindBugsFilter>
     <!-- the following ignore intended exposure of internal representation warnings -->
     <Match>
-        <Class name="~.*(Entrypoint|ControlApiMiddleware|ConfigurationWatcher|RouterSwitchListener|RouterFactory|FileConfigProvider|DockerContainerProvider|DockerContainerServiceImporter|ProviderAggregator|JsonDirectoryConfigStore|JWTAuthPublicKeysReconcilerHandlerImpl|TraceRoutingContext|ContextAwareHttpServerRequest|AuthenticationUserContext)"/>
+        <Class name="~.*(Entrypoint|ControlApiMiddleware|ConfigurationWatcher|RouterSwitchListener|RouterFactory|FileConfigProvider|DockerContainerProvider|DockerContainerServiceImporter|ProviderAggregator|JsonDirectoryConfigStore|JWTAuthPublicKeysReconcilerHandlerImpl|TraceRoutingContext|ContextAwareHttpServerRequest|AuthenticationUserContext|AuthorizationBearerMiddleware|PassAuthorizationMiddleware|JWTAuthTokenLoadHandler)"/>
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
     </Match>
     <Match>

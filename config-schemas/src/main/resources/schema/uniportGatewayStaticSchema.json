@@ -222,6 +222,100 @@
                     "required" : [ "audience", "publicKeys", "sessionScope", "issuer" ]
                   },
                   "type" : {
+                    "const" : "checkJWT"
+                  }
+                },
+                "required" : [ "name", "options", "type" ]
+              }, {
+                "additionalProperties" : false,
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "options" : {
+                    "additionalProperties" : false,
+                    "type" : "object",
+                    "properties" : {
+                      "publicKeysReconciliation" : {
+                        "additionalProperties" : false,
+                        "type" : "object",
+                        "properties" : {
+                          "intervalMs" : {
+                            "default" : 60000,
+                            "type" : "integer",
+                            "minimum" : 0.0
+                          },
+                          "enabled" : {
+                            "default" : true,
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "audience" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "publicKeys" : {
+                        "minItems" : 1,
+                        "type" : "array",
+                        "items" : {
+                          "additionalProperties" : false,
+                          "type" : "object",
+                          "properties" : {
+                            "publicKeyAlgorithm" : {
+                              "default" : "RS256",
+                              "minLength" : 1,
+                              "type" : "string"
+                            },
+                            "publicKey" : {
+                              "minLength" : 1,
+                              "type" : "string"
+                            }
+                          },
+                          "required" : [ "publicKey" ]
+                        }
+                      },
+                      "additionalIssuers" : {
+                        "type" : "array",
+                        "items" : {
+                          "minLength" : 1,
+                          "type" : "string"
+                        }
+                      },
+                      "claims" : {
+                        "type" : "array",
+                        "items" : {
+                          "additionalProperties" : false,
+                          "type" : "object",
+                          "properties" : {
+                            "claimPath" : {
+                              "minLength" : 1,
+                              "type" : "string"
+                            },
+                            "value" : { },
+                            "operator" : {
+                              "enum" : [ "CONTAINS", "CONTAINS_SUBSTRING_WHITESPACE", "EQUALS", "EQUALS_SUBSTRING_WHITESPACE" ]
+                            }
+                          },
+                          "required" : [ "claimPath", "value", "operator" ]
+                        }
+                      },
+                      "sessionScope" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "issuer" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      }
+                    },
+                    "required" : [ "audience", "publicKeys", "sessionScope", "issuer" ]
+                  },
+                  "type" : {
                     "const" : "passAuthorization"
                   }
                 },

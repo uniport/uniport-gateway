@@ -68,6 +68,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
      * 
      * @return a list of JSON web keys as JSON data structure
      */
+    @Override
     List<JsonObject> getJwks();
 
     static Future<JWTAuthOptions> fetchPublicKeys(Vertx vertx, List<PublicKeyOptions> publicKeys) {

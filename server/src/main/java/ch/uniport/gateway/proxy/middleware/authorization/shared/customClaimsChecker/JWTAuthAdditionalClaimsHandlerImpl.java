@@ -1,16 +1,17 @@
 package ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker;
 
 import ch.uniport.gateway.proxy.middleware.authorization.shared.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.tokenLoader.JWTAuthTokenLoadHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.HttpException;
-import io.vertx.ext.web.handler.impl.JWTAuthHandlerImpl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import net.minidev.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl implements JWTAuthAdditionalClaimsHandler {
+public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthTokenLoadHandler implements JWTAuthAdditionalClaimsHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthAdditionalClaimsHandlerImpl.class);
 
@@ -29,12 +30,13 @@ public class JWTAuthAdditionalClaimsHandlerImpl extends JWTAuthHandlerImpl imple
     private final JWTAuthPublicKeysReconcilerHandler reconciler;
 
     public JWTAuthAdditionalClaimsHandlerImpl(
+        Vertx vertx,
         JWTAuth authProvider, JWTAuthAdditionalClaimsOptions options,
         JWTAuthPublicKeysReconcilerHandler reconciler
     ) {
-        super(authProvider, null);
+        super(vertx, authProvider);
 
-        additionalJWTClaims = options == null ? List.of() : options.getAdditionalClaims();
+        this.additionalJWTClaims = options == null ? List.of() : options.getAdditionalClaims();
         this.reconciler = reconciler;
     }
 

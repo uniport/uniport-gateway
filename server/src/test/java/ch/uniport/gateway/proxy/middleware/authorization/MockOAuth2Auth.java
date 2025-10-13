@@ -15,6 +15,10 @@ public class MockOAuth2Auth implements OAuth2Auth {
     private final int refreshedExpiresIn;
     private final JsonObject principal;
 
+    public MockOAuth2Auth(JsonObject principal) {
+        this("localhost", 1234, principal, 0);
+    }
+
     public MockOAuth2Auth(JsonObject principal, int refreshedExpiresIn) {
         this("localhost", 1234, principal, refreshedExpiresIn);
     }

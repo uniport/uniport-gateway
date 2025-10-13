@@ -13,6 +13,7 @@ import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewa
 import ch.uniport.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.authorization.checkJwt.CheckJWTMiddleware;
 import ch.uniport.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
@@ -66,6 +67,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
@@ -160,15 +162,15 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddleware(JWTAuth authProvider, boolean optional) {
-        return withMiddleware(new BearerOnlyMiddleware("bearerOnly", JWTAuthHandler.create(authProvider), optional));
+        return withMiddleware(new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(vertx, authProvider, null, null), optional));
     }
 
     public MiddlewareServerBuilder withBearerOnlyMiddlewareOtherClaims(
-        JWTAuth authProvider,
+        Vertx vertx, JWTAuth authProvider,
         JWTAuthAdditionalClaimsOptions options, boolean optional
     ) {
         return withMiddleware(
-            new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(authProvider, options),
+            new BearerOnlyMiddleware("bearerOnly", JWTAuthAdditionalClaimsHandler.create(vertx, authProvider, options),
                 optional));
     }
 
@@ -216,6 +218,14 @@ public final class MiddlewareServerBuilder {
             throw new IllegalStateException("BearerOnly Middleware could not be instantiated");
         }
         return withMiddleware(middlewareFuture.result());
+    }
+
+    public MiddlewareServerBuilder withCheckJwtMiddleware(String sessionScope, AuthenticationHandler authHandler) {
+        return withMiddleware(new CheckJWTMiddleware(vertx, "checkJwt", sessionScope, authHandler));
+    }
+
+    public MiddlewareServerBuilder withCheckJwtMiddleware(String sessionScope, JWTAuth authProvider) {
+        return withMiddleware(new CheckJWTMiddleware(vertx, "checkJwt", sessionScope, JWTAuthAdditionalClaimsHandler.create(vertx, authProvider, null, null)));
     }
 
     public MiddlewareServerBuilder withCspMiddleware(List<DirectiveOptions> directives, boolean reportOnly) {
@@ -266,7 +276,7 @@ public final class MiddlewareServerBuilder {
     }
 
     public MiddlewareServerBuilder withPassAuthorizationMiddleware(String sessionScope, JWTAuth authProvider) {
-        return withMiddleware(new PassAuthorizationMiddleware(vertx, "passAuthorization", sessionScope, JWTAuthHandler.create(authProvider)));
+        return withMiddleware(new PassAuthorizationMiddleware(vertx, "passAuthorization", sessionScope, JWTAuthHandler.create(authProvider, null)));
     }
 
     public MiddlewareServerBuilder withAuthorizationBearerMiddleware(String sessionScope) {

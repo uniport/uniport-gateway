@@ -147,6 +147,14 @@ Additionally:
 
 The **Bodyhandler Middleware** is currently only used/needed in the context of CSRF and should only be set if necessary.
 
+##### `checkJwt`
+
+This Middleware is similar to the `bearerOnly` Middleware, but loads the id/access token associated with the configured session scope, instead of using the bearer token in the authorization header. It validates and checks the token according to the configured JWT options.
+
+--8<-- "content/04-customization/include-base-auth-handler-options.md"
+
+--8<-- "content/04-customization/include-auth-bearer-options.md"
+
 ##### `checkRoute`
 
 The `checkRoute` Middleware of type `checkRoute` returns a `202` status code directly for a request if the value `_check-route_` is found in the request's URI. Otherwise, this Middleware ignores the request.
