@@ -13,6 +13,7 @@ import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertTrue;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.authorization.MockOAuth2Auth;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.tokenLoader.SessionScopeAuthTokenLoader;
 import ch.uniport.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import ch.uniport.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import io.vertx.core.Handler;
@@ -179,7 +180,7 @@ public class AuthorizationBearerMiddlewareTest extends MiddlewareTestBase {
         // wait for access token to expire
         try {
             final CountDownLatch waiter = new CountDownLatch(1);
-            waiter.await(AuthorizationBearerMiddleware.EXPIRATION_LEEWAY_SECONDS + expiresIn + 1, TimeUnit.SECONDS);
+            waiter.await(SessionScopeAuthTokenLoader.EXPIRATION_LEEWAY_SECONDS + expiresIn + 1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

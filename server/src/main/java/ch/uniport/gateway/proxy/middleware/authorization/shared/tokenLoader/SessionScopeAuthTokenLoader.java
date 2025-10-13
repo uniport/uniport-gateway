@@ -1,48 +1,43 @@
-package ch.uniport.gateway.proxy.middleware.authorization;
+package ch.uniport.gateway.proxy.middleware.authorization.shared.tokenLoader;
 
-import ch.uniport.gateway.proxy.middleware.TraceMiddleware;
 import ch.uniport.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import ch.uniport.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.web.Session;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Abstract middleware for middlewares operating on the Authorization Header.
  */
-public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
+public final class SessionScopeAuthTokenLoader {
 
     public static final int EXPIRATION_LEEWAY_SECONDS = 5;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthTokenMiddlewareBase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionScopeAuthTokenLoader.class);
 
-    private final Vertx vertx;
-    protected final String name;
-    protected final String sessionScope;
-
-    protected AuthTokenMiddlewareBase(Vertx vertx, String name, String sessionScope) {
-        Objects.requireNonNull(vertx, "vertx must not be null");
-        Objects.requireNonNull(name, "name must not be null");
-        Objects.requireNonNull(sessionScope, "sessionScope must not be null");
-
-        this.vertx = vertx;
-        this.name = name;
-        this.sessionScope = sessionScope;
+    private SessionScopeAuthTokenLoader() {
     }
 
-    protected Future<String> getAuthToken(Session session) {
-        AuthenticationUserContext authContext = null;
-        final boolean idTokenDemanded = sessionScope.equals(OAuth2MiddlewareFactory.SESSION_SCOPE_ID);
+    public static void load(Vertx vertx, Session session, String sessionScope, Handler<AsyncResult<String>> resultHandler) {
+        load(vertx, session, sessionScope)
+            .onComplete(resultHandler);
+    }
 
-        if (idTokenDemanded) {
-            // all ID tokens are the same hence take anyone
+    public static Future<String> load(Vertx vertx, Session session, String sessionScope) {
+        AuthenticationUserContext authContext = null;
+        final boolean idTokenRequested = sessionScope.equals(OAuth2MiddlewareFactory.SESSION_SCOPE_ID);
+
+        if (idTokenRequested) {
+            // all ID tokens are the same hence take anyone FIXME they are not regarding the audience
             authContext = AuthenticationUserContext.fromSessionAtAnyScope(session).orElse(null);
         } else if (sessionScope.length() != 0) {
+            LOGGER.debug("Loading access token for session scope: '{}'", sessionScope);
             authContext = AuthenticationUserContext.fromSessionAtScope(session, sessionScope).orElse(null);
         } else {
             LOGGER.debug("No token demanded");
@@ -50,16 +45,16 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
         }
 
         if (authContext == null) {
-            final String errMsg = "No user found";
+            final String errMsg = "No token found";
             LOGGER.debug(errMsg);
             return Future.failedFuture(errMsg);
         }
 
-        return refreshUser(authContext, session)
-            .map(ac -> buildAuthToken(ac, idTokenDemanded));
+        return refreshUser(vertx, authContext, session, sessionScope)
+            .map(ac -> loadAuthToken(ac, idTokenRequested));
     }
 
-    private Future<AuthenticationUserContext> refreshUser(AuthenticationUserContext authContext, Session session) {
+    private static Future<AuthenticationUserContext> refreshUser(Vertx vertx, AuthenticationUserContext authContext, Session session, String sessionScope) {
         final User user = authContext.getUser();
         if (!user.expired(EXPIRATION_LEEWAY_SECONDS)) {
             LOGGER.debug("Use existing access token");
@@ -72,13 +67,13 @@ public abstract class AuthTokenMiddlewareBase extends TraceMiddleware {
             .map(u -> AuthenticationUserContext.of(authProvider, u).toSessionAtScope(session, sessionScope));
     }
 
-    private String buildAuthToken(AuthenticationUserContext authContext, boolean idTokenDemanded) {
+    private static String loadAuthToken(AuthenticationUserContext authContext, boolean idTokenRequested) {
         final String rawToken;
-        if (idTokenDemanded) {
+        if (idTokenRequested) {
             LOGGER.debug("Providing id token");
             rawToken = authContext.getIdToken();
         } else {
-            LOGGER.debug("Providing access token for session scope: '{}'", sessionScope);
+            LOGGER.debug("Providing access token");
             rawToken = authContext.getAccessToken();
         }
 
