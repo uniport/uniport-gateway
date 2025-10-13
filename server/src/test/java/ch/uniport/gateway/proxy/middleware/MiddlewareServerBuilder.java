@@ -13,9 +13,9 @@ import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewa
 import ch.uniport.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddleware;
 import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddleware;
 import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddleware;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsHandler;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import ch.uniport.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddleware;
 import ch.uniport.gateway.proxy.middleware.checkRoute.CheckRouteMiddleware;
 import ch.uniport.gateway.proxy.middleware.claimToHeader.ClaimToHeaderMiddleware;

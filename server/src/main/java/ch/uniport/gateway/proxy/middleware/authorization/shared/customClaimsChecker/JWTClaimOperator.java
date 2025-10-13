@@ -1,4 +1,4 @@
-package ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
+package ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker;
 
 import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 

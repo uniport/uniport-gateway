@@ -1,6 +1,6 @@
-package ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.customClaimsChecker;
+package ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker;
 
-import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
+import ch.uniport.gateway.proxy.middleware.authorization.shared.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
