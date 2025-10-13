@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Added
+
+- Added middleware `checkJWT` that verifies claims based on a token in the session scope ([#38](https://github.com/uniport/uniport-gateway/issues/38))
+
 ### Changed
 
 - Stop using deprecated usage of `ingress.host` in helm charts, use `ingress.hosts` instead.

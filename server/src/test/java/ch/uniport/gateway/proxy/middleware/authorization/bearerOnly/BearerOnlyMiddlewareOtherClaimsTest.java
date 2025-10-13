@@ -82,7 +82,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         uniportGateway(vertx, HOST, testCtx)
-            .withBearerOnlyMiddlewareOtherClaims(
+            .withBearerOnlyMiddlewareOtherClaims(vertx,
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
             .build().start()
@@ -107,7 +107,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         uniportGateway(vertx, HOST, testCtx)
-            .withBearerOnlyMiddlewareOtherClaims(
+            .withBearerOnlyMiddlewareOtherClaims(vertx,
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
             .build().start()
@@ -138,7 +138,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         uniportGateway(vertx, HOST, testCtx)
-            .withBearerOnlyMiddlewareOtherClaims(
+            .withBearerOnlyMiddlewareOtherClaims(vertx,
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
             .build().start()
@@ -167,7 +167,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         uniportGateway(vertx, HOST, testCtx)
-            .withBearerOnlyMiddlewareOtherClaims(
+            .withBearerOnlyMiddlewareOtherClaims(vertx,
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
             .build().start()
@@ -202,7 +202,7 @@ public class BearerOnlyMiddlewareOtherClaimsTest {
         final List<String> expectedAudience = List.of("Organisation", "Uniport-Gateway");
 
         uniportGateway(vertx, HOST, testCtx)
-            .withBearerOnlyMiddlewareOtherClaims(
+            .withBearerOnlyMiddlewareOtherClaims(vertx,
                 jwtAuth(vertx, expectedIssuer, expectedAudience),
                 jwtAdditionalClaims(expectedClaims), false)
             .build().start()

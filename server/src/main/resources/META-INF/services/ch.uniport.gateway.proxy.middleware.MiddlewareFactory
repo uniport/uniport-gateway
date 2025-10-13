@@ -1,5 +1,6 @@
 ch.uniport.gateway.proxy.middleware.authorization.authorizationBearer.AuthorizationBearerMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareFactory
+ch.uniport.gateway.proxy.middleware.authorization.checkJwt.CheckJWTMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.bodyHandler.BodyHandlerMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.checkRoute.CheckRouteMiddlewareFactory
