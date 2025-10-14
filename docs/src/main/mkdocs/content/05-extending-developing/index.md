@@ -239,3 +239,30 @@ It should be noted here that when applying the Pre-Commit Hook, committing may t
         </executions>
     </plugin>
     ```
+
+## Authorization
+
+In the `authorization` package, there a multiple middlewares implemented that share functionality:
+
+- `bearerOnly` - validate and check claims of a JWT provided as a bearer token in an authorization header
+- `passAuthorization` - validate and check claims of a JWT stored in a session scope, ensuring the authorization header is the same for the incoming request and the outgoing request (required for the Keycloak admin UI)
+- `checkJwt` - validate and check claims of a JWT provided in the session scope
+- `authorizationBearer` - put a JWT in the authorization header as a bearer token from a session scope
+
+As for all middleware, the have to implement `Middleware` and `MiddlewareFactory` interface. Further, they do not implement `Middleware` directly, but inherit from `TraceMiddleware` for automatic trace span handling per middleware. So far, this is the standard for every middleware.
+
+There are various components shared, such as:
+
+- capability to verify multiple issuers (`JWTAuthMultipleIssuersProvider`)
+- capability to verify custom claims (`JWTAuthAdditionalClaimsHandler`)
+- (periodically) fetch public keys from the issuer signature verification (`JWTAuthPublicKeysReconcilerHandler`/`Impl`)
+- load and store JWTs in the session scope (`SessionScopeAuthTokenLoader`)
+
+To glue that all together, including the config schema and config validation,
+
+- `bearerOnly`, `passAuthorization` and `checkJwt` the middleware factories inherit from `WithAuthHandlerMiddlewareFactoryBase`.
+- `authorizationBearer` and `JWTAuthAdditionalClaimsHandler` (via `JWTAuthTokenLoadHandler`) use `SessionScopeAuthTokenLoader`
+
+The following image visualizes how the components are connected. Note that only custom components are shown and Vert.x components are omitted:
+
+![Classes Overview](./data/authorization_classes.drawio.png)
