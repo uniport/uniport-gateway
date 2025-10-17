@@ -11,7 +11,7 @@ docker compose -f ../auth/docker-compose-auth.yml up
 Verify Keycloak is [set up correctly](../auth/README.md).
 
 ```bash
-sed -i '' -r -e 's/step[0-9]+/step5/g' ../docker-compose.yml
+sd 'step[0-9]+' 'step5' ../docker-compose.yml
 docker compose up
 ```
 

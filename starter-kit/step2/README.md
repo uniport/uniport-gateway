@@ -5,7 +5,7 @@ In this example Uniport-Gateway [configures an entrypoint with two middlewares](
 ## Run
 
 ```bash
-sed -i '' -r -e 's/step[0-9]+/step2/g' ../docker-compose.yml
+sd 'step[0-9]+' 'step2' ../docker-compose.yml
 docker compose up
 ```
 

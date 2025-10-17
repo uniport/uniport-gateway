@@ -5,7 +5,7 @@ In this example Uniport-Gateway serves as a reverse proxy for two services: `who
 ## Run
 
 ```bash
-sed -i '' -r -e 's/step[0-9]+/step1/g' ../docker-compose.yml
+sd 'step[0-9]+' 'step1' ../docker-compose.yml
 docker compose up
 ```
 
