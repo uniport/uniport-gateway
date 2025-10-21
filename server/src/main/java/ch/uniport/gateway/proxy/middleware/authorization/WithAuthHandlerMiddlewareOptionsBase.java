@@ -28,25 +28,25 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements Middleware
         Preconditions.checkState(!getPublicKeys().isEmpty(), "'getPublicKeys' must have at least one element");
     }
 
-    @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE)
+    @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE)
     public abstract List<String> getAudience();
 
-    @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.ISSUER)
+    @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.ISSUER)
     public abstract String getIssuer();
 
-    @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS)
+    @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS)
     public abstract List<PublicKeyOptions> getPublicKeys();
 
-    @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.ADDITIONAL_ISSUERS)
+    @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.ADDITIONAL_ISSUERS)
     public abstract List<String> getAdditionalIssuers();
 
-    @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.CLAIMS)
+    @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.CLAIMS)
     public abstract List<ClaimOptions> getClaims();
 
     @Default
-    @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION)
+    @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION)
     public ReconciliationOptions getReconciliation() {
-        logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION);
+        logDefault(LOGGER, JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION);
         return ReconciliationOptions.builder().build();
     }
 
@@ -55,13 +55,13 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements Middleware
     @JsonDeserialize(builder = PublicKeyOptions.Builder.class)
     public abstract static class AbstractPublicKeyOptions implements MiddlewareOptionsModel {
 
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY)
         public abstract String getKey();
 
         @Default
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM)
         public String getAlgorithm() {
-            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, DEFAULT_PUBLIC_KEY_ALGORITHM);
+            logDefault(LOGGER, JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, DEFAULT_PUBLIC_KEY_ALGORITHM);
             return DEFAULT_PUBLIC_KEY_ALGORITHM;
         }
     }
@@ -71,13 +71,13 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements Middleware
     @JsonDeserialize(builder = ClaimOptions.Builder.class)
     public abstract static class AbstractClaimOptions implements MiddlewareOptionsModel {
 
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR)
         public abstract JWTClaimOperator getOperator();
 
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.CLAIM_PATH)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_PATH)
         public abstract String getPath();
 
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.CLAIM_VALUE)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_VALUE)
         public abstract Object getValue();
     }
 
@@ -87,17 +87,17 @@ public abstract class WithAuthHandlerMiddlewareOptionsBase implements Middleware
     public abstract static class AbstractReconciliationOptions implements MiddlewareOptionsModel {
 
         @Default
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_ENABLED)
         public boolean isEnabled() {
-            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED,
+            logDefault(LOGGER, JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_ENABLED,
                 DEFAULT_RECONCILIATION_ENABLED_VALUE);
             return DEFAULT_RECONCILIATION_ENABLED_VALUE;
         }
 
         @Default
-        @JsonProperty(WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS)
+        @JsonProperty(JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS)
         public long getIntervalMs() {
-            logDefault(LOGGER, WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS,
+            logDefault(LOGGER, JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS,
                 DEFAULT_RECONCILIATION_INTERVAL_MS);
             return DEFAULT_RECONCILIATION_INTERVAL_MS;
         }

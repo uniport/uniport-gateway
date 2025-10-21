@@ -12,8 +12,8 @@ import ch.uniport.gateway.proxy.middleware.KeycloakServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.authorization.PublicKeyOptions;
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customIssuerChecker.JWTAuthMultipleIssuersProvider;
 import ch.uniport.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
@@ -48,45 +48,45 @@ public class BearerOnlyMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                             new JsonObject()
-                                .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
-                                .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")))
-                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
+                                .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
+                                .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")))
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
 
         final JsonObject missingRequiredProperty = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "blub")))));
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "blub")))));
 
         final JsonObject invalidPublicKey = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "notbase64*oraurl")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, new JsonArray().add("blub"))))));
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, "notbase64*oraurl")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, new JsonArray().add("blub"))))));
 
         final JsonObject invalidPublicKeyFormat = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
 
         final JsonObject invalidAudience = buildConfiguration(
             withMiddlewares(
                 withMiddleware("foo", BearerOnlyMiddlewareFactory.TYPE,
                     withMiddlewareOpts(new JsonObject()
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar")
-                        .put(WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("valid", 123, true))))));
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "bar")
+                        .put(JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, JsonArray.of("valid", 123, true))))));
 
         return Stream.of(
             Arguments.of("accept simple config", simple, complete, expectedTrue),

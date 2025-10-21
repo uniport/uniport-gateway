@@ -9,7 +9,7 @@ import static io.vertx.core.http.HttpMethod.GET;
 
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.authorization.passAuthorization.PassAuthorizationMiddlewareFactory;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
@@ -38,12 +38,12 @@ public class PassAuthorizationMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", PassAuthorizationMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
+                        JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                             JsonObject.of(
-                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=",
-                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")),
-                        WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar",
-                        WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"),
+                                JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=",
+                                JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")),
+                        JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "bar",
+                        JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"),
                         PassAuthorizationMiddlewareFactory.SESSION_SCOPE, "blub")))));
 
         final JsonObject missingOptions = buildConfiguration(

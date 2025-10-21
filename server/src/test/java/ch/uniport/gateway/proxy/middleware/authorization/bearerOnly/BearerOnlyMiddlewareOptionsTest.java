@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ch.uniport.gateway.proxy.middleware.authorization.ClaimOptions;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.ReconciliationOptions;
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTClaimOperator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonArray;
@@ -77,30 +77,30 @@ public class BearerOnlyMiddlewareOptionsTest {
     public void shouldCreateFromJson(Options given) {
         final JsonArray publicKeys = JsonArray.of(
             JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, given.publicKey,
-                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, given.publicKeyAlgorithm));
+                JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, given.publicKey,
+                JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, given.publicKeyAlgorithm));
 
         final JsonObject json = new JsonObject(JsonObject.of(
-            WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, given.audience,
-            WithAuthHandlerMiddlewareFactoryBase.ISSUER, given.issuer,
-            WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, publicKeys,
-            WithAuthHandlerMiddlewareFactoryBase.ADDITIONAL_ISSUERS, given.additionalIssuers,
+            JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, given.audience,
+            JWTAuthVerifierMiddlewareFactoryBase.ISSUER, given.issuer,
+            JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS, publicKeys,
+            JWTAuthVerifierMiddlewareFactoryBase.ADDITIONAL_ISSUERS, given.additionalIssuers,
             BearerOnlyMiddlewareFactory.OPTIONAL, given.optional).getMap());
 
         if (given.claimOperator != null || given.claimValue != null || given.claimPath != null) {
             final JsonArray claims = JsonArray.of(
                 JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR, given.claimOperator,
-                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_PATH, given.claimPath,
-                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_VALUE, given.claimValue));
-            json.put(WithAuthHandlerMiddlewareFactoryBase.CLAIMS, claims);
+                    JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR, given.claimOperator,
+                    JWTAuthVerifierMiddlewareFactoryBase.CLAIM_PATH, given.claimPath,
+                    JWTAuthVerifierMiddlewareFactoryBase.CLAIM_VALUE, given.claimValue));
+            json.put(JWTAuthVerifierMiddlewareFactoryBase.CLAIMS, claims);
         }
 
         if (given.reconciliationEnabled != null || given.reconciliationIntervalMs != null) {
             final JsonObject reconciliation = JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, given.reconciliationEnabled,
-                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs);
-            json.put(WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, reconciliation);
+                JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_ENABLED, given.reconciliationEnabled,
+                JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, given.reconciliationIntervalMs);
+            json.put(JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, reconciliation);
         }
 
         // when

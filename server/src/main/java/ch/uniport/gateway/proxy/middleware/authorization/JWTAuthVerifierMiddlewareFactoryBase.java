@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract factory for shared WithAuthHandlerMiddleware.
  */
-public abstract class WithAuthHandlerMiddlewareFactoryBase implements MiddlewareFactory {
+public abstract class JWTAuthVerifierMiddlewareFactoryBase implements MiddlewareFactory {
 
     // schema
     public static final String AUDIENCE = "audience";
@@ -58,7 +58,7 @@ public abstract class WithAuthHandlerMiddlewareFactoryBase implements Middleware
         CLAIM_OPERATOR_EQUALS,
         CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WithAuthHandlerMiddlewareFactoryBase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthVerifierMiddlewareFactoryBase.class);
 
     @Override
     public ObjectSchemaBuilder optionsSchema() {

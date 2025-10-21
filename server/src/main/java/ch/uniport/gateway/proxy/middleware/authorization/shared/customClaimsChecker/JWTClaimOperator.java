@@ -1,16 +1,16 @@
 package ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker;
 
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 
 public enum JWTClaimOperator {
 
-    EQUALS(WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR_EQUALS),
+    EQUALS(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR_EQUALS),
 
-    CONTAINS(WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR_CONTAINS),
+    CONTAINS(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR_CONTAINS),
 
-    EQUALS_SUBSTRING_WHITESPACE(WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE),
+    EQUALS_SUBSTRING_WHITESPACE(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR_EQUALS_SUBSTRING_WHITESPACE),
 
-    CONTAINS_SUBSTRING_WHITESPACE(WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE);
+    CONTAINS_SUBSTRING_WHITESPACE(JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR_CONTAINS_SUBSTRING_WHITESPACE);
 
     private final String name;
 

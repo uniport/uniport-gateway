@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTClaimOperator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonArray;
@@ -30,21 +30,21 @@ public class BackChannelLogoutMiddlewareOptionsTest {
         final Integer reconciliationIntervalMs = 1234;
 
         final JsonObject json = JsonObject.of(
-            WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, audience,
-            WithAuthHandlerMiddlewareFactoryBase.ISSUER, issuer,
-            WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
+            JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, audience,
+            JWTAuthVerifierMiddlewareFactoryBase.ISSUER, issuer,
+            JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                 JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, publicKey,
-                    WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, publicKeyAlgorithm)),
-            WithAuthHandlerMiddlewareFactoryBase.ADDITIONAL_ISSUERS, additionalIssuers,
-            WithAuthHandlerMiddlewareFactoryBase.CLAIMS, JsonArray.of(
+                    JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, publicKey,
+                    JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, publicKeyAlgorithm)),
+            JWTAuthVerifierMiddlewareFactoryBase.ADDITIONAL_ISSUERS, additionalIssuers,
+            JWTAuthVerifierMiddlewareFactoryBase.CLAIMS, JsonArray.of(
                 JsonObject.of(
-                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_OPERATOR, claimOperator.toString(),
-                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_PATH, claimPath,
-                    WithAuthHandlerMiddlewareFactoryBase.CLAIM_VALUE, claimValue)),
-            WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, JsonObject.of(
-                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_ENABLED, reconciliationEnabled,
-                WithAuthHandlerMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, reconciliationIntervalMs));
+                    JWTAuthVerifierMiddlewareFactoryBase.CLAIM_OPERATOR, claimOperator.toString(),
+                    JWTAuthVerifierMiddlewareFactoryBase.CLAIM_PATH, claimPath,
+                    JWTAuthVerifierMiddlewareFactoryBase.CLAIM_VALUE, claimValue)),
+            JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS_RECONCILIATION, JsonObject.of(
+                JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_ENABLED, reconciliationEnabled,
+                JWTAuthVerifierMiddlewareFactoryBase.RECONCILIATION_INTERVAL_MS, reconciliationIntervalMs));
 
         // when
         final ThrowingSupplier<BackChannelLogoutMiddlewareOptions> parse = () -> new ObjectMapper().readValue(json.encode(), BackChannelLogoutMiddlewareOptions.class);

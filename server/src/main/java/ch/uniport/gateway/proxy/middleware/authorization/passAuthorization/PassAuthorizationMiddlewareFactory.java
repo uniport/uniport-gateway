@@ -3,7 +3,7 @@ package ch.uniport.gateway.proxy.middleware.authorization.passAuthorization;
 import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Factory for {@link PassAuthorizationMiddleware}.
  */
-public class PassAuthorizationMiddlewareFactory extends WithAuthHandlerMiddlewareFactoryBase {
+public class PassAuthorizationMiddlewareFactory extends JWTAuthVerifierMiddlewareFactoryBase {
 
     // schema
     public static final String TYPE = "passAuthorization";

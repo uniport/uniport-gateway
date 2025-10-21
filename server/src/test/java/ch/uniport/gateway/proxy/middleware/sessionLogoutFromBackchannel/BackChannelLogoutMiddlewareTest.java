@@ -17,7 +17,7 @@ import ch.uniport.gateway.proxy.middleware.BrowserConnected;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
-import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareFactoryBase;
+import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import ch.uniport.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
 import com.google.common.io.Resources;
 import io.vertx.core.Future;
@@ -54,12 +54,12 @@ public class BackChannelLogoutMiddlewareTest extends MiddlewareTestBase {
             withMiddlewares(
                 withMiddleware("foo", BackChannelLogoutMiddlewareFactory.TYPE,
                     withMiddlewareOpts(JsonObject.of(
-                        WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
+                        JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEYS, JsonArray.of(
                             JsonObject.of(
-                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=",
-                                WithAuthHandlerMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")),
-                        WithAuthHandlerMiddlewareFactoryBase.ISSUER, "bar",
-                        WithAuthHandlerMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
+                                JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY, "Ymx1Ygo=",
+                                JWTAuthVerifierMiddlewareFactoryBase.PUBLIC_KEY_ALGORITHM, "RS256")),
+                        JWTAuthVerifierMiddlewareFactoryBase.ISSUER, "bar",
+                        JWTAuthVerifierMiddlewareFactoryBase.AUDIENCE, JsonArray.of("blub"))))));
 
         final JsonObject missingOptions = buildConfiguration(
             withMiddlewares(
