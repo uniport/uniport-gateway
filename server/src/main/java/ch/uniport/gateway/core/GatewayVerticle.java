@@ -8,6 +8,7 @@ import ch.uniport.gateway.core.config.file.GatewayConfigRetriever;
 import ch.uniport.gateway.core.config.model.EntrypointModel;
 import ch.uniport.gateway.core.config.model.ProviderModel;
 import ch.uniport.gateway.core.config.model.StaticModel;
+import ch.uniport.gateway.core.config.model.TlsModel;
 import ch.uniport.gateway.core.entrypoint.Entrypoint;
 import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
 import ch.uniport.gateway.proxy.config.watcher.ConfigurationWatcher;
@@ -18,10 +19,10 @@ import ch.uniport.gateway.proxy.router.RouterFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
@@ -124,15 +125,15 @@ public class GatewayVerticle extends AbstractVerticle {
         return Future.succeededFuture(gateway);
     }
 
-    private Future<List<HttpServer>> runServer(StaticModel config, JsonObject env) {
+    private Future<CompositeFuture> runServer(StaticModel config, JsonObject env) {
         final Function<ConfigurationWatcher, List<Future<HttpServer>>> deployEntrypoints = w -> config.getEntrypoints()
             .stream()
             .map(ep -> createEntrypoint(ep, env, w)
-                .compose(entrypoint -> entryPointListen(entrypoint)))
+                .compose(entrypoint -> entrypoint.listen()))
             .toList();
 
         return deployConfigurationWatcher(config.getEntrypoints(), config.getProviders(), env)
-            .map(w -> Future.join(deployEntrypoints.apply(w)))
+            .compose(w -> Future.join(deployEntrypoints.apply(w)))
             .mapEmpty();
     }
 
@@ -158,12 +159,13 @@ public class GatewayVerticle extends AbstractVerticle {
     ) {
         final String epName = entrypoint.getName();
         final int epPort = entrypoint.getPort();
+        final TlsModel epTls = entrypoint.getTls();
         final List<MiddlewareModel> epMiddlewares = entrypoint.getMiddlewares();
 
         final PublicProtoHostPort publicProtoHostPort = PublicProtoHostPort.of(env, epPort);
         final RouterFactory routerFactory = new RouterFactory(vertx, publicProtoHostPort, epName);
 
-        final Entrypoint ep = new Entrypoint(vertx, epName, epPort, epMiddlewares);
+        final Entrypoint ep = new Entrypoint(vertx, epName, epPort, epTls, epMiddlewares);
 
         // this glues the entrypoint and the dynamic configuration
         // there are 3 routers in play here:
@@ -180,19 +182,6 @@ public class GatewayVerticle extends AbstractVerticle {
 
         return vertx.deployVerticle(watcher)
             .map(id -> ep);
-    }
-
-    private Future<HttpServer> entryPointListen(Entrypoint entrypoint) {
-        final HttpServerOptions options = new HttpServerOptions()
-            .setMaxHeaderSize(DEFAULT_HEADER_LIMIT)
-            .setSsl(entrypoint.isTls())
-            .setKeyCertOptions(entrypoint.jksOptions());
-
-        LOGGER.info("Listening on entrypoint '{}' at port '{}'", entrypoint.name(), entrypoint.port());
-        return vertx
-            .createHttpServer(options)
-            .requestHandler(entrypoint.router())
-            .listen(entrypoint.port());
     }
 
     private void shutdownOnStartupFailure(Throwable throwable) {

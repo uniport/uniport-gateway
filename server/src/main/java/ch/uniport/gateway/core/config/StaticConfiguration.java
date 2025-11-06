@@ -31,6 +31,11 @@ public class StaticConfiguration {
     public static final String ENTRYPOINT_PORT = "port";
     public static final String ENTRYPOINT_MIDDLEWARES = DynamicConfiguration.ROUTER_MIDDLEWARES;
 
+    // tls
+    public static final String ENTRYPOINT_TLS = "tls";
+    public static final String ENTRYPOINT_TLS_CERT_FILE = "certFile";
+    public static final String ENTRYPOINT_TLS_KEY_FILE = "keyFile";
+
     // providers
     public static final String PROVIDERS = "providers";
     public static final String PROVIDERS_THROTTLE_INTERVAL_MS = "providersThrottleIntervalMs";
@@ -78,6 +83,10 @@ public class StaticConfiguration {
             .optionalProperty(StaticConfiguration.ENTRYPOINT_MIDDLEWARES,
                 Schemas.arraySchema()
                     .items(Schemas.oneOf(getBuildMiddlewareSchema())))
+            .optionalProperty(ENTRYPOINT_TLS, Schemas.objectSchema()
+                .requiredProperty(ENTRYPOINT_TLS_CERT_FILE, Schemas.stringSchema())
+                .requiredProperty(ENTRYPOINT_TLS_KEY_FILE, Schemas.stringSchema())
+                .allowAdditionalProperties(false))
             .allowAdditionalProperties(false);
 
         final ObjectSchemaBuilder[] providerSchema = buildProviderSchema();

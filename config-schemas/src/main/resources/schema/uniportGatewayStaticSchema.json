@@ -1304,6 +1304,19 @@
           "name" : {
             "minLength" : 1,
             "type" : "string"
+          },
+          "tls" : {
+            "additionalProperties" : false,
+            "type" : "object",
+            "properties" : {
+              "keyFile" : {
+                "type" : "string"
+              },
+              "certFile" : {
+                "type" : "string"
+              }
+            },
+            "required" : [ "keyFile", "certFile" ]
           }
         },
         "required" : [ "port", "name" ]

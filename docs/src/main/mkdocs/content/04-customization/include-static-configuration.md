@@ -66,6 +66,7 @@ Entrypoints are the network entry points of Uniport-Gateway. They define the por
 | `name` | Yes | String | Name of the entrypoint |
 | `port` | Yes | Integer | Port number |
 | `sessionDisabled` | No | Boolean | Disables session handling (Default: `false`). As of version `8.0.0`, this variable **MUST NOT** be set anymore. Session is not active by default, it can only be activated if the Session Middleware is explicitly declared. |
+| `tls` | No | Object | Configure paths to files with a certificate and key with `certFile` and `keyFile`. |
 | `middlewares` | No | List of [middlewares](../04-customization/index.md#entry-middlewares) | Middlewares can be attached to each entrypoint, which are first processed before a request is forwarded to the route-specific middlewares. |
 
 #### Applications

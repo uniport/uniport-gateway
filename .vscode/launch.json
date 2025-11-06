@@ -34,6 +34,14 @@
             "mainClass": "ch.uniport.gateway.GatewayLauncher"
         },
         {
+            "name": "Launch (entrypoints)",
+            "type": "java",
+            "projectName": "server",
+            "request": "launch",
+            "envFile": "${workspaceFolder}/server/src/test/resources/configs/entrypoints/uniport-gateway.env",
+            "mainClass": "ch.uniport.gateway.GatewayLauncher"
+        },
+        {
             "name": "Launch (dev reduced)",
             "type": "java",
             "projectName": "server",

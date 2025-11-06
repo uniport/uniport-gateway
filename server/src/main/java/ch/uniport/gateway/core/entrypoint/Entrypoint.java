@@ -2,6 +2,7 @@ package ch.uniport.gateway.core.entrypoint;
 
 import ch.uniport.gateway.GatewayRouterInternal;
 import ch.uniport.gateway.Runtime;
+import ch.uniport.gateway.core.config.model.TlsModel;
 import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
 import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
@@ -9,10 +10,14 @@ import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.net.JksOptions;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.KeyCertOptions;
+import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +25,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Entry point for the uniport-gateway.
  */
-public class Entrypoint {
+public final class Entrypoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Entrypoint.class);
+
+    /**
+     * Default maximum length of all headers for HTTP/1.x in bytes = {@code 10240},
+     * i.e. 10 kilobytes
+     */
+    private static final int DEFAULT_HEADER_LIMIT = 10 * 1024;
 
     private final Vertx vertx;
 
@@ -33,19 +44,34 @@ public class Entrypoint {
     private GatewayRouterInternal router;
     private Tls tls;
 
-    public Entrypoint(Vertx vertx, String name, int port, List<MiddlewareModel> entryMiddlewares) {
+    public Entrypoint(Vertx vertx, String name, int port, TlsModel tls, List<MiddlewareModel> entryMiddlewares) {
+        Objects.requireNonNull(vertx, "vertx must not be null");
+        Objects.requireNonNull(name, "name must not be null");
         this.vertx = vertx;
         this.name = name;
         this.port = port;
         this.middlewares = entryMiddlewares;
+
+        if (tls != null) {
+            this.tls = new Tls(
+                new PemKeyCertOptions()
+                    .setKeyPath(tls.getKeyFile())
+                    .setCertPath(tls.getCertFile()));
+        }
     }
 
-    public String name() {
-        return name;
-    }
+    public Future<HttpServer> listen() {
+        final HttpServerOptions options = new HttpServerOptions()
+            .setMaxHeaderSize(DEFAULT_HEADER_LIMIT)
+            .setUseAlpn(true)
+            .setSsl(isTls())
+            .setKeyCertOptions(keyCertOptions());
 
-    public int port() {
-        return port;
+        LOGGER.info("Listening on entrypoint '{}' at port '{}'", name, port);
+        return vertx
+            .createHttpServer(options)
+            .requestHandler(router())
+            .listen(port);
     }
 
     public GatewayRouterInternal router() {
@@ -101,31 +127,26 @@ public class Entrypoint {
             .create(vertx, middlewareName, router, middlewareOptions);
     }
 
-    public boolean isTls() {
+    private boolean isTls() {
         return tls != null;
     }
 
-    public void setJksOptions(JksOptions jksOptions) {
-        tls = new Tls(jksOptions);
-    }
-
-    public JksOptions jksOptions() {
+    private KeyCertOptions keyCertOptions() {
         if (isTls()) {
-            return tls.jksOptions();
+            return tls.keyCertOptions();
         }
         return null;
     }
 
     static class Tls {
-        private JksOptions jksOptions;
+        private KeyCertOptions options;
 
-        Tls(JksOptions jksOptions) {
-            this.jksOptions = jksOptions;
+        Tls(KeyCertOptions options) {
+            this.options = options;
         }
 
-        public JksOptions jksOptions() {
-            return jksOptions;
+        public KeyCertOptions keyCertOptions() {
+            return options;
         }
     }
-
 }

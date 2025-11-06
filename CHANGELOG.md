@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Added
+
+- Support TLS configuration on entrypoint ([PORTAL-2425](https://inventage-all.atlassian.net/browse/PORTAL-2425)).
+
 ## [10.1.0]-202510210938-63-fb00848 - 2025-10-21
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%2210.1.0-202510210938-63-fb00848%22)
 
 ### Added
 
-- Added middleware `checkJWT` that verifies claims based on a token in the session scope ([#38](https://github.com/uniport/uniport-gateway/issues/38))
+- Added middleware `checkJWT` that verifies claims based on a token in the session scope ([#38](https://github.com/uniport/uniport-gateway/issues/38)).
 
 ### Changed
 
