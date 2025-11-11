@@ -1,7 +1,7 @@
 package ch.uniport.gateway.proxy.middleware.authorization;
 
-import ch.uniport.gateway.core.config.model.ModelStyle;
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
+import ch.uniport.gateway.proxy.middleware.ModelStyle;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTClaimOperator;
 import ch.uniport.gateway.proxy.middleware.csrf.CSRFMiddlewareOptions;
 import com.fasterxml.jackson.annotation.JsonProperty;

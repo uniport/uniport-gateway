@@ -19,6 +19,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>ch.uniport.gateway</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- vertx -->
         <dependency>
             <groupId>io.vertx</groupId>

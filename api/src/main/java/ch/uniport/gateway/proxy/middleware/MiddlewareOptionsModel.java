@@ -1,4 +1,4 @@
-package ch.uniport.gateway.proxy.config.model;
+package ch.uniport.gateway.proxy.middleware;
 
 import org.slf4j.Logger;
 

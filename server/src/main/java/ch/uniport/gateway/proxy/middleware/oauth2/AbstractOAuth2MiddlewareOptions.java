@@ -1,6 +1,6 @@
 package ch.uniport.gateway.proxy.middleware.oauth2;
 
-import ch.uniport.gateway.core.config.model.ModelStyle;
+import ch.uniport.gateway.proxy.middleware.ModelStyle;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.immutables.value.Value.Immutable;
 

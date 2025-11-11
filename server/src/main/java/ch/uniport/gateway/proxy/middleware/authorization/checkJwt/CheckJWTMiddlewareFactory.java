@@ -1,7 +1,7 @@
 package ch.uniport.gateway.proxy.middleware.authorization.checkJwt;
 
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandler;
 import ch.uniport.gateway.proxy.middleware.authorization.JWTAuthVerifierMiddlewareFactoryBase;
 import io.vertx.core.Future;

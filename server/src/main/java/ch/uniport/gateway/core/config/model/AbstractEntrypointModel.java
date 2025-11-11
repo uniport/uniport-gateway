@@ -2,6 +2,7 @@ package ch.uniport.gateway.core.config.model;
 
 import ch.uniport.gateway.core.config.StaticConfiguration;
 import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
+import ch.uniport.gateway.proxy.middleware.ModelStyle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;

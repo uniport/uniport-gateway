@@ -22,5 +22,9 @@
         <Class name="~.*(ConfigurationWatcher|CompositeCSPHandlerImpl|RelyingPartyHandler|DockerContainerServiceImporter)"/>
         <Bug pattern="AT_NONATOMIC_64BIT_PRIMITIVE,AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
     </Match>
+    <Match>
+        <Class name="~.*(Middleware)"/>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,UC_USELESS_OBJECT"/>
+    </Match>
 
 </FindBugsFilter>

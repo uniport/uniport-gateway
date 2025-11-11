@@ -1,8 +1,8 @@
 package ch.uniport.gateway.proxy.middleware.oauth2;
 
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.oauth2.relyingParty.RelyingPartyHandler;
 import ch.uniport.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;

@@ -1,6 +1,6 @@
 package ch.uniport.gateway.proxy.middleware.authorization.bearerOnly;
 
-import ch.uniport.gateway.core.config.model.ModelStyle;
+import ch.uniport.gateway.proxy.middleware.ModelStyle;
 import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

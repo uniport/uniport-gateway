@@ -11,6 +11,7 @@
     <modules>
         <module>config-schemas</module>
         <module>helm</module>
+        <module>api</module>
         <module>server</module>
         <module>docs</module>
     </modules>

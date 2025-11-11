@@ -6,7 +6,6 @@ import static ch.uniport.gateway.proxy.middleware.replacedSessionCookieDetection
 import static ch.uniport.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions.DEFAULT_SESSION_COOKIE_NAME;
 
 import ch.uniport.gateway.proxy.config.model.AbstractServiceModel;
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.authorization.MockOAuth2Auth;
 import ch.uniport.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.WithAuthHandlerMiddlewareOptionsBase;

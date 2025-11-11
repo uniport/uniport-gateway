@@ -1,4 +1,4 @@
-package ch.uniport.gateway.core.config.model;
+package ch.uniport.gateway.proxy.middleware;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

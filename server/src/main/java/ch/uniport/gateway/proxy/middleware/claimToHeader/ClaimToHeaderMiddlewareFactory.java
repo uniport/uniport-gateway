@@ -1,8 +1,8 @@
 package ch.uniport.gateway.proxy.middleware.claimToHeader;
 
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;

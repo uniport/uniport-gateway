@@ -2,9 +2,9 @@ package ch.uniport.gateway.proxy.config.model.deserialize;
 
 import ch.uniport.gateway.proxy.config.DynamicConfiguration;
 import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactoryLoader;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;

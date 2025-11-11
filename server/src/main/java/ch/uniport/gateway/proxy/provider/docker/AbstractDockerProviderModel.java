@@ -1,8 +1,8 @@
 package ch.uniport.gateway.proxy.provider.docker;
 
 import ch.uniport.gateway.core.config.StaticConfiguration;
-import ch.uniport.gateway.core.config.model.ModelStyle;
 import ch.uniport.gateway.core.config.model.ProviderModel;
+import ch.uniport.gateway.proxy.middleware.ModelStyle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.immutables.value.Value.Default;

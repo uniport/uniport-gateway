@@ -1,8 +1,8 @@
 package ch.uniport.gateway.proxy.middleware.authorization;
 
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customIssuerChecker.JWTAuthMultipleIssuersOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.publickeysReconciler.JWTAuthPublicKeysReconcilerHandler;

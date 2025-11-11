@@ -1,8 +1,9 @@
 package ch.uniport.gateway.proxy.config.model;
 
-import ch.uniport.gateway.core.config.model.ModelStyle;
 import ch.uniport.gateway.proxy.config.DynamicConfiguration;
 import ch.uniport.gateway.proxy.config.model.deserialize.MiddlewareModelJsonDeserializer;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
+import ch.uniport.gateway.proxy.middleware.ModelStyle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import javax.annotation.Nullable;

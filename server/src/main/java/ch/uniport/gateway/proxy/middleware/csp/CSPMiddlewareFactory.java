@@ -1,8 +1,8 @@
 package ch.uniport.gateway.proxy.middleware.csp;
 
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.csp.compositeCSP.CompositeCSPHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;

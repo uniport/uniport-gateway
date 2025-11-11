@@ -1,6 +1,5 @@
 package ch.uniport.gateway.proxy.middleware;
 
-import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;

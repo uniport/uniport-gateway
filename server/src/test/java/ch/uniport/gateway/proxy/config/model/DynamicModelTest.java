@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.uniport.gateway.proxy.config.DynamicConfiguration;
+import ch.uniport.gateway.proxy.middleware.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.headers.HeaderMiddlewareFactory;
 import ch.uniport.gateway.proxy.middleware.headers.HeaderMiddlewareOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
