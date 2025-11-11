@@ -4,6 +4,7 @@ import ch.uniport.gateway.proxy.config.DynamicConfiguration;
 import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
 import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareFactoryLoader;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
@@ -31,7 +32,7 @@ public class MiddlewareModelJsonDeserializer extends JsonDeserializer<Middleware
         final String type = typeNode.asText();
         builder.withType(type);
 
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(type);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(type);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", type);
             throw new IllegalArgumentException(errMsg);

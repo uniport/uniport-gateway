@@ -2,6 +2,7 @@ package ch.uniport.gateway.proxy.config;
 
 import ch.uniport.gateway.proxy.config.model.AbstractServiceModel;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareFactoryLoader;
 import ch.uniport.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -52,7 +53,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_NAME = "name";
     public static final String MIDDLEWARE_TYPE = "type";
     public static final String MIDDLEWARE_OPTIONS = "options";
-    public static final List<String> MIDDLEWARE_TYPES = MiddlewareFactory.Loader.listFactories().stream()
+    public static final List<String> MIDDLEWARE_TYPES = MiddlewareFactoryLoader.listFactories().stream()
         .map(MiddlewareFactory::provides)
         .toList();
     // services
@@ -103,7 +104,7 @@ public class DynamicConfiguration {
     }
 
     private static ObjectSchemaBuilder[] buildMiddlewareSchema() {
-        final ObjectSchemaBuilder[] middlewareSchemas = MiddlewareFactory.Loader.listFactories()
+        final ObjectSchemaBuilder[] middlewareSchemas = MiddlewareFactoryLoader.listFactories()
             .stream()
             .map(factory -> {
                 final ObjectSchemaBuilder optionsSchema = factory.optionsSchema();
@@ -637,7 +638,7 @@ public class DynamicConfiguration {
     }
 
     private static Future<Void> validateMiddlewareOptions(String mwType, JsonObject mwOptions) {
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(mwType);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(mwType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", mwType);
             LOGGER.error(errMsg);

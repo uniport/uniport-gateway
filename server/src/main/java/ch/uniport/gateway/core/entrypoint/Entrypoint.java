@@ -7,6 +7,7 @@ import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
 import ch.uniport.gateway.proxy.config.model.MiddlewareOptionsModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareFactoryLoader;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -115,7 +116,7 @@ public final class Entrypoint {
         final String middlewareType = middlewareConfig.getType();
         final MiddlewareOptionsModel middlewareOptions = middlewareConfig.getOptions();
 
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.error(errMsg);

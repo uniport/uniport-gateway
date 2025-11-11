@@ -10,6 +10,7 @@ import ch.uniport.gateway.proxy.config.model.RouterModel;
 import ch.uniport.gateway.proxy.config.model.ServiceModel;
 import ch.uniport.gateway.proxy.middleware.Middleware;
 import ch.uniport.gateway.proxy.middleware.MiddlewareFactory;
+import ch.uniport.gateway.proxy.middleware.MiddlewareFactoryLoader;
 import ch.uniport.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import ch.uniport.gateway.proxy.middleware.oauth2.OAuth2MiddlewareOptions;
 import ch.uniport.gateway.proxy.middleware.oauth2.OAuth2RegistrationMiddlewareFactory;
@@ -322,7 +323,7 @@ public class RouterFactory {
         final MiddlewareOptionsModel middlewareOptions = injectPublicProtocolHostPort(middlewareType,
             middlewareConfig.getOptions());
 
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactory.Loader.getFactory(middlewareType);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.error(errMsg);
