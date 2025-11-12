@@ -1,0 +1,8 @@
+# necessary services for 'extensions' example
+services:
+  whoami:
+    image: traefik/whoami
+    expose:
+      - "80"
+    ports:
+      - "8081:80"

@@ -275,4 +275,4 @@ Custom middleware implementations provided in a additional JAR can be dynamicall
 
 The JAR also has to contain a `META-INF/services/ch.uniport.gateway.proxy.middleware.MiddlewareFactory` file with the fully-qualified path to the middleware factory implementation.
 
-See `server/src/test/java/ch/uniport/gateway/proxy/router/additionalRoutes` for a simple example.
+See `extensions/src/main/java/ch/uniport/gateway/extensions/middleware/example` for a simple example.

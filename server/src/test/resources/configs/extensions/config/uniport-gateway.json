@@ -1,0 +1,28 @@
+{
+    "entrypoints": [
+        {
+            "name": "entrypoint",
+            "port": 20000,
+            "middlewares": [
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json"
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "providers": [
+        {
+            "name": "file",
+            "directory": "./dynamic-config",
+            "watch": true
+        }
+    ]
+}
