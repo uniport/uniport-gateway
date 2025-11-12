@@ -266,3 +266,13 @@ To glue that all together, including the config schema and config validation,
 The following image visualizes how the components are connected. Note that only custom components are shown and Vert.x components are omitted:
 
 ![Classes Overview](./data/authorization_classes.drawio.png)
+
+## Custom middleware implementations
+
+Custom middleware implementations provided in a additional JAR can be dynamically loaded by the Uniport-Gateway. For this the middleware has to implement the interfaces `MiddlewareFactory`,`MiddlewareOptionsModel` and `Middleware` that are provided as part of the `api` package:
+
+`MiddlewareFactory`: The entrypoint that glues everything together like type, config JSON schema, validation, config model and creation of the middleware. `MiddlewareOptionsModel`: For mapping the validated JSON config onto Java classes aka models. `Middleware`: For the actual middleware implementation handling requests.
+
+The JAR also has to contain a `META-INF/services/ch.uniport.gateway.proxy.middleware.MiddlewareFactory` file with the fully-qualified path to the middleware factory implementation.
+
+See `server/src/test/java/ch/uniport/gateway/proxy/router/additionalRoutes` for a simple example.

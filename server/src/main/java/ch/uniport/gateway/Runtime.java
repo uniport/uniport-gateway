@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Runtime {
+public final class Runtime {
 
     public static final String DEVELOPMENT_MODE_KEY = "DEVELOPMENT";
     public static final String VERTICLE_INSTANCES_KEY = "VERTICLE_INSTANCES";
@@ -16,6 +16,9 @@ public class Runtime {
 
     private static final String INSTANCE_NAME_PROPERTY = "UNIPORT_GATEWAY_INSTANCE_NAME";
     public static final String DEFAULT_INSTANCE_NAME = "unknown";
+
+    public static final String EXTENSIONS_PATH_PROPERTY = "UNIPORT_GATEWAY_EXTENSIONS";
+    public static final String DEFAULT_EXTENSIONS_PATH = "/etc/uniport-gateway/extensions";
 
     public static final String LOGGING_CONFIG_PROPERTY = "UNIPORT_GATEWAY_LOGGING_CONFIG";
     public static final String STRUCTURAL_LOGGING_ENABLED_PROPERTY = "UNIPORT_GATEWAY_STRUCTURAL_LOGGING_ENABLED";
@@ -87,7 +90,11 @@ public class Runtime {
     }
 
     public static String getInstanceName() {
-        return System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME);
+        return System.getenv().getOrDefault(INSTANCE_NAME_PROPERTY, System.getProperty(INSTANCE_NAME_PROPERTY, DEFAULT_INSTANCE_NAME));
+    }
+
+    public static String getExtensionsPath() {
+        return System.getenv().getOrDefault(EXTENSIONS_PATH_PROPERTY, System.getProperty(EXTENSIONS_PATH_PROPERTY, DEFAULT_EXTENSIONS_PATH));
     }
 
     /**

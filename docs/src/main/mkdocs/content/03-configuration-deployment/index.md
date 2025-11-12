@@ -33,6 +33,7 @@ The Uniport-Gateway container image already includes a `uniport-gateway.json` fi
 | `UNIPORT_GATEWAY_METRICS_PORT` | HTTP Port for the Metrics Endpoint | 9090 |
 | `UNIPORT_GATEWAY_METRICS_PATH` | HTTP Path for the Metrics Endpoint | /metrics |
 | `UNIPORT_GATEWAY_CLUSTERED` | Switch to run the Uniport-Gateway in cluster mode. This also requires adjusting the number of deployed instances (e.g., `replicas` in the Helm Value Files). | false |
+| `UNIPORT_GATEWAY_EXTENSIONS` | Custom middleware implementations that can be loaded at runtime and are not part of the core. | /etc/uniport-gateway/extensions |
 
 The three variables `UNIPORT_GATEWAY_PUBLIC_PROTOCOL`, `UNIPORT_GATEWAY_PUBLIC_HOSTNAME`, and `UNIPORT_GATEWAY_PUBLIC_PORT` collectively form the public URL that the Uniport-Gateway uses for redirects. This applies to redirects from the OAuth2 Middleware to Portal-IAM.
 

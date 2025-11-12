@@ -53,7 +53,7 @@ public class DynamicConfiguration {
     public static final String MIDDLEWARE_NAME = "name";
     public static final String MIDDLEWARE_TYPE = "type";
     public static final String MIDDLEWARE_OPTIONS = "options";
-    public static final List<String> MIDDLEWARE_TYPES = MiddlewareFactoryLoader.listFactories().stream()
+    public static final List<String> MIDDLEWARE_TYPES = MiddlewareFactoryLoader.getInstance().listFactories().stream()
         .map(MiddlewareFactory::provides)
         .toList();
     // services
@@ -104,7 +104,7 @@ public class DynamicConfiguration {
     }
 
     private static ObjectSchemaBuilder[] buildMiddlewareSchema() {
-        final ObjectSchemaBuilder[] middlewareSchemas = MiddlewareFactoryLoader.listFactories()
+        final ObjectSchemaBuilder[] middlewareSchemas = MiddlewareFactoryLoader.getInstance().listFactories()
             .stream()
             .map(factory -> {
                 final ObjectSchemaBuilder optionsSchema = factory.optionsSchema();
@@ -638,7 +638,7 @@ public class DynamicConfiguration {
     }
 
     private static Future<Void> validateMiddlewareOptions(String mwType, JsonObject mwOptions) {
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(mwType);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getInstance().getFactory(mwType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", mwType);
             LOGGER.error(errMsg);

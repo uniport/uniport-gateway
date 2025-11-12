@@ -32,7 +32,7 @@ public class MiddlewareModelJsonDeserializer extends JsonDeserializer<Middleware
         final String type = typeNode.asText();
         builder.withType(type);
 
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(type);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getInstance().getFactory(type);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", type);
             throw new IllegalArgumentException(errMsg);

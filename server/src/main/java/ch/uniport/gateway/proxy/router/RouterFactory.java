@@ -323,7 +323,7 @@ public class RouterFactory {
         final MiddlewareOptionsModel middlewareOptions = injectPublicProtocolHostPort(middlewareType,
             middlewareConfig.getOptions());
 
-        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getFactory(middlewareType);
+        final Optional<MiddlewareFactory> middlewareFactory = MiddlewareFactoryLoader.getInstance().getFactory(middlewareType);
         if (middlewareFactory.isEmpty()) {
             final String errMsg = String.format("Unknown middleware '%s'", middlewareType);
             LOGGER.error(errMsg);
