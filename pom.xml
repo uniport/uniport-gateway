@@ -365,6 +365,7 @@
                     <configuration>
                         <chartVersion>${project.version}</chartVersion>
                         <chartDirectory>${project.basedir}/helm/target/uniport-gateway</chartDirectory>
+                        <helmVersion>3.19.2</helmVersion>
                         <useLocalHelmBinary>false</useLocalHelmBinary>
                         <debug>true</debug>
                         <uploadRepoSnapshot>
