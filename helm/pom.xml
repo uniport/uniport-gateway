@@ -111,27 +111,18 @@
             </plugin>
 
             <plugin>
-                <!-- See https://github.com/kokuwaio/helm-maven-plugin for documentation -->
                 <groupId>io.kokuwa.maven</groupId>
                 <artifactId>helm-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>${project.build.directory}/**/charts/**/charts/portal-lib</exclude>
-                    </excludes>
                     <chartDirectory>${chart.directory}</chartDirectory>
+                    <excludes>
+                        <exclude>${chart.directory}/charts/**/charts/portal-lib</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
-                        <!-- https://github.com/kokuwaio/helm-maven-plugin/issues/408 -->
-                        <id>default-clean</id>
-                        <phase>none</phase>
-                    </execution>
-                    <execution>
-                        <id>default-cli</id>
+                        <id>default-lint</id>
                         <configuration>
-                            <skipInstall>false</skipInstall>
-                            <skipUpgrade>false</skipUpgrade>
-                            <releaseName>${upstream.chart.name}</releaseName>
                             <values>
                                 <yamlFiles>
                                     <yamlFiles>${chart.directory}/values.localdev.yaml</yamlFiles>
