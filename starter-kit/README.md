@@ -75,7 +75,7 @@ All examples are based on the same docker compose file [docker-compose.yml](./do
 
 ### Step 9
 
-[Uniport-Gateway serving a static page containing an iframe](./step9/README.md).
+* [Uniport-Gateway serving a static page containing an iframe](./step9/README.md).
 
 ### Future Step Ideas
 
