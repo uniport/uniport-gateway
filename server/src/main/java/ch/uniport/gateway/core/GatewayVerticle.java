@@ -55,7 +55,7 @@ public class GatewayVerticle extends AbstractVerticle {
         GatewayConfigRetriever.create(vertx).getConfig()
             .onSuccess(rawConfigWithEnv -> handleRawConfig(rawConfigWithEnv.copy(), startPromise))
             .onFailure(err -> {
-                final String errMsg = String.format("failed to retrieve static configuration '{}'",
+                final String errMsg = String.format("failed to retrieve static configuration '%s'",
                     err.getMessage());
                 shutdownOnStartupFailure(new RuntimeException(errMsg));
             });
