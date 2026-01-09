@@ -75,7 +75,7 @@ jobs:
       deployments: write # update deployment
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
