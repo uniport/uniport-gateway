@@ -8,6 +8,7 @@ import ch.uniport.gateway.proxy.router.RouterFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.auth.oauth2.impl.OAuth2AuthProviderImpl;
@@ -54,6 +55,7 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     public static final String ADDITIONAL_SCOPES = "additionalScopes";
     public static final String ADDITIONAL_PARAMETERS = "additionalParameters";
     public static final String PASSTHROUGH_PARAMETERS = "passthroughParameters";
+    public static final String JWT_EXPIRATION_LEEWAY = "jwtExpirationLeeway";
 
     public static final String OIDC_RESPONSE_MODE = "response_mode";
     public static final String OIDC_RESPONSE_MODE_FORM_POST = "form_post";
@@ -66,9 +68,11 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     private static final String OAUTH2_CALLBACK_PREFIX = "/callback/";
     private static final int OAUTH2_PKCE_VERIFIER_LENGTH = 64;
     private static final String OIDC_SCOPE = "openid";
+    private static final Pattern ORIGIN_PATTERN = Pattern.compile("https?:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}");
 
-    private static final Pattern ORIGIN_PATTERN = Pattern
-        .compile("https?:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}");
+    // defaults
+    public static final boolean DEFAULT_OAUTH2_PROXY_AUTHENTICATION_FLOW = true;
+    public static final int DEFAULT_OAUTH2_JWT_EXPIRATION_LEEWAY = 0;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2MiddlewareFactory.class);
 
@@ -107,6 +111,8 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
             .optionalProperty(PASSTHROUGH_PARAMETERS, Schemas.arraySchema()
                 .items(Schemas.stringSchema()
                     .with(Keywords.minLength(1))))
+            .optionalProperty(JWT_EXPIRATION_LEEWAY, Schemas.intSchema()
+                .with(io.vertx.json.schema.draft7.dsl.Keywords.minimum(0)))
             .allowAdditionalProperties(false);
     }
 
@@ -228,11 +234,15 @@ public class OAuth2MiddlewareFactory implements MiddlewareFactory {
     }
 
     private OAuth2Options oAuth2Options(AbstractOAuth2MiddlewareOptionsBase options) {
+        final JWTOptions jwtOptions = new JWTOptions()
+            .setLeeway(Math.max(0, options.getJWTExpirationLeeway()));
+
         return new OAuth2Options()
             .setClientId(options.getClientId())
             .setClientSecret(options.getClientSecret())
             .setSite(options.getDiscoveryURL())
-            .setValidateIssuer(false);
+            .setValidateIssuer(false)
+            .setJWTOptions(jwtOptions);
     }
 
     private Function<OAuth2Auth, Future<Middleware>> createMiddleware(

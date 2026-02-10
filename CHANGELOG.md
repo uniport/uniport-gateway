@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Added
+
+- OAuth2 Middleware supports a configurable leeway for JWT expiration ([GH-79](https://github.com/uniport/uniport-gateway/issues/79)).
+
+### Changed
+
+- Bump version of Uniport-Gateway in start-kit to latest released version: `10.2.0-202601261419-87-6041ee5`.
+
+### Fixed
+
+- So that the config is not anymore periodically merged even with `"watch": false`. ([GH-80](https://github.com/uniport/uniport-gateway/issues/79)).
+
 ## [10.2.0]-202601261419-87-6041ee5 - 2026-01-26
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%2210.2.0-202601261419-87-6041ee5%22)

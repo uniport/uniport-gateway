@@ -61,6 +61,13 @@ public abstract class AbstractOAuth2MiddlewareOptionsBase implements MiddlewareO
     @JsonProperty(OAuth2MiddlewareFactory.PASSTHROUGH_PARAMETERS)
     public abstract List<String> getPassthroughParameters();
 
+    @Default
+    @JsonProperty(OAuth2MiddlewareFactory.JWT_EXPIRATION_LEEWAY)
+    public int getJWTExpirationLeeway() {
+        logDefault(LOGGER, OAuth2MiddlewareFactory.JWT_EXPIRATION_LEEWAY, OAuth2MiddlewareFactory.DEFAULT_OAUTH2_JWT_EXPIRATION_LEEWAY);
+        return OAuth2MiddlewareFactory.DEFAULT_OAUTH2_JWT_EXPIRATION_LEEWAY;
+    }
+
     // dynamically added during runtime
     public abstract Map<String, String> env();
 }
