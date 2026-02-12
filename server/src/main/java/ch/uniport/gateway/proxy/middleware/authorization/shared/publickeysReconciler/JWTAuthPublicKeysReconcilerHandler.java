@@ -4,6 +4,7 @@ import ch.uniport.gateway.proxy.middleware.authorization.JWKAccessibleAuthHandle
 import ch.uniport.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customClaimsChecker.JWTAuthAdditionalClaimsOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.shared.customIssuerChecker.JWTAuthMultipleIssuersOptions;
+import io.netty.handler.codec.http.HttpScheme;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -12,6 +13,7 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import java.net.MalformedURLException;
@@ -153,11 +155,11 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
         final int iamPort = port;
         final String iamDiscoveryPath = path;
         LOGGER.debug("Fetching jwks_uri from URL '{}://{}:{}{}'", iamProtocol, iamHost, iamPort, iamDiscoveryPath);
-        return WebClient.create(vertx)
+        return WebClient.create(vertx, new WebClientOptions().setSsl(HttpScheme.HTTPS.name().contentEqualsIgnoreCase(iamProtocol)))
             .get(iamPort, iamHost, iamDiscoveryPath)
             .as(BodyCodec.jsonObject())
             .send()
-            .compose(discoveryResp -> fetchJWKsFromJWKsURL(vertx, iamHost, iamPort, discoveryResp))
+            .compose(discoveryResp -> fetchJWKsFromJWKsURL(vertx, iamProtocol, iamHost, iamPort, discoveryResp))
             .onFailure(err -> LOGGER.info("Failed to complete discovery from URL '{}://{}:{}{}: {}'", iamProtocol,
                 iamHost, iamPort, iamDiscoveryPath, err));
     }
@@ -175,7 +177,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
      * @return
      */
     private static Future<List<JsonObject>> fetchJWKsFromJWKsURL(
-        Vertx vertx, String iamHost, int iamPort,
+        Vertx vertx, String iamProtocol, String iamHost, int iamPort,
         HttpResponse<JsonObject> discoveryResp
     ) {
         final String rawJWKsURI = discoveryResp.body().getString(JWKS_URI_KEY);
@@ -200,7 +202,7 @@ public interface JWTAuthPublicKeysReconcilerHandler extends JWKAccessibleAuthHan
         }
 
         LOGGER.debug("Fetching JWKS from URL '{}'", rawJWKsURI);
-        return WebClient.create(vertx)
+        return WebClient.create(vertx, new WebClientOptions().setSsl(HttpScheme.HTTPS.name().contentEqualsIgnoreCase(iamProtocol)))
             .get(iamPort, iamHost, iamJWKsPath)
             .as(BodyCodec.jsonObject())
             .send()

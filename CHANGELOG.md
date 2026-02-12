@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- So that the config is not anymore periodically merged even with `"watch": false`. ([GH-80](https://github.com/uniport/uniport-gateway/issues/79)).
+- So that the config is not anymore periodically merged even with `"watch": false` ([GH-80](https://github.com/uniport/uniport-gateway/issues/80)).
+- So that using HTTPS in URLs for fetching the IDP public key doesn't fail ([GH-81](https://github.com/uniport/uniport-gateway/issues/81)).
 
 ## [10.2.0]-202601261419-87-6041ee5 - 2026-01-26
 
