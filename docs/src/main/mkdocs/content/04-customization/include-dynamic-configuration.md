@@ -95,9 +95,9 @@ This Middleware checks every incoming request for an HTTP `Authorization` header
 
 Additionally:
 
-| Variable   | Required | Type    | Description                                                          |
-| ---------- | -------- | ------- | -------------------------------------------------------------------- |
-| `optional` | No       | Boolean | Switch whether the Authorization header in the request is mandatory. |
+| Variable   | Required | Type    | Default | Description                                                          |
+| ---------- | -------- | ------- |---------| -------------------------------------------------------------------- |
+| `optional` | No       | Boolean | false   | Switch whether the Authorization header in the request is mandatory. |
 
 !!! tip
 
