@@ -2,7 +2,7 @@
 
 [![Main build](https://github.com/uniport/uniport-gateway/actions/workflows/main.yaml/badge.svg)](https://github.com/uniport/uniport-gateway/actions/workflows/main.yaml)
 
-The Uniport-Gateway acts as an reverse proxy for all requests in Uniport.
+The Uniport-Gateway acts as a reverse proxy for all requests in Uniport.
 
 ## Why yet another reverse proxy?
 
