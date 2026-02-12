@@ -94,6 +94,7 @@ public class FileConfigProvider extends Provider {
 
     private ConfigRetrieverOptions getOptions() {
         final ConfigRetrieverOptions options = new ConfigRetrieverOptions();
+        options.setScanPeriod(-1); // to disable the io.vertx.config.ConfigRetrieverOptions.SCAN_PERIOD_DEFAULT
         if (this.watch) {
             LOGGER.info("Setting scan period to '{}'", SCAN_PERIOD_MS);
             options.setScanPeriod(SCAN_PERIOD_MS);
