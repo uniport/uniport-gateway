@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="UniportGateway" type="Application" factoryName="Application">
+  <configuration default="false" name="UniportGateway proxy-config.examples" type="Application" factoryName="Application">
     <envs>
       <env name="DEVELOPMENT" value="true" />
       <env name="UNIPORT_GATEWAY_JSON" value="$PROJECT_DIR$/helm/src/main/resources/proxy-config.examples/uniport-gateway.json" />
