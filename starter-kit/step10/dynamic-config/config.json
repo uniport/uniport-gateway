@@ -1,0 +1,77 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "rule": "PathPrefix('/mcp')",
+                "middlewares": [
+                    "headers",
+                    "bearerOnly"
+                ],
+                "service": "openstreetmap"
+            },
+            {
+                "name": "mcp-oauth-discovery",
+                "rule": "Path('/.well-known/oauth-protected-resource')",
+                "middlewares": [
+                    "mcpDiscoveryResponse"
+                ],
+                "service": "openstreetmap"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "bearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "http://host.docker.internal:8080/realms/mcp"
+                        }
+                    ],
+                    "audience": [
+                        "uniport-gateway"
+                    ],
+                    "issuer": "http://host.docker.internal:8080/realms/mcp",
+                    "optional": "false",
+                    "publicKeysReconciliation": {
+                        "enabled": true,
+                        "intervalMs": 3600000
+                    }
+                }
+            },
+            {
+                "name": "headers",
+                "type": "headers",
+                "options": {
+                    "customResponseHeaders": {
+                        "WWW-Authenticate": "Bearer realm=\"mcp-server\", resource_metadata=\"http://localhost:9000/.well-known/oauth-protected-resource\""
+                    }
+                }
+            },
+            {
+                "name": "mcpDiscoveryResponse",
+                "type": "customResponse",
+                "options": {
+                    "statusCode": 200,
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "content": "{\"resource\":\"https://portal.example.com/mcp\",\"authorization_servers\":[\"https://portal-iam.example.com/auth/realms/portal\"],\"scopes_supported\":[\"openid\",\"profile\"],\"bearer_methods_supported\":[\"header\"]}"
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "openstreetmap",
+                "servers": [
+                    {
+                        "protocol": "https",
+                        "host": "www.openstreetmap.org",
+                        "port": 443
+                    }
+                ]
+            }
+        ]
+    }
+}
