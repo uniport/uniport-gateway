@@ -5,10 +5,6 @@
             "port": 20000,
             "middlewares": [
                 {
-                    "name": "openTelemetry",
-                    "type": "openTelemetry"
-                },
-                {
                     "name": "responseSessionCookieRemoval",
                     "type": "responseSessionCookieRemoval"
                 },
@@ -73,76 +69,6 @@
                             {
                                 "name": "uniport.amr",
                                 "path": "/"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "name": "csp",
-                    "type": "csp",
-                    "options": {
-                        "policyDirectives": [
-                            {
-                                "directive": "report-to",
-                                "values": [
-                                    "/csp-reports"
-                                ]
-                            },
-                            {
-                                "directive": "report-uri",
-                                "values": [
-                                    "/csp-reports"
-                                ]
-                            },
-                            {
-                                "directive": "default-src",
-                                "values": [
-                                    "self"
-                                ]
-                            },
-                            {
-                                "directive": "style-src",
-                                "values": [
-                                    "https://fonts.googleapis.com",
-                                    "https://fonts.gstatic.com",
-                                    "https://cdn.jsdelivr.net",
-                                    "self",
-                                    "unsafe-inline"
-                                ]
-                            },
-                            {
-                                "directive": "font-src",
-                                "values": [
-                                    "https://fonts.googleapis.com",
-                                    "https://fonts.gstatic.com",
-                                    "https://cdn.jsdelivr.net",
-                                    "self",
-                                    "data:"
-                                ]
-                            },
-                            {
-                                "directive": "script-src",
-                                "values": [
-                                    "self",
-                                    "blob:",
-                                    "unsafe-inline",
-                                    "unsafe-eval",
-                                    "https://cdn.jsdelivr.net"
-                                ]
-                            },
-                            {
-                                "directive": "img-src",
-                                "values": [
-                                    "self",
-                                    "data: https:"
-                                ]
-                            },
-                            {
-                                "directive": "connect-src",
-                                "values": [
-                                    "self",
-                                    "https://fonts.googleapis.com"
-                                ]
                             }
                         ]
                     }
