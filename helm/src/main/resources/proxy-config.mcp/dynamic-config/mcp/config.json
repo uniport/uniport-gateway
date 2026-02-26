@@ -36,7 +36,7 @@
                         "Organisation"
                     ],
                     "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
-                    "optional": "${UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL}"
+                    "optional": true
                 }
             }
         ],
