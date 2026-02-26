@@ -28,14 +28,14 @@
                 "options": {
                     "publicKeys": [
                         {
-                            "publicKey": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                            "publicKey": "http://localhost:8080/auth/realms/mcp"
                         }
                     ],
                     "audience": [
                         "Uniport-Gateway",
                         "Organisation"
                     ],
-                    "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "issuer": "http://localhost:8090/auth/realms/mcp",
                     "optional": true
                 }
             }
