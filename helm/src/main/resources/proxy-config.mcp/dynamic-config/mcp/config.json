@@ -3,6 +3,9 @@
         "routers": [
             {
                 "name": "mcp",
+                "entrypoints": [
+                    "mcpHttp20001"
+                ],
                 "middlewares": [
                     "mcpBearerOnly"
                 ],
@@ -11,6 +14,9 @@
             },
             {
                 "name": "mcp-oauth-protected-resource",
+                "entrypoints": [
+                    "mcpHttp20001"
+                ],
                 "rule": "Path('/.well-known/oauth-protected-resource')",
                 "service": "mcp"
             }
