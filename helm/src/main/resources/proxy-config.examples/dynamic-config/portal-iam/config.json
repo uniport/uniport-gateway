@@ -4,6 +4,7 @@
             {
                 "name": "portal-iam-proxy-auth-admin",
                 "middlewares": [
+                    "portalIAMCors",
                     "portalIAMRedirectRegex",
                     "portalIAMOauth2",
                     "portalIAMPassAuthorization"
@@ -14,6 +15,7 @@
             {
                 "name": "portal-iam-proxy-auth-realms-master",
                 "middlewares": [
+                    "portalIAMCors",
                     "portalIAMRedirectRegex",
                     "portalIAMOauth2",
                     "portalIAMPassAuthorization"
@@ -23,6 +25,15 @@
             }
         ],
         "middlewares": [
+            {
+                "name": "portalIAMCors",
+                "type": "cors",
+                "options": {
+                    "allowedHeaders": [
+                        "mcp-protocol-version"
+                    ]
+                }
+            },
             {
                 "name": "portalIAMRedirectRegex",
                 "type": "redirectRegex",
