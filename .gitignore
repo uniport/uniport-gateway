@@ -50,3 +50,6 @@ docs/**/node/
 
 # Postgres data
 starter-kit/auth/volume/
+
+# Claude
+/.claude/settings.local.json
