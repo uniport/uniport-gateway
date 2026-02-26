@@ -3,6 +3,10 @@
         {
             "name": "http20000",
             "port": 20000,
+            "tls": {
+                "certFile": "/Users/psiska/Projects/uniport/uniport-gateway/helm/src/main/resources/proxy-config.mcp/localhost.pem",
+                "keyFile": "/Users/psiska/Projects/uniport/uniport-gateway/helm/src/main/resources/proxy-config.mcp/localhost-key.pem"
+            },
             "middlewares": [
                 {
                     "name": "cors",
@@ -96,6 +100,10 @@
         {
             "name": "mcpHttp20001",
             "port": 20001,
+            "tls": {
+                "certFile": "/Users/psiska/Projects/uniport/uniport-gateway/helm/src/main/resources/proxy-config.mcp/localhost.pem",
+                "keyFile": "/Users/psiska/Projects/uniport/uniport-gateway/helm/src/main/resources/proxy-config.mcp/localhost-key.pem"
+            },
             "middlewares": [
                 {
                     "name": "cors",
