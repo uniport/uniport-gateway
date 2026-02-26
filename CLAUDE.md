@@ -45,6 +45,9 @@ docs/             - MkDocs documentation site (Node.js based)
 starter-kit/      - 10-step progressive tutorial with docker-compose examples
 ```
 
+- Example dynamic configs (Helm defaults): `helm/src/main/resources/proxy-config.examples/dynamic-config/`
+- Middleware naming convention in dynamic configs: camelCase with context prefix (e.g., `portalIAMCors`, `portalIAMOauth2`)
+
 ## Architecture
 
 - **Static config** (`uniport-gateway.json`): Entrypoints + providers. Set at startup, not hot-reloaded.
