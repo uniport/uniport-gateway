@@ -1,0 +1,28 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "root",
+                "middlewares": [
+                    "rootResponse"
+                ],
+                "rule": "Path('/')",
+                "service": "base-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "rootResponse",
+                "type": "customResponse",
+                "options": {
+                    "statusCode": 200,
+                    "headers": {
+                        "Content-Type": "text/html; charset=utf-8"
+                    },
+                    "content": "<!DOCTYPE html><html><head><title>Uniport Gateway</title></head><body><h1>Hi!</h1></body></html>"
+                }
+            }
+        ],
+        "services": []
+    }
+}

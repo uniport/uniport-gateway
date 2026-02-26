@@ -1,0 +1,148 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "auth",
+                "rule": "PathPrefix('/auth')",
+                "middlewares": [
+                    "authRedirectRegex",
+                    "languageCookie"
+                ],
+                "service": "portal-iam"
+            },
+            {
+                "name": "login",
+                "middlewares": [
+                    "loginOauth2",
+                    "loginRedirectRegex"
+                ],
+                "rule": "PathPrefix('/login')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "register",
+                "middlewares": [
+                    "registerOauth2",
+                    "registerRedirectRegex"
+                ],
+                "rule": "PathPrefix('/register')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "frontChannelLogout",
+                "middlewares": [
+                    "logoutRedirectRegex"
+                ],
+                "rule": "PathPrefix('/logout')",
+                "service": "base-proxy"
+            },
+            {
+                "name": "backChannelLogout",
+                "middlewares": [
+                    "logoutRedirectRegex",
+                    "backChannelLogout"
+                ],
+                "rule": "PathPrefix('/backchannellogout')",
+                "service": "base-proxy"
+            }
+        ],
+        "middlewares": [
+            {
+                "name": "authRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/realms/master|auth/resources|auth/js|auth/admin).*",
+                    "replacement": "/login"
+                }
+            },
+            {
+                "name": "languageCookie",
+                "type": "languageCookie"
+            },
+            {
+                "name": "loginOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "${UNIPORT_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${UNIPORT_GATEWAY_CLIENT_SECRET}",
+                    "discoveryUrl": "http://${UNIPORT_GATEWAY_PORTAL_IAM_HOST}:${UNIPORT_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Login",
+                    "passthroughParameters": [
+                        "kc_idp_hint",
+                        "login_hint",
+                        "invitation_code"
+                    ]
+                }
+            },
+            {
+                "name": "registerOauth2",
+                "type": "oauth2",
+                "options": {
+                    "clientId": "${UNIPORT_GATEWAY_CLIENT_ID}",
+                    "clientSecret": "${UNIPORT_GATEWAY_CLIENT_SECRET}",
+                    "discoveryUrl": "http://${UNIPORT_GATEWAY_PORTAL_IAM_HOST}:${UNIPORT_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "sessionScope": "Login",
+                    "passthroughParameters": [
+                        "kc_idp_hint",
+                        "login_hint",
+                        "invitation_code"
+                    ]
+                }
+            },
+            {
+                "name": "loginRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/login(\\?.*)?",
+                    "replacement": "/base/service/redirect$1"
+                }
+            },
+            {
+                "name": "registerRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/register(\\?.*)?",
+                    "replacement": "/base/service/redirect$1"
+                }
+            },
+            {
+                "name": "logoutRedirectRegex",
+                "type": "redirectRegex",
+                "options": {
+                    "regex": "^/logout(.*)$",
+                    "replacement": "/base/service/logout$1"
+                }
+            },
+            {
+                "name": "backChannelLogout",
+                "type": "backChannelLogout",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
+                    ],
+                    "audience": [
+                        "Uniport-Gateway"
+                    ],
+                    "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "publicKeysReconciliation": {
+                        "enabled": true,
+                        "intervalMs": 3600000
+                    }
+                }
+            }
+        ],
+        "services": [
+            {
+                "name": "portal-iam",
+                "servers": [
+                    {
+                        "host": "${UNIPORT_GATEWAY_PORTAL_IAM_HOST}",
+                        "port": "${UNIPORT_GATEWAY_PORTAL_IAM_PORT}"
+                    }
+                ]
+            }
+        ]
+    }
+}
