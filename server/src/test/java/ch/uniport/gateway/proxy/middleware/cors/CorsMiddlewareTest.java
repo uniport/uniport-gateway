@@ -7,8 +7,10 @@ import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.AuthenticationRedirectRequestAssert.assertThat;
 import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 import static io.netty.handler.codec.http.HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS;
+import static io.vertx.core.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static io.vertx.core.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
 import static io.vertx.core.http.HttpHeaders.ORIGIN;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
@@ -480,6 +482,56 @@ public class CorsMiddlewareTest extends MiddlewareTestBase {
                         .hasStatusCode(204)
                         .hasHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS.toString(),
                             String.valueOf(allowCredentials));
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void testGETSingleCorsHeaderWhenBackendSendsNone(Vertx vertx, VertxTestContext testCtx)
+        throws InterruptedException {
+        // given: a backend that does NOT set any CORS headers
+        final String origin = "http://example.com";
+        uniportGateway(vertx, HOST, testCtx)
+            .withCorsMiddleware(origin)
+            .build(ctx -> {
+                ctx.response().setStatusCode(200).end("ok");
+            }).start()
+            // when
+            .incomingRequest(HttpMethod.GET, "/",
+                new RequestOptions().addHeader(ORIGIN, origin),
+                (resp) -> {
+                    // then: there should be exactly one Access-Control-Allow-Origin header
+                    List<String> values = resp.headers().getAll(ACCESS_CONTROL_ALLOW_ORIGIN);
+                    testCtx.verify(() -> {
+                        assertThat(values).hasSize(1);
+                        assertThat(values.get(0)).isEqualTo(origin);
+                    });
+                    testCtx.completeNow();
+                });
+    }
+
+    @Test
+    public void testGETDeduplicatesCorsHeadersFromBackend(Vertx vertx, VertxTestContext testCtx)
+        throws InterruptedException {
+        // given: a backend that also sets Access-Control-Allow-Origin (e.g. Keycloak)
+        final String origin = "http://example.com";
+        uniportGateway(vertx, HOST, testCtx)
+            .withCorsMiddleware(origin)
+            .build(ctx -> {
+                // simulate a proxied backend that sets its own CORS headers
+                ctx.response().headers().add(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+                ctx.response().setStatusCode(200).end("ok");
+            }).start()
+            // when
+            .incomingRequest(HttpMethod.GET, "/",
+                new RequestOptions().addHeader(ORIGIN, origin),
+                (resp) -> {
+                    // then: there should be exactly one Access-Control-Allow-Origin header
+                    List<String> values = resp.headers().getAll(ACCESS_CONTROL_ALLOW_ORIGIN);
+                    testCtx.verify(() -> {
+                        assertThat(values).hasSize(1);
+                        assertThat(values.get(0)).isEqualTo(origin);
+                    });
                     testCtx.completeNow();
                 });
     }

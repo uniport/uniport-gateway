@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Changed
+
+- CorsMiddleware deduplicates the headers ([GH-85](https://github.com/uniport/uniport-gateway/issues/85)).
+
 ## [10.3.0]-202602121511-92-c7ee225 - 2026-02-12
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%2210.3.0-202602121511-92-c7ee225%22)

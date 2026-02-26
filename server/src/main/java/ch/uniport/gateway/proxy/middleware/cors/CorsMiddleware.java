@@ -2,6 +2,7 @@ package ch.uniport.gateway.proxy.middleware.cors;
 
 import ch.uniport.gateway.proxy.middleware.TraceMiddleware;
 import io.opentelemetry.api.trace.Span;
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -70,9 +71,32 @@ public class CorsMiddleware extends TraceMiddleware {
         corsHandler.allowPrivateNetwork(allowPrivateNetwork);
     }
 
+    private static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+    private static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+
     @Override
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
+
+        // Deduplicate CORS headers that may be set by both the CorsHandler and a
+        // proxied backend service. The headersEndHandler runs just before the
+        // response is sent, after the proxy has copied backend headers.
+        ctx.addHeadersEndHandler(v -> {
+            final MultiMap headers = ctx.response().headers();
+            deduplicateHeader(headers, ACCESS_CONTROL_ALLOW_ORIGIN);
+            deduplicateHeader(headers, ACCESS_CONTROL_ALLOW_CREDENTIALS);
+            deduplicateHeader(headers, ACCESS_CONTROL_EXPOSE_HEADERS);
+        });
+
         corsHandler.handle(ctx);
+    }
+
+    private void deduplicateHeader(MultiMap headers, String headerName) {
+        final List<String> values = headers.getAll(headerName);
+        if (values.size() > 1) {
+            LOGGER.debug("{}: Deduplicating response header '{}' ({} values)", name, headerName, values.size());
+            headers.set(headerName, values.get(0));
+        }
     }
 }
