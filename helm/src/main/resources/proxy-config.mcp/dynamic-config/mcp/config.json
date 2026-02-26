@@ -3,6 +3,9 @@
         "routers": [
             {
                 "name": "mcp",
+                "middlewares": [
+                    "mcpBearerOnly"
+                ],
                 "rule": "PathPrefix('/mcp')",
                 "service": "mcp"
             },
@@ -12,14 +15,32 @@
                 "service": "mcp"
             }
         ],
-        "middlewares": [],
+        "middlewares": [
+            {
+                "name": "mcpBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
+                    ],
+                    "audience": [
+                        "Uniport-Gateway",
+                        "Organisation"
+                    ],
+                    "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": "${UNIPORT_GATEWAY_BEARER_TOKEN_OPTIONAL}"
+                }
+            }
+        ],
         "services": [
             {
                 "name": "mcp",
                 "servers": [
                     {
                         "host": "localhost",
-                        "port": "8000"
+                        "port": 8000
                     }
                 ]
             }
