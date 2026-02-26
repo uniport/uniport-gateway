@@ -29,9 +29,7 @@
                 "name": "portalIAMCors",
                 "type": "cors",
                 "options": {
-                    "allowedHeaders": [
-                        "mcp-protocol-version"
-                    ]
+                    "allowedHeaders": []
                 }
             },
             {
