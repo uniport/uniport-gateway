@@ -5,6 +5,24 @@
             "port": 20000,
             "middlewares": [
                 {
+                    "name": "cors",
+                    "type": "cors",
+                    "options": {
+                        "allowedOriginPatterns": [
+                            ".+"
+                        ],
+                        "allowedMethods": [
+                            "GET",
+                            "HEAD",
+                            "POST",
+                            "PUT",
+                            "DELETE",
+                            "PATCH",
+                            "OPTIONS"
+                        ]
+                    }
+                },
+                {
                     "name": "responseSessionCookieRemoval",
                     "type": "responseSessionCookieRemoval"
                 },
