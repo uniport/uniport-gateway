@@ -1,0 +1,28 @@
+{
+    "http": {
+        "routers": [
+            {
+                "name": "mcp",
+                "rule": "PathPrefix('/mcp')",
+                "service": "mcp"
+            },
+            {
+                "name": "mcp-oauth-protected-resource",
+                "rule": "Path('/.well-known/oauth-protected-resource')",
+                "service": "mcp"
+            }
+        ],
+        "middlewares": [],
+        "services": [
+            {
+                "name": "mcp",
+                "servers": [
+                    {
+                        "host": "localhost",
+                        "port": "8000"
+                    }
+                ]
+            }
+        ]
+    }
+}
