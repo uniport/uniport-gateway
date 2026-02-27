@@ -37,15 +37,6 @@
                 ],
                 "rule": "Path('/.well-known/oauth-protected-resource/organisation/mcp')",
                 "service": "organisation-mcp"
-            },
-            {
-                "name": "organisation-mcp-oauth-protected-resource",
-                "entrypoints": [
-                    "mcpHttp20001"
-                ],
-                "middlewares": [],
-                "rule": "Path('/.well-known/oauth-protected-resource')",
-                "service": "organisation-mcp"
             }
         ],
         "middlewares": [
