@@ -182,28 +182,26 @@ public class OAuth2AuthMiddleware extends TraceMiddleware {
         }
     }
 
-    private static void whenTokenForCodeReceived(
+    static void whenTokenForCodeReceived(
         Vertx vertx,
         AsyncResult<Void> asyncResult,
         RoutingContext ctx,
         OAuth2Auth authProvider,
         String sessionScope
     ) {
-        if (asyncResult.succeeded()) {
-            if (ctx.user() != null) {
-                LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'",
-                    sessionScope, SessionAdapter.displaySessionId(ctx.session()));
-                ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
-
-                // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User
-                // objects together.
-                // However, it is marked as deprecated, and therefore we use our own glue.
-                AuthenticationUserContext.of(authProvider, ctx.user()).toSessionAtScope(ctx.session(), sessionScope);
-                storeKeycloakSID(vertx, ctx);
-            }
-        }
         if (asyncResult.failed()) {
             LOGGER.warn("End handler failed '{}'", asyncResult.cause());
+        }
+        if (ctx.user() != null) {
+            LOGGER.debug("Setting user of session scope '{}' with updated sessionId '{}'",
+                sessionScope, SessionAdapter.displaySessionId(ctx.session()));
+            ContextualData.put(CONTEXTUAL_DATA_SESSION_ID, SessionAdapter.displaySessionId(ctx.session()));
+
+            // AccessToken from vertx-auth was the glue to bind the OAuth2Auth and User
+            // objects together.
+            // However, it is marked as deprecated, and therefore we use our own glue.
+            AuthenticationUserContext.of(authProvider, ctx.user()).toSessionAtScope(ctx.session(), sessionScope);
+            storeKeycloakSID(vertx, ctx);
         }
         OAuth2AuthMiddleware.removeOAuth2FlowState(ctx, sessionScope);
     }
