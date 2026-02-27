@@ -30,8 +30,8 @@ public class ResponseHeadersOnStatusMiddleware extends TraceMiddleware {
 
         this.name = name;
         this.statusCode = statusCode;
-        this.setHeaders = setHeaders;
-        this.rewriteRules = rewriteRules;
+        this.setHeaders = setHeaders == null ? null : MultiMap.caseInsensitiveMultiMap().addAll(setHeaders);
+        this.rewriteRules = rewriteRules == null ? null : Map.copyOf(rewriteRules);
     }
 
     @Override
