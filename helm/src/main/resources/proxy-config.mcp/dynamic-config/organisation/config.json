@@ -53,7 +53,7 @@
                 "options": {
                     "clientId": "${UNIPORT_GATEWAY_CLIENT_ID}",
                     "clientSecret": "${UNIPORT_GATEWAY_CLIENT_SECRET}",
-                    "discoveryUrl": "http://${UNIPORT_GATEWAY_PORTAL_IAM_HOST}:${UNIPORT_GATEWAY_PORTAL_IAM_PORT}/auth/realms/portal",
+                    "discoveryUrl": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}",
                     "sessionScope": "Organisation"
                 }
             },
