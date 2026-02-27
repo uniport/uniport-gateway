@@ -7,7 +7,6 @@ Both entrypoints use locally-trusted TLS certificates generated with [mkcert](ht
 Generate the certificates:
 
 ```bash
-cd helm/src/main/resources/proxy-config.mcp
 mkcert -cert-file localhost.pem -key-file localhost-key.pem localhost 127.0.0.1 ::1
 ```
 
