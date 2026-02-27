@@ -9,6 +9,10 @@
             },
             "middlewares": [
                 {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
                     "name": "cors",
                     "type": "cors",
                     "options": {
@@ -105,6 +109,10 @@
                 "keyFile": "helm/src/main/resources/proxy-config.mcp/localhost-key.pem"
             },
             "middlewares": [
+                {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
                 {
                     "name": "cors",
                     "type": "cors",
