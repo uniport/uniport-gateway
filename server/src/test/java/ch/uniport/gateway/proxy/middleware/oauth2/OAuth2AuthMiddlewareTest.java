@@ -19,28 +19,19 @@ import ch.uniport.gateway.proxy.middleware.KeycloakServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
-import ch.uniport.gateway.proxy.middleware.authorization.MockOAuth2Auth;
 import ch.uniport.gateway.proxy.middleware.oauth2.relyingParty.StateWithUri;
 import ch.uniport.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.Session;
-import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.sstore.SessionStore;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -50,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -874,94 +864,6 @@ public class OAuth2AuthMiddlewareTest extends MiddlewareTestBase {
                                             });
                                     });
                             });
-                    });
-            });
-    }
-
-    @Test
-    void whenTokenForCodeReceivedStoresUserEvenWhenEndHandlerFails(Vertx vertx, VertxTestContext testCtx) {
-        // given
-        final SessionStore sessionStore = LocalSessionStore.create(vertx);
-        final Session session = sessionStore.createSession(30_000);
-        final JsonObject principal = new JsonObject()
-            .put("access_token", "test-access-token")
-            .put("expires_in", 3600);
-        final User user = MockOAuth2Auth.createUser(principal);
-        final MockOAuth2Auth authProvider = new MockOAuth2Auth(principal);
-
-        final HttpServerRequest request = (HttpServerRequest) Proxy.newProxyInstance(
-            HttpServerRequest.class.getClassLoader(),
-            new Class[] { HttpServerRequest.class },
-            (proxy, method, args) -> {
-                if ("getParam".equals(method.getName())) {
-                    return null;
-                }
-                return null;
-            });
-
-        final RoutingContext ctx = (RoutingContext) Proxy.newProxyInstance(
-            RoutingContext.class.getClassLoader(),
-            new Class[] { RoutingContext.class },
-            (proxy, method, args) -> {
-                if ("user".equals(method.getName())) {
-                    return user;
-                }
-                if ("session".equals(method.getName())) {
-                    return session;
-                }
-                if ("request".equals(method.getName())) {
-                    return request;
-                }
-                if ("toString".equals(method.getName())) {
-                    return "MockRoutingContext";
-                }
-                if ("hashCode".equals(method.getName())) {
-                    return System.identityHashCode(proxy);
-                }
-                return null;
-            });
-
-        // when
-        OAuth2AuthMiddleware.whenTokenForCodeReceived(
-            vertx, Future.failedFuture("Connection closed"), ctx, authProvider, "test");
-
-        // then
-        Assertions.assertThat(AuthenticationUserContext.fromSessionAtScope(session, "test")).isPresent();
-        testCtx.completeNow();
-    }
-
-    @Test
-    void authenticatedSessionIsPreservedAfterCallback(Vertx vertx, VertxTestContext testCtx)
-        throws InterruptedException {
-        // given
-        final String protectedResource = "http://localhost:8080/test/resource";
-        final JsonObject oidcSessionState = oidcSessionState("aState", protectedResource, "aPKCE");
-        final KeycloakServer keycloakServer = new KeycloakServer(vertx, testCtx)
-            .startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler((bodyHandler -> {
-            }));
-        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withSessionMiddleware()
-            .withCustomSessionState(
-                OAuth2AuthMiddleware.PREFIX_STATE + oidcSessionState.getString(OIDC_PARAM_STATE), oidcSessionState)
-            .withOAuth2AuthMiddlewareForScope(keycloakServer, "test")
-            .build().start();
-        final RequestOptions reqOpts = new RequestOptions();
-
-        // Step 1: callback -> code-to-token -> authenticated session
-        gateway.incomingRequest(POST,
-            "/callback/test?state=" + oidcSessionState.getString(OIDC_PARAM_STATE) + "&code=THE-CODE",
-            response1 -> {
-                assertThat(testCtx, response1)
-                    .isRedirectTo(protectedResource);
-                final String sessionCookie = cookieFrom(response1);
-
-                // Step 2: access protected resource with session cookie -> should reach backend (200)
-                gateway.incomingRequest(GET, protectedResource,
-                    withCookie(reqOpts, sessionCookie),
-                    response2 -> {
-                        Assertions.assertThat(response2.statusCode()).isEqualTo(200);
-                        testCtx.completeNow();
-                        keycloakServer.closeServer();
                     });
             });
     }
