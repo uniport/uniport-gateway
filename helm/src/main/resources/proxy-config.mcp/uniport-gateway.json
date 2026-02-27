@@ -3,10 +3,6 @@
         {
             "name": "http20000",
             "port": 20000,
-            "tls": {
-                "certFile": "helm/src/main/resources/proxy-config.mcp/localhost.pem",
-                "keyFile": "helm/src/main/resources/proxy-config.mcp/localhost-key.pem"
-            },
             "middlewares": [
                 {
                     "name": "openTelemetry",
@@ -104,10 +100,6 @@
         {
             "name": "mcpHttp20001",
             "port": 20001,
-            "tls": {
-                "certFile": "helm/src/main/resources/proxy-config.mcp/localhost.pem",
-                "keyFile": "helm/src/main/resources/proxy-config.mcp/localhost-key.pem"
-            },
             "middlewares": [
                 {
                     "name": "openTelemetry",
