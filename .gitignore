@@ -50,3 +50,5 @@ docs/**/node/
 
 # Postgres data
 starter-kit/auth/volume/
+/helm/src/main/resources/proxy-config.examples/localhost.pem
+/helm/src/main/resources/proxy-config.examples/localhost-key.pem
