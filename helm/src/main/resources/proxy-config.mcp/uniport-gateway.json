@@ -128,42 +128,6 @@
                     }
                 }
             ]
-        },
-        {
-            "name": "authHttp8090",
-            "port": 8090,
-            "middlewares": [
-                {
-                    "name": "cors",
-                    "type": "cors",
-                    "options": {
-                        "allowedOriginPatterns": [
-                            ".+"
-                        ],
-                        "allowedMethods": [
-                            "GET",
-                            "HEAD",
-                            "POST",
-                            "PUT",
-                            "DELETE",
-                            "PATCH",
-                            "OPTIONS"
-                        ]
-                    }
-                },
-                {
-                    "name": "requestResponseLogger",
-                    "type": "requestResponseLogger",
-                    "options": {
-                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
-                        "contentTypes": [
-                            "text/plain",
-                            "application/json",
-                            "application/x-www-form-urlencoded"
-                        ]
-                    }
-                }
-            ]
         }
     ],
     "providers": [
