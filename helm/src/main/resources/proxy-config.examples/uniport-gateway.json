@@ -9,6 +9,24 @@
                     "type": "openTelemetry"
                 },
                 {
+                    "name": "cors",
+                    "type": "cors",
+                    "options": {
+                        "allowedOriginPatterns": [
+                            ".+"
+                        ],
+                        "allowedMethods": [
+                            "GET",
+                            "HEAD",
+                            "POST",
+                            "PUT",
+                            "DELETE",
+                            "PATCH",
+                            "OPTIONS"
+                        ]
+                    }
+                },
+                {
                     "name": "responseSessionCookieRemoval",
                     "type": "responseSessionCookieRemoval"
                 },
@@ -144,6 +162,46 @@
                                     "https://fonts.googleapis.com"
                                 ]
                             }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "mcpHttp20001",
+            "port": 20001,
+            "middlewares": [
+                {
+                    "name": "openTelemetry",
+                    "type": "openTelemetry"
+                },
+                {
+                    "name": "cors",
+                    "type": "cors",
+                    "options": {
+                        "allowedOriginPatterns": [
+                            ".+"
+                        ],
+                        "allowedMethods": [
+                            "GET",
+                            "HEAD",
+                            "POST",
+                            "PUT",
+                            "DELETE",
+                            "PATCH",
+                            "OPTIONS"
+                        ]
+                    }
+                },
+                {
+                    "name": "requestResponseLogger",
+                    "type": "requestResponseLogger",
+                    "options": {
+                        "uriWithoutLoggingRegex": "/health.*|/ready.*",
+                        "contentTypes": [
+                            "text/plain",
+                            "application/json",
+                            "application/x-www-form-urlencoded"
                         ]
                     }
                 }

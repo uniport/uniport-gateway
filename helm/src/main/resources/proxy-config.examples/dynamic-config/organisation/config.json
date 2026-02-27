@@ -13,6 +13,30 @@
                 ],
                 "rule": "PathPrefix('/organisation')",
                 "service": "organisation-proxy"
+            },
+            {
+                "name": "organisation-mcp",
+                "entrypoints": [
+                    "mcpHttp20001"
+                ],
+                "middlewares": [
+                    "organisationMcpWwwAuth",
+                    "organisationMcpBearerOnly",
+                    "organisationMcpReplacePath"
+                ],
+                "rule": "PathPrefix('/organisation/mcp')",
+                "service": "organisation-mcp"
+            },
+            {
+                "name": "organisation-mcp-oauth-protected-resource-replaced",
+                "entrypoints": [
+                    "mcpHttp20001"
+                ],
+                "middlewares": [
+                    "organisationMcpOauthProtectedResourceReplacePath"
+                ],
+                "rule": "Path('/.well-known/oauth-protected-resource/organisation/mcp')",
+                "service": "organisation-mcp"
             }
         ],
         "middlewares": [
@@ -54,8 +78,58 @@
                 "type": "checkRoute"
             },
             {
+                "name": "ShowSessionContentMiddleware",
+                "type": "_session_"
+            },
+            {
                 "name": "organisationCsrf",
                 "type": "csrf"
+            },
+            {
+                "name": "organisationMcpWwwAuth",
+                "type": "responseHeadersOnStatus",
+                "options": {
+                    "statusCode": 401,
+                    "rewriteResponseHeaders": {
+                        "WWW-Authenticate": {
+                            "regex": "(resource_metadata=\"[^\"]*\\.well-known/oauth-protected-resource)(\")",
+                            "replacement": "$1/organisation/mcp$2"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "organisationMcpBearerOnly",
+                "type": "bearerOnly",
+                "options": {
+                    "publicKeys": [
+                        {
+                            "publicKey": "${UNIPORT_GATEWAY_BEARER_TOKEN_PUBLIC_KEY}"
+                        }
+                    ],
+                    "audience": [
+                        "Uniport-Gateway",
+                        "Organisation"
+                    ],
+                    "issuer": "${UNIPORT_GATEWAY_BEARER_TOKEN_ISSUER}",
+                    "optional": true
+                }
+            },
+            {
+                "name": "organisationMcpReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/organisation(/mcp.*)",
+                    "replacement": "$1"
+                }
+            },
+            {
+                "name": "organisationMcpOauthProtectedResourceReplacePath",
+                "type": "replacePathRegex",
+                "options": {
+                    "regex": "/.well-known/oauth-protected-resource/organisation/mcp",
+                    "replacement": "/.well-known/oauth-protected-resource"
+                }
             }
         ],
         "services": [
@@ -65,6 +139,15 @@
                     {
                         "host": "${UNIPORT_GATEWAY_ORGANISATION_HOST}",
                         "port": "${UNIPORT_GATEWAY_ORGANISATION_PORT}"
+                    }
+                ]
+            },
+            {
+                "name": "organisation-mcp",
+                "servers": [
+                    {
+                        "host": "localhost",
+                        "port": 8000
                     }
                 ]
             }

@@ -3,6 +3,9 @@
         "routers": [
             {
                 "name": "auth",
+                "entrypoints": [
+                    "http20000"
+                ],
                 "rule": "PathPrefix('/auth')",
                 "middlewares": [
                     "authRedirectRegex",
@@ -12,6 +15,9 @@
             },
             {
                 "name": "login",
+                "entrypoints": [
+                    "http20000"
+                ],
                 "middlewares": [
                     "loginOauth2",
                     "loginRedirectRegex"
@@ -21,6 +27,9 @@
             },
             {
                 "name": "register",
+                "entrypoints": [
+                    "http20000"
+                ],
                 "middlewares": [
                     "registerOauth2",
                     "registerRedirectRegex"
@@ -30,6 +39,9 @@
             },
             {
                 "name": "frontChannelLogout",
+                "entrypoints": [
+                    "http20000"
+                ],
                 "middlewares": [
                     "logoutRedirectRegex"
                 ],
@@ -38,6 +50,9 @@
             },
             {
                 "name": "backChannelLogout",
+                "entrypoints": [
+                    "http20000"
+                ],
                 "middlewares": [
                     "logoutRedirectRegex",
                     "backChannelLogout"
