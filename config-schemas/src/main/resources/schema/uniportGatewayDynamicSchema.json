@@ -1080,6 +1080,56 @@
                   "additionalProperties" : false,
                   "type" : "object",
                   "properties" : {
+                    "setResponseHeaders" : {
+                      "additionalProperties" : {
+                        "minLength" : 1,
+                        "type" : "string"
+                      },
+                      "type" : "object",
+                      "minProperties" : 1
+                    },
+                    "rewriteResponseHeaders" : {
+                      "additionalProperties" : {
+                        "additionalProperties" : false,
+                        "type" : "object",
+                        "properties" : {
+                          "regex" : {
+                            "minLength" : 1,
+                            "type" : "string"
+                          },
+                          "replacement" : {
+                            "type" : "string"
+                          }
+                        },
+                        "required" : [ "regex", "replacement" ]
+                      },
+                      "type" : "object",
+                      "minProperties" : 1
+                    },
+                    "statusCode" : {
+                      "maximum" : 599.0,
+                      "type" : "integer",
+                      "minimum" : 100.0
+                    }
+                  },
+                  "required" : [ "statusCode" ]
+                },
+                "type" : {
+                  "const" : "responseHeadersOnStatus"
+                }
+              },
+              "required" : [ "name", "options", "type" ]
+            }, {
+              "additionalProperties" : false,
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "options" : {
+                  "additionalProperties" : false,
+                  "type" : "object",
+                  "properties" : {
                     "name" : {
                       "default" : "uniport.session",
                       "minLength" : 1,

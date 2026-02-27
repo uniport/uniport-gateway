@@ -20,6 +20,7 @@
                     "mcpHttp20001"
                 ],
                 "middlewares": [
+                    "organisationMcpWwwAuth",
                     "organisationMcpBearerOnly",
                     "organisationMcpReplacePath"
                 ],
@@ -92,6 +93,19 @@
             {
                 "name": "organisationCsrf",
                 "type": "csrf"
+            },
+            {
+                "name": "organisationMcpWwwAuth",
+                "type": "responseHeadersOnStatus",
+                "options": {
+                    "statusCode": 401,
+                    "rewriteResponseHeaders": {
+                        "WWW-Authenticate": {
+                            "regex": "(resource_metadata=\"[^\"]*\\.well-known/oauth-protected-resource)(\")",
+                            "replacement": "$1/organisation/mcp$2"
+                        }
+                    }
+                }
             },
             {
                 "name": "organisationMcpBearerOnly",

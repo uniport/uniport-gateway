@@ -23,6 +23,7 @@ ch.uniport.gateway.proxy.middleware.openTelemetry.OpenTelemetryMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddlewareFactory
+ch.uniport.gateway.proxy.middleware.responseHeadersOnStatus.ResponseHeadersOnStatusMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.session.SessionMiddlewareFactory
 ch.uniport.gateway.proxy.middleware.sessionBag.SessionBagMiddlewareFactory

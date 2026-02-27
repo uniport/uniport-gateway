@@ -40,6 +40,7 @@ import ch.uniport.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
 import ch.uniport.gateway.proxy.middleware.oauth2.OAuth2MiddlewareFactory;
 import ch.uniport.gateway.proxy.middleware.replacePathRegex.ReplacePathRegexMiddleware;
 import ch.uniport.gateway.proxy.middleware.replacedSessionCookieDetection.ReplacedSessionCookieDetectionMiddleware;
+import ch.uniport.gateway.proxy.middleware.responseHeadersOnStatus.ResponseHeadersOnStatusMiddleware;
 import ch.uniport.gateway.proxy.middleware.responseSessionCookie.ResponseSessionCookieRemovalMiddleware;
 import ch.uniport.gateway.proxy.middleware.session.AbstractSessionMiddlewareOptions;
 import ch.uniport.gateway.proxy.middleware.session.LifetimeCookieOptions;
@@ -268,6 +269,14 @@ public final class MiddlewareServerBuilder {
 
     public MiddlewareServerBuilder withReplacePathRegexMiddleware(String regex, String replacement) {
         return withMiddleware(new ReplacePathRegexMiddleware("replacePath", regex, replacement));
+    }
+
+    public MiddlewareServerBuilder withResponseHeadersOnStatusMiddleware(
+        int statusCode, MultiMap setHeaders,
+        Map<String, ResponseHeadersOnStatusMiddleware.CompiledRewriteRule> rewriteRules
+    ) {
+        return withMiddleware(new ResponseHeadersOnStatusMiddleware(
+            "responseHeadersOnStatus", statusCode, setHeaders, rewriteRules));
     }
 
     public MiddlewareServerBuilder withBodyHandlerMiddleware() {
