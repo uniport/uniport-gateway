@@ -68,7 +68,7 @@ starter-kit/      - 10-step progressive tutorial with docker-compose examples
 - **Spotless** enforces formatting (ratcheted to origin/main) - run `mvn spotless:apply` before committing
 - **Checkstyle** rules in `.code-style-settings/checkstyle/config.xml`
 - **SpotBugs** exclusions in `.code-style-settings/spotbugs/exclude.xml`
-- Pre-commit hooks enforce style
+- Pre-commit hooks run spotless + checkstyle only; SpotBugs runs in CI — run `mvn spotbugs:check -pl server` locally to catch issues early
 
 ## Testing
 
