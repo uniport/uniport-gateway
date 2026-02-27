@@ -114,7 +114,10 @@ public class ResponseHeadersOnStatusMiddlewareFactory implements MiddlewareFacto
             }
         }
 
-        LOGGER.debug("Created '{}#{}' middleware successfully", TYPE, name);
+        LOGGER.debug("Created '{}#{}' middleware: statusCode={}, setHeaders={}, rewriteHeaders={}",
+            TYPE, name, options.getStatusCode(),
+            setHeaders != null ? setHeaders.names() : "none",
+            rewriteRules != null ? rewriteRules.keySet() : "none");
         return Future.succeededFuture(
             new ResponseHeadersOnStatusMiddleware(name, options.getStatusCode(), setHeaders, rewriteRules));
     }

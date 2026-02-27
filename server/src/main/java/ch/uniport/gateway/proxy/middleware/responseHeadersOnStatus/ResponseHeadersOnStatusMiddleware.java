@@ -48,18 +48,25 @@ public class ResponseHeadersOnStatusMiddleware extends TraceMiddleware {
                         final String current = ctx.response().headers().get(headerName);
                         if (current != null) {
                             final String rewritten = rule.pattern().matcher(current).replaceAll(rule.replacement());
-                            LOGGER.debug("{}: Rewriting header '{}' from '{}' to '{}'", name, headerName, current, rewritten);
+                            LOGGER.debug("{}: Rewrote header '{}'", name, headerName);
+                            LOGGER.trace("{}: Rewrote header '{}': '{}' -> '{}'", name, headerName, current, rewritten);
                             ctx.response().headers().set(headerName, rewritten);
+                        } else {
+                            LOGGER.trace("{}: Header '{}' not present in response, skipping rewrite", name, headerName);
                         }
                     }
                 }
                 // 2. Set (replace) headers
                 if (setHeaders != null) {
                     for (Map.Entry<String, String> entry : setHeaders.entries()) {
-                        LOGGER.debug("{}: Setting header '{}' to '{}'", name, entry.getKey(), entry.getValue());
+                        LOGGER.debug("{}: Set header '{}'", name, entry.getKey());
+                        LOGGER.trace("{}: Set header '{}' to '{}'", name, entry.getKey(), entry.getValue());
                         ctx.response().headers().set(entry.getKey(), entry.getValue());
                     }
                 }
+            } else {
+                LOGGER.trace("{}: Status code {} does not match configured {}, skipping",
+                    name, ctx.response().getStatusCode(), statusCode);
             }
         });
         ctx.next();
