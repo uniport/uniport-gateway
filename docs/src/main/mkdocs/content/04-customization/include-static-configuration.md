@@ -69,17 +69,6 @@ Entrypoints are the network entry points of Uniport-Gateway. They define the por
 | `tls` | No | Object | Configure paths to files with a certificate and key with `certFile` and `keyFile`. |
 | `middlewares` | No | List of [middlewares](../04-customization/index.md#entry-middlewares) | Middlewares can be attached to each entrypoint, which are first processed before a request is forwarded to the route-specific middlewares. |
 
-#### Applications
-
-Applications define the core logic of Uniport-Gateway. They define which applications listen on which ports and paths.
-
-| Variable                    | Required | Type   | Description                                                                         |
-| --------------------------- | -------- | ------ | ----------------------------------------------------------------------------------- |
-| `name`                      | Yes      | String | Name of the application                                                             |
-| `entrypoint`                | Yes      | String | Reference to an existing entrypoint to listen for requests                          |
-| `requestSelector.urlPrefix` | Yes      | String | Path that the application listens on (TODO Status: not implemented, default is `/`) |
-| `provider`                  | Yes      | String | Class name of the application that processes requests                               |
-
 #### Providers
 
 The Uniport-Gateway can be configured via Providers.
