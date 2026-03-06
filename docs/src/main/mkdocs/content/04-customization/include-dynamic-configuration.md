@@ -194,7 +194,7 @@ The ClaimToHeader Middleware can set the value of a JWT Claim as an HTTP Header,
 
 ##### `cors`
 
-The CORS Middleware implements the CORS protocol. CORS is a secure mechanism for sharing resources that are requested from one host but provided by another.
+The CORS Middleware implements the CORS protocol. CORS is a secure mechanism for sharing resources that are requested from one host but provided by another. This middleware also deduplicates headers if they are present multiple times.
 
 Further information on CORS can be found here:
 
@@ -465,6 +465,10 @@ Replace Path Regex replaces the path of a URL using regex matching and replaceme
 | ------------- | -------- | ------ | -------------------------------------------------------------------------------------------------------- |
 | `regex`       | Yes      | String | The regex option is the regular expression used to match and capture the path from the request URL.      |
 | `replacement` | Yes      | String | The replacement option defines the format of the replacement path, which can contain captured variables. |
+
+##### `responseHeadersOnStatus`
+
+
 
 ##### `_session_`
 
