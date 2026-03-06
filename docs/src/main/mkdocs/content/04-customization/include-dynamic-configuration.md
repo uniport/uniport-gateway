@@ -468,7 +468,31 @@ Replace Path Regex replaces the path of a URL using regex matching and replaceme
 
 ##### `responseHeadersOnStatus`
 
+This middleware modifies response headers only when the response status code matches the configured value.
 
+| Variable                 | Required | Type    | Description                                    |
+| ------------------------ | -------- | ------- | ---------------------------------------------- |
+| `statusCode`             | Yes      | Integer | Status code when the header should be modified |
+| `setResponseHeaders`     | No       | Object  | Configuration for setting a header             |
+| `rewriteResponseHeaders` | No       | Object  | Configuration for rewriting a reader           |
+
+The following example rewrites the header `WWW-Authenticate` by the given regex.
+
+```json
+{
+    "name": "wwwAuth",
+    "type": "responseHeadersOnStatus",
+    "options": {
+        "statusCode": 401,
+        "rewriteResponseHeaders": {
+            "WWW-Authenticate": {
+                "regex": "(resource_metadata=\"[^\"]*\\.well-known/oauth-protected-resource)(\")",
+                "replacement": "$1/organisation/mcp$2"
+            }
+        }
+    }
+}
+```
 
 ##### `_session_`
 
