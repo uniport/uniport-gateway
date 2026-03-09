@@ -90,7 +90,7 @@ jobs:
           password: ${{ env.CI_AUTH_PSW }}
 
       - name: Login to Nexus Docker Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: uniportcr.artifacts.inventage.com
           username: ${{ env.CI_AUTH_USR }}
