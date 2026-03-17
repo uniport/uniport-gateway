@@ -11,8 +11,8 @@
     <artifactId>docs</artifactId>
 
     <properties>
-        <node.version>20.9.0</node.version>
-        <npm.version>10.1.0</npm.version>
+        <node.version>24.14.0</node.version>
+        <npm.version>11.9.0</npm.version>
         <assets.source>${project.basedir}/src/main/mkdocs</assets.source>
     </properties>
 

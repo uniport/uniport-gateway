@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New middleware `responseHeadersOnStatus` ([GH-84](https://github.com/uniport/uniport-gateway/issues/84)).
 - CorsMiddleware deduplicates the headers ([GH-85](https://github.com/uniport/uniport-gateway/issues/85)).
+- Bump `Node.js` from `20.9.0` to `24.14.0` and `npm` from `10.1.0` to `11.9.0` for docs build.
+- Remove deprecated `always-auth` from `.npmrc`.
 
 ## [10.3.0]-202602121511-92-c7ee225 - 2026-02-12
 
@@ -119,7 +121,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 - Change the internal representation of the dynamic configuration from JSON to Java Objects [PORTAL-2375](https://inventage-all.atlassian.net/browse/PORTAL-2375).
 - Upgrade the Vert.x stack from `4.5.8` to `4.5.14` ([PORTAL-2347](https://inventage-all.atlassian.net/browse/PORTAL-2347)).
 - Upgrade all used dependencies and plugins ([PORTAL-2347](https://inventage-all.atlassian.net/browse/PORTAL-2347)).
-- Require configured cookie name to be valid according to [RFC6265](https://datatracker.ietf.org/doc/html/rfc6265#section-4.1.1) in  `csrf`, `languageCookie`, `replacedSessionCookieDetection` and `session` ([PORTAL-2419](https://inventage-all.atlassian.net/browse/PORTAL-2419)).
+- Require configured cookie name to be valid according to [RFC6265](https://datatracker.ietf.org/doc/html/rfc6265#section-4.1.1) in `csrf`, `languageCookie`, `replacedSessionCookieDetection` and `session` ([PORTAL-2419](https://inventage-all.atlassian.net/browse/PORTAL-2419)).
 
 ## [9.4.0]-202503211149-1294-26d95127 - 2025-03-21
 
@@ -168,7 +170,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 ### Added
 
 - Support for back channel logout as triggered by Keycloak ([PORTAL-2175](https://inventage-all.atlassian.net/browse/PORTAL-2175)).
-- Additional routes to access Prometheus & Alertmanager  ([PORTAL-1758](https://inventage-all.atlassian.net/browse/PORTAL-1758)).
+- Additional routes to access Prometheus & Alertmanager ([PORTAL-1758](https://inventage-all.atlassian.net/browse/PORTAL-1758)).
 
 ### Changed
 
@@ -233,7 +235,7 @@ Starting with this release, please use the following OCI registry `uniportcr.art
 ### Fixed
 
 - JWT must be decoded with base64url ([PORTAL-1838](https://inventage-all.atlassian.net/browse/PORTAL-1838)).
-- Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](<https://issue.inventage>.   com/browse/PORTAL-1824)).
+- Update helm maven plugin to version `6.11.1` which fixes the wrong binary download on Apple Silicon machines ([PORTAL-1824](<https://issue.inventage>. com/browse/PORTAL-1824)).
 
 ### Added
 
