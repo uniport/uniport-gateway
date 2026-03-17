@@ -12,5 +12,6 @@
     "no-duplicate-heading": false,
     "no-trailing-punctuation": {
         "punctuation": ".,;:!。，；：！"
-    }
+    },
+    "table-column-style": false
 }
