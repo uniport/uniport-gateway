@@ -54,6 +54,8 @@
 
         <portal-helm-chart-library.version>6.3.0-202601211446-545-ac5d135</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.8.0-202508061627-173-3706bdb</portal-code-style-settings.version>
+
+        <helm.useLocalBinary>false</helm.useLocalBinary>
     </properties>
 
     <dependencyManagement>
@@ -367,7 +369,7 @@
                         <chartDirectory>${project.basedir}/helm/target/uniport-gateway</chartDirectory>
                         <!-- https://github.com/kokuwaio/helm-maven-plugin/issues/427 -->
                         <helmVersion>3.19.2</helmVersion>
-                        <useLocalHelmBinary>false</useLocalHelmBinary>
+                        <useLocalHelmBinary>${helm.useLocalBinary}</useLocalHelmBinary>
                         <debug>true</debug>
                         <uploadRepoSnapshot>
                             <name>inventage-portal-group</name>
