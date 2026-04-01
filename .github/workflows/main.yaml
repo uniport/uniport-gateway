@@ -1,5 +1,5 @@
 name: Main Build
-run-name: "Main build workflow #${{ github.run_number }} triggered by ${{ github.actor }} on ${{ github.ref }}"
+run-name: "Main build workflow #${{ github.run_number }} triggered by ${{ github.event_name == 'schedule' && 'cron' || github.event.head_commit.author.username || github.triggering_actor }} on ${{ github.ref }}"
 
 on:
   push:
