@@ -61,12 +61,14 @@ jobs:
   tag:
     name: Nexus Tagging
     needs: [build]
-    uses: uniport/workflows/.github/workflows/tag-nexus-artifacts.yml@main
+    uses: uniport/workflows/.github/workflows/shared-nexus-tag-artifacts.yml@main
     with:
       version: ${{ needs.build.outputs.VERSION }}
       group_id: ${{ needs.build.outputs.GROUP_ID }}
       tag_docker: true
       tag_maven: true
+      tag_npm: false
+      tag_helm: false
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
 
