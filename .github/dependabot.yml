@@ -9,13 +9,13 @@ registries:
   # @see https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#npm-registry
   inventage-maven:
     type: maven-repository
-    url: https://nexus3.inventage.com/repository/inventage-portal-maven-group
+    url: https://nexus3.inventage.com/repository/inventage-portal-maven-group-dependencies
     username: inventage-uniport-readonly
     password: ${{ secrets.NEXUS_NPM_PASSWORD_READ_ONLY }}
     replaces-base: true
   inventage-npm:
     type: npm-registry
-    url: https://nexus3.inventage.com/repository/inventage-portal-npm-group
+    url: https://nexus3.inventage.com/repository/inventage-portal-npm-group-dependencies
     username: inventage-uniport-readonly
     password: ${{secrets.NEXUS_NPM_PASSWORD_READ_ONLY}}
     replaces-base: true
