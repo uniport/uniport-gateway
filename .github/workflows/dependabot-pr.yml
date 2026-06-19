@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build:
     name: Build (preview)
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }} # Run for any PR opened by Dependabot, even if a human pushes follow-up commits
     uses: ./.github/workflows/build.yml
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
