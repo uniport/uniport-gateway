@@ -1,7 +1,7 @@
 initContainers:
   init-portal-iam:
     image:
-      registry: docker-registry.inventage.com:10116
+      registry: uniport-sandbox.artifacts.inventage.com
 
 ingress:
   className: nginx
