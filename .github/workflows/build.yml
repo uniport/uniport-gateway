@@ -57,7 +57,7 @@ jobs:
 
       - name: Setup Maven Variables
         id: vars
-        uses: uniport/workflows/.github/actions/setup-maven-build-variables@main
+        uses: uniport/workflows/.github/actions/base/setup-maven-build-variables@main
 
       - uses: gacts/github-slug@v1
         id: slug
@@ -73,7 +73,7 @@ jobs:
           EOF
 
       - name: Setup Java
-        uses: uniport/workflows/.github/actions/setup-java@main
+        uses: uniport/workflows/.github/actions/base/setup-java@main
         with:
           architecture: ${{ contains(runner.name, 'macduff') && 'aarch64' || '' }}
           cache-maven: ${{ !contains(runner.name, 'macduff') }}
@@ -84,7 +84,7 @@ jobs:
           security unlock-keychain -p "${{ secrets.MACDUFF_KEYCHAIN_PASSWORD }}"
 
       - name: Setup Helm
-        uses: uniport/workflows/.github/actions/add-helm-repositories@main
+        uses: uniport/workflows/.github/actions/base/add-helm-repositories@main
         with:
           username: ${{ env.CI_AUTH_USR }}
           password: ${{ env.CI_AUTH_PSW }}
@@ -98,14 +98,14 @@ jobs:
           logout: ${{ !contains(runner.name, 'macduff') }}
 
       - name: Setup NPM Access
-        uses: uniport/workflows/.github/actions/setup-npm-nexus-access@main
+        uses: uniport/workflows/.github/actions/base/setup-npm-nexus-access@main
         with:
           token: ${{ secrets.NEXUS_NPM_TOKEN_READ_ONLY }}
           repository: inventage-portal-npm-group
           auth-file: docs/src/main/mkdocs/.npmrc
 
       - name: Set version
-        uses: uniport/workflows/.github/actions/set-maven-project-version@main
+        uses: uniport/workflows/.github/actions/base/set-maven-project-version@main
         with:
           version: ${{ steps.vars.outputs.RC_VERSION }}
           settings-file: .github/settings.xml
@@ -123,7 +123,7 @@ jobs:
           mvn -B --settings .github/settings.xml initialize spotbugs:check
 
       - name: Check uncommitted code
-        uses: uniport/workflows/.github/actions/ensure-no-uncommitted-code@main
+        uses: uniport/workflows/.github/actions/base/ensure-no-uncommitted-code@main
 
       - name: Zip dist directory for artifacts
         working-directory: docs/src/main/mkdocs
