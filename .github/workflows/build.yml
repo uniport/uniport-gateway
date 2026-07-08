@@ -54,6 +54,10 @@ jobs:
         with:
           # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/main branch in the configuration
           fetch-depth: 0
+          # Under pull_request_target (dependabot-pr.yml) the default ref is the base branch,
+          # which would build base instead of the PR's proposed changes. Pin to the PR head
+          # when available; fall back to github.sha for push/dispatch.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup Maven Variables
         id: vars
