@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           # Need to fetch everything, otherwise "spotless-maven-plugin" fails because we reference origin/main branch in the configuration
           fetch-depth: 0
@@ -63,7 +63,7 @@ jobs:
         id: vars
         uses: uniport/workflows/.github/actions/base/setup-maven-build-variables@main
 
-      - uses: gacts/github-slug@v1
+      - uses: gacts/github-slug@83cd3d95888be8777f0d9c810c1266da1c5c3ef1 # v1.3.5
         id: slug
 
       - name: Setup Docs Variable
@@ -94,7 +94,7 @@ jobs:
           password: ${{ env.CI_AUTH_PSW }}
 
       - name: Login to Nexus Docker Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: uniportcr.artifacts.inventage.com
           username: ${{ env.CI_AUTH_USR }}
@@ -136,7 +136,7 @@ jobs:
 
       - name: Upload artifact for other jobs
         id: upload
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.docs-vars.outputs.ARTIFACT_NAME }}
           path: ${{ steps.docs-vars.outputs.ARTIFACT_PATH }}
