@@ -1,6 +1,5 @@
 package ch.uniport.gateway.proxy.middleware;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.authorization.PublicKeyOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.ReconciliationOptions;
 import ch.uniport.gateway.proxy.middleware.authorization.bearerOnly.BearerOnlyMiddlewareOptions;
@@ -61,7 +60,8 @@ public class KeycloakServer {
     private final Vertx vertx;
     private final VertxTestContext testCtx;
     private final String host;
-    private final int port;
+    // Assigned once a start* method has bound the server to an ephemeral port. Read via port().
+    private int port;
     private HttpServer server;
     private boolean serveValidPublicKeys = true;
     private String codeChallenge;
@@ -71,14 +71,9 @@ public class KeycloakServer {
     }
 
     public KeycloakServer(Vertx vertx, VertxTestContext testCtx, String host) {
-        this(vertx, testCtx, host, TestUtils.findFreePort());
-    }
-
-    public KeycloakServer(Vertx vertx, VertxTestContext testCtx, String host, int port) {
         this.vertx = vertx;
         this.testCtx = testCtx;
         this.host = host;
-        this.port = port;
     }
 
     public KeycloakServer setPKCE(String codeChallenge) {
@@ -91,11 +86,13 @@ public class KeycloakServer {
         this.server = vertx
             .createHttpServer()
             .requestHandler(handler)
-            .listen(this.port, this.host, ready -> {
+            .listen(0, this.host, ready -> {
                 if (ready.failed()) {
                     testCtx.failNow(ready.cause());
+                } else {
+                    // Capture the actually bound port so served URLs and port() reflect it.
+                    this.port = ready.result().actualPort();
                 }
-                // ready
                 latch.countDown();
             });
         latch.await();
@@ -116,7 +113,6 @@ public class KeycloakServer {
     }
 
     public KeycloakServer startWithDefaultDiscoveryHandler() throws InterruptedException {
-        final JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         final JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
             req -> {
@@ -124,7 +120,7 @@ public class KeycloakServer {
                     req.response()
                         .putHeader("content-type", "application/json")
                         .setStatusCode(200)
-                        .send(discoveryResponse.encode());
+                        .send(getDefaultDiscoveryResponse().encode());
                 } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
                     req.setExpectMultipart(true);
                     req.endHandler(v -> {
@@ -152,7 +148,6 @@ public class KeycloakServer {
 
     public KeycloakServer startWithDefaultDiscoveryHandlerAndCustomTokenBodyHandler(Handler<Buffer> bodyHandler)
         throws InterruptedException {
-        final JsonObject discoveryResponse = getDefaultDiscoveryResponse();
         final JsonObject tokenResponse = getDefaultTokenEndpointResponse();
         startServerWithCustomHandler(
             req -> {
@@ -160,7 +155,7 @@ public class KeycloakServer {
                     req.response()
                         .putHeader("content-type", "application/json")
                         .setStatusCode(200)
-                        .send(discoveryResponse.encode());
+                        .send(getDefaultDiscoveryResponse().encode());
                 } else if (req.path().equals(TEST_REALM_PATH + TOKEN_ENDPOINT_PATH)) {
                     req.bodyHandler(bodyHandler);
                     req.response()
@@ -173,14 +168,13 @@ public class KeycloakServer {
     }
 
     public KeycloakServer startWithDiscoveryHandlerWithJWKsURIAndDefaultJWKsURIHandler() throws InterruptedException {
-        final JsonObject discoveryResponse = getDiscoveryResponseWithJWKsURI();
         startServerWithCustomHandler(
             req -> {
                 if (req.path().equals(TEST_REALM_PATH + OPENID_DISCOVERY_PATH)) {
                     req.response()
                         .putHeader("content-type", "application/json")
                         .setStatusCode(200)
-                        .send(discoveryResponse.encode());
+                        .send(getDiscoveryResponseWithJWKsURI().encode());
                 } else if (req.path().equals(TEST_REALM_PATH + JWKS_URIS_PATH)) {
                     final JsonObject jwksURIResponse;
                     if (this.serveValidPublicKeys) {

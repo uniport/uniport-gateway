@@ -5,7 +5,6 @@ import static ch.uniport.gateway.TestUtils.withMiddleware;
 import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -104,16 +103,15 @@ public class RedirectRegexMiddlewareTest extends MiddlewareTestBase {
 
         final RedirectRegexMiddleware redirect = new RedirectRegexMiddleware("redirectRegex", regex, replacement);
 
-        final int port = TestUtils.findFreePort();
         final Router router = Router.router(vertx);
         router.route().handler(redirect).handler(ctx -> ctx.response().end("ok"));
         vertx.createHttpServer().requestHandler(req -> {
             router.handle(req);
             requestsServed.flag();
-        }).listen(port).onComplete(testCtx.succeeding(s -> {
+        }).listen(0).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
 
-            vertx.createHttpClient().request(HttpMethod.GET, port, "localhost", url).compose(req -> req.send())
+            vertx.createHttpClient().request(HttpMethod.GET, s.actualPort(), "localhost", url).compose(req -> req.send())
                 .onComplete(testCtx.succeeding(resp -> testCtx.verify(() -> {
                     VertxAssertions.assertEquals(testCtx, expectedStatusCode, resp.statusCode(), failureMsg);
                     VertxAssertions.assertEquals(testCtx, expectedURL, resp.headers().get(HttpHeaders.LOCATION),
