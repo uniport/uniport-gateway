@@ -1,6 +1,5 @@
 package ch.uniport.gateway.proxy.middleware;
 
-import ch.uniport.gateway.TestUtils;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -35,18 +34,21 @@ public class MiddlewareServer {
     }
 
     public MiddlewareServer start() {
-        final int port = TestUtils.findFreePort();
-        return start(port);
+        // Bind to an ephemeral port (0) and let the OS assign one atomically, then read back the
+        // actually bound port. Pre-selecting a port with findFreePort() and binding it later races
+        // with any concurrent test grabbing the freed port, causing intermittent
+        // "Address already in use" / "Connection reset" failures.
+        return start(0);
     }
 
     public MiddlewareServer start(int port) {
-        this.port = port;
         final Future<HttpServer> httpServerFuture = httpServer.listen(port, host);
         try {
             awaitComplete(httpServerFuture);
         } catch (Throwable e) {
             throw new RuntimeException("MiddlewareServer.start failed.", e);
         }
+        this.port = httpServer.actualPort();
         return this;
     }
 
