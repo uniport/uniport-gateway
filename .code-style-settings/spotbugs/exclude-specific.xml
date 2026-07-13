@@ -26,5 +26,12 @@
         <Class name="~.*(Middleware)"/>
         <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,UC_USELESS_OBJECT"/>
     </Match>
+    <Match>
+        <!-- fail-fast argument validation in constructors is intended; the finalizer attack this
+             warns about requires an attacker who can subclass, and finalization is deprecated
+             for removal (JEP 421) -->
+        <Class name="~.*"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
 
 </FindBugsFilter>
