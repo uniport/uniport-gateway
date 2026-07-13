@@ -66,7 +66,7 @@
                 "name": "authRedirectRegex",
                 "type": "redirectRegex",
                 "options": {
-                    "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/realms/master|auth/resources|auth/js|auth/admin).*",
+                    "regex": "^/(?!auth/realms/portal|auth/realms/idp1|auth/realms/inventage|auth/realms/master|auth/resources|auth/js|auth/admin).*",
                     "replacement": "/login"
                 }
             },
