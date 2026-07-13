@@ -29,6 +29,9 @@ public final class MiddlewareFactoryLoader {
         return Holder.INSTANCE;
     }
 
+    // synchronize on a private lock instead of the (globally reachable) singleton instance
+    private final Object lock = new Object();
+
     private URLClassLoader classLoader;
 
     private MiddlewareFactoryLoader() {
@@ -44,24 +47,26 @@ public final class MiddlewareFactoryLoader {
         classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
     }
 
-    public synchronized Optional<MiddlewareFactory> getFactory(String middlewareName) {
+    public Optional<MiddlewareFactory> getFactory(String middlewareName) {
         logger.debug("Middleware factory for '{}'", middlewareName);
         return listFactories().stream()
             .filter(instance -> instance.provides().equals(middlewareName))
             .findFirst();
     }
 
-    public synchronized List<MiddlewareFactory> listFactories() {
-        final ServiceLoader<MiddlewareFactory> loader = ServiceLoader.load(MiddlewareFactory.class, classLoader);
+    public List<MiddlewareFactory> listFactories() {
+        synchronized (lock) {
+            final ServiceLoader<MiddlewareFactory> loader = ServiceLoader.load(MiddlewareFactory.class, classLoader);
 
-        logger.debug("Discovered middleware factories:");
-        for (MiddlewareFactory factory : loader) {
-            logger.debug(factory.provides());
+            logger.debug("Discovered middleware factories:");
+            for (MiddlewareFactory factory : loader) {
+                logger.debug(factory.provides());
+            }
+
+            return loader.stream()
+                .map(ServiceLoader.Provider::get)
+                .toList();
         }
-
-        return loader.stream()
-            .map(ServiceLoader.Provider::get)
-            .toList();
     }
 
     private static List<URL> getJarURLs() {
