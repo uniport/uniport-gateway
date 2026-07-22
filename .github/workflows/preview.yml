@@ -36,6 +36,22 @@ jobs:
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
 
+  # SBOM and attestation. The gate inside shared-sbom.yml lets only X.Y.x maintenance branches
+  # through here (other feature-branch previews are skipped with a notice), matching the shared
+  # build pipeline. The Dependency-Track upload is disabled: it needs a self-hosted runner on
+  # the internal network, which this public repository cannot use.
+  sbom:
+    name: SBOM & Attestation
+    needs: [build]
+    uses: uniport/workflows/.github/workflows/shared-sbom.yml@main
+    with:
+      version: ${{ needs.build.outputs.VERSION }}
+      upload_to_dependency_track: false
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+
   docs:
     name: Deploy Docs (preview)
     needs: [build]
