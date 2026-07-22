@@ -70,6 +70,17 @@ mvn clean install -pl '!helm' -Dpublic=true
 
 Alternatively, the **latest releases** are available on the GitHub Container Registry: <https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway>
 
+## Supply Chain
+
+Builds of `main` and `X.Y.x` maintenance branches generate a CycloneDX SBOM of the Docker image and attest it (together with SLSA provenance) to the image via [cosign](https://github.com/sigstore/cosign). This is handled by the shared [`shared-sbom.yml`](https://github.com/uniport/workflows/blob/main/.github/workflows/shared-sbom.yml) workflow in `uniport/workflows`; see the [workflows README](https://github.com/uniport/workflows/blob/main/README.md#sbom-attestation--dependency-track) for design and verification details.
+
+Released images published to the GitHub Container Registry carry their attestations. Verify one and extract its SBOM with the public key [`cosign.pub`](https://github.com/uniport/workflows/blob/main/cosign.pub):
+
+```sh
+cosign verify-attestation --key cosign.pub --type cyclonedx --insecure-ignore-tlog \
+  ghcr.io/uniport/uniport-gateway@sha256:<digest>
+```
+
 ## Launch
 
 ### IDE

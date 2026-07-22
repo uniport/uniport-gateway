@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Artifacts](https://nexus3.inventage.com/#browse/search=version%3D%22???%22)
 
+### Added
+
+- Builds of `main` and `X.Y.x` maintenance branches now generate a CycloneDX SBOM of the Docker image and attest it (together with a SLSA provenance predicate) to the image via cosign, using the shared `shared-sbom.yml` workflow in `uniport/workflows`. Released images mirrored to the [GitHub Container Registry](https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway) now also carry their cosign attestation and signature tags, so they can be verified with `cosign verify-attestation --key cosign.pub`.
+
 ### Fixed
 
 - Flaky server tests caused by a port race in the test harness. The harness now binds an ephemeral port and reads the actual port back, instead of picking one and binding it later ([GH-132](https://github.com/uniport/uniport-gateway/pull/132)).

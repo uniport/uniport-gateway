@@ -72,6 +72,23 @@ jobs:
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
 
+  # Generate a CycloneDX SBOM of the pushed images and attest it (plus SLSA provenance) via
+  # cosign. Runs on the default branch and X.Y.x maintenance branches only (gate inside
+  # shared-sbom.yml); skips gracefully when the cosign secrets are absent. The Dependency-Track
+  # upload is disabled: it needs a self-hosted runner on the internal network, which this
+  # public repository cannot use.
+  sbom:
+    name: SBOM & Attestation
+    needs: [build]
+    uses: uniport/workflows/.github/workflows/shared-sbom.yml@main
+    with:
+      version: ${{ needs.build.outputs.VERSION }}
+      upload_to_dependency_track: false
+    secrets:
+      NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+
   docs:
     name: Deploy Docs (main)
     needs: [build]
