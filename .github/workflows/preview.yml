@@ -38,19 +38,22 @@ jobs:
 
   # SBOM and attestation. The gate inside shared-sbom.yml lets only X.Y.x maintenance branches
   # through here (other feature-branch previews are skipped with a notice), matching the shared
-  # build pipeline. The Dependency-Track upload is disabled: it needs a self-hosted runner on
-  # the internal network, which this public repository cannot use.
+  # build pipeline. The Dependency-Track upload runs on the self-hosted inventage-ephemeral-linux-amd64
+  # runner group, which can reach the internal network (dtrack is not publicly reachable). The
+  # upload job never runs in PR context (branch gate inside shared-sbom.yml), so fork code
+  # cannot reach the runner.
   sbom:
     name: SBOM & Attestation
     needs: [build]
     uses: uniport/workflows/.github/workflows/shared-sbom.yml@main
     with:
       version: ${{ needs.build.outputs.VERSION }}
-      upload_to_dependency_track: false
+      dtrack_runner: inventage-ephemeral-linux-amd64
     secrets:
       NEXUS3_PW: ${{ secrets.NEXUS3_PW }}
       COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
       COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      DEPENDENCY_TRACK_API_KEY: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
 
   docs:
     name: Deploy Docs (preview)
