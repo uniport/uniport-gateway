@@ -72,7 +72,7 @@ Alternatively, the **latest releases** are available on the GitHub Container Reg
 
 ## Supply Chain
 
-Builds of `main` and `X.Y.x` maintenance branches generate a CycloneDX SBOM of the Docker image and attest it (together with SLSA provenance) to the image via [cosign](https://github.com/sigstore/cosign). This is handled by the shared [`shared-sbom.yml`](https://github.com/uniport/workflows/blob/main/.github/workflows/shared-sbom.yml) workflow in `uniport/workflows`; see the [workflows README](https://github.com/uniport/workflows/blob/main/README.md#sbom-attestation--dependency-track) for design and verification details.
+Builds of `main` and `X.Y.x` maintenance branches generate a CycloneDX SBOM of the Docker image, attest it (together with SLSA provenance) to the image via [cosign](https://github.com/sigstore/cosign), and upload it to the Inventage-internal Dependency-Track instance. This is handled by the shared [`shared-sbom.yml`](https://github.com/uniport/workflows/blob/main/.github/workflows/shared-sbom.yml) workflow in `uniport/workflows`; see the [workflows README](https://github.com/uniport/workflows/blob/main/README.md#sbom-attestation--dependency-track) for design and verification details.
 
 Released images published to the GitHub Container Registry carry their attestations. Verify one and extract its SBOM with the public key [`cosign.pub`](https://github.com/uniport/workflows/blob/main/cosign.pub):
 
