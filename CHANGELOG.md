@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bump `Node.js` from `24.14.0` to `24.15.0` for the docs build. Transitive dependency `ini@7.0.0` (pulled in by `markdownlint-cli` 0.49.1) requires Node `^24.15.0`, which made `npm ci` fail with `EBADENGINE` on the open Dependabot PRs.
 - Flaky server tests caused by a port race in the test harness. The harness now binds an ephemeral port and reads the actual port back, instead of picking one and binding it later ([GH-132](https://github.com/uniport/uniport-gateway/pull/132)).
 
 ## [10.4.0]-202603171446-123-27d73dd - 2026-03-24
