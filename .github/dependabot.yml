@@ -32,7 +32,7 @@ updates:
       timezone: "Europe/Zurich"
     ignore:
       - dependency-name: "io.micrometer:micrometer-registry-prometheus" # required to be in sync with vertx-micrometer-metrics
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "java"
       - "dependencies"
@@ -47,7 +47,7 @@ updates:
       day: "saturday"
       time: "03:00"
       timezone: "Europe/Zurich"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "javascript"
       - "dependencies"
@@ -60,7 +60,7 @@ updates:
       day: "saturday"
       time: "03:00"
       timezone: "Europe/Zurich"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "no changelog"
