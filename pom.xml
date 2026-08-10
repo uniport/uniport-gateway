@@ -303,7 +303,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.48.1</version>
+                    <version>0.49.0</version>
                     <configuration>
                         <images>
                             <image>
@@ -670,7 +670,7 @@
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
                         <!-- Keep same version as used by the IntelliJ plugin, see IntelliJ IDEA > Preferences > Tools > Checkstyle -->
-                        <version>13.9.0</version>
+                        <version>13.10.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
