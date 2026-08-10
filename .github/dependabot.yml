@@ -2,6 +2,10 @@
 # package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Group names double as auto-merge policy handles - see the 'merge_policy' input
+# of uniport/workflows/.github/workflows/shared-dependabot-automerge.yml. Only
+# 'build-tooling' and 'actions' are auto-merged; the rest batch PRs but stay manual.
 
 version: 2
 
@@ -30,6 +34,8 @@ updates:
       day: "saturday"
       time: "03:00"
       timezone: "Europe/Zurich"
+    cooldown:
+      default-days: 30
     ignore:
       - dependency-name: "io.micrometer:micrometer-registry-prometheus" # required to be in sync with vertx-micrometer-metrics
     open-pull-requests-limit: 5
@@ -37,6 +43,43 @@ updates:
       - "java"
       - "dependencies"
       - "no changelog"
+    groups:
+      build-tooling:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "com.puppycrawl.tools:checkstyle"
+          - "com.diffplug.spotless:*"
+          - "com.github.spotbugs:*"
+          - "org.jacoco:*"
+          - "org.cyclonedx:*"
+          - "io.github.mfoo:libyear-maven-plugin"
+          - "io.fabric8:docker-maven-plugin"
+          - "io.kokuwa.maven:helm-maven-plugin"
+          - "com.rudikershaw.gitbuildhook:git-build-hook-maven-plugin"
+          - "com.github.eirslett:frontend-maven-plugin"
+          - "org.codehaus.mojo:*"
+        # Never auto-merge artifacts we build ourselves: Dependabot also resolves
+        # against the staging Nexus repo and cannot tell an unreleased artifact from
+        # a released one. These arrive as individual, human-reviewed PRs.
+        exclude-patterns:
+          - "com.inventage.*"
+          - "ch.uniport.*"
+      # The Vert.x stack moves as one: every artifact is aligned by
+      # vertx-stack-depchain, which is what Dependabot actually bumps.
+      vertx:
+        patterns:
+          - "io.vertx:*"
+          - "io.reactiverse:*"
+      # Same lockstep reason: the members are aligned by opentelemetry-bom.
+      opentelemetry:
+        patterns:
+          - "io.opentelemetry:*"
+          - "io.opentelemetry.*:*"
+      test-dependencies:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.assertj:*"
+          - "com.github.docker-java:*"
 
   - package-ecosystem: "npm"
     directory: "/docs/src/main/mkdocs"
@@ -47,11 +90,23 @@ updates:
       day: "saturday"
       time: "03:00"
       timezone: "Europe/Zurich"
+    cooldown:
+      default-days: 30
     open-pull-requests-limit: 5
     labels:
       - "javascript"
       - "dependencies"
       - "no changelog"
+    # This package builds the documentation and has devDependencies only, so it
+    # gets one group rather than the fleet's frontend-runtime/frontend-tooling
+    # split. Named for what it is: nothing here ships in the gateway.
+    groups:
+      docs-tooling:
+        dependency-type: "development"
+        update-types: ["patch", "minor"]
+        # Internal packages are excluded and arrive as individual, human-reviewed
+        # PRs: same staging-Nexus reason as the maven groups.
+        exclude-patterns: ["@uniport/*", "@ips/*", "@inventage/*"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -60,7 +115,14 @@ updates:
       day: "saturday"
       time: "03:00"
       timezone: "Europe/Zurich"
+    cooldown:
+      default-days: 30
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "no changelog"
+    groups:
+      actions:
+        patterns: ["*"]
+        # First-party actions track @main and are reviewed by a human if ever pinned
+        exclude-patterns: ["uniport/*"]
