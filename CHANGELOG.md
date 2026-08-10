@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builds of `main` and `X.Y.x` maintenance branches now generate a CycloneDX SBOM of the Docker image and attest it (together with a SLSA provenance predicate) to the image via cosign, using the shared `shared-sbom.yml` workflow in `uniport/workflows`. Released images mirrored to the [GitHub Container Registry](https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway) now also carry their cosign attestation and signature tags, so they can be verified with `cosign verify-attestation --key cosign.pub`.
 - The SBOM is now also uploaded to Dependency-Track. The upload job runs on the self-hosted `inventage-ephemeral-linux-amd64` runner group, which can reach the internal network; it never runs in PR context, so fork code cannot reach the runner.
 
+### Changed
+
+- Dependabot updates are now grouped (Vert.x, OpenTelemetry, build tooling, test dependencies, docs tooling and Actions), and build-tooling and Actions bumps auto-merge after a successful build, so routine bumps no longer need a manual merge.
+
 ### Fixed
 
 - Bump `Node.js` from `24.14.0` to `24.15.0` for the docs build. Transitive dependency `ini@7.0.0` (pulled in by `markdownlint-cli` 0.49.1) requires Node `^24.15.0`, which made `npm ci` fail with `EBADENGINE` on the open Dependabot PRs.
