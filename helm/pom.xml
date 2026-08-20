@@ -36,6 +36,9 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <outputDirectory>${chart.directory}</outputDirectory>
+                            <nonFilteredFileExtensions>
+                                <nonFilteredFileExtension>tgz</nonFilteredFileExtension>
+                            </nonFilteredFileExtensions>
                             <resources>
                                 <resource>
                                     <directory>src/main/resources</directory>
@@ -77,6 +80,30 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <!-- Download chart dependencies into src/main/resources/charts/ only when not
+                             already cached; maven-resources-plugin then copies them to target/.
+                             The portal-lib version is read from Chart.yaml (single source of truth). -->
+                        <id>ensure-chart-dependencies</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <executable>bash</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>VERSION=$(grep -A3 'name: portal-lib' src/main/resources/Chart.yaml | grep 'version:' | tr -d '"' | awk '{print $2}')
+                                    if [ ! -f "src/main/resources/charts/portal-lib-${VERSION}.tgz" ]; then
+                                      echo "[helm] Chart dependency not cached, downloading via helm dependency build...";
+                                      helm dependency build src/main/resources;
+                                    else
+                                      echo "[helm] Using cached chart dependency (src/main/resources/charts/).";
+                                    fi</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>validate-static-config</id>
                         <goals>
                             <goal>exec</goal>
@@ -94,16 +121,12 @@
                         <!-- has to run after helm:lint (bound to process-resources) -->
                         <phase>process-test-resources</phase>
                         <configuration>
-                            <executable>tar</executable>
+                            <executable>bash</executable>
                             <workingDirectory>${chart.directory}</workingDirectory>
                             <arguments>
-                                <argument>--extract</argument>
-                                <argument>--verbose</argument>
-                                <argument>--file</argument>
-                                <argument>charts/portal-lib-${portal-helm-chart-library.version}.tgz</argument>
-                                <argument>--strip-components</argument>
-                                <argument>1</argument>
-                                <argument>portal-lib/values.schema.json</argument>
+                                <argument>-c</argument>
+                                <argument>VERSION=$(grep -A3 'name: portal-lib' Chart.yaml | grep 'version:' | tr -d '"' | awk '{print $2}')
+tar --extract --verbose --file "charts/portal-lib-${VERSION}.tgz" --strip-components 1 portal-lib/values.schema.json</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -118,6 +141,11 @@
                     <excludes>
                         <exclude>${chart.directory}/charts/**/charts/portal-lib</exclude>
                     </excludes>
+                    <!-- Chart dependency resolution is owned by the ensure-chart-dependencies exec
+                         below, which keeps the tarball in src/main/resources/charts (gitignored);
+                         maven-resources-plugin copies it to target -->
+                    <skipDependencyBuild>true</skipDependencyBuild>
+                    <skipDependencyUpdate>true</skipDependencyUpdate>
                 </configuration>
                 <executions>
                     <execution>

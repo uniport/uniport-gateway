@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The `portal-lib` Helm chart dependency is now cached in `helm/src/main/resources/charts/` (gitignored) and pinned by a committed `Chart.lock`, with `Chart.yaml` as the single source of truth for its version. Local builds now require a `helm` binary on the `PATH`.
+- Upgraded chart library `6.3.0` → `6.4.0`.
 - Dependabot updates are now grouped (Vert.x, OpenTelemetry, build tooling, test dependencies, docs tooling and Actions), and build-tooling and Actions bumps auto-merge after a successful build, so routine bumps no longer need a manual merge.
 
 ### Fixed
