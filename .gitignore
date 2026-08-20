@@ -24,6 +24,9 @@
 .classpath
 .factorypath
 
+# Helm chart tarballs: cached locally on dev machines, downloaded fresh on CI
+helm/src/main/resources/charts/
+
 # Maven
 target/
 pom.xml.tag

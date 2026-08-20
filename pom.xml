@@ -50,12 +50,7 @@
         <docker-java.version>3.7.1</docker-java.version>
         <junit-jupiter.version>6.1.3</junit-jupiter.version>
 
-        <portal-helm-dependencies.repository>oci://uniportcr.artifacts.inventage.com/charts</portal-helm-dependencies.repository>
-
-        <portal-helm-chart-library.version>6.3.0-202601211446-545-ac5d135</portal-helm-chart-library.version>
         <portal-code-style-settings.version>1.8.0-202508061627-173-3706bdb</portal-code-style-settings.version>
-
-        <helm.useLocalBinary>false</helm.useLocalBinary>
     </properties>
 
     <dependencyManagement>
@@ -67,12 +62,6 @@
                 <version>${portal-code-style-settings.version}</version>
                 <type>zip</type>
             </dependency>
-            <dependency>
-                <groupId>com.inventage.portal.helm-chart-library</groupId>
-                <artifactId>helm</artifactId>
-                <version>${portal-helm-chart-library.version}</version>
-            </dependency>
-
             <!-- Vertx-->
             <dependency>
                 <groupId>io.vertx</groupId>
@@ -366,10 +355,12 @@
                     <extensions>true</extensions>
                     <configuration>
                         <chartVersion>${project.version}</chartVersion>
+                        <appVersion>${project.version}</appVersion>
                         <chartDirectory>${project.basedir}/helm/target/uniport-gateway</chartDirectory>
-                        <!-- https://github.com/kokuwaio/helm-maven-plugin/issues/427 -->
-                        <helmVersion>3.19.2</helmVersion>
-                        <useLocalHelmBinary>${helm.useLocalBinary}</useLocalHelmBinary>
+                        <!-- Use the helm binary from the PATH, which the build already requires for
+                             the chart dependency download (see helm/pom.xml). Chart pushes
+                             authenticate from the settings.xml server named by uploadRepo*/name. -->
+                        <useLocalHelmBinary>true</useLocalHelmBinary>
                         <debug>true</debug>
                         <uploadRepoSnapshot>
                             <name>inventage-portal-group</name>
@@ -389,7 +380,6 @@
                         <execution>
                             <id>default-upload</id>
                             <goals>
-                                <goal>registry-login</goal>
                                 <goal>push</goal>
                             </goals>
                             <phase>deploy</phase>

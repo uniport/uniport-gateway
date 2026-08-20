@@ -4,10 +4,11 @@ description: A Helm chart for configuring uniport-gateway on Kubernetes
 
 type: application
 
-version: ${project.version}
-appVersion: ${project.version}
+# Placeholder only: the packaged chart version and appVersion are set by the
+# helm-maven-plugin (chartVersion/appVersion in the root pom) at build time.
+version: 0.0.0-dev
 
 dependencies:
   - name: portal-lib
-    version: "${portal-helm-chart-library.version}"
-    repository: "${portal-helm-dependencies.repository}"
+    version: "6.4.0-202605150912-7-3dd66f7"
+    repository: "oci://uniportcr.artifacts.inventage.com/charts"

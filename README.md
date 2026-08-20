@@ -70,6 +70,22 @@ mvn clean install -pl '!helm' -Dpublic=true
 
 Alternatively, the **latest releases** are available on the GitHub Container Registry: <https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway>
 
+### Helm module
+
+The Helm chart is the part of the build that needs private access, so without a login just leave the module out as shown above. Building it requires a `helm` binary on the `PATH` and a one-time registry login:
+
+```shell
+helm registry login uniportcr.artifacts.inventage.com --username ...
+```
+
+The version of the `portal-lib` chart dependency is defined in [`helm/src/main/resources/Chart.yaml`](helm/src/main/resources/Chart.yaml) (single source of truth, pinned via the committed `Chart.lock`). The first build downloads the chart tarball into `helm/src/main/resources/charts/` (gitignored); every subsequent build reuses it from there, including after `mvn clean`.
+
+To bump the chart library version:
+
+1. Adjust the version in `helm/src/main/resources/Chart.yaml`
+2. Run `helm dependency update helm/src/main/resources` from the project root (downloads the new tarball and updates `Chart.lock`)
+3. Commit `Chart.yaml` and `Chart.lock` together
+
 ## Supply Chain
 
 Builds of `main` and `X.Y.x` maintenance branches generate a CycloneDX SBOM of the Docker image, attest it (together with SLSA provenance) to the image via [cosign](https://github.com/sigstore/cosign), and upload it to the Inventage-internal Dependency-Track instance. This is handled by the shared [`shared-sbom.yml`](https://github.com/uniport/workflows/blob/main/.github/workflows/shared-sbom.yml) workflow in `uniport/workflows`; see the [workflows README](https://github.com/uniport/workflows/blob/main/README.md#sbom-attestation--dependency-track) for design and verification details.

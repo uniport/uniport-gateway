@@ -1,0 +1,6 @@
+dependencies:
+- name: portal-lib
+  repository: oci://uniportcr.artifacts.inventage.com/charts
+  version: 6.4.0-202605150912-7-3dd66f7
+digest: sha256:186f92da3b1d7c5f50e68249c7319307de5c748e64623ce502ab49e53bfc4344
+generated: "2026-08-20T09:39:04.858984881Z"
