@@ -63,7 +63,7 @@ jobs:
         id: vars
         uses: uniport/workflows/.github/actions/base/setup-maven-build-variables@main
 
-      - uses: gacts/github-slug@83cd3d95888be8777f0d9c810c1266da1c5c3ef1 # v1.3.5
+      - uses: gacts/github-slug@c29c0ddd888a1703a6fc06c55a5f6ddd7beae490 # v1.3.6
         id: slug
 
       - name: Setup Docs Variable
