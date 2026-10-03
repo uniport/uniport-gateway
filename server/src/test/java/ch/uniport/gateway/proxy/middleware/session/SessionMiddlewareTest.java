@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
@@ -227,20 +228,32 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
             .withSessionMiddleware("^/(ignored).*", true, true)
             .build().start().connectBrowser();
 
+        // the browser does not persist cookies, so the session cookie has to be
+        // replayed for the ignored requests to hit the same session
+        final HeadersMultiMap headersMultiMap = new HeadersMultiMap();
+        final List<Long> lastAccessed = new ArrayList<>();
+
         // when
         browser.request(GET, "/request")
-            .thenCompose(response -> browser.request(GET, "/ignored"))
+            .whenComplete((response, error) -> {
+                assertThat(testCtx, response).hasStatusCode(200);
+                vertx.getOrCreateContext();
+                final SharedDataSessionImpl sharedDataSession = getSharedDataSession(vertx);
+                headersMultiMap.add("cookie", DEFAULT_SESSION_COOKIE_NAME + "=" + sharedDataSession.id());
+                lastAccessed.add(sharedDataSession.lastAccessed());
+            })
+            .thenCompose(response -> browser.request(GET, "/ignored", headersMultiMap))
             .whenComplete((response, error) -> {
                 vertx.getOrCreateContext();
-                final String cookie = response.cookies().get(0);
-                originalCookie.set(cookie);
+                originalCookie.set(lifetimeCookieOf(response));
+                VertxAssertions.assertEquals(testCtx, lastAccessed.get(0), getSharedDataSession(vertx).lastAccessed());
             })
-            .thenCompose(response -> browser.request(GET, "/ignored"))
+            .thenCompose(response -> browser.request(GET, "/ignored", headersMultiMap))
             .whenComplete((response, error) -> {
                 // then
                 vertx.getOrCreateContext();
-                final String cookie = response.cookies().get(0);
-                VertxAssertions.assertEquals(testCtx, originalCookie.get(), cookie);
+                VertxAssertions.assertEquals(testCtx, originalCookie.get(), lifetimeCookieOf(response));
+                VertxAssertions.assertEquals(testCtx, lastAccessed.get(0), getSharedDataSession(vertx).lastAccessed());
                 testCtx.completeNow();
             });
     }
@@ -465,6 +478,14 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         gateway.incomingRequest(GET, "/", reqOpts, (outgoingResponse) -> {
             testCtx.completeNow();
         });
+    }
+
+    private String lifetimeCookieOf(HttpClientResponse response) {
+        return response.cookies()
+            .stream()
+            .filter(cookie -> cookie.startsWith(DEFAULT_SESSION_LIFETIME_COOKIE_NAME + "="))
+            .findFirst()
+            .orElseThrow();
     }
 
     private SharedDataSessionImpl getSharedDataSession(Vertx vertx) {
