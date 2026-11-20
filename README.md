@@ -70,6 +70,18 @@ mvn clean install -pl '!helm' -Dpublic=true
 
 Alternatively, the **latest releases** are available on the GitHub Container Registry: <https://github.com/uniport/uniport-gateway/pkgs/container/uniport-gateway>
 
+### Dependency updates
+
+To check for newer dependency and plugin versions and get a [libyear](https://libyear.com/) report, run:
+
+```bash
+mvn -Pdependency-updates validate
+```
+
+Normal builds skip this check because it queries Maven Central once per dependency, which takes a while.
+
+To apply updates automatically: `mvn versions:update-properties versions:use-latest-versions -N`
+
 ### Helm module
 
 The Helm chart is the part of the build that needs private access, so without a login just leave the module out as shown above. Building it requires a `helm` binary on the `PATH` and a one-time registry login:
