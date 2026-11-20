@@ -6,17 +6,18 @@ import static ch.uniport.gateway.TestUtils.withMiddlewareOpts;
 import static ch.uniport.gateway.TestUtils.withMiddlewares;
 import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
 import ch.uniport.gateway.proxy.middleware.mock.TestBearerOnlyJWTProvider;
+import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jakarta.json.Json;
@@ -29,6 +30,13 @@ import org.junit.jupiter.params.provider.Arguments;
 
 @ExtendWith(VertxExtension.class)
 class MatomoMiddlewareTest extends MiddlewareTestBase {
+
+    // echoes the request headers so the test can see what the gateway forwarded
+    private static final Handler<RoutingContext> BACKEND_HANDLER = ctx -> {
+        final HttpServerResponse response = ctx.response();
+        ctx.request().headers().forEach(entry -> response.putHeader(entry.getKey(), entry.getValue()));
+        response.end();
+    };
 
     @SuppressWarnings("unchecked")
     @Override
@@ -84,12 +92,12 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
         .build();
 
     @Test
-    void headersParsedCorrectlyForAutoLoginPlugin(Vertx vertx, VertxTestContext testCtx) {
+    void headersParsedCorrectlyForAutoLoginPlugin(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final int port = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withMatomoMiddleware(DEFAULT_JWT_PATH_ROLES, DEFAULT_JWT_PATH_GROUP, DEFAULT_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_EMAIL)
-            .withProxyMiddleware(port)
+            .withBackend(vertx, BACKEND_HANDLER)
+            .withProxyMiddleware()
             .build().start();
 
         final jakarta.json.JsonObject payload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
@@ -97,15 +105,6 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
         final String accessToken = TestBearerOnlyJWTProvider.signToken(payload);
         final RequestOptions requestOptions = new RequestOptions();
         requestOptions.addHeader("Authorization", "Bearer " + accessToken);
-
-        vertx.createHttpServer().requestHandler((proxyRequestHandler) -> {
-            final MultiMap headers = proxyRequestHandler.headers();
-            final HttpServerResponse response = proxyRequestHandler.response();
-            headers.entries().forEach(entry -> {
-                response.putHeader(entry.getKey(), entry.getValue());
-            });
-            response.end();
-        }).listen(port);
 
         gateway.incomingRequest(HttpMethod.GET, "/", requestOptions, response -> {
             final MultiMap headers = response.headers();
@@ -130,12 +129,12 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    void discardAutoLoginHeaderNotSetByGateway(Vertx vertx, VertxTestContext testCtx) {
+    void discardAutoLoginHeaderNotSetByGateway(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final int port = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withMatomoMiddleware(DEFAULT_JWT_PATH_ROLES, DEFAULT_JWT_PATH_GROUP, DEFAULT_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_EMAIL)
-            .withProxyMiddleware(port)
+            .withBackend(vertx, BACKEND_HANDLER)
+            .withProxyMiddleware()
             .build().start();
 
         final jakarta.json.JsonObject payload = Json.createObjectBuilder(VALID_PAYLOAD_TEMPLATE)
@@ -145,15 +144,6 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
         final RequestOptions requestOptions = new RequestOptions();
         requestOptions.addHeader("Authorization", "Bearer " + accessToken);
         requestOptions.addHeader(HEADER_MATOMO_ROLE, selfSetRole);
-
-        vertx.createHttpServer().requestHandler((proxyRequestHandler) -> {
-            final MultiMap headers = proxyRequestHandler.headers();
-            final HttpServerResponse response = proxyRequestHandler.response();
-            headers.entries().forEach(entry -> {
-                response.putHeader(entry.getKey(), entry.getValue());
-            });
-            response.end();
-        }).listen(port);
 
         gateway.incomingRequest(HttpMethod.GET, "/", requestOptions, response -> {
             final MultiMap headers = response.headers();
@@ -168,20 +158,15 @@ class MatomoMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    void noAuthorizationHeader(Vertx vertx, VertxTestContext testCtx) {
+    void noAuthorizationHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
-        final int port = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withMatomoMiddleware(DEFAULT_JWT_PATH_ROLES, DEFAULT_JWT_PATH_GROUP, DEFAULT_JWT_PATH_USERNAME, DEFAULT_JWT_PATH_EMAIL)
-            .withProxyMiddleware(port)
+            .withBackend(vertx, BACKEND_HANDLER)
+            .withProxyMiddleware()
             .build().start();
 
         final RequestOptions requestOptions = new RequestOptions();
-
-        vertx.createHttpServer().requestHandler((proxyRequestHandler) -> {
-            final HttpServerResponse response = proxyRequestHandler.response();
-            response.end();
-        }).listen(port);
 
         gateway.incomingRequest(HttpMethod.GET, "/", requestOptions, response -> {
             VertxAssertions.assertEquals(testCtx, HttpStatus.SC_FORBIDDEN, response.statusCode());

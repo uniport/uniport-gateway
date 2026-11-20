@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -23,43 +21,6 @@ import org.apache.hc.core5.net.URIBuilder;
 public final class TestUtils {
 
     private TestUtils() {
-    }
-
-    /**
-     * Returns a free port number on localhost.
-     * <p>
-     * Heavily inspired from org.eclipse.jdt.launching.SocketUtil (to avoid a
-     * dependency to JDT just because of this).
-     * Slightly improved with close() missing in JDT. And throws exception instead
-     * of returning -1.
-     *
-     * @return a free port number on localhost
-     * @throws IllegalStateException
-     *             if unable to find a free port
-     */
-    public static int findFreePort() {
-        ServerSocket socket = null;
-        try {
-            socket = new ServerSocket(0);
-            final int port = socket.getLocalPort();
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // Ignore IOException on close()
-            }
-            return port;
-        } catch (IOException e) {
-            // do nothing
-        } finally {
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    // do nothing
-                }
-            }
-        }
-        throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
     }
 
     public static DynamicModel toModel(JsonObject config) {

@@ -86,6 +86,7 @@ public final class MiddlewareServerBuilder {
     private final Vertx vertx;
     private final Router router;
     private final VertxTestContext testCtx;
+    private volatile Integer backendPort;
 
     private MiddlewareServerBuilder(Vertx vertx, String host, VertxTestContext testCtx) {
         this.vertx = vertx;
@@ -379,12 +380,23 @@ public final class MiddlewareServerBuilder {
         }
     }
 
-    public MiddlewareServerBuilder withProxyMiddleware(int port) {
-        return withProxyMiddleware(host, port);
+    /**
+     * Proxies to the backend started by a previous {@code withBackend(...)} call.
+     */
+    public MiddlewareServerBuilder withProxyMiddleware() {
+        return withProxyMiddleware(host, requireBackendPort());
     }
 
-    public MiddlewareServerBuilder withProxyMiddleware(int port, boolean verbose) {
-        return withProxyMiddleware(host, port, verbose);
+    public MiddlewareServerBuilder withProxyMiddleware(boolean verbose) {
+        return withProxyMiddleware(host, requireBackendPort(), verbose);
+    }
+
+    public MiddlewareServerBuilder withProxyMiddleware(String host) {
+        return withProxyMiddleware(host, requireBackendPort());
+    }
+
+    public MiddlewareServerBuilder withProxyMiddleware(String host, String serverProtocol, boolean httpsTrustAll, boolean verifyHost, String httpsTrustStorePath, String httpsTrustStorePassword) {
+        return withProxyMiddleware(host, requireBackendPort(), serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword);
     }
 
     public MiddlewareServerBuilder withProxyMiddleware(String host, int port) {
@@ -406,22 +418,29 @@ public final class MiddlewareServerBuilder {
         return withMiddleware(new ReverseProxy(vertx, "proxy", host, port, serverProtocol, httpsTrustAll, verifyHost, httpsTrustStorePath, httpsTrustStorePassword, false));
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port) throws InterruptedException {
+    public MiddlewareServerBuilder withBackend(Vertx vertx) throws InterruptedException {
         final Handler<RoutingContext> defaultHandler = ctx -> ctx.response().end();
-        return withBackend(vertx, port, defaultHandler);
+        return withBackend(vertx, defaultHandler);
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, HttpServerOptions serverOptions) throws InterruptedException {
+    public MiddlewareServerBuilder withBackend(Vertx vertx, HttpServerOptions serverOptions) throws InterruptedException {
         final Handler<RoutingContext> defaultHandler = ctx -> ctx.response().end();
-        return withBackend(vertx, port, serverOptions, defaultHandler);
+        return withBackend(vertx, serverOptions, defaultHandler);
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, Handler<RoutingContext> handler) throws InterruptedException {
-        return withBackend(vertx, port, new HttpServerOptions(), handler);
+    public MiddlewareServerBuilder withBackend(Vertx vertx, Handler<RoutingContext> handler) throws InterruptedException {
+        return withBackend(vertx, new HttpServerOptions(), handler);
     }
 
-    public MiddlewareServerBuilder withBackend(Vertx vertx, int port, HttpServerOptions serverOptions, Handler<RoutingContext> handler)
+    /**
+     * Starts the backend on an OS-assigned port. Call it before the port-less
+     * {@code withProxyMiddleware(...)} variants, which read the bound port.
+     */
+    public MiddlewareServerBuilder withBackend(Vertx vertx, HttpServerOptions serverOptions, Handler<RoutingContext> handler)
         throws InterruptedException {
+        if (backendPort != null) {
+            throw new IllegalStateException("A backend is already started. The proxy can only target one.");
+        }
         final VertxTestContext testContext = new VertxTestContext();
         final Router serviceRouter = Router.router(vertx);
 
@@ -429,14 +448,27 @@ public final class MiddlewareServerBuilder {
 
         vertx.createHttpServer(serverOptions)
             .requestHandler(serviceRouter)
-            .listen(port)
-            .onComplete(testContext.succeedingThenComplete());
+            .listen(0)
+            .onComplete(testContext.succeeding(server -> {
+                backendPort = server.actualPort();
+                testContext.completeNow();
+            }));
 
         if (!testContext.awaitCompletion(TIMEOUT_SERVER_START_SECONDS, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
         }
+        if (testContext.failed()) {
+            throw new RuntimeException("Backend server failed to start.", testContext.causeOfFailure());
+        }
 
         return this;
+    }
+
+    private int requireBackendPort() {
+        if (backendPort == null) {
+            throw new IllegalStateException("No backend started. Call withBackend(...) before withProxyMiddleware().");
+        }
+        return backendPort;
     }
 
     public MiddlewareServerBuilder withMockOAuth2Middleware() {

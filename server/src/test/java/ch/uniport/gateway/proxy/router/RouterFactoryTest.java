@@ -29,7 +29,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,37 +55,23 @@ public class RouterFactoryTest {
 
     @BeforeEach
     public void setup(Vertx vertx) throws Exception {
-        final CountDownLatch latch = new CountDownLatch(2);
-
-        proxyPort = TestUtils.findFreePort();
-        vertx.createHttpServer()
+        proxy = vertx.createHttpServer()
             .requestHandler(req -> {
                 proxyRouter.handle(req);
             })
-            .listen(proxyPort)
-            .onComplete(r -> {
-                if (r.failed()) {
-                    throw new RuntimeException(r.cause());
-                }
-                proxy = r.result();
-                latch.countDown();
-            });
+            .listen(0)
+            .toCompletionStage().toCompletableFuture()
+            .get(5, TimeUnit.SECONDS);
+        proxyPort = proxy.actualPort();
 
-        serverPort = TestUtils.findFreePort();
-        vertx.createHttpServer()
+        server = vertx.createHttpServer()
             .requestHandler(req -> {
                 req.response().setStatusCode(200).end("ok");
             })
-            .listen(serverPort)
-            .onComplete(r -> {
-                if (r.failed()) {
-                    throw new RuntimeException(r.cause());
-                }
-                server = r.result();
-                latch.countDown();
-            });
-
-        latch.await();
+            .listen(0)
+            .toCompletionStage().toCompletableFuture()
+            .get(5, TimeUnit.SECONDS);
+        serverPort = server.actualPort();
 
         routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", HOST, String.format("%d", proxyPort)), ENTRYPOINT_NAME);
     }

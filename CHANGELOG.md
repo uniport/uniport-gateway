@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compilation on JDK 23 and newer. Since JDK 23, javac no longer runs annotation processors found on the classpath by default, so Immutables generated nothing and `server` failed with `cannot find symbol`. `maven-compiler-plugin` now sets `<proc>full</proc>`.
 - Bump `Node.js` from `24.14.0` to `24.15.0` for the docs build. Transitive dependency `ini@7.0.0` (pulled in by `markdownlint-cli` 0.49.1) requires Node `^24.15.0`, which made `npm ci` fail with `EBADENGINE` on the open Dependabot PRs.
 - Flaky server tests caused by a port race in the test harness. The harness now binds an ephemeral port and reads the actual port back, instead of picking one and binding it later ([GH-132](https://github.com/uniport/uniport-gateway/pull/132)).
+- The rest of the flaky server tests with the same port race: the proxy/backend pairs built through the test builder, and `EntrypointTest`, `RouterFactoryTest`, `ControlApiMiddlewareTest`, `SessionBagMiddlewareTest` and `MatomoMiddlewareTest`. They now bind ephemeral ports too, and `TestUtils.findFreePort()` is removed ([GH-133](https://github.com/uniport/uniport-gateway/issues/133)).
 
 ## [10.4.0]-202603171446-123-27d73dd - 2026-03-24
 

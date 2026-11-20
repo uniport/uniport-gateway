@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.config.model.AbstractServiceModel;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
@@ -332,9 +331,6 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         Handler<RoutingContext> serverReqHandler, Handler<HttpClientResponse> respHandler,
         List<Cookie> followUpReqCookies, Handler<HttpClientResponse> followUpRespHandler
     ) {
-        final int port = TestUtils.findFreePort();
-        final int servicePort = TestUtils.findFreePort();
-
         final Checkpoint proxyStarted = testCtx.checkpoint();
         final Checkpoint serverStarted = testCtx.checkpoint();
         final Checkpoint requestServed = testCtx.checkpoint(2);
@@ -346,8 +342,9 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
         serverRouter.route().handler(serverReqHandler);
         vertx.createHttpServer().requestHandler(req -> {
             serverRouter.handle(req);
-        }).listen(servicePort).onComplete(testCtx.succeeding(s -> {
+        }).listen(0).onComplete(testCtx.succeeding(s -> {
             serverStarted.flag();
+            final int servicePort = s.actualPort();
 
             // setup proxy
             final SessionHandler sessionHandler = SessionHandler.create(sessionStore).setSessionCookieName(SESSION_COOKIE_NAME);
@@ -367,8 +364,9 @@ public class SessionBagMiddlewareTest extends MiddlewareTestBase {
             vertx.createHttpServer().requestHandler(req -> {
                 proxyRouter.handle(req);
                 requestServed.flag();
-            }).listen(port).onComplete(testCtx.succeeding(p -> {
+            }).listen(0).onComplete(testCtx.succeeding(p -> {
                 proxyStarted.flag();
+                final int port = p.actualPort();
 
                 final HttpClient client = vertx.createHttpClient();
                 // send first request
