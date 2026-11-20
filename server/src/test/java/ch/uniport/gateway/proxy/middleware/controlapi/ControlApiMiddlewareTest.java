@@ -9,7 +9,6 @@ import static ch.uniport.gateway.proxy.middleware.controlapi.ControlApiMiddlewar
 import static ch.uniport.gateway.proxy.middleware.sessionBag.SessionBagMiddleware.SESSION_BAG_COOKIES;
 import static io.vertx.core.http.HttpMethod.GET;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
 import ch.uniport.gateway.proxy.middleware.oauth2.AuthenticationUserContext;
@@ -30,6 +29,7 @@ import io.vertx.junit5.VertxTestContext;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -84,25 +84,25 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    void sessionTerminationTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void sessionTerminationTest(Vertx vertx, VertxTestContext testCtx) throws Exception {
         // given
         final Cookie sessionTerminateCookie = Cookie.cookie(CONTROL_COOKIE_NAME, ControlApiAction.SESSION_TERMINATE.toString()).setMaxAge(3600);
 
         final Checkpoint sessionTerminated = testCtx.checkpoint();
-        final Checkpoint sessionTerminationServerStarted = testCtx.checkpoint();
         final Checkpoint responseReceived = testCtx.checkpoint();
         final AtomicReference<RoutingContext> routingContextHolder = new AtomicReference<>();
-        final int backendPort = TestUtils.findFreePort();
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(sessionTerminateCookie));
 
-        final int sessionTerminationPort = TestUtils.findFreePort();
-        vertx.createHttpServer()
+        final int sessionTerminationPort = vertx.createHttpServer()
             .requestHandler(req -> {
                 sessionTerminated.flag();
                 req.response().setStatusCode(200).end();
             })
-            .listen(sessionTerminationPort, testCtx.succeeding(v -> sessionTerminationServerStarted.flag()));
+            .listen(0)
+            .toCompletionStage().toCompletableFuture()
+            .get(5, TimeUnit.SECONDS)
+            .actualPort();
 
         final WebClient webclient = WebClient.create(vertx, new WebClientOptions()
             .setDefaultPort(sessionTerminationPort)
@@ -114,8 +114,8 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
             .withSessionBagMiddleware(List.of())
             .withMockOAuth2Middleware(HOST, sessionTerminationPort)
             .withControlApiMiddleware(ControlApiAction.SESSION_TERMINATE, webclient)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cookieInsertionHandler)
+            .withBackend(vertx, cookieInsertionHandler)
+            .withProxyMiddleware()
             .build().start()
             // when
             .incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {
@@ -139,22 +139,19 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
     }
 
     @Test
-    void sessionResetTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void sessionResetTest(Vertx vertx, VertxTestContext testCtx) throws Exception {
         // given
         final Cookie keycloakIdentityCookie = Cookie.cookie("KEYCLOAK_IDENTITY", "thisisme").setMaxAge(3600);
         final Cookie keycloakTestCookie = Cookie.cookie("KEYCLOAK_TEST", "keycloak").setMaxAge(3600);
         final Cookie sessionResetCookie = Cookie.cookie(CONTROL_COOKIE_NAME, ControlApiAction.SESSION_RESET.toString()).setMaxAge(3600);
 
         final Checkpoint sessionResetted = testCtx.checkpoint();
-        final Checkpoint sessionResetServerStarted = testCtx.checkpoint();
         final Checkpoint responseReceived = testCtx.checkpoint();
         final AtomicReference<RoutingContext> routingContextHolder = new AtomicReference<>();
-        final int backendPort = TestUtils.findFreePort();
 
         final Handler<RoutingContext> cookieInsertionHandler = getCookieInsertionHandler(List.of(keycloakTestCookie, sessionResetCookie));
 
-        final int sessionResetPort = TestUtils.findFreePort();
-        vertx.createHttpServer()
+        final int sessionResetPort = vertx.createHttpServer()
             .requestHandler(req -> {
                 VertxAssertions.assertTrue(
                     testCtx,
@@ -166,7 +163,10 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
                 sessionResetted.flag();
                 req.response().setStatusCode(200).end();
             })
-            .listen(sessionResetPort, testCtx.succeeding(v -> sessionResetServerStarted.flag()));
+            .listen(0)
+            .toCompletionStage().toCompletableFuture()
+            .get(5, TimeUnit.SECONDS)
+            .actualPort();
 
         uniportGateway(vertx, HOST, testCtx)
             .withRoutingContextHolder(routingContextHolder)
@@ -175,8 +175,8 @@ public class ControlApiMiddlewareTest extends MiddlewareTestBase {
             .withSessionBagMiddleware(List.of())
             .withMiddleware(prefilledSessionBag(routingContextHolder, keycloakIdentityCookie))
             .withControlApiMiddleware(ControlApiAction.SESSION_RESET, String.format("http://%s:%d/", HOST, sessionResetPort), WebClient.create(vertx))
-            .withBackend(vertx, backendPort, cookieInsertionHandler)
-            .withProxyMiddleware(backendPort)
+            .withBackend(vertx, cookieInsertionHandler)
+            .withProxyMiddleware()
             .build().start()
             // when
             .incomingRequest(GET, "/", new RequestOptions(), (outgoingResponse) -> {

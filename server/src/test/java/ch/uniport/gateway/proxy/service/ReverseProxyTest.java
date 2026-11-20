@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -35,6 +34,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,19 +51,18 @@ public class ReverseProxyTest {
     @Test
     void correctHostHeader(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final int backendPort = TestUtils.findFreePort();
-
         final Checkpoint hostVerified = testCtx.checkpoint();
         final Handler<RoutingContext> backendHandler = ctx -> {
             // then
+            final int backendPort = ctx.request().localAddress().port();
             VertxAssertions.assertEquals(testCtx, "local.uniport.ch" + ":" + backendPort, ctx.request().headers().get(HttpHeaderNames.HOST));
             hostVerified.flag();
             ctx.response().end();
         };
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware("local.uniport.ch", backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware("local.uniport.ch")
             .build().start();
 
         // when
@@ -77,11 +76,12 @@ public class ReverseProxyTest {
     void proxyTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String host = "127.0.0.1";
-        final int proxyPort = TestUtils.findFreePort();
-        final int backendPort = TestUtils.findFreePort();
+        final AtomicInteger proxyPortHolder = new AtomicInteger();
         final AtomicReference<String> clientAddressHolder = new AtomicReference<>();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
+            final int proxyPort = proxyPortHolder.get();
+            final int backendPort = ctx.request().localAddress().port();
             VertxAssertions.assertEquals(testCtx, "http", ctx.request().headers().get(X_FORWARDED_PROTO));
             VertxAssertions.assertEquals(testCtx, host + ":" + proxyPort, ctx.request().headers().get(X_FORWARDED_HOST));
             VertxAssertions.assertEquals(testCtx, String.valueOf(proxyPort), ctx.request().headers().get(X_FORWARDED_PORT));
@@ -92,15 +92,16 @@ public class ReverseProxyTest {
             ctx.response().end();
         };
 
-        uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
-            .build().start(proxyPort);
+        final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware(host)
+            .build().start();
+        proxyPortHolder.set(gateway.port());
 
         // in order to capture the local address of the client we need to assemble it http client ourself
         final RequestOptions opt = new RequestOptions()
             .setHost(host)
-            .setPort(proxyPort)
+            .setPort(gateway.port())
             .setURI("/")
             .setMethod(HttpMethod.GET);
 
@@ -123,8 +124,6 @@ public class ReverseProxyTest {
     void proxyPreserveXForwardedHeadersTest(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String host = "localhost";
-        final int proxyPort = TestUtils.findFreePort();
-        final int backendPort = TestUtils.findFreePort();
 
         final String proto = "foo";
         final String port = String.valueOf(1234);
@@ -137,9 +136,9 @@ public class ReverseProxyTest {
         };
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
-            .build().start(proxyPort);
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware(host)
+            .build().start();
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/",
@@ -160,10 +159,9 @@ public class ReverseProxyTest {
         // given
         final ListAppender<ILoggingEvent> listAppender = new ListAppender<ILoggingEvent>();
         final Logger logger = setupLogger(listAppender);
-        final int backendPort = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(backendPort, true)
-            .withBackend(vertx, backendPort, ctx -> ctx.response().end("ok"))
+            .withBackend(vertx, ctx -> ctx.response().end("ok"))
+            .withProxyMiddleware(true)
             .build().start();
 
         //when
@@ -180,10 +178,9 @@ public class ReverseProxyTest {
         // given
         final ListAppender<ILoggingEvent> listAppender = new ListAppender<ILoggingEvent>();
         final Logger logger = setupLogger(listAppender);
-        final int backendPort = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(backendPort, true)
-            .withBackend(vertx, backendPort, ctx -> ctx.response().end("ok"))
+            .withBackend(vertx, ctx -> ctx.response().end("ok"))
+            .withProxyMiddleware(true)
             .build().start();
 
         //when
@@ -206,7 +203,6 @@ public class ReverseProxyTest {
     void proxyRequestToHTTPSServer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int backendPort = TestUtils.findFreePort();
         final File trustStoreFile = loadFile("truststore-test.jks");
         final String trustStorePassword = "123456";
         final HttpServerOptions serverOptions = new HttpServerOptions()
@@ -216,8 +212,8 @@ public class ReverseProxyTest {
                 .setPassword(trustStorePassword));
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort, "https", false, false, trustStoreFile.getPath(), trustStorePassword)
-            .withBackend(vertx, backendPort, serverOptions)
+            .withBackend(vertx, serverOptions)
+            .withProxyMiddleware(host, "https", false, false, trustStoreFile.getPath(), trustStorePassword)
             .build().start();
 
         //when
@@ -234,7 +230,6 @@ public class ReverseProxyTest {
     void proxyRequestToHTTPSServerTrustAllCertificates(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int backendPort = TestUtils.findFreePort();
         final File file = loadFile("truststore-test.jks");
         final boolean trustAllCertificates = true;
         final HttpServerOptions serverOptions = new HttpServerOptions()
@@ -244,8 +239,8 @@ public class ReverseProxyTest {
                 .setPassword("123456"));
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
-            .withBackend(vertx, backendPort, serverOptions)
+            .withBackend(vertx, serverOptions)
+            .withProxyMiddleware(host, "https", trustAllCertificates, false, null, null)
             .build().start();
 
         //when
@@ -257,20 +252,26 @@ public class ReverseProxyTest {
     }
 
     @Test
-    void proxyRequestToHTTPSServerWithoutCertificate(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
+    void proxyRequestToHTTPSServerWithUntrustedCertificate(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int backendPort = TestUtils.findFreePort();
-        final boolean trustAllCertificates = true;
+        final File keyStoreFile = loadFile("truststore-test.jks");
+        final HttpServerOptions serverOptions = new HttpServerOptions()
+            .setSsl(true)
+            .setKeyCertOptions(new JksOptions()
+                .setPath(keyStoreFile.getPath())
+                .setPassword("123456"));
+        final boolean trustAllCertificates = false;
 
+        // the proxy has no truststore for the backend's self-signed certificate
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
-            .withBackend(vertx, backendPort, new HttpServerOptions().setSsl(true))
+            .withBackend(vertx, serverOptions)
+            .withProxyMiddleware(host, "https", trustAllCertificates, false, null, null)
             .build().start();
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
-            VertxAssertions.assertEquals(testCtx, response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            VertxAssertions.assertEquals(testCtx, HttpResponseStatus.BAD_GATEWAY.code(), response.statusCode());
             testCtx.completeNow();
         });
     }
@@ -279,18 +280,17 @@ public class ReverseProxyTest {
     void proxyRequestToNotHTTPSServer(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         //given
         final String host = "localhost";
-        final int backendPort = TestUtils.findFreePort();
         final boolean trustAllCertificates = true;
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort, "https", trustAllCertificates, false, null, null)
-            .withBackend(vertx, backendPort)
+            .withBackend(vertx)
+            .withProxyMiddleware(host, "https", trustAllCertificates, false, null, null)
             .build().start();
 
         //when
         gateway.incomingRequest(HttpMethod.GET, "/", response -> {
             //then
-            VertxAssertions.assertEquals(testCtx, response.statusCode(), HttpResponseStatus.BAD_GATEWAY.code());
+            VertxAssertions.assertEquals(testCtx, HttpResponseStatus.BAD_GATEWAY.code(), response.statusCode());
             testCtx.completeNow();
         });
     }
@@ -323,8 +323,6 @@ public class ReverseProxyTest {
     private void testWebSocket(Vertx vertx, VertxTestContext testCtx, WebsocketVersion version) throws InterruptedException {
         // given
         final String host = "localhost";
-        final int proxyPort = TestUtils.findFreePort();
-        final int backendPort = TestUtils.findFreePort();
         final String message = "ping";
         final Checkpoint wsClosed = testCtx.checkpoint();
 
@@ -338,11 +336,12 @@ public class ReverseProxyTest {
             }));
         };
 
-        uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
+        final int proxyPort = uniportGateway(vertx, testCtx)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware(host)
             .build()
-            .start(proxyPort);
+            .start()
+            .port();
 
         // when
         final WebSocketClient client = vertx.createWebSocketClient();
@@ -364,18 +363,17 @@ public class ReverseProxyTest {
     public void testWebSocketReject(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String host = "localhost";
-        final int proxyPort = TestUtils.findFreePort();
-        final int backendPort = TestUtils.findFreePort();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
             ctx.response().setStatusCode(400).end();
         };
 
-        uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
+        final int proxyPort = uniportGateway(vertx, testCtx)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware(host)
             .build()
-            .start(proxyPort);
+            .start()
+            .port();
 
         final WebSocketClient client = vertx.createWebSocketClient();
         final WebSocketConnectOptions options = new WebSocketConnectOptions()
@@ -395,20 +393,19 @@ public class ReverseProxyTest {
     public void testInboundClose(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String host = "localhost";
-        final int proxyPort = TestUtils.findFreePort();
-        final int backendPort = TestUtils.findFreePort();
 
         final Handler<NetSocket> backendHandler = so -> {
             so.handler(buff -> {
                 so.close();
             });
         };
-        startNetBackend(vertx, backendPort, backendHandler);
+        final int backendPort = startNetBackend(vertx, backendHandler);
 
-        uniportGateway(vertx, testCtx)
+        final int proxyPort = uniportGateway(vertx, testCtx)
             .withProxyMiddleware(host, backendPort)
             .build()
-            .start(proxyPort);
+            .start()
+            .port();
 
         final WebSocketClient client = vertx.createWebSocketClient();
         final WebSocketConnectOptions options = new WebSocketConnectOptions()
@@ -424,24 +421,26 @@ public class ReverseProxyTest {
         }));
     }
 
-    protected void startNetBackend(Vertx vertx, int port, Handler<NetSocket> handler) throws InterruptedException {
+    protected int startNetBackend(Vertx vertx, Handler<NetSocket> handler) throws InterruptedException {
         final VertxTestContext testContext = new VertxTestContext();
 
-        final NetServer backendServer = vertx.createNetServer(new HttpServerOptions().setPort(port).setHost("localhost"));
+        final NetServer backendServer = vertx.createNetServer(new HttpServerOptions().setPort(0).setHost("localhost"));
         backendServer.connectHandler(handler);
         backendServer.listen(testContext.succeeding(s -> testContext.completeNow()));
 
         if (!testContext.awaitCompletion(5, TimeUnit.SECONDS)) {
             throw new RuntimeException("Timeout: Server did not start in time.");
         }
+        if (testContext.failed()) {
+            throw new RuntimeException("Backend server failed to start.", testContext.causeOfFailure());
+        }
+        return backendServer.actualPort();
     }
 
     @Test
     public void testWebSocketFirefox(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
         final String host = "localhost";
-        final int proxyPort = TestUtils.findFreePort();
-        final int backendPort = TestUtils.findFreePort();
         final Checkpoint wsClosed = testCtx.checkpoint();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
@@ -453,11 +452,12 @@ public class ReverseProxyTest {
             }));
         };
 
-        uniportGateway(vertx, testCtx)
-            .withProxyMiddleware(host, backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
+        final int proxyPort = uniportGateway(vertx, testCtx)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware(host)
             .build()
-            .start(proxyPort);
+            .start()
+            .port();
 
         final HttpClient httpClient = vertx.createHttpClient();
         final RequestOptions options = new RequestOptions()

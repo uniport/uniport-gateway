@@ -10,7 +10,6 @@ import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertNotNull;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertNull;
 import static ch.uniport.gateway.proxy.middleware.VertxAssertions.assertTrue;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
 import ch.uniport.gateway.proxy.middleware.csp.compositeCSP.CSPMergeStrategy;
@@ -201,7 +200,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String middlewareStyleDirective = "style-src";
         final String middlewareStyleValue = "self";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, "")
@@ -210,9 +208,9 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
-            .withProxyMiddleware(backendPort)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
+            .withProxyMiddleware()
             .build().start();
 
         //when
@@ -238,7 +236,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "media-src";
         final String backendMediaValue = "'self'";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue)
@@ -248,8 +245,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.UNION)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         //when
@@ -279,7 +276,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "media-src";
         final String backendMediaValue = "'self'";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue)
@@ -289,8 +285,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.INTERNAL)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         // when
@@ -320,7 +316,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "media-src";
         final String backendMediaValue = "'self'";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue)
@@ -330,8 +325,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, differentStyleValue)), false, CSPMergeStrategy.EXTERNAL)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         //when
@@ -360,7 +355,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "media-src";
         final String backendMediaValue = "'self'";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue)
@@ -369,8 +363,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         //when
@@ -397,7 +391,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "style-src";
         final String backendMediaValue = "http://test.com";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue)
@@ -406,8 +399,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.UNION)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         //when
@@ -434,7 +427,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "style-src";
         final String backendMediaValue = "http://test.com";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response()
                 .putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue)
@@ -443,8 +435,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         //when
@@ -471,7 +463,6 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
         final String backendMediaDirective = "style-src";
         final String backendMediaValue = "http://test.com";
 
-        final int backendPort = TestUtils.findFreePort();
         final Handler<RoutingContext> cspInsertionHandler = ctx -> {
             ctx.response().putHeader(CONTENT_SECURITY_POLICY, backendMediaDirective + " " + backendMediaValue);
             ctx.response().end();
@@ -479,8 +470,8 @@ class CSPMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withCspMiddleware(List.of(createDirective(middlewareStyleDirective, middlewareStyleValue)), false, CSPMergeStrategy.EXTERNAL)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, cspInsertionHandler)
+            .withBackend(vertx, cspInsertionHandler)
+            .withProxyMiddleware()
             .build().start();
 
         //when

@@ -2,7 +2,6 @@ package ch.uniport.gateway.proxy.service;
 
 import static ch.uniport.gateway.proxy.middleware.MiddlewareServerBuilder.uniportGateway;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.VertxAssertions;
 import io.vertx.core.Handler;
@@ -39,12 +38,11 @@ public class MiddlewareChainTest {
             checkedPath.flag();
         };
 
-        final int backendPort = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testContext)
             .withReplacePathRegexMiddleware(requestReplacePathRegex1, requestReplacePathReplacement1)
             .withReplacePathRegexMiddleware(requestReplacePathRegex2, requestReplacePathReplacement2)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, incomingPathCheckHandler)
+            .withBackend(vertx, incomingPathCheckHandler)
+            .withProxyMiddleware()
             .build().start();
 
         // when 
@@ -60,11 +58,10 @@ public class MiddlewareChainTest {
         final String expectedHeaderValue = "blub";
         final MultiMap responseHeaders = HeadersMultiMap.headers().add(headerName, expectedHeaderValue);
 
-        final int backendPort = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testContext)
             .withHeaderMiddleware(HeadersMultiMap.httpHeaders(), responseHeaders)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort)
+            .withBackend(vertx)
+            .withProxyMiddleware()
             .build().start();
 
         // when 
@@ -87,12 +84,11 @@ public class MiddlewareChainTest {
         final MultiMap responseHeaders1 = HeadersMultiMap.headers().add(headerName, ""); // remove header 
         final MultiMap responseHeaders2 = HeadersMultiMap.headers().add(headerName, "blub"); // set header 
 
-        final int backendPort = TestUtils.findFreePort();
         final MiddlewareServer gateway = uniportGateway(vertx, testContext)
             .withHeaderMiddleware(HeadersMultiMap.httpHeaders(), responseHeaders1)
             .withHeaderMiddleware(HeadersMultiMap.httpHeaders(), responseHeaders2)
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort)
+            .withBackend(vertx)
+            .withProxyMiddleware()
             .build().start();
 
         // when 

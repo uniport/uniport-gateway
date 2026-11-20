@@ -1,6 +1,5 @@
 package ch.uniport.gateway.core.entrypoint;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.core.config.model.TlsModel;
 import ch.uniport.gateway.proxy.config.model.DynamicModel;
 import ch.uniport.gateway.proxy.config.model.MiddlewareModel;
@@ -13,7 +12,6 @@ import ch.uniport.gateway.proxy.middleware.redirectRegex.RedirectRegexMiddleware
 import ch.uniport.gateway.proxy.router.PublicProtoHostPort;
 import ch.uniport.gateway.proxy.router.RouterFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
@@ -25,7 +23,7 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public class EntrypointTest {
     static final String LOCALHOST = "localhost";
-    static final String ENTRYPOINT_PREFIX = "http";
+    static final String ENTRYPOINT_NAME = "http";
 
     private HttpServer server;
     private int proxyPort;
@@ -44,26 +42,15 @@ public class EntrypointTest {
 
     @BeforeEach
     public void setup(Vertx vertx) throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        proxyPort = TestUtils.findFreePort();
-        serverPort = TestUtils.findFreePort();
         server = vertx.createHttpServer()
             .requestHandler(
                 req -> {
                     req.response().setStatusCode(200).end("ok");
                 })
-            .listen(serverPort, ready -> {
-                if (ready.failed()) {
-                    throw new RuntimeException(ready.cause());
-                }
-                latch.countDown();
-            });
-
-        latch.await();
-
-        routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", LOCALHOST, String.format("%d", proxyPort)),
-            ENTRYPOINT_PREFIX + proxyPort);
+            .listen(0)
+            .toCompletionStage().toCompletableFuture()
+            .get(5, TimeUnit.SECONDS);
+        serverPort = server.actualPort();
     }
 
     @AfterEach
@@ -79,9 +66,9 @@ public class EntrypointTest {
      * The redirect middleware sets a key-value pair in the response header.
      */
     @Test
-    void entryRedirectMiddlewareRunsOnAllRoutes(Vertx vertx, VertxTestContext testCtx) {
+    void entryRedirectMiddlewareRunsOnAllRoutes(Vertx vertx, VertxTestContext testCtx) throws Exception {
         // given
-        final String entryPointIdentifier = ENTRYPOINT_PREFIX + proxyPort;
+        final String entryPointIdentifier = ENTRYPOINT_NAME;
         final String expectedRedirect = "/to/some/page";
 
         final MiddlewareModel entryMiddlewareConfig = MiddlewareModel.builder()
@@ -118,8 +105,8 @@ public class EntrypointTest {
                     .build()))
             .build();
 
-        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, null, List.of(entryMiddlewareConfig));
-        await(testCtx, entrypoint.listen());
+        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, 0, null, List.of(entryMiddlewareConfig));
+        listen(vertx, entrypoint);
 
         routerFactory.createRouter(dynamicConfig).onComplete(testCtx.succeeding(router -> {
             entrypoint.router().mountSubRouter("/", router);
@@ -143,9 +130,9 @@ public class EntrypointTest {
     }
 
     @Test
-    void shouldWorkWithTLS(Vertx vertx, VertxTestContext testCtx) {
+    void shouldWorkWithTLS(Vertx vertx, VertxTestContext testCtx) throws Exception {
         // given
-        final String entryPointIdentifier = ENTRYPOINT_PREFIX + proxyPort;
+        final String entryPointIdentifier = ENTRYPOINT_NAME;
         final String tlsHost = "local.uniport.ch"; // resolves to localhost
 
         // generate self-signed certificate
@@ -162,8 +149,8 @@ public class EntrypointTest {
             .withCertFile(pemFiles.certFile.getAbsolutePath())
             .withKeyFile(pemFiles.keyFile.getAbsolutePath())
             .build();
-        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, proxyPort, tls, null);
-        await(testCtx, entrypoint.listen());
+        final Entrypoint entrypoint = new Entrypoint(vertx, entryPointIdentifier, 0, tls, null);
+        listen(vertx, entrypoint);
 
         // configure router
         final DynamicModel dynamicConfig = DynamicModel.builder()
@@ -204,14 +191,13 @@ public class EntrypointTest {
         }));
     }
 
-    private void await(VertxTestContext testCtx, Future<?> fut) {
-        final CountDownLatch latch = new CountDownLatch(1);
-        fut.onComplete(ar -> latch.countDown());
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            testCtx.failNow(e);
-        }
+    // The router factory needs the public port, which is only known once the entrypoint has bound port 0.
+    private void listen(Vertx vertx, Entrypoint entrypoint) throws Exception {
+        proxyPort = entrypoint.listen()
+            .toCompletionStage().toCompletableFuture()
+            .get(5, TimeUnit.SECONDS)
+            .actualPort();
+        routerFactory = new RouterFactory(vertx, PublicProtoHostPort.of("http", LOCALHOST, String.format("%d", proxyPort)), ENTRYPOINT_NAME);
     }
 
     private void doRequest(

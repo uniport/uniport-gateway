@@ -14,7 +14,6 @@ import static io.vertx.core.http.HttpMethod.POST;
 import static io.vertx.ext.web.sstore.LocalSessionStore.DEFAULT_SESSION_MAP_NAME;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import ch.uniport.gateway.TestUtils;
 import ch.uniport.gateway.proxy.middleware.BrowserConnected;
 import ch.uniport.gateway.proxy.middleware.MiddlewareServer;
 import ch.uniport.gateway.proxy.middleware.MiddlewareTestBase;
@@ -342,7 +341,6 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
         final Set<Function<String, String>> cookieHeaders = arg.getKey();
         final Set<String> expectedCookies = arg.getValue();
         final AtomicInteger reqCount = new AtomicInteger();
-        final int backendPort = TestUtils.findFreePort();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
             final int rc = reqCount.incrementAndGet();
@@ -371,8 +369,8 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware()
             .build().start();
 
         // obtain session cookie
@@ -432,7 +430,6 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @MethodSource("provideCookieHeaders")
     void shouldNotChangeCookieHeaderStructure(List<List<String>> cookieHeaders, Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final int backendPort = TestUtils.findFreePort();
 
         final Handler<RoutingContext> backendHandler = ctx -> {
             // then
@@ -453,8 +450,8 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
 
         final MiddlewareServer gateway = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, backendHandler)
+            .withBackend(vertx, backendHandler)
+            .withProxyMiddleware()
             .build().start();
 
         // when
@@ -479,14 +476,12 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
     @Test
     public void shouldHandleMalformedCookiePORTAL2380(Vertx vertx, VertxTestContext testCtx) throws InterruptedException {
         // given
-        final int backendPort = TestUtils.findFreePort();
         final String cookieName = "whatsNew:1.01";
         final MultiMap headers = HeadersMultiMap.httpHeaders()
             .set(HttpHeaders.COOKIE, cookieName + "=true"); // malformed cookie: contains illegal column
         final BrowserConnected browser = uniportGateway(vertx, testCtx)
             .withSessionMiddleware()
-            .withProxyMiddleware(backendPort)
-            .withBackend(vertx, backendPort, ctx -> {
+            .withBackend(vertx, ctx -> {
                 // then
                 final Set<io.netty.handler.codec.http.cookie.Cookie> nettyCookies = ctx.request().headers().getAll(HttpHeaders.COOKIE).stream()
                     .filter(header -> header != null)
@@ -496,6 +491,7 @@ public class SessionMiddlewareTest extends MiddlewareTestBase {
                 VertxAssertions.assertTrue(testCtx, nettyCookies.stream().anyMatch(cookie -> cookie.name().equals(cookieName)));
                 ctx.end("ok");
             })
+            .withProxyMiddleware()
             .build().start()
             .connectBrowser();
 
