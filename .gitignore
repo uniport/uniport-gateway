@@ -39,7 +39,6 @@ server/src/main/config/uniport-gateway.specific.env
 helm/src/main/resources/values.specific.yaml
 helm/src/main/resources/proxy-config.specific/
 
-# ASDF
 .tool-versions
 
 # documentation
