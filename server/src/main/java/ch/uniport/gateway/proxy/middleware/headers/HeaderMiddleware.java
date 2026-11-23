@@ -4,6 +4,7 @@ import ch.uniport.gateway.proxy.middleware.TraceMiddleware;
 import io.opentelemetry.api.trace.Span;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -13,8 +14,10 @@ import org.slf4j.LoggerFactory;
 // client <-- modified response headers <-- HeaderMiddleware <-- response headers         <-- server
 
 /**
- * Manages request/response headers. It can add/remove headers on both requests
- * and responses.
+ * Manages request/response headers. An empty value removes the header.
+ * Configured request headers replace any value sent by the client, so a client
+ * cannot override them. Configured response headers are added unless the same
+ * value is already present.
  */
 public class HeaderMiddleware extends TraceMiddleware {
 
@@ -38,22 +41,37 @@ public class HeaderMiddleware extends TraceMiddleware {
     public void handleWithTraceSpan(RoutingContext ctx, Span span) {
         LOGGER.debug("{}: Handling '{}'", name, ctx.request().absoluteURI());
 
-        modifyHeaders(ctx.request().headers(), requestHeaderModifiers, "request");
-        ctx.addHeadersEndHandler(v -> modifyHeaders(ctx.response().headers(), responseHeaderModifiers, "response"));
+        replaceRequestHeaders(ctx.request().headers(), requestHeaderModifiers);
+        ctx.addHeadersEndHandler(v -> appendResponseHeaders(ctx.response().headers(), responseHeaderModifiers));
         ctx.next();
     }
 
-    private void modifyHeaders(MultiMap headers, MultiMap modifiers, String headerType) {
+    private void replaceRequestHeaders(MultiMap headers, MultiMap modifiers) {
+        for (String headerName : modifiers.names()) {
+            final List<String> values = modifiers.getAll(headerName).stream()
+                .filter(value -> !value.isEmpty())
+                .toList();
+            if (values.isEmpty()) {
+                LOGGER.debug("Removing request header '{}'", headerName);
+                headers.remove(headerName);
+            } else {
+                LOGGER.debug("Setting request header '{}:{}'", headerName, values);
+                headers.set(headerName, values);
+            }
+        }
+    }
+
+    private void appendResponseHeaders(MultiMap headers, MultiMap modifiers) {
         for (Entry<String, String> header : modifiers.entries()) {
             if (header.getValue().isEmpty()) {
                 if (headers.contains(header.getKey())) {
-                    LOGGER.debug("Removing {} header '{}'", headerType, header.getKey());
+                    LOGGER.debug("Removing response header '{}'", header.getKey());
                     headers.remove(header.getKey());
                 }
             } else {
                 if (!headers.getAll(header.getKey()).contains(header.getValue())) {
                     // only add if not already present
-                    LOGGER.debug("Setting {} header '{}:{}'", headerType, header.getKey(), header.getValue());
+                    LOGGER.debug("Adding response header '{}:{}'", header.getKey(), header.getValue());
                     headers.add(header.getKey(), header.getValue());
                 }
             }

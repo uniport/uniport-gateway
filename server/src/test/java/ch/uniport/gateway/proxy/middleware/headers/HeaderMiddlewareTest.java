@@ -78,7 +78,7 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
         });
     }
 
-    static Stream<Arguments> headerTestData() {
+    static Stream<Arguments> commonHeaderTestData() {
         return Stream.of(//
             Arguments.of("adds a header",
                 HeadersMultiMap.httpHeaders().add("Foo", "bar"),
@@ -95,19 +95,31 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
             Arguments.of("do not duplicate a header",
                 HeadersMultiMap.httpHeaders().add("Foo", "bar"),
                 HeadersMultiMap.httpHeaders().add("Foo", "bar"),
-                HeadersMultiMap.httpHeaders().add("Foo", "bar")),
+                HeadersMultiMap.httpHeaders().add("Foo", "bar")));
+    }
+
+    static Stream<Arguments> requestHeaderTestData() {
+        return Stream.concat(commonHeaderTestData(), Stream.of(//
+            Arguments.of("replaces a header value sent by the client",
+                HeadersMultiMap.httpHeaders().add("Foo", "bar"),
+                HeadersMultiMap.httpHeaders().add("Foo", "test"),
+                HeadersMultiMap.httpHeaders().add("Foo", "test")),
+            Arguments.of("replaces all header values sent by the client",
+                HeadersMultiMap.httpHeaders().add("Foo", "bar").add("Foo", "baz"),
+                HeadersMultiMap.httpHeaders().add("Foo", "test").add("Foo", "test2"),
+                HeadersMultiMap.httpHeaders().add("Foo", "test").add("Foo", "test2"))));
+    }
+
+    static Stream<Arguments> responseHeaderTestData() {
+        return Stream.concat(commonHeaderTestData(), Stream.of(//
             Arguments.of("adds a header value",
                 HeadersMultiMap.httpHeaders().add("Foo", "bar"),
                 HeadersMultiMap.httpHeaders().add("Foo", "test"),
-                HeadersMultiMap.httpHeaders().add("Foo", "bar").add("Foo", "test")),
-            Arguments.of("delete a header",
-                HeadersMultiMap.httpHeaders().add("Foo", "bar"),
-                HeadersMultiMap.httpHeaders().add("Testing", "foo").add("Foo", ""),
-                HeadersMultiMap.httpHeaders().add("Testing", "foo")));
+                HeadersMultiMap.httpHeaders().add("Foo", "bar").add("Foo", "test"))));
     }
 
     @ParameterizedTest
-    @MethodSource("headerTestData")
+    @MethodSource("requestHeaderTestData")
     void requestHeaderTest(
         String name, MultiMap reqHeaders, MultiMap reqHeaderModifiers, MultiMap expectedReqHeaders,
         Vertx vertx, VertxTestContext testCtx
@@ -134,7 +146,7 @@ public class HeaderMiddlewareTest extends MiddlewareTestBase {
     }
 
     @ParameterizedTest
-    @MethodSource("headerTestData")
+    @MethodSource("responseHeaderTestData")
     void responseHeaderTest(
         String name, MultiMap respHeaders, MultiMap respHeaderModifiers, MultiMap expectedRespHeaders,
         Vertx vertx, VertxTestContext testCtx

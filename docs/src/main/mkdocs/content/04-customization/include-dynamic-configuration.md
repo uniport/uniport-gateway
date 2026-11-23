@@ -367,10 +367,10 @@ This Middleware allows hardcoded responses to be returned to the client. The fol
 
 The **Headers Middleware** manages the headers of incoming requests and outgoing responses.
 
-| Variable                | Required | Type                           | Description |
-| ----------------------- | -------- | ------------------------------ | ----------- |
-| `customRequestHeaders`  | No       | Pairs of header name and value | -           |
-| `customResponseHeaders` | No       | Pairs of header name and value | -           |
+| Variable | Required | Type | Description |
+| --- | --- | --- | --- |
+| `customRequestHeaders` | No | Pairs of header name and value | Set on the request, replacing any value the client sent. An empty value removes the header. |
+| `customResponseHeaders` | No | Pairs of header name and value | Added to the response unless the same value is already there. An empty value removes the header. |
 
 ##### `languageCookie`
 
