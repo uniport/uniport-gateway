@@ -10,6 +10,7 @@ Java 21 / Vert.x reverse proxy gateway with plugin-based middleware. Maven multi
 - `config-schemas` – JSON schema generation from Java models
 - `docs` – MkDocs documentation (Node `20.9.0` via `frontend-maven-plugin`)
 - `helm` – Kubernetes Helm chart
+- `starter-kit` – Step-by-step example configs (one feature per step, shared docker-compose)
 
 ## Commands
 
@@ -20,6 +21,7 @@ mvn clean install -pl '!helm' -Dpublic=true  # without private deps
 
 # Test
 mvn test                                       # unit tests (JUnit 5 + AssertJ)
+mvn test -pl server -am -Dtest=CorsMiddlewareTest -Dsurefire.failIfNoSpecifiedTests=false  # single test
 
 # Code quality
 mvn spotless:apply                             # format code
@@ -43,6 +45,15 @@ Key classes:
 - `GatewayVerticle` – Main verticle, reads config, builds entrypoints
 - `ConfigurationWatcher` / `ProviderAggregator` – Dynamic config reload (throttle `2000ms`)
 
+## Adding a Middleware
+
+Pattern: `server/.../proxy/middleware/<name>/` with `<Name>Middleware`, `<Name>MiddlewareFactory`, `Abstract<Name>MiddlewareOptions` (Immutables).
+
+1. Register the factory in `server/src/main/resources/META-INF/services/ch.uniport.gateway.proxy.middleware.MiddlewareFactory`
+2. Add a builder method to test helper `MiddlewareServerBuilder`
+3. Regenerate schemas with `mvn package -pl config-schemas -am` and commit the updated JSON in `config-schemas/src/main/resources/schema/`
+4. Add a CHANGELOG entry
+
 ## Gotchas
 
 - **Middleware order matters** – chain is sequential; changing order changes behavior
@@ -51,6 +62,7 @@ Key classes:
 - **Pre-commit hook** – auto-installed via `git-build-hook-maven-plugin`; skipped in CI
 - **Immutables** – Config models use `@org.immutables.value`; generated POJOs with validation
 - **Full git history required** – CI checkout needs full history for `spotless-maven-plugin`
+- **CHANGELOG check** – PRs to `main` need an entry under `[Unreleased]` (Keep a Changelog sections). Bypass with the `no changelog` label.
 
 ## Code Style
 
